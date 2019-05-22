@@ -5,11 +5,6 @@
     "description": "A description for 'sr_address'"
   },
   {
-    "name": "sr_secure_port",
-    "type": "java.lang.Integer",
-    "description": "A description for 'sr_secure_port'"
-  },
-  {
     "name": "event_publishing_tolerance",
     "type": "java.lang.Long",
     "description": "A description for 'event_publishing_tolerance'"
@@ -23,5 +18,10 @@
     "name": "check_interval",
     "type": "java.lang.Long",
     "description": "A description for 'check_interval'"
+  },
+  {
+    "name": "sr_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'sr_port'"
   }
 ]}

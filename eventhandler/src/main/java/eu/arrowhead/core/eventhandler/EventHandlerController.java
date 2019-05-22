@@ -11,7 +11,7 @@ public class EventHandlerController {
 	@Value("${check_interval}")
 	private long checkInterval;
 	
-	@RequestMapping(method = { RequestMethod.GET }, name = "/")
+	@RequestMapping(method = { RequestMethod.GET }, path = "/")
 	public String echoTimeout() {
 		System.out.println(checkInterval);
 		return String.valueOf(checkInterval);
