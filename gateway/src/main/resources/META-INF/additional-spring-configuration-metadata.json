@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "sr_address",
+    "type": "java.lang.String",
+    "description": "A description for 'sr_address'"
+  },
+  {
+    "name": "sr_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'sr_port'"
+  },
+  {
+    "name": "min_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'min_port'"
+  },
+  {
+    "name": "max_port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'max_port'"
+  }
+]}
