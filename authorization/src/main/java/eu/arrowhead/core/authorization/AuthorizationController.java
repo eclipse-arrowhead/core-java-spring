@@ -10,7 +10,7 @@ public class AuthorizationController {
 
 	private Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
-	@GetMapping(name = "/")
+	@GetMapping(path = "/")
 	public String deleteThisService() {
 		logger.debug("deleteThisService() is called.");
 		return "Delete this service.";

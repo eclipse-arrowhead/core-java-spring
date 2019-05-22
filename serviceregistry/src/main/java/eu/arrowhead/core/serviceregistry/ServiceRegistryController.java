@@ -15,7 +15,7 @@ public class ServiceRegistryController {
 	
 	private Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 	
-	@RequestMapping(method = { RequestMethod.GET }, name = "/")
+	@RequestMapping(method = { RequestMethod.GET }, path = "/")
 	public String echoTimeout() {
 		logger.debug("echoTimeout() is called.");
         return String.valueOf(pingTimeout);
