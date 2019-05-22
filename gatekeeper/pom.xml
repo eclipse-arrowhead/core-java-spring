@@ -1,0 +1,21 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+  	<parent>
+    	<groupId>eu.arrowhead</groupId>
+    	<artifactId>core</artifactId>
+    	<version>${revision}</version>
+  	</parent>
+  	
+  	<artifactId>arrowhead-gatekeeper</artifactId>
+  	<packaging>jar</packaging>
+  	<name>Arrowhead Gatekeeper</name>
+  	<description>Arrowhead Gatekeeper core service</description>
+  	
+  	<dependencies>
+	    <dependency>
+	      	<groupId>eu.arrowhead</groupId>
+	      	<artifactId>arrowhead-core-common</artifactId>
+	      	<version>${revision}</version>
+	    </dependency>
+  	</dependencies>  	
+</project>

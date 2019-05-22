@@ -1,0 +1,27 @@
+{"properties": [
+  {
+    "name": "ping_scheduled",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'ping_scheduled'"
+  },
+  {
+    "name": "ping_timeout",
+    "type": "java.lang.Long",
+    "description": "A description for 'ping_timeout'"
+  },
+  {
+    "name": "ping_interval",
+    "type": "java.lang.Long",
+    "description": "A description for 'ping_interval'"
+  },
+  {
+    "name": "ttl_scheduled",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'ttl_scheduled'"
+  },
+  {
+    "name": "ttl_interval",
+    "type": "java.lang.Long",
+    "description": "A description for 'ttl_interval'"
+  }
+]}
