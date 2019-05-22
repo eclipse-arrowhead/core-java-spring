@@ -46,3 +46,4 @@ wrapper
 /serviceregistry/*.log
 /authorization/*.log
 /.metadata/
+gatekeeper/gatekeeper\.log
