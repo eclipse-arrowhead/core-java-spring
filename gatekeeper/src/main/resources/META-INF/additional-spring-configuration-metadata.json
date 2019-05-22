@@ -1,0 +1,27 @@
+{"properties": [
+  {
+    "name": "sr_address",
+    "type": "java.lang.String",
+    "description": "A description for 'sr_address'"
+  },
+  {
+    "name": "sr_port",
+    "type": "java.lang.Long",
+    "description": "A description for 'sr_port'"
+  },
+  {
+    "name": "timeout",
+    "type": "java.lang.Long",
+    "description": "A description for 'timeout'"
+  },
+  {
+    "name": "use_gateway",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'use_gateway'"
+  },
+  {
+    "name": "public_brokers",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'public_brokers'"
+  }
+]}
