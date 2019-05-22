@@ -11,7 +11,7 @@ public class OrchestratorController {
 	@Value("${sr_address}")
 	private String srAddress;
 	
-	@RequestMapping(method = { RequestMethod.GET }, name = "/")
+	@RequestMapping(method = { RequestMethod.GET }, path = "/")
 	public String echoTimeout() {
 		System.out.println(srAddress);
 		return srAddress;
