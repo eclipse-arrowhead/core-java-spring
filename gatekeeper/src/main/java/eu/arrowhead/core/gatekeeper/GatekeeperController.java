@@ -11,7 +11,7 @@ public class GatekeeperController {
 	@Value("${sr_port}")
 	private long srPort;
 	
-	@RequestMapping(method = { RequestMethod.GET }, name = "/")
+	@RequestMapping(method = { RequestMethod.GET }, path = "/")
 	public String echoSRPort() {
 		System.out.println(srPort);
 		return String.valueOf(srPort);
