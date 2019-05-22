@@ -46,5 +46,6 @@ wrapper
 /serviceregistry/*.log
 /authorization/*.log
 /.metadata/
+gatekeeper/gatekeeper\.log
 /eventhandler/*.log
 /orchestrator/*.log
