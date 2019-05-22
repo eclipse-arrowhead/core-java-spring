@@ -42,3 +42,4 @@ wrapper
 /gateway/.settings
 /orchestrator/.settings
 /serviceregistry/.settings
+/serviceregistry/*.log
