@@ -6,7 +6,7 @@
   },
   {
     "name": "sr_port",
-    "type": "java.lang.Long",
+    "type": "java.lang.Integer",
     "description": "A description for 'sr_port'"
   },
   {

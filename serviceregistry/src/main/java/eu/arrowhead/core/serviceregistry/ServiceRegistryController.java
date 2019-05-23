@@ -1,5 +1,7 @@
 package eu.arrowhead.core.serviceregistry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -11,9 +13,11 @@ public class ServiceRegistryController {
 	@Value("${ping_timeout}")
 	private long pingTimeout;
 	
-	@RequestMapping(method = { RequestMethod.GET }, name = "/")
+	private Logger logger = LogManager.getLogger(ServiceRegistryController.class);
+	
+	@RequestMapping(method = { RequestMethod.GET }, path = "/")
 	public String echoTimeout() {
-		System.out.println(pingTimeout);
-		return String.valueOf(pingTimeout);
+		logger.debug("echoTimeout() is called.");
+        return String.valueOf(pingTimeout);
 	}
 }

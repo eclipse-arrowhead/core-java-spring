@@ -10,13 +10,8 @@
     "description": "A description for 'sr_port'"
   },
   {
-    "name": "min_port",
-    "type": "java.lang.Integer",
-    "description": "A description for 'min_port'"
-  },
-  {
-    "name": "max_port",
-    "type": "java.lang.Integer",
-    "description": "A description for 'max_port'"
+    "name": "enable_auth_for_cloud",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'enable_auth_for_cloud'"
   }
 ]}

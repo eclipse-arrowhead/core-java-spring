@@ -9,7 +9,7 @@
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
-		<RollingFile name="FileAppender" fileName="serviceregistry.log" filePattern="serviceregistry-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="FileAppender" fileName="authorization.log" filePattern="authorization-%d{yyyy-MM-dd}-%i.log">
 	    	<PatternLayout>
 	        	<Pattern>${LOG_PATTERN}</Pattern>
 	    	</PatternLayout>
