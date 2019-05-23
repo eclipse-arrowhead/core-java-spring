@@ -6,7 +6,7 @@
 	    <version>${revision}</version>
   	</parent>
   	
-	<artifactId>gateway</artifactId>
+	<artifactId>arrowhead-gateway</artifactId>
 	<packaging>jar</packaging>
   	<name>Arrowhead Gateway</name>
   	<description>Arrowhead Gateway core service</description>
