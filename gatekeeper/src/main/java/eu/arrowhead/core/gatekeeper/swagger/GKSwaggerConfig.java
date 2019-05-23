@@ -9,11 +9,15 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class GKSwaggerConfig {
+public class GKSwaggerConfig extends DefaultSwaggerConfig{
+	
+	public GKSwaggerConfig() {
+		super("Gatekeeper");		
+	}
 	
 	@Bean
 	public Docket customizeSwagger() {
-		return DefaultSwaggerConfig.createSwaggerForCoreSystem("Gatekeeper", this.getClass().getPackageName());
+		return configureSwaggerForCoreSystem(this.getClass().getPackageName());
 	}
-		
+			
 }
