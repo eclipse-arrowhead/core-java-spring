@@ -45,6 +45,8 @@
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
 		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
 		<swagger.version>2.0.5</swagger.version>
+		<disruptor.version>3.3.6</disruptor.version>
+		<http.client.version>4.5.8</http.client.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -95,7 +97,12 @@
 		<dependency>
 		    <groupId>com.lmax</groupId>
     		<artifactId>disruptor</artifactId>
-    		<version>3.3.6</version>
+    		<version>${disruptor.version}</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.apache.httpcomponents</groupId>
+    		<artifactId>httpclient</artifactId>
+    		<version>${http.client.version}</version>
 		</dependency>
 		
 		<dependency>
