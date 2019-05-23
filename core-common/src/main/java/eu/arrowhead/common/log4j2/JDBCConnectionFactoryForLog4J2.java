@@ -1,6 +1,8 @@
 package eu.arrowhead.common.log4j2;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -41,13 +43,17 @@ public class JDBCConnectionFactoryForLog4J2 {
 	}
 	
 	private static void init() throws Exception {
-		final String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-		final String applicationPropertiesPath = rootPath + CommonConstants.APPLICATION_PROPERTIES;
+		InputStream propStream = null;
+		File propertiesFile = new File(CommonConstants.APPLICATION_PROPERTIES);
+		if (!propertiesFile.exists()) {
+			propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(CommonConstants.APPLICATION_PROPERTIES);
+		} else {
+			propStream = new FileInputStream(propertiesFile);
+		}
 		
 		final Properties temp = new Properties();
-		temp.load(new FileInputStream(applicationPropertiesPath));
+		temp.load(propStream);
 
 		props = temp;
 	}
-
 }
