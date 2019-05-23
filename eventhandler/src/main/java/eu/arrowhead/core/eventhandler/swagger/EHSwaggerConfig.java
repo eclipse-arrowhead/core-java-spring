@@ -3,6 +3,7 @@ package eu.arrowhead.core.eventhandler.swagger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.swagger.DefaultSwaggerConfig;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -12,7 +13,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class EHSwaggerConfig extends DefaultSwaggerConfig{
 
 	public EHSwaggerConfig() {
-		super("Event Handler");
+		super(CommonConstants.CORE_SYSTEM_EVENT_HANDLER);
 	}
 	
 	@Bean

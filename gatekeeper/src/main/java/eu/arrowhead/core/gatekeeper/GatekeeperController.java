@@ -1,8 +1,10 @@
 package eu.arrowhead.core.gatekeeper;
 
+import org.apache.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import eu.arrowhead.common.CommonConstants;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -14,9 +16,9 @@ public class GatekeeperController {
 	
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = 200, message = "Core service is available"),
-			@ApiResponse(code = 401, message = "You are not authorized"),
-			@ApiResponse(code = 500, message = "Core service is not available")
+			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = ECHO_URI)
 	public String echoService() {

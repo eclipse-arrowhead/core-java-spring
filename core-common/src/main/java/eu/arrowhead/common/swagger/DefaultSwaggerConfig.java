@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.base.Predicates;
 
+import eu.arrowhead.common.CommonConstants;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -19,7 +20,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class DefaultSwaggerConfig {
 
 	private final String coreSystemName;
-
+	
 	public DefaultSwaggerConfig(String coreSystemName) {
 		this.coreSystemName = coreSystemName;
 	}
@@ -29,7 +30,7 @@ public class DefaultSwaggerConfig {
 	 */
 	@RequestMapping(method = RequestMethod.GET, path = "/")
 	public String redirectDefaultSwaggerUI() {
-		return "redirect:/swagger-ui.html";
+		return "redirect:" + CommonConstants.SWAGGER_UI_URI;
 	}
 	
 	public Docket configureSwaggerForCoreSystem(String swaggerPackage) {
@@ -38,7 +39,7 @@ public class DefaultSwaggerConfig {
 		          .apis(RequestHandlerSelectors.any())
 		          .apis(Predicates.not(RequestHandlerSelectors.basePackage(swaggerPackage)))
 		          .paths(PathSelectors.any())
-		          .paths(Predicates.not(PathSelectors.regex("/error")))
+		          .paths(Predicates.not(PathSelectors.regex(CommonConstants.SERVER_ERROR_URI)))
 		          .build()
 		          .useDefaultResponseMessages(false)
 		          .apiInfo(apiInfo());
