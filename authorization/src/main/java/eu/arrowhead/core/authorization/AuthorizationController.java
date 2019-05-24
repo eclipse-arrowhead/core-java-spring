@@ -24,10 +24,15 @@ import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.arrowhead.common.CommonConstants;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @RestController
 public class AuthorizationController {
-
+	
+	private static final String ECHO_URI = "/echo";
+	private static final String DELETE_SERVICE_URI = "/delete";
 	private static final String TEST_URI = "/test";
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
@@ -56,8 +61,19 @@ public class AuthorizationController {
 	private int srPort;
 	
 	
-	@GetMapping(path = TEST_URI)
-	public String deleteThisService() throws Exception {
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = ECHO_URI)
+	public String echoService() {
+		return "Got it!";
+	}
+	
+	@GetMapping(path = DELETE_SERVICE_URI)
+	public String deleteThisService() {
 		logger.debug("deleteThisService() is called.");
 	
 		// example how to call an other webservice (most of the code needs to refactor to an init method)

@@ -44,7 +44,7 @@
 	    <mvn.resources.version>3.1.0</mvn.resources.version>
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
 		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
-		<swagger.version>2.0.5</swagger.version>
+		<swagger.version>2.9.2</swagger.version>
 		<disruptor.version>3.3.6</disruptor.version>
 		<http.client.version>4.5.8</http.client.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -100,16 +100,20 @@
     		<version>${disruptor.version}</version>
 		</dependency>
 		<dependency>
-    		<groupId>org.apache.httpcomponents</groupId>
-    		<artifactId>httpclient</artifactId>
-    		<version>${http.client.version}</version>
-		</dependency>
-		
+           <groupId>org.apache.httpcomponents</groupId>
+           <artifactId>httpclient</artifactId>
+           <version>${http.client.version}</version>
+        </dependency>
 		<dependency>
-        	<groupId>io.swagger.core.v3</groupId>
-        	<artifactId>swagger-jaxrs2</artifactId>
-        	<version>${swagger.version}</version>
-      	</dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
+		<dependency>
+    		<groupId>io.springfox</groupId>
+    		<artifactId>springfox-swagger-ui</artifactId>
+    		<version>${swagger.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
