@@ -43,7 +43,6 @@ public class System {
 	}
 
 	public System(String systemName, String address, int port, String authenticationInfo) {
-		super();
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
