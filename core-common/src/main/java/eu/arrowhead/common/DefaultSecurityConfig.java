@@ -6,7 +6,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 public class DefaultSecurityConfig extends WebSecurityConfigurerAdapter {
 	
-	@Value(CommonConstants.$SERVER_SSL_ENABLED)
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 
     @Override

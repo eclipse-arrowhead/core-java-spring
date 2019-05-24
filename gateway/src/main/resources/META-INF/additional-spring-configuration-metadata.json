@@ -18,5 +18,10 @@
     "name": "max_port",
     "type": "java.lang.Integer",
     "description": "A description for 'max_port'"
+  },
+  {
+    "name": "disable.hostname.verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'disable.hostname.verifier'"
   }
 ]}
