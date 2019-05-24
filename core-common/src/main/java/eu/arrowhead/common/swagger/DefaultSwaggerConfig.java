@@ -16,7 +16,6 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-@Controller
 public class DefaultSwaggerConfig {
 
 	private final String coreSystemName;
@@ -25,19 +24,12 @@ public class DefaultSwaggerConfig {
 		this.coreSystemName = coreSystemName;
 	}
 	
-	/*
-	 * Necessary controller due to Swagger UI default path is hard coded and can't be configured. 
-	 */
-	@RequestMapping(method = RequestMethod.GET, path = "/")
-	public String redirectDefaultSwaggerUI() {
-		return "redirect:" + CommonConstants.SWAGGER_UI_URI;
-	}
-	
-	public Docket configureSwaggerForCoreSystem(String swaggerPackage) {
+	public Docket configureSwaggerForCoreSystem(String coreSystemSwaggerPackage) {
 		return new Docket(DocumentationType.SWAGGER_2)  
 		          .select()                                  
 		          .apis(RequestHandlerSelectors.any())
-		          .apis(Predicates.not(RequestHandlerSelectors.basePackage(swaggerPackage)))
+		          .apis(Predicates.not(RequestHandlerSelectors.basePackage(coreSystemSwaggerPackage)))
+		          .apis(Predicates.not(RequestHandlerSelectors.basePackage(CommonConstants.SWAGGER_COMMON_PACKAGE)))
 		          .paths(PathSelectors.any())
 		          .paths(Predicates.not(PathSelectors.regex(CommonConstants.SERVER_ERROR_URI)))
 		          .build()
