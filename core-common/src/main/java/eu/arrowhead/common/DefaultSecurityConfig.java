@@ -11,7 +11,8 @@ public class DefaultSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-    	http = http.httpBasic().disable();
+    	http = http.httpBasic().disable()
+    			   .csrf().disable();
     	if (sslEnabled) {
     		http.requiresChannel().anyRequest().requiresSecure();
     	}

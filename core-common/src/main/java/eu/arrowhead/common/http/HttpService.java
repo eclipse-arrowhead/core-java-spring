@@ -9,8 +9,10 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.el.MethodNotFoundException;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
@@ -23,6 +25,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -34,16 +37,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 
 @Component
 public class HttpService {
 
+	private static final String ERROR_MESSAGE_PART_PKIX_PATH = "PKIX path";
+	
+	private static final List<HttpMethod> NOT_SUPPORTED_METHODS = Collections.unmodifiableList(Arrays.asList(new HttpMethod[] { HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE }));
+ 
 	private final Logger logger = LogManager.getLogger(HttpService.class);
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
@@ -79,6 +88,9 @@ public class HttpService {
 	@Value(CommonConstants.$HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT_WD)
 	private int connectionManagerTimeout;
 	
+	@Autowired
+	private ArrowheadHttpResponseErrorHandler errorHandler;
+	
 	private RestTemplate template;
 	private RestTemplate sslTemplate;
 	private SSLContext sslContext;
@@ -100,30 +112,54 @@ public class HttpService {
 		logger.debug("HttpService is initialized.");
 	}
 	
-	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final P payload, final SSLContext giventContext) {
-		//TODO: asserts here about method and maybe response type  
+	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final P payload, final SSLContext givenContext) {
+		Assert.notNull(method, "Request method is not defined.");
 		logger.debug("Sending " + method + " request to: " + uri);
 		
 		if (uri == null) {
-			logger.error("sendRequest() is called with null URI");
+			logger.error("sendRequest() is called with null URI.");
 			throw new NullPointerException("HttpService.sendRequest method received null URI. This most likely means the invoking Core System could not " +
 			              				   "fetch the service of another Core System from the Service Registry!");
+		}
+		
+		if (NOT_SUPPORTED_METHODS.contains(method)) {
+			throw new MethodNotFoundException("Invalid method type was given to the HttpService.sendRequest() method.");
 		}
 		
 		final boolean secure = CommonConstants.HTTPS.equalsIgnoreCase(uri.getScheme());
 		if (secure && sslTemplate == null) {
 			logger.debug("sendRequest(): secure request sending was invoked in insecure mode.");
-			throw new AuthException("SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.",
-					 				HttpStatus.SC_UNAUTHORIZED);
+			throw new AuthException("SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.", HttpStatus.SC_UNAUTHORIZED);
 		}
 		
-		final RestTemplate usedTemplate = secure ? (giventContext != null ? createTemplate(giventContext) : sslTemplate) : template;
+		final RestTemplate usedTemplate = secure ? (givenContext != null ? createTemplate(givenContext) : sslTemplate) : template;
 
 		final HttpEntity<P> entity = getHttpEntity(method, payload);
-		final ResponseEntity<T> response = usedTemplate.exchange(uri.toUri(), method, entity, responseType);
-		//TODO: continue
-		
-		return response;
+		try {
+			final ResponseEntity<T> response = usedTemplate.exchange(uri.toUri(), method, entity, responseType);
+			
+			return response;
+		} catch (final ResourceAccessException e) {
+			if (e.getMessage().contains(ERROR_MESSAGE_PART_PKIX_PATH)) {
+				logger.error("The system at " + uri.toUriString() + " is not part of the same certificate chain of trust!");
+		        throw new AuthException("The system at " + uri.toUriString() + " is not part of the same certificate chain of trust!", HttpStatus.SC_UNAUTHORIZED, e);
+			} else {
+		        logger.error("UnavailableServerException occurred at " + uri.toUriString(), e);
+		        throw new UnavailableServerException("Could not get any response from: " + uri.toUriString(), HttpStatus.SC_SERVICE_UNAVAILABLE, e);
+			}
+		}
+	}
+	
+	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final P payload) {
+		return sendRequest(uri, method, responseType, payload, null);
+	}
+	
+	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final SSLContext givenContext) {
+		return sendRequest(uri, method, responseType, null, givenContext);
+	}
+	
+	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType) {
+		return sendRequest(uri, method, responseType, null, null);
 	}
 		
 	private <P> HttpEntity<P> getHttpEntity(final HttpMethod method, final P payload) {
@@ -139,8 +175,9 @@ public class HttpService {
 	private RestTemplate createTemplate(final SSLContext sslContext) {
 		final HttpClient client = createClient(sslContext);
 		final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(client);
-		
-		return new RestTemplate(factory);
+		final RestTemplate restTemplate = new RestTemplate(factory);
+		restTemplate.setErrorHandler(errorHandler);
+		return restTemplate;
 	}
 	
 	private HttpClient createClient(final SSLContext sslContext) {

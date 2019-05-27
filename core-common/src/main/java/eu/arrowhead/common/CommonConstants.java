@@ -22,6 +22,8 @@ public class CommonConstants {
 	
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
+	public static final String LOCALHOST = "127.0.0.1";
+	public static final int HTTP_PORT = 80;
 	
 	public static final String SERVER_ERROR_URI = "/error";
 	
