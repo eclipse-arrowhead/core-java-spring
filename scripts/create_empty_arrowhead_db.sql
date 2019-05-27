@@ -1,65 +1,94 @@
 CREATE DATABASE  IF NOT EXISTS `arrowhead`;
 USE `arrowhead`;
 
-#DROP TABLE IF EXISTS `service_definition`;
-CREATE TABLE `service_definition` (
-  `id` bigint(20) AUTO_INCREMENT PRIMARY KEY,
-  `service_definition` varchar(255) NOT NULL UNIQUE,
-  `created_at` timestamp NOT NULL DEFAULT NOW(),
-  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+# Dump of table system
+# ------------------------------------------------------------
 
-#DROP TABLE IF EXISTS `service_interface`;
-CREATE TABLE `service_interface` (
-  `id` bigint(20) AUTO_INCREMENT PRIMARY KEY,
-  `interface` varchar(255) DEFAULT NULL UNIQUE,
-  `created_at` timestamp NOT NULL DEFAULT NOW(),
-  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `system`;
 
-#DROP TABLE IF EXISTS `service_interface_connection`;
-CREATE TABLE `service_interface_connection` (
-  `id` bigint(20) AUTO_INCREMENT PRIMARY KEY,
-  `service_id` bigint(20),
-  `interface_id` bigint(20),
-  `created_at` timestamp NOT NULL DEFAULT NOW(),
-  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  CONSTRAINT `service` FOREIGN KEY (`service_id`) REFERENCES `service_definition`(`id`),
-  CONSTRAINT `interface` FOREIGN KEY (`interface_id`) REFERENCES `service_interface`(`id`),
-  UNIQUE KEY `pair` (`service_id`, `interface_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-#DROP TABLE IF EXISTS `system`;
 CREATE TABLE `system` (
-  `id` bigint(20) AUTO_INCREMENT PRIMARY KEY,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `system_name` varchar(255) NOT NULL,
   `address` varchar(255) NOT NULL,
   `port` int(11) NOT NULL,
   `authentication_info` varchar(2047) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT NOW(),
-  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  UNIQUE KEY `pair` (`system_name`, `address`, `port`)
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pair` (`system_name`,`address`,`port`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `service_definition`;
+
+CREATE TABLE `service_definition` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `service_definition` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `service_definition` (`service_definition`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-#DROP TABLE IF EXISTS `service_registry`;
+
+# Dump of table service_interface
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `service_interface`;
+
+CREATE TABLE `service_interface` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `interface` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `interface` (`interface`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table service_registry
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `service_registry`;
+
 CREATE TABLE `service_registry` (
-  `id` bigint(20) AUTO_INCREMENT PRIMARY KEY,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `service_id` bigint(20) NOT NULL,
   `system_id` bigint(20) NOT NULL,
   `service_uri` varchar(255) DEFAULT NULL,
-  `end_of_validity` timestamp DEFAULT NOW() + INTERVAL 1 DAY,
+  `end_of_validity` timestamp NULL DEFAULT NULL,
   `secure` varchar(255) DEFAULT 'NOT_SECURE',
-  `metadata` text DEFAULT '',
+  `metadata` text,
   `version` bigint(20) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT NOW(),
-  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
   UNIQUE KEY `pair` (`service_id`,`system_id`),
-  CONSTRAINT `system` FOREIGN KEY (`system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE
+  KEY `system` (`system_id`),
+  CONSTRAINT `service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `system` FOREIGN KEY (`system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+
+# Dump of table service_registry_interface_connection
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `service_registry_interface_connection`;
+
+CREATE TABLE `service_registry_interface_connection` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `service_registry_id` bigint(20) DEFAULT NULL,
+  `interface_id` bigint(20) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pair` (`service_registry_id`,`interface_id`),
+  KEY `interface` (`interface_id`),
+  CONSTRAINT `interface` FOREIGN KEY (`interface_id`) REFERENCES `service_interface` (`id`),
+  CONSTRAINT `service_registry` FOREIGN KEY (`service_registry_id`) REFERENCES `service_registry` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #DROP TABLE IF EXISTS `cloud`;
 CREATE TABLE `cloud` (
