@@ -43,6 +43,12 @@ public class System {
 	
 	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ServiceRegistry> serviceRegistryEntries;
+	
+	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	private Set<IntraCloudAuthorization> authorizationsAsConsumer;
+	
+	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	private Set<IntraCloudAuthorization> authorizationsAsProvider;
 
 	public System() {
 		
@@ -117,6 +123,22 @@ public class System {
 
 	public void setServiceRegistryEntries(Set<ServiceRegistry> serviceRegistryEntries) {
 		this.serviceRegistryEntries = serviceRegistryEntries;
+	}
+	
+	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() {
+		return authorizationsAsConsumer;
+	}
+
+	public void setAuthorizationsAsConsumer(Set<IntraCloudAuthorization> authorizationsAsConsumer) {
+		this.authorizationsAsConsumer = authorizationsAsConsumer;
+	}
+
+	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() {
+		return authorizationsAsProvider;
+	}
+
+	public void setAuthorizationsAsProvider(Set<IntraCloudAuthorization> authorizationsAsProvider) {
+		this.authorizationsAsProvider = authorizationsAsProvider;
 	}
 
 	@Override
