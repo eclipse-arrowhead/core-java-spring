@@ -17,7 +17,7 @@ public class ServiceInterface {
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column (nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
 	private String interface_;
 	
 	@Column (nullable = false)
