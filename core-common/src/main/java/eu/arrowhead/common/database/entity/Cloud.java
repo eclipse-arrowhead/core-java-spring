@@ -1,12 +1,16 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -52,6 +56,9 @@ public class Cloud {
 	
 	@Column (nullable = false)
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
+	
+	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
+	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
 
 	public Cloud() {
 		
@@ -164,6 +171,14 @@ public class Cloud {
 
 	public void setUpdatedAt(ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+	
+	public Set<InterCloudAuthorization> getInterCloudAuthorizations() {
+		return interCloudAuthorizations;
+	}
+
+	public void setInterCloudAuthorizations(Set<InterCloudAuthorization> interCloudAuthorizations) {
+		this.interCloudAuthorizations = interCloudAuthorizations;
 	}
 
 	@Override
