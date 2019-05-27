@@ -32,7 +32,13 @@ public class ServiceDefinition {
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
-
+	
+	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
+	private Set<IntraCloudAuthorization> intraCloudAuthorizations = new HashSet<IntraCloudAuthorization>();
+	
+	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
+	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
+	
 	public ServiceDefinition() {
 		
 	}
@@ -79,6 +85,22 @@ public class ServiceDefinition {
 
 	public void setServiceRegistryEntries(Set<ServiceRegistry> serviceRegistryEntries) {
 		this.serviceRegistryEntries = serviceRegistryEntries;
+	}
+	
+	public Set<IntraCloudAuthorization> getIntraCloudAuthorizations() {
+		return intraCloudAuthorizations;
+	}
+
+	public void setIntraCloudAuthorizations(Set<IntraCloudAuthorization> intraCloudAuthorizations) {
+		this.intraCloudAuthorizations = intraCloudAuthorizations;
+	}
+
+	public Set<InterCloudAuthorization> getInterCloudAuthorizations() {
+		return interCloudAuthorizations;
+	}
+
+	public void setInterCloudAuthorizations(Set<InterCloudAuthorization> interCloudAuthorizations) {
+		this.interCloudAuthorizations = interCloudAuthorizations;
 	}
 
 	@Override
