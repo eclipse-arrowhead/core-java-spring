@@ -79,8 +79,8 @@ DROP TABLE IF EXISTS `service_registry_interface_connection`;
 
 CREATE TABLE `service_registry_interface_connection` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `service_registry_id` bigint(20) DEFAULT NULL,
-  `interface_id` bigint(20) DEFAULT NULL,
+  `service_registry_id` bigint(20) NOT NULL,
+  `interface_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
