@@ -1,12 +1,15 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import eu.arrowhead.common.Defaults;
 
@@ -25,6 +28,9 @@ public class ServiceDefinition {
 	
 	@Column (nullable = false)
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
+	
+	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
+	private Set<ServiceRegistry> serviceRegistryEntries;
 
 	public ServiceDefinition() {
 		
@@ -64,6 +70,14 @@ public class ServiceDefinition {
 
 	public void setUpdatedAt(ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+	
+	public Set<ServiceRegistry> getServiceRegistryEntries() {
+		return serviceRegistryEntries;
+	}
+
+	public void setServiceRegistryEntries(Set<ServiceRegistry> serviceRegistryEntries) {
+		this.serviceRegistryEntries = serviceRegistryEntries;
 	}
 
 	@Override
