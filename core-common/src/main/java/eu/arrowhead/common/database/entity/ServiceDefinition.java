@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -30,7 +31,7 @@ public class ServiceDefinition {
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<ServiceRegistry> serviceRegistryEntries;
+	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
 
 	public ServiceDefinition() {
 		

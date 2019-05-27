@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -42,13 +43,13 @@ public class System {
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
 	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<ServiceRegistry> serviceRegistryEntries;
+	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
 	
 	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<IntraCloudAuthorization> authorizationsAsConsumer;
+	private Set<IntraCloudAuthorization> authorizationsAsConsumer = new HashSet<IntraCloudAuthorization>();
 	
 	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<IntraCloudAuthorization> authorizationsAsProvider;
+	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<IntraCloudAuthorization>();
 
 	public System() {
 		
