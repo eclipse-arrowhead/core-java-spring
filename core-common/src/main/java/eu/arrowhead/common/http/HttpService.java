@@ -34,7 +34,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 
@@ -102,6 +101,7 @@ public class HttpService {
 	}
 	
 	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final P payload, final SSLContext giventContext) {
+		//TODO: asserts here about method and maybe response type  
 		logger.debug("Sending " + method + " request to: " + uri);
 		
 		if (uri == null) {
