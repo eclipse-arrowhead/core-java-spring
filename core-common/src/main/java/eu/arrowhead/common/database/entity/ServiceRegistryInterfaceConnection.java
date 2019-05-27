@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"service_registry_id", "interface_id"}))
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceRegistryId", "interfaceId"}))
 public class ServiceRegistryInterfaceConnection {
 	
 	@Id
@@ -22,11 +22,11 @@ public class ServiceRegistryInterfaceConnection {
 	private long id;
 	
 	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "id", referencedColumnName = "service_registry_id", nullable = false)
+	@JoinColumn (name = "serviceRegistryId", referencedColumnName = "id", nullable = false)
 	private ServiceRegistry serviceRegistryEntry;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "id", referencedColumnName = "interface_id", nullable = false)
+	@JoinColumn (name = "interfaceId", referencedColumnName = "id", nullable = false)
 	private ServiceInterface serviceInterface;
 	
 	@Column (nullable = false)

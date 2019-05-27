@@ -18,7 +18,7 @@ import javax.persistence.UniqueConstraint;
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"service_id", "system_id"}))
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
 public class ServiceRegistry {
 	
 	@Id
@@ -26,11 +26,11 @@ public class ServiceRegistry {
 	private long id;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "id", referencedColumnName = "service_id", nullable = false)
+	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
 	private ServiceDefinition serviceDefinition;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "id", referencedColumnName = "system_id", nullable = false)
+	@JoinColumn (name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
 	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
