@@ -58,7 +58,7 @@ CREATE TABLE `service_registry` (
   `system_id` bigint(20) NOT NULL,
   `service_uri` varchar(255) DEFAULT NULL,
   `end_of_validity` timestamp NULL DEFAULT NULL,
-  `secure` varchar(255) DEFAULT 'NOT_SECURE',
+  `secure` int(1) NOT NULL DEFAULT 0 COMMENT 'Is secure?',
   `metadata` text,
   `version` bigint(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
