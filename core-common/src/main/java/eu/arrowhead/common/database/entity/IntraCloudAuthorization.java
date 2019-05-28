@@ -33,11 +33,11 @@ public class IntraCloudAuthorization {
 	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
 	private ServiceDefinition serviceDefinition;
 	
-	@Column (nullable = false, columnDefinition = "TIMESTAMP")
-	private ZonedDateTime createdAt = ZonedDateTime.now();
+	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, columnDefinition = "TIMESTAMP")
-	private ZonedDateTime updatedAt = ZonedDateTime.now();
+	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	private ZonedDateTime updatedAt;
 
 	public IntraCloudAuthorization() {
 		

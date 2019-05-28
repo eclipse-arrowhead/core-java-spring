@@ -27,11 +27,11 @@ public class ServiceInterface {
 	@Column (nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
 	private String interfaceName;
 	
-	@Column (nullable = false, columnDefinition = "TIMESTAMP")
-	private ZonedDateTime createdAt = ZonedDateTime.now();
+	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, columnDefinition = "TIMESTAMP")
-	private ZonedDateTime updatedAt = ZonedDateTime.now();
+	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	private ZonedDateTime updatedAt;
 	
 	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)

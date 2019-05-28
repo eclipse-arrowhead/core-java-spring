@@ -54,11 +54,11 @@ public class Cloud {
 	@Column (nullable = false)
 	private boolean ownCloud = false;
 	
-	@Column (nullable = false, columnDefinition = "TIMESTAMP")
-	private ZonedDateTime createdAt = ZonedDateTime.now();
+	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, columnDefinition = "TIMESTAMP")
-	private ZonedDateTime updatedAt = ZonedDateTime.now();
+	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	private ZonedDateTime updatedAt;
 	
 	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
