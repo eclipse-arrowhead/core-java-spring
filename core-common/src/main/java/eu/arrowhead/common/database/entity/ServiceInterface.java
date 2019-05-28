@@ -27,10 +27,10 @@ public class ServiceInterface {
 	@Column (nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
 	private String interfaceName;
 	
-	@Column (nullable = false)
+	@Column (nullable = false, columnDefinition = "TIMESTAMP")
 	private ZonedDateTime createdAt = ZonedDateTime.now();
 	
-	@Column (nullable = false)
+	@Column (nullable = false, columnDefinition = "TIMESTAMP")
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
 	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)

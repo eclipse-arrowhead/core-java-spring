@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -49,10 +48,10 @@ public class System {
 	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
-	@Column (nullable = false)
+	@Column (nullable = false, columnDefinition = "TIMESTAMP")
 	private ZonedDateTime createdAt = ZonedDateTime.now();
 	
-	@Column (nullable = false)
+	@Column (nullable = false, columnDefinition = "TIMESTAMP")
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
 	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
