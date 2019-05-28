@@ -16,6 +16,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import eu.arrowhead.common.Defaults;
 
 @Entity
@@ -56,6 +59,7 @@ public class ServiceRegistry {
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
 	@OneToMany (mappedBy = "serviceRegistryEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistryInterfaceConnection> interfaceConnections = new HashSet<ServiceRegistryInterfaceConnection>();
 
 	public ServiceRegistry() {

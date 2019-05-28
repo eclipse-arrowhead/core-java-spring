@@ -4,20 +4,33 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.Defaults;
 
 @Entity
 @Table (name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
+@NamedEntityGraphs ({ 
+	@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
+			attributeNodes = {
+					@NamedAttributeNode (value = "serviceRegistryEntries")
+			})
+	})
 public class System {
 	
 	@Id
@@ -43,7 +56,16 @@ public class System {
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
 	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
+	
+	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<IntraCloudAuthorization> authorizationsAsConsumer = new HashSet<IntraCloudAuthorization>();
+	
+	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<IntraCloudAuthorization>();
 	
 	public System() {
 		
@@ -119,7 +141,23 @@ public class System {
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) {
 		this.serviceRegistryEntries = serviceRegistryEntries;
 	}
-	
+		
+	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() {
+		return authorizationsAsConsumer;
+	}
+
+	public void setAuthorizationsAsConsumer(final Set<IntraCloudAuthorization> authorizationsAsConsumer) {
+		this.authorizationsAsConsumer = authorizationsAsConsumer;
+	}
+
+	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() {
+		return authorizationsAsProvider;
+	}
+
+	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) {
+		this.authorizationsAsProvider = authorizationsAsProvider;
+	}
+
 	@Override
 	public String toString() {
 		return "System [id=" + id + ", systemName=" + systemName + ", address=" + address + ", port=" + port + "]";

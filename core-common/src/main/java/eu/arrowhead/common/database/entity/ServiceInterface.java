@@ -12,6 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import eu.arrowhead.common.Defaults;
 
 @Entity
@@ -29,6 +32,10 @@ public class ServiceInterface {
 	
 	@Column (nullable = false)
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
+	
+	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<ServiceRegistryInterfaceConnection> serviceConnections = new HashSet<ServiceRegistryInterfaceConnection>();
 	
 	public ServiceInterface() {
 	
@@ -70,6 +77,14 @@ public class ServiceInterface {
 		this.updatedAt = updatedAt;
 	}
 	
+	public Set<ServiceRegistryInterfaceConnection> getServiceConnections() {
+		return serviceConnections;
+	}
+
+	public void setServiceConnections(final Set<ServiceRegistryInterfaceConnection> serviceConnections) {
+		this.serviceConnections = serviceConnections;
+	}
+
 	@Override
 	public String toString() {
 		return "ServiceInterface [id=" + id + ", interfaceName=" + interfaceName + "]";

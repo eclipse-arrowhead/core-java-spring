@@ -86,8 +86,8 @@ CREATE TABLE `service_registry_interface_connection` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `pair` (`service_registry_id`,`interface_id`),
   KEY `interface_sr` (`interface_id`),
-  CONSTRAINT `interface_sr` FOREIGN KEY (`interface_id`) REFERENCES `service_interface` (`id`),
-  CONSTRAINT `service_registry` FOREIGN KEY (`service_registry_id`) REFERENCES `service_registry` (`id`)
+  CONSTRAINT `interface_sr` FOREIGN KEY (`interface_id`) REFERENCES `service_interface` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `service_registry` FOREIGN KEY (`service_registry_id`) REFERENCES `service_registry` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #DROP TABLE IF EXISTS `cloud`;
@@ -120,9 +120,9 @@ CREATE TABLE `intra_cloud_authorization` (
   UNIQUE KEY `rule` (`consumer_system_id`,`provider_system_id`,`service_id`),
   KEY `provider` (`provider_system_id`),
   KEY `service_intra_auth` (`service_id`),
-  CONSTRAINT `service_intra_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`),
-  CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`),
-  CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`)
+  CONSTRAINT `service_intra_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #DROP TABLE IF EXISTS `inter_cloud_authorization`;
@@ -135,8 +135,8 @@ CREATE TABLE `inter_cloud_authorization` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `rule` (`consumer_cloud_id`,`service_id`),
   KEY `service_inter_auth` (`service_id`),
-  CONSTRAINT `cloud` FOREIGN KEY (`consumer_cloud_id`) REFERENCES `cloud` (`id`),
-  CONSTRAINT `service_inter_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`)
+  CONSTRAINT `cloud` FOREIGN KEY (`consumer_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `service_inter_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

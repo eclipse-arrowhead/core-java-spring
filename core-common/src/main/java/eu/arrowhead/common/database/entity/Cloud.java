@@ -14,6 +14,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import eu.arrowhead.common.Defaults;
 
 @Entity
@@ -56,6 +59,10 @@ public class Cloud {
 	
 	@Column (nullable = false)
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
+	
+	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
 	
 	public Cloud() {
 		
@@ -169,7 +176,15 @@ public class Cloud {
 	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	
+		
+	public Set<InterCloudAuthorization> getInterCloudAuthorizations() {
+		return interCloudAuthorizations;
+	}
+
+	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) {
+		this.interCloudAuthorizations = interCloudAuthorizations;
+	}
+
 	@Override
 	public String toString() {
 		return "Cloud [id=" + id + ", operator=" + operator + ", name=" + name + ", address=" + address + ", port="

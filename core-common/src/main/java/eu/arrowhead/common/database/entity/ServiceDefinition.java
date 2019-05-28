@@ -10,11 +10,23 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.Defaults;
 
 @Entity
+@NamedEntityGraphs ({ 
+	@NamedEntityGraph (name = "serviceDefinitionWithServiceRegistryEntries",
+			attributeNodes = {
+					@NamedAttributeNode (value = "serviceRegistryEntries")
+			})
+	})
 public class ServiceDefinition {
 
 	@Id
@@ -31,7 +43,16 @@ public class ServiceDefinition {
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
+	
+	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<IntraCloudAuthorization> intraCloudAuthorizations = new HashSet<IntraCloudAuthorization>();
+	
+	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
 	
 	public ServiceDefinition() {
 		
@@ -80,7 +101,23 @@ public class ServiceDefinition {
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) {
 		this.serviceRegistryEntries = serviceRegistryEntries;
 	}
-	
+		
+	public Set<IntraCloudAuthorization> getIntraCloudAuthorizations() {
+		return intraCloudAuthorizations;
+	}
+
+	public void setIntraCloudAuthorizations(final Set<IntraCloudAuthorization> intraCloudAuthorizations) {
+		this.intraCloudAuthorizations = intraCloudAuthorizations;
+	}
+		
+	public Set<InterCloudAuthorization> getInterCloudAuthorizations() {
+		return interCloudAuthorizations;
+	}
+
+	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) {
+		this.interCloudAuthorizations = interCloudAuthorizations;
+	}
+
 	@Override
 	public String toString() {
 		return "ServiceDefinition [id=" + id + ", serviceDefinition=" + serviceDefinition + "]";
