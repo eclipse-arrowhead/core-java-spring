@@ -41,13 +41,13 @@ public class ServiceRegistry {
 	private ZonedDateTime endOfValidity;
 	
 	@Column (nullable = false)
-	private Boolean secure;
+	private boolean secure = false;
 	
 	@Column (nullable = true, columnDefinition = "TEXT")
 	private String metadata;
 	
 	@Column (nullable = true)
-	private long version;
+	private int version = 1;
 	
 	@Column (nullable = false)
 	private ZonedDateTime createdAt = ZonedDateTime.now();
@@ -62,8 +62,8 @@ public class ServiceRegistry {
 		
 	}
 
-	public ServiceRegistry(ServiceDefinition serviceDefinition, System system, String serviceUri,
-			ZonedDateTime endOfValidity, Boolean secure, String metadata, long version) {
+	public ServiceRegistry(final ServiceDefinition serviceDefinition, final System system, final String serviceUri,
+			final ZonedDateTime endOfValidity, final boolean secure, final String metadata, final int version) {
 		this.serviceDefinition = serviceDefinition;
 		this.system = system;
 		this.serviceUri = serviceUri;
@@ -77,7 +77,7 @@ public class ServiceRegistry {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -85,7 +85,7 @@ public class ServiceRegistry {
 		return serviceDefinition;
 	}
 
-	public void setServiceDefinition(ServiceDefinition serviceDefinition) {
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) {
 		this.serviceDefinition = serviceDefinition;
 	}
 
@@ -93,7 +93,7 @@ public class ServiceRegistry {
 		return system;
 	}
 
-	public void setSystem(System system) {
+	public void setSystem(final System system) {
 		this.system = system;
 	}
 
@@ -101,7 +101,7 @@ public class ServiceRegistry {
 		return serviceUri;
 	}
 
-	public void setServiceUri(String serviceUri) {
+	public void setServiceUri(final String serviceUri) {
 		this.serviceUri = serviceUri;
 	}
 
@@ -109,15 +109,15 @@ public class ServiceRegistry {
 		return endOfValidity;
 	}
 
-	public void setEndOfValidity(ZonedDateTime endOfValidity) {
+	public void setEndOfValidity(final ZonedDateTime endOfValidity) {
 		this.endOfValidity = endOfValidity;
 	}
 
-	public Boolean getSecure() {
+	public boolean getSecure() {
 		return secure;
 	}
 
-	public void setSecure(Boolean secure) {
+	public void setSecure(final boolean secure) {
 		this.secure = secure;
 	}
 
@@ -125,15 +125,15 @@ public class ServiceRegistry {
 		return metadata;
 	}
 
-	public void setMetadata(String metadata) {
+	public void setMetadata(final String metadata) {
 		this.metadata = metadata;
 	}
 
-	public long getVersion() {
+	public int getVersion() {
 		return version;
 	}
 
-	public void setVersion(long version) {
+	public void setVersion(final int version) {
 		this.version = version;
 	}
 
@@ -141,7 +141,7 @@ public class ServiceRegistry {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -149,7 +149,7 @@ public class ServiceRegistry {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 	
@@ -157,7 +157,7 @@ public class ServiceRegistry {
 		return interfaceConnections;
 	}
 
-	public void setInterfaceConnections(Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
+	public void setInterfaceConnections(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
 		this.interfaceConnections = interfaceConnections;
 	}
 

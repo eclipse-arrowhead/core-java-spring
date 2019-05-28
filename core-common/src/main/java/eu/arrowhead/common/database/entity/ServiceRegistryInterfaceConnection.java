@@ -21,7 +21,7 @@ public class ServiceRegistryInterfaceConnection {
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "serviceRegistryId", referencedColumnName = "id", nullable = false)
 	private ServiceRegistry serviceRegistryEntry;
 	
@@ -39,7 +39,7 @@ public class ServiceRegistryInterfaceConnection {
 	
 	}
 
-	public ServiceRegistryInterfaceConnection(ServiceRegistry serviceRegistryEntry, ServiceInterface serviceInterface) {
+	public ServiceRegistryInterfaceConnection(final ServiceRegistry serviceRegistryEntry, final ServiceInterface serviceInterface) {
 		this.serviceRegistryEntry = serviceRegistryEntry;
 		this.serviceInterface = serviceInterface;
 	}
@@ -48,7 +48,7 @@ public class ServiceRegistryInterfaceConnection {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -56,7 +56,7 @@ public class ServiceRegistryInterfaceConnection {
 		return serviceRegistryEntry;
 	}
 
-	public void setServiceRegistryEntry(ServiceRegistry serviceRegistryEntry) {
+	public void setServiceRegistryEntry(final ServiceRegistry serviceRegistryEntry) {
 		this.serviceRegistryEntry = serviceRegistryEntry;
 	}
 
@@ -64,7 +64,7 @@ public class ServiceRegistryInterfaceConnection {
 		return serviceInterface;
 	}
 
-	public void setServiceInterface(ServiceInterface serviceInterface) {
+	public void setServiceInterface(final ServiceInterface serviceInterface) {
 		this.serviceInterface = serviceInterface;
 	}
 
@@ -72,7 +72,7 @@ public class ServiceRegistryInterfaceConnection {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -80,7 +80,7 @@ public class ServiceRegistryInterfaceConnection {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 

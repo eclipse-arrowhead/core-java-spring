@@ -27,7 +27,7 @@ public class Relay {
 	private int port;
 	
 	@Column (nullable = false)
-	private Boolean secure;
+	private boolean secure = false;
 	
 	@Column (nullable = false)
 	private ZonedDateTime createdAt = ZonedDateTime.now();
@@ -39,7 +39,7 @@ public class Relay {
 		
 	}
 
-	public Relay(String address, int port, Boolean secure) {
+	public Relay(final String address, final int port, final boolean secure) {
 		this.address = address;
 		this.port = port;
 		this.secure = secure;
@@ -49,7 +49,7 @@ public class Relay {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -57,7 +57,7 @@ public class Relay {
 		return address;
 	}
 
-	public void setAddress(String address) {
+	public void setAddress(final String address) {
 		this.address = address;
 	}
 
@@ -65,15 +65,15 @@ public class Relay {
 		return port;
 	}
 
-	public void setPort(int port) {
+	public void setPort(final int port) {
 		this.port = port;
 	}
 
-	public Boolean getSecure() {
+	public boolean getSecure() {
 		return secure;
 	}
 
-	public void setSecure(Boolean secure) {
+	public void setSecure(final boolean secure) {
 		this.secure = secure;
 	}
 
@@ -81,7 +81,7 @@ public class Relay {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -89,7 +89,7 @@ public class Relay {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 

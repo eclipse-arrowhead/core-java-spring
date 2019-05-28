@@ -33,17 +33,11 @@ public class ServiceDefinition {
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
 	
-	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<IntraCloudAuthorization> intraCloudAuthorizations = new HashSet<IntraCloudAuthorization>();
-	
-	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
-	
 	public ServiceDefinition() {
 		
 	}
 
-	public ServiceDefinition(String serviceDefinition) {
+	public ServiceDefinition(final String serviceDefinition) {
 		this.serviceDefinition = serviceDefinition;
 	}
 
@@ -51,7 +45,7 @@ public class ServiceDefinition {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -59,7 +53,7 @@ public class ServiceDefinition {
 		return serviceDefinition;
 	}
 
-	public void setServiceDefinition(String serviceDefinition) {
+	public void setServiceDefinition(final String serviceDefinition) {
 		this.serviceDefinition = serviceDefinition;
 	}
 
@@ -67,7 +61,7 @@ public class ServiceDefinition {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -75,7 +69,7 @@ public class ServiceDefinition {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 	
@@ -83,26 +77,10 @@ public class ServiceDefinition {
 		return serviceRegistryEntries;
 	}
 
-	public void setServiceRegistryEntries(Set<ServiceRegistry> serviceRegistryEntries) {
+	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) {
 		this.serviceRegistryEntries = serviceRegistryEntries;
 	}
 	
-	public Set<IntraCloudAuthorization> getIntraCloudAuthorizations() {
-		return intraCloudAuthorizations;
-	}
-
-	public void setIntraCloudAuthorizations(Set<IntraCloudAuthorization> intraCloudAuthorizations) {
-		this.intraCloudAuthorizations = intraCloudAuthorizations;
-	}
-
-	public Set<InterCloudAuthorization> getInterCloudAuthorizations() {
-		return interCloudAuthorizations;
-	}
-
-	public void setInterCloudAuthorizations(Set<InterCloudAuthorization> interCloudAuthorizations) {
-		this.interCloudAuthorizations = interCloudAuthorizations;
-	}
-
 	@Override
 	public String toString() {
 		return "ServiceDefinition [id=" + id + ", serviceDefinition=" + serviceDefinition + "]";

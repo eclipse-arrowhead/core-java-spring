@@ -22,7 +22,7 @@ public class ServiceInterface {
 	private long id;
 	
 	@Column (nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
-	private String interface_;
+	private String interfaceName;
 	
 	@Column (nullable = false)
 	private ZonedDateTime createdAt = ZonedDateTime.now();
@@ -30,38 +30,35 @@ public class ServiceInterface {
 	@Column (nullable = false)
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
-	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<ServiceRegistryInterfaceConnection> serviceConnections = new HashSet<ServiceRegistryInterfaceConnection>();
-
 	public ServiceInterface() {
 	
 	}
 
-	public ServiceInterface(String interface_) {
-		this.interface_ = interface_;
+	public ServiceInterface(final String interfaceName) {
+		this.interfaceName = interfaceName;
 	}
 
 	public long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
-	public String getInterface_() {
-		return interface_;
+	public String getInterfaceName() {
+		return interfaceName;
 	}
 
-	public void setInterface_(String interface_) {
-		this.interface_ = interface_;
+	public void setInterfaceName(final String interfaceName) {
+		this.interfaceName = interfaceName;
 	}
 
 	public ZonedDateTime getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -69,21 +66,13 @@ public class ServiceInterface {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 	
-	public Set<ServiceRegistryInterfaceConnection> getServiceConnections() {
-		return serviceConnections;
-	}
-
-	public void setServiceConnections(Set<ServiceRegistryInterfaceConnection> serviceConnections) {
-		this.serviceConnections = serviceConnections;
-	}
-
 	@Override
 	public String toString() {
-		return "ServiceInterface [id=" + id + ", interface_=" + interface_ + "]";
+		return "ServiceInterface [id=" + id + ", interfaceName=" + interfaceName + "]";
 	}
 	
 }

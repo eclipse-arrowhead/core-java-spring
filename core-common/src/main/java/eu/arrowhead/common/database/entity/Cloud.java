@@ -43,13 +43,13 @@ public class Cloud {
 	private String authenticationInfo;
 	
 	@Column (nullable = false)
-	private Boolean secure;
+	private boolean secure = false;
 	
 	@Column (nullable = false)
-	private Boolean neighbor;
+	private boolean neighbor = false;
 	
 	@Column (nullable = false)
-	private Boolean ownCloud;
+	private boolean ownCloud = false;
 	
 	@Column (nullable = false)
 	private ZonedDateTime createdAt = ZonedDateTime.now();
@@ -57,15 +57,12 @@ public class Cloud {
 	@Column (nullable = false)
 	private ZonedDateTime updatedAt = ZonedDateTime.now();
 	
-	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
-
 	public Cloud() {
 		
 	}
 
-	public Cloud(String operator, String name, String address, int port, String gatekeeperServiceUri,
-			String authenticationInfo, Boolean secure, Boolean neighbor, Boolean ownCloud) {
+	public Cloud(final String operator, final String name, final String address, final int port, final String gatekeeperServiceUri,
+			final String authenticationInfo, final boolean secure, final boolean neighbor, final boolean ownCloud) {
 		this.operator = operator;
 		this.name = name;
 		this.address = address;
@@ -81,7 +78,7 @@ public class Cloud {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -89,7 +86,7 @@ public class Cloud {
 		return operator;
 	}
 
-	public void setOperator(String operator) {
+	public void setOperator(final String operator) {
 		this.operator = operator;
 	}
 
@@ -97,7 +94,7 @@ public class Cloud {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -105,7 +102,7 @@ public class Cloud {
 		return address;
 	}
 
-	public void setAddress(String address) {
+	public void setAddress(final String address) {
 		this.address = address;
 	}
 
@@ -113,7 +110,7 @@ public class Cloud {
 		return port;
 	}
 
-	public void setPort(int port) {
+	public void setPort(final int port) {
 		this.port = port;
 	}
 
@@ -121,7 +118,7 @@ public class Cloud {
 		return gatekeeperServiceUri;
 	}
 
-	public void setGatekeeperServiceUri(String gatekeeperServiceUri) {
+	public void setGatekeeperServiceUri(final String gatekeeperServiceUri) {
 		this.gatekeeperServiceUri = gatekeeperServiceUri;
 	}
 
@@ -129,31 +126,31 @@ public class Cloud {
 		return authenticationInfo;
 	}
 
-	public void setAuthenticationInfo(String authenticationInfo) {
+	public void setAuthenticationInfo(final String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
 	}
 
-	public Boolean getSecure() {
+	public boolean getSecure() {
 		return secure;
 	}
 
-	public void setSecure(Boolean secure) {
+	public void setSecure(final boolean secure) {
 		this.secure = secure;
 	}
 
-	public Boolean getNeighbor() {
+	public boolean getNeighbor() {
 		return neighbor;
 	}
 
-	public void setNeighbor(Boolean neighbor) {
+	public void setNeighbor(final boolean neighbor) {
 		this.neighbor = neighbor;
 	}
 
-	public Boolean getOwnCloud() {
+	public boolean getOwnCloud() {
 		return ownCloud;
 	}
 
-	public void setOwnCloud(Boolean ownCloud) {
+	public void setOwnCloud(final boolean ownCloud) {
 		this.ownCloud = ownCloud;
 	}
 
@@ -161,7 +158,7 @@ public class Cloud {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -169,18 +166,10 @@ public class Cloud {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 	
-	public Set<InterCloudAuthorization> getInterCloudAuthorizations() {
-		return interCloudAuthorizations;
-	}
-
-	public void setInterCloudAuthorizations(Set<InterCloudAuthorization> interCloudAuthorizations) {
-		this.interCloudAuthorizations = interCloudAuthorizations;
-	}
-
 	@Override
 	public String toString() {
 		return "Cloud [id=" + id + ", operator=" + operator + ", name=" + name + ", address=" + address + ", port="

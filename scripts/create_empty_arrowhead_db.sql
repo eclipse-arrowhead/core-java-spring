@@ -38,11 +38,11 @@ DROP TABLE IF EXISTS `service_interface`;
 
 CREATE TABLE `service_interface` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `interface_` varchar(255) DEFAULT NULL,
+  `interface_name` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `interface` (`interface_`)
+  UNIQUE KEY `interface` (`interface_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -60,7 +60,7 @@ CREATE TABLE `service_registry` (
   `end_of_validity` timestamp NULL DEFAULT NULL,
   `secure` int(1) NOT NULL DEFAULT 0 COMMENT 'Is secure?',
   `metadata` text,
-  `version` bigint(20) DEFAULT NULL,
+  `version` int(11) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -85,8 +85,8 @@ CREATE TABLE `service_registry_interface_connection` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pair` (`service_registry_id`,`interface_id`),
-  KEY `interface_` (`interface_id`),
-  CONSTRAINT `interface_` FOREIGN KEY (`interface_id`) REFERENCES `service_interface` (`id`),
+  KEY `interface_sr` (`interface_id`),
+  CONSTRAINT `interface_sr` FOREIGN KEY (`interface_id`) REFERENCES `service_interface` (`id`),
   CONSTRAINT `service_registry` FOREIGN KEY (`service_registry_id`) REFERENCES `service_registry` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

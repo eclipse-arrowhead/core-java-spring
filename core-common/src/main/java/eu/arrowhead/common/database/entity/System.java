@@ -45,17 +45,11 @@ public class System {
 	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
 	
-	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<IntraCloudAuthorization> authorizationsAsConsumer = new HashSet<IntraCloudAuthorization>();
-	
-	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<IntraCloudAuthorization>();
-
 	public System() {
 		
 	}
 
-	public System(String systemName, String address, int port, String authenticationInfo) {
+	public System(final String systemName, final String address, final int port, final String authenticationInfo) {
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
@@ -66,7 +60,7 @@ public class System {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -74,7 +68,7 @@ public class System {
 		return systemName;
 	}
 
-	public void setSystemName(String systemName) {
+	public void setSystemName(final String systemName) {
 		this.systemName = systemName;
 	}
 
@@ -82,7 +76,7 @@ public class System {
 		return address;
 	}
 
-	public void setAddress(String address) {
+	public void setAddress(final String address) {
 		this.address = address;
 	}
 
@@ -90,7 +84,7 @@ public class System {
 		return port;
 	}
 
-	public void setPort(int port) {
+	public void setPort(final int port) {
 		this.port = port;
 	}
 
@@ -98,7 +92,7 @@ public class System {
 		return authenticationInfo;
 	}
 
-	public void setAuthenticationInfo(String authenticationInfo) {
+	public void setAuthenticationInfo(final String authenticationInfo) {
 		this.authenticationInfo = authenticationInfo;
 	}
 
@@ -106,7 +100,7 @@ public class System {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -114,7 +108,7 @@ public class System {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 	
@@ -122,26 +116,10 @@ public class System {
 		return serviceRegistryEntries;
 	}
 
-	public void setServiceRegistryEntries(Set<ServiceRegistry> serviceRegistryEntries) {
+	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) {
 		this.serviceRegistryEntries = serviceRegistryEntries;
 	}
 	
-	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() {
-		return authorizationsAsConsumer;
-	}
-
-	public void setAuthorizationsAsConsumer(Set<IntraCloudAuthorization> authorizationsAsConsumer) {
-		this.authorizationsAsConsumer = authorizationsAsConsumer;
-	}
-
-	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() {
-		return authorizationsAsProvider;
-	}
-
-	public void setAuthorizationsAsProvider(Set<IntraCloudAuthorization> authorizationsAsProvider) {
-		this.authorizationsAsProvider = authorizationsAsProvider;
-	}
-
 	@Override
 	public String toString() {
 		return "System [id=" + id + ", systemName=" + systemName + ", address=" + address + ", port=" + port + "]";
