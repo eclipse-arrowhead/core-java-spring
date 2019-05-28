@@ -23,8 +23,8 @@ public class JDBCConnectionFactoryForLog4J2 {
 			init();
 		} catch (final Exception e) {
 			// this class' purpose to configure logging so in case of exceptions we can't use logging
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			System.out.println(e.getMessage()); //NOSONAR no logging at this point
+			e.printStackTrace(); //NOSONAR no logging at this point
 		}
 	}
 	
@@ -55,5 +55,9 @@ public class JDBCConnectionFactoryForLog4J2 {
 		temp.load(propStream);
 
 		props = temp;
+	}
+	
+	private JDBCConnectionFactoryForLog4J2() {
+		throw new UnsupportedOperationException();
 	}
 }

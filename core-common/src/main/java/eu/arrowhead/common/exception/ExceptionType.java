@@ -10,13 +10,8 @@ package eu.arrowhead.common.exception;
 public enum ExceptionType {
 	ARROWHEAD,
 	AUTH,
-	BAD_MEDIA_TYPE,
-	BAD_METHOD,
 	BAD_PAYLOAD,
-	BAD_URI,
 	DATA_NOT_FOUND,
-	DUPLICATE_ENTRY,
 	GENERIC,
-	JSON_PROCESSING,
 	UNAVAILABLE
 }

@@ -89,7 +89,7 @@ public class HttpService {
 	private int connectionManagerTimeout;
 	
 	@Autowired
-	private ArrowheadHttpResponseErrorHandler errorHandler;
+	private ArrowheadHttpClientResponseErrorHandler errorHandler;
 	
 	private RestTemplate template;
 	private RestTemplate sslTemplate;

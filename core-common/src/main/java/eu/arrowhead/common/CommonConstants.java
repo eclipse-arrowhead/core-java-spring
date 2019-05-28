@@ -8,7 +8,7 @@ public class CommonConstants {
 	
 	public static final String DATABASE_URL = "spring.datasource.url";
 	public static final String DATABASE_USER = "spring.datasource.username";
-	public static final String DATABASE_PASSWORD = "spring.datasource.password";
+	public static final String DATABASE_PASSWORD = "spring.datasource.password"; //NOSONAR it is not a password 
 	public static final String DATABASE_DRIVER_CLASS = "spring.datasource.driver-class-name"; 
 	public static final String DATABASE_ENTITY_PACKAGE = "eu.arrowhead.common.database.entity";
 	public static final String DATABASE_REPOSITORY_PACKAGE = "eu.arrowhead.common.database.repository";

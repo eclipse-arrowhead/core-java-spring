@@ -50,9 +50,8 @@ public class AuthorizationController {
 	public String deleteThisService() throws Exception {
 		logger.debug("deleteThisService() is called.");
 	
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, srAddress, srPort, "trueEcho");
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, srAddress, srPort, "echo");
 		final ResponseEntity<String> responseEntity = httpService.sendRequest(uri, HttpMethod.GET, String.class, null, null);
-		
 		return "Delete this service. " + responseEntity.getBody();
 	}
 }
