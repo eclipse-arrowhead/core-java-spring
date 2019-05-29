@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.OnDelete;
@@ -21,11 +20,9 @@ import org.hibernate.annotations.OnDeleteAction;
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@NamedEntityGraphs ({ 
-	@NamedEntityGraph (name = "serviceDefinitionWithServiceRegistryEntries",
-			attributeNodes = {
-					@NamedAttributeNode (value = "serviceRegistryEntries")
-			})
+@NamedEntityGraph (name = "serviceDefinitionWithServiceRegistryEntries",
+	attributeNodes = {
+			@NamedAttributeNode (value = "serviceRegistryEntries")
 	})
 public class ServiceDefinition {
 
@@ -44,15 +41,15 @@ public class ServiceDefinition {
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
+	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<>();
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> intraCloudAuthorizations = new HashSet<IntraCloudAuthorization>();
+	private Set<IntraCloudAuthorization> intraCloudAuthorizations = new HashSet<>();
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
+	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<>();
 	
 	public ServiceDefinition() {
 		

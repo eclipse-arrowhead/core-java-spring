@@ -43,7 +43,7 @@ public class IntraCloudAuthorization {
 		
 	}
 
-	public IntraCloudAuthorization(System consumerSystem, System providerSystem, ServiceDefinition serviceDefinition) {
+	public IntraCloudAuthorization(final System consumerSystem, final System providerSystem, final ServiceDefinition serviceDefinition) {
 		this.consumerSystem = consumerSystem;
 		this.providerSystem = providerSystem;
 		this.serviceDefinition = serviceDefinition;
@@ -53,7 +53,7 @@ public class IntraCloudAuthorization {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -61,7 +61,7 @@ public class IntraCloudAuthorization {
 		return consumerSystem;
 	}
 
-	public void setConsumerSystem(System consumerSystem) {
+	public void setConsumerSystem(final System consumerSystem) {
 		this.consumerSystem = consumerSystem;
 	}
 
@@ -69,7 +69,7 @@ public class IntraCloudAuthorization {
 		return providerSystem;
 	}
 
-	public void setProviderSystem(System providerSystem) {
+	public void setProviderSystem(final System providerSystem) {
 		this.providerSystem = providerSystem;
 	}
 
@@ -77,7 +77,7 @@ public class IntraCloudAuthorization {
 		return serviceDefinition;
 	}
 
-	public void setServiceDefinition(ServiceDefinition serviceDefinition) {
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) {
 		this.serviceDefinition = serviceDefinition;
 	}
 
@@ -85,7 +85,7 @@ public class IntraCloudAuthorization {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -93,7 +93,7 @@ public class IntraCloudAuthorization {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 

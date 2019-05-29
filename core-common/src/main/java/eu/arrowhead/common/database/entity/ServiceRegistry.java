@@ -60,7 +60,7 @@ public class ServiceRegistry {
 	
 	@OneToMany (mappedBy = "serviceRegistryEntry", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ServiceRegistryInterfaceConnection> interfaceConnections = new HashSet<ServiceRegistryInterfaceConnection>();
+	private Set<ServiceRegistryInterfaceConnection> interfaceConnections = new HashSet<>();
 
 	public ServiceRegistry() {
 		
