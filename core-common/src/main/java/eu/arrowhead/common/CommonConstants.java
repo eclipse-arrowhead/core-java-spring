@@ -20,13 +20,18 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
+	public static final String UNKNOWN_ORIGIN = "<unknown>";
+	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
+	public static final String COMMON_NAME_FIELD_NAME = "CN";
+	
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
 	public static final String LOCALHOST = "127.0.0.1";
 	public static final int HTTP_PORT = 80;
 	
 	public static final String SERVER_ERROR_URI = "/error";
-	
+	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
