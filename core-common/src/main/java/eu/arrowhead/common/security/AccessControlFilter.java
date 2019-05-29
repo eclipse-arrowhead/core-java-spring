@@ -12,18 +12,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.security.thirdparty.MultiReadRequestWrapper;
 
 public class AccessControlFilter extends GenericFilterBean {
 	
@@ -34,20 +36,30 @@ public class AccessControlFilter extends GenericFilterBean {
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {
 			try {
-				final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-				final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
-				final String clientCN = getCertificateCNFromRequest(httpServletRequest);
-				if (clientCN == null) {
-					//TODO: better exception
-					throw new AuthException("Do you see this?");
-				}
+				final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
+				final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
+				final String requestJSON = requestWrapper.getCachedBody();
+				final String clientCN = getCertificateCNFromRequest(requestWrapper);
+				if (!isClientAuthorized(clientCN, requestWrapper.getMethod(), requestTarget, requestJSON)) {
+//			        log.error(commonName + " is unauthorized to access " + requestTarget);
+//			        throw new AuthException(commonName + " is unauthorized to access " + requestTarget);
+			        //TODO continue
+			    }
+				
+				chain.doFilter(requestWrapper, response);
 			} catch (final ArrowheadException ex) {
 				handleException(ex, response);
 				return;
 			}
+		} else {
+			chain.doFilter(request, response);
 		}
 		
-		chain.doFilter(request, response);
+	}
+
+	protected boolean isClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 	private String getCertificateCNFromRequest(final HttpServletRequest request) {
