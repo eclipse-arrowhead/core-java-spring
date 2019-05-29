@@ -1,8 +1,10 @@
-package eu.arrowhead.common;
+package eu.arrowhead.common.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+import eu.arrowhead.common.CommonConstants;
 
 public class DefaultSecurityConfig extends WebSecurityConfigurerAdapter {
 	
