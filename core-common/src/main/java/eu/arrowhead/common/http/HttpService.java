@@ -51,7 +51,7 @@ public class HttpService {
 
 	private static final String ERROR_MESSAGE_PART_PKIX_PATH = "PKIX path";
 	
-	private static final List<HttpMethod> NOT_SUPPORTED_METHODS = Collections.unmodifiableList(Arrays.asList(new HttpMethod[] { HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE }));
+	private static final List<HttpMethod> NOT_SUPPORTED_METHODS = Collections.unmodifiableList(Arrays.asList(HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE));
  
 	private final Logger logger = LogManager.getLogger(HttpService.class);
 	
@@ -93,12 +93,12 @@ public class HttpService {
 	
 	private RestTemplate template;
 	private RestTemplate sslTemplate;
-	private SSLContext sslContext;
 	
 	@PostConstruct
-	public void init() throws Exception {
+	public void init() throws Exception { //NOSONAR Exception needs here
 		logger.debug("Initializing HttpService...");
 		template = createTemplate(null);
+		SSLContext sslContext;
 		if (sslEnabled) {
 			try {
 				sslContext = createSSLContext();
@@ -114,7 +114,7 @@ public class HttpService {
 	
 	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final P payload, final SSLContext givenContext) {
 		Assert.notNull(method, "Request method is not defined.");
-		logger.debug("Sending " + method + " request to: " + uri);
+		logger.debug("Sending {} request to: {}", method, uri);
 		
 		if (uri == null) {
 			logger.error("sendRequest() is called with null URI.");
@@ -132,20 +132,26 @@ public class HttpService {
 			throw new AuthException("SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.", HttpStatus.SC_UNAUTHORIZED);
 		}
 		
-		final RestTemplate usedTemplate = secure ? (givenContext != null ? createTemplate(givenContext) : sslTemplate) : template;
+		
+		
+		RestTemplate usedTemplate;
+		if (secure) { // to make SonarQube happy
+			usedTemplate = givenContext != null ? createTemplate(givenContext) : sslTemplate;
+		} else {
+			usedTemplate = template;
+		}
 
-		final HttpEntity<P> entity = getHttpEntity(method, payload);
+		final HttpEntity<P> entity = getHttpEntity(payload);
 		try {
-			final ResponseEntity<T> response = usedTemplate.exchange(uri.toUri(), method, entity, responseType);
-			
-			return response;
-		} catch (final ResourceAccessException e) {
-			if (e.getMessage().contains(ERROR_MESSAGE_PART_PKIX_PATH)) {
-				logger.error("The system at " + uri.toUriString() + " is not part of the same certificate chain of trust!");
-		        throw new AuthException("The system at " + uri.toUriString() + " is not part of the same certificate chain of trust!", HttpStatus.SC_UNAUTHORIZED, e);
+			return usedTemplate.exchange(uri.toUri(), method, entity, responseType);
+		} catch (final ResourceAccessException ex) {
+			if (ex.getMessage().contains(ERROR_MESSAGE_PART_PKIX_PATH)) {
+				logger.error("The system at {} is not part of the same certificate chain of trust!", uri.toUriString());
+		        throw new AuthException("The system at " + uri.toUriString() + " is not part of the same certificate chain of trust!", HttpStatus.SC_UNAUTHORIZED, ex);
 			} else {
-		        logger.error("UnavailableServerException occurred at " + uri.toUriString(), e);
-		        throw new UnavailableServerException("Could not get any response from: " + uri.toUriString(), HttpStatus.SC_SERVICE_UNAVAILABLE, e);
+		        logger.error("UnavailableServerException occurred at {}", uri.toUriString());
+		        logger.debug("Exception", ex);
+		        throw new UnavailableServerException("Could not get any response from: " + uri.toUriString(), HttpStatus.SC_SERVICE_UNAVAILABLE, ex);
 			}
 		}
 	}
@@ -154,16 +160,16 @@ public class HttpService {
 		return sendRequest(uri, method, responseType, payload, null);
 	}
 	
-	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final SSLContext givenContext) {
+	public <T> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final SSLContext givenContext) {
 		return sendRequest(uri, method, responseType, null, givenContext);
 	}
 	
-	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType) {
+	public <T> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType) {
 		return sendRequest(uri, method, responseType, null, null);
 	}
 		
-	private <P> HttpEntity<P> getHttpEntity(final HttpMethod method, final P payload) {
-		final MultiValueMap<String,String> headers = new LinkedMultiValueMap<String,String>();
+	private <P> HttpEntity<P> getHttpEntity(final P payload) {
+		final MultiValueMap<String,String> headers = new LinkedMultiValueMap<>();
 		headers.put(HttpHeaders.ACCEPT, Arrays.asList(MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE));
 		if (payload != null) {
 			headers.put(HttpHeaders.CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_JSON_VALUE));
@@ -188,10 +194,8 @@ public class HttpService {
 										 .build();
 		} else {
 			SSLConnectionSocketFactory socketFactory;
-			if (disableHostnameVerifier) {
-				final HostnameVerifier allHostsAreAllowed = (hostname, session) -> {
-					return true;
-				}; // just for testing, DO NOT USE this in a production environment
+			if (disableHostnameVerifier) { // just for testing, DO NOT USE this in a production environment
+				final HostnameVerifier allHostsAreAllowed = (hostname, session) -> true; //NOSONAR 
 				socketFactory = new SSLConnectionSocketFactory(sslContext, allHostsAreAllowed);
 			} else {
 				socketFactory = new SSLConnectionSocketFactory(sslContext);
@@ -205,23 +209,22 @@ public class HttpService {
 	}
 	
 	private SSLContext createSSLContext() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, KeyManagementException, UnrecoverableKeyException {
-		Assert.isTrue(!Utilities.isEmpty(keyStoreType), CommonConstants.KEYSTORE_TYPE + " is not defined.");
-		Assert.notNull(keyStore, CommonConstants.KEYSTORE_PATH + " is not defined.");
+		final String messageNotDefined = " is not defined.";
+		Assert.isTrue(!Utilities.isEmpty(keyStoreType), CommonConstants.KEYSTORE_TYPE + messageNotDefined);
+		Assert.notNull(keyStore, CommonConstants.KEYSTORE_PATH + messageNotDefined);
 		Assert.isTrue(keyStore.exists(), CommonConstants.KEYSTORE_PATH + " file is not found.");
-		Assert.notNull(keyStorePassword, CommonConstants.KEYSTORE_PASSWORD + " is not defined.");
-		Assert.notNull(keyPassword, CommonConstants.KEY_PASSWORD + " is not defined.");
-		Assert.notNull(trustStore, CommonConstants.TRUSTSTORE_PATH + " is not defined.");
+		Assert.notNull(keyStorePassword, CommonConstants.KEYSTORE_PASSWORD + messageNotDefined);
+		Assert.notNull(keyPassword, CommonConstants.KEY_PASSWORD + messageNotDefined);
+		Assert.notNull(trustStore, CommonConstants.TRUSTSTORE_PATH + messageNotDefined);
 		Assert.isTrue(trustStore.exists(), CommonConstants.TRUSTSTORE_PATH + " file is not found.");
-		Assert.notNull(trustStorePassword, CommonConstants.TRUSTSTORE_PASSWORD + " is not defined.");
+		Assert.notNull(trustStorePassword, CommonConstants.TRUSTSTORE_PASSWORD + messageNotDefined);
 		
 		final KeyStore keystore = KeyStore.getInstance(keyStoreType);
 		keystore.load(keyStore.getInputStream(), keyStorePassword.toCharArray());
-		final SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(trustStore.getURL(), trustStorePassword.toCharArray())
-							   								 .loadKeyMaterial(keystore, keyPassword.toCharArray())
-							   								 .setKeyStoreType(keyStoreType)
-							   								 .build();
-
-		return sslContext;
+		return new SSLContextBuilder().loadTrustMaterial(trustStore.getURL(), trustStorePassword.toCharArray())
+							   		  .loadKeyMaterial(keystore, keyPassword.toCharArray())
+							   		  .setKeyStoreType(keyStoreType)
+							   		  .build();
 	}
 	
 	private RequestConfig createRequestConfig() {

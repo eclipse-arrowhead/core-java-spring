@@ -31,20 +31,21 @@ public class ArrowheadHttpClientResponseErrorHandler extends DefaultResponseErro
 		ErrorMessageDTO dto;
 		try {
 			dto = mapper.readValue(response.getBody(), ErrorMessageDTO.class);
-		} catch (final IOException e) {
-			logger.debug("Unable to deserialize error message: " + e.getMessage(), e);
-		    logger.error("Request failed at " + url + ", response status code: " + response.getRawStatusCode());
-		    throw new RuntimeException("Unknown error occurred at " + url + ". Check log for possibly more information.", e);
+		} catch (final IOException ex) {
+			logger.debug("Unable to deserialize error message: {}", ex.getMessage());
+			logger.debug("Exception: ", ex);
+		    logger.error("Request failed at {}, response status code: {}", url, response.getRawStatusCode());
+		    throw new ArrowheadException("Unknown error occurred at " + url + ". Check log for possibly more information.", ex);
 		}
 		
 		if (dto.getExceptionType() == null) {
-		    logger.error("Request failed at " + url + ", response status code: " + response.getRawStatusCode());
-		    logger.error("Request failed, error message: " + dto.getErrorMessage());
-		    throw new RuntimeException("Unknown error occurred at " + url + ". Check log for possibly more information.");
+			logger.error("Request failed at {}, response status code: {}", url, response.getRawStatusCode());
+			logger.error("Request failed, error message: {}", dto.getErrorMessage());
+		    throw new ArrowheadException("Unknown error occurred at " + url + ". Check log for possibly more information.");
 		}
 		
-		logger.debug("Error occured at " + url + ". Returned with " + response.getRawStatusCode());
-		logger.error("Request returned with " + dto.getExceptionType() + ": " + dto.getErrorMessage());
+		logger.debug("Error occured at {}. Returned with {}", url, response.getRawStatusCode());
+		logger.error("Request returned with {}: {}", dto.getExceptionType(), dto.getErrorMessage());
 		switch (dto.getExceptionType()) {
 	    case ARROWHEAD:
 	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
@@ -59,7 +60,7 @@ public class ArrowheadHttpClientResponseErrorHandler extends DefaultResponseErro
         case UNAVAILABLE:
 	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
 	    default:
-	    	logger.error("Unknown exception type: " + dto.getExceptionType());
+	    	logger.error("Unknown exception type: {}", dto.getExceptionType());
 	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
         }
 	}
