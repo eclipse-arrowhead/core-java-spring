@@ -1,5 +1,7 @@
 package eu.arrowhead.common.database.service;
 
+import java.util.NoSuchElementException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,9 +10,13 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.database.entity.System;
 
 @Service
 public class ServiceRegistryDBService {
+	
+	//=================================================================================================
+	// members
 	
 	@Autowired
 	private ServiceRegistryRepository serviceRegistryRepository;
@@ -27,6 +33,12 @@ public class ServiceRegistryDBService {
 	@Autowired
 	private SystemRepository systemRepository;
 	
-	//TODO 
-	// implement GET system by id > return system obj
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	public System getSystemById(final long systemId) throws NoSuchElementException {		
+		return systemRepository.findById(systemId).get();		
+	}
 }
