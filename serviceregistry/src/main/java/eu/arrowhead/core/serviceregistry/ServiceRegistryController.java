@@ -30,7 +30,8 @@ public class ServiceRegistryController {
 	// members
 		
 	private static final String ECHO_URI = "/echo";
-	private static final String SYSTEM_BY_ID_URI = "/mgmt/service/{id}";
+	private static final String SYSTEM_BY_ID_PATH_VARIABLE="id";
+	private static final String SYSTEM_BY_ID_URI = "/mgmt/service/{"+SYSTEM_BY_ID_PATH_VARIABLE+"}";
 	
 	private Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -56,7 +57,7 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@GetMapping(SYSTEM_BY_ID_URI)
-	@ResponseBody public SystemResponseDTO getSystemById(@PathVariable(value = "id") final long systemId) {		
+	@ResponseBody public SystemResponseDTO getSystemById(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId) {		
 		
 		final SystemResponseDTO response;
 		final System system; 
