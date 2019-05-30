@@ -18,6 +18,8 @@ public class DTOConverter {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	
+	private DTOConverter() {
+		throw new UnsupportedOperationException();
+	}
 	
 }
