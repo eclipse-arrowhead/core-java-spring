@@ -38,7 +38,9 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	public System getSystemById(final long systemId) throws NoSuchElementException {		
+	public System getSystemById(final long systemId) {
+		if(!systemRepository.findById(systemId).isPresent()) throw new NoSuchElementException();
+		
 		return systemRepository.findById(systemId).get();		
 	}
 }
