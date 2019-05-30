@@ -23,5 +23,10 @@
     "name": "public_brokers",
     "type": "java.lang.Boolean",
     "description": "A description for 'public_brokers'"
+  },
+  {
+    "name": "disable.hostname.verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'disable.hostname.verifier'"
   }
 ]}
