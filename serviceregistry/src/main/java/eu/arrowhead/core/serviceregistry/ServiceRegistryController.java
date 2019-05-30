@@ -29,11 +29,11 @@ public class ServiceRegistryController {
 
 	//=================================================================================================
 	// members
-		
+	
 	private static final String ECHO_URI = "/echo";
-	private static final String LOCAL_SWAGGER_HTTP_200_MESSAGE = "serviceRegistry service is available";
-	private static final String LOCAL_SWAGGER_HTTP_400_MESSAGE = "NoSuchElement";
-	private static final String LOCAL_SWAGGER_HTTP_417_MESSAGE = "Invalid parameter";
+	private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
+	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
+	private static final String GET_SYSTEM_BY_ID_HTTP_417_MESSAGE = "Not a valid System id";
 	private static final String SYSTEM_BY_ID_PATH_VARIABLE = "id";
 	private static final String SYSTEM_BY_ID_URI = "/mgmt/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
 	
@@ -48,7 +48,7 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = LOCAL_SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -60,10 +60,10 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return system by id", response = SystemResponseDTO.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = LOCAL_SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = LOCAL_SWAGGER_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_BY_ID_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_BY_ID_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = LOCAL_SWAGGER_HTTP_417_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = GET_SYSTEM_BY_ID_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(SYSTEM_BY_ID_URI)
