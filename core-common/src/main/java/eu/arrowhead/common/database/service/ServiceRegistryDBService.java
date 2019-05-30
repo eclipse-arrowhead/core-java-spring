@@ -27,4 +27,6 @@ public class ServiceRegistryDBService {
 	@Autowired
 	private SystemRepository systemRepository;
 	
+	//TODO 
+	// implement GET system by id > return system obj
 }
