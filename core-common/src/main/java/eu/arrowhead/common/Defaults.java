@@ -16,6 +16,10 @@ public class Defaults {
 	public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 	public static final int DEFAULT_CONNECTION_MANAGER_TIMEOUT = 10000;
 	
+	// CORS defaults
+	public static final long CORS_MAX_AGE = 600;
+	public static final String CORS_ALLOW_CREDENTIALS = "true";
+	
 	private Defaults() {
 		throw new UnsupportedOperationException();
 	}
