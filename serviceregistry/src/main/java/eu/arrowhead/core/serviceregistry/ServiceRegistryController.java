@@ -17,6 +17,7 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -30,10 +31,13 @@ public class ServiceRegistryController {
 	// members
 		
 	private static final String ECHO_URI = "/echo";
-	private static final String SYSTEM_BY_ID_PATH_VARIABLE="id";
-	private static final String SYSTEM_BY_ID_URI = "/mgmt/service/{"+SYSTEM_BY_ID_PATH_VARIABLE+"}";
+	private static final String LOCAL_SWAGGER_HTTP_200_MESSAGE = "serviceRegistry service is available";
+	private static final String LOCAL_SWAGGER_HTTP_400_MESSAGE = "NoSuchElement";
+	private static final String LOCAL_SWAGGER_HTTP_417_MESSAGE = "Invalid parameter";
+	private static final String SYSTEM_BY_ID_PATH_VARIABLE = "id";
+	private static final String SYSTEM_BY_ID_URI = "/mgmt/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
 	
-	private Logger logger = LogManager.getLogger(ServiceRegistryController.class);
+	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
@@ -44,37 +48,40 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = LOCAL_SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	
-	//-------------------------------------------------------------------------------------------------
-		@GetMapping(path = ECHO_URI)
+	@GetMapping(path = ECHO_URI)
 	public String echoService() {
 		return "Got it!";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return system by id", response = SystemResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = LOCAL_SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = LOCAL_SWAGGER_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = LOCAL_SWAGGER_HTTP_417_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
 	@GetMapping(SYSTEM_BY_ID_URI)
 	@ResponseBody public SystemResponseDTO getSystemById(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId) {		
+		logger.debug("getSystemById started ...");
 		
-		final SystemResponseDTO response;
-		final System system; 
-		
-		if(systemId < 1) {
-			throw new DataNotFoundException("System id must be greater then 0. ", HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI+SYSTEM_BY_ID_URI);
+		if (systemId < 1) {
+			throw new BadPayloadException("System id must be greater then 0. ", HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 		
-		try {
+		try {			
 			
-			system = serviceRegistryDBService.getSystemById(systemId);
-			response = DTOConverter.convertSystemToSystemResponseDTO(system);	
+			final System system = serviceRegistryDBService.getSystemById(systemId);
 			
-			return response;
+			return DTOConverter.convertSystemToSystemResponseDTO(system);	
 		
-		} catch (NoSuchElementException e) {
-			throw new DataNotFoundException("No such System by id: "+systemId, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI+SYSTEM_BY_ID_URI, e);
+		} catch (final NoSuchElementException e) {
+			throw new DataNotFoundException("No such System by id: " + systemId, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI, e);
 		}
 		
 	}
