@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -29,7 +30,7 @@ public class JDBCConnectionFactoryForLog4J2 {
 		}
 	}
 	
-	public static Connection getConnection() throws Exception {
+	public static Connection getConnection() throws SQLException {
 		if (dataSource == null) {
 			final HikariConfig config = new HikariConfig();
 			config.setJdbcUrl(props.getProperty(CommonConstants.DATABASE_URL));
