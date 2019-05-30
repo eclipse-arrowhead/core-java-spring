@@ -6,6 +6,7 @@ import java.net.Socket;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -21,6 +22,7 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 
 @Component
+@DisallowConcurrentExecution
 public class ProvidersReachabilityTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);

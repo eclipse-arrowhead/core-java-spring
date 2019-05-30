@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -17,6 +18,7 @@ import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 
 @Component
+@DisallowConcurrentExecution
 public class ServiceEndOfValidityCheckTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ServiceEndOfValidityCheckTask.class);
