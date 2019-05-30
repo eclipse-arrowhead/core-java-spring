@@ -9,7 +9,7 @@ public class DTOConverter {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO convertSystemToSystemResponseDTO(System system) {
+	public static SystemResponseDTO convertSystemToSystemResponseDTO(System system) {
 
 		return new SystemResponseDTO(system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
 	}
