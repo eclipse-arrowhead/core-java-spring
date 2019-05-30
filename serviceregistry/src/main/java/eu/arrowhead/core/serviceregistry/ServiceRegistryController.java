@@ -30,4 +30,9 @@ public class ServiceRegistryController {
 	public String echoService() {
 		return "Got it!";
 	}
+	
+	//TODO  implement get method as in endpoint doc ...
+	//	GET /mgmt/services/{id}
+	// call db .. ?ok =>200 :400
+	// return ... class > ~ response entyty >> dto class system
 }
