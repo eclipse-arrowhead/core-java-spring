@@ -10,7 +10,7 @@ public class DTOConverter {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertSystemToSystemResponseDTO(System system) {
+	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
 		
 		return new SystemResponseDTO(system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
