@@ -68,7 +68,17 @@ public class CommonConstants {
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
 	public static final String SERVICE_REGISTRY_PORT = "sr_port";
 	public static final String $SERVICE_REGISTRY_PORT_WD = "${" + SERVICE_REGISTRY_PORT + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PORT + "}";
-
+	public static final String SERVICE_REGISTRY_PING_SCHEDULED = "ping_scheduled";
+	public static final String $SERVICE_REGISTRY_PING_SCHEDULED_WD = "${" + SERVICE_REGISTRY_PING_SCHEDULED + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED + "}";
+	public static final String SERVICE_REGISTRY_PING_INTERVAL = "ping_interval";
+	public static final String $SERVICE_REGISTRY_PING_INTERVAL_WD = "${" + SERVICE_REGISTRY_PING_INTERVAL + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES + "}";
+	public static final String SERVICE_REGISTRY_PING_TIMEOUT = "ping_timeout";
+	public static final String $SERVICE_REGISTRY_PING_TIMEOUT_WD = "${" + SERVICE_REGISTRY_PING_TIMEOUT + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILISECONDS + "}";
+	public static final String SERVICE_REGISTRY_TTL_SCHEDULED = "ttl_scheduled";
+	public static final String $SERVICE_REGISTRY_TTL_SCHEDULED_WD = "${" + SERVICE_REGISTRY_TTL_SCHEDULED + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED + "}";
+	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
+	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
+	
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}

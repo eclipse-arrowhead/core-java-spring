@@ -29,50 +29,53 @@ public class ProvidersReachabilityTask implements Job {
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
-	@Value ("${ping_timeout}")
+	@Value (CommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
 	private int timeout;
 	
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
+	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		checkProvidersReachability();		
 	}
 	
 	private void checkProvidersReachability() {
 		int pageIndexCounter = 0;
-		Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-		if (pageOfServiceEntries.isEmpty()) {
-			logger.info("PROVIDERS REACHABILITY TASK: Servise Registry database is empty");
-		} else {
-			int totalPages = pageOfServiceEntries.getTotalPages();		
-			while (pageIndexCounter < totalPages) {
-				if (pageIndexCounter != 0) {
+		Page<ServiceRegistry> pageOfServiceEntries;
+		try {
+			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			if (pageOfServiceEntries.isEmpty()) {
+				logger.info("Servise Registry database is empty");
+			} else {
+				final int totalPages = pageOfServiceEntries.getTotalPages();
+				pingAndRemoveRegisteredServices(pageOfServiceEntries);
+				pageIndexCounter++;
+				while (pageIndexCounter < totalPages) {
 					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 					pingAndRemoveRegisteredServices(pageOfServiceEntries);
-				} else {
-					pingAndRemoveRegisteredServices(pageOfServiceEntries);
+					pageIndexCounter++;
 				}
-				pageIndexCounter++;
 			}
+		} catch (IllegalArgumentException exception) {
+			logger.debug(exception.getMessage());
 		}
 	}
 	
-	private void pingAndRemoveRegisteredServices(Page<ServiceRegistry> pageOfServiceEntries) {
-		for (ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
-			System provider = serviceRegistryEntry.getSystem();
-			String address = provider.getAddress();
-			int port = provider.getPort();
+	private void pingAndRemoveRegisteredServices(final Page<ServiceRegistry> pageOfServiceEntries) {
+		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
+			final System provider = serviceRegistryEntry.getSystem();
+			final String address = provider.getAddress();
+			final int port = provider.getPort();
 			if (! pingService(address, port)) {
 				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
 			}
 		}
 	}
 	
-	private boolean pingService(String address, int port) {
-		InetSocketAddress providerHost = new InetSocketAddress(address, port);
+	private boolean pingService(final String address, final int port) {
+		final InetSocketAddress providerHost = new InetSocketAddress(address, port);
 		try (Socket socket = new Socket()) {
 			socket.connect(providerHost, timeout);
 			return true;
-		} catch (IOException exception) {
+		} catch (final IOException exception) {
 			return false;
 		}
 	}

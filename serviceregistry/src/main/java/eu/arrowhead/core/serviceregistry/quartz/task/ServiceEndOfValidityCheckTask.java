@@ -26,39 +26,42 @@ public class ServiceEndOfValidityCheckTask implements Job {
 	private ServiceRegistryDBService serviceRegistryDBService;
 
 	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
+	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		checkServicesEndOfValidity();		
 	}
 	
 	private void checkServicesEndOfValidity() {		
 		int pageIndexCounter = 0;
-		Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-		if (pageOfServiceEntries.isEmpty()) {
-			logger.info("SERVICE END OF VALIDITY CHECK TASK: Servise Registry database is empty");
-		} else {
-			int totalPages = pageOfServiceEntries.getTotalPages();		
-			while (pageIndexCounter < totalPages) {
-				if (pageIndexCounter != 0) {
+		Page<ServiceRegistry> pageOfServiceEntries;
+		try {
+			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			if (pageOfServiceEntries.isEmpty()) {
+				logger.info("Servise Registry database is empty");
+			} else {
+				final int totalPages = pageOfServiceEntries.getTotalPages();
+				removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries);
+				pageIndexCounter++;
+				while (pageIndexCounter < totalPages) {
 					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 					removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries);
-				} else {
-					removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries);
+					pageIndexCounter++;
 				}
-				pageIndexCounter++;
 			}
-		}		
+		} catch (IllegalArgumentException exception) {
+			logger.debug(exception.getMessage());
+		}
 	}
 	
-	private void removeRegisteredServicesWithInvalidTTL(Page<ServiceRegistry> pageOfServiceEntries) {
-		for (ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
-			ZonedDateTime endOfValidity = serviceRegistryEntry.getEndOfValidity();
+	private void removeRegisteredServicesWithInvalidTTL(final Page<ServiceRegistry> pageOfServiceEntries) {
+		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
+			final ZonedDateTime endOfValidity = serviceRegistryEntry.getEndOfValidity();
 			if (endOfValidity != null && ! isTTLValid(endOfValidity)) {
 				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
 			}
 		}
 	}
 	
-	private boolean isTTLValid(ZonedDateTime endOfValidity) {
+	private boolean isTTLValid(final ZonedDateTime endOfValidity) {
 		return endOfValidity.isAfter(ZonedDateTime.now());
 	}
 	

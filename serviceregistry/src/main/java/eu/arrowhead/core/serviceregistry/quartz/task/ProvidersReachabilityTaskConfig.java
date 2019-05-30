@@ -2,9 +2,7 @@ package eu.arrowhead.core.serviceregistry.quartz.task;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.JobDetail;
 import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -13,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
-import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.serviceregistry.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
@@ -25,17 +23,20 @@ public class ProvidersReachabilityTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext;
 	
-	@Value ("${ping_scheduled}")
+	@Value (CommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
 	private boolean pingScheduled;
 	
-	@Value ("${ping_interval}")
+	@Value (CommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
 	private int pingInterval;
+	
+	private final String nameOfTrigger = "Providers_Reachability_Task_Trigger";
+	private final String nameOfTask = "Providers_Reachability_Task_Detail";
 	
 	@Bean
     public SchedulerFactoryBean providersReachabilityTaskScheduler() {
-		AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
+		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
-		SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
+		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
 		if (pingScheduled) {			
 	        schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(providersReachabilityTaskDetail().getObject());
@@ -49,19 +50,19 @@ public class ProvidersReachabilityTaskConfig {
 	
 	@Bean
     public SimpleTriggerFactoryBean providersReachabilityTaskTrigger() {
-		SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
+		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(providersReachabilityTaskDetail().getObject());
         trigger.setRepeatInterval(pingInterval * 60000);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        trigger.setName("Providers_Reachability_Task_Trigger");
+        trigger.setName(nameOfTrigger);
         return trigger;
     }
 	
 	@Bean
     public JobDetailFactoryBean providersReachabilityTaskDetail() {
-        JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
+        final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
         jobDetailFactory.setJobClass(ProvidersReachabilityTask.class);
-        jobDetailFactory.setName("Providers_Reachability_Task_Detail");
+        jobDetailFactory.setName(nameOfTask);
         jobDetailFactory.setDurability(true);
         return jobDetailFactory;
     }

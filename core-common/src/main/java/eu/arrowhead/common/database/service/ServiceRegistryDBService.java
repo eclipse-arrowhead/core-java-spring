@@ -32,7 +32,7 @@ public class ServiceRegistryDBService {
 	@Autowired
 	private SystemRepository systemRepository;
 	
-	public Page<ServiceRegistry> getAllServiceReqistryEntries(int page, int size, Direction direction, String sortField) {
+	public Page<ServiceRegistry> getAllServiceReqistryEntries(int page, int size, Direction direction, final String sortField) {
 		if (page < 0) {
 			page = 0;
 		}
@@ -43,13 +43,13 @@ public class ServiceRegistryDBService {
 			direction = Direction.ASC;
 		}
 		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField)) {
-			//TODO throw an exception
+			throw new IllegalArgumentException("Sortable field with reference '" + sortField + "' is not available");
 		}
 		return serviceRegistryRepository.findAll(PageRequest.of(page, size, direction, sortField));
 	}
 	
 	@Transactional (rollbackFor = Exception.class)
-	public void removeServiceRegistryEntryById(long id) {
+	public void removeServiceRegistryEntryById(final long id) {
 		serviceRegistryRepository.deleteById(id);
 	}
 	
