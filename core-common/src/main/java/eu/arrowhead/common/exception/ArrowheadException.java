@@ -10,7 +10,7 @@ package eu.arrowhead.common.exception;
 @SuppressWarnings("serial")
 public class ArrowheadException extends RuntimeException {
 
-	private ExceptionType exceptionType = ExceptionType.ARROWHEAD;
+	private ExceptionType exceptionType = ExceptionType.ARROWHEAD; //NOSONAR can't be final because derived class want to use the setter
 	private final int errorCode;
 	private final String origin;
 

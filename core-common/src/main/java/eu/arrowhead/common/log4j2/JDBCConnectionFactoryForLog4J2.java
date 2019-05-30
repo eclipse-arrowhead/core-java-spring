@@ -2,6 +2,7 @@ package eu.arrowhead.common.log4j2;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Properties;
@@ -21,10 +22,10 @@ public class JDBCConnectionFactoryForLog4J2 {
 	static {
 		try {
 			init();
-		} catch (final Exception e) {
+		} catch (final IOException ex) {
 			// this class' purpose to configure logging so in case of exceptions we can't use logging
-			System.out.println(e.getMessage()); //NOSONAR no logging at this point
-			e.printStackTrace(); //NOSONAR no logging at this point
+			System.out.println(ex.getMessage()); //NOSONAR no logging at this point
+			ex.printStackTrace(); //NOSONAR no logging at this point
 		}
 	}
 	
@@ -42,7 +43,7 @@ public class JDBCConnectionFactoryForLog4J2 {
 		return dataSource.getConnection();
 	}
 	
-	private static void init() throws Exception {
+	private static void init() throws IOException {
 		InputStream propStream = null;
 		File propertiesFile = new File(CommonConstants.APPLICATION_PROPERTIES);
 		if (!propertiesFile.exists()) {

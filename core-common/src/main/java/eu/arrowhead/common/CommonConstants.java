@@ -44,13 +44,13 @@ public class CommonConstants {
 	public static final String $KEYSTORE_TYPE = "${" + KEYSTORE_TYPE + "}";
 	public static final String KEYSTORE_PATH = "server.ssl.key-store";
 	public static final String $KEYSTORE_PATH = "${" + KEYSTORE_PATH + "}";
-	public static final String KEYSTORE_PASSWORD = "server.ssl.key-store-password";
+	public static final String KEYSTORE_PASSWORD = "server.ssl.key-store-password"; //NOSONAR it is not a password
 	public static final String $KEYSTORE_PASSWORD = "${" + KEYSTORE_PASSWORD + "}";
-	public static final String KEY_PASSWORD = "server.ssl.key-password";
+	public static final String KEY_PASSWORD = "server.ssl.key-password"; //NOSONAR it is not a password
 	public static final String $KEY_PASSWORD = "${" + KEY_PASSWORD + "}";
 	public static final String TRUSTSTORE_PATH = "server.ssl.trust-store";
 	public static final String $TRUSTSTORE_PATH = "${" + TRUSTSTORE_PATH + "}";
-	public static final String TRUSTSTORE_PASSWORD = "server.ssl.trust-store-password";
+	public static final String TRUSTSTORE_PASSWORD = "server.ssl.trust-store-password"; //NOSONAR it is not a password
 	public static final String $TRUSTSTORE_PASSWORD = "${" + TRUSTSTORE_PASSWORD + "}";
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
