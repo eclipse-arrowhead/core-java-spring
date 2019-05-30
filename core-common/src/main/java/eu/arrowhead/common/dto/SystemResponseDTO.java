@@ -21,7 +21,7 @@ public class SystemResponseDTO implements Serializable {
 	public SystemResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO(String systemName, String address, int port, String authenticationInfo) {
+	public SystemResponseDTO(final String systemName, final String address, final int port, final String authenticationInfo) {
 		
 		this.systemName = systemName;
 		this.address = address;
