@@ -27,6 +27,7 @@ public class ProvidersReachabilityTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);
 	private final int pageSize = 1000;
+	private int removedServiceRegistryEntries;
 	
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
@@ -36,7 +37,10 @@ public class ProvidersReachabilityTask implements Job {
 	
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		checkProvidersReachability();		
+		logger.info("STARTED: Providers reachability task");
+		removedServiceRegistryEntries = 0;
+		checkProvidersReachability();
+		logger.info("FINISHED: Providers reachability task. Number of removed service registry entry: " + removedServiceRegistryEntries);
 	}
 	
 	private void checkProvidersReachability() {
@@ -45,7 +49,7 @@ public class ProvidersReachabilityTask implements Job {
 		try {
 			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
-				logger.info("Servise Registry database is empty");
+				logger.debug("Servise Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
 				pingAndRemoveRegisteredServices(pageOfServiceEntries);
@@ -68,6 +72,8 @@ public class ProvidersReachabilityTask implements Job {
 			final int port = provider.getPort();
 			if (! pingService(address, port)) {
 				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
+				removedServiceRegistryEntries++;
+				logger.debug("REMOVED: " + serviceRegistryEntry);
 			}
 		}
 	}

@@ -23,13 +23,17 @@ public class ServiceEndOfValidityCheckTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ServiceEndOfValidityCheckTask.class);
 	private final int pageSize = 1000;
+	private int removedServiceRegistryEntries;
 	
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
 
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		checkServicesEndOfValidity();		
+		logger.info("STARTED: Services end of validity check task");
+		removedServiceRegistryEntries = 0;
+		checkServicesEndOfValidity();
+		logger.info("FINISHED: Services end of validity check task. Number of removed service registry entry: " + removedServiceRegistryEntries);
 	}
 	
 	private void checkServicesEndOfValidity() {		
@@ -38,7 +42,7 @@ public class ServiceEndOfValidityCheckTask implements Job {
 		try {
 			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
-				logger.info("Servise Registry database is empty");
+				logger.debug("Servise Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
 				removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries);
@@ -59,6 +63,8 @@ public class ServiceEndOfValidityCheckTask implements Job {
 			final ZonedDateTime endOfValidity = serviceRegistryEntry.getEndOfValidity();
 			if (endOfValidity != null && ! isTTLValid(endOfValidity)) {
 				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
+				removedServiceRegistryEntries++;
+				logger.debug("REMOVED: " + serviceRegistryEntry);
 			}
 		}
 	}
