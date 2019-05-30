@@ -20,6 +20,9 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
+	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
+	public static final String SERVER_COMMON_NAME = "server.common.name";
+	
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
 	public static final String COMMON_NAME_FIELD_NAME = "CN";

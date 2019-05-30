@@ -16,11 +16,6 @@ public class MultiReadRequestWrapper extends HttpServletRequestWrapper {
     public MultiReadRequestWrapper(final HttpServletRequest request) throws IOException {
     	super(request);
 	    body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-//	    final BufferedReader bufferedReader = request.getReader();
-//	    String line;
-//	    while ((line = bufferedReader.readLine()) != null){
-//	    	body += line;
-//	    }
 	}
     
     public String getCachedBody() { 
@@ -29,8 +24,7 @@ public class MultiReadRequestWrapper extends HttpServletRequestWrapper {
 	
     @Override
 	public ServletInputStream getInputStream() throws IOException {
-    	CustomServletInputStream kid = new CustomServletInputStream(body.getBytes());
-	    return kid;
+    	return  new CustomServletInputStream(body.getBytes());
 	}
 
 	@Override

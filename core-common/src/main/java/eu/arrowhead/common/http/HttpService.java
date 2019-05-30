@@ -27,7 +27,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -42,6 +41,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.UnavailableServerException;
@@ -54,27 +54,6 @@ public class HttpService {
 	private static final List<HttpMethod> NOT_SUPPORTED_METHODS = Collections.unmodifiableList(Arrays.asList(HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE));
  
 	private final Logger logger = LogManager.getLogger(HttpService.class);
-	
-	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	private boolean sslEnabled;
-	
-	@Value(CommonConstants.$KEYSTORE_TYPE)
-	private String keyStoreType;
-	
-	@Value(CommonConstants.$KEYSTORE_PATH)
-	private Resource keyStore;
-	
-	@Value(CommonConstants.$KEYSTORE_PASSWORD)
-	private String keyStorePassword;
-	
-	@Value(CommonConstants.$KEY_PASSWORD)
-	private String keyPassword;
-	
-	@Value(CommonConstants.$TRUSTSTORE_PATH)
-	private Resource trustStore;
-	
-	@Value(CommonConstants.$TRUSTSTORE_PASSWORD)
-	private String trustStorePassword;
 	
 	@Value(CommonConstants.$DISABLE_HOSTNAME_VERIFIER_WD)
 	private boolean disableHostnameVerifier;
@@ -89,6 +68,9 @@ public class HttpService {
 	private int connectionManagerTimeout;
 	
 	@Autowired
+	private SSLProperties sslProperties;
+	
+	@Autowired
 	private ArrowheadHttpClientResponseErrorHandler errorHandler;
 	
 	private RestTemplate template;
@@ -99,13 +81,14 @@ public class HttpService {
 		logger.debug("Initializing HttpService...");
 		template = createTemplate(null);
 		SSLContext sslContext;
-		if (sslEnabled) {
+		if (sslProperties.isSslEnabled()) {
 			try {
 				sslContext = createSSLContext();
-			} catch (final KeyManagementException | UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+			} catch (final KeyManagementException | UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ex) {
 				// it's initialization so we just logging the exception then let the application die
-				logger.error("Error while creating SSL context: " + e.getMessage(), e);
-				throw e;
+				logger.error("Error while creating SSL context: {}", ex.getMessage());
+				logger.debug("Exception", ex);
+				throw ex;
 			}
 			sslTemplate = createTemplate(sslContext);
 		}
@@ -131,8 +114,6 @@ public class HttpService {
 			logger.debug("sendRequest(): secure request sending was invoked in insecure mode.");
 			throw new AuthException("SSL Context is not set, but secure request sending was invoked. An insecure module can not send requests to secure modules.", HttpStatus.SC_UNAUTHORIZED);
 		}
-		
-		
 		
 		RestTemplate usedTemplate;
 		if (secure) { // to make SonarQube happy
@@ -210,20 +191,20 @@ public class HttpService {
 	
 	private SSLContext createSSLContext() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, KeyManagementException, UnrecoverableKeyException {
 		final String messageNotDefined = " is not defined.";
-		Assert.isTrue(!Utilities.isEmpty(keyStoreType), CommonConstants.KEYSTORE_TYPE + messageNotDefined);
-		Assert.notNull(keyStore, CommonConstants.KEYSTORE_PATH + messageNotDefined);
-		Assert.isTrue(keyStore.exists(), CommonConstants.KEYSTORE_PATH + " file is not found.");
-		Assert.notNull(keyStorePassword, CommonConstants.KEYSTORE_PASSWORD + messageNotDefined);
-		Assert.notNull(keyPassword, CommonConstants.KEY_PASSWORD + messageNotDefined);
-		Assert.notNull(trustStore, CommonConstants.TRUSTSTORE_PATH + messageNotDefined);
-		Assert.isTrue(trustStore.exists(), CommonConstants.TRUSTSTORE_PATH + " file is not found.");
-		Assert.notNull(trustStorePassword, CommonConstants.TRUSTSTORE_PASSWORD + messageNotDefined);
+		Assert.isTrue(!Utilities.isEmpty(sslProperties.getKeyStoreType()), CommonConstants.KEYSTORE_TYPE + messageNotDefined);
+		Assert.notNull(sslProperties.getKeyStore(), CommonConstants.KEYSTORE_PATH + messageNotDefined);
+		Assert.isTrue(sslProperties.getKeyStore().exists(), CommonConstants.KEYSTORE_PATH + " file is not found.");
+		Assert.notNull(sslProperties.getKeyStorePassword(), CommonConstants.KEYSTORE_PASSWORD + messageNotDefined);
+		Assert.notNull(sslProperties.getKeyPassword(), CommonConstants.KEY_PASSWORD + messageNotDefined);
+		Assert.notNull(sslProperties.getTrustStore(), CommonConstants.TRUSTSTORE_PATH + messageNotDefined);
+		Assert.isTrue(sslProperties.getTrustStore().exists(), CommonConstants.TRUSTSTORE_PATH + " file is not found.");
+		Assert.notNull(sslProperties.getTrustStorePassword(), CommonConstants.TRUSTSTORE_PASSWORD + messageNotDefined);
 		
-		final KeyStore keystore = KeyStore.getInstance(keyStoreType);
-		keystore.load(keyStore.getInputStream(), keyStorePassword.toCharArray());
-		return new SSLContextBuilder().loadTrustMaterial(trustStore.getURL(), trustStorePassword.toCharArray())
-							   		  .loadKeyMaterial(keystore, keyPassword.toCharArray())
-							   		  .setKeyStoreType(keyStoreType)
+		final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
+		keystore.load(sslProperties.getKeyStore().getInputStream(), sslProperties.getKeyStorePassword().toCharArray());
+		return new SSLContextBuilder().loadTrustMaterial(sslProperties.getTrustStore().getURL(), sslProperties.getTrustStorePassword().toCharArray())
+							   		  .loadKeyMaterial(keystore, sslProperties.getKeyPassword().toCharArray())
+							   		  .setKeyStoreType(sslProperties.getKeyStoreType())
 							   		  .build();
 	}
 	
