@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database.service;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,12 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	public System getSystemById(final long systemId) {
-		if(!systemRepository.findById(systemId).isPresent()) throw new NoSuchElementException();
+		final Optional<System> systemOption = systemRepository.findById(systemId);
 		
-		return systemRepository.findById(systemId).get();		
+		if (!systemOption.isPresent()){
+			throw new NoSuchElementException();		
+		}
+		
+		return systemOption.get();			
 	}
 }
