@@ -1,8 +1,13 @@
 package eu.arrowhead.common.database.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
@@ -26,5 +31,26 @@ public class ServiceRegistryDBService {
 	
 	@Autowired
 	private SystemRepository systemRepository;
+	
+	public Page<ServiceRegistry> getAllServiceReqistryEntries(int page, int size, Direction direction, String sortField) {
+		if (page < 0) {
+			page = 0;
+		}
+		if (size < 0) {
+			size = Integer.MAX_VALUE;
+		}
+		if (direction == null) {
+			direction = Direction.ASC;
+		}
+		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField)) {
+			//TODO throw an exception
+		}
+		return serviceRegistryRepository.findAll(PageRequest.of(page, size, direction, sortField));
+	}
+	
+	@Transactional (rollbackFor = Exception.class)
+	public void removeServiceRegistryEntryById(long id) {
+		serviceRegistryRepository.deleteById(id);
+	}
 	
 }

@@ -20,6 +20,8 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
+	public static final String COMMON_FIELD_NAME_ID = "id";
+	
 	public static final String SERVER_ERROR_URI = "/error";
 	
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
