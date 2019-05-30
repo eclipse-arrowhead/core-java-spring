@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.GenericFilterBean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
@@ -27,7 +26,7 @@ import eu.arrowhead.common.exception.AuthException;
 
 public class AccessControlFilter extends GenericFilterBean {
 	
-	protected Logger logger = LogManager.getLogger(AccessControlFilter.class);
+	protected Logger log = LogManager.getLogger(AccessControlFilter.class);
 	protected ObjectMapper mapper = new ObjectMapper();
 	
 	@Override
@@ -35,7 +34,7 @@ public class AccessControlFilter extends GenericFilterBean {
 		if (request instanceof HttpServletRequest) {
 			try {
 				final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-				final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
+//				final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
 				final String clientCN = getCertificateCNFromRequest(httpServletRequest);
 				if (clientCN == null) {
 					//TODO: better exception
@@ -63,7 +62,8 @@ public class AccessControlFilter extends GenericFilterBean {
 	private void handleException(final ArrowheadException ex, final ServletResponse response) throws IOException {
 		final HttpStatus status = Utilities.calculateHttpStatusFromArrowheadException(ex);
 		final String origin = ex.getOrigin() == null ? CommonConstants.UNKNOWN_ORIGIN : ex.getOrigin();
-		logger.debug(ex.getClass().getName() + " at " + origin + ": " + ex.getMessage(), ex);
+		log.debug("{} at {}: {}", ex.getClass().getName(), origin, ex.getMessage());
+		log.debug("Exception", ex);
 		final ErrorMessageDTO dto = new ErrorMessageDTO(ex);
 		if (ex.getErrorCode() == 0) {
 			dto.setErrorCode(status.value());
