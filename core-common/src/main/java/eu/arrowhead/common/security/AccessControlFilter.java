@@ -62,7 +62,8 @@ public class AccessControlFilter extends GenericFilterBean {
 	private void handleException(final ArrowheadException ex, final ServletResponse response) throws IOException {
 		final HttpStatus status = Utilities.calculateHttpStatusFromArrowheadException(ex);
 		final String origin = ex.getOrigin() == null ? CommonConstants.UNKNOWN_ORIGIN : ex.getOrigin();
-		log.debug(ex.getClass().getName() + " at " + origin + ": " + ex.getMessage(), ex);
+		log.debug("{} at {}: {}", ex.getClass().getName(), origin, ex.getMessage());
+		log.debug("Exception", ex);
 		final ErrorMessageDTO dto = new ErrorMessageDTO(ex);
 		if (ex.getErrorCode() == 0) {
 			dto.setErrorCode(status.value());
