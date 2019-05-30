@@ -47,10 +47,10 @@ public class AuthorizationController {
 	}
 	
 	@GetMapping(path = DELETE_SERVICE_URI)
-	public String deleteThisService() throws Exception {
+	public String deleteThisService() {
 		logger.debug("deleteThisService() is called.");
 	
-		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, srAddress, srPort, "echo");
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, srAddress, srPort, "serviceregistry/echo");
 		final ResponseEntity<String> responseEntity = httpService.sendRequest(uri, HttpMethod.GET, String.class, null, null);
 		return "Delete this service. " + responseEntity.getBody();
 	}

@@ -7,6 +7,7 @@ import javax.naming.ldap.Rdn;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
@@ -82,6 +83,7 @@ public class Utilities {
 		return status;
 	}
 	
+	@Nullable
 	public static String getCertCNFromSubject(final String subjectName) {
 		if (subjectName == null) {
 			return null;
@@ -93,8 +95,7 @@ public class Utilities {
 	    	for (final Rdn rdn : ldapname.getRdns()) {
 	    		// Find the data after the CN field
 	    		if (CommonConstants.COMMON_NAME_FIELD_NAME.equalsIgnoreCase(rdn.getType())) {
-	    			final String cn = (String) rdn.getValue();
-	    			return cn;
+	    			return (String) rdn.getValue();
 	    		}
 	    	}
 	    } catch (final InvalidNameException ex) {
@@ -104,6 +105,7 @@ public class Utilities {
 	    return null;
 	}
 	
+	@Nullable
 	public static String stripEndSlash(final String uri) {
 	    if (uri != null && uri.endsWith("/")) {
 	    	return uri.substring(0, uri.length() - 1);
