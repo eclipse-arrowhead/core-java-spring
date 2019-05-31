@@ -37,7 +37,7 @@ public class SystemListResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public int getTotalNumberOfSystems() {
+	public long getTotalNumberOfSystems() {
 		return totalNumberOfSystems;
 	}
 
@@ -49,7 +49,7 @@ public class SystemListResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public void setTotalNumberOfSystems(final int totalNumberOfSystems) {
+	public void setTotalNumberOfSystems(final long totalNumberOfSystems) {
 		this.totalNumberOfSystems = totalNumberOfSystems;
 	}
 
