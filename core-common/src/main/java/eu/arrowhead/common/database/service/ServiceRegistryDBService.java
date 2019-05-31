@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
@@ -32,20 +33,15 @@ public class ServiceRegistryDBService {
 	@Autowired
 	private SystemRepository systemRepository;
 	
-	public Page<ServiceRegistry> getAllServiceReqistryEntries(int page, int size, Direction direction, final String sortField) {
-		if (page < 0) {
-			page = 0;
+	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, Direction direction, final String sortField) {
+		final int page_ = page < 0 ? 0 : page;
+		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
+		final Direction direction_ = direction == null ? Direction.ASC : direction;
+		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField_)) {
+			throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
 		}
-		if (size < 0) {
-			size = Integer.MAX_VALUE;
-		}
-		if (direction == null) {
-			direction = Direction.ASC;
-		}
-		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField)) {
-			throw new IllegalArgumentException("Sortable field with reference '" + sortField + "' is not available");
-		}
-		return serviceRegistryRepository.findAll(PageRequest.of(page, size, direction, sortField));
+		return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
 	}
 	
 	@Transactional (rollbackFor = Exception.class)
