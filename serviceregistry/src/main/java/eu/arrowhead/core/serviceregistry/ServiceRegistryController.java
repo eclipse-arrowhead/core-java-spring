@@ -40,7 +40,7 @@ public class ServiceRegistryController {
 	private static final String SYSTEM_BY_ID_URI = "/mgmt/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
 	private static final String SYSTEMS_URI = "/mgmt/systems";
 	private static final String GET_SYSTEMS_HTTP_200_MESSAGE = "Systems returned";
-	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = "";
+	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = " Invalid paraameters";
 	private static final String GET_SYSTEMS_HTTP_417_MESSAGE = "Not valid request parameters";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
@@ -118,11 +118,11 @@ public class ServiceRegistryController {
 			
 			validatedPage = -1;
 			validatedSize = -1;
-		
+			
 		} else {
 			if ( page == null || size==null ) {
 				
-				throw new BadPayloadException(" Invalid paraameters", HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+				throw new BadPayloadException(" Invalid paraameters", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
 			
 			} else {
 				validatedPage = page;
@@ -135,7 +135,7 @@ public class ServiceRegistryController {
 			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, direction, sortField));	
 		
 		} catch ( final IllegalArgumentException e) {
-			throw new DataNotFoundException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
+			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 		}
 		
 	}
