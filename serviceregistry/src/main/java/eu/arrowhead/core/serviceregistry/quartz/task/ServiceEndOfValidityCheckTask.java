@@ -31,13 +31,13 @@ public class ServiceEndOfValidityCheckTask implements Job {
 
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		logger.info("STARTED: Services end of validity check task");
-		final List<Long> removedServiceRegistryIDs = checkServicesEndOfValidity();
-		logger.info("FINISHED: Services end of validity check task. Number of removed service registry entry: " + removedServiceRegistryIDs.size());
+		logger.debug("STARTED: Services end of validity check task");
+		final List<ServiceRegistry> removedServiceRegistries = checkServicesEndOfValidity();
+		logger.debug("FINISHED: Services end of validity check task. Number of removed service registry entry: " + removedServiceRegistries.size());
 	}
 	
-	public List<Long> checkServicesEndOfValidity() {
-		final List<Long> removedServiceRegistryIDs = new ArrayList<>();
+	public List<ServiceRegistry> checkServicesEndOfValidity() {
+		final List<ServiceRegistry> removedServiceRegistryEntries = new ArrayList<>();
 		int pageIndexCounter = 0;
 		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
@@ -46,31 +46,31 @@ public class ServiceEndOfValidityCheckTask implements Job {
 				logger.debug("Servise Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
-				removedServiceRegistryIDs.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
+				removedServiceRegistryEntries.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
 					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-					removedServiceRegistryIDs.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
+					removedServiceRegistryEntries.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
 					pageIndexCounter++;
 				}
 			}
 		} catch (final IllegalArgumentException exception) {
 			logger.debug(exception.getMessage());
 		}
-		return removedServiceRegistryIDs;
+		return removedServiceRegistryEntries;
 	}
 	
-	private List<Long> removeRegisteredServicesWithInvalidTTL(final Page<ServiceRegistry> pageOfServiceEntries) {
-		final List<Long> removedServiceRegistryIDs = new ArrayList<>();
+	private List<ServiceRegistry> removeRegisteredServicesWithInvalidTTL(final Page<ServiceRegistry> pageOfServiceEntries) {
+		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
 		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
 			final ZonedDateTime endOfValidity = serviceRegistryEntry.getEndOfValidity();
 			if (endOfValidity != null && ! isTTLValid(endOfValidity)) {
-				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
-				removedServiceRegistryIDs.add(serviceRegistryEntry.getId());
+				toBeRemoved.add(serviceRegistryEntry);
 				logger.debug("REMOVED: " + serviceRegistryEntry);
 			}
 		}
-		return removedServiceRegistryIDs;
+		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);
+		return toBeRemoved;
 	}
 	
 	private boolean isTTLValid(final ZonedDateTime endOfValidity) {

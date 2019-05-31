@@ -49,4 +49,9 @@ public class ServiceRegistryDBService {
 		serviceRegistryRepository.deleteById(id);
 	}
 	
+	@Transactional (rollbackFor = Exception.class)
+	public void removeBulkOfServiceRegistryEntries(Iterable<ServiceRegistry> entities) {
+		serviceRegistryRepository.deleteInBatch(entities);
+		serviceRegistryRepository.flush();
+	}
 }

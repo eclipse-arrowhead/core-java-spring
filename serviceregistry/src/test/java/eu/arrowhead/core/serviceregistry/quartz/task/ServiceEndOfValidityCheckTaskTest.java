@@ -2,7 +2,7 @@ package eu.arrowhead.core.serviceregistry.quartz.task;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -60,14 +60,14 @@ public class ServiceEndOfValidityCheckTaskTest {
 		
 		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(sreviceRegistryEntries);
 		when(serviceRegistryDBService.getAllServiceReqistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
-		doNothing().when(serviceRegistryDBService).removeServiceRegistryEntryById(anyLong());
+		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
 	
 	@Test
 	public void testCheckServicesEndOfValidity() {
-		final List<Long> removedIds = serviceEndOfValidityCheckTask.checkServicesEndOfValidity();
-		assertEquals(removedIds.size(), 1);
-		final long id = removedIds.get(0);
+		final List<ServiceRegistry> removedEntries = serviceEndOfValidityCheckTask.checkServicesEndOfValidity();
+		assertEquals(removedEntries.size(), 1);
+		final long id = removedEntries.get(0).getId();
 		assertEquals(id, 1);
 	}
 
