@@ -134,7 +134,7 @@ public class ServiceRegistryController {
 			
 			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, direction, sortField));	
 		
-		} catch ( final NoSuchElementException e) {
+		} catch ( final IllegalArgumentException e) {
 			throw new DataNotFoundException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 		}
 		
