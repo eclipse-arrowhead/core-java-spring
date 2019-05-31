@@ -1,5 +1,6 @@
 package eu.arrowhead.common;
 
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
@@ -20,11 +21,12 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import eu.arrowhead.common.exception.ArrowheadException;
 
 public class Utilities {
-	
-	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	
 	private static final int SERVICE_CN_NAME_LENGTH = 5;
 	@SuppressWarnings("unused")
@@ -35,8 +37,44 @@ public class Utilities {
 	private static final String AH_MASTER_SUFFIX = "eu";
 	private static final String AH_MASTER_NAME = "arrowhead";
 	
+	private static final Logger logger = LogManager.getLogger(Utilities.class);
+	private static final ObjectMapper mapper = new ObjectMapper();
+	
+	static {
+	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+	}
+	
 	public static boolean isEmpty(final String str) {
 		return str == null || str.isBlank();
+	}
+	
+	@Nullable
+	public static String stripEndSlash(final String uri) {
+	    if (uri != null && uri.endsWith("/")) {
+	    	return uri.substring(0, uri.length() - 1);
+	    }
+	    
+	    return uri;
+	}
+	
+	@Nullable
+	public static String toPrettyJson(final String jsonString) {
+		try {
+			if (jsonString != null) {
+				final String jsonString_ = jsonString.trim();
+				if (jsonString_.startsWith("{")) {
+					Object tempObj = mapper.readValue(jsonString_, Object.class);
+					return mapper.writeValueAsString(tempObj);
+				} else {
+					Object[] tempObj = mapper.readValue(jsonString_, Object[].class);
+					return mapper.writeValueAsString(tempObj);
+				}
+			}
+	    } catch (final IOException ex) {
+	    	// it seems it is not a JSON string, so we just return untouched
+	    }
+		
+	    return jsonString;
 	}
 
 	/**
@@ -120,15 +158,6 @@ public class Utilities {
 	    }
 
 	    return null;
-	}
-	
-	@Nullable
-	public static String stripEndSlash(final String uri) {
-	    if (uri != null && uri.endsWith("/")) {
-	    	return uri.substring(0, uri.length() - 1);
-	    }
-	    
-	    return uri;
 	}
 	
 	public static X509Certificate getFirstCertFromKeyStore(final KeyStore keystore) {

@@ -25,7 +25,7 @@ public class InboundDebugFilter extends ArrowheadFilter {
 			}
 			
 			if (!Utilities.isEmpty(requestWrapper.getCachedBody())) {
-				log.debug("Body: {}", requestWrapper.getCachedBody());
+				log.debug("Body: {}", Utilities.toPrettyJson(requestWrapper.getCachedBody()));
 			}
 			
 			chain.doFilter(requestWrapper, response);

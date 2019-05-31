@@ -8,9 +8,7 @@ import java.security.cert.CertificateException;
 import java.util.ServiceConfigurationError;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -19,10 +17,39 @@ import eu.arrowhead.common.exception.ArrowheadException;
 
 @RunWith(SpringRunner.class)
 public class UtilitiesTest {
+
+	private static final String OS_NAME = "os.name";
+	private static final String WINDOWS_PREFIX = "win";
 	
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+	@Test
+	public void testToPrettyJSONInputNull() {
+		final String result = Utilities.toPrettyJson(null);
+		Assert.assertNull(result);
+	}
 	
+	public void testToPrettyJSONNotJSON() {
+		final String result = Utilities.toPrettyJson("abc");
+		Assert.assertEquals("abc", result);
+	}
+	
+	@Test
+	public void testToPrettyJSONValidObject() {
+		final String osName = System.getProperty(OS_NAME).toLowerCase();
+		final String expected =  osName.startsWith(WINDOWS_PREFIX) ? "{\r\n  \"a\" : 1\r\n}" : "{\n  \"a\" : 1\n}";
+		
+		final String result = Utilities.toPrettyJson("{ \"a\": 1 }");
+		Assert.assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testToPrettyJSONValidList() {
+		final String osName = System.getProperty(OS_NAME).toLowerCase();
+		final String expected =  osName.startsWith(WINDOWS_PREFIX) ? "[ {\r\n  \"a\" : 1\r\n} ]" : "[ {\n  \"a\" : 1\n} ]";
+		
+		final String result = Utilities.toPrettyJson("[{ \"a\": 1 }]");
+		Assert.assertEquals(expected, result);
+	}
+
 	@Test
 	public void testCalculateHttpStatusFromArrowheadExceptionBradbury() {
 		final ArrowheadException ex = new ArrowheadException("Fahrenheit", 451);
@@ -39,35 +66,31 @@ public class UtilitiesTest {
 	
 	@Test
 	public void testGetCertCNFromSubjectOk() {
-		String result = Utilities.getCertCNFromSubject("cn=abc.def.gh");
+		final String result = Utilities.getCertCNFromSubject("cn=abc.def.gh");
 		Assert.assertEquals("abc.def.gh", result);
 	}
 	
 	@Test
 	public void testGetCertCNFromSubjectNotOk() {
-		String result = Utilities.getCertCNFromSubject("abc.def.gh");
+		final String result = Utilities.getCertCNFromSubject("abc.def.gh");
 		Assert.assertNull(result);
 	}
 	
 	@Test
 	public void testGetCertCNFromSubjectNullParameter() {
-		String result = Utilities.getCertCNFromSubject(null);
+		final String result = Utilities.getCertCNFromSubject(null);
 		Assert.assertNull(result);
 	}
 	
-	@Test
+	@Test(expected = ServiceConfigurationError.class)
 	public void testGetFirstCertFromKeyStoreNotInitializedKeyStore() throws KeyStoreException {
-		expectedException.expect(ServiceConfigurationError.class);
-		
-		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		Utilities.getFirstCertFromKeyStore(keystore);
 	}
 	
-	@Test
+	@Test(expected = ServiceConfigurationError.class)
 	public void testGetFirstCertFromKeyStoreEmptyKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-		expectedException.expect(ServiceConfigurationError.class);
-		
-		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keystore.load(null, null);
 		Utilities.getFirstCertFromKeyStore(keystore);
 	}
