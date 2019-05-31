@@ -33,7 +33,7 @@ public class ServiceRegistryDBService {
 	@Autowired
 	private SystemRepository systemRepository;
 	
-	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, Direction direction, final String sortField) {
+	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		final int page_ = page < 0 ? 0 : page;
 		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
 		final Direction direction_ = direction == null ? Direction.ASC : direction;
