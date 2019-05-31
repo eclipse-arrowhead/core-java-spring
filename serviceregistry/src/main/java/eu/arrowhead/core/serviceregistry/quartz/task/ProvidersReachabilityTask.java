@@ -39,7 +39,7 @@ public class ProvidersReachabilityTask implements Job {
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.info("STARTED: Providers reachability task");
-		List<Long> removedServiceRegistryIDs = checkProvidersReachability();
+		final List<Long> removedServiceRegistryIDs = checkProvidersReachability();
 		logger.info("FINISHED: Providers reachability task. Number of removed service registry entry: " + removedServiceRegistryIDs.size());
 	}
 	
@@ -61,7 +61,7 @@ public class ProvidersReachabilityTask implements Job {
 					pageIndexCounter++;
 				}
 			}
-		} catch (IllegalArgumentException exception) {
+		} catch (final IllegalArgumentException exception) {
 			logger.debug(exception.getMessage());
 		}
 		return removedServiceRegistryIDs;
