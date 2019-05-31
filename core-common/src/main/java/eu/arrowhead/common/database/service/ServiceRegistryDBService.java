@@ -57,7 +57,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public Page<System> getSystemEntries(final int page, final int size, final Direction direction, final String sortField) {
+	public Page<System> getSystemEntries(final int page, final int size, final String direction, final String sortField) {
 		final int validatedPage;
 		final int validatedSize;
 		final Direction validatedDirection;
@@ -78,13 +78,18 @@ public class ServiceRegistryDBService {
 		if (direction == null) {
 			validatedDirection = Direction.ASC;
 		}else {
-			validatedDirection = direction;
+			try {
+				validatedDirection = Direction.fromString(direction);
+			}catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Direction field with reference '" + direction + "' is not available");
+			}
+			
 		}
 		
 		if(sortField==null || "".equalsIgnoreCase(sortField)) {
 			validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
 		}else {
-			if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField)) {
+			if (! System.SORTABLE_FIELDS_BY.contains(sortField)) {
 				throw new IllegalArgumentException("Sortable field with reference '" + sortField + "' is not available");
 			}else {
 				validatedSortField = sortField;
