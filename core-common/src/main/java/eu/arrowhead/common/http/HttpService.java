@@ -51,7 +51,7 @@ public class HttpService {
 
 	private static final String ERROR_MESSAGE_PART_PKIX_PATH = "PKIX path";
 	
-	private static final List<HttpMethod> NOT_SUPPORTED_METHODS = Collections.unmodifiableList(Arrays.asList(HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE));
+	private static final List<HttpMethod> NOT_SUPPORTED_METHODS = List.of(HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE); 
  
 	private final Logger logger = LogManager.getLogger(HttpService.class);
 	
