@@ -79,6 +79,8 @@ public class CommonConstants {
 	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
 	
+	public static final int CONVERSION_MILLISECOND_TO_MINUTES = 60000;
+	
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}

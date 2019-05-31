@@ -1,5 +1,7 @@
 package eu.arrowhead.core.serviceregistry.quartz.task;
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SimpleTrigger;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
@@ -31,8 +34,8 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	
 	private final int schedulerDelay = 15;
 	
-	private final String nameOfTrigger = "Services_End_OF_Validity_Check_Task_Trigger";
-	private final String nameOfTask = "Services_End_OF_Validity_Check_Task_Detail";	
+	private static final String NAME_OF_TRIGGER = "Services_End_OF_Validity_Check_Task_Trigger";
+	private static final String NAME_OF_TASK = "Services_End_OF_Validity_Check_Task_Detail";	
 	
 	@Bean
 	public SchedulerFactoryBean servicesEndOfValidityCheckSheduler() {
@@ -55,9 +58,9 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
     public SimpleTriggerFactoryBean servicesEndOfValidityCheckTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(servicesEndOfValidityCheckTaskDetail().getObject());
-        trigger.setRepeatInterval(ttlInterval * 60000);
+        trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTES);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        trigger.setName(nameOfTrigger);
+        trigger.setName(NAME_OF_TRIGGER);
         return trigger;
     }
 	
@@ -65,7 +68,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
     public JobDetailFactoryBean servicesEndOfValidityCheckTaskDetail() {
         final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
         jobDetailFactory.setJobClass(ServiceEndOfValidityCheckTask.class);
-        jobDetailFactory.setName(nameOfTask);
+        jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
         return jobDetailFactory;
     }
