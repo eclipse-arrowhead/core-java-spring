@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
@@ -54,6 +56,45 @@ public class ServiceRegistryDBService {
 		return systemOption.get();			
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	
+	public Page<ServiceRegistry> getSystemEntries(final int page, final int size, final Direction direction, final String sortField) {
+		final int validatedPage;
+		final int validatedSize;
+		final Direction validatedDirection;
+		final String validatedSortField;
+		
+		if (page < 0) {
+			validatedPage = 0;
+		}else {
+			validatedPage = page;
+		}
+		
+		if (size < 0) {
+			validatedSize = Integer.MAX_VALUE;
+		}else {
+			validatedSize = size;
+		}
+		
+		if (direction == null) {
+			validatedDirection = Direction.ASC;
+		}else {
+			validatedDirection = direction;
+		}
+		
+		if(sortField==null || "".equalsIgnoreCase(sortField)) {
+			validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		}else {
+			if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField)) {
+				throw new IllegalArgumentException("Sortable field with reference '" + sortField + "' is not available");
+			}else {
+				validatedSortField = sortField;
+			}
+		}
+		
+		return serviceRegistryRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+	}
+	
     //-------------------------------------------------------------------------------------------------
 	
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(int page, int size, Direction direction, final String sortField) {
