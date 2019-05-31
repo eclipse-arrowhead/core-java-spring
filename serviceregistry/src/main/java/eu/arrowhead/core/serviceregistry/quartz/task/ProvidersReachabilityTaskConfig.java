@@ -29,6 +29,8 @@ public class ProvidersReachabilityTaskConfig {
 	@Value (CommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
 	private int pingInterval;
 	
+	private final int schedulerDelay = 10;
+	
 	private final String nameOfTrigger = "Providers_Reachability_Task_Trigger";
 	private final String nameOfTask = "Providers_Reachability_Task_Detail";
 	
@@ -41,6 +43,7 @@ public class ProvidersReachabilityTaskConfig {
 	        schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(providersReachabilityTaskDetail().getObject());
 	        schedulerFactory.setTriggers(providersReachabilityTaskTrigger().getObject());
+	        schedulerFactory.setStartupDelay(schedulerDelay);
 	        logger.info("Providers reachabilitiy task adjusted with ping interval: " + pingInterval + " minutes");
 		} else {
 			logger.info("Providers reachabilitiy task is not adjusted");

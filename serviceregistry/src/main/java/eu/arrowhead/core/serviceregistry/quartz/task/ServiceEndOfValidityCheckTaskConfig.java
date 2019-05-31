@@ -29,6 +29,8 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	@Value (CommonConstants.$SERVICE_REGISTRY_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
+	private final int schedulerDelay = 15;
+	
 	private final String nameOfTrigger = "Services_End_OF_Validity_Check_Task_Trigger";
 	private final String nameOfTask = "Services_End_OF_Validity_Check_Task_Detail";	
 	
@@ -41,6 +43,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	        schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(servicesEndOfValidityCheckTaskDetail().getObject());
 	        schedulerFactory.setTriggers(servicesEndOfValidityCheckTaskTrigger().getObject());
+	        schedulerFactory.setStartupDelay(schedulerDelay);
 	        logger.info("Services end of validity task adjusted with ttl interval: " + ttlInterval + " minutes");
 		} else {
 			logger.info("Services end of validity task is not adjusted");
