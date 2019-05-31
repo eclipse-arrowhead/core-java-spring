@@ -79,6 +79,11 @@ public class CommonConstants {
 	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
 	
+	public static final String REQUEST_PARAM_PAGE = "page";
+	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
+	public static final String REQUEST_PARAM_DIRECTION = "direction";
+	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
+	
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}
