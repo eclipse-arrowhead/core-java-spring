@@ -20,6 +20,10 @@ public class ErrorMessageDTO {
 		setError(ex);
 	}
 	
+	public ErrorMessageDTO(final String errorMessage, final int errorCode, final ExceptionType exceptionType, final String origin) {
+		setError(errorMessage, errorCode, exceptionType, origin);
+	}
+	
 	public void setError(final String errorMessage, final int errorCode, final ExceptionType exceptionType, final String origin) {
 		this.errorMessage = errorMessage;
 		this.errorCode = errorCode;

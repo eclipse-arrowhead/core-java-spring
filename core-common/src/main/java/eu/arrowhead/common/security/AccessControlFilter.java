@@ -10,29 +10,17 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.filter.GenericFilterBean;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.thirdparty.MultiReadRequestWrapper;
 
-public abstract class AccessControlFilter extends GenericFilterBean {
-	
-	protected Logger log = LogManager.getLogger(AccessControlFilter.class);
-	protected ObjectMapper mapper = new ObjectMapper();
+public abstract class AccessControlFilter extends ArrowheadFilter {
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	protected Map<String,String> arrowheadContext;
@@ -40,6 +28,7 @@ public abstract class AccessControlFilter extends GenericFilterBean {
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {
+			log.debug("Checking access in AccessControlFilter...");
 			try {
 				final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
 				final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
@@ -55,6 +44,7 @@ public abstract class AccessControlFilter extends GenericFilterBean {
 			        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
 			    }
 				
+				log.debug("Using MultiReadRequestWrapper in the filter chain from now...");
 				chain.doFilter(requestWrapper, response);
 			} catch (final ArrowheadException ex) {
 				handleException(ex, response);
@@ -82,24 +72,5 @@ public abstract class AccessControlFilter extends GenericFilterBean {
 		}
 		
 		return null;
-	}
-	
-	private void handleException(final ArrowheadException ex, final ServletResponse response) throws IOException {
-		final HttpStatus status = Utilities.calculateHttpStatusFromArrowheadException(ex);
-		final String origin = ex.getOrigin() == null ? CommonConstants.UNKNOWN_ORIGIN : ex.getOrigin();
-		log.debug("{} at {}: {}", ex.getClass().getName(), origin, ex.getMessage());
-		log.debug("Exception", ex);
-		final ErrorMessageDTO dto = new ErrorMessageDTO(ex);
-		if (ex.getErrorCode() <= 0) {
-			dto.setErrorCode(status.value());
-		}
-		sendError(status, dto, (HttpServletResponse) response);
-	}
-
-	private void sendError(final HttpStatus status, final ErrorMessageDTO dto, final HttpServletResponse response) throws IOException {
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		response.setStatus(status.value());
-		response.getWriter().print(mapper.writeValueAsString(dto));
-		response.getWriter().flush();
 	}
 }
