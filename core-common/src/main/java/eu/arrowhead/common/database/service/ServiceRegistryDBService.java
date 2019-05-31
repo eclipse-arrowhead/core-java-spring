@@ -54,7 +54,7 @@ public class ServiceRegistryDBService {
 		return systemOption.get();			
 	}
 
-        //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 	
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(int page, int size, Direction direction, final String sortField) {
 		if (page < 0) {
