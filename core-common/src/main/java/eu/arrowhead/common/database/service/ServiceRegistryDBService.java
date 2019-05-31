@@ -1,6 +1,5 @@
 package eu.arrowhead.common.database.service;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -13,12 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.database.entity.System;
 
 @Service
 public class ServiceRegistryDBService {
