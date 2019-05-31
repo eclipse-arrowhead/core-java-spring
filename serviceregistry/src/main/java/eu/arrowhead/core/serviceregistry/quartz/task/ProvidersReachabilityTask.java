@@ -3,6 +3,8 @@ package eu.arrowhead.core.serviceregistry.quartz.task;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +29,6 @@ public class ProvidersReachabilityTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);
 	private final int pageSize = 1000;
-	private int removedServiceRegistryEntries;
 	
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
@@ -38,12 +39,12 @@ public class ProvidersReachabilityTask implements Job {
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.info("STARTED: Providers reachability task");
-		removedServiceRegistryEntries = 0;
-		checkProvidersReachability();
-		logger.info("FINISHED: Providers reachability task. Number of removed service registry entry: " + removedServiceRegistryEntries);
+		List<Long> removedServiceRegistryIDs = checkProvidersReachability();
+		logger.info("FINISHED: Providers reachability task. Number of removed service registry entry: " + removedServiceRegistryIDs.size());
 	}
 	
-	private void checkProvidersReachability() {
+	public List<Long> checkProvidersReachability() {
+		final List<Long> removedServiceRegistryIDs = new ArrayList<>();
 		int pageIndexCounter = 0;
 		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
@@ -52,30 +53,33 @@ public class ProvidersReachabilityTask implements Job {
 				logger.debug("Servise Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
-				pingAndRemoveRegisteredServices(pageOfServiceEntries);
+				removedServiceRegistryIDs.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
 					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-					pingAndRemoveRegisteredServices(pageOfServiceEntries);
+					removedServiceRegistryIDs.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 					pageIndexCounter++;
 				}
 			}
 		} catch (IllegalArgumentException exception) {
 			logger.debug(exception.getMessage());
 		}
+		return removedServiceRegistryIDs;
 	}
 	
-	private void pingAndRemoveRegisteredServices(final Page<ServiceRegistry> pageOfServiceEntries) {
+	private List<Long> pingAndRemoveRegisteredServices(final Page<ServiceRegistry> pageOfServiceEntries) {
+		final List<Long> removedServiceRegistryIDs = new ArrayList<>();
 		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
 			final System provider = serviceRegistryEntry.getSystem();
 			final String address = provider.getAddress();
 			final int port = provider.getPort();
 			if (! pingService(address, port)) {
 				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
-				removedServiceRegistryEntries++;
+				removedServiceRegistryIDs.add(serviceRegistryEntry.getId());
 				logger.debug("REMOVED: " + serviceRegistryEntry);
 			}
 		}
+		return removedServiceRegistryIDs;
 	}
 	
 	private boolean pingService(final String address, final int port) {

@@ -1,6 +1,8 @@
 package eu.arrowhead.core.serviceregistry.quartz.task;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +25,6 @@ public class ServiceEndOfValidityCheckTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ServiceEndOfValidityCheckTask.class);
 	private final int pageSize = 1000;
-	private int removedServiceRegistryEntries;
 	
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
@@ -31,12 +32,12 @@ public class ServiceEndOfValidityCheckTask implements Job {
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.info("STARTED: Services end of validity check task");
-		removedServiceRegistryEntries = 0;
-		checkServicesEndOfValidity();
-		logger.info("FINISHED: Services end of validity check task. Number of removed service registry entry: " + removedServiceRegistryEntries);
+		final List<Long> removedServiceRegistryIDs = checkServicesEndOfValidity();
+		logger.info("FINISHED: Services end of validity check task. Number of removed service registry entry: " + removedServiceRegistryIDs.size());
 	}
 	
-	private void checkServicesEndOfValidity() {		
+	public List<Long> checkServicesEndOfValidity() {
+		final List<Long> removedServiceRegistryIDs = new ArrayList<>();
 		int pageIndexCounter = 0;
 		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
@@ -45,28 +46,31 @@ public class ServiceEndOfValidityCheckTask implements Job {
 				logger.debug("Servise Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
-				removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries);
+				removedServiceRegistryIDs.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
 					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-					removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries);
+					removedServiceRegistryIDs.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
 					pageIndexCounter++;
 				}
 			}
-		} catch (IllegalArgumentException exception) {
+		} catch (final IllegalArgumentException exception) {
 			logger.debug(exception.getMessage());
 		}
+		return removedServiceRegistryIDs;
 	}
 	
-	private void removeRegisteredServicesWithInvalidTTL(final Page<ServiceRegistry> pageOfServiceEntries) {
+	private List<Long> removeRegisteredServicesWithInvalidTTL(final Page<ServiceRegistry> pageOfServiceEntries) {
+		final List<Long> removedServiceRegistryIDs = new ArrayList<>();
 		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
 			final ZonedDateTime endOfValidity = serviceRegistryEntry.getEndOfValidity();
 			if (endOfValidity != null && ! isTTLValid(endOfValidity)) {
 				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
-				removedServiceRegistryEntries++;
+				removedServiceRegistryIDs.add(serviceRegistryEntry.getId());
 				logger.debug("REMOVED: " + serviceRegistryEntry);
 			}
 		}
+		return removedServiceRegistryIDs;
 	}
 	
 	private boolean isTTLValid(final ZonedDateTime endOfValidity) {
