@@ -11,7 +11,7 @@ public class SystemListResponseDTO implements Serializable {
 	
 	private static final long serialVersionUID = -1661484009332215820L;
 	
-	private List<SystemResponseDTO> systemResponeDTOList = new ArrayList<SystemResponseDTO>();
+	private List<SystemResponseDTO> systemResponeDTOList = new ArrayList<>();
 	private long totalNumberOfSystems;
 	
 	//=================================================================================================
