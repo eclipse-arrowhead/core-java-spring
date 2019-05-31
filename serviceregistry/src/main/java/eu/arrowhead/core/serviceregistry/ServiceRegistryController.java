@@ -85,4 +85,8 @@ public class ServiceRegistryController {
 		}
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//TODO
+	//implement List<SystemResponseDTO> getSystems(int page, int itemPerPage){...}
 }
