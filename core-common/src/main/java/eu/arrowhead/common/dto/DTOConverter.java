@@ -49,7 +49,7 @@ public class DTOConverter {
 	
 	private static List<SystemResponseDTO> sytemEntryListToSystemResponeDTOList(final List<System> systemList) {
 		
-		final List<SystemResponseDTO> systemResponseDTOs = new ArrayList<>();
+		final List<SystemResponseDTO> systemResponseDTOs = new ArrayList<SystemResponseDTO>();
 		
 		for (System system : systemList) {
 			systemResponseDTOs.add(convertSystemToSystemResponseDTO(system));
