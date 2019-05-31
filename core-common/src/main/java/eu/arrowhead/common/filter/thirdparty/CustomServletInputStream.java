@@ -1,4 +1,4 @@
-package eu.arrowhead.common.security.thirdparty;
+package eu.arrowhead.common.filter.thirdparty;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;

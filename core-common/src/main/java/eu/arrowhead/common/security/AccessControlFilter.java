@@ -18,7 +18,8 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.security.thirdparty.MultiReadRequestWrapper;
+import eu.arrowhead.common.filter.ArrowheadFilter;
+import eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper;
 
 public abstract class AccessControlFilter extends ArrowheadFilter {
 	

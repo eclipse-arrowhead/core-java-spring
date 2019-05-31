@@ -1,4 +1,4 @@
-package eu.arrowhead.common.security;
+package eu.arrowhead.common.filter;
 
 import java.io.IOException;
 
@@ -23,8 +23,8 @@ import eu.arrowhead.common.exception.ArrowheadException;
 
 public abstract class ArrowheadFilter extends GenericFilterBean {
 	
-	protected Logger log = LogManager.getLogger(AccessControlFilter.class);
-	protected ObjectMapper mapper = new ObjectMapper();
+	protected final Logger log = LogManager.getLogger(ArrowheadFilter.class);
+	protected final ObjectMapper mapper = new ObjectMapper();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

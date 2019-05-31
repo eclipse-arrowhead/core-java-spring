@@ -1,4 +1,4 @@
-package eu.arrowhead.common.security.thirdparty;
+package eu.arrowhead.common.filter.thirdparty;
 
 import java.io.BufferedReader;
 import java.io.IOException;

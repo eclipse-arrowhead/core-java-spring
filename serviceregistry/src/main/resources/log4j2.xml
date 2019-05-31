@@ -32,9 +32,12 @@
     	<AsyncLogger name="eu.arrowhead" level="info" additivity="true">
             <AppenderRef ref="MySQLDatabase" />
     	</AsyncLogger>
+    	
+    	<Logger name="eu.arrowhead" level="debug">
+            <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
+    	</Logger>
     
         <Root level="info">
-            <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
             <AppenderRef ref="FileAppender" />
         </Root>
     </Loggers>

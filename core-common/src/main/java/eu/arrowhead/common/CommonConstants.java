@@ -69,6 +69,9 @@ public class CommonConstants {
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
 	public static final String SERVICE_REGISTRY_PORT = "sr_port";
 	public static final String $SERVICE_REGISTRY_PORT_WD = "${" + SERVICE_REGISTRY_PORT + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_PORT + "}";
+	
+	public static final String LOG_ALL_REQUEST_AND_RESPONSE = "log_all_request_and_response";
+	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + Defaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
 
 	private CommonConstants() {
 		throw new UnsupportedOperationException();

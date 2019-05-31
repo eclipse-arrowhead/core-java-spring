@@ -11,6 +11,8 @@ public class Defaults {
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
 	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	
+	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
+	
 	// HTTP client defaults
 	public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;
 	public static final int DEFAULT_SOCKET_TIMEOUT = 30000;

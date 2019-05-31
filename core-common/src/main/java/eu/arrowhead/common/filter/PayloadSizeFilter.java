@@ -1,4 +1,4 @@
-package eu.arrowhead.common.security;
+package eu.arrowhead.common.filter;
 
 import java.io.IOException;
 
