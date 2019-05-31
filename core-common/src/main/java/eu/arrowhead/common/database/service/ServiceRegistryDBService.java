@@ -57,7 +57,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public Page<ServiceRegistry> getSystemEntries(final int page, final int size, final Direction direction, final String sortField) {
+	public Page<System> getSystemEntries(final int page, final int size, final Direction direction, final String sortField) {
 		final int validatedPage;
 		final int validatedSize;
 		final Direction validatedDirection;
@@ -91,7 +91,7 @@ public class ServiceRegistryDBService {
 			}
 		}
 		
-		return serviceRegistryRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		return systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 	}
 	
     //-------------------------------------------------------------------------------------------------
