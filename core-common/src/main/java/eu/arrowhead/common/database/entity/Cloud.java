@@ -11,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -79,6 +81,17 @@ public class Cloud {
 		this.secure = secure;
 		this.neighbor = neighbor;
 		this.ownCloud = ownCloud;
+	}
+	
+	@PrePersist
+	public void onCreate() {
+		this.createdAt = ZonedDateTime.now();
+		this.updatedAt = this.createdAt;
+	}
+	
+	@PreUpdate
+	public void onUpdate() {
+		this.updatedAt = ZonedDateTime.now();
 	}
 
 	public long getId() {
