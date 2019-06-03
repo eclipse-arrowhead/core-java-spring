@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -78,6 +80,17 @@ public class ServiceRegistry {
 		this.secure = secure;
 		this.metadata = metadata;
 		this.version = version;
+	}
+	
+	@PrePersist
+	public void onCreate() {
+		this.createdAt = ZonedDateTime.now();
+		this.updatedAt = this.createdAt;
+	}
+	
+	@PreUpdate
+	public void onUpdate() {
+		this.updatedAt = ZonedDateTime.now();
 	}
 
 	public long getId() {
