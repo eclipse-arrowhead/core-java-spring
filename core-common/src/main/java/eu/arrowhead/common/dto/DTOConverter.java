@@ -25,16 +25,40 @@ public class DTOConverter {
 	public static SystemListResponseDTO convertSystemEntryListToSystemListResponseDTO(final Page<System> systemEntryList) {
 		Assert.notNull(systemEntryList, "systemEntryList is null");
 		
-		final long totalNumberOfSystems = systemEntryList.getTotalElements();		
+		final long count = systemEntryList.getTotalElements();		
 		
 		final SystemListResponseDTO systemListResponseDTO = new SystemListResponseDTO();
 		
-		systemListResponseDTO.setTotalNumberOfSystems(totalNumberOfSystems);
+		systemListResponseDTO.setTotalNumberOfSystems(count);
 		systemListResponseDTO.setSystemResponeDTOList(sytemEntryListToSystemResponeDTOList(systemEntryList.getContent()));
 		
 		return systemListResponseDTO;
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static System convertSystemRequestDTOToSystem(final SystemRequestDTO systemRequestDTO) {
+		Assert.notNull(systemRequestDTO, "System is null");
+		Assert.notNull(systemRequestDTO.getAddress(), "SystemAddress is null");
+		Assert.notNull(systemRequestDTO.getPort(), "SystemPort is null");
+		Assert.notNull(systemRequestDTO.getSystemName(), "SystemName is null");
+		
+		final String validatedAuthenticationInfo = systemRequestDTO.getAuthenticationInfo();
+		if ( validatedAuthenticationInfo != null && "".equalsIgnoreCase(validatedAuthenticationInfo)) {
+			
+			return new System(systemRequestDTO.getSystemName(), systemRequestDTO.getAddress(), systemRequestDTO.getPort(), validatedAuthenticationInfo);
+		}
+		else {
+			System system = new System();
+			system.setAddress(systemRequestDTO.getAddress());
+			system.setPort(systemRequestDTO.getPort());
+			system.setSystemName(systemRequestDTO.getSystemName());
+			
+			return system;
+		}
+						
+	}
+		
 	
 	//=================================================================================================
 	// assistant methods
