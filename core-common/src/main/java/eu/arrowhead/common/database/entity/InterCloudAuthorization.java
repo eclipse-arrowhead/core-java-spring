@@ -10,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -42,6 +44,17 @@ public class InterCloudAuthorization {
 	public InterCloudAuthorization(final Cloud cloud, final ServiceDefinition serviceDefinition) {
 		this.cloud = cloud;
 		this.serviceDefinition = serviceDefinition;
+	}
+	
+	@PrePersist
+	public void onCreate() {
+		this.createdAt = ZonedDateTime.now();
+		this.updatedAt = this.createdAt;
+	}
+	
+	@PreUpdate
+	public void onUpdate() {
+		this.updatedAt = ZonedDateTime.now();
 	}
 
 	public long getId() {
