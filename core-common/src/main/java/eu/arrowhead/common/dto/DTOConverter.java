@@ -1,7 +1,9 @@
 package eu.arrowhead.common.dto;
 
-import eu.arrowhead.common.database.entity.System;
 import org.springframework.util.Assert;
+
+import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.System;
 
 public class DTOConverter {
 
@@ -14,6 +16,12 @@ public class DTOConverter {
 		Assert.notNull(system, "System is null");
 		
 		return new SystemResponseDTO(system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
+	}
+	
+	public static ServiceResponseDTO convertServiceToServiceResponseDTO (final ServiceDefinition service) {
+		Assert.notNull(service, "Service is null");
+		
+		return new ServiceResponseDTO(service.getId(), service.getServiceDefinition(), String.valueOf(service.getCreatedAt()), String.valueOf(service.getUpdatedAt()));
 	}
 	
 	//=================================================================================================
