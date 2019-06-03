@@ -29,8 +29,8 @@ public class DTOConverter {
 		
 		final SystemListResponseDTO systemListResponseDTO = new SystemListResponseDTO();
 		
-		systemListResponseDTO.setTotalNumberOfSystems(count);
-		systemListResponseDTO.setSystemResponeDTOList(sytemEntryListToSystemResponeDTOList(systemEntryList.getContent()));
+		systemListResponseDTO.setCount(count);
+		systemListResponseDTO.setData(sytemEntryListToSystemResponeDTOList(systemEntryList.getContent()));
 		
 		return systemListResponseDTO;
 		
