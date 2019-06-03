@@ -11,7 +11,7 @@ public class SystemListResponseDTO implements Serializable {
 	
 	private static final long serialVersionUID = -1661484009332215820L;
 	
-	private List<SystemResponseDTO> systemResponeDTOList = new ArrayList<>();
+	private List<SystemResponseDTO> data = new ArrayList<>();
 	private long count;
 	
 	//=================================================================================================
@@ -25,14 +25,14 @@ public class SystemListResponseDTO implements Serializable {
 	
 	public SystemListResponseDTO(final List<SystemResponseDTO> systemResponeDTOList, final int totalNumberOfSystems) {
 		super();
-		this.systemResponeDTOList = systemResponeDTOList;
+		this.data = systemResponeDTOList;
 		this.count = totalNumberOfSystems;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	
 	public List<SystemResponseDTO> getSystemResponeDTOList() {
-		return systemResponeDTOList;
+		return data;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ public class SystemListResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	
 	public void setSystemResponeDTOList(final List<SystemResponseDTO> systemResponeDTOList) {
-		this.systemResponeDTOList = systemResponeDTOList;
+		this.data = systemResponeDTOList;
 	}
 
 	//-------------------------------------------------------------------------------------------------
