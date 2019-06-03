@@ -44,7 +44,6 @@ public class ServiceRegistryDBService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	public System getSystemById(final long systemId) {
 		final Optional<System> systemOption = systemRepository.findById(systemId);
 		
@@ -54,6 +53,8 @@ public class ServiceRegistryDBService {
 		
 		return systemOption.get();			
 	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		final int page_ = page < 0 ? 0 : page;
 		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
@@ -65,11 +66,13 @@ public class ServiceRegistryDBService {
 		return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceRegistryEntryById(final long id) {
 		serviceRegistryRepository.deleteById(id);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public void removeBulkOfServiceRegistryEntries(Iterable<ServiceRegistry> entities) {
 		serviceRegistryRepository.deleteInBatch(entities);

@@ -28,7 +28,7 @@ import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 public class ProvidersReachabilityTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);
-	private final int pageSize = 1000;
+	private static final int PAGE_SIZE = 1000;
 	
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
@@ -40,7 +40,7 @@ public class ProvidersReachabilityTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: Providers reachability task");
 		final List<ServiceRegistry> removedServiceRegistries = checkProvidersReachability();
-		logger.debug("FINISHED: Providers reachability task. Number of removed service registry entry: " + removedServiceRegistries.size());
+		logger.debug("FINISHED: Providers reachability task. Number of removed service registry entry: {}", removedServiceRegistries.size());
 	}
 	
 	public List<ServiceRegistry> checkProvidersReachability() {
@@ -48,7 +48,7 @@ public class ProvidersReachabilityTask implements Job {
 		int pageIndexCounter = 0;
 		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
-			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
 				logger.debug("Servise Registry database is empty");
 			} else {
@@ -56,7 +56,7 @@ public class ProvidersReachabilityTask implements Job {
 				removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
-					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 					removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 					pageIndexCounter++;
 				}
@@ -75,7 +75,7 @@ public class ProvidersReachabilityTask implements Job {
 			final int port = provider.getPort();
 			if (! pingService(address, port)) {				
 				toBeRemoved.add(serviceRegistryEntry);
-				logger.debug("REMOVED: " + serviceRegistryEntry);
+				logger.debug("REMOVED: {}", serviceRegistryEntry);
 			}
 		}
 		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);

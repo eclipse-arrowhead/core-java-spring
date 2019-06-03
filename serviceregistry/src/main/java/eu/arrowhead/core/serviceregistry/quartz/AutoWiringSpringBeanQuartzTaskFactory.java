@@ -8,8 +8,9 @@ import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
 public final class AutoWiringSpringBeanQuartzTaskFactory extends SpringBeanJobFactory {
 
-    private transient AutowireCapableBeanFactory beanFactory;
-
+    private AutowireCapableBeanFactory beanFactory;
+    
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 
         beanFactory = applicationContext.getAutowireCapableBeanFactory();

@@ -1,7 +1,5 @@
 package eu.arrowhead.core.serviceregistry.quartz.task;
 
-import javax.print.attribute.standard.DateTimeAtCompleted;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SimpleTrigger;
@@ -10,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
@@ -32,7 +29,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	@Value (CommonConstants.$SERVICE_REGISTRY_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
-	private final int schedulerDelay = 15;
+	private static final int SCHEDULER_DELAY = 15;
 	
 	private static final String NAME_OF_TRIGGER = "Services_End_OF_Validity_Check_Task_Trigger";
 	private static final String NAME_OF_TASK = "Services_End_OF_Validity_Check_Task_Detail";	
@@ -46,8 +43,8 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	        schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(servicesEndOfValidityCheckTaskDetail().getObject());
 	        schedulerFactory.setTriggers(servicesEndOfValidityCheckTaskTrigger().getObject());
-	        schedulerFactory.setStartupDelay(schedulerDelay);
-	        logger.info("Services end of validity task adjusted with ttl interval: " + ttlInterval + " minutes");
+	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+	        logger.info("Services end of validity task adjusted with ttl interval: {} minutes", ttlInterval);
 		} else {
 			logger.info("Services end of validity task is not adjusted");
 		}

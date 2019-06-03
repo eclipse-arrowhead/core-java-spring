@@ -26,7 +26,7 @@ import eu.arrowhead.common.Defaults;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
 public class ServiceRegistry {
 	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt");
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)

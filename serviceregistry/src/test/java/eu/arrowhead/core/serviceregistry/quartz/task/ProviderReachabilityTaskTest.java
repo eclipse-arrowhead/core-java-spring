@@ -53,7 +53,7 @@ public class ProviderReachabilityTaskTest {
 	@Test
 	public void testCheckProvidersReachabilityConnectionFailure() {
 		final List<ServiceRegistry> removedEntries = providersReachabilityTask.checkProvidersReachability();
-		assertEquals(removedEntries.size(), 1);
+		assertEquals(1, removedEntries.size());
 	}
 	
 }

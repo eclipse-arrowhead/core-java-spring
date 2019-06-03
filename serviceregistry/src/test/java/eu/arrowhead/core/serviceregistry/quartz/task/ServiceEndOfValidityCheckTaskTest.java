@@ -66,9 +66,9 @@ public class ServiceEndOfValidityCheckTaskTest {
 	@Test
 	public void testCheckServicesEndOfValidity() {
 		final List<ServiceRegistry> removedEntries = serviceEndOfValidityCheckTask.checkServicesEndOfValidity();
-		assertEquals(removedEntries.size(), 1);
+		assertEquals(1, removedEntries.size());
 		final long id = removedEntries.get(0).getId();
-		assertEquals(id, 1);
+		assertEquals(1, id);
 	}
 
 }
