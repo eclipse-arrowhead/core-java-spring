@@ -23,5 +23,10 @@
     "name": "ttl_interval",
     "type": "java.lang.Long",
     "description": "A description for 'ttl_interval'"
+  },
+  {
+    "name": "disable.hostname.verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'disable.hostname.verifier'"
   }
 ]}

@@ -2,8 +2,10 @@ package eu.arrowhead.common.log4j2;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -21,14 +23,14 @@ public class JDBCConnectionFactoryForLog4J2 {
 	static {
 		try {
 			init();
-		} catch (final Exception e) {
+		} catch (final IOException ex) {
 			// this class' purpose to configure logging so in case of exceptions we can't use logging
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			System.out.println(ex.getMessage()); //NOSONAR no logging at this point
+			ex.printStackTrace(); //NOSONAR no logging at this point
 		}
 	}
 	
-	public static Connection getConnection() throws Exception {
+	public static Connection getConnection() throws SQLException {
 		if (dataSource == null) {
 			final HikariConfig config = new HikariConfig();
 			config.setJdbcUrl(props.getProperty(CommonConstants.DATABASE_URL));
@@ -42,7 +44,7 @@ public class JDBCConnectionFactoryForLog4J2 {
 		return dataSource.getConnection();
 	}
 	
-	private static void init() throws Exception {
+	private static void init() throws IOException {
 		InputStream propStream = null;
 		File propertiesFile = new File(CommonConstants.APPLICATION_PROPERTIES);
 		if (!propertiesFile.exists()) {
@@ -55,5 +57,9 @@ public class JDBCConnectionFactoryForLog4J2 {
 		temp.load(propStream);
 
 		props = temp;
+	}
+	
+	private JDBCConnectionFactoryForLog4J2() {
+		throw new UnsupportedOperationException();
 	}
 }

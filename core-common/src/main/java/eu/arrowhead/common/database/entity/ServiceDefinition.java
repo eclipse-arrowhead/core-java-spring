@@ -31,7 +31,7 @@ public class ServiceDefinition {
 	private long id;
 	
 	@Column (nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
-	private String serviceDefinition;
+	private String serviceDefinition; //NOSONAR
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
