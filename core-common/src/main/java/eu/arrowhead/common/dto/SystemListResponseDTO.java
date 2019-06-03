@@ -31,26 +31,25 @@ public class SystemListResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	public List<SystemResponseDTO> getSystemResponeDTOList() {
+	public List<SystemResponseDTO> getData() {
 		return data;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public long getTotalNumberOfSystems() {
+	public long getCount() {
 		return count;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public void setSystemResponeDTOList(final List<SystemResponseDTO> systemResponeDTOList) {
-		this.data = systemResponeDTOList;
+	public void setData(List<SystemResponseDTO> data) {
+		this.data = data;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public void setTotalNumberOfSystems(final long totalNumberOfSystems) {
-		this.count = totalNumberOfSystems;
+	public void setCount(long count) {
+		this.count = count;
 	}
-
 }
