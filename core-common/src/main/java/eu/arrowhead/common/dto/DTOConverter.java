@@ -24,6 +24,13 @@ public class DTOConverter {
 		return new ServiceResponseDTO(service.getId(), service.getServiceDefinition(), String.valueOf(service.getCreatedAt()), String.valueOf(service.getUpdatedAt()));
 	}
 	
+	public ServiceDefinition convertServiceRequestDTOToServiceDefinition(ServiceRequestDTO serviceRequestDTO) {
+		Assert.notNull(serviceRequestDTO, "Service is null");
+		Assert.notNull(serviceRequestDTO.getServiceDefinition(), "Service definition is null");
+		
+		return new ServiceDefinition(serviceRequestDTO.getServiceDefinition());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
