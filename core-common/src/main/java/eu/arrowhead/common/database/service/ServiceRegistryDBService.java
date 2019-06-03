@@ -1,9 +1,11 @@
 package eu.arrowhead.common.database.service;
 
+import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -18,6 +20,9 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
 
 @Service
 public class ServiceRegistryDBService {
@@ -80,7 +85,7 @@ public class ServiceRegistryDBService {
 		}else {
 			try {
 				validatedDirection = Direction.fromString(direction);
-			}catch (IllegalArgumentException e) {
+			}catch (final IllegalArgumentException e) {
 				throw new IllegalArgumentException("Direction field with reference '" + direction + "' is not available");
 			}
 			
@@ -116,6 +121,29 @@ public class ServiceRegistryDBService {
 		}
 		return serviceRegistryRepository.findAll(PageRequest.of(page, size, direction, sortField));
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	@Transactional (rollbackFor = Exception.class)
+	public System createSystem(final SystemRequestDTO systemRequestDTO) {
+		
+		final Integer port = systemRequestDTO.getPort();
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
+			throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
+		}
+			
+		final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
+		
+		try {
+			return systemRepository.saveAndFlush(system);
+		} catch ( final Exception e) {
+		  throw new BadPayloadException("Could not crate System, with given parameters", e);
+		}
+		
+			
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceRegistryEntryById(final long id) {

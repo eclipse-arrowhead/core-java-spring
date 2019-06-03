@@ -18,7 +18,7 @@ public class DTOConverter {
 	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
 		
-		return new SystemResponseDTO(system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
+		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -44,12 +44,12 @@ public class DTOConverter {
 		Assert.notNull(systemRequestDTO.getSystemName(), "SystemName is null");
 		
 		final String validatedAuthenticationInfo = systemRequestDTO.getAuthenticationInfo();
-		if ( validatedAuthenticationInfo != null && "".equalsIgnoreCase(validatedAuthenticationInfo)) {
+		if ( validatedAuthenticationInfo != null && !"".equalsIgnoreCase(validatedAuthenticationInfo)) {
 			
 			return new System(systemRequestDTO.getSystemName(), systemRequestDTO.getAddress(), systemRequestDTO.getPort(), validatedAuthenticationInfo);
 		}
 		else {
-			System system = new System();
+			final System system = new System();
 			system.setAddress(systemRequestDTO.getAddress());
 			system.setPort(systemRequestDTO.getPort());
 			system.setSystemName(systemRequestDTO.getSystemName());
@@ -75,7 +75,7 @@ public class DTOConverter {
 		
 		final List<SystemResponseDTO> systemResponseDTOs = new ArrayList<>();
 		
-		for (System system : systemList) {
+		for (final System system : systemList) {
 			systemResponseDTOs.add(convertSystemToSystemResponseDTO(system));
 		}
 		

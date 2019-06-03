@@ -13,7 +13,7 @@ public class SystemRequestDTO implements Serializable {
 	private Long userId; // only used in update requests
 	private String systemName;
 	private String address;
-	private int port;
+	private Integer port;
 	private String authenticationInfo;
 	
 	//=================================================================================================
@@ -24,15 +24,15 @@ public class SystemRequestDTO implements Serializable {
 	public Long getUserId() { return userId;}
 	public String getSystemName() { return systemName; }
 	public String getAddress() { return address; }
-	public int getPort() { return port;	}
+	public Integer getPort() { return port;	}
 	public String getAuthenticationInfo() {	return authenticationInfo; }
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	public void setUserId(Long userId) { this.userId = userId; }
-	public void setSystemName(String systemName) { this.systemName = systemName; }
-	public void setAddress(String address) { this.address = address; }
-	public void setPort(int port) { this.port = port; }
-	public void setAuthenticationInfo(String authenticationInfo) { this.authenticationInfo = authenticationInfo;	}
+	public void setUserId(final Long userId) { this.userId = userId; }
+	public void setSystemName(final String systemName) { this.systemName = systemName; }
+	public void setAddress(final String address) { this.address = address; }
+	public void setPort(final Integer port) { this.port = port; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo;	}
 	
 }
