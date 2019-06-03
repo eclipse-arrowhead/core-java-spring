@@ -62,7 +62,7 @@ public class Cloud {
 	
 	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<InterCloudAuthorization>();
+	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<>();
 	
 	public Cloud() {
 		

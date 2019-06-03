@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -24,6 +25,8 @@ import eu.arrowhead.common.Defaults;
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
 public class ServiceRegistry {
+	
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -60,7 +63,7 @@ public class ServiceRegistry {
 	
 	@OneToMany (mappedBy = "serviceRegistryEntry", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ServiceRegistryInterfaceConnection> interfaceConnections = new HashSet<ServiceRegistryInterfaceConnection>();
+	private Set<ServiceRegistryInterfaceConnection> interfaceConnections = new HashSet<>();
 
 	public ServiceRegistry() {
 		

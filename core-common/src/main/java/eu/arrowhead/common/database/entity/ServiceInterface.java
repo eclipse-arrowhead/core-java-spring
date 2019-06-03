@@ -35,7 +35,7 @@ public class ServiceInterface {
 	
 	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ServiceRegistryInterfaceConnection> serviceConnections = new HashSet<ServiceRegistryInterfaceConnection>();
+	private Set<ServiceRegistryInterfaceConnection> serviceConnections = new HashSet<>();
 	
 	public ServiceInterface() {
 	

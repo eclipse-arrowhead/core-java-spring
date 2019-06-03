@@ -39,7 +39,7 @@ public class InterCloudAuthorization {
 	
 	}
 
-	public InterCloudAuthorization(Cloud cloud, ServiceDefinition serviceDefinition) {
+	public InterCloudAuthorization(final Cloud cloud, final ServiceDefinition serviceDefinition) {
 		this.cloud = cloud;
 		this.serviceDefinition = serviceDefinition;
 	}
@@ -48,7 +48,7 @@ public class InterCloudAuthorization {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -56,7 +56,7 @@ public class InterCloudAuthorization {
 		return cloud;
 	}
 
-	public void setCloud(Cloud cloud) {
+	public void setCloud(final Cloud cloud) {
 		this.cloud = cloud;
 	}
 
@@ -64,7 +64,7 @@ public class InterCloudAuthorization {
 		return serviceDefinition;
 	}
 
-	public void setServiceDefinition(ServiceDefinition serviceDefinition) {
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) {
 		this.serviceDefinition = serviceDefinition;
 	}
 
@@ -72,7 +72,7 @@ public class InterCloudAuthorization {
 		return createdAt;
 	}
 
-	public void setCreatedAt(ZonedDateTime createdAt) {
+	public void setCreatedAt(final ZonedDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -80,7 +80,7 @@ public class InterCloudAuthorization {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(ZonedDateTime updatedAt) {
+	public void setUpdatedAt(final ZonedDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 

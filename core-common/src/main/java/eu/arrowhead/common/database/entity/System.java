@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -24,11 +23,9 @@ import eu.arrowhead.common.Defaults;
 
 @Entity
 @Table (name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
-@NamedEntityGraphs ({ 
-	@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
-			attributeNodes = {
-					@NamedAttributeNode (value = "serviceRegistryEntries")
-			})
+@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
+	attributeNodes = {
+		@NamedAttributeNode (value = "serviceRegistryEntries")
 	})
 public class System {
 	
@@ -56,15 +53,15 @@ public class System {
 	
 	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<ServiceRegistry>();
+	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<>();
 	
 	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> authorizationsAsConsumer = new HashSet<IntraCloudAuthorization>();
+	private Set<IntraCloudAuthorization> authorizationsAsConsumer = new HashSet<>();
 	
 	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<IntraCloudAuthorization>();
+	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<>();
 	
 	public System() {
 		
