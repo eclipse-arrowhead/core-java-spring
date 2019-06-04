@@ -172,7 +172,7 @@ public class ServiceRegistryDBService {
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
 		final ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 		if (find != null) {
-			throw new BadPayloadException(serviceDefinition + "definition already exists");
+			throw new BadPayloadException(serviceDefinition + " definition already exists");
 		}
 	}
 }
