@@ -20,11 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
+import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -43,6 +46,7 @@ public class ServiceRegistryController {
 	// members
 	
 	private static final String ECHO_URI = "/echo";
+	
 	private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
 	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String GET_SYSTEM_BY_ID_HTTP_417_MESSAGE = "Not a valid System id";
@@ -58,6 +62,10 @@ public class ServiceRegistryController {
 	private static final String PUT_SYSTEM_HTTP_200_MESSAGE = "System updated";
 	private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
 	private static final String PUT_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
+	
+	private static final String SERVICES_URI = CommonConstants.MGMT_URI + "/services";
+	private static final String POST_SERVICES_HTTP_201_MESSAGE = "Service definition created";
+	private static final String POST_SERVICES_HTTP_400_MESSAGE = "Could not create service definition";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -109,7 +117,6 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-
 	@ApiOperation(value = "Return systems by request parameters", response = SystemResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEMS_HTTP_200_MESSAGE),
@@ -157,7 +164,6 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-
 	@ApiOperation(value = "Return created system ", response = SystemResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
@@ -182,37 +188,52 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-
-		@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
-		@ApiResponses (value = {
-				@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-		})	
-		@PutMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
-		@ResponseBody public SystemResponseDTO updateSystem(@RequestBody final SystemRequestDTO request) {
-			checkSystemPutRequest(request);
-			
-			try {
-				final System system = serviceRegistryDBService.createSystem(request);
-				return DTOConverter.convertSystemToSystemResponseDTO(system);
-			} catch (final Exception e) {
-				throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
-			}
-			
-				
-			
+	@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})	
+	@PutMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
+	@ResponseBody public SystemResponseDTO updateSystem(@RequestBody final SystemRequestDTO request) {
+		checkSystemPutRequest(request);
+		
+		try {
+			final System system = serviceRegistryDBService.createSystem(request);
+			return DTOConverter.convertSystemToSystemResponseDTO(system);
+		} catch (final Exception e) {
+			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 		}
-
+		
+			
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return created service definition", response = ServiceDefinitionResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SERVICES_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path =SERVICES_URI, consumes = "application/json", produces = "application/json")
+	@ResponseBody public ServiceDefinitionResponseDTO addServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
+		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		if (serviceDefinition.isBlank()) {
+			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		}
+		return serviceRegistryDBService.createServiceDefinition(serviceDefinition);
+	}
 
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
 		
-	private void checkSystemPutRequest(SystemRequestDTO request) {
+	private void checkSystemPutRequest(final SystemRequestDTO request) {
 		
 		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
 			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
