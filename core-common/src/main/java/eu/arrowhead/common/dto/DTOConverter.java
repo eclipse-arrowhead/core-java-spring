@@ -18,17 +18,10 @@ public class DTOConverter {
 		return new SystemResponseDTO(system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
 	}
 	
-	public static ServiceResponseDTO convertServiceToServiceResponseDTO (final ServiceDefinition service) {
+	public static ServiceDefinitionResponseDTO convertServiceToServiceResponseDTO (final ServiceDefinition service) {
 		Assert.notNull(service, "Service is null");
 		
-		return new ServiceResponseDTO(service.getId(), service.getServiceDefinition(), String.valueOf(service.getCreatedAt()), String.valueOf(service.getUpdatedAt()));
-	}
-	
-	public ServiceDefinition convertServiceRequestDTOToServiceDefinition(ServiceRequestDTO serviceRequestDTO) {
-		Assert.notNull(serviceRequestDTO, "Service is null");
-		Assert.notNull(serviceRequestDTO.getServiceDefinition(), "Service definition is null");
-		
-		return new ServiceDefinition(serviceRequestDTO.getServiceDefinition());
+		return new ServiceDefinitionResponseDTO(service.getId(), service.getServiceDefinition(), String.valueOf(service.getCreatedAt()), String.valueOf(service.getUpdatedAt()));
 	}
 	
 	//=================================================================================================

@@ -2,7 +2,7 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
-public class ServiceResponseDTO implements Serializable {
+public class ServiceDefinitionResponseDTO implements Serializable {
 
 	private static final long serialVersionUID = -1087135064729428440L;
 	
@@ -19,10 +19,10 @@ public class ServiceResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceResponseDTO() {}
+	public ServiceDefinitionResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceResponseDTO(final Long id, final String serviceDefinition, final String createdAt, final String updatedAt) {
+	public ServiceDefinitionResponseDTO(final Long id, final String serviceDefinition, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.serviceDefinition = serviceDefinition;
 		this.createdAt = createdAt;

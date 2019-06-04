@@ -2,23 +2,23 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
-public class ServiceRequestDTO implements Serializable {
+public class ServiceDefinitionRequestDTO implements Serializable {
 
 	private static final long serialVersionUID = -1966787184376371095L;
 	
 	//=================================================================================================
 	// members
-		
+	
 	private String serviceDefinition;
 			
 	//=================================================================================================
 	// methods
 		
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRequestDTO() {}
+	public ServiceDefinitionRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRequestDTO(final String serviceDefinition) {
+	public ServiceDefinitionRequestDTO(final String serviceDefinition) {
 		this.serviceDefinition = serviceDefinition;
 	}
 

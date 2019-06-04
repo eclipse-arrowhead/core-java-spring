@@ -8,14 +8,19 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
+import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -31,11 +36,14 @@ public class ServiceRegistryController {
 	// members
 	
 	private static final String ECHO_URI = "/echo";
+	
 	private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
 	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String GET_SYSTEM_BY_ID_HTTP_417_MESSAGE = "Not a valid System id";
 	private static final String SYSTEM_BY_ID_PATH_VARIABLE = "id";
 	private static final String SYSTEM_BY_ID_URI = "/mgmt/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
+	
+	private static final String SERVICES_URI = "/mgmt/services";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -85,4 +93,10 @@ public class ServiceRegistryController {
 		}
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+//	@PutMapping(path =SERVICES_URI, consumes = "application/json", produces = "application/json")
+//	@ResponseBody public ServiceDefinitionResponseDTO addService(@RequestBody ServiceDefinitionRequestDTO requestDTO) {
+//				
+//	}
 }
