@@ -168,7 +168,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
-	public void removeServiceDefinitionById(long id) {
+	public void removeServiceDefinitionById(final long id) {
 		serviceDefinitionRepository.deleteById(id);
 		serviceDefinitionRepository.flush();
 	}

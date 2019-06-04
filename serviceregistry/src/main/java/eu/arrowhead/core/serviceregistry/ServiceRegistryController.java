@@ -285,10 +285,12 @@ public class ServiceRegistryController {
 	})
 	@DeleteMapping(path =SERVICES_BY_ID_URI)
 	public ResponseEntity<HttpStatus> removeServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+		logger.debug("New Service Definition delete request recieved with id: {}", id);
 		if (id < 1) {
 			throw new BadPayloadException("Service Definition id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		serviceRegistryDBService.removeServiceDefinitionById(id);
+		logger.debug("Service definition with id: '{}' succesfully deleted", id);
 		return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
 	}
 		
