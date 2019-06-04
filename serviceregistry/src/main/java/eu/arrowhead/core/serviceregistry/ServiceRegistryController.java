@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -170,12 +171,57 @@ public class ServiceRegistryController {
 			
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+
+		@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
+		@ApiResponses (value = {
+				@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SYSTEM_HTTP_400_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = POST_SYSTEM_HTTP_417_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+		})	
+		@PutMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
+		@ResponseBody public SystemResponseDTO updateSystem(@RequestBody final SystemRequestDTO request) {
+			checkSystemPutRequest(request);
+			
+			try {
+				final System system = serviceRegistryDBService.createSystem(request);
+				return DTOConverter.convertSystemToSystemResponseDTO(system);
+			} catch (final Exception e) {
+				throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
+			}
+			
+				
+			
+		}
+
 
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
 		
+	private void checkSystemPutRequest(SystemRequestDTO request) {
+		
+		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
+			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		}
+		if (request.getPort() == null ) {
+			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		}
+		if (request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
+			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		}
+		if (request.getSystemId() == null) {
+			throw new BadPayloadException("System id is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		}
+			
+		}
+
+	//-------------------------------------------------------------------------------------------------
+	
 	private void checkSystemRequest(final SystemRequestDTO request) {
 		
 		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
