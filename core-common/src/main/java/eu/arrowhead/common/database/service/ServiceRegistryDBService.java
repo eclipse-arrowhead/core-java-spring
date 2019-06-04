@@ -158,8 +158,8 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public SystemResponseDTO updateSystemResponse(long validatedSystemId, String validatedSystemName, String validatedAddress,
-			int validatedPort, String validatedAuthenticationInfo) {
+	public SystemResponseDTO updateSystemResponse(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
+			final int validatedPort, final String validatedAuthenticationInfo) {
 		
 		try {			
 			
@@ -176,15 +176,15 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Transactional (rollbackFor = Exception.class)
-	public System updateSystem(long validatedSystemId, String validatedSystemName, String validatedAddress,
-			int validatedPort, String validatedAuthenticationInfo) {
+	public System updateSystem(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
+			final int validatedPort, final String validatedAuthenticationInfo) {
 		
-		Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
+		final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
 		if (!systemOptional.isPresent()) {
 			throw new DataNotFoundException("No system with id : "+ validatedSystemId);
 		}
 		
-		System system = systemOptional.get();
+		final System system = systemOptional.get();
 		
 		if (checkIfUniqValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
 			checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
@@ -201,8 +201,8 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	private boolean checkIfUniqValidationNeeded(System system, String validatedSystemName, String validatedAddress,
-			int validatedPort) {
+	private boolean checkIfUniqValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
+			final int validatedPort) {
 		
 		boolean isUniqnessCheckNeeded = false;
 		
@@ -225,17 +225,17 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkConstraintsOfServiceDefinitionTable(String serviceDefinition) {
-		ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
+		final ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 		if (find != null) {
 			throw new BadPayloadException(serviceDefinition + "definition already exists");
 		}
 	}
 	
-	private void checkConstraintsOfSystemTable(String validatedSystemName, String validatedAddress,
-			int validatedPort) {
+	private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress,
+			final int validatedPort) {
 		
-		System find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
+		final System find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
 		if (find != null) {
 			throw new BadPayloadException("Service by name:"+validatedSystemName+
 					", address:" + validatedAddress +
