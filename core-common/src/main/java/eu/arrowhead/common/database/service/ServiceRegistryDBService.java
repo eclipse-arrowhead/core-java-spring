@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
@@ -104,48 +106,66 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-		@Transactional (rollbackFor = Exception.class)
-		public System createSystem(final SystemRequestDTO systemRequestDTO) {
+	@Transactional (rollbackFor = Exception.class)
+	public System createSystem(final SystemRequestDTO systemRequestDTO) {
+		
+		final Integer port = systemRequestDTO.getPort();
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
+			throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
+		}
 			
-			final Integer port = systemRequestDTO.getPort();
-			if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
-				throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
-			}
-				
-			final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
-			
-			try {
-				return systemRepository.saveAndFlush(system);
-			} catch ( final Exception e) {
-			  throw new BadPayloadException("Could not crate System, with given parameters", e);
-			}
-			
-				
+		final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
+		
+		try {
+			return systemRepository.saveAndFlush(system);
+		} catch ( final Exception e) {
+		  throw new BadPayloadException("Could not crate System, with given parameters", e);
 		}
 		
+			
+	}
+		
+	//-------------------------------------------------------------------------------------------------
+	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
+		final int page_ = page < 0 ? 0 : page;
+		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
+		final Direction direction_ = direction == null ? Direction.ASC : direction;
+		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField_)) {
+			throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
+		}
+		return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
+	}
 	
 	//-------------------------------------------------------------------------------------------------
-		public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
-			final int page_ = page < 0 ? 0 : page;
-			final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
-			final Direction direction_ = direction == null ? Direction.ASC : direction;
-			final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
-			if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField_)) {
-				throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
-			}
-			return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
-		}
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinition createServiceDefinition (String serviceDefinition) {
+		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
+		ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
+		return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public void removeServiceRegistryEntryById(final long id) {
+		serviceRegistryRepository.deleteById(id);
+	}
 		
-		//-------------------------------------------------------------------------------------------------
-		@Transactional (rollbackFor = Exception.class)
-		public void removeServiceRegistryEntryById(final long id) {
-			serviceRegistryRepository.deleteById(id);
-		}
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public void removeBulkOfServiceRegistryEntries(Iterable<ServiceRegistry> entities) {
+		serviceRegistryRepository.deleteInBatch(entities);
+		serviceRegistryRepository.flush();
+	}
+	
+	//=================================================================================================
+	// assistant methods
 		
-		//-------------------------------------------------------------------------------------------------
-		@Transactional (rollbackFor = Exception.class)
-		public void removeBulkOfServiceRegistryEntries(Iterable<ServiceRegistry> entities) {
-			serviceRegistryRepository.deleteInBatch(entities);
-			serviceRegistryRepository.flush();
+	//-------------------------------------------------------------------------------------------------
+	private void checkConstraintsOfServiceDefinitionTable(String serviceDefinition) {
+		ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+		if (find != null) {
+			throw new BadPayloadException(serviceDefinition + "definition already exists");
 		}
+	}
 }
