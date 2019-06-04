@@ -102,95 +102,50 @@ public class ServiceRegistryDBService {
 		return systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 	}
 	
-    //-------------------------------------------------------------------------------------------------
-	
-	public Page<ServiceRegistry> getAllServiceReqistryEntries(int page, int size, Direction direction, final String sortField) {
-		if (page < 0) {
-			page = 0;
-		}
-		if (size < 0) {
-			size = Integer.MAX_VALUE;
-		}
-		if (direction == null) {
-			direction = Direction.ASC;
-		}
-		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField)) {
-			throw new IllegalArgumentException("Sortable field with reference '" + sortField + "' is not available");
-		}
-		return serviceRegistryRepository.findAll(PageRequest.of(page, size, direction, sortField));
-	}
-	
 	//-------------------------------------------------------------------------------------------------
 	
-	@Transactional (rollbackFor = Exception.class)
-	public System createSystem(final SystemRequestDTO systemRequestDTO) {
-		
-		final Integer port = systemRequestDTO.getPort();
-		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
-			throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
-		}
+		@Transactional (rollbackFor = Exception.class)
+		public System createSystem(final SystemRequestDTO systemRequestDTO) {
 			
-		final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
-		
-		try {
-			return systemRepository.saveAndFlush(system);
-		} catch ( final Exception e) {
-		  throw new BadPayloadException("Could not crate System, with given parameters", e);
-		}
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	
-	
-	public System getSystemById(final long systemId) {
-		final Optional<System> systemOption = systemRepository.findById(systemId);
-		
-		final Integer port = systemRequestDTO.getPort();
-		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
-			throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
-		}
+			final Integer port = systemRequestDTO.getPort();
+			if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
+				throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
+			}
+				
+			final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
 			
-		final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
-		
-		try {
-			return systemRepository.saveAndFlush(system);
-		} catch ( final Exception e) {
-		  throw new BadPayloadException("Could not crate System, with given parameters", e);
-		}
-		
+			try {
+				return systemRepository.saveAndFlush(system);
+			} catch ( final Exception e) {
+			  throw new BadPayloadException("Could not crate System, with given parameters", e);
+			}
 			
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	
-	@Transactional (rollbackFor = Exception.class)
-	public void removeServiceRegistryEntryById(final long id) {
-		serviceRegistryRepository.deleteById(id);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
-		final int page_ = page < 0 ? 0 : page;
-		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
-		final Direction direction_ = direction == null ? Direction.ASC : direction;
-		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
-		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField_)) {
-			throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
+				
 		}
-		return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
-	}
+		
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = Exception.class)
-	public void removeServiceRegistryEntryById(final long id) {
-		serviceRegistryRepository.deleteById(id);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = Exception.class)
-	public void removeBulkOfServiceRegistryEntries(Iterable<ServiceRegistry> entities) {
-		serviceRegistryRepository.deleteInBatch(entities);
-		serviceRegistryRepository.flush();
-	}
+		public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
+			final int page_ = page < 0 ? 0 : page;
+			final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
+			final Direction direction_ = direction == null ? Direction.ASC : direction;
+			final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+			if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField_)) {
+				throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
+			}
+			return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		@Transactional (rollbackFor = Exception.class)
+		public void removeServiceRegistryEntryById(final long id) {
+			serviceRegistryRepository.deleteById(id);
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		@Transactional (rollbackFor = Exception.class)
+		public void removeBulkOfServiceRegistryEntries(Iterable<ServiceRegistry> entities) {
+			serviceRegistryRepository.deleteInBatch(entities);
+			serviceRegistryRepository.flush();
+		}
 }
