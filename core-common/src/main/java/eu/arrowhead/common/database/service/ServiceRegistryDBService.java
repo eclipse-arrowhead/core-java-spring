@@ -21,6 +21,7 @@ import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectio
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 
@@ -139,10 +140,16 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
-	public ServiceDefinition createServiceDefinition (String serviceDefinition) {
+	public ServiceDefinition insertServiceDefinition (final String serviceDefinition) {
 		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
-		ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
+		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
 		return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceDefinitionResponseDTO createServiceDefinition (final String serviceDefinition) {
+		final ServiceDefinition serviceDefinitionEntry = insertServiceDefinition(serviceDefinition);
+		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -153,7 +160,7 @@ public class ServiceRegistryDBService {
 		
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
-	public void removeBulkOfServiceRegistryEntries(Iterable<ServiceRegistry> entities) {
+	public void removeBulkOfServiceRegistryEntries(final Iterable<ServiceRegistry> entities) {
 		serviceRegistryRepository.deleteInBatch(entities);
 		serviceRegistryRepository.flush();
 	}
@@ -162,8 +169,8 @@ public class ServiceRegistryDBService {
 	// assistant methods
 		
 	//-------------------------------------------------------------------------------------------------
-	private void checkConstraintsOfServiceDefinitionTable(String serviceDefinition) {
-		ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
+		final ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 		if (find != null) {
 			throw new BadPayloadException(serviceDefinition + "definition already exists");
 		}
