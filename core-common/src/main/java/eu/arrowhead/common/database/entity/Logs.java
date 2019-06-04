@@ -15,7 +15,7 @@ public class Logs {
 	@Column (length = Defaults.VARCHAR_LOG)
 	private String logId;
 	
-	@Column (nullable = true, columnDefinition = "TIMESTAMP DEFAULT NULL")
+	@Column (nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime entryDate;
 	
 	@Column (nullable = true, length = Defaults.VARCHAR_LOG)
