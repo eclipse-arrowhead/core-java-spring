@@ -147,7 +147,7 @@ public class ServiceRegistryDBService {
 		
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
-	public ServiceDefinition updateServiceDefinition(final long id, final String serviceDefinition) {
+	public ServiceDefinition updateServiceDefinitionById(final long id, final String serviceDefinition) {
 		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
 		ServiceDefinition serviceDefinitionEntry;
 		if (find.isPresent()) {
@@ -161,9 +161,16 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
-	public ServiceDefinitionResponseDTO updateServiceDefinitionResponse(final long id, final String serviceDefinition) {
-		final ServiceDefinition serviceDefinitionEntry = updateServiceDefinition(id, serviceDefinition);
+	public ServiceDefinitionResponseDTO updateServiceDefinitionByIdResponse(final long id, final String serviceDefinition) {
+		final ServiceDefinition serviceDefinitionEntry = updateServiceDefinitionById(id, serviceDefinition);
 		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public void removeServiceDefinitionById(long id) {
+		serviceDefinitionRepository.deleteById(id);
+		serviceDefinitionRepository.flush();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -182,6 +189,7 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceRegistryEntryById(final long id) {
 		serviceRegistryRepository.deleteById(id);
+		serviceRegistryRepository.flush();
 	}
 		
 	//-------------------------------------------------------------------------------------------------

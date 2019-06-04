@@ -6,6 +6,8 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,6 +68,7 @@ public class ServiceRegistryController {
 	private static final String PUT_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
 	private static final String PATCH_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
 	private static final String PATCH_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
+	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -220,7 +223,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path =SERVICES_URI, consumes = "application/json", produces = "application/json")
-	@ResponseBody public ServiceDefinitionResponseDTO registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
+	@ResponseBody public ResponseEntity<ServiceDefinitionResponseDTO> registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
 		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
 		if (serviceDefinition.isBlank()) {
@@ -229,7 +232,7 @@ public class ServiceRegistryController {
 		serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 		logger.debug("{} service definition succesfully registered.", serviceDefinition);
-		return serviceDefinitionResponse;
+		return new ResponseEntity<>(serviceDefinitionResponse, org.springframework.http.HttpStatus.CREATED);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -252,7 +255,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		serviceDefinition.trim().toLowerCase();
-		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionResponse(id, serviceDefinition);
+		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
 		logger.debug("Service definition with id: '{}' succesfully updated with definition '{}'.", id, serviceDefinition);
 		return serviceDefinitionResponse;
 	}
@@ -271,7 +274,24 @@ public class ServiceRegistryController {
 		//Currently ServiceDefinition has only one updatable field, therefore PUT and PATH do the same
 		return putUpdateServiceDefinition(id, serviceDefinitionRequestDTO);
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove service definition", response = ServiceDefinitionResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path =SERVICES_BY_ID_URI)
+	public ResponseEntity<HttpStatus> removeServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+		if (id < 1) {
+			throw new BadPayloadException("Service Definition id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+		}
+		serviceRegistryDBService.removeServiceDefinitionById(id);
+		return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
+	}
+		
 	//=================================================================================================
 	// assistant methods
 	
