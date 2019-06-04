@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
@@ -170,17 +171,16 @@ public class ServiceRegistryController {
 		checkSystemRequest(request);
 		
 		try {
-			final System system = serviceRegistryDBService.createSystem(request);
-			return DTOConverter.convertSystemToSystemResponseDTO(system);
+			
+			return callCreateSystem(request);
 		} catch (final Exception e) {
 			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 		}
 		
-			
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+
 
 	@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
 	@ApiResponses (value = {
@@ -215,7 +215,7 @@ public class ServiceRegistryController {
 	})	
 	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
 	@ResponseBody public SystemResponseDTO updateSystemByFields(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
-		checkSystemPutRequest(request);
+		checkSystemPatchRequest(request);
 		
 		try {
 			
@@ -230,34 +230,76 @@ public class ServiceRegistryController {
 	//=================================================================================================
 	// assistant methods
 	
+
 	//-------------------------------------------------------------------------------------------------
+	
+	private SystemResponseDTO callCreateSystem(SystemRequestDTO request) {
 		
+		final String validatedSystemName = request.getSystemName().toLowerCase();
+		final String validatedAddress = request.getAddress().toLowerCase();
+		final int  validatedPort = request.getPort();
+		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
+		
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Port must be between "+ 
+					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
+					CommonConstants.SYSTEM_PORT_RANGE_MAX +"", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		
+		return serviceRegistryDBService.createSystemResponse( validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
 	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO request, final Long systemId) {
 		
 		final long validatedSystemId = systemId;
 		
 
-		final String validatedSystemName = request.getSystemName();
-		final String validatedAddress = request.getAddress();
+		final String validatedSystemName = request.getSystemName().toLowerCase();
+		final String validatedAddress = request.getAddress().toLowerCase();
 		final int  validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
 		
 		return serviceRegistryDBService.updateSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	
+	private void checkSystemPatchRequest(SystemRequestDTO request) {
+		boolean needChange = false;
+		
+		if (!Utilities.isEmpty(request.getAddress())) {
+			needChange = true;
+		}
+		
+		if (!Utilities.isEmpty(request.getSystemName())) {
+			needChange = true;
+		}
+		
+		if (request.getPort() != null ) {
+			needChange = true;
+		}
+		
+		if (!needChange) {
+			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+	}
+	//-------------------------------------------------------------------------------------------------
+	
 	private void checkSystemPutRequest(final SystemRequestDTO request) {
 		
 		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
-			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		if (request.getPort() == null ) {
-			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		if (request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
-			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 			
-		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	

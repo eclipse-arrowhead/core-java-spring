@@ -109,14 +109,10 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Transactional (rollbackFor = Exception.class)
-	public System createSystem(final SystemRequestDTO systemRequestDTO) {
-		
-		final Integer port = systemRequestDTO.getPort();
-		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
-			throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
-		}
+	public System createSystem(String validatedSystemName, String validatedAddress, int validatedPort,
+			String validatedAuthenticationInfo) {
 			
-		final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
+		final System system = new System(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
 		
 		try {
 			return systemRepository.saveAndFlush(system);
@@ -124,9 +120,14 @@ public class ServiceRegistryDBService {
 		  throw new BadPayloadException("Could not crate System, with given parameters", e);
 		}
 		
-			
 	}
+	//-------------------------------------------------------------------------------------------------
+	
+	public SystemResponseDTO createSystemResponse(String validatedSystemName, String validatedAddress, int validatedPort,
+			String validatedAuthenticationInfo) {
 		
+		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo));
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	
@@ -225,12 +226,15 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
 		final ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 		if (find != null) {
 			throw new BadPayloadException(serviceDefinition + "definition already exists");
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
 	
 	private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress,
 			final int validatedPort) {
@@ -245,4 +249,5 @@ public class ServiceRegistryDBService {
 		
 		
 	}
+
 }
