@@ -197,11 +197,9 @@ public class ServiceRegistryController {
 				
 				return callUpdateSystem(request, systemId);
 			} catch (final Exception e) {
-				throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
+				throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
 			}
-			
-				
-			
+
 		}
 
 

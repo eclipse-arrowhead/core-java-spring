@@ -190,6 +190,11 @@ public class ServiceRegistryDBService {
 			checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
 		}
 		
+		system.setSystemName(validatedSystemName);
+		system.setAddress(validatedAddress);
+		system.setPort(validatedPort);
+		system.setAuthenticationInfo(validatedAuthenticationInfo);
+		
 		return systemRepository.saveAndFlush(system);
 		
 	}
