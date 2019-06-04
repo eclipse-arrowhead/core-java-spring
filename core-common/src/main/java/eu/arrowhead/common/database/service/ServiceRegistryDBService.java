@@ -123,6 +123,7 @@ public class ServiceRegistryDBService {
 	}
 	//-------------------------------------------------------------------------------------------------
 	
+	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO createSystemResponse(String validatedSystemName, String validatedAddress, int validatedPort,
 			String validatedAuthenticationInfo) {
 		
@@ -158,7 +159,7 @@ public class ServiceRegistryDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	
+	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO updateSystemResponse(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
 			final int validatedPort, final String validatedAuthenticationInfo) {
 		
