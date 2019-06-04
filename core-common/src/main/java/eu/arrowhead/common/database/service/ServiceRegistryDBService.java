@@ -25,6 +25,7 @@ import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
 
 @Service
 public class ServiceRegistryDBService {
@@ -130,6 +131,42 @@ public class ServiceRegistryDBService {
 	}
 		
 	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinition createServiceDefinition (final String serviceDefinition) {
+		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
+		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
+		return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinitionResponseDTO createServiceDefinitionResponse (final String serviceDefinition) {
+		final ServiceDefinition serviceDefinitionEntry = createServiceDefinition(serviceDefinition);
+		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
+	}
+		
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinition updateServiceDefinition(final long id, final String serviceDefinition) {
+		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
+		ServiceDefinition serviceDefinitionEntry;
+		if (find.isPresent()) {
+			serviceDefinitionEntry = find.get();
+			serviceDefinitionEntry.setServiceDefinition(serviceDefinition);
+			return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);
+		} else {
+			throw new DataNotFoundException("Service definition with id of '" + id + "' not exists");
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinitionResponseDTO updateServiceDefinitionResponse(final long id, final String serviceDefinition) {
+		final ServiceDefinition serviceDefinitionEntry = updateServiceDefinition(id, serviceDefinition);
+		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		final int page_ = page < 0 ? 0 : page;
 		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
@@ -139,20 +176,6 @@ public class ServiceRegistryDBService {
 			throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
 		}
 		return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = Exception.class)
-	public ServiceDefinition createServiceDefinition (final String serviceDefinition) {
-		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
-		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
-		return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionResponseDTO createServiceDefinitionResponse (final String serviceDefinition) {
-		final ServiceDefinition serviceDefinitionEntry = createServiceDefinition(serviceDefinition);
-		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -173,9 +196,8 @@ public class ServiceRegistryDBService {
 		
 	//-------------------------------------------------------------------------------------------------
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
-		final ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
-		if (find != null) {
-			logger.debug("{}  definition already exists", serviceDefinition);
+		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+		if (find.isPresent()) {
 			throw new BadPayloadException(serviceDefinition + " definition already exists");
 		}
 	}
