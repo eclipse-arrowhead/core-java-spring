@@ -25,10 +25,14 @@ public abstract class ArrowheadFilter extends GenericFilterBean {
 	
 	protected final Logger log = LogManager.getLogger(ArrowheadFilter.class);
 	protected final ObjectMapper mapper = new ObjectMapper();
-
+	
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		chain.doFilter(request, response);
+	}
+	
+	protected ArrowheadFilter() {
+		log.info("{} is active", this.getClass().getSimpleName());
 	}
 
 	protected void handleException(final ArrowheadException ex, final ServletResponse response) throws IOException {

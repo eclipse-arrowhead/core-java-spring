@@ -33,6 +33,7 @@ public class ApplicationInitListener {
 	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		logger.debug("Initialization in onApplicationEvent()...");
 		
+		logger.info("Server mode: {}", sslProperties.isSslEnabled() ? "SECURED" : "NOT SECURED");
 		if (sslProperties.isSslEnabled()) {
 			checkServerCertificate(event.getApplicationContext());
 		}

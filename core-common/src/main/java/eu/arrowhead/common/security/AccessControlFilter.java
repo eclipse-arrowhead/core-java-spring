@@ -40,10 +40,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 					throw new AuthException("Unauthorized access: " + requestTarget);
 				}
 				
-				if (!isClientAuthorized(clientCN, requestWrapper.getMethod(), requestTarget, requestJSON)) {
-			        log.error("{} is unauthorized to access {}", clientCN, requestTarget);
-			        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
-			    }
+				checkClientAuthorized(clientCN, requestWrapper.getMethod(), requestTarget, requestJSON);
 				
 				log.debug("Using MultiReadRequestWrapper in the filter chain from now...");
 				chain.doFilter(requestWrapper, response);
@@ -54,14 +51,21 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 			chain.doFilter(request, response);
 		}
 	}
-
-	protected boolean isClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON) {
+	
+	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON) {
+	    // All requests from the local cloud are allowed
+	    if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, getServerCloudCN())) {
+	        log.debug("{} is unauthorized to access {}", clientCN, requestTarget);
+	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
+	    }
+	}
+	
+	protected String getServerCloudCN() {
 		final String serverCN = arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
 	    final String[] serverFields = serverCN.split("\\.", 2); // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
 	    Assert.isTrue(serverFields.length >= 2, "Server common name is invalid: " + serverCN);
 	    
-	    // All requests from the local cloud are allowed
-	    return Utilities.isKeyStoreCNArrowheadValid(clientCN, serverFields[1]);
+	    return serverFields[1];
 	}
 
 	@Nullable

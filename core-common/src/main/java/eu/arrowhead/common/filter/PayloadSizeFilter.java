@@ -33,7 +33,7 @@ public class PayloadSizeFilter extends ArrowheadFilter {
 		
 		chain.doFilter(request, response);
 	}
-
+	
 	private boolean checkPayload(final String method, final long contentLength, final String requestTarget, final HttpServletResponse response) throws IOException {
 		final RequestMethod requestMethod = RequestMethod.valueOf(method);
 		
