@@ -32,6 +32,7 @@ public class CommonConstants {
 	public static final int HTTP_PORT = 80;
 	
 	public static final String SERVER_ERROR_URI = "/error";
+	public static final String MGMT_URI = "/mgmt";
 	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
