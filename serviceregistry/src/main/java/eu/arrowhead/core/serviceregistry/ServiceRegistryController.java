@@ -37,6 +37,7 @@ public class ServiceRegistryController {
 	// members
 	
 	private static final String ECHO_URI = "/echo";
+	
 	private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
 	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String GET_SYSTEM_BY_ID_HTTP_417_MESSAGE = "Not a valid System id";
@@ -53,6 +54,8 @@ public class ServiceRegistryController {
 	private static final String PUT_SYSTEM_HTTP_200_MESSAGE = "System updated";
 	private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
 	private static final String PUT_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
+	
+	private static final String SERVICES_URI = "/mgmt/services";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -217,7 +220,7 @@ public class ServiceRegistryController {
 		final int  validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
 		
-		return serviceRegistryDBService.updateSystem(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+		return serviceRegistryDBService.updateSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
 	}
 
 	private void checkSystemPutRequest(final SystemRequestDTO request) {
@@ -254,4 +257,4 @@ public class ServiceRegistryController {
 		
 	}
 	
-}	
+}

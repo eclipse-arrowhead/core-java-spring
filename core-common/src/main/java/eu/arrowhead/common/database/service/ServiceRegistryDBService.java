@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
@@ -153,36 +155,15 @@ public class ServiceRegistryDBService {
 		serviceRegistryRepository.deleteInBatch(entities);
 		serviceRegistryRepository.flush();
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public System updateSystem(final SystemRequestDTO systemRequestDTO, Long systemId) {
-		
-		if (systemRepository.existsById(systemId)) {
-			throw new BadPayloadException("Could not update System, no System with id : "+ systemId);
-		}
-		
-		final Integer port = systemRequestDTO.getPort();
-		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX ) {
-			throw new IllegalArgumentException("Port number  '" + port + "' is out of valid port range");
-		}
-			
-		final System system = DTOConverter.convertSystemRequestDTOToSystem(systemRequestDTO);
-		system.setId(systemId);
-			
-		try {			
-			return systemRepository.saveAndFlush(system);
-		} catch ( final Exception e) {
-		  throw new BadPayloadException("Could not crate System, with given parameters", e);
-		}
-	}
 
-	public SystemResponseDTO updateSystem(long validatedSystemId, String validatedSystemName, String validatedAddress,
+	//-------------------------------------------------------------------------------------------------
+	
+	public SystemResponseDTO updateSystemResponse(long validatedSystemId, String validatedSystemName, String validatedAddress,
 			int validatedPort, String validatedAuthenticationInfo) {
 		
-		
 		try {			
 			
-			return DTOConverter.convertSystemToSystemResponseDTO(updateSystemById(validatedSystemId,
+			return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(validatedSystemId,
 					validatedSystemName,
 					validatedAddress,
 					validatedPort,
@@ -192,8 +173,10 @@ public class ServiceRegistryDBService {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	
 	@Transactional (rollbackFor = Exception.class)
-	public System updateSystemById(long validatedSystemId, String validatedSystemName, String validatedAddress,
+	public System updateSystem(long validatedSystemId, String validatedSystemName, String validatedAddress,
 			int validatedPort, String validatedAuthenticationInfo) {
 		
 		Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
@@ -202,16 +185,19 @@ public class ServiceRegistryDBService {
 		}
 		
 		System system = systemOptional.get();
-		checkIfUniqValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
-		system.setId(validatedSystemId );
 		
+		if (checkIfUniqValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
+			checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
+		}
 		
-		return null;
+		return systemRepository.saveAndFlush(system);
 		
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	
 	private boolean checkIfUniqValidationNeeded(System system, String validatedSystemName, String validatedAddress,
-			int validatedPort, String validatedAuthenticationInfo) {
+			int validatedPort) {
 		
 		boolean isUniqnessCheckNeeded = false;
 		
@@ -230,6 +216,28 @@ public class ServiceRegistryDBService {
 		}
 		
 		return isUniqnessCheckNeeded;	
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkConstraintsOfServiceDefinitionTable(String serviceDefinition) {
+		ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+		if (find != null) {
+			throw new BadPayloadException(serviceDefinition + "definition already exists");
+		}
+	}
+	
+	private void checkConstraintsOfSystemTable(String validatedSystemName, String validatedAddress,
+			int validatedPort) {
+		
+		System find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
+		if (find != null) {
+			throw new BadPayloadException("Service by name:"+validatedSystemName+
+					", address:" + validatedAddress +
+					", port: "+validatedPort + 
+					" already exists");
+		}
+		
 		
 	}
 }

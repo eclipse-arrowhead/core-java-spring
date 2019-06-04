@@ -8,6 +8,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.System;
+
 public class DTOConverter {
 
 	
@@ -59,6 +62,12 @@ public class DTOConverter {
 						
 	}
 		
+	
+	public static ServiceDefinitionResponseDTO convertServiceToServiceResponseDTO (final ServiceDefinition service) {
+		Assert.notNull(service, "Service is null");
+		
+		return new ServiceDefinitionResponseDTO(service.getId(), service.getServiceDefinition(), String.valueOf(service.getCreatedAt()), String.valueOf(service.getUpdatedAt()));
+	}
 	
 	//=================================================================================================
 	// assistant methods
