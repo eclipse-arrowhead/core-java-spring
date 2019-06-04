@@ -45,7 +45,7 @@ public class ServiceRegistryController {
 	private static final String GET_SYSTEMS_HTTP_200_MESSAGE = "Systems returned";
 	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = " Invalid paraameters";
 	private static final String GET_SYSTEMS_HTTP_417_MESSAGE = "Not valid request parameters";
-	private static final String POST_SYSTEM_HTTP_200_MESSAGE = "System created";
+	private static final String POST_SYSTEM_HTTP_201_MESSAGE = "System created";
 	private static final String POST_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
 	private static final String POST_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
 	
@@ -150,7 +150,7 @@ public class ServiceRegistryController {
 
 	@ApiOperation(value = "Return created system ", response = SystemResponseDTO.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = POST_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SYSTEM_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = POST_SYSTEM_HTTP_417_MESSAGE),
