@@ -140,15 +140,15 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
-	public ServiceDefinition insertServiceDefinition (final String serviceDefinition) {
+	public ServiceDefinition createServiceDefinition (final String serviceDefinition) {
 		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
 		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
 		return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionResponseDTO createServiceDefinition (final String serviceDefinition) {
-		final ServiceDefinition serviceDefinitionEntry = insertServiceDefinition(serviceDefinition);
+	public ServiceDefinitionResponseDTO createServiceDefinitionResponse (final String serviceDefinition) {
+		final ServiceDefinition serviceDefinitionEntry = createServiceDefinition(serviceDefinition);
 		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
 	}
 	

@@ -219,7 +219,7 @@ public class ServiceRegistryController {
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		return serviceRegistryDBService.createServiceDefinition(serviceDefinition);
+		return serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 	}
 
 	//=================================================================================================
