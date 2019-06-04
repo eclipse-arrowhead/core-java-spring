@@ -41,8 +41,9 @@ public class ServiceRegistryController {
 	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String GET_SYSTEM_BY_ID_HTTP_417_MESSAGE = "Not a valid System id";
 	private static final String SYSTEM_BY_ID_PATH_VARIABLE = "id";
-	private static final String SYSTEM_BY_ID_URI = "/mgmt/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
-	private static final String SYSTEMS_URI = "/mgmt/systems";
+	private static final String SYSTEM_BY_ID_URI = CommonConstants.MGMT_URI+"/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
+	private static final String SYSTEMS_URI = CommonConstants.MGMT_URI+"/systems";
+	private static final String SYSTEMS_BY_ID_URI = CommonConstants.MGMT_URI+"/systems/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
 	private static final String GET_SYSTEMS_HTTP_200_MESSAGE = "Systems returned";
 	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = " Invalid paraameters";
 	private static final String GET_SYSTEMS_HTTP_417_MESSAGE = "Not valid request parameters";
@@ -185,13 +186,13 @@ public class ServiceRegistryController {
 				@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
 				@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 		})	
-		@PutMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
-		@ResponseBody public SystemResponseDTO updateSystem(@RequestBody final SystemRequestDTO request) {
+		@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
+		@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
 			checkSystemPutRequest(request);
 			
 			try {
-				final System system = serviceRegistryDBService.createSystem(request);
-				return DTOConverter.convertSystemToSystemResponseDTO(system);
+				
+				return callUpdateSystem(request, systemId);
 			} catch (final Exception e) {
 				throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 			}
@@ -206,7 +207,20 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 		
-	private void checkSystemPutRequest(SystemRequestDTO request) {
+	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO request, final Long systemId) {
+		
+		final long validatedSystemId = systemId;
+		
+
+		final String validatedSystemName = request.getSystemName();
+		final String validatedAddress = request.getAddress();
+		final int  validatedPort = request.getPort();
+		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
+		
+		return serviceRegistryDBService.updateSystem(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+	}
+
+	private void checkSystemPutRequest(final SystemRequestDTO request) {
 		
 		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
 			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
