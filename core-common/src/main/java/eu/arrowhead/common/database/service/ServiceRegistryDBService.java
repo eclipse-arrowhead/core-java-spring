@@ -1,6 +1,5 @@
 package eu.arrowhead.common.database.service;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -21,7 +20,6 @@ import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectio
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
