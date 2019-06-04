@@ -49,6 +49,9 @@ public class ServiceRegistryController {
 	private static final String POST_SYSTEM_HTTP_201_MESSAGE = "System created";
 	private static final String POST_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
 	private static final String POST_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
+	private static final String PUT_SYSTEM_HTTP_200_MESSAGE = "System updated";
+	private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
+	private static final String PUT_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -176,10 +179,10 @@ public class ServiceRegistryController {
 
 		@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
 		@ApiResponses (value = {
-				@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SYSTEM_HTTP_400_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
 				@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = POST_SYSTEM_HTTP_417_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
 				@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 		})	
 		@PutMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
