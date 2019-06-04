@@ -29,8 +29,10 @@ public class ProvidersReachabilityTaskConfig {
 	@Value (CommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
 	private int pingInterval;
 	
-	private final String nameOfTrigger = "Providers_Reachability_Task_Trigger";
-	private final String nameOfTask = "Providers_Reachability_Task_Detail";
+	private static final int SCHEDULER_DELAY = 10;
+	
+	private static final String NAME_OF_TRIGGER = "Providers_Reachability_Task_Trigger";
+	private static final String NAME_OF_TASK = "Providers_Reachability_Task_Detail";
 	
 	@Bean
     public SchedulerFactoryBean providersReachabilityTaskScheduler() {
@@ -41,7 +43,8 @@ public class ProvidersReachabilityTaskConfig {
 	        schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(providersReachabilityTaskDetail().getObject());
 	        schedulerFactory.setTriggers(providersReachabilityTaskTrigger().getObject());
-	        logger.info("Providers reachabilitiy task adjusted with ping interval: " + pingInterval + " minutes");
+	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+	        logger.info("Providers reachabilitiy task adjusted with ping interval: {} minutes", pingInterval);
 		} else {
 			logger.info("Providers reachabilitiy task is not adjusted");
 		}
@@ -52,9 +55,9 @@ public class ProvidersReachabilityTaskConfig {
     public SimpleTriggerFactoryBean providersReachabilityTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(providersReachabilityTaskDetail().getObject());
-        trigger.setRepeatInterval(pingInterval * 60000);
+        trigger.setRepeatInterval(pingInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTES);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        trigger.setName(nameOfTrigger);
+        trigger.setName(NAME_OF_TRIGGER);
         return trigger;
     }
 	
@@ -62,7 +65,7 @@ public class ProvidersReachabilityTaskConfig {
     public JobDetailFactoryBean providersReachabilityTaskDetail() {
         final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
         jobDetailFactory.setJobClass(ProvidersReachabilityTask.class);
-        jobDetailFactory.setName(nameOfTask);
+        jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
         return jobDetailFactory;
     }

@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -26,7 +28,7 @@ import eu.arrowhead.common.Defaults;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
 public class ServiceRegistry {
 	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt");
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -78,6 +80,17 @@ public class ServiceRegistry {
 		this.secure = secure;
 		this.metadata = metadata;
 		this.version = version;
+	}
+	
+	@PrePersist
+	public void onCreate() {
+		this.createdAt = ZonedDateTime.now();
+		this.updatedAt = this.createdAt;
+	}
+	
+	@PreUpdate
+	public void onUpdate() {
+		this.updatedAt = ZonedDateTime.now();
 	}
 
 	public long getId() {

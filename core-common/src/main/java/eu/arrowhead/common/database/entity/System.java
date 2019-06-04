@@ -15,6 +15,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -76,6 +77,17 @@ public class System {
 		this.address = address;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
+	}
+	
+	@PrePersist
+	public void onCreate() {
+		this.createdAt = ZonedDateTime.now();
+		this.updatedAt = this.createdAt;
+	}
+	
+	@PreUpdate
+	public void onUpdate() {
+		this.updatedAt = ZonedDateTime.now();
 	}
 
 	public long getId() {
@@ -163,9 +175,4 @@ public class System {
 		return "System [id=" + id + ", systemName=" + systemName + ", address=" + address + ", port=" + port + "]";
 	}
 	
-	@PrePersist
-	private void onCreate() {
-		this.createdAt = ZonedDateTime.now();
-		this.updatedAt = this.createdAt;
-	}
 }

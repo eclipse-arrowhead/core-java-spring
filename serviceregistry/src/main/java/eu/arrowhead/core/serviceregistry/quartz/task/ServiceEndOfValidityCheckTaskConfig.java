@@ -29,8 +29,10 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	@Value (CommonConstants.$SERVICE_REGISTRY_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
-	private final String nameOfTrigger = "Services_End_OF_Validity_Check_Task_Trigger";
-	private final String nameOfTask = "Services_End_OF_Validity_Check_Task_Detail";	
+	private static final int SCHEDULER_DELAY = 15;
+	
+	private static final String NAME_OF_TRIGGER = "Services_End_OF_Validity_Check_Task_Trigger";
+	private static final String NAME_OF_TASK = "Services_End_OF_Validity_Check_Task_Detail";	
 	
 	@Bean
 	public SchedulerFactoryBean servicesEndOfValidityCheckSheduler() {
@@ -41,7 +43,8 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	        schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(servicesEndOfValidityCheckTaskDetail().getObject());
 	        schedulerFactory.setTriggers(servicesEndOfValidityCheckTaskTrigger().getObject());
-	        logger.info("Services end of validity task adjusted with ttl interval: " + ttlInterval + " minutes");
+	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+	        logger.info("Services end of validity task adjusted with ttl interval: {} minutes", ttlInterval);
 		} else {
 			logger.info("Services end of validity task is not adjusted");
 		}
@@ -52,9 +55,9 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
     public SimpleTriggerFactoryBean servicesEndOfValidityCheckTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(servicesEndOfValidityCheckTaskDetail().getObject());
-        trigger.setRepeatInterval(ttlInterval * 60000);
+        trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTES);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        trigger.setName(nameOfTrigger);
+        trigger.setName(NAME_OF_TRIGGER);
         return trigger;
     }
 	
@@ -62,7 +65,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
     public JobDetailFactoryBean servicesEndOfValidityCheckTaskDetail() {
         final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
         jobDetailFactory.setJobClass(ServiceEndOfValidityCheckTask.class);
-        jobDetailFactory.setName(nameOfTask);
+        jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
         return jobDetailFactory;
     }

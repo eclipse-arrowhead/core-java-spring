@@ -3,6 +3,8 @@ package eu.arrowhead.core.serviceregistry.quartz.task;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,8 +28,7 @@ import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 public class ProvidersReachabilityTask implements Job {
 	
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);
-	private final int pageSize = 1000;
-	private int removedServiceRegistryEntries;
+	private static final int PAGE_SIZE = 1000;
 	
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
@@ -37,45 +38,48 @@ public class ProvidersReachabilityTask implements Job {
 	
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		logger.info("STARTED: Providers reachability task");
-		removedServiceRegistryEntries = 0;
-		checkProvidersReachability();
-		logger.info("FINISHED: Providers reachability task. Number of removed service registry entry: " + removedServiceRegistryEntries);
+		logger.debug("STARTED: Providers reachability task");
+		final List<ServiceRegistry> removedServiceRegistries = checkProvidersReachability();
+		logger.debug("FINISHED: Providers reachability task. Number of removed service registry entry: {}", removedServiceRegistries.size());
 	}
 	
-	private void checkProvidersReachability() {
+	public List<ServiceRegistry> checkProvidersReachability() {
+		final List<ServiceRegistry> removedServiceRegistryEntries = new ArrayList<>();
 		int pageIndexCounter = 0;
 		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
-			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
 				logger.debug("Servise Registry database is empty");
 			} else {
 				final int totalPages = pageOfServiceEntries.getTotalPages();
-				pingAndRemoveRegisteredServices(pageOfServiceEntries);
+				removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
-					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, pageSize, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-					pingAndRemoveRegisteredServices(pageOfServiceEntries);
+					pageOfServiceEntries = serviceRegistryDBService.getAllServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+					removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 					pageIndexCounter++;
 				}
 			}
-		} catch (IllegalArgumentException exception) {
+		} catch (final IllegalArgumentException exception) {
 			logger.debug(exception.getMessage());
 		}
+		return removedServiceRegistryEntries;
 	}
 	
-	private void pingAndRemoveRegisteredServices(final Page<ServiceRegistry> pageOfServiceEntries) {
+	private List<ServiceRegistry> pingAndRemoveRegisteredServices(final Page<ServiceRegistry> pageOfServiceEntries) {
+		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
 		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
 			final System provider = serviceRegistryEntry.getSystem();
 			final String address = provider.getAddress();
 			final int port = provider.getPort();
-			if (! pingService(address, port)) {
-				serviceRegistryDBService.removeServiceRegistryEntryById(serviceRegistryEntry.getId());
-				removedServiceRegistryEntries++;
-				logger.debug("REMOVED: " + serviceRegistryEntry);
+			if (! pingService(address, port)) {				
+				toBeRemoved.add(serviceRegistryEntry);
+				logger.debug("REMOVED: {}", serviceRegistryEntry);
 			}
 		}
+		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);
+		return toBeRemoved;
 	}
 	
 	private boolean pingService(final String address, final int port) {
