@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -181,27 +182,50 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 
-		@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
-		@ApiResponses (value = {
-				@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-		})	
-		@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
-		@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
-			checkSystemPutRequest(request);
+	@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})	
+	@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
+	@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
+		checkSystemPutRequest(request);
+		
+		try {
 			
-			try {
-				
-				return callUpdateSystem(request, systemId);
-			} catch (final Exception e) {
-				throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
-			}
-
+			return callUpdateSystem(request, systemId);
+		} catch (final Exception e) {
+			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
 		}
+	
+	}
 
+	//-------------------------------------------------------------------------------------------------
+
+	@ApiOperation(value = "Return system  updated by fields", response = SystemResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})	
+	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
+	@ResponseBody public SystemResponseDTO updateSystemByFields(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
+		checkSystemPutRequest(request);
+		
+		try {
+			
+			return callUpdateSystem(request, systemId);
+		} catch (final Exception e) {
+			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
+		}
+	
+	}
+	
 
 	//=================================================================================================
 	// assistant methods
@@ -231,9 +255,6 @@ public class ServiceRegistryController {
 		}
 		if (request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
 			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
-		}
-		if (request.getSystemId() == null) {
-			throw new BadPayloadException("System id is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
 		}
 			
 		}
