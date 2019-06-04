@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
@@ -157,6 +158,7 @@ public class ServiceRegistryDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	
 	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO updateSystemResponse(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
 			final int validatedPort, final String validatedAuthenticationInfo) {
@@ -202,7 +204,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private boolean checkIfUniqValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
-			final int validatedPort) {
+			final Integer validatedPort) {
 		
 		boolean isUniqnessCheckNeeded = false;
 		
@@ -246,6 +248,59 @@ public class ServiceRegistryDBService {
 					" already exists");
 		}
 		
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+
+	@Transactional (rollbackFor = Exception.class)
+	public SystemResponseDTO updateNonNullableSystemResponse(long validatedSystemId, String validatedSystemName,
+			String validatedAddress, Integer validatedPort, String validatedAuthenticationInfo) {
+			
+		try {			
+			
+			return DTOConverter.convertSystemToSystemResponseDTO(updateNonNullableSystem(validatedSystemId,
+					validatedSystemName,
+					validatedAddress,
+					validatedPort,
+					validatedAuthenticationInfo));
+		} catch ( final Exception e) {
+		  throw new BadPayloadException("Could not crate System, with given parameters", e);
+		}
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	
+	@Transactional (rollbackFor = Exception.class)
+	public System updateNonNullableSystem(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
+			final Integer validatedPort, final String validatedAuthenticationInfo) {
+		
+		final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
+		if (!systemOptional.isPresent()) {
+			throw new DataNotFoundException("No system with id : "+ validatedSystemId);
+		}
+		
+		final System system = systemOptional.get();
+		
+		if (checkIfUniqValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
+			checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
+		}
+		if ( !Utilities.isEmpty(validatedSystemName)) {
+			system.setSystemName(validatedSystemName);
+		}
+		if ( !Utilities.isEmpty(validatedAddress)) {
+			system.setAddress(validatedAddress);
+		}
+		if ( validatedPort != null) {
+			system.setPort(validatedPort);
+		}
+		if ( !Utilities.isEmpty(validatedAuthenticationInfo)) {
+			system.setAuthenticationInfo(validatedAuthenticationInfo);
+		}
+		
+		return systemRepository.saveAndFlush(system);
 		
 	}
 

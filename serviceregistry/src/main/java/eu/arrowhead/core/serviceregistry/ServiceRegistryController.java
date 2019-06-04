@@ -192,7 +192,7 @@ public class ServiceRegistryController {
 	})	
 	@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
 	@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
-		checkSystemPutRequest(request);
+		checkSystemPutRequest(request, systemId);
 		
 		try {
 			
@@ -215,11 +215,11 @@ public class ServiceRegistryController {
 	})	
 	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
 	@ResponseBody public SystemResponseDTO updateSystemByFields(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
-		checkSystemPatchRequest(request);
+		checkSystemPatchRequest(request, systemId);
 		
 		try {
 			
-			return callUpdateSystem(request, systemId);
+			return callNonNullableUpdateSystem(request, systemId);
 		} catch (final Exception e) {
 			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
 		}
@@ -232,7 +232,7 @@ public class ServiceRegistryController {
 	
 
 	//-------------------------------------------------------------------------------------------------
-	
+
 	private SystemResponseDTO callCreateSystem(SystemRequestDTO request) {
 		
 		final String validatedSystemName = request.getSystemName().toLowerCase();
@@ -251,10 +251,9 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO request, final Long systemId) {
+	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO request, final long systemId) {
 		
-		final long validatedSystemId = systemId;
-		
+		final long validatedSystemId = systemId;		
 
 		final String validatedSystemName = request.getSystemName().toLowerCase();
 		final String validatedAddress = request.getAddress().toLowerCase();
@@ -263,10 +262,28 @@ public class ServiceRegistryController {
 		
 		return serviceRegistryDBService.updateSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
+		private SystemResponseDTO callNonNullableUpdateSystem(SystemRequestDTO request, long systemId) {
+			final long validatedSystemId = systemId;		
+
+			final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase():"";
+			final String validatedAddress = request.getSystemName() != null ? request.getAddress().toLowerCase():"";
+			final Integer  validatedPort = request.getPort();
+			final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
+			
+			return serviceRegistryDBService.updateNonNullableSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+		}
 
 	//-------------------------------------------------------------------------------------------------
 	
-	private void checkSystemPatchRequest(SystemRequestDTO request) {
+	private void checkSystemPatchRequest(SystemRequestDTO request, final long systemId) {
+		
+		if ( systemId <= 0) {
+			throw new BadPayloadException("System id must be greater then zero." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		
 		boolean needChange = false;
 		
 		if (!Utilities.isEmpty(request.getAddress())) {
@@ -281,21 +298,28 @@ public class ServiceRegistryController {
 			needChange = true;
 		}
 		
+		if (request.getAuthenticationInfo() != null ) {
+			needChange = true;
+		}
 		if (!needChange) {
 			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 	}
 	//-------------------------------------------------------------------------------------------------
 	
-	private void checkSystemPutRequest(final SystemRequestDTO request) {
+	private void checkSystemPutRequest(final SystemRequestDTO request, final long systemId) {
 		
-		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
+		if ( systemId <= 0) {
+			throw new BadPayloadException("System id must be greater then zero." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		
+		if ( request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
 			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
-		if (request.getPort() == null ) {
+		if ( request.getPort() == null ) {
 			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
-		if (request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
+		if ( request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
 			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 			
