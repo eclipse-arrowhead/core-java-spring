@@ -1,9 +1,10 @@
 package eu.arrowhead.common.database.service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +46,8 @@ public class ServiceRegistryDBService {
 	
 	@Autowired
 	private SystemRepository systemRepository;
+	
+	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
 	//=================================================================================================
 	// methods
@@ -172,6 +175,7 @@ public class ServiceRegistryDBService {
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
 		final ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 		if (find != null) {
+			logger.debug("{}  definition already exists", serviceDefinition);
 			throw new BadPayloadException(serviceDefinition + " definition already exists");
 		}
 	}

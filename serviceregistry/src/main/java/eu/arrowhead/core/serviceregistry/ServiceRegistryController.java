@@ -214,12 +214,16 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path =SERVICES_URI, consumes = "application/json", produces = "application/json")
-	@ResponseBody public ServiceDefinitionResponseDTO addServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
+	@ResponseBody public ServiceDefinitionResponseDTO registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
 		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		logger.debug("New Service Definition registration request recived with definition: {}", serviceDefinition);
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		return serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
+		serviceDefinition.trim();
+		ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
+		logger.debug("{} service definition succesfully registered.", serviceDefinition);
+		return serviceDefinitionResponse;
 	}
 
 	//=================================================================================================
