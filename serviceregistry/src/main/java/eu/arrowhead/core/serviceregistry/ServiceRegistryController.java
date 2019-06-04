@@ -54,8 +54,11 @@ public class ServiceRegistryController {
 	private static final String POST_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
 	private static final String POST_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
 	private static final String PUT_SYSTEM_HTTP_200_MESSAGE = "System updated";
-	private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
+	private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not update system";
 	private static final String PUT_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
+	private static final String PATCH_SYSTEM_HTTP_200_MESSAGE = "System updated";
+	private static final String PATCH_SYSTEM_HTTP_400_MESSAGE = "Could not update system";
+	private static final String PATCH_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
 	
 	private static final String SERVICES_URI = "/mgmt/services";
 	
@@ -207,10 +210,10 @@ public class ServiceRegistryController {
 
 	@ApiOperation(value = "Return system  updated by fields", response = SystemResponseDTO.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = PATCH_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SYSTEM_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PATCH_SYSTEM_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
 	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
@@ -265,16 +268,16 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-		private SystemResponseDTO callNonNullableUpdateSystem(SystemRequestDTO request, long systemId) {
-			final long validatedSystemId = systemId;		
-
-			final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase():"";
-			final String validatedAddress = request.getSystemName() != null ? request.getAddress().toLowerCase():"";
-			final Integer  validatedPort = request.getPort();
-			final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
-			
-			return serviceRegistryDBService.updateNonNullableSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
-		}
+	private SystemResponseDTO callNonNullableUpdateSystem(SystemRequestDTO request, long systemId) {
+		final long validatedSystemId = systemId;		
+	
+		final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase():"";
+		final String validatedAddress = request.getSystemName() != null ? request.getAddress().toLowerCase():"";
+		final Integer  validatedPort = request.getPort();
+		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
+		
+		return serviceRegistryDBService.updateNonNullableSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	
