@@ -13,7 +13,9 @@ import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.ExceptionType;
 
 @RunWith(SpringRunner.class)
 public class UtilitiesTest {
@@ -48,6 +50,29 @@ public class UtilitiesTest {
 		
 		final String result = Utilities.toPrettyJson("[{ \"a\": 1 }]");
 		Assert.assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testFromJSONNullString() {
+		final ErrorMessageDTO result = Utilities.fromJson(null, ErrorMessageDTO.class);
+		Assert.assertNull(result);
+	}
+	
+	@Test
+	public void testFromJSONNullClass() {
+		final Object result = Utilities.fromJson("does not matter", null);
+		Assert.assertNull(result);
+	}
+	
+	@Test(expected = ArrowheadException.class)
+	public void testFromJSONConvertFailed() {
+		Utilities.fromJson("wrong JSON", ErrorMessageDTO.class);
+	}
+	
+	@Test
+	public void testFromJSONConvertSuccess() {
+		ErrorMessageDTO result = Utilities.fromJson("{ \"exceptionType\": \"AUTH\" }", ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.AUTH, result.getExceptionType());
 	}
 
 	@Test

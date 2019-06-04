@@ -76,6 +76,19 @@ public class Utilities {
 		
 	    return jsonString;
 	}
+	
+	@Nullable
+	public static <T> T fromJson(final String json, final Class<T> parsedClass) {
+		if (json == null || parsedClass == null) {
+			return null;
+		}
+		
+	    try {
+	    	return mapper.readValue(json, parsedClass);
+	    } catch (final IOException e) {
+	      throw new ArrowheadException("The specified string cannot be converted to a(n) " + parsedClass.getSimpleName() + " object.", e);
+	    }
+	}
 
 	/**
 	 * 
