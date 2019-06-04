@@ -28,6 +28,7 @@ public class CommonConstants {
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
 	public static final String COMMON_NAME_FIELD_NAME = "CN";
+	public static final String LOCAL_SYSTEM_OPERATOR_NAME = "sysop";
 	
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
@@ -37,6 +38,9 @@ public class CommonConstants {
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
 	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
+	public static final String OP_SERVICEREGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -68,6 +72,9 @@ public class CommonConstants {
 	public static final String HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT = "http.client.connection.manager.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_MANAGER_TIMEOUT + "}";
 	
+	public static final String LOG_ALL_REQUEST_AND_RESPONSE = "log_all_request_and_response";
+	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + Defaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
+	
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
 	public static final String SERVICE_REGISTRY_PORT = "sr_port";
@@ -93,9 +100,6 @@ public class CommonConstants {
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
 	
 	public static final int CONVERSION_MILLISECOND_TO_MINUTES = 60000;
-	
-	public static final String LOG_ALL_REQUEST_AND_RESPONSE = "log_all_request_and_response";
-	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + Defaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
 
 	private CommonConstants() {
 		throw new UnsupportedOperationException();

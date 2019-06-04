@@ -32,7 +32,7 @@ import eu.arrowhead.common.Defaults;
 	})
 public class System {
 	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "systemName", "address", "port");
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "systemName", "address", "port"); //NOSONAR
 	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
