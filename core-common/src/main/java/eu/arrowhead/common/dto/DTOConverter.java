@@ -1,7 +1,5 @@
 package eu.arrowhead.common.dto;
 
-import eu.arrowhead.common.database.entity.System;
-
 import java.util.ArrayList;
 import java.util.List;
 

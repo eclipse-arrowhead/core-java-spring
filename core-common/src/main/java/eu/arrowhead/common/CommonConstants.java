@@ -20,6 +20,11 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
+	public static final String CORE_SYSTEM_ORCHESTRATOR_NAME = "orchestrator";
+	public static final String CORE_SYSTEM_GATEKEEPER_NAME = "gatekeeper";
+	public static final String CORE_SYSTEM_CA_NAME = "certificateauthority"; // for future use
+	public static final String CORE_SYSTEM_CA_NAME_2 = "certificate_authority";  // for future use
+	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
@@ -95,6 +100,8 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
 	public static final String REQUEST_PARAM_DIRECTION_DEFAULT_VALUE = "ASC";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
+	
+	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "systemName";
 	
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;

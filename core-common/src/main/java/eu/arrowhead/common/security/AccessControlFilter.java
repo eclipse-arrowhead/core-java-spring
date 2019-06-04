@@ -34,14 +34,14 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 				final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
 				final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
 				final String requestJSON = requestWrapper.getCachedBody();
-//				final Map<String,String[]> queryParams = requestWrapper.getParameterMap();
+				final Map<String,String[]> queryParams = requestWrapper.getParameterMap();
 				final String clientCN = getCertificateCNFromRequest(requestWrapper);
 				if (clientCN == null) {
 					log.error("Unauthorized access: {}", requestTarget);
 					throw new AuthException("Unauthorized access: " + requestTarget);
 				}
 				
-				checkClientAuthorized(clientCN, requestWrapper.getMethod(), requestTarget, requestJSON);
+				checkClientAuthorized(clientCN, requestWrapper.getMethod(), requestTarget, requestJSON, queryParams);
 				
 				log.debug("Using MultiReadRequestWrapper in the filter chain from now...");
 				chain.doFilter(requestWrapper, response);
@@ -53,7 +53,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 		}
 	}
 	
-	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON) {
+	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		if (!Utilities.isKeyStoreCNArrowheadValid(clientCN)) {
 			log.debug("{} is not a valid common name, access denied!", clientCN);
 	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);

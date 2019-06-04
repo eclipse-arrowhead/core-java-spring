@@ -23,7 +23,6 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
