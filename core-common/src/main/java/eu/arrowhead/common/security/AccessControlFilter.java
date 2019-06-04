@@ -34,6 +34,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 				final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
 				final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
 				final String requestJSON = requestWrapper.getCachedBody();
+//				final Map<String,String[]> queryParams = requestWrapper.getParameterMap();
 				final String clientCN = getCertificateCNFromRequest(requestWrapper);
 				if (clientCN == null) {
 					log.error("Unauthorized access: {}", requestTarget);
