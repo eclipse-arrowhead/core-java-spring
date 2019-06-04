@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 
 public class SystemResponseDTO implements Serializable {
 
@@ -26,15 +27,23 @@ public class SystemResponseDTO implements Serializable {
 	public SystemResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo) {
+	public SystemResponseDTO(final long systemId,
+			final String systemName,
+			final String address,
+			final int port,
+			final String authenticationInfo,
+			final String createdAt,
+			final String upDatedAt) {
 		
 		this.sytemId = systemId;
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
 		this.authenticationInfo = authenticationInfo;
+		this.createdAt = createdAt;
+		this.updatedAt = upDatedAt;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public long getSytemId() { return sytemId;	}
 	public String getSystemName() { return systemName; }
