@@ -52,6 +52,9 @@ public class ServiceRegistryDBService {
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
+	private final static String COULD_NOT_CREATE_SYSTEM_ERROR_MESSAGE = "Could not crate System, with given parameters";
+	private static final String COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE = "Could not update System, with given parameters";
+	
 	//=================================================================================================
 	// methods
 	
@@ -122,7 +125,7 @@ public class ServiceRegistryDBService {
 		try {
 			return systemRepository.saveAndFlush(system);
 		} catch ( final Exception e) {
-		  throw new BadPayloadException("Could not crate System, with given parameters", e);
+		  throw new BadPayloadException(COULD_NOT_CREATE_SYSTEM_ERROR_MESSAGE, e);
 		}
 		
 	}
@@ -222,7 +225,7 @@ public class ServiceRegistryDBService {
 					validatedPort,
 					validatedAuthenticationInfo));
 		} catch ( final Exception e) {
-		  throw new BadPayloadException("Could not crate System, with given parameters", e);
+		  throw new BadPayloadException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, e);
 		}
 	}
 
@@ -254,6 +257,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
+	@Transactional (rollbackFor = Exception.class)
 	public void removeSystemById(long id) {
 		
 		systemRepository.deleteById(id);
@@ -275,11 +279,15 @@ public class ServiceRegistryDBService {
 		final String actualAddress = system.getAddress();
 		final int  actualPort = system.getPort();
 		
-		if ( actualSystemName != validatedSystemName) {
-			isUniqnessCheckNeeded = true;
+		if ( actualSystemName != null && validatedSystemName != null) {
+			if ( !actualSystemName.equalsIgnoreCase(validatedSystemName)) {
+				isUniqnessCheckNeeded = true;
+			}
 		}
-		if ( actualAddress != validatedAddress) {
-			isUniqnessCheckNeeded = true;
+		if ( actualAddress != null &&  validatedAddress != null) {
+			if ( !actualAddress.equalsIgnoreCase(validatedAddress)) {
+				isUniqnessCheckNeeded = true;
+			}
 		}
 		if ( actualPort != validatedPort) {
 			isUniqnessCheckNeeded = true;
@@ -329,7 +337,7 @@ public class ServiceRegistryDBService {
 					validatedPort,
 					validatedAuthenticationInfo));
 		} catch ( final Exception e) {
-		  throw new BadPayloadException("Could not crate System, with given parameters", e);
+		  throw new BadPayloadException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, e);
 		}
 	}
 	
