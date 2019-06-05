@@ -66,7 +66,7 @@ public class DTOConverter {
 						
 	}
 		
-	
+	//-------------------------------------------------------------------------------------------------
 	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
 		Assert.notNull(serviceDefinition, "ServiceDefinition is null");
 		Assert.notNull(serviceDefinition.getServiceDefinition(), "ServiceDefinition is null");
@@ -74,13 +74,7 @@ public class DTOConverter {
 		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), String.valueOf(serviceDefinition.getCreatedAt()), String.valueOf(serviceDefinition.getUpdatedAt()));
 	}
 	
-	public static ServiceDefinition convertServiceDefinitionRequestDTOToServiceDefinition(final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		Assert.notNull(serviceDefinitionRequestDTO, "ServiceDefinitionRequestDTO is null");
-		Assert.notNull(serviceDefinitionRequestDTO.getServiceDefinition(), "ServiceDefinition is null");
-		
-		return new ServiceDefinition(serviceDefinitionRequestDTO.getServiceDefinition());
-	}
-	
+	//-------------------------------------------------------------------------------------------------
 	public static ServiceDefinitionsListResponseDTO convertServiceDefinitionsListToServiceDefinitionListResponseDTO(final List<ServiceDefinition> serviceDefinitions) {
 		Assert.notNull(serviceDefinitions, "List of ServiceDefinition is null");
 		
