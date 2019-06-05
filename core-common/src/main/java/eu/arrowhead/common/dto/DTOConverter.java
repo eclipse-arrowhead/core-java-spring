@@ -69,10 +69,18 @@ public class DTOConverter {
 	}
 		
 	
-	public static ServiceDefinitionResponseDTO convertServiceToServiceResponseDTO (final ServiceDefinition service) {
-		Assert.notNull(service, "Service is null");
+	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
+		Assert.notNull(serviceDefinition, "ServiceDefinition is null");
+		Assert.notNull(serviceDefinition.getServiceDefinition(), "ServiceDefinition is null");
 		
-		return new ServiceDefinitionResponseDTO(service.getId(), service.getServiceDefinition(), String.valueOf(service.getCreatedAt()), String.valueOf(service.getUpdatedAt()));
+		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), String.valueOf(serviceDefinition.getCreatedAt()), String.valueOf(serviceDefinition.getUpdatedAt()));
+	}
+	
+	public static ServiceDefinition convertServiceDefinitionRequestDTOToServiceDefinition(final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
+		Assert.notNull(serviceDefinitionRequestDTO, "ServiceDefinitionRequestDTO is null");
+		Assert.notNull(serviceDefinitionRequestDTO.getServiceDefinition(), "ServiceDefinition is null");
+		
+		return new ServiceDefinition(serviceDefinitionRequestDTO.getServiceDefinition());
 	}
 	
 	//=================================================================================================

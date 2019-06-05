@@ -3,6 +3,8 @@ package eu.arrowhead.common.database.service;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +24,8 @@ import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -45,6 +49,8 @@ public class ServiceRegistryDBService {
 	
 	@Autowired
 	private SystemRepository systemRepository;
+	
+	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
 	//=================================================================================================
 	// methods
@@ -131,6 +137,50 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinition createServiceDefinition (final String serviceDefinition) {
+		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
+		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
+		return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinitionResponseDTO createServiceDefinitionResponse (final String serviceDefinition) {
+		final ServiceDefinition serviceDefinitionEntry = createServiceDefinition(serviceDefinition);
+		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
+	}
+		
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinition updateServiceDefinitionById(final long id, final String serviceDefinition) {
+		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
+		ServiceDefinition serviceDefinitionEntry;
+		if (find.isPresent()) {
+			serviceDefinitionEntry = find.get();
+			serviceDefinitionEntry.setServiceDefinition(serviceDefinition);
+			return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);
+		} else {
+			throw new DataNotFoundException("Service definition with id of '" + id + "' not exists");
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public ServiceDefinitionResponseDTO updateServiceDefinitionByIdResponse(final long id, final String serviceDefinition) {
+		final ServiceDefinition serviceDefinitionEntry = updateServiceDefinitionById(id, serviceDefinition);
+		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = Exception.class)
+	public void removeServiceDefinitionById(final long id) {
+		serviceDefinitionRepository.deleteById(id);
+		serviceDefinitionRepository.flush();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		final int page_ = page < 0 ? 0 : page;
 		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
@@ -147,6 +197,7 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceRegistryEntryById(final long id) {
 		serviceRegistryRepository.deleteById(id);
+		serviceRegistryRepository.flush();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -229,7 +280,8 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
-		final ServiceDefinition find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+		
+		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 		if (find != null) {
 			throw new BadPayloadException(serviceDefinition + "definition already exists");
 		}
