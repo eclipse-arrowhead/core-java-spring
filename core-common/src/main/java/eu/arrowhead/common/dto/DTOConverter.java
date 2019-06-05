@@ -1,7 +1,5 @@
 package eu.arrowhead.common.dto;
 
-import eu.arrowhead.common.database.entity.System;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +19,13 @@ public class DTOConverter {
 	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
 		
-		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
+		return new SystemResponseDTO(system.getId(),
+				system.getSystemName(),
+				system.getAddress(),
+				system.getPort(),
+				system.getAuthenticationInfo(),
+				String.valueOf(system.getCreatedAt()),
+				String.valueOf(system.getUpdatedAt()));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

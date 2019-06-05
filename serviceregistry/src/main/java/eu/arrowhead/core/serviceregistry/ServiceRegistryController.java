@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
@@ -47,8 +48,9 @@ public class ServiceRegistryController {
 	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String GET_SYSTEM_BY_ID_HTTP_417_MESSAGE = "Not a valid System id";
 	private static final String SYSTEM_BY_ID_PATH_VARIABLE = "id";
-	private static final String SYSTEM_BY_ID_URI = "/mgmt/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
-	private static final String SYSTEMS_URI = "/mgmt/systems";
+	private static final String SYSTEM_BY_ID_URI = CommonConstants.MGMT_URI+"/system/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
+	private static final String SYSTEMS_URI = CommonConstants.MGMT_URI+"/systems";
+	private static final String SYSTEMS_BY_ID_URI = CommonConstants.MGMT_URI+"/systems/{" + SYSTEM_BY_ID_PATH_VARIABLE + "}";
 	private static final String GET_SYSTEMS_HTTP_200_MESSAGE = "Systems returned";
 	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = " Invalid paraameters";
 	private static final String GET_SYSTEMS_HTTP_417_MESSAGE = "Not valid request parameters";
@@ -56,8 +58,13 @@ public class ServiceRegistryController {
 	private static final String POST_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
 	private static final String POST_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
 	private static final String PUT_SYSTEM_HTTP_200_MESSAGE = "System updated";
-	private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
+	private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not update system";
 	private static final String PUT_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
+	private static final String PATCH_SYSTEM_HTTP_200_MESSAGE = "System updated";
+	private static final String PATCH_SYSTEM_HTTP_400_MESSAGE = "Could not update system";
+	private static final String PATCH_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
+	private static final String DELETE_SYSTEM_HTTP_200_MESSAGE = "System deleted";
+	private static final String DELETE_SYSTEM_HTTP_400_MESSAGE = "Could not delete system";
 	
 	private static final String SERVICES_URI = CommonConstants.MGMT_URI + "/services";
 	private static final String SERVICES_BY_ID_PATH_VARIABLE = "id";
@@ -76,6 +83,10 @@ public class ServiceRegistryController {
 	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
 	private static final String DELETE_SERVICES_HTTP_400_MESSAGE = "Could not remove service definition";
 	private static final String DELETE_SERVICES_HTTP_404_MESSAGE = "Service definition with given parameters not exists";
+	
+	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
+	private static final String ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE ="System id must be greater then 0. ";
+
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -106,12 +117,12 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = GET_SYSTEM_BY_ID_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(SYSTEM_BY_ID_URI)
+	@GetMapping(SYSTEMS_BY_ID_URI)
 	@ResponseBody public SystemResponseDTO getSystemById(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId) {		
 		logger.debug("getSystemById started ...");
 		
 		if (systemId < 1) {
-			throw new BadPayloadException("System id must be greater then 0. ", HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 		
 		try {			
@@ -155,7 +166,7 @@ public class ServiceRegistryController {
 		} else {
 			if ( page == null || size==null ) {
 				
-				throw new BadPayloadException(" Invalid paraameters", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+				throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
 			
 			} else {
 				validatedPage = page;
@@ -168,7 +179,7 @@ public class ServiceRegistryController {
 			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, direction, sortField));	
 		
 		} catch ( final IllegalArgumentException e) {
-			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 		}
 		
 	}
@@ -187,17 +198,16 @@ public class ServiceRegistryController {
 		checkSystemRequest(request);
 		
 		try {
-			final System system = serviceRegistryDBService.createSystem(request);
-			return DTOConverter.convertSystemToSystemResponseDTO(system);
-		} catch (final Exception e) {
-			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
-		}
-		
 			
+			return callCreateSystem(request);
+		} catch (final Exception e) {
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
+		}
 		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+
 	@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
@@ -206,22 +216,63 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
-	@PutMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
-	@ResponseBody public SystemResponseDTO updateSystem(@RequestBody final SystemRequestDTO request) {
-		checkSystemPutRequest(request);
+	@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
+	@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
+		checkSystemPutRequest(request, systemId);
 		
 		try {
-			final System system = serviceRegistryDBService.createSystem(request);
-			return DTOConverter.convertSystemToSystemResponseDTO(system);
-		} catch (final Exception e) {
-			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
-		}
-		
 			
+			return callUpdateSystem(request, systemId);
+		} catch (final Exception e) {
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
+		}
+	
+	}
+
+	//-------------------------------------------------------------------------------------------------
+
+	@ApiOperation(value = "Return system  updated by fields", response = SystemResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = PATCH_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PATCH_SYSTEM_HTTP_417_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})	
+	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
+	@ResponseBody public SystemResponseDTO updateSystemByFields(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
+		checkSystemPatchRequest(request, systemId);
 		
+		try {
+			
+			return callNonNullableUpdateSystem(request, systemId);
+		} catch (final Exception e) {
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
+		}
+	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove system")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path =SYSTEMS_BY_ID_URI)
+	public ResponseEntity<HttpStatus> removeSystem(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+		logger.debug("New System delete request recieved with id: {}", id);
+		if (id < 1) {
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		serviceRegistryDBService.removeSystemById(id);
+		logger.debug("System with id: '{}' succesfully deleted", id);
+		return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
 	@ApiOperation(value = "Return requested service definition", response = ServiceDefinitionResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICES_HTTP_200_MESSAGE),
@@ -327,24 +378,100 @@ public class ServiceRegistryController {
 	//=================================================================================================
 	// assistant methods
 	
+
 	//-------------------------------------------------------------------------------------------------
+
+	private SystemResponseDTO callCreateSystem(SystemRequestDTO request) {
 		
-	private void checkSystemPutRequest(final SystemRequestDTO request) {
+		final String validatedSystemName = request.getSystemName().toLowerCase();
+		final String validatedAddress = request.getAddress().toLowerCase();
+		final int  validatedPort = request.getPort();
+		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
 		
-		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
-			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Port must be between "+ 
+					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
+					CommonConstants.SYSTEM_PORT_RANGE_MAX +"", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
-		if (request.getPort() == null ) {
-			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		
+		return serviceRegistryDBService.createSystemResponse( validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO request, final long systemId) {
+		
+		final long validatedSystemId = systemId;		
+
+		final String validatedSystemName = request.getSystemName().toLowerCase();
+		final String validatedAddress = request.getAddress().toLowerCase();
+		final int  validatedPort = request.getPort();
+		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
+		
+		return serviceRegistryDBService.updateSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	private SystemResponseDTO callNonNullableUpdateSystem(SystemRequestDTO request, long systemId) {
+		final long validatedSystemId = systemId;		
+	
+		final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase():"";
+		final String validatedAddress = request.getSystemName() != null ? request.getAddress().toLowerCase():"";
+		final Integer  validatedPort = request.getPort();
+		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
+		
+		return serviceRegistryDBService.updateNonNullableSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	
+	private void checkSystemPatchRequest(SystemRequestDTO request, final long systemId) {
+		
+		if ( systemId <= 0) {
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
-		if (request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
-			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		
+		boolean needChange = false;
+		
+		if (!Utilities.isEmpty(request.getAddress())) {
+			needChange = true;
 		}
-		if (request.getSystemId() == null) {
-			throw new BadPayloadException("System id is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		
+		if (!Utilities.isEmpty(request.getSystemName())) {
+			needChange = true;
+		}
+		
+		if (request.getPort() != null ) {
+			needChange = true;
+		}
+		
+		if (request.getAuthenticationInfo() != null ) {
+			needChange = true;
+		}
+		if (!needChange) {
+			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+	}
+	//-------------------------------------------------------------------------------------------------
+	
+	private void checkSystemPutRequest(final SystemRequestDTO request, final long systemId) {
+		
+		if ( systemId <= 0) {
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		
+		if ( request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
+			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		if ( request.getPort() == null ) {
+			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		if ( request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
+			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 			
-		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	
@@ -360,5 +487,6 @@ public class ServiceRegistryController {
 			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
 		}
 	}
+
 	 
 }	
