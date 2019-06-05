@@ -22,7 +22,7 @@ import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
 import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
 
 /**
- * IMPORTANT: These tests may have failed if the certificates are changed in the src/main/resources folder. 
+ * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
  *
  */
 @RunWith(SpringRunner.class)

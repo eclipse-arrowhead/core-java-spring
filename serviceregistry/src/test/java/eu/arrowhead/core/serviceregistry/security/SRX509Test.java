@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * IMPORTANT: These tests may have failed if the certificates are changed in the src/main/resources folder. 
+ * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
  *
  */
 @RunWith(SpringRunner.class)
