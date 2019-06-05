@@ -62,6 +62,8 @@ public class ServiceRegistryController {
 	private static final String SERVICES_URI = CommonConstants.MGMT_URI + "/services";
 	private static final String SERVICES_BY_ID_PATH_VARIABLE = "id";
 	private static final String SERVICES_BY_ID_URI = SERVICES_URI + "/{" + SERVICES_BY_ID_PATH_VARIABLE + "}";
+	private static final String GET_SERVICES_HTTP_200_MESSAGE = "Services returned";
+	private static final String GET_SERVICES_HTTP_400_MESSAGE = "Could not retrive service definition";
 	private static final String POST_SERVICES_HTTP_201_MESSAGE = "Service definition created";
 	private static final String POST_SERVICES_HTTP_400_MESSAGE = "Could not create service definition";
 	private static final String PUT_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
@@ -212,6 +214,25 @@ public class ServiceRegistryController {
 		
 			
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested service definition", response = ServiceDefinitionResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path =SERVICES_BY_ID_URI, produces = "application/json")
+	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+		logger.debug("New Service Definition get request recieved with id: {}", id);
+		if (id < 1) {
+			throw new BadPayloadException("Service Definition id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+		}
+		ServiceDefinitionResponseDTO serviceDefinitionEntry = serviceRegistryDBService.getServiceDefinitionByIdResponse(id);
+		logger.debug("Service definition with id: '{}' succesfully retrived", id);
+		return serviceDefinitionEntry;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

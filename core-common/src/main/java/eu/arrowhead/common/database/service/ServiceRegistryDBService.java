@@ -129,7 +129,23 @@ public class ServiceRegistryDBService {
 		
 			
 	}
-		
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceDefinition getServiceDefinitionById(final long id) {
+		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
+		if (find.isPresent()) {
+			return find.get();
+		} else {
+			throw new DataNotFoundException("Service definition with id of '" + id + "' not exists");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceDefinitionResponseDTO getServiceDefinitionByIdResponse(final long id) {
+		final ServiceDefinition serviceDefinitionEntry = getServiceDefinitionById(id);
+		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public ServiceDefinition createServiceDefinition (final String serviceDefinition) {
