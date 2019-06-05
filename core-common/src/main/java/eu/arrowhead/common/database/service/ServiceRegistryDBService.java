@@ -23,9 +23,8 @@ import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectio
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -61,6 +60,9 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	public System getSystemById(final long systemId) {
+		
+		logger.debug(" getSystemById started ...");
+		
 		final Optional<System> systemOption = systemRepository.findById(systemId);
 		
 		if (!systemOption.isPresent()){
@@ -73,6 +75,9 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	public Page<System> getSystemEntries(final int page, final int size, final String direction, final String sortField) {
+		
+		logger.debug(" getSystemEntries started ...");
+		
 		final int validatedPage;
 		final int validatedSize;
 		final Direction validatedDirection;
@@ -119,7 +124,9 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public System createSystem(final String validatedSystemName, final String validatedAddress, final int validatedPort,
 			final String validatedAuthenticationInfo) {
-			
+		
+		logger.debug(" createSystem started ...");
+		
 		final System system = new System(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
 		
 		try {
@@ -134,6 +141,8 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO createSystemResponse(final String validatedSystemName, final String validatedAddress, final int validatedPort,
 			final String validatedAuthenticationInfo) {
+		
+		logger.debug(" createSystemResponse started ...");
 		
 		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo));
 	}
@@ -235,6 +244,8 @@ public class ServiceRegistryDBService {
 	public System updateSystem(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
 			final int validatedPort, final String validatedAuthenticationInfo) {
 		
+		logger.debug(" updateSystem started ...");
+		
 		final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
 		if (!systemOptional.isPresent()) {
 			throw new DataNotFoundException("No system with id : "+ validatedSystemId);
@@ -260,8 +271,67 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public void removeSystemById(final long id) {
 		
+		logger.debug(" removeSystemById started ...");
+		
 		systemRepository.deleteById(id);
 		systemRepository.flush();
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	@Transactional (rollbackFor = Exception.class)
+	public SystemResponseDTO updateNonNullableSystemResponse(final long validatedSystemId, final String validatedSystemName,
+			final String validatedAddress, final Integer validatedPort, final String validatedAuthenticationInfo) {
+		
+		logger.debug(" updateNonNullableSystemResponse started ...");
+		
+		try {			
+			
+			return DTOConverter.convertSystemToSystemResponseDTO(updateNonNullableSystem(validatedSystemId,
+					validatedSystemName,
+					validatedAddress,
+					validatedPort,
+					validatedAuthenticationInfo));
+		} catch ( final Exception e) {
+			throw new BadPayloadException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, e);
+		}
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	
+	@Transactional (rollbackFor = Exception.class)
+	public System updateNonNullableSystem(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
+			final Integer validatedPort, final String validatedAuthenticationInfo) {
+		
+		logger.debug(" updateNonNullableSystem started ...");
+		
+		final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
+		if (!systemOptional.isPresent()) {
+			throw new DataNotFoundException("No system with id : "+ validatedSystemId);
+		}
+		
+		final System system = systemOptional.get();
+		
+		if (checkIfUniqValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
+			checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
+		}
+		if ( !Utilities.isEmpty(validatedSystemName)) {
+			system.setSystemName(validatedSystemName);
+		}
+		if ( !Utilities.isEmpty(validatedAddress)) {
+			system.setAddress(validatedAddress);
+		}
+		if ( validatedPort != null) {
+			system.setPort(validatedPort);
+		}
+		if ( !Utilities.isEmpty(validatedAuthenticationInfo)) {
+			system.setAuthenticationInfo(validatedAuthenticationInfo);
+		}
+		
+		return systemRepository.saveAndFlush(system);
 		
 	}
 
@@ -272,6 +342,8 @@ public class ServiceRegistryDBService {
 	
 	private boolean checkIfUniqValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
 			final Integer validatedPort) {
+		
+		logger.debug(" removeSystemById started ...");
 		
 		boolean isUniqnessCheckNeeded = false;
 		
@@ -312,6 +384,8 @@ public class ServiceRegistryDBService {
 	private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress,
 			final int validatedPort) {
 		
+		logger.debug(" checkConstraintsOfSystemTable started ...");
+		
 		final System find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
 		if (find != null) {
 			throw new BadPayloadException("Service by name:"+validatedSystemName+
@@ -323,58 +397,6 @@ public class ServiceRegistryDBService {
 		
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-
-	@Transactional (rollbackFor = Exception.class)
-	public SystemResponseDTO updateNonNullableSystemResponse(final long validatedSystemId, final String validatedSystemName,
-			final String validatedAddress, final Integer validatedPort, final String validatedAuthenticationInfo) {
-			
-		try {			
-			
-			return DTOConverter.convertSystemToSystemResponseDTO(updateNonNullableSystem(validatedSystemId,
-					validatedSystemName,
-					validatedAddress,
-					validatedPort,
-					validatedAuthenticationInfo));
-		} catch ( final Exception e) {
-		  throw new BadPayloadException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, e);
-		}
-	}
-	
-	
-	//-------------------------------------------------------------------------------------------------
-	
-	
-	@Transactional (rollbackFor = Exception.class)
-	public System updateNonNullableSystem(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
-			final Integer validatedPort, final String validatedAuthenticationInfo) {
-		
-		final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
-		if (!systemOptional.isPresent()) {
-			throw new DataNotFoundException("No system with id : "+ validatedSystemId);
-		}
-		
-		final System system = systemOptional.get();
-		
-		if (checkIfUniqValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
-			checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
-		}
-		if ( !Utilities.isEmpty(validatedSystemName)) {
-			system.setSystemName(validatedSystemName);
-		}
-		if ( !Utilities.isEmpty(validatedAddress)) {
-			system.setAddress(validatedAddress);
-		}
-		if ( validatedPort != null) {
-			system.setPort(validatedPort);
-		}
-		if ( !Utilities.isEmpty(validatedAuthenticationInfo)) {
-			system.setAuthenticationInfo(validatedAuthenticationInfo);
-		}
-		
-		return systemRepository.saveAndFlush(system);
-		
-	}
 
 
 
