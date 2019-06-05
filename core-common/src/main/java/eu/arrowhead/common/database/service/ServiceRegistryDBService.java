@@ -420,7 +420,7 @@ public class ServiceRegistryDBService {
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
 		
 		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
-		if (find != null) {
+		if (find.isPresent()) {
 			throw new BadPayloadException(serviceDefinition + "definition already exists");
 		}
 	}
