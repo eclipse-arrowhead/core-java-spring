@@ -386,10 +386,13 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	
 	private SystemResponseDTO callNonNullableUpdateSystem(SystemRequestDTO request, long systemId) {
+		
+		logger.debug(" callNonNullableUpdateSystem started ...");
+		
 		final long validatedSystemId = systemId;		
 	
 		final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase():"";
-		final String validatedAddress = request.getSystemName() != null ? request.getAddress().toLowerCase():"";
+		final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase():"";
 		final Integer  validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
 		
@@ -399,6 +402,8 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	
 	private void checkSystemPatchRequest(SystemRequestDTO request, final long systemId) {
+		
+		logger.debug(" checkSystemPatchRequest started ...");
 		
 		if ( systemId <= 0) {
 			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
