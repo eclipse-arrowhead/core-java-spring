@@ -52,7 +52,7 @@ public class ServiceRegistryDBService {
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
 	private final static String COULD_NOT_CREATE_SYSTEM_ERROR_MESSAGE = "Could not crate System, with given parameters";
-	private static final String COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE = "Could not update System, with given parameters";
+	private final static String COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE = "Could not update System, with given parameters";
 	
 	//=================================================================================================
 	// methods
