@@ -1,11 +1,11 @@
-package eu.arrowhead.common.filter;
+package eu.arrowhead.core.serviceregistry.security;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,26 +13,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
-import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
 
 /**
  * IMPORTANT: These tests may have failed if the certificates are changed in the src/main/resources folder. 
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ServiceRegistryMain.class)
+@SpringBootTest
+@ContextConfiguration
 @AutoConfigureMockMvc
-public class PayloadSizeFilterTest {
-
+public class SRX509Test {
+	
 	@Autowired
 	SRAccessControlFilter sracFilter;
-	
+
 	@Autowired
 	private WebApplicationContext wac;
 	
@@ -45,24 +45,33 @@ public class PayloadSizeFilterTest {
 									  .addFilters(sracFilter)
 									  .build();
 	}
-	
+
 	@Test
-	public void testPayloadFilterGetWithBody() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/echo")
-					.secure(true)
-					.with(x509("certificates/valid.pem"))
-					.content("{ \"abc\": \"def\" }")
-				    .accept(MediaType.TEXT_PLAIN))
-					.andExpect(status().isBadRequest());
+	public void testEcho() throws Exception {
+		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/echo")
+											   .secure(true)
+											   .with(x509("certificates/valid.pem"))
+											   .accept(MediaType.TEXT_PLAIN))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		final String result = response.getResponse().getContentAsString();
+		Assert.assertEquals("Got it!", result);
 	}
 	
 	@Test
-	public void testPayloadFilterPostWithoutBody() throws Exception {
-		this.mockMvc.perform(post("/serviceregistry/mgmt/systems")
+	public void testEchoNoCertificate() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/echo")
 					.secure(true)
-					.with(x509("certificates/valid.pem"))
-					.contentType(MediaType.APPLICATION_JSON)
-				    .accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest());
+					.accept(MediaType.TEXT_PLAIN))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	@Test
+	public void testEchoInvalidCertificate() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/echo")
+					.secure(true)
+					.with(x509("certificates/notvalid.pem"))
+					.accept(MediaType.TEXT_PLAIN))
+					.andExpect(status().isUnauthorized());
 	}
 }

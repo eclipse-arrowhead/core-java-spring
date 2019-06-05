@@ -47,7 +47,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		}
 	}
 	
-	//TODO: test after register is implemented
+	//TODO: test in SRAccessControlFilterTest after register is implemented
 	private void checkProviderAccessToRegister(final String clientCN, final String requestJSON, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		final ServiceRegistryRequestDTO requestBody = Utilities.fromJson(requestJSON, ServiceRegistryRequestDTO.class);
@@ -63,7 +63,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		}
 	}
 
-	//TODO: test after unregister is implemented
+	//TODO: test in SRAccessControlFilterTest after unregister is implemented
 	private void checkProviderAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		
@@ -79,7 +79,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		}
 	}
 	
-	//TODO: test after query is implemented
+	//TODO: test in SRAccessControlFilterTest after query is implemented
 	private void checkIfClientIsAllowed(final String clientCN, final String requestTarget, final String cloudCN) {
 		for (final String coreSystemName : allowedCoreSystemsForQuery) {
 			final String coreSystemCN = coreSystemName + "." + cloudCN;
