@@ -117,8 +117,8 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Transactional (rollbackFor = Exception.class)
-	public System createSystem(String validatedSystemName, String validatedAddress, int validatedPort,
-			String validatedAuthenticationInfo) {
+	public System createSystem(final String validatedSystemName, final String validatedAddress, final int validatedPort,
+			final String validatedAuthenticationInfo) {
 			
 		final System system = new System(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
 		
@@ -132,8 +132,8 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Transactional (rollbackFor = Exception.class)
-	public SystemResponseDTO createSystemResponse(String validatedSystemName, String validatedAddress, int validatedPort,
-			String validatedAuthenticationInfo) {
+	public SystemResponseDTO createSystemResponse(final String validatedSystemName, final String validatedAddress, final int validatedPort,
+			final String validatedAuthenticationInfo) {
 		
 		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo));
 	}
@@ -258,7 +258,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	@Transactional (rollbackFor = Exception.class)
-	public void removeSystemById(long id) {
+	public void removeSystemById(final long id) {
 		
 		systemRepository.deleteById(id);
 		systemRepository.flush();
@@ -326,8 +326,8 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 
 	@Transactional (rollbackFor = Exception.class)
-	public SystemResponseDTO updateNonNullableSystemResponse(long validatedSystemId, String validatedSystemName,
-			String validatedAddress, Integer validatedPort, String validatedAuthenticationInfo) {
+	public SystemResponseDTO updateNonNullableSystemResponse(final long validatedSystemId, final String validatedSystemName,
+			final String validatedAddress, final Integer validatedPort, final String validatedAuthenticationInfo) {
 			
 		try {			
 			
