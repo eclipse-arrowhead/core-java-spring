@@ -180,8 +180,8 @@ public class ServiceRegistryDBService {
 		
 		
 	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionsListResponseDTO getAllServiceDefinitionEntriesResponse(final int page, final int size) {
-		final List<ServiceDefinition> serviceDefinitionEntries = getAllServiceDefinitionEntries(page, size, null, null).getContent();
+	public ServiceDefinitionsListResponseDTO getAllServiceDefinitionEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		final List<ServiceDefinition> serviceDefinitionEntries = getAllServiceDefinitionEntries(page, size, direction, sortField).getContent();
 		return DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
 	}
 	

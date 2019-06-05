@@ -6,6 +6,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
@@ -274,7 +276,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested service definitions", response = ServiceDefinitionsListResponseDTO.class)
+	@ApiOperation(value = "Return requested service definitions by the given parameters", response = ServiceDefinitionsListResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICES_HTTP_400_MESSAGE),
@@ -284,22 +286,39 @@ public class ServiceRegistryController {
 	@GetMapping(path =SERVICES_URI, produces = "application/json")
 	@ResponseBody public ServiceDefinitionsListResponseDTO getBunchOfServiceDefinitions(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
-			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size) {
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CommonConstants.REQUEST_PARAM_DIRECTION_DEFAULT_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New Service Definition get request recieved with page: {} and item_per page: {}", page, size);
 		int validatedPage;
 		int validatedSize;
+		Direction validatedDirection;
+		final String validatedSortField = sortField.trim();
 		if (page == null && size == null) {
 			validatedPage = -1;
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}
 		}
-		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getAllServiceDefinitionEntriesResponse(validatedPage, validatedSize);
+		switch (direction) {
+			case "ASC":
+				validatedDirection = Direction.ASC;
+				break;
+			case "DESC":
+				validatedDirection = Direction.DESC;
+				break;
+			default:
+				throw new BadPayloadException("Invalid sort direction flag", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		}
+		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new BadPayloadException("Sortable field with reference '" + validatedSortField + "' is not available", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		}
+		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getAllServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, validatedSortField);
 		logger.debug("Service definition  with page: {} and item_per page: {} succesfully retrived", page, size);
 		return serviceDefinitionEntries;
 	}
