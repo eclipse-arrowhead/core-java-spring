@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
@@ -187,6 +188,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
 	@PostMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
+	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
 		checkSystemRequest(request);
 		
