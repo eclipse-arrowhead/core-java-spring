@@ -351,16 +351,14 @@ public class ServiceRegistryDBService {
 		final String actualAddress = system.getAddress();
 		final int  actualPort = system.getPort();
 		
-		if ( actualSystemName != null && validatedSystemName != null) {
-			if ( !actualSystemName.equalsIgnoreCase(validatedSystemName)) {
+		if ( actualSystemName != null && validatedSystemName != null && !actualSystemName.equalsIgnoreCase(validatedSystemName)) {
 				isUniqnessCheckNeeded = true;
-			}
 		}
-		if ( actualAddress != null &&  validatedAddress != null) {
-			if ( !actualAddress.equalsIgnoreCase(validatedAddress)) {
-				isUniqnessCheckNeeded = true;
-			}
+		
+		if ( actualAddress != null &&  validatedAddress != null && !actualAddress.equalsIgnoreCase(validatedAddress)) {
+			isUniqnessCheckNeeded = true;
 		}
+		
 		if ( actualPort != validatedPort) {
 			isUniqnessCheckNeeded = true;
 		}
