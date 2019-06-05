@@ -243,23 +243,23 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-		@ApiOperation(value = "Remove system")
-		@ApiResponses (value = {
-				@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_HTTP_400_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-				@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-		})
-		@DeleteMapping(path =SYSTEMS_BY_ID_URI)
-		public ResponseEntity<HttpStatus> removeSystem(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
-			logger.debug("New System delete request recieved with id: {}", id);
-			if (id < 1) {
-				throw new BadPayloadException("System id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
-			}
-			serviceRegistryDBService.removeSystemById(id);
-			logger.debug("System with id: '{}' succesfully deleted", id);
-			return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
+	@ApiOperation(value = "Remove system")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path =SYSTEMS_BY_ID_URI)
+	public ResponseEntity<HttpStatus> removeSystem(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+		logger.debug("New System delete request recieved with id: {}", id);
+		if (id < 1) {
+			throw new BadPayloadException("System id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
+		serviceRegistryDBService.removeSystemById(id);
+		logger.debug("System with id: '{}' succesfully deleted", id);
+		return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	
