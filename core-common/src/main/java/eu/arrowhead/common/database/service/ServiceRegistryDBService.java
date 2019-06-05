@@ -275,7 +275,7 @@ public class ServiceRegistryDBService {
 		logger.debug(" removeSystemById started ...");
 		
 		if (!systemRepository.existsById(id)) {
-			throw new BadPayloadException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
+			throw new DataNotFoundException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
 		}		
 		systemRepository.deleteById(id);
 		systemRepository.flush();
