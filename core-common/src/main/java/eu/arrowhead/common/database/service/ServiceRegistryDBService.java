@@ -169,23 +169,23 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Page<ServiceDefinition> getAllServiceDefinitionEntries(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getAllServiceDefinitionEntries started..");
-		final int page_ = page < 0 ? 0 : page;
-		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
-		final Direction direction_ = direction == null ? Direction.ASC : direction;
-		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
-		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(sortField_)) {
-			throw new DataNotFoundException("Sortable field with reference '" + sortField_ + "' is not available");
+	public Page<ServiceDefinition> getServiceDefinitionEntries(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceDefinitionEntries started..");
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 0 ? Integer.MAX_VALUE : size; 		
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new DataNotFoundException("Sortable field with reference '" + validatedSortField + "' is not available");
 		}
-		return serviceDefinitionRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
+		return serviceDefinitionRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 	}
 		
 		
 	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionsListResponseDTO getAllServiceDefinitionEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getAllServiceDefinitionEntriesResponse started..");
-		final List<ServiceDefinition> serviceDefinitionEntries = getAllServiceDefinitionEntries(page, size, direction, sortField).getContent();
+	public ServiceDefinitionsListResponseDTO getServiceDefinitionEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceDefinitionEntriesResponse started..");
+		final List<ServiceDefinition> serviceDefinitionEntries = getServiceDefinitionEntries(page, size, direction, sortField).getContent();
 		return DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
 	}
 	
@@ -245,14 +245,14 @@ public class ServiceRegistryDBService {
 	
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getAllServiceReqistryEntries started..");
-		final int page_ = page < 0 ? 0 : page;
-		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
-		final Direction direction_ = direction == null ? Direction.ASC : direction;
-		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
-		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField_)) {
-			throw new DataNotFoundException("Sortable field with reference '" + sortField_ + "' is not available");
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 0 ? Integer.MAX_VALUE : size; 		
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new DataNotFoundException("Sortable field with reference '" + validatedSortField + "' is not available");
 		}
-		return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
+		return serviceRegistryRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 	}
 	
 	//-------------------------------------------------------------------------------------------------

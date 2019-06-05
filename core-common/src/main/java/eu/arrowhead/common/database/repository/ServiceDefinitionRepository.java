@@ -10,6 +10,6 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 @Repository
 public interface ServiceDefinitionRepository extends JpaRepository<ServiceDefinition, Long> {
 	
-	Optional<ServiceDefinition> findByServiceDefinition(String serviceDefinition);	
+	Optional<ServiceDefinition> findByServiceDefinition(final String serviceDefinition);	
 	
 }

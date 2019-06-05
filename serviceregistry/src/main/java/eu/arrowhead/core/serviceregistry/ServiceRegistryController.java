@@ -287,7 +287,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path =SERVICES_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceDefinitionsListResponseDTO getBunchOfServiceDefinitions(
+	@ResponseBody public ServiceDefinitionsListResponseDTO getServiceDefinitions(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CommonConstants.REQUEST_PARAM_DIRECTION_DEFAULT_VALUE) final String direction,
@@ -321,7 +321,7 @@ public class ServiceRegistryController {
 		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new BadPayloadException("Sortable field with reference '" + validatedSortField + "' is not available", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getAllServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, validatedSortField);
+		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, validatedSortField);
 		logger.debug("Service definition  with page: {} and item_per page: {} succesfully retrived", page, size);
 		return serviceDefinitionEntries;
 	}
@@ -336,7 +336,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path =SERVICES_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinitionById(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
 		logger.debug("New Service Definition get request recieved with id: {}", id);
 		if (id < 1) {
 			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
@@ -356,7 +356,7 @@ public class ServiceRegistryController {
 	})
 	@PostMapping(path =SERVICES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@ResponseBody public ServiceDefinitionResponseDTO registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
+	@ResponseBody public ServiceDefinitionResponseDTO addServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
 		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
 		if (serviceDefinition.isBlank()) {
@@ -406,7 +406,7 @@ public class ServiceRegistryController {
 	@PatchMapping(path =SERVICES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/json")
 	@ResponseBody public ServiceDefinitionResponseDTO patchUpdateServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id
 			, @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		//Currently ServiceDefinition has only one updatable field, therefore PUT and PATH do the same
+		//Currently ServiceDefinition has only one updatable field, therefore PUT and PATCH do the same
 		return putUpdateServiceDefinition(id, serviceDefinitionRequestDTO);
 	}
 	

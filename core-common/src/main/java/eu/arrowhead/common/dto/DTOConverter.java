@@ -69,7 +69,6 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
 		Assert.notNull(serviceDefinition, "ServiceDefinition is null");
-		Assert.notNull(serviceDefinition.getServiceDefinition(), "ServiceDefinition is null");
 		
 		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), String.valueOf(serviceDefinition.getCreatedAt()), String.valueOf(serviceDefinition.getUpdatedAt()));
 	}
