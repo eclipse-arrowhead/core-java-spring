@@ -76,6 +76,9 @@ public class ServiceRegistryController {
 	private static final String PATCH_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
 	private static final String PATCH_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
 	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
+	
+	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
+	private static final String ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE ="System id must be greater then 0. ";
 
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
@@ -112,7 +115,7 @@ public class ServiceRegistryController {
 		logger.debug("getSystemById started ...");
 		
 		if (systemId < 1) {
-			throw new BadPayloadException("System id must be greater then 0. ", HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 		
 		try {			
@@ -156,7 +159,7 @@ public class ServiceRegistryController {
 		} else {
 			if ( page == null || size==null ) {
 				
-				throw new BadPayloadException(" Invalid paraameters", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+				throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
 			
 			} else {
 				validatedPage = page;
@@ -169,7 +172,7 @@ public class ServiceRegistryController {
 			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, direction, sortField));	
 		
 		} catch ( final IllegalArgumentException e) {
-			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 		}
 		
 	}
@@ -191,7 +194,7 @@ public class ServiceRegistryController {
 			
 			return callCreateSystem(request);
 		} catch (final Exception e) {
-			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
 		}
 		
 	}
@@ -214,7 +217,7 @@ public class ServiceRegistryController {
 			
 			return callUpdateSystem(request, systemId);
 		} catch (final Exception e) {
-			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
 		}
 	
 	}
@@ -237,7 +240,7 @@ public class ServiceRegistryController {
 			
 			return callNonNullableUpdateSystem(request, systemId);
 		} catch (final Exception e) {
-			throw new BadPayloadException("Not valid request parameters." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
+			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
 		}
 	
 	}
@@ -254,7 +257,7 @@ public class ServiceRegistryController {
 	public ResponseEntity<HttpStatus> removeSystem(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
 		logger.debug("New System delete request recieved with id: {}", id);
 		if (id < 1) {
-			throw new BadPayloadException("System id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		serviceRegistryDBService.removeSystemById(id);
 		logger.debug("System with id: '{}' succesfully deleted", id);
@@ -396,7 +399,7 @@ public class ServiceRegistryController {
 	private void checkSystemPatchRequest(SystemRequestDTO request, final long systemId) {
 		
 		if ( systemId <= 0) {
-			throw new BadPayloadException("System id must be greater then zero." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
 		boolean needChange = false;
@@ -425,7 +428,7 @@ public class ServiceRegistryController {
 	private void checkSystemPutRequest(final SystemRequestDTO request, final long systemId) {
 		
 		if ( systemId <= 0) {
-			throw new BadPayloadException("System id must be greater then zero." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
 		if ( request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
