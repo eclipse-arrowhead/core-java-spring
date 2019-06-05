@@ -77,6 +77,16 @@ public class DTOConverter {
 		return new ServiceDefinition(serviceDefinitionRequestDTO.getServiceDefinition());
 	}
 	
+	public static ServiceDefinitionsListResponseDTO convertServiceDefinitionsListToServiceDefinitionListResponseDTO(final List<ServiceDefinition> serviceDefinitions) {
+		Assert.notNull(serviceDefinitions, "List of ServiceDefinition is null");
+		
+		final List<ServiceDefinitionResponseDTO> serviceDefinitionDTOs = new ArrayList<>();
+		for (final ServiceDefinition definition : serviceDefinitions) {
+			serviceDefinitionDTOs.add(convertServiceDefinitionToServiceDefinitionResponseDTO(definition));
+		}		
+		return new ServiceDefinitionsListResponseDTO( serviceDefinitionDTOs, serviceDefinitionDTOs.size());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
