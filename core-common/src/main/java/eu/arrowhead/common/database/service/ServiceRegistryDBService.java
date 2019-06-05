@@ -53,6 +53,7 @@ public class ServiceRegistryDBService {
 	
 	private static final String COULD_NOT_CREATE_SYSTEM_ERROR_MESSAGE = "Could not crate System, with given parameters";
 	private static final String COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE = "Could not update System, with given parameters";
+	private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
 	
 	//=================================================================================================
 	// methods
@@ -273,6 +274,9 @@ public class ServiceRegistryDBService {
 		
 		logger.debug(" removeSystemById started ...");
 		
+		if (!systemRepository.existsById(id)) {
+			throw new BadPayloadException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
+		}		
 		systemRepository.deleteById(id);
 		systemRepository.flush();
 		
