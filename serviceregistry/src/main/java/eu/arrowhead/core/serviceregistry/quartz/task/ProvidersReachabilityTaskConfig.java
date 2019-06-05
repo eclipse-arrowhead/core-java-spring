@@ -21,7 +21,7 @@ public class ProvidersReachabilityTaskConfig {
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.class);
 	
 	@Autowired
-    private ApplicationContext applicationContext;
+    private ApplicationContext applicationContext; //NOSONAR
 	
 	@Value (CommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
 	private boolean pingScheduled;

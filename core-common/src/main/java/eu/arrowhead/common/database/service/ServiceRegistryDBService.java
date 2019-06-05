@@ -25,9 +25,8 @@ import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -56,6 +55,7 @@ public class ServiceRegistryDBService {
 	
 	private static final String COULD_NOT_CREATE_SYSTEM_ERROR_MESSAGE = "Could not crate System, with given parameters";
 	private static final String COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE = "Could not update System, with given parameters";
+	private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
 	
 	//=================================================================================================
 	// methods
@@ -317,6 +317,9 @@ public class ServiceRegistryDBService {
 		
 		logger.debug(" removeSystemById started ...");
 		
+		if (!systemRepository.existsById(id)) {
+			throw new DataNotFoundException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
+		}		
 		systemRepository.deleteById(id);
 		systemRepository.flush();
 		
@@ -416,7 +419,7 @@ public class ServiceRegistryDBService {
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
 		
 		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
-		if (find != null) {
+		if (find.isPresent()) {
 			throw new BadPayloadException(serviceDefinition + "definition already exists");
 		}
 	}

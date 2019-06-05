@@ -198,6 +198,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
 	@PostMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
+	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
 		checkSystemRequest(request);
 		
@@ -257,6 +258,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	
 	@ApiOperation(value = "Remove system")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
@@ -354,12 +356,12 @@ public class ServiceRegistryController {
 	@PostMapping(path =SERVICES_URI, consumes = "application/json", produces = "application/json")
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public ServiceDefinitionResponseDTO registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		serviceDefinition.trim().toLowerCase();
+		serviceDefinition = serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 		logger.debug("{} service definition succesfully registered.", serviceDefinition);
 		return serviceDefinitionResponse;
@@ -377,7 +379,7 @@ public class ServiceRegistryController {
 	@PutMapping(path =SERVICES_BY_ID_URI, consumes = "application/json", produces = "application/json")
 	@ResponseBody public ServiceDefinitionResponseDTO putUpdateServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id
 			, @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition update request recieved with id: {}, definition: {}", id, serviceDefinition);
 		if (id < 1) {
 			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
@@ -385,7 +387,7 @@ public class ServiceRegistryController {
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
-		serviceDefinition.trim().toLowerCase();
+		serviceDefinition = serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
 		logger.debug("Service definition with id: '{}' succesfully updated with definition '{}'.", id, serviceDefinition);
 		return serviceDefinitionResponse;
@@ -464,11 +466,14 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	private SystemResponseDTO callNonNullableUpdateSystem(final SystemRequestDTO request, final long systemId) {
+	private SystemResponseDTO callNonNullableUpdateSystem(SystemRequestDTO request, long systemId) {
+		
+		logger.debug(" callNonNullableUpdateSystem started ...");
+		
 		final long validatedSystemId = systemId;		
 	
 		final String validatedSystemName = request.getSystemName() != null ? request.getSystemName().toLowerCase():"";
-		final String validatedAddress = request.getSystemName() != null ? request.getAddress().toLowerCase():"";
+		final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase():"";
 		final Integer  validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
 		
@@ -478,6 +483,8 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	
 	private void checkSystemPatchRequest(final SystemRequestDTO request, final long systemId) {
+		
+		logger.debug(" checkSystemPatchRequest started ...");
 		
 		if ( systemId <= 0) {
 			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
