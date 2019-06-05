@@ -356,12 +356,12 @@ public class ServiceRegistryController {
 	@PostMapping(path =SERVICES_URI, consumes = "application/json", produces = "application/json")
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public ServiceDefinitionResponseDTO registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		serviceDefinition.trim().toLowerCase();
+		serviceDefinition = serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 		logger.debug("{} service definition succesfully registered.", serviceDefinition);
 		return serviceDefinitionResponse;
@@ -379,7 +379,7 @@ public class ServiceRegistryController {
 	@PutMapping(path =SERVICES_BY_ID_URI, consumes = "application/json", produces = "application/json")
 	@ResponseBody public ServiceDefinitionResponseDTO putUpdateServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id
 			, @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition update request recieved with id: {}, definition: {}", id, serviceDefinition);
 		if (id < 1) {
 			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
@@ -387,7 +387,7 @@ public class ServiceRegistryController {
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
-		serviceDefinition.trim().toLowerCase();
+		serviceDefinition = serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
 		logger.debug("Service definition with id: '{}' succesfully updated with definition '{}'.", id, serviceDefinition);
 		return serviceDefinitionResponse;
