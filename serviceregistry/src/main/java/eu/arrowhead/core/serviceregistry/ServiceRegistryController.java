@@ -107,7 +107,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = GET_SYSTEM_BY_ID_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(SYSTEM_BY_ID_URI)
+	@GetMapping(SYSTEMS_BY_ID_URI)
 	@ResponseBody public SystemResponseDTO getSystemById(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId) {		
 		logger.debug("getSystemById started ...");
 		
