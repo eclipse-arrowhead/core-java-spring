@@ -251,7 +251,19 @@ public class ServiceRegistryDBService {
 		return systemRepository.saveAndFlush(system);
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	
+	public void removeSystemById(long id) {
+		
+		systemRepository.deleteById(id);
+		systemRepository.flush();
+		
+	}
 
+	//=================================================================================================
+	// assistant methods
+	
 	//-------------------------------------------------------------------------------------------------
 	
 	private boolean checkIfUniqValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
@@ -355,5 +367,7 @@ public class ServiceRegistryDBService {
 		return systemRepository.saveAndFlush(system);
 		
 	}
+
+
 
 }
