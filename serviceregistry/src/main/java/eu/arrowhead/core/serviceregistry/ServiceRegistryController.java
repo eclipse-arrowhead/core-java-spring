@@ -276,7 +276,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove service definition", response = ServiceDefinitionResponseDTO.class)
+	@ApiOperation(value = "Remove service definition")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SERVICES_HTTP_400_MESSAGE),
