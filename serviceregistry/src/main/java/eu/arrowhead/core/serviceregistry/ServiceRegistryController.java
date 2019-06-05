@@ -6,6 +6,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
@@ -70,13 +73,20 @@ public class ServiceRegistryController {
 	private static final String SERVICES_URI = CommonConstants.MGMT_URI + "/services";
 	private static final String SERVICES_BY_ID_PATH_VARIABLE = "id";
 	private static final String SERVICES_BY_ID_URI = SERVICES_URI + "/{" + SERVICES_BY_ID_PATH_VARIABLE + "}";
+	private static final String GET_SERVICES_HTTP_200_MESSAGE = "Services returned";
+	private static final String GET_SERVICES_HTTP_400_MESSAGE = "Could not retrive service definition";
+	private static final String GET_SERVICES_HTTP_404_MESSAGE = "Service definition with given parameters not exists";
 	private static final String POST_SERVICES_HTTP_201_MESSAGE = "Service definition created";
 	private static final String POST_SERVICES_HTTP_400_MESSAGE = "Could not create service definition";
 	private static final String PUT_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
 	private static final String PUT_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
+	private static final String PUT_SERVICES_HTTP_404_MESSAGE = "Service definition with given parameters not exists";
 	private static final String PATCH_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
 	private static final String PATCH_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
+	private static final String PATCH_SERVICES_HTTP_404_MESSAGE = "Service definition with given parameters not exists";
 	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
+	private static final String DELETE_SERVICES_HTTP_400_MESSAGE = "Could not remove service definition";
+	private static final String DELETE_SERVICES_HTTP_404_MESSAGE = "Service definition with given parameters not exists";
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE ="System id must be greater then 0. ";
@@ -248,6 +258,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	
 	@ApiOperation(value = "Remove system")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
@@ -267,7 +278,74 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested service definitions by the given parameters", response = ServiceDefinitionsListResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path =SERVICES_URI, produces = "application/json")
+	@ResponseBody public ServiceDefinitionsListResponseDTO getBunchOfServiceDefinitions(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CommonConstants.REQUEST_PARAM_DIRECTION_DEFAULT_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New Service Definition get request recieved with page: {} and item_per page: {}", page, size);
+		int validatedPage;
+		int validatedSize;
+		Direction validatedDirection;
+		final String validatedSortField = sortField.trim();
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+		switch (direction) {
+			case "ASC":
+				validatedDirection = Direction.ASC;
+				break;
+			case "DESC":
+				validatedDirection = Direction.DESC;
+				break;
+			default:
+				throw new BadPayloadException("Invalid sort direction flag", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		}
+		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new BadPayloadException("Sortable field with reference '" + validatedSortField + "' is not available", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		}
+		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getAllServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, validatedSortField);
+		logger.debug("Service definition  with page: {} and item_per page: {} succesfully retrived", page, size);
+		return serviceDefinitionEntries;
+	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested service definition", response = ServiceDefinitionResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = GET_SERVICES_HTTP_404_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path =SERVICES_BY_ID_URI, produces = "application/json")
+	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+		logger.debug("New Service Definition get request recieved with id: {}", id);
+		if (id < 1) {
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+		}
+		final ServiceDefinitionResponseDTO serviceDefinitionEntry = serviceRegistryDBService.getServiceDefinitionByIdResponse(id);
+		logger.debug("Service definition with id: '{}' succesfully retrived", id);
+		return serviceDefinitionEntry;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return created service definition", response = ServiceDefinitionResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SERVICES_HTTP_201_MESSAGE),
@@ -276,7 +354,8 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path =SERVICES_URI, consumes = "application/json", produces = "application/json")
-	@ResponseBody public ResponseEntity<ServiceDefinitionResponseDTO> registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@ResponseBody public ServiceDefinitionResponseDTO registerServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
 		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
 		if (serviceDefinition.isBlank()) {
@@ -285,7 +364,7 @@ public class ServiceRegistryController {
 		serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 		logger.debug("{} service definition succesfully registered.", serviceDefinition);
-		return new ResponseEntity<>(serviceDefinitionResponse, org.springframework.http.HttpStatus.CREATED);
+		return serviceDefinitionResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -293,6 +372,7 @@ public class ServiceRegistryController {
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_SERVICES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = PUT_SERVICES_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -302,7 +382,7 @@ public class ServiceRegistryController {
 		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition update request recieved with id: {}, definition: {}", id, serviceDefinition);
 		if (id < 1) {
-			throw new BadPayloadException("Service Definition id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}		
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
@@ -318,6 +398,7 @@ public class ServiceRegistryController {
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PATCH_SERVICES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = PATCH_SERVICES_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -332,19 +413,19 @@ public class ServiceRegistryController {
 	@ApiOperation(value = "Remove service definition")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICES_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = DELETE_SERVICES_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@DeleteMapping(path =SERVICES_BY_ID_URI)
-	public ResponseEntity<HttpStatus> removeServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+	public void removeServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
 		logger.debug("New Service Definition delete request recieved with id: {}", id);
 		if (id < 1) {
-			throw new BadPayloadException("Service Definition id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		serviceRegistryDBService.removeServiceDefinitionById(id);
 		logger.debug("Service definition with id: '{}' succesfully deleted", id);
-		return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
 	}
 		
 	//=================================================================================================
@@ -353,7 +434,7 @@ public class ServiceRegistryController {
 
 	//-------------------------------------------------------------------------------------------------
 
-	private SystemResponseDTO callCreateSystem(SystemRequestDTO request) {
+	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request) {
 		
 		final String validatedSystemName = request.getSystemName().toLowerCase();
 		final String validatedAddress = request.getAddress().toLowerCase();
@@ -401,7 +482,7 @@ public class ServiceRegistryController {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	private void checkSystemPatchRequest(SystemRequestDTO request, final long systemId) {
+	private void checkSystemPatchRequest(final SystemRequestDTO request, final long systemId) {
 		
 		logger.debug(" checkSystemPatchRequest started ...");
 		

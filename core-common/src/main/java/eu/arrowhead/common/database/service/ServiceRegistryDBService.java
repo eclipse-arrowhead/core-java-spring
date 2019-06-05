@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -25,6 +26,8 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -142,10 +145,45 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO createSystemResponse(final String validatedSystemName, final String validatedAddress, final int validatedPort,
 			final String validatedAuthenticationInfo) {
-		
 		logger.debug(" createSystemResponse started ...");
 		
 		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo));
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceDefinition getServiceDefinitionById(final long id) {
+		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
+		if (find.isPresent()) {
+			return find.get();
+		} else {
+			throw new DataNotFoundException("Service definition with id of '" + id + "' not exists");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceDefinitionResponseDTO getServiceDefinitionByIdResponse(final long id) {
+		final ServiceDefinition serviceDefinitionEntry = getServiceDefinitionById(id);
+		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<ServiceDefinition> getAllServiceDefinitionEntries(final int page, final int size, final Direction direction, final String sortField) {
+		final int page_ = page < 0 ? 0 : page;
+		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
+		final Direction direction_ = direction == null ? Direction.ASC : direction;
+		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(sortField_)) {
+			throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
+		}
+		return serviceDefinitionRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
+	}
+		
+		
+	//-------------------------------------------------------------------------------------------------
+	public ServiceDefinitionsListResponseDTO getAllServiceDefinitionEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		final List<ServiceDefinition> serviceDefinitionEntries = getAllServiceDefinitionEntries(page, size, direction, sortField).getContent();
+		return DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
