@@ -1,7 +1,6 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 
 public class SystemResponseDTO implements Serializable {
 
@@ -21,8 +20,6 @@ public class SystemResponseDTO implements Serializable {
 	//=================================================================================================
 	// methods
 	
-
-
 	//-------------------------------------------------------------------------------------------------
 	public SystemResponseDTO() {}
 	
