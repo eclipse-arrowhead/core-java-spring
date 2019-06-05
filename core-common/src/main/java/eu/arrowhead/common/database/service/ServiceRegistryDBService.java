@@ -173,7 +173,7 @@ public class ServiceRegistryDBService {
 		final Direction direction_ = direction == null ? Direction.ASC : direction;
 		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(sortField_)) {
-			throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
+			throw new DataNotFoundException("Sortable field with reference '" + sortField_ + "' is not available");
 		}
 		return serviceDefinitionRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
 	}
@@ -225,6 +225,9 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceDefinitionById(final long id) {
+		if (! serviceRegistryRepository.existsById(id)) {
+			throw new DataNotFoundException("Service Definition with id '" + id + "' not exists");
+		}
 		serviceDefinitionRepository.deleteById(id);
 		serviceDefinitionRepository.flush();
 	}
@@ -237,7 +240,7 @@ public class ServiceRegistryDBService {
 		final Direction direction_ = direction == null ? Direction.ASC : direction;
 		final String sortField_ = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(sortField_)) {
-			throw new IllegalArgumentException("Sortable field with reference '" + sortField_ + "' is not available");
+			throw new DataNotFoundException("Sortable field with reference '" + sortField_ + "' is not available");
 		}
 		return serviceRegistryRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
 	}
@@ -246,6 +249,9 @@ public class ServiceRegistryDBService {
 	
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceRegistryEntryById(final long id) {
+		if (! serviceRegistryRepository.existsById(id)) {
+			throw new DataNotFoundException("Service Definition with id '" + id + "' not exists");
+		}
 		serviceRegistryRepository.deleteById(id);
 		serviceRegistryRepository.flush();
 	}
