@@ -144,6 +144,11 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO createSystemResponse(final String validatedSystemName, final String validatedAddress, final int validatedPort,
 			final String validatedAuthenticationInfo) {
+		logger.debug(" createSystemResponse started ...");
+		
+		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo));
+	}
+	
 	
 	//-------------------------------------------------------------------------------------------------
 	public ServiceDefinition getServiceDefinitionById(final long id) {
@@ -173,11 +178,8 @@ public class ServiceRegistryDBService {
 		return serviceDefinitionRepository.findAll(PageRequest.of(page_, size_, direction_, sortField_));
 	}
 		
-		logger.debug(" createSystemResponse started ...");
 		
-		return DTOConverter.convertSystemToSystemResponseDTO(createSystem(validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo));
-	}
-	
+	//-------------------------------------------------------------------------------------------------
 	public ServiceDefinitionsListResponseDTO getAllServiceDefinitionEntriesResponse(final int page, final int size) {
 		final List<ServiceDefinition> serviceDefinitionEntries = getAllServiceDefinitionEntries(page, size, null, null).getContent();
 		return DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
