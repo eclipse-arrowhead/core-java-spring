@@ -63,6 +63,8 @@ public class ServiceRegistryController {
 	private static final String PATCH_SYSTEM_HTTP_200_MESSAGE = "System updated";
 	private static final String PATCH_SYSTEM_HTTP_400_MESSAGE = "Could not update system";
 	private static final String PATCH_SYSTEM_HTTP_417_MESSAGE = "Not valid request parameters";
+	private static final String DELETE_SYSTEM_HTTP_200_MESSAGE = "System deleted";
+	private static final String DELETE_SYSTEM_HTTP_400_MESSAGE = "Could not delete system";
 	
 	private static final String SERVICES_URI = CommonConstants.MGMT_URI + "/services";
 	private static final String SERVICES_BY_ID_PATH_VARIABLE = "id";
@@ -74,6 +76,7 @@ public class ServiceRegistryController {
 	private static final String PATCH_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
 	private static final String PATCH_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
 	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
+
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -240,6 +243,25 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+		@ApiOperation(value = "Remove system")
+		@ApiResponses (value = {
+				@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_HTTP_400_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+				@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+		})
+		@DeleteMapping(path =SYSTEMS_BY_ID_URI)
+		public ResponseEntity<HttpStatus> removeSystem(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
+			logger.debug("New System delete request recieved with id: {}", id);
+			if (id < 1) {
+				throw new BadPayloadException("System id must be greater then 0. ", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			}
+			serviceRegistryDBService.removeSystemById(id);
+			logger.debug("System with id: '{}' succesfully deleted", id);
+			return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
+		}
+	
+	//-------------------------------------------------------------------------------------------------
 	
 	@ApiOperation(value = "Return created service definition", response = ServiceDefinitionResponseDTO.class)
 	@ApiResponses (value = {
@@ -302,7 +324,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove service definition", response = ServiceDefinitionResponseDTO.class)
+	@ApiOperation(value = "Remove service definition")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SERVICES_HTTP_400_MESSAGE),
