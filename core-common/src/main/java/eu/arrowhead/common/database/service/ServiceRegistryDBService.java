@@ -152,6 +152,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public ServiceDefinition getServiceDefinitionById(final long id) {
+		logger.debug("getServiceDefinitionById started...");
 		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
 		if (find.isPresent()) {
 			return find.get();
@@ -162,12 +163,14 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public ServiceDefinitionResponseDTO getServiceDefinitionByIdResponse(final long id) {
+		logger.debug("getServiceDefinitionByIdResponse started..");
 		final ServiceDefinition serviceDefinitionEntry = getServiceDefinitionById(id);
 		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceDefinition> getAllServiceDefinitionEntries(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getAllServiceDefinitionEntries started..");
 		final int page_ = page < 0 ? 0 : page;
 		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
 		final Direction direction_ = direction == null ? Direction.ASC : direction;
@@ -181,6 +184,7 @@ public class ServiceRegistryDBService {
 		
 	//-------------------------------------------------------------------------------------------------
 	public ServiceDefinitionsListResponseDTO getAllServiceDefinitionEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getAllServiceDefinitionEntriesResponse started..");
 		final List<ServiceDefinition> serviceDefinitionEntries = getAllServiceDefinitionEntries(page, size, direction, sortField).getContent();
 		return DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
 	}
@@ -189,6 +193,7 @@ public class ServiceRegistryDBService {
 	
 	@Transactional (rollbackFor = Exception.class)
 	public ServiceDefinition createServiceDefinition (final String serviceDefinition) {
+		logger.debug("createServiceDefinition started..");
 		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
 		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
 		return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);		
@@ -197,6 +202,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public ServiceDefinitionResponseDTO createServiceDefinitionResponse (final String serviceDefinition) {
+		logger.debug("createServiceDefinitionResponse started..");
 		final ServiceDefinition serviceDefinitionEntry = createServiceDefinition(serviceDefinition);
 		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
 	}
@@ -204,6 +210,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public ServiceDefinition updateServiceDefinitionById(final long id, final String serviceDefinition) {
+		logger.debug("updateServiceDefinitionById started..");
 		final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
 		ServiceDefinition serviceDefinitionEntry;
 		if (find.isPresent()) {
@@ -218,6 +225,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public ServiceDefinitionResponseDTO updateServiceDefinitionByIdResponse(final long id, final String serviceDefinition) {
+		logger.debug("updateServiceDefinitionByIdResponse started..");
 		final ServiceDefinition serviceDefinitionEntry = updateServiceDefinitionById(id, serviceDefinition);
 		return DTOConverter.convertServiceDefinitionToServiceDefinitionResponseDTO(serviceDefinitionEntry);
 	}
@@ -225,6 +233,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceDefinitionById(final long id) {
+		logger.debug("removeServiceDefinitionById started..");
 		if (! serviceRegistryRepository.existsById(id)) {
 			throw new DataNotFoundException("Service Definition with id '" + id + "' not exists");
 		}
@@ -235,6 +244,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getAllServiceReqistryEntries started..");
 		final int page_ = page < 0 ? 0 : page;
 		final int size_ = size < 0 ? Integer.MAX_VALUE : size; 		
 		final Direction direction_ = direction == null ? Direction.ASC : direction;
@@ -249,6 +259,7 @@ public class ServiceRegistryDBService {
 	
 	@Transactional (rollbackFor = Exception.class)
 	public void removeServiceRegistryEntryById(final long id) {
+		logger.debug("removeServiceRegistryEntryById started..");
 		if (! serviceRegistryRepository.existsById(id)) {
 			throw new DataNotFoundException("Service Definition with id '" + id + "' not exists");
 		}
@@ -260,6 +271,7 @@ public class ServiceRegistryDBService {
 	
 	@Transactional (rollbackFor = Exception.class)
 	public void removeBulkOfServiceRegistryEntries(final Iterable<ServiceRegistry> entities) {
+		logger.debug("removeBulkOfServiceRegistryEntries started..");
 		serviceRegistryRepository.deleteInBatch(entities);
 		serviceRegistryRepository.flush();
 	}
