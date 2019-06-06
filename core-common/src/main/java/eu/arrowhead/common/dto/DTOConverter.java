@@ -74,14 +74,14 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static ServiceDefinitionsListResponseDTO convertServiceDefinitionsListToServiceDefinitionListResponseDTO(final List<ServiceDefinition> serviceDefinitions) {
+	public static ServiceDefinitionsListResponseDTO convertServiceDefinitionsListToServiceDefinitionListResponseDTO(final Page<ServiceDefinition> serviceDefinitions) {
 		Assert.notNull(serviceDefinitions, "List of ServiceDefinition is null");
 		
 		final List<ServiceDefinitionResponseDTO> serviceDefinitionDTOs = new ArrayList<>();
 		for (final ServiceDefinition definition : serviceDefinitions) {
 			serviceDefinitionDTOs.add(convertServiceDefinitionToServiceDefinitionResponseDTO(definition));
 		}		
-		return new ServiceDefinitionsListResponseDTO( serviceDefinitionDTOs, serviceDefinitionDTOs.size());
+		return new ServiceDefinitionsListResponseDTO( serviceDefinitionDTOs, serviceDefinitions.getTotalElements());
 	}
 	
 	//=================================================================================================

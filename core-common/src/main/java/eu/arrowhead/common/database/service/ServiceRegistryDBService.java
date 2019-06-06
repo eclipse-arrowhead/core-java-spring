@@ -156,13 +156,13 @@ public class ServiceRegistryDBService {
 	public ServiceDefinition getServiceDefinitionById(final long id) {
 		logger.debug("getServiceDefinitionById started...");
 		try {
-			Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
+			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
 			if (find.isPresent()) {
 				return find.get();
 			} else {
 				throw new InvalidParameterException("Service definition with id of '" + id + "' not exists");
 			}
-		} catch (InvalidParameterException ex) {
+		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -189,7 +189,7 @@ public class ServiceRegistryDBService {
 		}
 		try {
 			return serviceDefinitionRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -199,7 +199,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	public ServiceDefinitionsListResponseDTO getServiceDefinitionEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceDefinitionEntriesResponse started..");
-		final List<ServiceDefinition> serviceDefinitionEntries = getServiceDefinitionEntries(page, size, direction, sortField).getContent();
+		final Page<ServiceDefinition> serviceDefinitionEntries = getServiceDefinitionEntries(page, size, direction, sortField);
 		return DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
 	}
 	
@@ -208,11 +208,15 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = ArrowheadException.class)
 	public ServiceDefinition createServiceDefinition (final String serviceDefinition) {
 		logger.debug("createServiceDefinition started..");
-		checkConstraintsOfServiceDefinitionTable(serviceDefinition);
-		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(serviceDefinition);
+		if (serviceDefinition == null || serviceDefinition.isBlank()) {
+			throw new InvalidParameterException("serviceDefinition is null or blank");
+		}
+		final String validatedServiceDefinition = serviceDefinition.trim().toLowerCase();
+		checkConstraintsOfServiceDefinitionTable(validatedServiceDefinition);
+		final ServiceDefinition serviceDefinitionEntry = new ServiceDefinition(validatedServiceDefinition);
 		try {
 			return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -231,17 +235,24 @@ public class ServiceRegistryDBService {
 	public ServiceDefinition updateServiceDefinitionById(final long id, final String serviceDefinition) {
 		logger.debug("updateServiceDefinitionById started..");
 		try {
-			Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
-			if (find.isPresent()) {
-				ServiceDefinition serviceDefinitionEntry = find.get();
-				serviceDefinitionEntry.setServiceDefinition(serviceDefinition);
+			if (serviceDefinition == null || serviceDefinition.isBlank()) {
+				throw new InvalidParameterException("serviceDefinition is null or blank");
+			}
+			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
+			if (find.isPresent()) {				
+				String validatedServiceDefinition = serviceDefinition.trim().toLowerCase();
+				final ServiceDefinition serviceDefinitionEntry = find.get();
+				if (!validatedServiceDefinition.equals(serviceDefinitionEntry.getServiceDefinition())) {
+					checkConstraintsOfServiceDefinitionTable(validatedServiceDefinition);
+				}
+				serviceDefinitionEntry.setServiceDefinition(validatedServiceDefinition);
 				return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);
 			} else {
 				throw new InvalidParameterException("Service definition with id of '" + id + "' not exists");
 			}
-		} catch (InvalidParameterException ex) {
+		} catch (final InvalidParameterException ex) {
 			throw ex;
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -265,9 +276,9 @@ public class ServiceRegistryDBService {
 			}
 			serviceDefinitionRepository.deleteById(id);
 			serviceDefinitionRepository.flush();
-		} catch (InvalidParameterException ex) {
+		} catch (final InvalidParameterException ex) {
 			throw ex;
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -286,7 +297,7 @@ public class ServiceRegistryDBService {
 		}
 		try {
 			return serviceRegistryRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -303,9 +314,9 @@ public class ServiceRegistryDBService {
 			}
 			serviceRegistryRepository.deleteById(id);
 			serviceRegistryRepository.flush();
-		} catch (InvalidParameterException ex) {
+		} catch (final InvalidParameterException ex) {
 			throw ex;
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -319,7 +330,7 @@ public class ServiceRegistryDBService {
 		try {
 			serviceRegistryRepository.deleteInBatch(entities);
 			serviceRegistryRepository.flush();
-		} catch  (Exception ex) {
+		} catch  (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -479,13 +490,13 @@ public class ServiceRegistryDBService {
 	
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
 		try {
-			Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 			if (find.isPresent()) {
 				throw new InvalidParameterException(serviceDefinition + "definition already exists");
 			}
-		} catch (InvalidParameterException ex) {
+		} catch (final InvalidParameterException ex) {
 			throw ex;
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
