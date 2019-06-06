@@ -181,7 +181,7 @@ public class ServiceRegistryDBService {
 	public Page<ServiceDefinition> getServiceDefinitionEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceDefinitionEntries started..");
 		final int validatedPage = page < 0 ? 0 : page;
-		final int validatedSize = size < 0 ? Integer.MAX_VALUE : size; 		
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
 		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
@@ -271,7 +271,7 @@ public class ServiceRegistryDBService {
 	public void removeServiceDefinitionById(final long id) {
 		logger.debug("removeServiceDefinitionById started..");
 		try {
-			if (!serviceRegistryRepository.existsById(id)) {
+			if (!serviceDefinitionRepository.existsById(id)) {
 				throw new InvalidParameterException("Service Definition with id '" + id + "' not exists");
 			}
 			serviceDefinitionRepository.deleteById(id);
@@ -289,7 +289,7 @@ public class ServiceRegistryDBService {
 	public Page<ServiceRegistry> getAllServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getAllServiceReqistryEntries started..");
 		final int validatedPage = page < 0 ? 0 : page;
-		final int validatedSize = size < 0 ? Integer.MAX_VALUE : size; 		
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
 		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
@@ -492,7 +492,7 @@ public class ServiceRegistryDBService {
 		try {
 			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 			if (find.isPresent()) {
-				throw new InvalidParameterException(serviceDefinition + "definition already exists");
+				throw new InvalidParameterException(serviceDefinition + " definition already exists");
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
