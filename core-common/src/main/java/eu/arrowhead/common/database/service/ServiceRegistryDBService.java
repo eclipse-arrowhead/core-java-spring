@@ -53,8 +53,6 @@ public class ServiceRegistryDBService {
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
-	private static final String COULD_NOT_CREATE_SYSTEM_ERROR_MESSAGE = "Could not crate System, with given parameters";
-	private static final String COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE = "Could not update System, with given parameters";
 	private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
 	
 	//=================================================================================================
@@ -62,8 +60,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	public SystemResponseDTO getSystemById(final long systemId) {
-		
+	public SystemResponseDTO getSystemById(final long systemId) {		
 		logger.debug(" getSystemById started ...");
 		
 		final Optional<System> systemOption = systemRepository.findById(systemId);
@@ -107,8 +104,7 @@ public class ServiceRegistryDBService {
 	
 	@Transactional (rollbackFor = Exception.class)
 	public System createSystem(final String systemName, final String address, final int port,
-			final String authenticationInfo) {
-		
+			final String authenticationInfo) {		
 		logger.debug(" createSystem started ...");
 		
 		final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo);
@@ -321,18 +317,14 @@ public class ServiceRegistryDBService {
 	
 	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO updateSystemResponse(final long validatedSystemId, final String validatedSystemName, final String validatedAddress,
-			final int validatedPort, final String validatedAuthenticationInfo) {
+		final int validatedPort, final String validatedAuthenticationInfo) {
 		
-		try {			
-			
-			return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(validatedSystemId,
-					validatedSystemName,
-					validatedAddress,
-					validatedPort,
-					validatedAuthenticationInfo));
-		} catch ( final Exception ex) {
-		  throw new InvalidParameterException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, ex);
-		}
+
+		return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(validatedSystemId,
+			validatedSystemName,
+			validatedAddress,
+			validatedPort,
+			validatedAuthenticationInfo));
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -398,17 +390,13 @@ public class ServiceRegistryDBService {
 	public SystemResponseDTO mergeSystemResponse(final long validatedSystemId, final String validatedSystemName,
 			final String validatedAddress, final Integer validatedPort, final String validatedAuthenticationInfo) {		
 		logger.debug(" mergeSystemResponse started ...");
+
+		return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(validatedSystemId,
+			validatedSystemName,
+			validatedAddress,
+			validatedPort,
+			validatedAuthenticationInfo));
 		
-		try {			
-			
-			return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(validatedSystemId,
-					validatedSystemName,
-					validatedAddress,
-					validatedPort,
-					validatedAuthenticationInfo));
-		} catch ( final Exception ex) {
-			throw new  InvalidParameterException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, ex);
-		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
