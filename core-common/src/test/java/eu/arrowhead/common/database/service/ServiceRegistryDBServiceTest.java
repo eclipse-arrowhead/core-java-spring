@@ -13,15 +13,24 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 @RunWith (SpringRunner.class)
 public class ServiceRegistryDBServiceTest {
 	
+	//=================================================================================================
+	// members
+	
 	@InjectMocks
 	ServiceRegistryDBService serviceRegistryDBService; 
 	
 	@Mock
 	ServiceRegistryRepository serviceRegistryRepository;
+	
+	//=================================================================================================
+	// methods
+		
+	//-------------------------------------------------------------------------------------------------
 		
 	@Test (expected = InvalidParameterException.class)
 	public void testGetAllServiceReqistryEntriesWithInvalidSortField() {
-		serviceRegistryDBService.getAllServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
+		serviceRegistryDBService.getServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
 }
