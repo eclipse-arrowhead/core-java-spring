@@ -265,7 +265,6 @@ public class ServiceRegistryController {
 		int validatedPage;
 		int validatedSize;
 		Direction validatedDirection;
-		final String validatedSortField = sortField.trim();
 		if (page == null && size == null) {
 			validatedPage = -1;
 			validatedSize = -1;
@@ -287,10 +286,10 @@ public class ServiceRegistryController {
 			default:
 				throw new BadPayloadException("Invalid sort direction flag", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		if (! ServiceDefinition.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-			throw new BadPayloadException("Sortable field with reference '" + validatedSortField + "' is not available", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		if (sortField.isBlank()) {
+			throw new BadPayloadException("sortField is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, validatedSortField);
+		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("Service definition  with page: {} and item_per page: {} succesfully retrived", page, size);
 		return serviceDefinitionEntries;
 	}
@@ -326,12 +325,11 @@ public class ServiceRegistryController {
 	@PostMapping(path =SERVICES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public ServiceDefinitionResponseDTO addServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
-		if (serviceDefinition.isBlank()) {
-			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		if (serviceDefinition == null || serviceDefinition.isBlank()) {
+			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
 		}
-		serviceDefinition = serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 		logger.debug("{} service definition succesfully registered.", serviceDefinition);
 		return serviceDefinitionResponse;
@@ -349,15 +347,14 @@ public class ServiceRegistryController {
 	@PutMapping(path =SERVICES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ServiceDefinitionResponseDTO putUpdateServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id
 			, @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
+		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition update request recieved with id: {}, definition: {}", id, serviceDefinition);
 		if (id < 1) {
 			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}		
-		if (serviceDefinition.isBlank()) {
-			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+		if (serviceDefinition == null || serviceDefinition.isBlank()) {
+			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
-		serviceDefinition = serviceDefinition.trim().toLowerCase();
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
 		logger.debug("Service definition with id: '{}' succesfully updated with definition '{}'.", id, serviceDefinition);
 		return serviceDefinitionResponse;
@@ -436,7 +433,7 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	private SystemResponseDTO callMergeSystem(SystemRequestDTO request, long systemId) {		
+	private SystemResponseDTO callMergeSystem(final SystemRequestDTO request, long systemId) {		
 		logger.debug(" callMergeSystem started ...");
 		
 		checkSystemMergeRequest(request, systemId);

@@ -46,7 +46,7 @@ public class ProviderReachabilityTaskTest {
 		sreviceRegistryEntries.add(new ServiceRegistry(serviceDefinition, testSystem, "testUri", ZonedDateTime.now(), true, "", 1));
 			
 		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(sreviceRegistryEntries);
-		when(serviceRegistryDBService.getAllServiceReqistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
+		when(serviceRegistryDBService.getServiceReqistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
 		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
 	
