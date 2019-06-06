@@ -9,7 +9,7 @@ public class SystemResponseDTO implements Serializable {
 	
 	private static final long serialVersionUID = 3919207845374510215L;
 	
-	private long sytemId;
+	private long id;
 	private String systemName;
 	private String address;
 	private int port;
@@ -32,7 +32,7 @@ public class SystemResponseDTO implements Serializable {
 			final String createdAt,
 			final String upDatedAt) {
 		
-		this.sytemId = systemId;
+		this.id = systemId;
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
@@ -42,7 +42,7 @@ public class SystemResponseDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public long getSytemId() { return sytemId;	}
+	public long getId() { return id;	}
 	public String getSystemName() { return systemName; }
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
@@ -51,7 +51,7 @@ public class SystemResponseDTO implements Serializable {
 	public String getCreatedAt() { return createdAt; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setSytemId(long sytemId) { this.sytemId = sytemId; }
+	public void setId(long sytemId) { this.id = sytemId; }
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
