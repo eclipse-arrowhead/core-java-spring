@@ -240,7 +240,7 @@ public class ServiceRegistryDBService {
 			}
 			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findById(id);
 			if (find.isPresent()) {				
-				String validatedServiceDefinition = serviceDefinition.trim().toLowerCase();
+				final String validatedServiceDefinition = serviceDefinition.trim().toLowerCase();
 				final ServiceDefinition serviceDefinitionEntry = find.get();
 				if (!validatedServiceDefinition.equals(serviceDefinitionEntry.getServiceDefinition())) {
 					checkConstraintsOfServiceDefinitionTable(validatedServiceDefinition);
