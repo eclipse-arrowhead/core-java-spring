@@ -183,7 +183,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = POST_SYSTEM_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
-	@PostMapping(path = SYSTEMS_URI, consumes = "application/json", produces = "application/json")
+	@PostMapping(path = SYSTEMS_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
 		checkSystemRequest(request);
@@ -201,7 +201,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PUT_SYSTEM_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
-	@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
+	@PutMapping(path = SYSTEMS_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
 		checkSystemPutRequest(request, systemId);
 		
@@ -218,7 +218,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_EXPECTATION_FAILED, message = PATCH_SYSTEM_HTTP_417_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
-	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = "application/json", produces = "application/json")
+	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SystemResponseDTO updateSystemByFields(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
 		checkSystemPatchRequest(request, systemId);
 		
