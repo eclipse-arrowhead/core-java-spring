@@ -128,7 +128,7 @@ public class ServiceRegistryController {
 		logger.debug("getSystemById started ...");
 		
 		if (systemId < 1) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_EXPECTATION_FAILED, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
+			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 		
 		try {			
