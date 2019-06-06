@@ -443,8 +443,8 @@ public class ServiceRegistryDBService {
 		
 		logger.debug(" checkConstraintsOfSystemTable started ...");
 		
-		final System find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
-		if (find != null) {
+		final Optional<System> find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
+		if (find.isPresent()) {
 			throw new BadPayloadException("Service by name:"+validatedSystemName+
 					", address:" + validatedAddress +
 					", port: "+validatedPort + 
