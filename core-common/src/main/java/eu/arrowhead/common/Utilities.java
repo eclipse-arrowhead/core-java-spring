@@ -67,8 +67,6 @@ public class Utilities {
 	    		status = HttpStatus.UNAUTHORIZED;
 			    break;
 	        case BAD_PAYLOAD:
-	        	status = HttpStatus.BAD_REQUEST;
-	          	break;
 	        case INVALID_PARAMETER:
 	        	status = HttpStatus.BAD_REQUEST;
 	          	break;
