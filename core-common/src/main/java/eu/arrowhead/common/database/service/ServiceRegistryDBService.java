@@ -74,20 +74,20 @@ public class ServiceRegistryDBService {
 		final Optional<System> systemOption = systemRepository.findById(systemId);
 		
 		if (!systemOption.isPresent()){
-			throw new NoSuchElementException();		
+			throw new  InvalidParameterException("");		
 		}
 		
 		try {
 			return DTOConverter.convertSystemToSystemResponseDTO(systemOption.get());			
-		} catch (final Exception e) {
-			throw new ArrowheadException("", e);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public SystemListResponseDTO getSystemEntries(final int page, final int size, final String direction, final String sortField) {
-		
+	public SystemListResponseDTO getSystemEntries(final int page, final int size, final String direction, final String sortField) {		
 		logger.debug(" getSystemEntries started ...");
 		
 		final int validatedPage;
@@ -112,7 +112,7 @@ public class ServiceRegistryDBService {
 		}else {
 			try {
 				validatedDirection = Direction.fromString(direction);
-			}catch (final IllegalArgumentException e) {
+			}catch (final IllegalArgumentException ex) {
 				throw new IllegalArgumentException("Direction field with reference '" + direction + "' is not available");
 			}
 			
@@ -129,8 +129,9 @@ public class ServiceRegistryDBService {
 		}
 		try {
 			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
-		} catch (Exception e) {
-			throw new ArrowheadException("", e);
+		} catch (Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
 	}
@@ -147,8 +148,9 @@ public class ServiceRegistryDBService {
 		
 		try {
 			return systemRepository.saveAndFlush(system);
-		} catch ( final Exception e) {
-		  throw new ArrowheadException("", e);
+		} catch ( final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
 	}
@@ -361,8 +363,8 @@ public class ServiceRegistryDBService {
 					validatedAddress,
 					validatedPort,
 					validatedAuthenticationInfo));
-		} catch ( final Exception e) {
-		  throw new BadPayloadException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, e);
+		} catch ( final Exception ex) {
+		  throw new InvalidParameterException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, ex);
 		}
 	}
 
@@ -381,12 +383,12 @@ public class ServiceRegistryDBService {
 		
 		final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
 		if (!systemOptional.isPresent()) {
-			throw new DataNotFoundException("No system with id : "+ validatedSystemId);
+			throw new InvalidParameterException("No system with id : "+ validatedSystemId);
 		}
 		
 		final System system = systemOptional.get();
 		
-		if (checkIfUniqeValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
+		if (checkIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
 			checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
 		}
 		
@@ -395,8 +397,13 @@ public class ServiceRegistryDBService {
 		system.setPort(validatedPort);
 		system.setAuthenticationInfo(validatedAuthenticationInfo);
 		
-		return systemRepository.saveAndFlush(system);
-		
+		try {
+			
+			return systemRepository.saveAndFlush(system);
+		} catch (Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -406,10 +413,15 @@ public class ServiceRegistryDBService {
 		logger.debug(" removeSystemById started ...");
 		
 		if (!systemRepository.existsById(id)) {
-			throw new DataNotFoundException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
-		}		
-		systemRepository.deleteById(id);
-		systemRepository.flush();
+			throw new InvalidParameterException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
+		}	
+		try {
+			systemRepository.deleteById(id);
+			systemRepository.flush();
+		} catch (Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 		
 	}
 	
@@ -418,7 +430,7 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public SystemResponseDTO mergeSystemResponse(final long validatedSystemId, final String validatedSystemName,
 			final String validatedAddress, final Integer validatedPort, final String validatedAuthenticationInfo) {		
-		logger.debug(" updateNonNullableSystemResponse started ...");
+		logger.debug(" mergeSystemResponse started ...");
 		
 		try {			
 			
@@ -427,8 +439,8 @@ public class ServiceRegistryDBService {
 					validatedAddress,
 					validatedPort,
 					validatedAuthenticationInfo));
-		} catch ( final Exception e) {
-			throw new BadPayloadException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, e);
+		} catch ( final Exception ex) {
+			throw new  InvalidParameterException(COULD_NOT_UPDATE_SYSTEM_ERROR_MESSAGE, ex);
 		}
 	}
 	
@@ -437,7 +449,7 @@ public class ServiceRegistryDBService {
 	@Transactional (rollbackFor = Exception.class)
 	public System mergeSystem(final long systemId, final String systemName, final String address,
 			final Integer port, final String authenticationInfo) {		
-		logger.debug(" updateNonNullableSystem started ...");
+		logger.debug(" mergeSystem started ...");
 		
 		final long validatedSystemId = validateSystemId(systemId);
 		final Integer validatedPort = validateAllowNullSystemPort(port);
@@ -447,12 +459,12 @@ public class ServiceRegistryDBService {
 		
 		final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
 		if (!systemOptional.isPresent()) {
-			throw new DataNotFoundException("No system with id : "+ validatedSystemId);
+			throw new  InvalidParameterException("No system with id : "+ validatedSystemId);
 		}
 		
 		final System system = systemOptional.get();
 		
-		if (checkIfUniqeValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
+		if (checkIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
 			checkConstraintsOfSystemTable(
 					validatedSystemName != null ? validatedSystemName : system.getSystemName(),
 					validatedAddress != null ? validatedAddress : system.getAddress(),
@@ -471,8 +483,12 @@ public class ServiceRegistryDBService {
 		
 		system.setAuthenticationInfo(validatedAuthenticationInfo);
 		
-		
-		return systemRepository.saveAndFlush(system);
+		try {
+			return systemRepository.saveAndFlush(system);
+		} catch (Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 		
 	}
 	//=================================================================================================
@@ -480,9 +496,8 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	private boolean checkIfUniqeValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
-			final Integer validatedPort) {
-		
+	private boolean checkIfUniqueValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
+			final Integer validatedPort) {		
 		logger.debug(" removeSystemById started ...");
 		
 		boolean isUniqnessCheckNeeded = false;
@@ -510,6 +525,8 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private void checkConstraintsOfServiceDefinitionTable(final String serviceDefinition) {
+		logger.debug(" checkConstraintsOfServiceDefinitionTable started ...");
+		
 		try {
 			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
 			if (find.isPresent()) {
@@ -527,15 +544,21 @@ public class ServiceRegistryDBService {
 	
 	private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress,
 			final int validatedPort) {
-		
 		logger.debug(" checkConstraintsOfSystemTable started ...");
 		
-		final Optional<System> find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
-		if (find.isPresent()) {
-			throw new BadPayloadException("Service by name:"+validatedSystemName+
-					", address:" + validatedAddress +
-					", port: "+validatedPort + 
-					" already exists");
+		try {
+			final Optional<System> find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
+			if (find.isPresent()) {
+				throw new InvalidParameterException("Service by name:"+validatedSystemName+
+						", address:" + validatedAddress +
+						", port: "+validatedPort + 
+						" already exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
 		
@@ -544,18 +567,19 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private System validateNonNullSystemParameters(String systemName, String address, int port, String authenticationInfo) {
-
+		logger.debug(" validateNonNullSystemParameters started ...");
+		
 		if (Utilities.isEmpty(systemName)) {
-			throw new BadPayloadException(""); //TODO USE ILLEGAL_PARAMETER:EXCEPTION
+			throw new  InvalidParameterException("System name is null or empty");
 		}
 		
 		if (Utilities.isEmpty(address)) {
-			throw new BadPayloadException(""); //TODO USE ILLEGAL_PARAMETER:EXCEPTION
+			throw new  InvalidParameterException("System address is null or empty");
 		}
 		
 		final int validatedPort = port;
-		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Port must be between "+ 
+		if ( ( validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN ) || ( validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) ) {
+			throw new InvalidParameterException("Port must be between "+ 
 					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
 					CommonConstants.SYSTEM_PORT_RANGE_MAX +"");
 		}
@@ -573,9 +597,10 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private String validateSystemParamString(final String param) {
+		logger.debug(" validateSystemParamString started ...");
 		
 		if (Utilities.isEmpty(param)) {
-			throw new IllegalArgumentException("parameter null or empty"); // TODO Use Arrowhead IllegalPrameterException 
+			throw new IllegalArgumentException("parameter null or empty");
 		}
 		
 		return  param.trim().toLowerCase();
@@ -584,6 +609,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private int validateSystemPort(final int port) {
+		logger.debug(" validateSystemPort started ...");
 		
 		final int validatedPort = port;
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
@@ -598,6 +624,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private long validateSystemId(final long systemId) {
+		logger.debug(" validateSystemId started ...");
 		
 		if (systemId < 1) {
 			throw new IllegalArgumentException("System id must be greater then null"); // TODO Use Arrowhead IllegalPrameterException 
@@ -609,6 +636,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private Integer validateAllowNullSystemPort(final Integer port) {
+		logger.debug(" validateAllowNullSystemPort started ...");
 		
 		final Integer validatedPort = port;
 		if (validatedPort != null && (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
@@ -623,6 +651,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	
 	private String validateAllowNullSystemParamString(final String param) {
+		logger.debug(" validateAllowNullSystemParamString started ...");
 		
 		if (Utilities.isEmpty(param)) {
 			return null;
