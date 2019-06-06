@@ -27,6 +27,8 @@ public class Defaults {
 	public static final long CORS_MAX_AGE = 600;
 	public static final String CORS_ALLOW_CREDENTIALS = "true";
 	
+	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = "ASC";
+	
 	private Defaults() {
 		throw new UnsupportedOperationException();
 	}

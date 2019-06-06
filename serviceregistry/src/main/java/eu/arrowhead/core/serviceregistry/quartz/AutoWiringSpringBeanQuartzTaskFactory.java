@@ -1,7 +1,6 @@
 package eu.arrowhead.core.serviceregistry.quartz;
 
 import org.quartz.spi.TriggerFiredBundle;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
@@ -11,7 +10,7 @@ public final class AutoWiringSpringBeanQuartzTaskFactory extends SpringBeanJobFa
     private AutowireCapableBeanFactory beanFactory;
     
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(ApplicationContext applicationContext) {
 
         beanFactory = applicationContext.getAutowireCapableBeanFactory();
     }

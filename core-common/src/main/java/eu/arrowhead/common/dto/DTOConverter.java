@@ -19,7 +19,13 @@ public class DTOConverter {
 	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
 		
-		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo());		
+		return new SystemResponseDTO(system.getId(),
+				system.getSystemName(),
+				system.getAddress(),
+				system.getPort(),
+				system.getAuthenticationInfo(),
+				String.valueOf(system.getCreatedAt()),
+				String.valueOf(system.getUpdatedAt()));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -36,43 +42,23 @@ public class DTOConverter {
 		return systemListResponseDTO;
 		
 	}
-	
+		
 	//-------------------------------------------------------------------------------------------------
-	public static System convertSystemRequestDTOToSystem(final SystemRequestDTO systemRequestDTO) {
-		Assert.notNull(systemRequestDTO, "System is null");
-		Assert.notNull(systemRequestDTO.getAddress(), "SystemAddress is null");
-		Assert.notNull(systemRequestDTO.getPort(), "SystemPort is null");
-		Assert.notNull(systemRequestDTO.getSystemName(), "SystemName is null");
-		
-		final String validatedAuthenticationInfo = systemRequestDTO.getAuthenticationInfo();
-		if ( validatedAuthenticationInfo != null && !"".equalsIgnoreCase(validatedAuthenticationInfo)) {
-			
-			return new System(systemRequestDTO.getSystemName(), systemRequestDTO.getAddress(), systemRequestDTO.getPort(), validatedAuthenticationInfo);
-		}
-		else {
-			final System system = new System();
-			system.setAddress(systemRequestDTO.getAddress());
-			system.setPort(systemRequestDTO.getPort());
-			system.setSystemName(systemRequestDTO.getSystemName());
-			
-			return system;
-		}
-						
-	}
-		
-	
 	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
 		Assert.notNull(serviceDefinition, "ServiceDefinition is null");
-		Assert.notNull(serviceDefinition.getServiceDefinition(), "ServiceDefinition is null");
 		
 		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), String.valueOf(serviceDefinition.getCreatedAt()), String.valueOf(serviceDefinition.getUpdatedAt()));
 	}
 	
-	public static ServiceDefinition convertServiceDefinitionRequestDTOToServiceDefinition(final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		Assert.notNull(serviceDefinitionRequestDTO, "ServiceDefinitionRequestDTO is null");
-		Assert.notNull(serviceDefinitionRequestDTO.getServiceDefinition(), "ServiceDefinition is null");
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceDefinitionsListResponseDTO convertServiceDefinitionsListToServiceDefinitionListResponseDTO(final Page<ServiceDefinition> serviceDefinitions) {
+		Assert.notNull(serviceDefinitions, "List of ServiceDefinition is null");
 		
-		return new ServiceDefinition(serviceDefinitionRequestDTO.getServiceDefinition());
+		final List<ServiceDefinitionResponseDTO> serviceDefinitionDTOs = new ArrayList<>();
+		for (final ServiceDefinition definition : serviceDefinitions) {
+			serviceDefinitionDTOs.add(convertServiceDefinitionToServiceDefinitionResponseDTO(definition));
+		}		
+		return new ServiceDefinitionsListResponseDTO( serviceDefinitionDTOs, serviceDefinitions.getTotalElements());
 	}
 	
 	//=================================================================================================

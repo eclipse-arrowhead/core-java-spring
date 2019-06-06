@@ -12,6 +12,7 @@ public class CommonConstants {
 	public static final String DATABASE_DRIVER_CLASS = "spring.datasource.driver-class-name"; 
 	public static final String DATABASE_ENTITY_PACKAGE = "eu.arrowhead.common.database.entity";
 	public static final String DATABASE_REPOSITORY_PACKAGE = "eu.arrowhead.common.database.repository";
+	public static final String DATABASE_OPERATION_EXCEPTION_MSG = "Database operation exception";
 	
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
@@ -98,7 +99,6 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
-	public static final String REQUEST_PARAM_DIRECTION_DEFAULT_VALUE = "ASC";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
 	
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "systemName";
@@ -107,7 +107,7 @@ public class CommonConstants {
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
 	
 	public static final long CONVERSION_MILLISECOND_TO_MINUTES = 60000;
-
+	
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}

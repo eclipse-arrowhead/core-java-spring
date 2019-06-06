@@ -9,7 +9,7 @@ public class ServiceDefinitionResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private Long id;
+	private long id;
 	private String serviceDefinition;
 	private String createdAt;
 	private String updatedAt;
@@ -22,7 +22,7 @@ public class ServiceDefinitionResponseDTO implements Serializable {
 	public ServiceDefinitionResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionResponseDTO(final Long id, final String serviceDefinition, final String createdAt, final String updatedAt) {
+	public ServiceDefinitionResponseDTO(final long id, final String serviceDefinition, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.serviceDefinition = serviceDefinition;
 		this.createdAt = createdAt;
@@ -30,13 +30,13 @@ public class ServiceDefinitionResponseDTO implements Serializable {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Long getId() { return id; }
+	public long getId() { return id; }
 	public String getServiceDefinition() { return serviceDefinition; }
 	public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId(final Long id) { this.id = id; }
+	public void setId(final long id) { this.id = id; }
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
