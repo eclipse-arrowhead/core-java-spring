@@ -7,9 +7,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -18,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
 import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
 
@@ -26,6 +29,7 @@ import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
  *
  */
 @RunWith(SpringRunner.class)
+@Ignore
 @SpringBootTest(classes = ServiceRegistryMain.class)
 @AutoConfigureMockMvc
 public class PayloadSizeFilterTest {
