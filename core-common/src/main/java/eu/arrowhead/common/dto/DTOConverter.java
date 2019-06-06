@@ -42,29 +42,6 @@ public class DTOConverter {
 		return systemListResponseDTO;
 		
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public static System convertSystemRequestDTOToSystem(final SystemRequestDTO systemRequestDTO) {
-		Assert.notNull(systemRequestDTO, "System is null");
-		Assert.notNull(systemRequestDTO.getAddress(), "SystemAddress is null");
-		Assert.notNull(systemRequestDTO.getPort(), "SystemPort is null");
-		Assert.notNull(systemRequestDTO.getSystemName(), "SystemName is null");
-		
-		final String validatedAuthenticationInfo = systemRequestDTO.getAuthenticationInfo();
-		if ( validatedAuthenticationInfo != null && !"".equalsIgnoreCase(validatedAuthenticationInfo)) {
-			
-			return new System(systemRequestDTO.getSystemName(), systemRequestDTO.getAddress(), systemRequestDTO.getPort(), validatedAuthenticationInfo);
-		}
-		else {
-			final System system = new System();
-			system.setAddress(systemRequestDTO.getAddress());
-			system.setPort(systemRequestDTO.getPort());
-			system.setSystemName(systemRequestDTO.getSystemName());
-			
-			return system;
-		}
-						
-	}
 		
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
