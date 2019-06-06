@@ -2,53 +2,79 @@ package eu.arrowhead.common.security;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.filter.GenericFilterBean;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.filter.ArrowheadFilter;
+import eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper;
 
-public class AccessControlFilter extends GenericFilterBean {
+public abstract class AccessControlFilter extends ArrowheadFilter {
 	
-	protected Logger log = LogManager.getLogger(AccessControlFilter.class);
-	protected ObjectMapper mapper = new ObjectMapper();
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	protected Map<String,String> arrowheadContext;
 	
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {
+			log.debug("Checking access in AccessControlFilter...");
 			try {
-				final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-//				final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
-				final String clientCN = getCertificateCNFromRequest(httpServletRequest);
+				final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
+				final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
+				final String requestJSON = requestWrapper.getCachedBody();
+				final Map<String,String[]> queryParams = requestWrapper.getParameterMap();
+				final String clientCN = getCertificateCNFromRequest(requestWrapper);
 				if (clientCN == null) {
-					//TODO: better exception
-					throw new AuthException("Do you see this?");
+					log.error("Unauthorized access: {}", requestTarget);
+					throw new AuthException("Unauthorized access: " + requestTarget);
 				}
+				
+				checkClientAuthorized(clientCN, requestWrapper.getMethod(), requestTarget, requestJSON, queryParams);
+				
+				log.debug("Using MultiReadRequestWrapper in the filter chain from now...");
+				chain.doFilter(requestWrapper, response);
 			} catch (final ArrowheadException ex) {
 				handleException(ex, response);
-				return;
 			}
+		} else {
+			chain.doFilter(request, response);
 		}
-		
-		chain.doFilter(request, response);
+	}
+	
+	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
+		if (!Utilities.isKeyStoreCNArrowheadValid(clientCN)) {
+			log.debug("{} is not a valid common name, access denied!", clientCN);
+	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
+		}
+
+	    // All requests from the local cloud are allowed
+	    if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, getServerCloudCN())) {
+	        log.debug("{} is unauthorized to access {}", clientCN, requestTarget);
+	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
+	    }
+	}
+	
+	protected String getServerCloudCN() {
+		final String serverCN = arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
+	    final String[] serverFields = serverCN.split("\\.", 2); // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
+	    Assert.isTrue(serverFields.length >= 2, "Server common name is invalid: " + serverCN);
+	    
+	    return serverFields[1];
 	}
 
+	@Nullable
 	private String getCertificateCNFromRequest(final HttpServletRequest request) {
 		final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
 		if (certificates != null && certificates.length != 0) {
@@ -57,24 +83,5 @@ public class AccessControlFilter extends GenericFilterBean {
 		}
 		
 		return null;
-	}
-	
-	private void handleException(final ArrowheadException ex, final ServletResponse response) throws IOException {
-		final HttpStatus status = Utilities.calculateHttpStatusFromArrowheadException(ex);
-		final String origin = ex.getOrigin() == null ? CommonConstants.UNKNOWN_ORIGIN : ex.getOrigin();
-		log.debug("{} at {}: {}", ex.getClass().getName(), origin, ex.getMessage());
-		log.debug("Exception", ex);
-		final ErrorMessageDTO dto = new ErrorMessageDTO(ex);
-		if (ex.getErrorCode() == 0) {
-			dto.setErrorCode(status.value());
-		}
-		sendError(status, dto, (HttpServletResponse) response);
-	}
-
-	private void sendError(final HttpStatus status, final ErrorMessageDTO dto, final HttpServletResponse response) throws IOException {
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		response.setStatus(status.value());
-		response.getWriter().print(mapper.writeValueAsString(dto));
-		response.getWriter().flush();
 	}
 }

@@ -13,5 +13,10 @@
     "name": "disable.hostname.verifier",
     "type": "java.lang.Boolean",
     "description": "A description for 'disable.hostname.verifier'"
+  },
+  {
+    "name": "log_all_request_and_response",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'log_all_request_and_response'"
   }
 ]}

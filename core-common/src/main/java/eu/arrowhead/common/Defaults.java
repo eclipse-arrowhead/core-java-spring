@@ -16,10 +16,18 @@ public class Defaults {
 	public static final int DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES = 13;
 	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	
+	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
+	
 	// HTTP client defaults
 	public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;
 	public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 	public static final int DEFAULT_CONNECTION_MANAGER_TIMEOUT = 10000;
+	
+	// CORS defaults
+	public static final long CORS_MAX_AGE = 600;
+	public static final String CORS_ALLOW_CREDENTIALS = "true";
+	
+	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = "ASC";
 	
 	private Defaults() {
 		throw new UnsupportedOperationException();
