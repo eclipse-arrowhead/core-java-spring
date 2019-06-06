@@ -83,7 +83,6 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
-	public static final String REQUEST_PARAM_DIRECTION_DEFAULT_VALUE = "ASC";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
 	
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
