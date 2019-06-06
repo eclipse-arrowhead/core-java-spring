@@ -91,8 +91,10 @@ public class ServiceRegistryController {
 	private static final String DELETE_SERVICES_HTTP_404_MESSAGE = "Service definition with given parameters not exists";
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
-	private static final String ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE ="System id must be greater then 0. ";
-
+	private static final String SYSTEM_ID_NOT_VALID_ERROR_MESSAGE = " System id must be greater then 0. ";
+	private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
+	private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
+	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -128,7 +130,7 @@ public class ServiceRegistryController {
 		logger.debug("getSystemById started ...");
 		
 		if (systemId < 1) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 		
 		return serviceRegistryDBService.getSystemById(systemId);			
@@ -219,10 +221,10 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})	
 	@PatchMapping(path = SYSTEMS_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public SystemResponseDTO updateSystemByFields(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
-		checkSystemPatchRequest(request, systemId);
+	@ResponseBody public SystemResponseDTO mergeSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
+		checkSystemMergeRequest(request, systemId);
 		
-		return callNonNullableUpdateSystem(request, systemId);
+		return callMergeSystem(request, systemId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -238,7 +240,7 @@ public class ServiceRegistryController {
 	public ResponseEntity<HttpStatus> removeSystem(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
 		logger.debug("New System delete request recieved with id: {}", id);
 		if (id < 1) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		serviceRegistryDBService.removeSystemById(id);
 		logger.debug("System with id: '{}' succesfully deleted", id);
@@ -306,7 +308,7 @@ public class ServiceRegistryController {
 	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinitionById(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
 		logger.debug("New Service Definition get request recieved with id: {}", id);
 		if (id < 1) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		final ServiceDefinitionResponseDTO serviceDefinitionEntry = serviceRegistryDBService.getServiceDefinitionByIdResponse(id);
 		logger.debug("Service definition with id: '{}' succesfully retrived", id);
@@ -350,7 +352,7 @@ public class ServiceRegistryController {
 		String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition update request recieved with id: {}, definition: {}", id, serviceDefinition);
 		if (id < 1) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}		
 		if (serviceDefinition.isBlank()) {
 			throw new BadPayloadException("serviceDefinition is blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
@@ -390,7 +392,7 @@ public class ServiceRegistryController {
 	public void removeServiceDefinition(@PathVariable(value = CommonConstants.COMMON_FIELD_NAME_ID) final long id) {
 		logger.debug("New Service Definition delete request recieved with id: {}", id);
 		if (id < 1) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		serviceRegistryDBService.removeServiceDefinitionById(id);
 		logger.debug("Service definition with id: '{}' succesfully deleted", id);
@@ -403,24 +405,24 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 
 	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request) {
+		logger.debug(" callCreateSystem started ...");
 		
-		final String validatedSystemName = request.getSystemName().toLowerCase();
-		final String validatedAddress = request.getAddress().toLowerCase();
-		final int  validatedPort = request.getPort();
-		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
+		checkSystemRequest(request);
 		
-		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Port must be between "+ 
-					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
-					CommonConstants.SYSTEM_PORT_RANGE_MAX +"", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
-		}
+		final String systemName = request.getSystemName();
+		final String address = request.getAddress();
+		final int  port = request.getPort();
+		final String authenticationInfo = request.getAuthenticationInfo();
 		
-		return serviceRegistryDBService.createSystemResponse( validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+		return serviceRegistryDBService.createSystemResponse( systemName, address, port, authenticationInfo);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	
 	private SystemResponseDTO callUpdateSystem(final SystemRequestDTO request, final long systemId) {
+		logger.debug(" callUpdateSystem started ...");
+		
+		checkSystemPutRequest(request, systemId);
 		
 		final long validatedSystemId = systemId;		
 
@@ -434,9 +436,10 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	private SystemResponseDTO callNonNullableUpdateSystem(SystemRequestDTO request, long systemId) {
+	private SystemResponseDTO callMergeSystem(SystemRequestDTO request, long systemId) {		
+		logger.debug(" callMergeSystem started ...");
 		
-		logger.debug(" callNonNullableUpdateSystem started ...");
+		checkSystemMergeRequest(request, systemId);
 		
 		final long validatedSystemId = systemId;		
 	
@@ -445,17 +448,16 @@ public class ServiceRegistryController {
 		final Integer  validatedPort = request.getPort();
 		final String validatedAuthenticationInfo = request.getAuthenticationInfo()!=null?request.getAuthenticationInfo():"";
 		
-		return serviceRegistryDBService.updateNonNullableSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+		return serviceRegistryDBService.mergeSystemResponse(validatedSystemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	
-	private void checkSystemPatchRequest(final SystemRequestDTO request, final long systemId) {
-		
+	private void checkSystemMergeRequest(final SystemRequestDTO request, final long systemId) {
 		logger.debug(" checkSystemPatchRequest started ...");
 		
 		if ( systemId <= 0) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
 		boolean needChange = false;
@@ -469,6 +471,14 @@ public class ServiceRegistryController {
 		}
 		
 		if (request.getPort() != null ) {
+			
+			final Integer validatedPort = request.getPort();
+			if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+				throw new BadPayloadException("Port must be between "+ 
+						CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
+						CommonConstants.SYSTEM_PORT_RANGE_MAX +"", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			}
+			
 			needChange = true;
 		}
 		
@@ -482,35 +492,38 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	
 	private void checkSystemPutRequest(final SystemRequestDTO request, final long systemId) {
+		logger.debug(" checkSystemPutRequest started ...");
 		
 		if ( systemId <= 0) {
-			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
-		if ( request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
-			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
-		}
-		if ( request.getPort() == null ) {
-			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
-		}
-		if ( request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
-			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
-		}
+		checkSystemRequest(request);
 			
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	
 	private void checkSystemRequest(final SystemRequestDTO request) {
+		logger.debug(" checkSystemRequest started ...");
 		
-		if (request.getAddress() == null || "".equalsIgnoreCase(request.getAddress().trim()) ) {
-			throw new BadPayloadException("System address is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		if (Utilities.isEmpty(request.getSystemName())) {
+			throw new BadPayloadException( SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
-		if (request.getPort() == null ) {
-			throw new BadPayloadException("System port is null." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		
+		if (Utilities.isEmpty(request.getAddress())) {
+			throw new BadPayloadException( SYSTEM_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
-		if (request.getSystemName() == null || "".equalsIgnoreCase(request.getAddress().trim())) {
-			throw new BadPayloadException("System name is null or empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		
+		if (request.getPort() == null) {
+			throw new BadPayloadException( SYSTEM_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		
+		final int validatedPort = request.getPort();
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Port must be between "+ 
+					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
+					CommonConstants.SYSTEM_PORT_RANGE_MAX +"", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 	}
 
