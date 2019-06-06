@@ -131,16 +131,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(ID_MUST_BE_GREATER_THEN_ZERO_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 		
-		try {			
-			
-			final System system = serviceRegistryDBService.getSystemById(systemId);
-			
-			return DTOConverter.convertSystemToSystemResponseDTO(system);	
-		
-		} catch (final NoSuchElementException e) {
-			throw new DataNotFoundException("No such System by id: " + systemId, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI, e);
-		}
-		
+		return serviceRegistryDBService.getSystemById(systemId);			
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -180,14 +171,7 @@ public class ServiceRegistryController {
 			}			
 		}
 		
-		try {			
-			
-			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, direction, sortField));	
-		
-		} catch ( final IllegalArgumentException e) {
-			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
-		}
-		
+		return serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, direction, sortField);			
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -204,13 +188,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO addSystem(@RequestBody final SystemRequestDTO request) {
 		checkSystemRequest(request);
 		
-		try {
-			
-			return callCreateSystem(request);
-		} catch (final Exception e) {
-			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI, e);
-		}
-		
+		return callCreateSystem(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -227,13 +205,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO updateSystem(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
 		checkSystemPutRequest(request, systemId);
 		
-		try {
-			
-			return callUpdateSystem(request, systemId);
-		} catch (final Exception e) {
-			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
-		}
-	
+		return callUpdateSystem(request, systemId);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -250,13 +222,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO updateSystemByFields(@PathVariable(value = SYSTEM_BY_ID_PATH_VARIABLE) final long systemId, @RequestBody final SystemRequestDTO request) {
 		checkSystemPatchRequest(request, systemId);
 		
-		try {
-			
-			return callNonNullableUpdateSystem(request, systemId);
-		} catch (final Exception e) {
-			throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI, e);
-		}
-	
+		return callNonNullableUpdateSystem(request, systemId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

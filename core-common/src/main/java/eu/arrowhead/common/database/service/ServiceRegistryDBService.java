@@ -26,7 +26,9 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -62,7 +64,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	public System getSystemById(final long systemId) {
+	public SystemResponseDTO getSystemById(final long systemId) {
 		
 		logger.debug(" getSystemById started ...");
 		
@@ -72,12 +74,16 @@ public class ServiceRegistryDBService {
 			throw new NoSuchElementException();		
 		}
 		
-		return systemOption.get();			
+		try {
+			return DTOConverter.convertSystemToSystemResponseDTO(systemOption.get());			
+		} catch (final Exception e) {
+			throw new ArrowheadException("", e);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public Page<System> getSystemEntries(final int page, final int size, final String direction, final String sortField) {
+	public SystemListResponseDTO getSystemEntries(final int page, final int size, final String direction, final String sortField) {
 		
 		logger.debug(" getSystemEntries started ...");
 		
@@ -118,8 +124,12 @@ public class ServiceRegistryDBService {
 				validatedSortField = sortField;
 			}
 		}
+		try {
+			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
+		} catch (Exception e) {
+			throw new ArrowheadException("", e);
+		}
 		
-		return systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
