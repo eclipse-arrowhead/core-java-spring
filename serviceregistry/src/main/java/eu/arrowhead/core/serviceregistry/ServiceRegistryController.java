@@ -1,7 +1,5 @@
 package eu.arrowhead.core.serviceregistry;
 
-import java.util.NoSuchElementException;
-
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,10 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
-import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
@@ -36,7 +31,6 @@ import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -149,7 +143,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemListResponseDTO getSystems(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final Direction direction,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField){		
 		
 		logger.debug("getSystems started ...");
@@ -433,7 +427,7 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	private SystemResponseDTO callMergeSystem(final SystemRequestDTO request, long systemId) {		
+	private SystemResponseDTO callMergeSystem(final SystemRequestDTO request, final long systemId) {		
 		logger.debug(" callMergeSystem started ...");
 		
 		checkSystemMergeRequest(request, systemId);

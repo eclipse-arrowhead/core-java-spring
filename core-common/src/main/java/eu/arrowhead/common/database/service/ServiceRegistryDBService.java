@@ -1,10 +1,7 @@
 package eu.arrowhead.common.database.service;
 
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +11,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import antlr.Utils;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
@@ -32,7 +28,6 @@ import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @Service
@@ -87,49 +82,21 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	public SystemListResponseDTO getSystemEntries(final int page, final int size, final String direction, final String sortField) {		
+	public SystemListResponseDTO getSystemEntries(final int page, final int size, final Direction direction, final String sortField) {		
 		logger.debug(" getSystemEntries started ...");
 		
-		final int validatedPage;
-		final int validatedSize;
-		final Direction validatedDirection;
-		final String validatedSortField;
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
-		if (page < 0) {
-			validatedPage = 0;
-		}else {
-			validatedPage = page;
+		if (! System.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new IllegalArgumentException("Sortable field with reference '" + validatedSortField + "' is not available");
 		}
 		
-		if (size < 0) {
-			validatedSize = Integer.MAX_VALUE;
-		}else {
-			validatedSize = size;
-		}
-		
-		if (direction == null) {
-			validatedDirection = Direction.ASC;
-		}else {
-			try {
-				validatedDirection = Direction.fromString(direction);
-			}catch (final IllegalArgumentException ex) {
-				throw new IllegalArgumentException("Direction field with reference '" + direction + "' is not available");
-			}
-			
-		}
-		
-		if(sortField==null || "".equalsIgnoreCase(sortField)) {
-			validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
-		}else {
-			if (! System.SORTABLE_FIELDS_BY.contains(sortField)) {
-				throw new IllegalArgumentException("Sortable field with reference '" + sortField + "' is not available");
-			}else {
-				validatedSortField = sortField;
-			}
-		}
 		try {
 			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -400,7 +367,7 @@ public class ServiceRegistryDBService {
 		try {
 			
 			return systemRepository.saveAndFlush(system);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -418,7 +385,7 @@ public class ServiceRegistryDBService {
 		try {
 			systemRepository.deleteById(id);
 			systemRepository.flush();
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -485,7 +452,7 @@ public class ServiceRegistryDBService {
 		
 		try {
 			return systemRepository.saveAndFlush(system);
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -566,7 +533,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	
-	private System validateNonNullSystemParameters(String systemName, String address, int port, String authenticationInfo) {
+	private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo) {
 		logger.debug(" validateNonNullSystemParameters started ...");
 		
 		if (Utilities.isEmpty(systemName)) {
@@ -600,7 +567,7 @@ public class ServiceRegistryDBService {
 		logger.debug(" validateSystemParamString started ...");
 		
 		if (Utilities.isEmpty(param)) {
-			throw new IllegalArgumentException("parameter null or empty");
+			throw new InvalidParameterException("parameter null or empty");
 		}
 		
 		return  param.trim().toLowerCase();
@@ -613,7 +580,7 @@ public class ServiceRegistryDBService {
 		
 		final int validatedPort = port;
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Port must be between "+ 
+			throw new InvalidParameterException("Port must be between "+ 
 					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
 					CommonConstants.SYSTEM_PORT_RANGE_MAX +"");
 		}
