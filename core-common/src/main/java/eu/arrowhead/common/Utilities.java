@@ -69,6 +69,9 @@ public class Utilities {
 	        case BAD_PAYLOAD:
 	        	status = HttpStatus.BAD_REQUEST;
 	          	break;
+	        case INVALID_PARAMETER:
+	        	status = HttpStatus.BAD_REQUEST;
+	          	break;
 	        case DATA_NOT_FOUND:
 	        	status = HttpStatus.NOT_FOUND;
 	        	break;
