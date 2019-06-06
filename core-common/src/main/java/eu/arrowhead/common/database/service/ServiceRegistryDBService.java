@@ -54,6 +54,9 @@ public class ServiceRegistryDBService {
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
 	private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
+	private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between "+ 
+			CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
+			CommonConstants.SYSTEM_PORT_RANGE_MAX +"";
 	
 	//=================================================================================================
 	// methods
@@ -534,9 +537,7 @@ public class ServiceRegistryDBService {
 		
 		final int validatedPort = port;
 		if ( ( validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN ) || ( validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) ) {
-			throw new InvalidParameterException("Port must be between "+ 
-					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
-					CommonConstants.SYSTEM_PORT_RANGE_MAX +"");
+			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
 		}
 		
 		final String validatedSystemName = systemName.trim().toLowerCase() ;
@@ -568,9 +569,7 @@ public class ServiceRegistryDBService {
 		
 		final int validatedPort = port;
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("Port must be between "+ 
-					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
-					CommonConstants.SYSTEM_PORT_RANGE_MAX +"");
+			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
 		}
 		
 		return  validatedPort;
@@ -582,7 +581,7 @@ public class ServiceRegistryDBService {
 		logger.debug(" validateSystemId started ...");
 		
 		if (systemId < 1) {
-			throw new IllegalArgumentException("System id must be greater then null"); // TODO Use Arrowhead IllegalPrameterException 
+			throw new IllegalArgumentException("System id must be greater then null");
 		}
 		
 		return systemId;
@@ -595,9 +594,7 @@ public class ServiceRegistryDBService {
 		
 		final Integer validatedPort = port;
 		if (validatedPort != null && (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
-			throw new BadPayloadException("Port must be between "+ 
-					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
-					CommonConstants.SYSTEM_PORT_RANGE_MAX +"");
+			throw new BadPayloadException(PORT_RANGE_ERROR_MESSAGE);
 		}
 		
 		return  validatedPort;
