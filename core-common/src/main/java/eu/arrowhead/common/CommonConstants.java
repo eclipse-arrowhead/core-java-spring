@@ -12,6 +12,7 @@ public class CommonConstants {
 	public static final String DATABASE_DRIVER_CLASS = "spring.datasource.driver-class-name"; 
 	public static final String DATABASE_ENTITY_PACKAGE = "eu.arrowhead.common.database.entity";
 	public static final String DATABASE_REPOSITORY_PACKAGE = "eu.arrowhead.common.database.repository";
+	public static final String DATABASE_OPERATION_EXCEPTION_MSG = "Database operation exception";
 	
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
@@ -32,6 +33,7 @@ public class CommonConstants {
 	public static final int HTTP_PORT = 80;
 	
 	public static final String SERVER_ERROR_URI = "/error";
+	public static final String MGMT_URI = "/mgmt";
 	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
@@ -79,7 +81,15 @@ public class CommonConstants {
 	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
 	
-	public static final int CONVERSION_MILLISECOND_TO_MINUTES = 60000;
+	public static final String REQUEST_PARAM_PAGE = "page";
+	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
+	public static final String REQUEST_PARAM_DIRECTION = "direction";
+	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
+	
+	public static final int SYSTEM_PORT_RANGE_MIN = 0;
+	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
+	
+	public static final long CONVERSION_MILLISECOND_TO_MINUTES = 60000;
 	
 	private CommonConstants() {
 		throw new UnsupportedOperationException();

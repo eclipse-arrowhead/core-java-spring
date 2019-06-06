@@ -21,6 +21,8 @@ public class Defaults {
 	public static final int DEFAULT_SOCKET_TIMEOUT = 30000;
 	public static final int DEFAULT_CONNECTION_MANAGER_TIMEOUT = 10000;
 	
+	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = "ASC";
+	
 	private Defaults() {
 		throw new UnsupportedOperationException();
 	}
