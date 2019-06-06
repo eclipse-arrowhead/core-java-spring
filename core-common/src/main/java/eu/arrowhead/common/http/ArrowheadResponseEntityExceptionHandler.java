@@ -31,7 +31,7 @@ public class ArrowheadResponseEntityExceptionHandler extends ResponseEntityExcep
 		log.debug("{} at {}: {}", ex.getClass().getName(), origin, ex.getMessage());
 		log.debug("Exception", ex);
 		final ErrorMessageDTO dto = new ErrorMessageDTO(ex);
-		if (ex.getErrorCode() == 0) {
+		if (ex.getErrorCode() <= 0) {
 			dto.setErrorCode(status.value());
 		}
 		return handleExceptionInternal(ex, dto, headers, status, request);

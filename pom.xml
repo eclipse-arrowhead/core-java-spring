@@ -34,7 +34,7 @@
   	</modules>
   	
 	<properties>
-		<base.version>5</base.version>
+		<base.version>4.1.2</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.compiler.version>3.8.1</mvn.compiler.version>
