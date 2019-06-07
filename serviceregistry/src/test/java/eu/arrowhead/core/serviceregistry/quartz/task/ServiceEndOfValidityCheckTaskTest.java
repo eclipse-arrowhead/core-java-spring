@@ -26,6 +26,7 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
+import eu.arrowhead.common.dto.ServiceSecurityType;
 
 
 @RunWith (SpringRunner.class)
@@ -46,15 +47,15 @@ public class ServiceEndOfValidityCheckTaskTest {
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
 		final System testSystem = new System("testSystem", "testAddress", 1, "testAuthenticationInfo");
 		
-		final ServiceRegistry pastTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.minusMinutes(10), true, "", 1);
+		final ServiceRegistry pastTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.minusMinutes(10), ServiceSecurityType.TOKEN, "", 1);
 		pastTTL.setId(1);
 		sreviceRegistryEntries.add(pastTTL);
 		
-		final ServiceRegistry futureTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.plusMinutes(10), true, "", 1);		
+		final ServiceRegistry futureTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.plusMinutes(10), ServiceSecurityType.TOKEN, "", 1);		
 		futureTTL.setId(2);
 		sreviceRegistryEntries.add(futureTTL);
 		
-		final ServiceRegistry noTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", null, true, "", 1);
+		final ServiceRegistry noTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", null, ServiceSecurityType.TOKEN, "", 1);
 		noTTL.setId(3);
 		sreviceRegistryEntries.add(noTTL);
 		
