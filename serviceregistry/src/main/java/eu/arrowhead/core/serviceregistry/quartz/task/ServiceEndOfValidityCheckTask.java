@@ -57,6 +57,7 @@ public class ServiceEndOfValidityCheckTask implements Job {
 		} catch (final IllegalArgumentException exception) {
 			logger.debug(exception.getMessage());
 		}
+		
 		return removedServiceRegistryEntries;
 	}
 	
@@ -70,11 +71,11 @@ public class ServiceEndOfValidityCheckTask implements Job {
 			}
 		}
 		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);
+		
 		return toBeRemoved;
 	}
 	
 	private boolean isTTLValid(final ZonedDateTime endOfValidity) {
 		return endOfValidity.isAfter(ZonedDateTime.now());
 	}
-	
 }

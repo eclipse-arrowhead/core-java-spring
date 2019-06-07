@@ -33,7 +33,7 @@ public class ProvidersReachabilityTask implements Job {
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
 	
-	@Value (CommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
+	@Value(CommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
 	private int timeout;
 	
 	@Override
@@ -64,6 +64,7 @@ public class ProvidersReachabilityTask implements Job {
 		} catch (final IllegalArgumentException exception) {
 			logger.debug(exception.getMessage());
 		}
+		
 		return removedServiceRegistryEntries;
 	}
 	
@@ -79,6 +80,7 @@ public class ProvidersReachabilityTask implements Job {
 			}
 		}
 		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);
+		
 		return toBeRemoved;
 	}
 	
@@ -91,5 +93,4 @@ public class ProvidersReachabilityTask implements Job {
 			return false;
 		}
 	}
-	
 }

@@ -15,5 +15,4 @@ public class DefaultSwaggerController {
 	public String redirectDefaultSwaggerUI() {
 		return "redirect:" + CommonConstants.SWAGGER_UI_URI;
 	}
-
 }

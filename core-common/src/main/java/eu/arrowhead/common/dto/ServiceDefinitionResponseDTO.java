@@ -14,7 +14,6 @@ public class ServiceDefinitionResponseDTO implements Serializable {
 	private String createdAt;
 	private String updatedAt;
 	
-	
 	//=================================================================================================
 	// methods
 	
