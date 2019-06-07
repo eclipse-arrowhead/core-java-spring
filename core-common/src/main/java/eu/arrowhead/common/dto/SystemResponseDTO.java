@@ -51,11 +51,11 @@ public class SystemResponseDTO implements Serializable {
 	public String getCreatedAt() { return createdAt; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setId(long sytemId) { this.id = sytemId; }
+	public void setId(final long sytemId) { this.id = sytemId; }
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
-	public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 }

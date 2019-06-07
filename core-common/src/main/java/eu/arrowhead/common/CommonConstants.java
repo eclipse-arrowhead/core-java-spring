@@ -108,6 +108,9 @@ public class CommonConstants {
 	
 	public static final long CONVERSION_MILLISECOND_TO_MINUTES = 60000;
 	
+	public static final String SORT_ORDER_ASCENDING = "ASC";
+	public static final String SORT_ORDER_DESCENDING = "DESC";
+	
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}

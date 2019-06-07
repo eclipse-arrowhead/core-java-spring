@@ -23,10 +23,10 @@ public class ProvidersReachabilityTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value (CommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
+	@Value(CommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
 	private boolean pingScheduled;
 	
-	@Value (CommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
+	@Value(CommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
 	private int pingInterval;
 	
 	private static final int SCHEDULER_DELAY = 10;
@@ -39,6 +39,7 @@ public class ProvidersReachabilityTaskConfig {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
+		
 		if (pingScheduled) {			
 	        schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(providersReachabilityTaskDetail().getObject());
@@ -48,6 +49,7 @@ public class ProvidersReachabilityTaskConfig {
 		} else {
 			logger.info("Providers reachabilitiy task is not adjusted");
 		}
+		
 		return schedulerFactory;        
     }
 	
@@ -58,6 +60,7 @@ public class ProvidersReachabilityTaskConfig {
         trigger.setRepeatInterval(pingInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTES);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
+        
         return trigger;
     }
 	
@@ -67,7 +70,7 @@ public class ProvidersReachabilityTaskConfig {
         jobDetailFactory.setJobClass(ProvidersReachabilityTask.class);
         jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
+        
         return jobDetailFactory;
     }
-	
 }

@@ -23,10 +23,10 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value (CommonConstants.$SERVICE_REGISTRY_TTL_SCHEDULED_WD)
+	@Value(CommonConstants.$SERVICE_REGISTRY_TTL_SCHEDULED_WD)
 	private boolean ttlScheduled;
 	
-	@Value (CommonConstants.$SERVICE_REGISTRY_TTL_INTERVAL_WD)
+	@Value(CommonConstants.$SERVICE_REGISTRY_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
 	private static final int SCHEDULER_DELAY = 15;
@@ -48,6 +48,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 		} else {
 			logger.info("Services end of validity task is not adjusted");
 		}
+		
 		return schedulerFactory;        
     }
 	
@@ -58,6 +59,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
         trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTES);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
+        
         return trigger;
     }
 	
@@ -67,6 +69,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
         jobDetailFactory.setJobClass(ServiceEndOfValidityCheckTask.class);
         jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
+        
         return jobDetailFactory;
     }
 }

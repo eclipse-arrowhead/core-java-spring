@@ -32,7 +32,7 @@ Pull this code and enter the directory.
 Execute ```mvn install``` command. Wait until the build succeeds. 
 After succeeding enter the serviceregistry/target directory.
 ```cd serviceregistry/target```
-and execute: ```java -jar arrowhead-serviceregistry-5.jar```
+and execute: ```java -jar arrowhead-serviceregistry-4.1.2.jar```
 
 Wait until server starts...
 
