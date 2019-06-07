@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import eu.arrowhead.common.CommonConstants;
  *
  */
 @RunWith(SpringRunner.class)
-@Ignore
 @SpringBootTest
 @ContextConfiguration
 @AutoConfigureMockMvc
