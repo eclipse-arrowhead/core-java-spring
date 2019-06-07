@@ -20,7 +20,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith (SpringRunner.class)
-public class ServiceRegistryControllerTestServiceDefinition {
+public class ServiceRegistryControllerServiceDefinitionTest {
 	
 	//=================================================================================================
 	// members

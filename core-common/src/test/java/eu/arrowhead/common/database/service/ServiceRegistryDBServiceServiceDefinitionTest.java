@@ -18,7 +18,7 @@ import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith (SpringRunner.class)
-public class ServiceRegistryDBServiceTestServiceDefinition {
+public class ServiceRegistryDBServiceServiceDefinitionTest {
 	
 	//=================================================================================================
 	// members
