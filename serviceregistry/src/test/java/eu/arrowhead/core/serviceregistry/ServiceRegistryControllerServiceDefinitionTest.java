@@ -51,13 +51,6 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	public void getServiceDefinitionsTestWithInvalidSortDirectionFlagInput() {
 		serviceRegistryController.getServiceDefinitions(null, null, "invalid", null);
 	}
-	
-	
-	
-	@Test (expected = BadPayloadException.class)
-	public void getServiceDefinitionsTestWithBlankSortFiedInput() {
-		serviceRegistryController.getServiceDefinitions(null, null, "ASC", "   ");		
-	}	
 
 	//=================================================================================================
 	// assistant methods
