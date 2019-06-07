@@ -1,10 +1,16 @@
 package eu.arrowhead.common;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.ServiceConfigurationError;
 
@@ -28,6 +34,9 @@ import eu.arrowhead.common.exception.ArrowheadException;
 
 public class Utilities {
 	
+	//=================================================================================================
+	// members
+	
 	private static final int SERVICE_CN_NAME_LENGTH = 5;
 	@SuppressWarnings("unused")
 	private static final int CLOUD_CN_NAME_LENGTH = 4;
@@ -44,10 +53,15 @@ public class Utilities {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	public static boolean isEmpty(final String str) {
 		return str == null || str.isBlank();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String stripEndSlash(final String uri) {
 	    if (uri != null && uri.endsWith("/")) {
@@ -57,6 +71,7 @@ public class Utilities {
 	    return uri;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String toPrettyJson(final String jsonString) {
 		try {
@@ -77,6 +92,7 @@ public class Utilities {
 	    return jsonString;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static <T> T fromJson(final String json, final Class<T> parsedClass) {
 		if (json == null || parsedClass == null) {
@@ -89,7 +105,44 @@ public class Utilities {
 	      throw new ArrowheadException("The specified string cannot be converted to a(n) " + parsedClass.getSimpleName() + " object.", e);
 	    }
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Nullable
+	public Map<String,String> text2Map(final String text) {
+		if (text == null) {
+			return null;
+		}
+		
+		final Map<String,String> result = new HashMap<>();
+		if (isEmpty(text)) {
+			final String[] parts = text.split(",");
+			for (final String part : parts) {
+				final String[] pair = part.split("=");
+				result.put(URLDecoder.decode(pair[0].trim(), StandardCharsets.UTF_8), pair.length == 1 ? "" : URLDecoder.decode(pair[1].trim(), StandardCharsets.UTF_8));
+			}
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Nullable
+	public String map2Text(final Map<String,String> map) {
+		if (map == null) {
+			return null;
+		}
+		
+		final StringBuilder sb = new StringBuilder();
+		for (final Entry<String,String> entry : map.entrySet()) {
+			final String key = URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8);
+			final String value = URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8);
+			sb.append(key).append("=").append(value).append(", ");
+		}
+		
+		return map.isEmpty() ? "" : sb.substring(0, sb.length() - 2);
+	}
 
+	//-------------------------------------------------------------------------------------------------
 	/**
 	 * 
 	 * @param scheme default: http
@@ -120,10 +173,12 @@ public class Utilities {
 		return builder.build();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public static UriComponents createURI(final String scheme, final String host, final int port, final String path) {
 		return createURI(scheme, host, port, null, path);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public static HttpStatus calculateHttpStatusFromArrowheadException(final ArrowheadException ex) {
 		Assert.notNull(ex, "Exception is null.");
 		
@@ -151,6 +206,7 @@ public class Utilities {
 		return status;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String getCertCNFromSubject(final String subjectName) {
 		if (subjectName == null) {
@@ -174,6 +230,7 @@ public class Utilities {
 	    return null;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public static X509Certificate getFirstCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
 		
@@ -186,6 +243,7 @@ public class Utilities {
         }
     }
 	
+	//-------------------------------------------------------------------------------------------------
 	public static boolean isKeyStoreCNArrowheadValid(final String commonName) {
 		if (isEmpty(commonName)) {
 			return false;
@@ -195,6 +253,7 @@ public class Utilities {
         return cnFields.length == SERVICE_CN_NAME_LENGTH && cnFields[cnFields.length - 1].equals(AH_MASTER_SUFFIX) && cnFields[cnFields.length - 2].equals(AH_MASTER_NAME);
     }
 	
+	//-------------------------------------------------------------------------------------------------
 	public static boolean isKeyStoreCNArrowheadValid(final String clientCN, final String cloudCN) {
 		if (isEmpty(clientCN) || isEmpty(cloudCN)) {
 			return false;
@@ -205,6 +264,10 @@ public class Utilities {
 	    return clientFields.length >= 2 && cloudCN.equalsIgnoreCase(clientFields[1]);
 	}
 	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
 	private Utilities() {
 		throw new UnsupportedOperationException();
 	}

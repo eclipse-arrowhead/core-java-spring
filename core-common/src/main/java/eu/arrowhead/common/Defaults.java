@@ -2,6 +2,9 @@ package eu.arrowhead.common;
 
 public class Defaults {
 
+	//=================================================================================================
+	// members
+
 	public static final int VARCHAR_LOG = 100;
 	public static final int VARCHAR_BASIC = 255;
 	public static final int VARCHAR_EXTENDED = 2047;
@@ -29,6 +32,10 @@ public class Defaults {
 	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CommonConstants.SORT_ORDER_ASCENDING;
 	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
 	private Defaults() {
 		throw new UnsupportedOperationException();
 	}

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 
 public class DTOConverter {
@@ -58,6 +59,30 @@ public class DTOConverter {
 		}		
 		
 		return new ServiceDefinitionsListResponseDTO(serviceDefinitionDTOs, serviceDefinitions.getTotalElements());
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceRegistryResponseDTO convertServiceRegistryToServiceRegistryResponseDTO(final ServiceRegistry entry) {
+		Assert.notNull(entry, "SR entry is null.");
+		Assert.notNull(entry.getServiceDefinition(), "Related service definition is null.");
+		Assert.notNull(entry.getSystem(), "Related system is null.");
+		Assert.notNull(entry.getInterfaceConnections(), "Related interface connection set is null.");
+		Assert.isTrue(entry.getInterfaceConnections().size() > 0, "Related interface connection set is empty.");
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionDTO = convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition());
+		final SystemResponseDTO systemDTO = convertSystemToSystemResponseDTO(entry.getSystem());
+		
+		final ServiceRegistryResponseDTO dto = new ServiceRegistryResponseDTO();
+		dto.setId(entry.getId());
+		dto.setServiceDefinition(serviceDefinitionDTO);
+		dto.setProvider(systemDTO);
+		dto.setServiceUri(entry.getServiceUri());
+		dto.setEndOfValidity(entry.getEndOfValidity() != null ? entry.getEndOfValidity().toString() : null);
+		dto.setSecure(entry.getSecure());
+		//TODO:
+		
+		return dto;
 	}
 	
 	//=================================================================================================

@@ -11,22 +11,30 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 public class MultiReadRequestWrapper extends HttpServletRequestWrapper {
 
+	//=================================================================================================
+	// members
+
     private final String body;
 
-    public MultiReadRequestWrapper(final HttpServletRequest request) throws IOException {
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public MultiReadRequestWrapper(final HttpServletRequest request) throws IOException {
     	super(request);
 	    body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 	}
     
-    public String getCachedBody() { 
-    	return body;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getCachedBody() { return body; }
 	
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
 	public ServletInputStream getInputStream() throws IOException {
     	return  new CustomServletInputStream(body.getBytes());
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public BufferedReader getReader() throws IOException {
 		return new BufferedReader(new InputStreamReader(this.getInputStream()));

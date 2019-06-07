@@ -33,6 +33,9 @@ import eu.arrowhead.common.CommonConstants;
 @AutoConfigureMockMvc
 public class SRAccessControlFilterTest {
 	
+	//=================================================================================================
+	// members
+
 	@Autowired
 	private ApplicationContext appContext;
 	
@@ -44,6 +47,10 @@ public class SRAccessControlFilterTest {
 	
 	private MockMvc mockMvc;
 	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setup() {
 		assumeTrue(secure);
@@ -56,6 +63,7 @@ public class SRAccessControlFilterTest {
 		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testEchoCertificateOtherCloud() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/echo")
@@ -65,6 +73,7 @@ public class SRAccessControlFilterTest {
 					.andExpect(status().isUnauthorized());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testMgmtServiceNoSysop() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/mgmt/systems")
@@ -74,6 +83,7 @@ public class SRAccessControlFilterTest {
 					.andExpect(status().isUnauthorized());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testMgmtServiceSysop() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/mgmt/systems")

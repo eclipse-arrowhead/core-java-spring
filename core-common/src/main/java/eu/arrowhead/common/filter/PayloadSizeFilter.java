@@ -17,6 +17,10 @@ import eu.arrowhead.common.exception.ExceptionType;
 
 public class PayloadSizeFilter extends ArrowheadFilter {
 
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {
@@ -34,6 +38,10 @@ public class PayloadSizeFilter extends ArrowheadFilter {
 		chain.doFilter(request, response);
 	}
 	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
 	private boolean checkPayload(final String method, final long contentLength, final String requestTarget, final HttpServletResponse response) throws IOException {
 		final RequestMethod requestMethod = RequestMethod.valueOf(method);
 		

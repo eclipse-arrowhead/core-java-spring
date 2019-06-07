@@ -2,6 +2,9 @@ package eu.arrowhead.common;
 
 public class CommonConstants {
 	
+	//=================================================================================================
+	// members
+	
 	public static final String APPLICATION_PROPERTIES = "application.properties";
 	
 	public static final String BASE_PACKAGE = "eu.arrowhead";
@@ -110,7 +113,11 @@ public class CommonConstants {
 	
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
-	
+
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}

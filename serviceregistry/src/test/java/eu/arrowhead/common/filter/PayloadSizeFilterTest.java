@@ -33,6 +33,9 @@ import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
 @SpringBootTest(classes = ServiceRegistryMain.class)
 @AutoConfigureMockMvc
 public class PayloadSizeFilterTest {
+	
+	//=================================================================================================
+	// members
 
 	@Autowired
 	private ApplicationContext appContext;
@@ -44,7 +47,11 @@ public class PayloadSizeFilterTest {
 	private WebApplicationContext wac;
 	
 	private MockMvc mockMvc;
-	
+
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setup() {
 		assumeTrue(secure);
@@ -56,6 +63,7 @@ public class PayloadSizeFilterTest {
 									  .build();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPayloadFilterGetWithBody() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/echo")
@@ -66,6 +74,7 @@ public class PayloadSizeFilterTest {
 					.andExpect(status().isBadRequest());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPayloadFilterPostWithoutBody() throws Exception {
 		this.mockMvc.perform(post("/serviceregistry/mgmt/systems")
