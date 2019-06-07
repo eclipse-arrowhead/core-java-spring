@@ -1,6 +1,5 @@
 package eu.arrowhead.common.database.service;
 
-import java.awt.geom.IllegalPathStateException;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
