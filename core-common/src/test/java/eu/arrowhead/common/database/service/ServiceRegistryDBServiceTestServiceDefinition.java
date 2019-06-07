@@ -1,9 +1,9 @@
 package eu.arrowhead.common.database.service;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.anyLong;
 
 import java.util.Optional;
 
@@ -16,21 +16,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
-import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith (SpringRunner.class)
-public class ServiceRegistryDBServiceTest {
+public class ServiceRegistryDBServiceTestServiceDefinition {
 	
 	//=================================================================================================
 	// members
 	
 	@InjectMocks
 	ServiceRegistryDBService serviceRegistryDBService; 
-	
-	@Mock
-	ServiceRegistryRepository serviceRegistryRepository;
-	
+		
 	@Mock
 	ServiceDefinitionRepository serviceDefinitionRepository;
 	
@@ -175,20 +171,5 @@ public class ServiceRegistryDBServiceTest {
 	public void removeServiceDefinitionByIdTest() {
 		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
 		serviceRegistryDBService.removeServiceDefinitionById(0);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-		
-	@Test (expected = InvalidParameterException.class)
-	public void testGetServiceReqistryEntries() {
-		serviceRegistryDBService.getServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	
-	@Test (expected = InvalidParameterException.class)
-	public void removeServiceRegistryEntryByIdTest() {
-		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
-		serviceRegistryDBService.removeServiceRegistryEntryById(0);
-	}
+	}	
 }
