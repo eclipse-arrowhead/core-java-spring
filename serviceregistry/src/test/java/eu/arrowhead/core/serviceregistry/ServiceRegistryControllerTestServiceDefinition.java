@@ -20,7 +20,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith (SpringRunner.class)
-public class ServiceRegistryControllerTest {
+public class ServiceRegistryControllerTestServiceDefinition {
 	
 	//=================================================================================================
 	// members
@@ -35,49 +35,29 @@ public class ServiceRegistryControllerTest {
 	// methods
 		
 	//-------------------------------------------------------------------------------------------------
+	//Tests of getServiceDefinitions
 	
-	@Test
-	public void getServiceDefinitionsTest() {
-		Page<ServiceDefinition> serviceDefinitionEntries = createServiceDefinitionPageForDBMocking(10);
-		
-		//Testing with null page but defined size input
-		boolean isNullPageButDefinedSizeThrowBadPayloadException = false;
-		try {
-			serviceRegistryController.getServiceDefinitions(null, 5, null, null);
-		} catch (BadPayloadException ex) {
-			isNullPageButDefinedSizeThrowBadPayloadException = true;
-		}
-		assertTrue(isNullPageButDefinedSizeThrowBadPayloadException);
-		
-		//Testing with defined page but null size input
-		boolean isDefinedPageButNullSizeThrowBadPayloadException = false;
-		try {
-			serviceRegistryController.getServiceDefinitions(0, null, null, null);
-		} catch (BadPayloadException ex) {
-			isDefinedPageButNullSizeThrowBadPayloadException = true;
-		}
-		assertTrue(isDefinedPageButNullSizeThrowBadPayloadException);
-		
-		//Testing with invalid sort direction flag input
-		boolean isInvalidDirectionFlagThrowBadPayloadException = false;
-		try {
-			serviceRegistryController.getServiceDefinitions(null, null, "invalid", null);
-		} catch (BadPayloadException ex) {
-			isInvalidDirectionFlagThrowBadPayloadException = true;
-		}
-		assertTrue(isInvalidDirectionFlagThrowBadPayloadException);
-		
-		//Testing with blank sortFied input
-		boolean isBlankSortFieldThrowBadPayloadException = false;
-		try {
-			serviceRegistryController.getServiceDefinitions(null, null, "ASC", "   ");
-		} catch (BadPayloadException ex) {
-			isBlankSortFieldThrowBadPayloadException = true;
-		}
-		assertTrue(isBlankSortFieldThrowBadPayloadException);
-		
+	@Test (expected = BadPayloadException.class)
+	public void getServiceDefinitionsTestWithNullPageButDefinedSizeInput() {
+		serviceRegistryController.getServiceDefinitions(null, 5, null, null);
 	}
 	
+	@Test (expected = BadPayloadException.class)
+	public void getServiceDefinitionsTestWithDefinedPageButNullSizeInput() {
+		serviceRegistryController.getServiceDefinitions(0, null, null, null);
+	}
+	
+	@Test (expected = BadPayloadException.class)
+	public void getServiceDefinitionsTestWithInvalidSortDirectionFlagInput() {
+		serviceRegistryController.getServiceDefinitions(null, null, "invalid", null);
+	}
+	
+	
+	
+	@Test (expected = BadPayloadException.class)
+	public void getServiceDefinitionsTestWithBlankSortFiedInput() {
+		serviceRegistryController.getServiceDefinitions(null, null, "ASC", "   ");		
+	}	
 
 	//=================================================================================================
 	// assistant methods

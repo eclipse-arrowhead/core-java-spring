@@ -29,6 +29,7 @@ public class ServiceRegistryDBServiceTestServiceRegistry {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
+	//Tests of getServiceReqistryEntries
 		
 	@Test (expected = InvalidParameterException.class)
 	public void getServiceReqistryEntriesTest() {
@@ -36,6 +37,7 @@ public class ServiceRegistryDBServiceTestServiceRegistry {
 	}
 		
 	//-------------------------------------------------------------------------------------------------
+	//Tests of removeServiceRegistryEntryById
 		
 	@Test (expected = InvalidParameterException.class)
 	public void removeServiceRegistryEntryByIdTest() {
