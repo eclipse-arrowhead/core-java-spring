@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.service;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -31,7 +33,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void crateSystemSystemNameNullTest() {
 
@@ -45,7 +46,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void crateSystemAdrressNullTest() {
 
@@ -59,7 +59,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void crateSystemSystemNameEmptyStringTest() {
 
@@ -73,7 +72,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void crateSystemAdrressEmptyStringTest() {
 
@@ -87,7 +85,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void uniqueKeyViolationTest() {
 		//Testing unique key violation
@@ -107,7 +104,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void uniqueKeyViolationNoEffectOfWhiteSpaceTest() {
 		//Testing unique key violation
@@ -127,7 +123,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void uniqueKeyViolationNoEffectOfCaseDifferenceTest() {
 		//Testing unique key violation
@@ -147,26 +142,489 @@ public class ServiceRegistryDBServiceSystemTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
-	public void updateSystemByIdTest() {
-		final String systemName0 = "alreadyexiststestsystemname0";
-		final String address0 = "alreadyexiststestaddress0";
+	public void updateSystemByIdInvalidIdTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
 		final int port0 = 0;
 		final long testId0 = 0;
+		final String authenticationInfo0 = null;
 		
-		final System system0 = new System(systemName0, address0, port0, null);
-		final Optional<System> systemOptional0 = Optional.of(system0);
-		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional0);
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
 		
-		final String systemName1 = "alreadyexiststestsystemname1";
-		final String address1 = "alreadyexiststestaddress1";
-		final int port1 = 1;
-		final long testId1 = 1;
+		boolean isInvalidIdThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = true;
+		}
 		
-		final System system1 = new System(systemName1, address1, port1, null);
-		final Optional<System> systemOptional1 = Optional.of(system1);
-		when(systemRepository.findById(eq(testId1))).thenReturn(systemOptional1);
+		assertTrue(isInvalidIdThrowInvalidParameterException);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSystemByIdBelowValidPortTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
 		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidPortThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isInvalidPortThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isInvalidPortThrowInvalidParameterException);		
 	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSystemByIdAboveValidPortTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidPortThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isInvalidPortThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isInvalidPortThrowInvalidParameterException);		
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSystemByNullSystemNameTest() {
+		final String systemName0 = null;
+		final String address0 = "testAddress0";
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isNullNameThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isNullNameThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isNullNameThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSystemByEmptySystemNameTest() {
+		final String systemName0 = "         ";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isEmptyNameThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isEmptyNameThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isEmptyNameThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSystemByNullAddressTest() {
+		final String systemName0 = "testSystem0";
+		final String address0 = null;
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isNullAddressThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isNullAddressThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isNullAddressThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSystemByEmptyAddressTest() {
+		final String systemName0 = "testSystem0";
+		final String address0 = "              ";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isEmptyAddressThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isEmptyAddressThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isEmptyAddressThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByIdInvalidIdTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 0;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByIdBelowValidPortTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);		
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByIdAboveValidPortTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = false;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = true;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);		
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByINullPortTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final Integer port0 = null;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, 1, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);		
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByNullSystemNameTest() {
+		final String systemName0 = null;
+		final String address0 = "testAddress0";
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isNullNameThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isNullNameThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isNullNameThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByEmptySystemNameTest() {
+		final String systemName0 = "         ";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isEmptyNameThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isEmptyNameThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isEmptyNameThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByNullAddressTest() {
+		final String systemName0 = "testSystem0";
+		final String address0 = null;
+		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isNullAddressThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isNullAddressThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isNullAddressThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByEmptyAddressTest() {
+		final String systemName0 = "testSystem0";
+		final String address0 = "              ";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isEmptyAddressThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+		} catch (final InvalidParameterException ex) {
+			isEmptyAddressThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isEmptyAddressThrowInvalidParameterException);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemBySingleParameterNameTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, "mergeTestName", null, null, null);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemBySingleParameterAddressTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, null, "mergeTestAddress", null, null);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemBySingleParameterPortTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, null, null, 1, null);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemBySingleParameterAuthInfoTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, null, null, null, "testAuthenticationInfo");
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void mergeSystemByAllNullParametersTest() {
+		final String systemName0 = "testSystemName0";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		final System system = new System(systemName0, address0, port0, authenticationInfo0);
+		final Optional<System> systemOptional = Optional.of(system);
+		when(systemRepository.findById(eq(testId0))).thenReturn(systemOptional);
+		when(systemRepository.saveAndFlush(eq(system))).thenReturn(system);
+		
+		boolean isInvalidIdThrowInvalidParameterException = true;
+		try {
+			serviceRegistryDBService.mergeSystem(testId0, null, null, null, null);
+		} catch (final IllegalArgumentException ex) {
+			isInvalidIdThrowInvalidParameterException = false;
+		}
+		
+		assertTrue(isInvalidIdThrowInvalidParameterException);
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test (expected = InvalidParameterException.class)
+	public void removeServiceByIdTest() {
+		when(systemRepository.existsById(anyLong())).thenReturn(false);
+		serviceRegistryDBService.removeSystemById(0);
+	}
 }
