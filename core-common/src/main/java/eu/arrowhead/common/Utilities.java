@@ -108,13 +108,13 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Nullable
-	public Map<String,String> text2Map(final String text) {
+	public static Map<String,String> text2Map(final String text) {
 		if (text == null) {
 			return null;
 		}
 		
 		final Map<String,String> result = new HashMap<>();
-		if (isEmpty(text)) {
+		if (!isEmpty(text.trim())) {
 			final String[] parts = text.split(",");
 			for (final String part : parts) {
 				final String[] pair = part.split("=");
@@ -127,7 +127,7 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Nullable
-	public String map2Text(final Map<String,String> map) {
+	public static String map2Text(final Map<String,String> map) {
 		if (map == null) {
 			return null;
 		}
