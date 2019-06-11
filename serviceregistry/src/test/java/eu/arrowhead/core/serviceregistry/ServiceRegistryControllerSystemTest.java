@@ -30,10 +30,10 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith (SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
@@ -126,11 +126,11 @@ public class ServiceRegistryControllerSystemTest {
 	public void getSystemByIdTestWithInvalidId() throws Exception  {
 		final System system = createSystemForDBMocking();
 		
-		long invalidSystemId = -1L;
+		long invalidSystemId = 0L;
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		when(serviceRegistryDBService.getSystemById(invalidSystemId)).thenReturn(systemResponseDTO);
 		
-		this.mockMvc.perform(get("/serviceregistry/mgmt/systems/{id}")
+		this.mockMvc.perform(get("/serviceregistry/mgmt/systems/{id}", "id", invalidSystemId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	
