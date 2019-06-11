@@ -48,7 +48,8 @@ public class ServiceRegistryDBServiceSystemTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test (expected = InvalidParameterException.class)
 	public void getSystemEntriesInvalidSortfiledValueTest() {
-		final int validatedPage = 1;
+	
+	final int validatedPage = 1;
 	final int validatedSize = 1;
 	final Direction validatedDirection = Direction.ASC;
 	final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
