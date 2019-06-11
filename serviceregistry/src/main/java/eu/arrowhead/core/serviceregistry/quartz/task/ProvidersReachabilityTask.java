@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.service.ServiceRegistryDBService;
+import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @Component
 @DisallowConcurrentExecution
