@@ -1,4 +1,4 @@
-package eu.arrowhead.common.database.service;
+package eu.arrowhead.core.serviceregistry.database.service;
 
 import java.util.Optional;
 
@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -25,8 +24,6 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -356,7 +353,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public ServiceDefinitionResponseDTO updateServiceDefinitionByIdResponse(final long id, final String serviceDefinition) {
 		logger.debug("updateServiceDefinitionByIdResponse started..");
 		
@@ -401,7 +398,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public void removeServiceRegistryEntryById(final long id) {
 		logger.debug("removeServiceRegistryEntryById started..");
 		if (!serviceRegistryRepository.existsById(id)) {
@@ -418,7 +415,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
+	@Transactional (rollbackFor = ArrowheadException.class)
 	public void removeBulkOfServiceRegistryEntries(final Iterable<ServiceRegistry> entities) {
 		logger.debug("removeBulkOfServiceRegistryEntries started..");
 		try {
@@ -429,39 +426,10 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
-	public ServiceRegistryResponseDTO registerServiceResponse(final ServiceRegistryRequestDTO request) {
-		Assert.notNull(request, "request is null.");
-		//TODO: continue 
-		checkServiceRegistryRequest(request);
-		
-		final String validatedServiceDefinition = request.getServiceDefinition().toLowerCase().trim();
-		final String validatedProviderName = request.getProviderSystem().getSystemName().toLowerCase().trim();
-		final String validatedProviderAddress = request.getProviderSystem().getAddress().toLowerCase().trim();
-		final int validatedProviderPort = request.getProviderSystem().getPort().intValue();
-		try {
-			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(validatedServiceDefinition);
-			final ServiceDefinition serviceDefinition = optServiceDefinition.isPresent() ? optServiceDefinition.get() : createServiceDefinition(validatedServiceDefinition);
-			
-			final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(validatedProviderName, validatedProviderAddress, validatedProviderPort);
-			final System provider = optProvider.isPresent() ? optProvider.get() : 
-														createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
-														
-			//TODO: continue 
-
-			return null; //TODO: delete this
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-		
-	}
 
 	//=================================================================================================
 	// assistant methods
-
+	
 	//-------------------------------------------------------------------------------------------------
 	private boolean checkSystemIfUniqueValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
 												  final Integer validatedPort) {		
@@ -604,17 +572,5 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request) {
-		Assert.isTrue(!Utilities.isEmpty(request.getServiceDefinition()), "Service definition is not specified.");
-		Assert.notNull(request.getProviderSystem(), "Provider system is not specified.");
-		Assert.isTrue(!Utilities.isEmpty(request.getProviderSystem().getSystemName()), "Provider system name is not specified.");
-		Assert.isTrue(!Utilities.isEmpty(request.getProviderSystem().getAddress()), "Provider system address is not specified.");
-		Assert.notNull(request.getProviderSystem().getPort(), "Provider system port is not specified.");
-		Assert.notNull(request.getInterfaces(), "Interfaces list is not specified.");
-		Assert.isTrue(!request.getInterfaces().isEmpty(), "Interfaces is is empty.");
-		
 	}
 }
