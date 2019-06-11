@@ -1,5 +1,6 @@
 package eu.arrowhead.core.serviceregistry;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -130,9 +131,27 @@ public class ServiceRegistryControllerSystemTest {
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
 		when(serviceRegistryDBService.getSystemById(invalidSystemId)).thenReturn(systemResponseDTO);
 		
-		this.mockMvc.perform(get("/serviceregistry/mgmt/systems/{id}", "id", invalidSystemId)
+		this.mockMvc.perform(get("/serviceregistry/mgmt/systems/"+invalidSystemId)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
+	
+	}
+	
+	@Test
+	public void getSystemByIdTestWithValidId() throws Exception  {
+		final System system = createSystemForDBMocking();
+		
+		long validSystemId = 11;
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
+		when(serviceRegistryDBService.getSystemById(validSystemId)).thenReturn(systemResponseDTO);
+		
+		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/systems/"+validSystemId)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);
+		assertThat(0 < responseBody.getId());	
 	
 	}
 
@@ -159,7 +178,7 @@ public class ServiceRegistryControllerSystemTest {
 	
 	private System createSystemForDBMocking() {
 		final String systemName = "mockSystemName";
-		final String address = "mockSystemaddress";
+		final String address = "mockSystemAddress";
 		final Integer port = 1;
 		final String authenticationInfo = null;
 		

@@ -30,10 +30,10 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith (SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
