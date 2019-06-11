@@ -1,4 +1,4 @@
-package eu.arrowhead.common.database.service;
+package eu.arrowhead.core.serviceregistry.database.service;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;

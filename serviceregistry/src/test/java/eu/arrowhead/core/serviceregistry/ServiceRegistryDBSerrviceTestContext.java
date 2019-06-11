@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import eu.arrowhead.common.database.service.ServiceRegistryDBService;
+import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @Configuration
 public class ServiceRegistryDBSerrviceTestContext {
