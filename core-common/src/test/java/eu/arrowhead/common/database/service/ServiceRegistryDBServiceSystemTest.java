@@ -1,22 +1,16 @@
 package eu.arrowhead.common.database.service;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CommonConstants;
@@ -38,106 +32,6 @@ public class ServiceRegistryDBServiceSystemTest {
 	//=================================================================================================
 	// methods
 	
-	//-------------------------------------------------------------------------------------------------
-	@Test (expected = InvalidParameterException.class)
-	public void getSystemByIdTest() {
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-		serviceRegistryDBService.getSystemById(1);		
-	}	
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test (expected = InvalidParameterException.class)
-	public void getSystemEntriesInvalidSortfiledValueTest() {
-		final int validatedPage = 1;
-	final int validatedSize = 1;
-	final Direction validatedDirection = Direction.ASC;
-	final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
-
-	final String invalidSortField = "invalisSortField";
-	
-	final String systemName0 = "testSystemName0";
-	final String address0 = "testAddress0";
-	final int port0 = 0;
-	final String authenticationInfo0 = null;
-	
-	final System system = new System(systemName0, address0, port0, authenticationInfo0);
-	
-	final List<System> systemsList = new ArrayList<>();
-	systemsList.add(system);
-	final Page<System> systems  = new PageImpl<System>(systemsList);
-	when(systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField))).thenReturn(systems);
-	
-
-	serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, validatedDirection, invalidSortField);
-	
-	}
-	
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void getSystemEntriesNullSortfiledValueTest() {
-		final int validatedPage = 1;
-	final int validatedSize = 1;
-	final Direction validatedDirection = Direction.ASC;
-	final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
-	
-	final String invalidSortField = null;
-	
-	final String systemName0 = "testSystemName0";
-	final String address0 = "testAddress0";
-	final int port0 = 0;
-	final String authenticationInfo0 = null;
-	
-	final System system = new System(systemName0, address0, port0, authenticationInfo0);
-	
-	final List<System> systemsList = new ArrayList<>();
-	systemsList.add(system);
-	final Page<System> systems  = new PageImpl<System>(systemsList);
-	when(systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField))).thenReturn(systems);
-	
-	boolean isNullDefintionThrowInvalidParameterException = true;
-	try {
-		serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, validatedDirection, invalidSortField);
-	} catch (final InvalidParameterException ex) {
-		isNullDefintionThrowInvalidParameterException = false;
-	}
-	assertTrue(isNullDefintionThrowInvalidParameterException);	
-	
-	}
-	
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void getSystemEntriesEmptySortfiledValueTest() {
-		final int validatedPage = 1;
-	final int validatedSize = 1;
-	final Direction validatedDirection = Direction.ASC;
-	final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
-	
-	final String invalidSortField = "";
-	
-	final String systemName0 = "testSystemName0";
-	final String address0 = "testAddress0";
-	final int port0 = 0;
-	final String authenticationInfo0 = null;
-	
-	final System system = new System(systemName0, address0, port0, authenticationInfo0);
-	
-	final List<System> systemsList = new ArrayList<>();
-	systemsList.add(system);
-	final Page<System> systems  = new PageImpl<System>(systemsList);
-	when(systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField))).thenReturn(systems);
-	
-	boolean isNullDefintionThrowInvalidParameterException = true;
-	try {
-		serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, validatedDirection, invalidSortField);
-	} catch (final InvalidParameterException ex) {
-		isNullDefintionThrowInvalidParameterException = false;
-	}
-	assertTrue(isNullDefintionThrowInvalidParameterException);	
-	
-	}
-		
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void crateSystemSystemNameNullTest() {
