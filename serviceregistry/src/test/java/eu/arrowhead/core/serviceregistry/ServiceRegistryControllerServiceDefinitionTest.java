@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -270,6 +271,23 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
 				.content("{\"serviceDefinition\": "+ serviceDefinition + "}")
 				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of removeServiceDefinition
+	
+	@Test
+	public void removeServiceDefinitionTestWithValidId( ) throws Exception {
+		this.mockMvc.perform(delete("/serviceregistry/mgmt/services/4")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	@Test
+	public void removeServiceDefinitionTestWithInvalidId( ) throws Exception {
+		this.mockMvc.perform(delete("/serviceregistry/mgmt/services/0")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
