@@ -58,7 +58,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	private ObjectMapper objectMapper;
 	
 	@MockBean(name = "mockServiceRegistryDBService") 
-	ServiceRegistryDBService serviceRegistryDBService;
+	private ServiceRegistryDBService serviceRegistryDBService;
 	
 	//=================================================================================================
 	// methods
@@ -69,6 +69,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	//Tests of getServiceDefinitions
 	
