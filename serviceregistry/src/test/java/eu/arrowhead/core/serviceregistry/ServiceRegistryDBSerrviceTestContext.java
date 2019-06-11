@@ -15,5 +15,4 @@ public class ServiceRegistryDBSerrviceTestContext {
 	public ServiceRegistryDBService mockServiceRegistryDBService() {
 		return Mockito.mock(ServiceRegistryDBService.class);
 	}
-
 }
