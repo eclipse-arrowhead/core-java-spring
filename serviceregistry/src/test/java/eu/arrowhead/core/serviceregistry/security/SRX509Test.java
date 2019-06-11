@@ -36,10 +36,10 @@ import eu.arrowhead.common.CommonConstants;
 public class SRX509Test {
 	
 	@Autowired
-	ApplicationContext appContext;
+	private ApplicationContext appContext;
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	public boolean secure;
+	private boolean secure;
 
 	@Autowired
 	private WebApplicationContext wac;

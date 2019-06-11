@@ -35,10 +35,10 @@ import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
 public class PayloadSizeFilterTest {
 
 	@Autowired
-	ApplicationContext appContext;
+	private ApplicationContext appContext;
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	public boolean secure;
+	private boolean secure;
 	
 	@Autowired
 	private WebApplicationContext wac;
