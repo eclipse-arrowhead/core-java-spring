@@ -33,6 +33,7 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.ServiceRegistryDBService;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 
 @RunWith (SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
@@ -120,10 +121,24 @@ public class ServiceRegistryControllerSystemTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
+	
+	@Test
+	public void getSystemByIdTestWithInvalidId() throws Exception  {
+		final System system = createSystemForDBMocking();
+		
+		long invalidSystemId = -1L;
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
+		when(serviceRegistryDBService.getSystemById(invalidSystemId)).thenReturn(systemResponseDTO);
+		
+		this.mockMvc.perform(get("/serviceregistry/mgmt/systems/{id}")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	
+	}
 
 	//=================================================================================================
 	// assistant methods
-	
+
 	private Page<System> createSystemPageForDBMocking(final int amountOfEntry) {
 		
 		final List<System> systemList = new ArrayList<>(amountOfEntry);
@@ -141,4 +156,21 @@ public class ServiceRegistryControllerSystemTest {
 		return entries;
 	}
 
+	
+	private System createSystemForDBMocking() {
+		final String systemName = "mockSystemName";
+		final String address = "mockSystemaddress";
+		final Integer port = 1;
+		final String authenticationInfo = null;
+		
+		System system = new System(systemName, address, port, authenticationInfo);
+		
+		system.setId(1);
+		
+		final ZonedDateTime timeStamp = ZonedDateTime.now();
+		system.setCreatedAt(timeStamp);
+		system.setUpdatedAt(timeStamp);
+		
+		return system;
+	}
 }
