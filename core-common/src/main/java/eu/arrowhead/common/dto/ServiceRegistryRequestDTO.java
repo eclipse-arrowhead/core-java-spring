@@ -9,9 +9,9 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -5341100529626341447L;
+	private static final long serialVersionUID = -3805773665976065056L;
 	
-	private ServiceDefinitionRequestDTO serviceDefinition;
+	private String serviceDefinition;
 	private SystemRequestDTO providerSystem;
 	private String serviceUri;
 	private String endOfValidity;
@@ -24,7 +24,7 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionRequestDTO getServiceDefinition() { return serviceDefinition; }
+	public String getServiceDefinition() { return serviceDefinition; }
 	public SystemRequestDTO getProviderSystem() { return providerSystem; }
 	public String getServiceUri() { return serviceUri; }
 	public String getEndOfValidity() { return endOfValidity; }
@@ -34,7 +34,7 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	public List<String> getInterfaces() { return interfaces; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setServiceDefinition(final ServiceDefinitionRequestDTO serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setProviderSystem(final SystemRequestDTO providerSystem) { this.providerSystem = providerSystem; }
 	public void setServiceUri(final String serviceUri) { this.serviceUri = serviceUri; }
 	public void setEndOfValidity(final String endOfValidity) { this.endOfValidity = endOfValidity; }

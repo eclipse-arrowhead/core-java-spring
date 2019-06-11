@@ -45,7 +45,7 @@ public class ServiceRegistry {
 	@JoinColumn (name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column (nullable = true, length = Defaults.VARCHAR_BASIC)
 	private String serviceUri;
 	
 	@Column (nullable = true)
@@ -53,13 +53,13 @@ public class ServiceRegistry {
 	
 	@Column (nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'NOT_SECURE'")
 	@Enumerated(EnumType.STRING)
-	private ServiceSecurityType secure;
+	private ServiceSecurityType secure = ServiceSecurityType.NOT_SECURE;
 	
 	@Column (nullable = true, columnDefinition = "TEXT")
 	private String metadata;
 	
 	@Column (nullable = true)
-	private int version = 1;
+	private Integer version = 1;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
