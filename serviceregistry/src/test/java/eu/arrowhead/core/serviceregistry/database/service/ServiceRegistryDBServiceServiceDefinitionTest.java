@@ -24,10 +24,10 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 	// members
 	
 	@InjectMocks
-	ServiceRegistryDBService serviceRegistryDBService; 
+	private ServiceRegistryDBService serviceRegistryDBService; 
 		
 	@Mock
-	ServiceDefinitionRepository serviceDefinitionRepository;
+	private ServiceDefinitionRepository serviceDefinitionRepository;
 	
 	//=================================================================================================
 	// methods
