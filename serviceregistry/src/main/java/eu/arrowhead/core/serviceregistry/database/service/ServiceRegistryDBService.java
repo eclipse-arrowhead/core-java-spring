@@ -594,7 +594,7 @@ public class ServiceRegistryDBService {
 		try {
 			final Optional<System> find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
 			if (find.isPresent()) {
-				throw new InvalidParameterException("Service with name: " + validatedSystemName +
+				throw new InvalidParameterException("System with name: " + validatedSystemName +
 													", address: " + validatedAddress +
 													", port: " + validatedPort + 
 													" already exists.");
