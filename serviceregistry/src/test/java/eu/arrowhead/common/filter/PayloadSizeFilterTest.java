@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
 import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
 
