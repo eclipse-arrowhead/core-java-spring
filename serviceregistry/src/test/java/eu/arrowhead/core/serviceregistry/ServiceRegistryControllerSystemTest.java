@@ -176,7 +176,7 @@ public class ServiceRegistryControllerSystemTest {
 				.andReturn();
 		
 		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);
-		assertThat(0 < responseBody.getId());	
+		assertThat(0 < responseBody.getId()).isTrue();	
 	
 	}
 	
@@ -342,7 +342,7 @@ public class ServiceRegistryControllerSystemTest {
 				.andReturn();
 		
 		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), SystemResponseDTO.class);
-		assertThat(0 < responseBody.getId());	
+		assertThat(0 < responseBody.getId()).isTrue();	
 	
 	}
 	
