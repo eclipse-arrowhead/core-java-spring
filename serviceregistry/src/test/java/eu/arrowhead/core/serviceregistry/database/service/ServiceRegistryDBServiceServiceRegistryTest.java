@@ -1,5 +1,8 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,25 +14,34 @@ import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
-public class ServiceRegistryDBServiceTest {
+public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//=================================================================================================
 	// members
-	
+		
 	@InjectMocks
 	ServiceRegistryDBService serviceRegistryDBService; 
-	
+		
 	@Mock
 	ServiceRegistryRepository serviceRegistryRepository;
-	
+		
 	//=================================================================================================
 	// methods
-		
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testGetAllServiceReqistryEntriesWithInvalidSortField() {
-		serviceRegistryDBService.getServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
-	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//Tests of getServiceReqistryEntries
+		
+	@Test (expected = InvalidParameterException.class)
+	public void getServiceReqistryEntriesTest() {
+		serviceRegistryDBService.getServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
+	}
+		
+	//-------------------------------------------------------------------------------------------------
+	//Tests of removeServiceRegistryEntryById
+		
+	@Test (expected = InvalidParameterException.class)
+	public void removeServiceRegistryEntryByIdTest() {
+		when(serviceRegistryRepository.existsById(anyLong())).thenReturn(false);
+		serviceRegistryDBService.removeServiceRegistryEntryById(0);
+	}
 }
