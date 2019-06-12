@@ -20,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -149,11 +150,7 @@ public class ServiceRegistryControllerSystemTest {
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void getSystemByIdTestWithInvalidId() throws Exception  {
-		final System system = createSystemForDBMocking();
-		
 		final long inValidSystemId = 0L;
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.getSystemById(inValidSystemId)).thenReturn(systemResponseDTO);
 		
 		this.mockMvc.perform(get(SYSTEMS_URL + inValidSystemId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -176,8 +173,7 @@ public class ServiceRegistryControllerSystemTest {
 				.andReturn();
 		
 		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);
-		assertThat(0 < responseBody.getId()).isTrue();	
-	
+		Assert.assertTrue(0 < responseBody.getId());	
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -199,17 +195,13 @@ public class ServiceRegistryControllerSystemTest {
 		
 		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);
 		
-		assertEquals(request.getSystemName(), responseBody.getSystemName());
+		Assert.assertTrue(request.getSystemName().trim().equalsIgnoreCase(responseBody.getSystemName().trim()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void addSystemTestWithNullPortDefinition() throws Exception {
-		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
-		
+
 		final SystemRequestDTO request = createNullPortSystemRequestDTO();
 		
 		this.mockMvc.perform(post(SYSTEMS_URL)
@@ -222,10 +214,6 @@ public class ServiceRegistryControllerSystemTest {
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void addSystemTestWithBelowPortRangePortDefinition() throws Exception {
-		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
 		
 		final SystemRequestDTO request = createBelowPortRangePortSystemRequestDTO();
 		
@@ -240,10 +228,6 @@ public class ServiceRegistryControllerSystemTest {
 	@Test
 	public void addSystemTestWithAbovePortRangePortDefinition() throws Exception {
 		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
-		
 		final SystemRequestDTO request = createAbovePortRangePortSystemRequestDTO();
 		
 		this.mockMvc.perform(post(SYSTEMS_URL)
@@ -256,10 +240,6 @@ public class ServiceRegistryControllerSystemTest {
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void addSystemTestWithNullSystemNameDefinition() throws Exception {
-		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
 		
 		final SystemRequestDTO request = createNullSystemNameSystemRequestDTO();
 		
@@ -274,10 +254,6 @@ public class ServiceRegistryControllerSystemTest {
 	@Test
 	public void addSystemTestWithEmptySystemNameDefinition() throws Exception {
 		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
-		
 		final SystemRequestDTO request = createEmptySystemNameSystemRequestDTO();
 		
 		this.mockMvc.perform(post(SYSTEMS_URL)
@@ -291,10 +267,6 @@ public class ServiceRegistryControllerSystemTest {
 	@Test
 	public void addSystemTestWithNullAddressDefinition() throws Exception {
 		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
-		
 		final SystemRequestDTO request = createNullAddressSystemRequestDTO();
 		
 		this.mockMvc.perform(post(SYSTEMS_URL)
@@ -307,10 +279,6 @@ public class ServiceRegistryControllerSystemTest {
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void addSystemTestWithEmptyAddressDefinition() throws Exception {
-		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.createSystemResponse(anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
 		
 		final SystemRequestDTO request = createEmptyAddressSystemRequestDTO();
 		
@@ -342,7 +310,7 @@ public class ServiceRegistryControllerSystemTest {
 				.andReturn();
 		
 		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), SystemResponseDTO.class);
-		assertThat(0 < responseBody.getId()).isTrue();	
+		Assert.assertTrue(0 < responseBody.getId());	
 	
 	}
 	
@@ -351,11 +319,6 @@ public class ServiceRegistryControllerSystemTest {
 	public void updateSystemByIdTestWithInValidId() throws Exception  {
 
 		final long inValidSystemId = - 1L;
-		
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		
-		when(serviceRegistryDBService.updateSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
 		
 		final SystemRequestDTO request = createValidSystemRequestDTO();
 				
@@ -384,7 +347,7 @@ public class ServiceRegistryControllerSystemTest {
 				.andReturn();
 		
 		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);	
-		assertEquals(request.getSystemName(), responseBody.getSystemName());
+		Assert.assertTrue(request.getSystemName().trim().equalsIgnoreCase(responseBody.getSystemName().trim()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -397,25 +360,18 @@ public class ServiceRegistryControllerSystemTest {
 		
 		final SystemRequestDTO request = createNullPortSystemRequestDTO();
 		
-		final MvcResult response = this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
+		this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes(request))
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+				.andExpect(status().isOk());
 
-		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);
-		assertNotNull(responseBody.getSystemName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Test
 	public void mergeSystemTestWithBelowPortRangePortDefinition() throws Exception {
 		final long validSystemId = 1L;
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
-		
 		final SystemRequestDTO request = createBelowPortRangePortSystemRequestDTO();
 		
 		this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
@@ -429,10 +385,6 @@ public class ServiceRegistryControllerSystemTest {
 	@Test
 	public void mergeSystemTestWithAbovePortRangePortDefinition() throws Exception {
 		final long validSystemId = 1L;
-		final System system = createSystemForDBMocking();
-		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(system);
-		when(serviceRegistryDBService.mergeSystemResponse(anyLong(), anyString(), anyString(), anyInt(), anyString())).thenReturn(systemResponseDTO);
-		
 		final SystemRequestDTO request = createAbovePortRangePortSystemRequestDTO();
 		
 		this.mockMvc.perform(patch(SYSTEMS_URL + validSystemId)
