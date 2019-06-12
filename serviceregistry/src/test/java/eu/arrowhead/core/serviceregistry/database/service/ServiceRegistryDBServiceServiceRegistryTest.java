@@ -1,5 +1,8 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,7 +14,7 @@ import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
-public class ServiceRegistryDBServiceTest {
+public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//=================================================================================================
 	// members
@@ -32,4 +35,9 @@ public class ServiceRegistryDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRemoveServiceRegistryEntryByIdWithNonExistentId() {
+		when(serviceRegistryRepository.existsById(anyLong())).thenReturn(false);
+		serviceRegistryDBService.removeServiceRegistryEntryById(1);
+	}
 }
