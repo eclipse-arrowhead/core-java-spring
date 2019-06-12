@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
-@RunWith (SpringRunner.class)
+@RunWith(SpringRunner.class)
 public class ServiceRegistryDBServiceTest {
 	
 	//=================================================================================================
@@ -26,8 +26,7 @@ public class ServiceRegistryDBServiceTest {
 	// methods
 		
 	//-------------------------------------------------------------------------------------------------
-		
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void testGetAllServiceReqistryEntriesWithInvalidSortField() {
 		serviceRegistryDBService.getServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
 	}

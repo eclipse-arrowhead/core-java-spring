@@ -71,7 +71,7 @@ public class DTOConverter {
 		Assert.notNull(entry.getServiceDefinition(), "Related service definition is null.");
 		Assert.notNull(entry.getSystem(), "Related system is null.");
 		Assert.notNull(entry.getInterfaceConnections(), "Related interface connection set is null.");
-		Assert.isTrue(entry.getInterfaceConnections().size() > 0, "Related interface connection set is empty.");
+		Assert.isTrue(!entry.getInterfaceConnections().isEmpty(), "Related interface connection set is empty.");
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionDTO = convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition());
 		final SystemResponseDTO systemDTO = convertSystemToSystemResponseDTO(entry.getSystem());
@@ -113,7 +113,7 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static List<String> collectInterfaceNames(Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
-		final List<String> result = new ArrayList<String>(interfaceConnections.size());
+		final List<String> result = new ArrayList<>(interfaceConnections.size());
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
 			result.add(conn.getServiceInterface().getInterfaceName());
 		}

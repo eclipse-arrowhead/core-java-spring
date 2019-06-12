@@ -1,7 +1,6 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -472,7 +471,8 @@ public class ServiceRegistryDBService {
 														
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : ZonedDateTime.parse(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
-			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, request.getVersion(),
+			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
+			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
 																  request.getInterfaces());
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
@@ -483,13 +483,12 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceRegistry createServiceRegistry(final ServiceDefinition serviceDefinition, final System provider, final String serviceUri, final ZonedDateTime endOfValidity,
-												 final ServiceSecurityType securityType, final String metadataStr, final Integer version, final List<String> interfaces) {
+												 final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
 		logger.debug("createServiceRegistry started...");
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
 		Assert.notNull(provider, "Provider is not specified.");
@@ -501,12 +500,13 @@ public class ServiceRegistryDBService {
 		try {
 			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
 			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();
-			final ServiceRegistry srEntry = new ServiceRegistry(serviceDefinition, provider, validatedServiceUri, endOfValidity, secure, metadataStr, version);
+			final ServiceRegistry srEntry = serviceRegistryRepository.save(new ServiceRegistry(serviceDefinition, provider, validatedServiceUri, endOfValidity, secure, metadataStr, version));
 			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);
 			for (final ServiceInterface serviceInterface : serviceInterfaces) {
 				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
 				srEntry.getInterfaceConnections().add(connection);
 			}
+			serviceRegistryInterfaceConnectionRepository.saveAll(srEntry.getInterfaceConnections());
 			
 			return serviceRegistryRepository.saveAndFlush(srEntry);
 		} catch (final Exception ex) {
@@ -712,6 +712,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<ServiceInterface> findOrCreateServiceInterfaces(final List<String> interfaces) {
+		logger.debug("findOrCreateServiceInterfaces started ...");
 		final List<ServiceInterface> result = new ArrayList<>(interfaces.size());
 		final List<ServiceInterface> newInterfaces = new ArrayList<>();
 		for (final String name : interfaces) {
