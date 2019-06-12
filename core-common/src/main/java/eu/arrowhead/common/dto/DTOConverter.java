@@ -92,6 +92,19 @@ public class DTOConverter {
 		return dto;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceRegistryListResponseDTO convertServiceRegistryListToServiceRegistryListResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
+		
+		final List<ServiceRegistryResponseDTO> serviceRegistryEntryDTOs = new ArrayList<>(serviceRegistryEntries.getNumberOfElements());
+		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
+			serviceRegistryEntryDTOs.add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+		}
+		
+		return new ServiceRegistryListResponseDTO(serviceRegistryEntryDTOs, serviceRegistryEntries.getTotalElements());
+	}
+	
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -112,7 +125,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<String> collectInterfaceNames(Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
+	private static List<String> collectInterfaceNames(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
 		final List<String> result = new ArrayList<>(interfaceConnections.size());
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
 			result.add(conn.getServiceInterface().getInterfaceName());

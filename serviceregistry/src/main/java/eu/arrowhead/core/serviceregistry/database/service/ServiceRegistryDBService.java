@@ -32,6 +32,7 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
@@ -396,12 +397,13 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> getServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getAllServiceReqistryEntries started..");
+		logger.debug("getServiceReqistryEntries started..");
+		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
 		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
-		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+		if (!ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
 		}
 		try {
@@ -412,6 +414,49 @@ public class ServiceRegistryDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceReqistryEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceReqistryEntriesResponse started..");
+		
+		final Page<ServiceRegistry> serviceReqistryEntries = getServiceReqistryEntries(page, size, direction, sortField);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceReqistryEntries);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<ServiceRegistry> getServiceReqistryEntriesByServiceDefintion(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceReqistryEntriesByServiceDefintion started..");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		if (!ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+		}
+		
+		try {
+			final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+			if (serviceDefinitionOptional.isPresent()) {
+				return serviceRegistryRepository.findAllByServiceDefinition(serviceDefinitionOptional.get(), PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+			} else {
+				throw new InvalidParameterException("Service with definition of '" + serviceDefinition + "'is not exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceReqistryEntriesByServiceDefintionResponse(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceReqistryEntriesByServiceDefintionResponse started..");
+		
+		final Page<ServiceRegistry> serviceReqistryEntriesByServiceDefintion = getServiceReqistryEntriesByServiceDefintion(serviceDefinition, page, size, direction, sortField);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceReqistryEntriesByServiceDefintion);		
+	}
+		
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeServiceRegistryEntryById(final long id) {

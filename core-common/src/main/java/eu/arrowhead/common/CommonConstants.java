@@ -109,6 +109,7 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
+	public static final String REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
 	
 	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "systemName";
 	

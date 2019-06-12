@@ -27,6 +27,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
@@ -83,6 +84,11 @@ public class ServiceRegistryController {
 	private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
 	private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
+	
+	private static final String SERVICEREGISTRY_MGMT_URI = CommonConstants.MGMT_URI;
+	private static final String SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICEREGISTRY_MGMT_URI + "/servicedef";
+	private static final String GET_SERVICEREGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
+	private static final String GET_SERVICEREGISTRY_HTTP_400_MESSAGE = "Could not retrive service registry entries";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -363,7 +369,83 @@ public class ServiceRegistryController {
 		serviceRegistryDBService.removeServiceDefinitionById(id);
 		logger.debug("Service definition with id: '{}' succesfully deleted", id);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested service registry entries by the given parameters", response = ServiceRegistryListResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICEREGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICEREGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = SERVICEREGISTRY_MGMT_URI)
+	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntries(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New Service Registry get request recieved with page: {} and item_per page: {}", page, size);
 		
+		int validatedPage;
+		int validatedSize;
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+		
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_URI);
+		final ServiceRegistryListResponseDTO serviceReqistryEntriesResponse = serviceRegistryDBService.getServiceReqistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);		
+		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
+		
+		return serviceReqistryEntriesResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested service registry entries by service definition based on the given parameters", response = ServiceRegistryListResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICEREGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICEREGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path =  SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI)
+	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntriesByServiceDefinition(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New Service Registry get by Service Defintition request recieved with page: {} and item_per page: {}", page, size);
+		
+		if (Utilities.isEmpty(serviceDefinition)) {
+			throw new BadPayloadException("Service definition cannot be empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+		}
+		int validatedPage;
+		int validatedSize;
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}		
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+		final ServiceRegistryListResponseDTO serviceReqistryEntries = serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintionResponse(serviceDefinition, validatedPage, validatedSize, validatedDirection, sortField);
+		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
+		return serviceReqistryEntries;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
