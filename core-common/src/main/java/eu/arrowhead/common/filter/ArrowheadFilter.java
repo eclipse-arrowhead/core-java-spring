@@ -23,18 +23,31 @@ import eu.arrowhead.common.exception.ArrowheadException;
 
 public abstract class ArrowheadFilter extends GenericFilterBean {
 	
+	//=================================================================================================
+	// members
+
+	
 	protected final Logger log = LogManager.getLogger(ArrowheadFilter.class);
 	protected final ObjectMapper mapper = new ObjectMapper();
 	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		chain.doFilter(request, response);
 	}
 	
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	protected ArrowheadFilter() {
 		log.info("{} is active", this.getClass().getSimpleName());
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	protected void handleException(final ArrowheadException ex, final ServletResponse response) throws IOException {
 		final HttpStatus status = Utilities.calculateHttpStatusFromArrowheadException(ex);
 		final String origin = ex.getOrigin() == null ? CommonConstants.UNKNOWN_ORIGIN : ex.getOrigin();
@@ -47,6 +60,7 @@ public abstract class ArrowheadFilter extends GenericFilterBean {
 		sendError(status, dto, (HttpServletResponse) response);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	protected void sendError(final HttpStatus status, final ErrorMessageDTO dto, final HttpServletResponse response) throws IOException {
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setStatus(status.value());

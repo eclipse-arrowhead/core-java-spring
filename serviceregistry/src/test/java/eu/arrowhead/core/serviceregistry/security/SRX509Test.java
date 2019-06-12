@@ -35,6 +35,9 @@ import eu.arrowhead.common.CommonConstants;
 @AutoConfigureMockMvc
 public class SRX509Test {
 	
+	//=================================================================================================
+	// members
+	
 	@Autowired
 	private ApplicationContext appContext;
 	
@@ -45,7 +48,11 @@ public class SRX509Test {
 	private WebApplicationContext wac;
 	
 	private MockMvc mockMvc;
-	
+
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setup() {
 		assumeTrue(secure);
@@ -57,6 +64,7 @@ public class SRX509Test {
 									  .build();
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testEcho() throws Exception {
 		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/echo")
@@ -69,6 +77,7 @@ public class SRX509Test {
 		Assert.assertEquals("Got it!", result);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testEchoNoCertificate() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/echo")
@@ -77,6 +86,7 @@ public class SRX509Test {
 					.andExpect(status().isUnauthorized());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testEchoInvalidCertificate() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/echo")

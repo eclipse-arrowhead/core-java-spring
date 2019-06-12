@@ -7,13 +7,20 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 public class CustomServletInputStream extends ServletInputStream {
+	
+	//=================================================================================================
+	// members
 
-    private byte[] myBytes;
+	private byte[] myBytes;
 
     private int lastIndexRetrieved = -1;
     private ReadListener readListener = null;
 
-    public CustomServletInputStream(final String s) {
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public CustomServletInputStream(final String s) {
         try {
             this.myBytes = s.getBytes(StandardCharsets.UTF_8.name());
         } catch (final UnsupportedEncodingException ex) {
@@ -21,23 +28,27 @@ public class CustomServletInputStream extends ServletInputStream {
         }
     }
 
-    public CustomServletInputStream(final byte[] inputBytes) {
+    //-------------------------------------------------------------------------------------------------
+	public CustomServletInputStream(final byte[] inputBytes) {
         this.myBytes = inputBytes;
     }
 
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
     public boolean isFinished() {
         return (lastIndexRetrieved == myBytes.length - 1);
     }
 
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
     public boolean isReady() {
         // This implementation will never block
         // We also never need to call the readListener from this method, as this method will never return false
         return isFinished();
     }
 
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
     public void setReadListener(final ReadListener readListener) {
         this.readListener = readListener;
         if (!isFinished()) {
@@ -55,7 +66,8 @@ public class CustomServletInputStream extends ServletInputStream {
         }
     }
 
-    @Override
+    //-------------------------------------------------------------------------------------------------
+	@Override
     public int read() throws IOException {
         int i;
         if (!isFinished()) {

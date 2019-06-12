@@ -13,31 +13,40 @@ package eu.arrowhead.common.exception;
 @SuppressWarnings("serial")
 public class InvalidParameterException extends ArrowheadException {
 
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	public InvalidParameterException(final String msg, final int errorCode, final String origin, final Throwable cause) {
 		super(msg, errorCode, origin, cause);
 		this.setExceptionType(ExceptionType.INVALID_PARAMETER);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public InvalidParameterException(final String msg, final int errorCode, final String origin) {
 	    super(msg, errorCode, origin);
 	    this.setExceptionType(ExceptionType.INVALID_PARAMETER);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public InvalidParameterException(final String msg, final int errorCode, final Throwable cause) {
 	    super(msg, errorCode, cause);
 	    this.setExceptionType(ExceptionType.INVALID_PARAMETER);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public InvalidParameterException(final String msg, final int errorCode) {
 	    super(msg, errorCode);
 	    this.setExceptionType(ExceptionType.INVALID_PARAMETER);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public InvalidParameterException(final String msg, final Throwable cause) {
 	    super(msg, cause);
 	    this.setExceptionType(ExceptionType.INVALID_PARAMETER);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public InvalidParameterException(final String msg) {
 	    super(msg);
 	    this.setExceptionType(ExceptionType.INVALID_PARAMETER);

@@ -2,6 +2,9 @@ package eu.arrowhead.common;
 
 public class CommonConstants {
 	
+	//=================================================================================================
+	// members
+	
 	public static final String APPLICATION_PROPERTIES = "application.properties";
 	
 	public static final String BASE_PACKAGE = "eu.arrowhead";
@@ -38,6 +41,9 @@ public class CommonConstants {
 	
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
+	public static final String JSON = "JSON";
+	public static final String XML = "XML";
+	
 	public static final String LOCALHOST = "127.0.0.1";
 	public static final int HTTP_PORT = 80;
 	
@@ -95,6 +101,9 @@ public class CommonConstants {
 	public static final String $SERVICE_REGISTRY_TTL_SCHEDULED_WD = "${" + SERVICE_REGISTRY_TTL_SCHEDULED + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED + "}";
 	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
+	public static final String SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = "use_strict_service_intf_name_verifier";
+	public static final String $SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" +
+																							Defaults.DEFAULT_SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
 	
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
@@ -110,7 +119,11 @@ public class CommonConstants {
 	
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
-	
+
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}

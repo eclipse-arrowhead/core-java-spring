@@ -13,31 +13,40 @@ package eu.arrowhead.common.exception;
 @SuppressWarnings("serial")
 public class BadPayloadException extends ArrowheadException {
 
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	public BadPayloadException(final String msg, final int errorCode, final String origin, final Throwable cause) {
 	    super(msg, errorCode, origin, cause);
 	    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public BadPayloadException(final String msg, final int errorCode, final String origin) {
 	    super(msg, errorCode, origin);
 	    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public BadPayloadException(final String msg, final int errorCode, final Throwable cause) {
 	    super(msg, errorCode, cause);
 	    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public BadPayloadException(final String msg, final int errorCode) {
 	    super(msg, errorCode);
 	    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public BadPayloadException(final String msg, final Throwable cause) {
 	    super(msg, cause);
 	    this.setExceptionType(ExceptionType.BAD_PAYLOAD);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public BadPayloadException(final String msg) {
 	    super(msg);
 	    this.setExceptionType(ExceptionType.BAD_PAYLOAD);

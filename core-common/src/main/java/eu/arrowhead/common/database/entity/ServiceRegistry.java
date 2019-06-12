@@ -7,6 +7,8 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,6 +25,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.dto.ServiceSecurityType;
 
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
@@ -42,20 +45,21 @@ public class ServiceRegistry {
 	@JoinColumn (name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column (nullable = true, length = Defaults.VARCHAR_BASIC)
 	private String serviceUri;
 	
 	@Column (nullable = true)
 	private ZonedDateTime endOfValidity;
 	
-	@Column (nullable = false)
-	private boolean secure = false;
+	@Column (nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'NOT_SECURE'")
+	@Enumerated(EnumType.STRING)
+	private ServiceSecurityType secure = ServiceSecurityType.NOT_SECURE;
 	
 	@Column (nullable = true, columnDefinition = "TEXT")
 	private String metadata;
 	
 	@Column (nullable = true)
-	private int version = 1;
+	private Integer version = 1;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
@@ -72,7 +76,7 @@ public class ServiceRegistry {
 	}
 
 	public ServiceRegistry(final ServiceDefinition serviceDefinition, final System system, final String serviceUri,
-			final ZonedDateTime endOfValidity, final boolean secure, final String metadata, final int version) {
+			final ZonedDateTime endOfValidity, final ServiceSecurityType secure, final String metadata, final int version) {
 		this.serviceDefinition = serviceDefinition;
 		this.system = system;
 		this.serviceUri = serviceUri;
@@ -133,11 +137,11 @@ public class ServiceRegistry {
 		this.endOfValidity = endOfValidity;
 	}
 
-	public boolean getSecure() {
+	public ServiceSecurityType getSecure() {
 		return secure;
 	}
 
-	public void setSecure(final boolean secure) {
+	public void setSecure(final ServiceSecurityType secure) {
 		this.secure = secure;
 	}
 

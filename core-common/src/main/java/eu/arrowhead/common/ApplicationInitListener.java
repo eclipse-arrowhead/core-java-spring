@@ -23,12 +23,20 @@ import eu.arrowhead.common.exception.AuthException;
 
 @Component
 public class ApplicationInitListener {
+	
+	//=================================================================================================
+	// members
+
 
 	private Logger logger = LogManager.getLogger(ApplicationInitListener.class);
 
 	@Autowired
 	private SSLProperties sslProperties;
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@EventListener
 	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		logger.debug("Initialization in onApplicationEvent()...");
@@ -41,11 +49,16 @@ public class ApplicationInitListener {
 		logger.debug("Initialization in onApplicationEvent() is done.");
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
 	public Map<String,String> getArrowheadContext() {
 		return new ConcurrentHashMap<>();
 	}
 	
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	private void checkServerCertificate(final ApplicationContext appContext) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		Assert.isTrue(sslProperties.isSslEnabled(), "SSL is not enabled.");
 		final String messageNotDefined = " is not defined.";

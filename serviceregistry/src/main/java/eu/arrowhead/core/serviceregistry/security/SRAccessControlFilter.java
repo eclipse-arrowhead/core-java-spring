@@ -16,9 +16,16 @@ import eu.arrowhead.common.security.AccessControlFilter;
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
 public class SRAccessControlFilter extends AccessControlFilter {
 	
+	//=================================================================================================
+	// members
+	
 	private static final String[] allowedCoreSystemsForQuery = { CommonConstants.CORE_SYSTEM_ORCHESTRATOR_NAME, CommonConstants.CORE_SYSTEM_GATEKEEPER_NAME, CommonConstants.CORE_SYSTEM_CA_NAME,
 																 CommonConstants.CORE_SYSTEM_CA_NAME_2 };
 	
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
@@ -39,6 +46,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	private void checkIfLocalSystemOperator(final String clientCN, final String requestTarget, final String cloudCN) {
 		final String sysopCN = CommonConstants.LOCAL_SYSTEM_OPERATOR_NAME + "." + cloudCN;
 		if (!clientCN.equalsIgnoreCase(sysopCN)) {
@@ -47,6 +55,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	//TODO: test in SRAccessControlFilterTest after register is implemented
 	private void checkProviderAccessToRegister(final String clientCN, final String requestJSON, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
@@ -63,6 +72,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	//TODO: test in SRAccessControlFilterTest after unregister is implemented
 	private void checkProviderAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
@@ -79,6 +89,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	//TODO: test in SRAccessControlFilterTest after query is implemented
 	private void checkIfClientIsAllowed(final String clientCN, final String requestTarget, final String cloudCN) {
 		for (final String coreSystemName : allowedCoreSystemsForQuery) {
@@ -93,6 +104,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 	    throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	private String getClientNameFromCN(final String clientCN) {
 		return clientCN.split("\\.", 2)[0];
 	}

@@ -23,10 +23,17 @@ import eu.arrowhead.common.exception.UnavailableServerException;
 
 @Component
 public class ArrowheadHttpClientResponseErrorHandler extends DefaultResponseErrorHandler {
-	
+
+	//=================================================================================================
+	// members
+
 	private final Logger logger = LogManager.getLogger(HttpService.class);
 	private final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void handleError(final URI url, final HttpMethod method, final ClientHttpResponse response) throws IOException {
 		ErrorMessageDTO dto;
