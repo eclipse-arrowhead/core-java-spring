@@ -132,7 +132,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void crateSystemAdrressNullTest() {
+	public void crateSystemAddressNullTest() {
 
 		serviceRegistryDBService.createSystem("x", null, 1, "x");
 				
@@ -148,7 +148,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void crateSystemAdrressEmptyStringTest() {
+	public void crateSystemAddressEmptyStringTest() {
 
 		serviceRegistryDBService.createSystem("x", "", 1, "x");
 				
@@ -479,7 +479,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void mergeSystemBySingleParameterPortTest() {
+	public void mergeSystemByIdSingleParameterPortTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
 		final int port0 = 1;
@@ -500,7 +500,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void mergeSystemBySingleParameterAuthInfoTest() {
+	public void mergeSystemByIdSingleParameterAuthInfoTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
 		final int port0 = 1;
@@ -521,7 +521,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void mergeSystemByAllNullParametersTest() {
+	public void mergeSystemByIdAllNullParametersTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
 		final int port0 = 1;
