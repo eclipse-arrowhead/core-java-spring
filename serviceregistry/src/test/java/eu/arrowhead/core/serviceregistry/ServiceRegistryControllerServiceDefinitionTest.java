@@ -125,7 +125,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	@Test
-	public void getServiceDefinitionsTestWithInvalidSortDirectionFlagParametert() throws Exception {
+	public void getServiceDefinitionsTestWithInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
 				.param("direction", "invalid")
 				.accept(MediaType.APPLICATION_JSON))
@@ -180,7 +180,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	@Test
 	public void addServiceDefinitionTestWithNullDefinition() throws Exception {
 		this.mockMvc.perform(post("/serviceregistry/mgmt/services")
-				.content("{\"serviceDefinition\": \"\"}")
+				.content("{}")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -218,9 +218,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	
 	@Test
 	public void putUpdateServiceDefinitionTestWithNullDefintion() throws Exception {
-		final String serviceDefinition = null;
 		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
-				.content("{\"serviceDefinition\": "+ serviceDefinition + "}")
+				.content("{}")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -228,9 +227,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	
 	@Test
 	public void putUpdateServiceDefinitionTestWithBlankDefintion() throws Exception {
-		final String serviceDefinition = "      ";
 		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
-				.content("{\"serviceDefinition\": "+ serviceDefinition + "}")
+				.content("{\"serviceDefinition\": \"     \"}")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -259,9 +257,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	
 	@Test
 	public void patchUpdateServiceDefinitionTestWithNullDefintion() throws Exception {
-		final String serviceDefinition = null;
 		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
-				.content("{\"serviceDefinition\": "+ serviceDefinition + "}")
+				.content("{}")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -269,9 +266,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	
 	@Test
 	public void patchUpdateServiceDefinitionTestWithBlankDefintion() throws Exception {
-		final String serviceDefinition = "      ";
 		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
-				.content("{\"serviceDefinition\": "+ serviceDefinition + "}")
+				.content("{\"serviceDefinition\": \"      \"}")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
