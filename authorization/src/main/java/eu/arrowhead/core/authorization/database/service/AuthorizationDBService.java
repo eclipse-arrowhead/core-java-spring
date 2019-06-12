@@ -1,4 +1,4 @@
-package eu.arrowhead.common.database.service;
+package eu.arrowhead.core.authorization.database.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
