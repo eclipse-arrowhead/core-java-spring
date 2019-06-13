@@ -56,7 +56,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testGetAllServiceReqistryEntriesWithInvalidSortField() {
-		serviceRegistryDBService.getServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
+		serviceRegistryDBService.getServiceRegistryEntries(0, 10, Direction.ASC, "notValid");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

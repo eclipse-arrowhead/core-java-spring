@@ -76,7 +76,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 	private void checkProviderAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		
-		final String providerName = queryParams.getOrDefault(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, new String[] { "" })[0];
+		final String providerName = queryParams.getOrDefault(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, new String[] { "" })[0];
 		if (Utilities.isEmpty(providerName)) {
 			log.debug("Provider name is not set in the query parameters when use {}", requestTarget);
 			return; // we can't continue the check and the endpoint will throw BadPayloadException

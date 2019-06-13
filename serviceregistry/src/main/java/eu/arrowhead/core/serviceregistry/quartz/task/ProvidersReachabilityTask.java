@@ -48,7 +48,7 @@ public class ProvidersReachabilityTask implements Job {
 		int pageIndexCounter = 0;
 		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
-			pageOfServiceEntries = serviceRegistryDBService.getServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
 				logger.debug("Servise Registry database is empty");
 			} else {
@@ -56,7 +56,7 @@ public class ProvidersReachabilityTask implements Job {
 				removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
-					pageOfServiceEntries = serviceRegistryDBService.getServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+					pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 					removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 					pageIndexCounter++;
 				}

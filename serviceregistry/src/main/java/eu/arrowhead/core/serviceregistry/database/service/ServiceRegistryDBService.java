@@ -395,47 +395,17 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Page<ServiceRegistry> getServiceReqistryEntries(final int page, final int size, final Direction direction, final String sortField) {
+	public Page<ServiceRegistry> getServiceRegistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getAllServiceReqistryEntries started..");
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
 		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
-		if (! ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+		if (!ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
 		}
 		try {
 			return serviceRegistryRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
-	public void removeServiceRegistryEntryById(final long id) {
-		logger.debug("removeServiceRegistryEntryById started..");
-		if (!serviceRegistryRepository.existsById(id)) {
-			throw new InvalidParameterException("Service Definition with id '" + id + "' not exists");
-		}
-		
-		try {
-			serviceRegistryRepository.deleteById(id);
-			serviceRegistryRepository.flush();
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
-	public void removeBulkOfServiceRegistryEntries(final Iterable<ServiceRegistry> entities) {
-		logger.debug("removeBulkOfServiceRegistryEntries started..");
-		try {
-			serviceRegistryRepository.deleteInBatch(entities);
-			serviceRegistryRepository.flush();
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -509,6 +479,75 @@ public class ServiceRegistryDBService {
 			serviceRegistryInterfaceConnectionRepository.saveAll(srEntry.getInterfaceConnections());
 			
 			return serviceRegistryRepository.saveAndFlush(srEntry);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class) 
+	public void removeServiceRegistry(final String serviceDefinition, final String providerSystemName, final String providerSystemAddress, final int providerSystemPort) {
+		logger.debug("removeServiceRegistry started...");
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "Service definition is not specified.");
+		Assert.isTrue(!Utilities.isEmpty(providerSystemName), "Provider system name is not specified.");
+		Assert.isTrue(!Utilities.isEmpty(providerSystemAddress), "Provider system address is not specified.");
+		
+		final String validatedServiceDefinition = serviceDefinition.toLowerCase().trim();
+		final String validatedSystemName = providerSystemName.toLowerCase().trim();
+		final String validatedSystemAddress = providerSystemAddress.toLowerCase().trim();
+		
+		try {
+			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(validatedServiceDefinition);
+			if (optServiceDefinition.isEmpty()) {
+				throw new InvalidParameterException("No service exists with definition " + validatedServiceDefinition);
+			}
+			
+			final Optional<System> optProviderSystem = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedSystemAddress, providerSystemPort);
+			if (optProviderSystem.isEmpty()) {
+				throw new InvalidParameterException("No system with name: " + validatedSystemName + ", address: " + validatedSystemAddress + ", port: " + providerSystemPort + 
+													" exists.");
+			}
+			
+			final Optional<ServiceRegistry> optServiceRegistryEntry = serviceRegistryRepository.findByServiceDefinitionAndSystem(optServiceDefinition.get(), optProviderSystem.get());
+			if (optServiceRegistryEntry.isEmpty()) {
+				throw new InvalidParameterException("No Service Registry entry with provider: (" + validatedSystemName + ", " + validatedSystemAddress + ":" + providerSystemPort +
+													") and service definition: " + validatedServiceDefinition + " exists.");
+			}
+			
+			removeServiceRegistryEntryById(optServiceRegistryEntry.get().getId());
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeServiceRegistryEntryById(final long id) {
+		logger.debug("removeServiceRegistryEntryById started..");
+		if (!serviceRegistryRepository.existsById(id)) {
+			throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
+		}
+		
+		try {
+			serviceRegistryRepository.deleteById(id);
+			serviceRegistryRepository.flush();
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeBulkOfServiceRegistryEntries(final Iterable<ServiceRegistry> entities) {
+		logger.debug("removeBulkOfServiceRegistryEntries started..");
+		try {
+			serviceRegistryRepository.deleteInBatch(entities);
+			serviceRegistryRepository.flush();
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
