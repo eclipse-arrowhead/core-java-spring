@@ -88,6 +88,9 @@ public class ServiceRegistryController {
 	private static final String SERVICE_REGISTRY_REGISTER_DESCRIPTION = "Registers a service";
 	private static final String SERVICE_REGISTRY_REGISTER_201_MESSAGE = "Service registered";
 	private static final String SERVICE_REGISTRY_REGISTER_400_MESSAGE = "Could not register service";
+	private static final String SERVICE_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered service";
+	private static final String SERVICE_REGISTRY_UNREGISTER_200_MESSAGE = "Registered service removed";
+	private static final String SERVICE_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove service";
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String SYSTEM_ID_NOT_VALID_ERROR_MESSAGE = " System id must be greater then 0. ";
@@ -397,6 +400,26 @@ public class ServiceRegistryController {
 		
 		return response;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_UNREGISTER_DESCRIPTION)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_UNREGISTER_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_UNREGISTER_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI)
+	public void unregisterService(@RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
+								  @RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME) final String providerName,
+								  @RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS) final String providerAddress,
+								  @RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int providerPort) {
+		logger.debug("Service removal request received");
+		checkUnregisterServiceParameters(serviceDefinition, providerName, providerAddress, providerPort);
+		
+		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort);
+		logger.debug("{} successfully removied its service {}", providerName, serviceDefinition);
+	}
 		
 	//=================================================================================================
 	// assistant methods
@@ -515,9 +538,9 @@ public class ServiceRegistryController {
 		
 		final int validatedPort = request.getPort();
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Port must be between "+ 
+			throw new BadPayloadException("Port must be between " + 
 					CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
-					CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST, origin);
+					CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 	
@@ -574,6 +597,29 @@ public class ServiceRegistryController {
 			if (!interfaceNameVerifier.isValid(intf)) {
 				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
 			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkUnregisterServiceParameters(final String serviceDefinition, final String providerName, final String providerAddress, final int providerPort) {
+		// parameters can't be null, but can be empty
+		logger.debug("checkUnregisterServiceParameters started...");
+		
+		final String origin = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
+		if (Utilities.isEmpty(serviceDefinition)) {
+			throw new BadPayloadException("Service definition is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(providerName)) {
+			throw new BadPayloadException("Name of the provider system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(providerAddress)) {
+			throw new BadPayloadException("Address of the provider system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (providerPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || providerPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 }
