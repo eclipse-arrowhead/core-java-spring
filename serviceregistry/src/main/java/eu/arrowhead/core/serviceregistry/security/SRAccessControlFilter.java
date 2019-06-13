@@ -34,13 +34,13 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		if (requestTarget.contains(CommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, requestTarget, cloudCN);
-		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_REGISTER_URI)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI)) {
 			// A provider system can only register its own services!
 			checkProviderAccessToRegister(clientCN, requestJSON, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_UNREGISTER_URI)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI)) {
 			// A provider system can only unregister its own services!
 			checkProviderAccessToDeregister(clientCN, queryParams, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICEREGISTRY_QUERY_URI)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAllowed(clientCN, requestTarget, cloudCN);
 		}

@@ -1,7 +1,6 @@
 package eu.arrowhead.common.dto;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +9,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.System;
@@ -85,11 +85,18 @@ public class DTOConverter {
 		dto.setSecure(entry.getSecure());
 		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
 		dto.setVersion(entry.getVersion());
-		dto.setInterfaces(collectInterfaceNames(entry.getInterfaceConnections()));
+		dto.setInterfaces(collectInterfaces(entry.getInterfaceConnections()));
 		dto.setCreatedAt(entry.getCreatedAt().toString());
 		dto.setUpdatedAt(entry.getUpdatedAt().toString());
 		
 		return dto;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceInterfaceResponseDTO convertServiceInterfaceToServiceInterfaceResponseDTO(final ServiceInterface intf) {
+		Assert.notNull(intf, "Interface entry is null.");
+		
+		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), intf.getCreatedAt().toString(), intf.getUpdatedAt().toString());
 	}
 	
 	//=================================================================================================
@@ -112,12 +119,12 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<String> collectInterfaceNames(Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
-		final List<String> result = new ArrayList<>(interfaceConnections.size());
+	private static List<ServiceInterfaceResponseDTO> collectInterfaces(Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
+		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
-			result.add(conn.getServiceInterface().getInterfaceName());
+			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
 		}
-		Collections.sort(result);
+		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
 		
 		return result;
 	}

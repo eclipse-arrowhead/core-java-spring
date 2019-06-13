@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
@@ -41,7 +42,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//=================================================================================================
 	// members
 	
-	private static final String SERVICEREGISTRY_REGISTER_URI = "/serviceregistry/register";
+	private static final String SERVICEREGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 
 	@Autowired
 	private WebApplicationContext wac;
