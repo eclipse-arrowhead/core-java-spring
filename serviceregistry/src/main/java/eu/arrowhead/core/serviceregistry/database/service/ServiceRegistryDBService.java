@@ -724,7 +724,7 @@ public class ServiceRegistryDBService {
 		Assert.isTrue(!interfaces.isEmpty(), "Interfaces is is empty.");
 		
 		for (final String intf : interfaces) {
-			Assert.isTrue(!interfaceNameVerifier.isValid(intf), "Specified interface name is not valid: " + intf);
+			Assert.isTrue(interfaceNameVerifier.isValid(intf), "Specified interface name is not valid: " + intf);
 		}
 	}
 	

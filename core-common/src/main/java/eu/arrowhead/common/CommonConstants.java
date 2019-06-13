@@ -49,10 +49,10 @@ public class CommonConstants {
 	
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
-	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
-	public static final String OP_SERVICEREGISTRY_REGISTER_URI = "/register";
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_URI = "/unregister";
-	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";
+	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
+	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

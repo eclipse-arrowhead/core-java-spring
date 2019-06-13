@@ -13,7 +13,7 @@ public class ServiceRegistryResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = 3140433479350803169L;
+	private static final long serialVersionUID = -635438605292398404L;
 	
 	private long id;
 	private ServiceDefinitionResponseDTO serviceDefinition;
@@ -23,7 +23,7 @@ public class ServiceRegistryResponseDTO implements Serializable {
 	private ServiceSecurityType secure;
 	private Map<String,String> metadata;
 	private int version;
-	private List<String> interfaces;
+	private List<ServiceInterfaceResponseDTO> interfaces;
 	private String createdAt;
 	private String updatedAt;
 
@@ -39,7 +39,7 @@ public class ServiceRegistryResponseDTO implements Serializable {
 	public ServiceSecurityType getSecure() { return secure; }
 	public Map<String,String> getMetadata() { return metadata; }
 	public int getVersion() { return version; }
-	public List<String> getInterfaces() { return interfaces; }
+	public List<ServiceInterfaceResponseDTO> getInterfaces() { return interfaces; }
 	public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 	
@@ -51,7 +51,7 @@ public class ServiceRegistryResponseDTO implements Serializable {
 	public void setSecure(final ServiceSecurityType secure) { this.secure = secure; }
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final int version) { this.version = version; }
-	public void setInterfaces(final List<String> interfaces) { this.interfaces = interfaces; }
+	public void setInterfaces(final List<ServiceInterfaceResponseDTO> interfaces) { this.interfaces = interfaces; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 }

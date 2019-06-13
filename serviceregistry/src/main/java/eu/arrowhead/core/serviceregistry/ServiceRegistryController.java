@@ -1,5 +1,8 @@
 package eu.arrowhead.core.serviceregistry;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,11 +31,15 @@ import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.ServiceSecurityType;
 import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
+import eu.arrowhead.core.serviceregistry.intf.ServiceInterfaceNameVerifier;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -41,7 +48,7 @@ import io.swagger.annotations.ApiResponses;
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CommonConstants.SERVICEREGISTRY_URI)
+@RequestMapping(CommonConstants.SERVICE_REGISTRY_URI)
 public class ServiceRegistryController {
 
 	//=================================================================================================
@@ -56,7 +63,7 @@ public class ServiceRegistryController {
 	private static final String SYSTEMS_URI = CommonConstants.MGMT_URI+"/systems";
 	private static final String SYSTEMS_BY_ID_URI = CommonConstants.MGMT_URI+"/systems/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_SYSTEMS_HTTP_200_MESSAGE = "Systems returned";
-	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = " Invalid paraameters";
+	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = " Invalid parameters";
 	private static final String POST_SYSTEM_HTTP_201_MESSAGE = "System created";
 	private static final String POST_SYSTEM_HTTP_400_MESSAGE = "Could not create system";
 	private static final String PUT_SYSTEM_HTTP_200_MESSAGE = "System updated";
@@ -69,7 +76,7 @@ public class ServiceRegistryController {
 	private static final String SERVICES_URI = CommonConstants.MGMT_URI + "/services";
 	private static final String SERVICES_BY_ID_URI = SERVICES_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_SERVICES_HTTP_200_MESSAGE = "Services returned";
-	private static final String GET_SERVICES_HTTP_400_MESSAGE = "Could not retrive service definition";
+	private static final String GET_SERVICES_HTTP_400_MESSAGE = "Could not retrieve service definition";
 	private static final String POST_SERVICES_HTTP_201_MESSAGE = "Service definition created";
 	private static final String POST_SERVICES_HTTP_400_MESSAGE = "Could not create service definition";
 	private static final String PUT_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
@@ -79,21 +86,28 @@ public class ServiceRegistryController {
 	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
 	private static final String DELETE_SERVICES_HTTP_400_MESSAGE = "Could not remove service definition";
 	
+	private static final String SERVICE_REGISTRY_REGISTER_DESCRIPTION = "Registers a service";
+	private static final String SERVICE_REGISTRY_REGISTER_201_MESSAGE = "Service registered";
+	private static final String SERVICE_REGISTRY_REGISTER_400_MESSAGE = "Could not register service";
+	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String SYSTEM_ID_NOT_VALID_ERROR_MESSAGE = " System id must be greater then 0. ";
 	private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " System name must have value ";
 	private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
 	
-	private static final String SERVICEREGISTRY_MGMT_URI = CommonConstants.MGMT_URI;
-	private static final String SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICEREGISTRY_MGMT_URI + "/servicedef";
-	private static final String GET_SERVICEREGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
-	private static final String GET_SERVICEREGISTRY_HTTP_400_MESSAGE = "Could not retrive service registry entries";
+	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.MGMT_URI;
+	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICE_REGISTRY_MGMT_URI + "/servicedef";
+	private static final String GET_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
+	private static final String GET_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrive service registry entries";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
+	
+	@Autowired
+	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 	
 	//=================================================================================================
 	// methods
@@ -123,7 +137,7 @@ public class ServiceRegistryController {
 		logger.debug("getSystemById started ...");
 		
 		if (systemId < 1) {
-			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEM_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 		
 		return serviceRegistryDBService.getSystemById(systemId);			
@@ -154,14 +168,14 @@ public class ServiceRegistryController {
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+				throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}			
 		}
 		
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
 		
 		return serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, validatedDirection, sortField);			
 	}
@@ -218,7 +232,7 @@ public class ServiceRegistryController {
 	public void removeSystem(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New System delete request recieved with id: {}", id);
 		if (id < 1) {
-			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		serviceRegistryDBService.removeSystemById(id);
 		logger.debug("System with id: '{}' succesfully deleted", id);
@@ -247,14 +261,14 @@ public class ServiceRegistryController {
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}
 		}
 
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
 		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("Service definition  with page: {} and item_per page: {} succesfully retrived", page, size);
 		
@@ -274,7 +288,7 @@ public class ServiceRegistryController {
 		logger.debug("New Service Definition get request recieved with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionEntry = serviceRegistryDBService.getServiceDefinitionByIdResponse(id);
@@ -298,7 +312,7 @@ public class ServiceRegistryController {
 		logger.debug("New Service Definition registration request recieved with definition: {}", serviceDefinition);
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_URI);
+			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
@@ -322,11 +336,11 @@ public class ServiceRegistryController {
 		logger.debug("New Service Definition update request recieved with id: {}, definition: {}", id, serviceDefinition);
 		
 		if (id < 1) {
-			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
 		}		
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
@@ -363,7 +377,7 @@ public class ServiceRegistryController {
 		logger.debug("New Service Definition delete request recieved with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
 		}
 		
 		serviceRegistryDBService.removeServiceDefinitionById(id);
@@ -373,12 +387,12 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested service registry entries by the given parameters", response = ServiceRegistryListResponseDTO.class)
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICEREGISTRY_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICEREGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = SERVICEREGISTRY_MGMT_URI)
+	@GetMapping(path = SERVICE_REGISTRY_MGMT_URI)
 	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntries(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
@@ -393,14 +407,14 @@ public class ServiceRegistryController {
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_URI);
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}
 		}
 		
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_URI);
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_URI);
 		final ServiceRegistryListResponseDTO serviceReqistryEntriesResponse = serviceRegistryDBService.getServiceReqistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);		
 		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
 		
@@ -410,12 +424,12 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested service registry entries by service definition based on the given parameters", response = ServiceRegistryListResponseDTO.class)
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICEREGISTRY_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICEREGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path =  SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI)
+	@GetMapping(path =  SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI)
 	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntriesByServiceDefinition(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
@@ -425,7 +439,7 @@ public class ServiceRegistryController {
 		logger.debug("New Service Registry get by Service Defintition request recieved with page: {} and item_per page: {}", page, size);
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("Service definition cannot be empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+			throw new BadPayloadException("Service definition cannot be empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
 		}
 		int validatedPage;
 		int validatedSize;
@@ -434,27 +448,46 @@ public class ServiceRegistryController {
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}
 		}		
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICEREGISTRY_URI + SERVICEREGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
 		final ServiceRegistryListResponseDTO serviceReqistryEntries = serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintionResponse(serviceDefinition, validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
 		return serviceReqistryEntries;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_REGISTER_DESCRIPTION)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = SERVICE_REGISTRY_REGISTER_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_REGISTER_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody ServiceRegistryResponseDTO registerService(@RequestBody final ServiceRegistryRequestDTO request) {
+		logger.debug("New service registration request recieved");
+		checkServiceRegistryRequest(request);
+		
+		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
+		logger.debug("{} successfully registers its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+	
+		return response;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
-
 	//-------------------------------------------------------------------------------------------------
 	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request) {
 		logger.debug(" callCreateSystem started ...");
 		
-		checkSystemRequest(request, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_URI);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
@@ -501,7 +534,7 @@ public class ServiceRegistryController {
 		logger.debug(" checkSystemPatchRequest started ...");
 		
 		if (systemId <= 0) {
-			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
 		boolean needChange = false;
@@ -519,7 +552,7 @@ public class ServiceRegistryController {
 			if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 				throw new BadPayloadException("Port must be between " + 
 											  CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
-											  CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+											  CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 			}
 			
 			needChange = true;
@@ -530,7 +563,7 @@ public class ServiceRegistryController {
 		}
 		
 		if (!needChange) {
-			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 	}
 
@@ -539,10 +572,10 @@ public class ServiceRegistryController {
 		logger.debug(" checkSystemPutRequest started ...");
 		
 		if (systemId <= 0) {
-			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
-		checkSystemRequest(request, CommonConstants.SERVICEREGISTRY_URI + SYSTEMS_BY_ID_URI);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 			
 	}
 
@@ -551,15 +584,15 @@ public class ServiceRegistryController {
 		logger.debug(" checkSystemRequest started ...");
 		
 		if (Utilities.isEmpty(request.getSystemName())) {
-			throw new BadPayloadException( SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (Utilities.isEmpty(request.getAddress())) {
-			throw new BadPayloadException( SYSTEM_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException(SYSTEM_ADDRESS_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (request.getPort() == null) {
-			throw new BadPayloadException( SYSTEM_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException(SYSTEM_PORT_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		final int validatedPort = request.getPort();
@@ -572,6 +605,7 @@ public class ServiceRegistryController {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Direction calculateDirection(final String direction, final String origin) {
+		logger.debug("calculateDirection started ...");
 		final String directionStr = direction != null ? direction.toUpperCase() : "";
 		Direction validatedDirection;
 		switch (directionStr) {
@@ -586,5 +620,42 @@ public class ServiceRegistryController {
 		}
 		
 		return validatedDirection;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request) {
+		logger.debug("checkServiceRegistryRequest started ...");
+
+		final String origin = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
+		if (Utilities.isEmpty(request.getServiceDefinition())) {
+			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		checkSystemRequest(request.getProviderSystem(), origin);
+		
+		if (!Utilities.isEmpty(request.getEndOfValidity())) {
+			try {
+				ZonedDateTime.parse(request.getEndOfValidity().trim());
+			} catch (final DateTimeParseException ex) {
+				throw new BadPayloadException("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", HttpStatus.SC_BAD_REQUEST,
+											  origin);
+			}
+		}
+		
+		final ServiceSecurityType type = request.getSecure() == null ? ServiceSecurityType.NOT_SECURE : request.getSecure();
+		if ((type == ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() != null) ||
+			 type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
+		}
+		
+		if (request.getInterfaces() == null || request.getInterfaces().isEmpty()) {
+			throw new BadPayloadException("Interfaces list is null or empty.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		for (final String intf : request.getInterfaces()) {
+			if (!interfaceNameVerifier.isValid(intf)) {
+				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+		}
 	}
 }
