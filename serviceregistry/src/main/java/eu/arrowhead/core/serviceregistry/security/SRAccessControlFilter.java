@@ -72,7 +72,6 @@ public class SRAccessControlFilter extends AccessControlFilter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	//TODO: test in SRAccessControlFilterTest after unregister is implemented
 	private void checkProviderAccessToDeregister(final String clientCN, final Map<String,String[]> queryParams, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		

@@ -3,12 +3,10 @@ package eu.arrowhead.core.serviceregistry.security;
 import static org.junit.Assume.assumeTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.IOException;
-import java.security.cert.CertificateException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +24,6 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
@@ -49,6 +46,7 @@ public class SRAccessControlFilterTest {
 	private static final String SERVICE_REGISTRY_ECHO = CommonConstants.SERVICE_REGISTRY_URI + "/echo";
 	private static final String SERVICE_REGISTRY_MGMT_SYSTEMS = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/systems";
 	private static final String SERVICE_REGISTRY_REGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
+	private static final String SERVICE_REGISTRY_UNREGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 
 	@Autowired
 	private ApplicationContext appContext;
@@ -176,6 +174,47 @@ public class SRAccessControlFilterTest {
 		postRegister(dto, "certificates/provider.pem", status().isBadRequest());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterWithNoSystemName() throws Exception {
+		// Filter breaks the filter chain and expects that the web service rejects the ill-formed request
+		deleteUnregister("", "certificates/provider.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemNameAndClientNameDoesNotMatch() throws Exception {
+		deleteUnregister("something_else", "certificates/provider.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemNameAndClientNameExactMatch() throws Exception {
+		// Filter enables the access but we use ill-formed input to make sure DB operation is never happened (without mocking it)
+		deleteUnregister("client-demo-provider", "certificates/provider.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemNameAndClientNameCaseInsensitiveMatch() throws Exception {
+		// Filter enables the access but we use ill-formed input to make sure DB operation is never happened (without mocking it)
+		deleteUnregister("CLIENT-demo-provider", "certificates/provider.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterSystemNameAndClientNameIgnoreUnderscoresMatch() throws Exception {
+		// Filter enables the access but we use ill-formed input to make sure DB operation is never happened (without mocking it)
+		deleteUnregister("c_l_i_e_n_t-demo-provider", "certificates/provider.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testunregisterSystemNameAndClientNameIgnoreUnderscoresAndCaseInsensitiveMatch() throws Exception {
+		// Filter enables the access but we use ill-formed input to make sure DB operation is never happened (without mocking it)
+		deleteUnregister("c_l_i_e_n_t-demo-Provider", "certificates/provider.pem", status().isBadRequest());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -187,6 +226,14 @@ public class SRAccessControlFilterTest {
 			    	.contentType(MediaType.APPLICATION_JSON)
 			    	.content(objectMapper.writeValueAsBytes(request))
 			    	.accept(MediaType.APPLICATION_JSON))
+					.andExpect(matcher);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void deleteUnregister(final String systemName, final String certificatePath, final ResultMatcher matcher) throws Exception {
+		this.mockMvc.perform(delete(SERVICE_REGISTRY_UNREGISTER + "?" + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME + "=" + systemName)
+			    	.secure(true)
+			    	.with(x509(certificatePath)))
 					.andExpect(matcher);
 	}
 }
