@@ -55,7 +55,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testGetAllServiceReqistryEntriesWithInvalidSortField() {
+	public void testGetAllServiceRegistryEntriesWithInvalidSortField() {
 		serviceRegistryDBService.getServiceRegistryEntries(0, 10, Direction.ASC, "notValid");
 	}
 	
@@ -169,8 +169,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		dto.setProviderSystem(sysDto);
 		dto.setEndOfValidity("not a ZoneDateTime");
 		
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(new ServiceDefinition(serviceDefinitionStr)));
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(new System(systemName, address, port, null)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(new ServiceDefinition(serviceDefinitionStr)));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(new System(systemName, address, port, null)));
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
@@ -190,14 +190,14 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testCreateServiceRegistryUniqueConstraintViolation() {
-		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(), any())).thenReturn(Optional.of(new ServiceRegistry()));
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, null, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryNotSecuredButAuthenticationInfoSpecified() {
-		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(), any())).thenReturn(Optional.empty());
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		final System provider = new System();
 		provider.setAuthenticationInfo("1234");
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), provider, null, null, ServiceSecurityType.NOT_SECURE, null, 1, null);
@@ -206,28 +206,88 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
-		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(), any())).thenReturn(Optional.empty());
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryInterfacesListNull() {
-		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(), any())).thenReturn(Optional.empty());
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryInterfacesListEmpty() {
-		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(), any())).thenReturn(Optional.empty());
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, Collections.<String>emptyList());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryInvalidInterface() {
-		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(), any())).thenReturn(Optional.empty());
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveServiceRegistryServiceDefinitionNull() {
+		serviceRegistryDBService.removeServiceRegistry(null, null, null, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveServiceRegistryServiceDefinitionEmpty() {
+		serviceRegistryDBService.removeServiceRegistry(" ", null, null, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveServiceRegistryProviderSystemNameNull() {
+		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", null, null, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveServiceRegistryProviderSystemNameEmpty() {
+		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", " ", null, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveServiceRegistryProviderSystemAddressNull() {
+		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", null, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveServiceRegistryProviderSystemAddressEmpty() {
+		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", " ", 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRemoveServiceRegistryServiceDefinitionNotExists() {
+		when(serviceDefinitionRepository.findByServiceDefinition("servicedefinition")).thenReturn(Optional.empty());
+		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", "SystemAddress", 1); // also checks case insensitivity
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRemoveServiceRegistryProviderSystemNotExists() {
+		when(serviceDefinitionRepository.findByServiceDefinition("servicedefinition")).thenReturn(Optional.of(new ServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort("system", "systemaddress", 1)).thenReturn(Optional.empty());
+		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", "SystemAddress", 1); // also checks case insensitivity
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRemoveServiceRegistryEntryNotExists() {
+		when(serviceDefinitionRepository.findByServiceDefinition("servicedefinition")).thenReturn(Optional.of(new ServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort("system", "systemaddress", 1)).thenReturn(Optional.of(new System()));
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", "SystemAddress", 1); // also checks case insensitivity
 	}
 }

@@ -486,6 +486,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class) 
 	public void removeServiceRegistry(final String serviceDefinition, final String providerSystemName, final String providerSystemAddress, final int providerSystemPort) {
 		logger.debug("removeServiceRegistry started...");
@@ -515,7 +516,7 @@ public class ServiceRegistryDBService {
 													") and service definition: " + validatedServiceDefinition + " exists.");
 			}
 			
-			removeServiceRegistryEntryById(optServiceRegistryEntry.get().getId());
+			removeServiceRegistryEntryById(optServiceRegistryEntry.get().getId()); 
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -560,7 +561,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	private boolean checkSystemIfUniqueValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
 												  final Integer validatedPort) {		
-		logger.debug(" removeSystemById started ...");
+		logger.debug(" checkSystemIfUniqueValidationNeeded started ...");
 		
 		final String actualSystemName = system.getSystemName();
 		final String actualAddress = system.getAddress();
