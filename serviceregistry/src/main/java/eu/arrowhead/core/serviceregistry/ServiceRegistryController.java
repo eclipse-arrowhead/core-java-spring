@@ -58,9 +58,9 @@ public class ServiceRegistryController {
 	private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
 	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String PATH_VARIABLE_ID = "id";
-	private static final String SYSTEM_BY_ID_URI = CommonConstants.MGMT_URI+"/system/{" + PATH_VARIABLE_ID + "}";
-	private static final String SYSTEMS_URI = CommonConstants.MGMT_URI+"/systems";
-	private static final String SYSTEMS_BY_ID_URI = CommonConstants.MGMT_URI+"/systems/{" + PATH_VARIABLE_ID + "}";
+	private static final String SYSTEM_BY_ID_URI = CommonConstants.MGMT_URI + "/system/{" + PATH_VARIABLE_ID + "}";
+	private static final String SYSTEMS_URI = CommonConstants.MGMT_URI + "/systems";
+	private static final String SYSTEMS_BY_ID_URI = CommonConstants.MGMT_URI + "/systems/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_SYSTEMS_HTTP_200_MESSAGE = "Systems returned";
 	private static final String GET_SYSTEMS_HTTP_400_MESSAGE = " Invalid parameters";
 	private static final String POST_SYSTEM_HTTP_201_MESSAGE = "System created";

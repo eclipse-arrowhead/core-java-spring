@@ -56,7 +56,6 @@ public class SRAccessControlFilter extends AccessControlFilter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO: test in SRAccessControlFilterTest after register is implemented
 	private void checkProviderAccessToRegister(final String clientCN, final String requestJSON, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
 		final ServiceRegistryRequestDTO requestBody = Utilities.fromJson(requestJSON, ServiceRegistryRequestDTO.class);
