@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -104,6 +105,41 @@ public class DTOConverter {
 		return new ServiceRegistryListResponseDTO(serviceRegistryEntryDTOs, serviceRegistryEntries.getTotalElements());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static AutoCompleteDataResponseDTO convertServiceRegistryEntriesToAutoCompleteDataResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
+		
+		final Set<Long> serviceIds = new HashSet<>();
+		final Set<Long> systemIds = new HashSet<>();
+		final Set<Long> interfaceIds = new HashSet<>();
+		final List<IdValueDTO> serviceList = new ArrayList<>();
+		final List<SystemResponseDTO> systemList = new ArrayList<>();
+		final List<IdValueDTO> interfaceList = new ArrayList<>();
+		
+		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
+			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
+			final long systemId = srEntry.getSystem().getId();
+			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
+			
+			if (!serviceIds.contains(serviceDefinitionId)) {
+				serviceIds.add(serviceDefinitionId);
+				serviceList.add(new IdValueDTO(serviceDefinitionId, srEntry.getServiceDefinition().getServiceDefinition()));
+			}
+			if (!systemIds.contains(systemId)) {
+				systemIds.add(systemId);
+				systemList.add(new SystemResponseDTO(systemId, srEntry.getSystem().getSystemName(), srEntry.getSystem().getAddress(), srEntry.getSystem().getPort(), null, null, null));
+			}
+			for (final ServiceRegistryInterfaceConnection connection : interfaceConnections) {
+				final long interfId = connection.getServiceInterface().getId();
+				if (!interfaceIds.contains(interfId)) {
+					interfaceIds.add(interfId);
+					interfaceList.add(new IdValueDTO(interfId, connection.getServiceInterface().getInterfaceName()));
+				}
+			}
+		}
+		
+		return new AutoCompleteDataResponseDTO(serviceList, systemList, interfaceList);
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceInterfaceResponseDTO convertServiceInterfaceToServiceInterfaceResponseDTO(final ServiceInterface intf) {
@@ -132,7 +168,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<ServiceInterfaceResponseDTO> collectInterfaces(Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
+	private static List<ServiceInterfaceResponseDTO> collectInterfaces(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
 		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
 			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
