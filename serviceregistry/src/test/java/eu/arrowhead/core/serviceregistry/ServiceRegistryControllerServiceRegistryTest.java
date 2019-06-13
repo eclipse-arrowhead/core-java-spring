@@ -214,42 +214,42 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoParameter() throws Exception {
-		postUnregisterService(null, status().isBadRequest());
+		deleteUnregisterService(null, status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoServiceDefinitionParameter() throws Exception {
 		final String queryStr = createQueryStringForUnregister(null, "x", "a", 1);
-		postUnregisterService(queryStr, status().isBadRequest());
+		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoSystemNameParameter() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", null, "a", 1);
-		postUnregisterService(queryStr, status().isBadRequest());
+		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoAddressParameter() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "x", null, 1);
-		postUnregisterService(queryStr, status().isBadRequest());
+		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceNoPortParameter() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "x", "a", null);
-		postUnregisterService(queryStr, status().isBadRequest());
+		deleteUnregisterService(queryStr, status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnregisterServiceServiceDefinitionEmpty() throws Exception {
 		final String queryStr = createQueryStringForUnregister("", "x", "a", 1);
-		final MvcResult result = postUnregisterService(queryStr, status().isBadRequest());
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
@@ -260,7 +260,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUnregisterServiceSystemNameEmpty() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "", "a", 1);
-		final MvcResult result = postUnregisterService(queryStr, status().isBadRequest());
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
@@ -271,7 +271,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUnregisterServiceAddressEmpty() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "x", "", 1);
-		final MvcResult result = postUnregisterService(queryStr, status().isBadRequest());
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
@@ -282,7 +282,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUnregisterServicePortNumberTooLow() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "x", "a", -1);
-		final MvcResult result = postUnregisterService(queryStr, status().isBadRequest());
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
@@ -293,7 +293,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testUnregisterServicePortNumberTooHigh() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "x", "a", 66000);
-		final MvcResult result = postUnregisterService(queryStr, status().isBadRequest());
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
@@ -305,7 +305,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	public void testUnregisterServiceEverythingIsOk() throws Exception {
 		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
 		doNothing().when(serviceRegistryDBService).removeServiceRegistry(any(String.class), any(String.class), any(String.class), anyInt());
-		postUnregisterService(queryStr, status().isOk());
+		deleteUnregisterService(queryStr, status().isOk());
 	}
 	
 	//=================================================================================================
@@ -322,7 +322,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private MvcResult postUnregisterService(final String queryStr, final ResultMatcher matcher) throws Exception {
+	private MvcResult deleteUnregisterService(final String queryStr, final ResultMatcher matcher) throws Exception {
 		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
 		return this.mockMvc.perform(delete(SERVICE_REGISTRY_UNREGISTER_URI + validatedQueryStr)
 						   .accept(MediaType.APPLICATION_JSON))
