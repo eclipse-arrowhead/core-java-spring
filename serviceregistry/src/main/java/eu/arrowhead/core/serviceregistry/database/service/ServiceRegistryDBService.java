@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -30,10 +29,10 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.AutoCompleteDataResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
@@ -425,11 +424,11 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public AutoCompleteDataResponseDTO getServiceReqistryEntriesForAutoCompleteDataResponse() {
+	public ServiceRegistryGrouppedResponseDTO getServiceReqistryEntriesForAutoCompleteDataResponse() {
 		logger.debug("getServiceReqistryEntriesForAutoCompleteDataResponse started..");
 		
 		final Page<ServiceRegistry> serviceReqistryEntries = getServiceReqistryEntries(-1, -1, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-		return DTOConverter.convertServiceRegistryEntriesToAutoCompleteDataResponseDTO(serviceReqistryEntries);
+		return DTOConverter.convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(serviceReqistryEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

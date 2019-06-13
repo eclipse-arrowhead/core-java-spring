@@ -1,8 +1,10 @@
 package eu.arrowhead.common.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
@@ -106,39 +108,75 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static AutoCompleteDataResponseDTO convertServiceRegistryEntriesToAutoCompleteDataResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+	public static ServiceRegistryGrouppedResponseDTO convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
 		
-		final Set<Long> serviceIds = new HashSet<>();
-		final Set<Long> systemIds = new HashSet<>();
-		final Set<Long> interfaceIds = new HashSet<>();
-		final List<IdValueDTO> serviceList = new ArrayList<>();
-		final List<SystemResponseDTO> systemList = new ArrayList<>();
-		final List<IdValueDTO> interfaceList = new ArrayList<>();
-		
+		final Map<Long, ServicesGrouppedBySystemsResponseDTO> servicesBySystemId= new HashMap<>();
+		final Map<String, ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
+		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
+		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
+		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();
+						
 		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
-			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
 			final long systemId = srEntry.getSystem().getId();
-			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
+			final String systemName = srEntry.getSystem().getSystemName();
+			final String systemAddress = srEntry.getSystem().getAddress();
+			final int systemPort = srEntry.getSystem().getPort();
+			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
+			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();			
 			
+			//Creating ServicesGrouppedBySystemsResponseDTO
+			if (servicesBySystemId.containsKey(systemId)) {
+				servicesBySystemId.get(systemId).getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+			} else {
+				final ServicesGrouppedBySystemsResponseDTO dto = new ServicesGrouppedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, new ArrayList<>());
+				dto.getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+				servicesBySystemId.put(systemId, dto);
+			}
+			
+			//Filling up AutoCompleteDataResponseDTO
+			final Set<Long> serviceIds = new HashSet<>();
+			final Set<Long> systemIds = new HashSet<>();
+			final Set<Long> interfaceIds = new HashSet<>();
+						
 			if (!serviceIds.contains(serviceDefinitionId)) {
 				serviceIds.add(serviceDefinitionId);
-				serviceList.add(new IdValueDTO(serviceDefinitionId, srEntry.getServiceDefinition().getServiceDefinition()));
+				servicesForAutoComplete.add(new IdValueDTO(serviceDefinitionId, serviceDefinition));
 			}
 			if (!systemIds.contains(systemId)) {
 				systemIds.add(systemId);
-				systemList.add(new SystemResponseDTO(systemId, srEntry.getSystem().getSystemName(), srEntry.getSystem().getAddress(), srEntry.getSystem().getPort(), null, null, null));
+				systemsForAutoComplete.add(new SystemResponseDTO(systemId, systemName, systemAddress, systemPort, null, null, null));
 			}
+						
+			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
 			for (final ServiceRegistryInterfaceConnection connection : interfaceConnections) {
 				final long interfId = connection.getServiceInterface().getId();
+				final String interfaceName = connection.getServiceInterface().getInterfaceName();
+				
 				if (!interfaceIds.contains(interfId)) {
 					interfaceIds.add(interfId);
-					interfaceList.add(new IdValueDTO(interfId, connection.getServiceInterface().getInterfaceName()));
+					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
+				}
+				
+				//Creating ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO
+				final String key = serviceDefinitionId + "-" + interfId;
+				if (servicesByServiceDefinitionAndInterface.containsKey(key)) {
+					servicesByServiceDefinitionAndInterface.get(key).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+				} else {
+					final ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition, interfaceName,  new ArrayList<>());
+					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+					servicesByServiceDefinitionAndInterface.put(key, dto);
 				}
 			}
 		}
 		
-		return new AutoCompleteDataResponseDTO(serviceList, systemList, interfaceList);
+		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
+		final List<ServicesGrouppedBySystemsResponseDTO> servicesGrouppedBySystemsResponseDTOList = new ArrayList<>();
+		servicesGrouppedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
+		final List<ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesGrouppedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
+		servicesGrouppedByServiceDefinitionAndInterfaceResponseDTOList.addAll(servicesByServiceDefinitionAndInterface.values());
+		
+		return new ServiceRegistryGrouppedResponseDTO(servicesGrouppedBySystemsResponseDTOList, servicesGrouppedByServiceDefinitionAndInterfaceResponseDTOList, autoCompleteDataResponseDTO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
