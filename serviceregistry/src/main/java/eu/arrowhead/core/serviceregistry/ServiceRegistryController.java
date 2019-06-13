@@ -30,6 +30,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
@@ -98,6 +99,7 @@ public class ServiceRegistryController {
 	
 	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.MGMT_URI;
 	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICE_REGISTRY_MGMT_URI + "/servicedef";
+	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = SERVICE_REGISTRY_MGMT_URI + "/groupped";
 	private static final String GET_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
 	private static final String GET_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrive service registry entries";
 	
@@ -458,6 +460,22 @@ public class ServiceRegistryController {
 		final ServiceRegistryListResponseDTO serviceReqistryEntries = serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintionResponse(serviceDefinition, validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
 		return serviceReqistryEntries;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return all service registry entries groupped for frontend usage", response = ServiceRegistryGrouppedResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = SERVICE_REGISTRY_MGMT_GROUPPED_URI)
+	@ResponseBody public ServiceRegistryGrouppedResponseDTO getServiceRegistryGrouppedData() {
+		logger.debug("New get request for groupped service registry data");
+		final ServiceRegistryGrouppedResponseDTO serviceReqistryEntriesForServiceRegistryGrouppedResponse = serviceRegistryDBService.getServiceReqistryEntriesForServiceRegistryGrouppedResponse();
+		logger.debug("Groupped service registry data succesfully retrived");
+		return serviceReqistryEntriesForServiceRegistryGrouppedResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

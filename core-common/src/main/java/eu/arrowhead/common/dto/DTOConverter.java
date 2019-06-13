@@ -115,7 +115,10 @@ public class DTOConverter {
 		final Map<String, ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
 		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
 		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
-		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();
+		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();		
+		final Set<Long> serviceIdsForAutoComplete = new HashSet<>();
+		final Set<Long> systemIdsForAutoComplete = new HashSet<>();
+		final Set<Long> interfaceIdsForAutoComplete = new HashSet<>();
 						
 		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
 			final long systemId = srEntry.getSystem().getId();
@@ -123,7 +126,7 @@ public class DTOConverter {
 			final String systemAddress = srEntry.getSystem().getAddress();
 			final int systemPort = srEntry.getSystem().getPort();
 			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
-			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();			
+			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();		
 			
 			//Creating ServicesGrouppedBySystemsResponseDTO
 			if (servicesBySystemId.containsKey(systemId)) {
@@ -134,17 +137,13 @@ public class DTOConverter {
 				servicesBySystemId.put(systemId, dto);
 			}
 			
-			//Filling up AutoCompleteDataResponseDTO
-			final Set<Long> serviceIds = new HashSet<>();
-			final Set<Long> systemIds = new HashSet<>();
-			final Set<Long> interfaceIds = new HashSet<>();
-						
-			if (!serviceIds.contains(serviceDefinitionId)) {
-				serviceIds.add(serviceDefinitionId);
+			//Filling up AutoCompleteDataResponseDTO						
+			if (!serviceIdsForAutoComplete.contains(serviceDefinitionId)) {
+				serviceIdsForAutoComplete.add(serviceDefinitionId);
 				servicesForAutoComplete.add(new IdValueDTO(serviceDefinitionId, serviceDefinition));
 			}
-			if (!systemIds.contains(systemId)) {
-				systemIds.add(systemId);
+			if (!systemIdsForAutoComplete.contains(systemId)) {
+				systemIdsForAutoComplete.add(systemId);
 				systemsForAutoComplete.add(new SystemResponseDTO(systemId, systemName, systemAddress, systemPort, null, null, null));
 			}
 						
@@ -153,8 +152,8 @@ public class DTOConverter {
 				final long interfId = connection.getServiceInterface().getId();
 				final String interfaceName = connection.getServiceInterface().getInterfaceName();
 				
-				if (!interfaceIds.contains(interfId)) {
-					interfaceIds.add(interfId);
+				if (!interfaceIdsForAutoComplete.contains(interfId)) {
+					interfaceIdsForAutoComplete.add(interfId);
 					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
 				}
 				

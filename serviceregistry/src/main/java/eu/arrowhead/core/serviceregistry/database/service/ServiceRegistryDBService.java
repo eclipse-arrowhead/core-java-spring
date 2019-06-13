@@ -424,7 +424,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryGrouppedResponseDTO getServiceReqistryEntriesForAutoCompleteDataResponse() {
+	public ServiceRegistryGrouppedResponseDTO getServiceReqistryEntriesForServiceRegistryGrouppedResponse() {
 		logger.debug("getServiceReqistryEntriesForAutoCompleteDataResponse started..");
 		
 		final Page<ServiceRegistry> serviceReqistryEntries = getServiceReqistryEntries(-1, -1, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
