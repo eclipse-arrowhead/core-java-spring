@@ -46,7 +46,6 @@ import eu.arrowhead.common.dto.AutoCompleteDataResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.IdValueDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
@@ -67,7 +66,10 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	// members
 	
 	private static final String SERVICEREGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
-
+	private static final String SERVICEREGISTRY_REGISTER_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI;
+	private static final String SERVICEREGISTRY_REGISTER_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/servicedef";
+	private static final String SERVICEREGISTRY_REGISTER_MGMT_GROUPPED_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/groupped";
+	
 	@Autowired
 	private WebApplicationContext wac;
 	
@@ -237,7 +239,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
 		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
-		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt")
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_URI)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -255,7 +257,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
 		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
-		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt")
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_URI)
 				.param("page", "0")
 				.param("item_per_page", String.valueOf(numOfServices * numOfSystems))
 				.accept(MediaType.APPLICATION_JSON))
@@ -269,7 +271,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesWithNullPageButDefinedSizeParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_URI)
 				.param("item_per_page", "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -278,7 +280,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test 
 	public void testGetServiceRegistryEntriesWithDefinedPageButNullSizeParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_URI)
 				.param("page", "0")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -287,7 +289,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesWithInvalidSortDirectionFlagParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_URI)
 				.param("direction", "invalid")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -298,7 +300,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithOnlyServiceDefInput() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_SERVICEDEF_URI)
 				.param("service_definition", "test")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
@@ -307,7 +309,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithoutServiceDefInput() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_SERVICEDEF_URI)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
@@ -315,7 +317,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndNullPageButDefinedSizeParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_SERVICEDEF_URI)
 				.param("service_definition", "test")
 				.param("item_per_page", "1")
 				.accept(MediaType.APPLICATION_JSON))
@@ -325,7 +327,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndDefinedPageButNullSizeParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_SERVICEDEF_URI)
 				.param("service_definition", "test")
 				.param("page", "1")
 				.accept(MediaType.APPLICATION_JSON))
@@ -335,7 +337,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndInvalidSortDirectionFlagParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+		this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_SERVICEDEF_URI)
 				.param("service_definition", "test")
 				.param("direction", "invalid")
 				.accept(MediaType.APPLICATION_JSON))
@@ -355,7 +357,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryGrouppedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(serviceRegistryEntries);
 		when(serviceRegistryDBService.getServiceReqistryEntriesForServiceRegistryGrouppedResponse()).thenReturn(dto);
 		
-		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/groupped")
+		final MvcResult response = this.mockMvc.perform(get(SERVICEREGISTRY_REGISTER_MGMT_GROUPPED_URI)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
