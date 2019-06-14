@@ -202,6 +202,14 @@ public class RegistryUtilsTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testFilterOnVersionExactProvidedServicesNullOrEmpty() {
+		RegistryUtils.filterOnVersion(null, 1); // it just shows there is no exception if it called with null first parameter
+		RegistryUtils.filterOnVersion(List.of(), 1); // it just shows there is no exception if it called with empty first parameter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testFilterOnVersionExactNoMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
@@ -218,6 +226,14 @@ public class RegistryUtilsTest {
 		RegistryUtils.filterOnVersion(providedServices, 2);
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testFilterOnVersionMinMaxProvidedServicesNullOrEmpty() {
+		RegistryUtils.filterOnVersion(null, 1, 10); // it just shows there is no exception if it called with null first parameter
+		RegistryUtils.filterOnVersion(List.of(), 1, 10); // it just shows there is no exception if it called with empty first parameter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -322,6 +338,24 @@ public class RegistryUtilsTest {
 		RegistryUtils.filterOnMeta(providedServices, Map.of("key", "value"));
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testFilterOnPingProvidedServicesNullOrEmpty() {
+		RegistryUtils.filterOnPing(null, 1); // it just shows there is no exception if it called with null first parameter
+		RegistryUtils.filterOnPing(List.of(), 1); // it just shows there is no exception if it called with empty first parameter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnPingInvalidTimeout() {
+		final ServiceRegistry sr = new ServiceRegistry();
+		final List<ServiceRegistry> providedServices = List.of(sr);
+		final List<ServiceRegistry> expectedList = List.of(sr);
+		RegistryUtils.filterOnPing(providedServices, -1); // it just shows there is no exception if it called with invalid second parameter
+		Assert.assertEquals(expectedList, providedServices);
 	}
  	
 	//=================================================================================================

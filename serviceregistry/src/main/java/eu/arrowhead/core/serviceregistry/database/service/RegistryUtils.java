@@ -1,5 +1,8 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,17 @@ public class RegistryUtils {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public static boolean pingService(final String address, final int port, final int timeout) {
+		final InetSocketAddress providerHost = new InetSocketAddress(address, port);
+		try (final Socket socket = new Socket()) {
+			socket.connect(providerHost, timeout);
+			return true;
+		} catch (final IOException ex) {
+			return false;
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static List<String> normalizeInterfaceNames(final List<String> interfaceNames) { 
@@ -92,6 +106,10 @@ public class RegistryUtils {
 	// This method may CHANGE the content of providedServices
 	public static void filterOnVersion(final List<ServiceRegistry> providedServices, final int targetVersion) {
 		logger.debug("filterOnVersion(List, int) started...");
+		if (providedServices == null || providedServices.isEmpty()) {
+			return;
+		}
+		
 		providedServices.removeIf(sr -> sr.getVersion() == null || sr.getVersion().intValue() != targetVersion);
 	}
 	
@@ -99,12 +117,18 @@ public class RegistryUtils {
 	// This method may CHANGE the content of providedServices
 	public static void filterOnVersion(final List<ServiceRegistry> providedServices, final int minVersion, final int maxVersion) {
 		logger.debug("filterOnVersion(List, int, int) started...");
+		if (providedServices == null || providedServices.isEmpty()) {
+			return;
+		}
+		
 		providedServices.removeIf(sr -> sr.getVersion() == null || sr.getVersion().intValue() < minVersion || sr.getVersion().intValue() > maxVersion);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	// throws IllegalStateException if two keys are identical after trim
-	public static Map<String,String> normalizeMetadata(final Map<String,String> metadata) throws IllegalStateException {
+	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
+	public static Map<String,String> normalizeMetadata(final Map<String,String> metadata) throws IllegalStateException { 
+		logger.debug("normalizeMetadata started...");
 		if (metadata == null) {
 			return Map.of();
 		}
@@ -130,6 +154,17 @@ public class RegistryUtils {
 		}
 		
 		providedServices.removeAll(toBeRemoved);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of providedServices
+	public static void filterOnPing(final List<ServiceRegistry> providedServices, final int timeout) {
+		logger.debug("filterOnPing started...");
+		if (providedServices == null || providedServices.isEmpty() || timeout <= 0) {
+			return;
+		}
+		
+		providedServices.removeIf(sr -> !pingService(sr.getSystem().getAddress(), sr.getSystem().getPort(), timeout));
 	}
 
 	//=================================================================================================
