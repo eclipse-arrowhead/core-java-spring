@@ -2,7 +2,9 @@ package eu.arrowhead.core.serviceregistry.database.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -247,6 +249,80 @@ public class RegistryUtilsTest {
 		Assert.assertEquals(2, providedServices.get(0).getId());
 		Assert.assertEquals(3, providedServices.get(1).getId());
 	}
+
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeMetadataNullMap() {
+		Assert.assertEquals(0, RegistryUtils.normalizeMetadata(null).size());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalStateException.class)
+	public void testNormalizeMetadataDuplicateKeys() {
+		final Map<String,String> map = Map.of("A", "B", "A ", "C");
+		RegistryUtils.normalizeMetadata(map);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeMetadataNullValueRemoved() {
+		final Map<String,String> map = new HashMap<>();
+		map.put("A", null);
+		final Map<String,String> normalizedMap = RegistryUtils.normalizeMetadata(map);
+		Assert.assertEquals(0, normalizedMap.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeMetadataTrimKeyAndValue() {
+		final Map<String,String> map = new HashMap<>();
+		map.put("A  ", "B  ");
+		final Map<String,String> normalizedMap = RegistryUtils.normalizeMetadata(map);
+		Assert.assertEquals(1, normalizedMap.size());
+		Assert.assertTrue(normalizedMap.containsKey("A"));
+		Assert.assertEquals("B", normalizedMap.get("A"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testFilterOnMetaProvidedServicesNullOrEmpty() {
+		RegistryUtils.filterOnMeta(null, Map.of("A", "B")); // it just shows there is no exception if it called with null first parameter
+		RegistryUtils.filterOnMeta(List.of(), Map.of("A", "B")); // it just shows there is no exception if it called with empty first parameter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnMetaMetadataRequirementsNullOrEmpty() {
+		final ServiceRegistry sr = new ServiceRegistry();
+		final List<ServiceRegistry> providedServices = List.of(sr);
+		final List<ServiceRegistry> expectedList = List.of(sr);
+		RegistryUtils.filterOnMeta(providedServices, null); // it just shows there is no exception and no changes if it called with null second parameter
+		Assert.assertEquals(expectedList, providedServices);
+		RegistryUtils.filterOnMeta(providedServices, Map.of()); // it just shows there is no exception and no changes if it called with empty second parameter
+		Assert.assertEquals(expectedList, providedServices);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnMetaExactMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnMeta(providedServices, Map.of("key", "value2"));
+		Assert.assertEquals(1, providedServices.size());
+		Assert.assertEquals(3, providedServices.get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnMetaSubsetMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnMeta(providedServices, Map.of("key", "value"));
+		Assert.assertEquals(1, providedServices.size());
+		Assert.assertEquals(2, providedServices.get(0).getId());
+	}
  	
 	//=================================================================================================
 	// assistant methods
@@ -266,18 +342,21 @@ public class RegistryUtilsTest {
 		srEntry1.setId(1);
 		srEntry1.setVersion(null);
 		srEntry1.setSecure(ServiceSecurityType.TOKEN);
+		srEntry1.setMetadata(null);
 		srEntry1.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry1, intf1));
 		
 		final ServiceRegistry srEntry2 = new ServiceRegistry();
 		srEntry2.setId(2);
 		srEntry2.setVersion(2);
 		srEntry2.setSecure(ServiceSecurityType.CERTIFICATE);
+		srEntry2.setMetadata("key=value, otherkey=othervalue");
 		srEntry2.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry2, intf3));
 		
 		final ServiceRegistry srEntry3 = new ServiceRegistry();
 		srEntry3.setId(3);
 		srEntry3.setVersion(10);
 		srEntry3.setSecure(ServiceSecurityType.CERTIFICATE);
+		srEntry3.setMetadata("key=value2");
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf1));
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf2));
 		

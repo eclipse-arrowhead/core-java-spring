@@ -2,12 +2,14 @@ package eu.arrowhead.core.serviceregistry.database.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.dto.ServiceSecurityType;
@@ -98,6 +100,36 @@ public class RegistryUtils {
 	public static void filterOnVersion(final List<ServiceRegistry> providedServices, final int minVersion, final int maxVersion) {
 		logger.debug("filterOnVersion(List, int, int) started...");
 		providedServices.removeIf(sr -> sr.getVersion() == null || sr.getVersion().intValue() < minVersion || sr.getVersion().intValue() > maxVersion);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// throws IllegalStateException if two keys are identical after trim
+	public static Map<String,String> normalizeMetadata(final Map<String,String> metadata) throws IllegalStateException {
+		if (metadata == null) {
+			return Map.of();
+		}
+		
+		return metadata.entrySet().parallelStream().filter(e -> e.getValue() != null).collect(Collectors.toMap(e -> e.getKey().trim(),
+																	  		 								   e -> e.getValue() != null ? e.getValue().trim() : null));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of providedServices
+	public static void filterOnMeta(final List<ServiceRegistry> providedServices, final Map<String,String> metadataRequirements) {
+		logger.debug("filterOnMeta started...");
+		if (providedServices == null || providedServices.isEmpty() || metadataRequirements == null || metadataRequirements.isEmpty()) {
+			return;
+		}
+		
+		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
+		for (final ServiceRegistry srEntry : providedServices) {
+			final Map<String,String> metadata = Utilities.text2Map(srEntry.getMetadata());
+			if (metadata == null || !metadata.entrySet().containsAll(metadataRequirements.entrySet())) {
+				toBeRemoved.add(srEntry);
+			}
+		}
+		
+		providedServices.removeAll(toBeRemoved);
 	}
 
 	//=================================================================================================
