@@ -99,6 +99,19 @@ public class DTOConverter {
 		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), intf.getCreatedAt().toString(), intf.getUpdatedAt().toString());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceQueryResultDTO convertListOfServiceRegistryEntriesToServiceQueryResultDTO(final List<ServiceRegistry> entries) {
+		final ServiceQueryResultDTO result = new ServiceQueryResultDTO();
+		
+		if (entries != null) {
+			for (final ServiceRegistry srEntry : entries) {
+				result.getServiceQueryData().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+			}
+		}
+		
+		return result;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
