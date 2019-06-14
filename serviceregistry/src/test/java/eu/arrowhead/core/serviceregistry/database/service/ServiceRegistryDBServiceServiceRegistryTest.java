@@ -57,7 +57,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//Tests of getServiceReqistryEntries
 		
 	@Test (expected = InvalidParameterException.class)
-	public void getServiceReqistryEntriesTest() {
+	public void testGetServiceReqistryEntriesWithNotValidSortField() {
 		serviceRegistryDBService.getServiceReqistryEntries(0, 10, Direction.ASC, "notValid");
 	}
 		
@@ -65,10 +65,13 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//Tests of removeServiceRegistryEntryById
 		
 	@Test (expected = InvalidParameterException.class)
-	public void removeServiceRegistryEntryByIdTest() {
+	public void testRemoveServiceRegistryEntryByIdWithNotExistingId() {
 		when(serviceRegistryRepository.existsById(anyLong())).thenReturn(false);
 		serviceRegistryDBService.removeServiceRegistryEntryById(1);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of registerServiceResponse
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
@@ -178,6 +181,9 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of createServiceRegistry		
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
