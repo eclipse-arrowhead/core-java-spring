@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+import eu.arrowhead.common.dto.ServiceSecurityType;
 
 public class RegistryUtils {
 	
@@ -25,7 +26,7 @@ public class RegistryUtils {
 	public static List<String> normalizeInterfaceNames(final List<String> interfaceNames) { 
 		logger.debug("normalizeInterfaceNames started...");
 		if (interfaceNames == null) {
-			return List.<String>of();
+			return List.of();
 		}
 		
 		return interfaceNames.stream().filter(Objects::nonNull).filter(e -> !e.isBlank()).map(e -> e.toUpperCase().trim()).collect(Collectors.toList());
@@ -50,6 +51,34 @@ public class RegistryUtils {
 			}
 			
 			if (remove) {
+				toBeRemoved.add(srEntry);
+			}
+		}
+		
+		providedServices.removeAll(toBeRemoved);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static List<ServiceSecurityType> normalizeSecurityTypes(final List<ServiceSecurityType> securityTypes) {
+		logger.debug("normalizeSecurityTypes started...");
+		if (securityTypes == null) {
+			return List.of();
+		}
+		
+		return securityTypes.stream().filter(Objects::nonNull).collect(Collectors.toList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of providedServices
+	public static void filterOnSecurityType(final List<ServiceRegistry> providedServices, final List<ServiceSecurityType> securityTypes) {
+		logger.debug("filterOnSecurityType started...");
+		if (providedServices == null || providedServices.isEmpty() || securityTypes == null || securityTypes.isEmpty()) {
+			return;
+		}
+		
+		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
+		for (final ServiceRegistry srEntry : providedServices) {
+			if (!securityTypes.contains(srEntry.getSecure())) {
 				toBeRemoved.add(srEntry);
 			}
 		}

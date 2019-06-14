@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+import eu.arrowhead.common.dto.ServiceSecurityType;
 
 @RunWith(SpringRunner.class)
 public class RegistryUtilsTest {
@@ -28,7 +29,7 @@ public class RegistryUtilsTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testNormalizeInterfaceNamesEmptyList() {
-		Assert.assertEquals(0, RegistryUtils.normalizeInterfaceNames(List.<String>of()).size());
+		Assert.assertEquals(0, RegistryUtils.normalizeInterfaceNames(List.of()).size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -66,7 +67,7 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnInterfacesProvidedServicesNullOrEmpty() {
 		RegistryUtils.filterOnInterfaces(null, List.of("HTTP-SECURE-JSON")); // it just shows there is no exception if it called with null first parameter
-		RegistryUtils.filterOnInterfaces(List.<ServiceRegistry>of(), List.of("HTTP-SECURE-JSON")); // it just shows there is no exception if it called with empty first parameter
+		RegistryUtils.filterOnInterfaces(List.of(), List.of("HTTP-SECURE-JSON")); // it just shows there is no exception if it called with empty first parameter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ public class RegistryUtilsTest {
 		final List<ServiceRegistry> expectedList = List.of(sr);
 		RegistryUtils.filterOnInterfaces(providedServices, null); // it just shows there is no exception and no changes if it called with null second parameter
 		Assert.assertEquals(expectedList, providedServices);
-		RegistryUtils.filterOnInterfaces(providedServices, List.<String>of()); // it just shows there is no exception and no changes if it called with empty second parameter
+		RegistryUtils.filterOnInterfaces(providedServices, List.of()); // it just shows there is no exception and no changes if it called with empty second parameter
 		Assert.assertEquals(expectedList, providedServices);
 	}
 	
@@ -110,6 +111,93 @@ public class RegistryUtilsTest {
 		Assert.assertEquals(3, providedServices.size());
 		Assert.assertEquals(expectedList, providedServices);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeSecurityTypesNullList() {
+		Assert.assertEquals(0, RegistryUtils.normalizeSecurityTypes(null).size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeSecurityTypesEmptyList() {
+		Assert.assertEquals(0, RegistryUtils.normalizeSecurityTypes(List.of()).size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeSecurityTypesRemoveNull() {
+		Assert.assertEquals(0, RegistryUtils.normalizeSecurityTypes(Arrays.asList((ServiceSecurityType)null)).size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testNormalizeSecurityTypesDoesNothing() {
+		final List<ServiceSecurityType> result = RegistryUtils.normalizeSecurityTypes(Arrays.asList(ServiceSecurityType.TOKEN));
+		Assert.assertEquals(1, result.size());
+		Assert.assertEquals(ServiceSecurityType.TOKEN, result.get(0));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testFilterOnSecurityTypeProvidedServicesNullOrEmpty() {
+		RegistryUtils.filterOnSecurityType(null, List.of(ServiceSecurityType.TOKEN)); // it just shows there is no exception if it called with null first parameter
+		RegistryUtils.filterOnSecurityType(List.of(), List.of(ServiceSecurityType.TOKEN)); // it just shows there is no exception if it called with empty first parameter
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnSecurityTypeSecurityTypeListNullOrEmpty() {
+		final ServiceRegistry sr = new ServiceRegistry();
+		final List<ServiceRegistry> providedServices = List.of(sr);
+		final List<ServiceRegistry> expectedList = List.of(sr);
+		RegistryUtils.filterOnSecurityType(providedServices, null); // it just shows there is no exception and no changes if it called with null second parameter
+		Assert.assertEquals(expectedList, providedServices);
+		RegistryUtils.filterOnSecurityType(providedServices, List.of()); // it just shows there is no exception and no changes if it called with empty second parameter
+		Assert.assertEquals(expectedList, providedServices);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnSecurityTypeNoMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.NOT_SECURE));
+		Assert.assertEquals(0, providedServices.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnSecurityTypeOneMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.TOKEN));
+		Assert.assertEquals(1, providedServices.size());
+		Assert.assertEquals(1, providedServices.get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnSecurityTypeTwoMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.CERTIFICATE));
+		Assert.assertEquals(2, providedServices.size());
+		Assert.assertEquals(2, providedServices.get(0).getId());
+		Assert.assertEquals(3, providedServices.get(1).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnSecurityTypeThreeMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		final List<ServiceRegistry> expected = new ArrayList<>(providedServices);
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.CERTIFICATE, ServiceSecurityType.TOKEN));
+		Assert.assertEquals(3, providedServices.size());
+		Assert.assertEquals(expected, providedServices);
+	}
  	
 	//=================================================================================================
 	// assistant methods
@@ -127,14 +215,17 @@ public class RegistryUtilsTest {
 		
 		final ServiceRegistry srEntry1 = new ServiceRegistry();
 		srEntry1.setId(1);
+		srEntry1.setSecure(ServiceSecurityType.TOKEN);
 		srEntry1.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry1, intf1));
 		
 		final ServiceRegistry srEntry2 = new ServiceRegistry();
 		srEntry2.setId(2);
+		srEntry2.setSecure(ServiceSecurityType.CERTIFICATE);
 		srEntry2.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry2, intf3));
 		
 		final ServiceRegistry srEntry3 = new ServiceRegistry();
 		srEntry3.setId(3);
+		srEntry3.setSecure(ServiceSecurityType.CERTIFICATE);
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf1));
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf2));
 		
