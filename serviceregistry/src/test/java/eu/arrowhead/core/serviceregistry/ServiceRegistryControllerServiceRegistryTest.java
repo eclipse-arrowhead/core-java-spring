@@ -286,6 +286,55 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Test of getServiceRegistryEntriesByServiceDefinition
+	
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithOnlyServiceDefInput() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+				.param("service_definition", "test")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithoutServiceDefInput() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndNullPageButDefinedSizeParameter() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+				.param("service_definition", "test")
+				.param("item_per_page", "1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndDefinedPageButNullSizeParameter() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+				.param("service_definition", "test")
+				.param("page", "1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndInvalidSortDirectionFlagParameter() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/mgmt/servicedef")
+				.param("service_definition", "test")
+				.param("direction", "invalid")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
