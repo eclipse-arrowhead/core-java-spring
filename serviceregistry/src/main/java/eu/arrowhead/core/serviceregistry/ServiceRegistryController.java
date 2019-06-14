@@ -93,6 +93,9 @@ public class ServiceRegistryController {
 	private static final String SERVICE_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered service";
 	private static final String SERVICE_REGISTRY_UNREGISTER_200_MESSAGE = "Registered service removed";
 	private static final String SERVICE_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove service";
+	private static final String SERVICE_REGISTRY_UPDATE_DESCRIPTION = "Update a service";
+	private static final String SERVICE_REGISTRY_UPDATE_201_MESSAGE = "Service updated";
+	private static final String SERVICE_REGISTRY_UPDATE_400_MESSAGE = "Could not update service";
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String SYSTEM_ID_NOT_VALID_ERROR_MESSAGE = " System id must be greater then 0. ";
@@ -101,6 +104,7 @@ public class ServiceRegistryController {
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
 	
 	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.MGMT_URI;
+	private static final String SERVICE_REGISTRY_MGMT_URI_BY_ID = SERVICE_REGISTRY_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICE_REGISTRY_MGMT_URI + "/servicedef";
 	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = SERVICE_REGISTRY_MGMT_URI + "/groupped";
 	private static final String GET_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
@@ -502,6 +506,47 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_REGISTER_DESCRIPTION, response = ServiceRegistryResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = SERVICE_REGISTRY_REGISTER_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_REGISTER_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@PostMapping(path = SERVICE_REGISTRY_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody ServiceRegistryResponseDTO registerMgmtService(@RequestBody final ServiceRegistryRequestDTO request) {
+		logger.debug("New service registration request recieved");
+		checkServiceRegistryRequest(request, SERVICE_REGISTRY_MGMT_URI);
+		
+		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
+		logger.debug("{} successfully registers its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+	
+		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_UPDATE_DESCRIPTION, response = ServiceRegistryResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = SERVICE_REGISTRY_UPDATE_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_UPDATE_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@PutMapping(path = SERVICE_REGISTRY_MGMT_URI_BY_ID, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody ServiceRegistryResponseDTO updateMgmtService(@PathVariable(value = PATH_VARIABLE_ID) final long id,
+			@RequestBody final ServiceRegistryRequestDTO request) { 
+		logger.debug("New service registration request recieved");
+		checkServiceRegistryUpdateRequest(request, SERVICE_REGISTRY_MGMT_URI, id);
+		
+		final ServiceRegistryResponseDTO response = serviceRegistryDBService.updateServiceByIdResponse(request, id);
+		logger.debug("{} successfully updated its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+	
+		return response;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICE_REGISTRY_UNREGISTER_DESCRIPTION)
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_UNREGISTER_200_MESSAGE),
@@ -701,6 +746,42 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final String origin) {
+		logger.debug("checkServiceRegistryRequest started ...");
+	
+		if (Utilities.isEmpty(request.getServiceDefinition())) {
+			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	
+		checkSystemRequest(request.getProviderSystem(), origin);
+		
+		if (!Utilities.isEmpty(request.getEndOfValidity())) {
+			try {
+				ZonedDateTime.parse(request.getEndOfValidity().trim());
+			} catch (final DateTimeParseException ex) {
+				throw new BadPayloadException("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", HttpStatus.SC_BAD_REQUEST,
+											  origin);
+			}
+		}
+		
+		final ServiceSecurityType type = request.getSecure() == null ? ServiceSecurityType.NOT_SECURE : request.getSecure();
+		if ((type == ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() != null) ||
+			 type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
+		}
+		
+		if (request.getInterfaces() == null || request.getInterfaces().isEmpty()) {
+			throw new BadPayloadException("Interfaces list is null or empty.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		for (final String intf : request.getInterfaces()) {
+			if (!interfaceNameVerifier.isValid(intf)) {
+				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private void checkUnregisterServiceParameters(final String serviceDefinition, final String providerName, final String providerAddress, final int providerPort) {
 		// parameters can't be null, but can be empty
 		logger.debug("checkUnregisterServiceParameters started...");
@@ -722,4 +803,16 @@ public class ServiceRegistryController {
 			throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRegistryUpdateRequest(final ServiceRegistryRequestDTO request, final String origin,
+			final long id) {
+		if (id <= 0) {
+			throw new BadPayloadException(SYSTEM_ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		checkServiceRegistryRequest(request, origin);
+		
+	}
+
 }

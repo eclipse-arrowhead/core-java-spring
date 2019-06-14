@@ -507,6 +507,60 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceRegistryResponseDTO updateServiceByIdResponse(final ServiceRegistryRequestDTO request, final long id) {
+		logger.debug("registerServiceResponse started...");
+		Assert.notNull(request, "request is null.");
+		Assert.isTrue(0 < id, "id is not greather then zero");
+		
+		checkServiceRegistryRequest(request);
+		
+		final eu.arrowhead.common.database.entity.ServiceRegistry srEntry;
+		final Optional<eu.arrowhead.common.database.entity.ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
+		if (srEntryOptional.isPresent()) {
+			srEntry = srEntryOptional.get();
+		} else {
+			throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
+		}
+		
+		final String validatedServiceDefinition = request.getServiceDefinition().toLowerCase().trim();
+		final String validatedProviderName = request.getProviderSystem().getSystemName().toLowerCase().trim();
+		final String validatedProviderAddress = request.getProviderSystem().getAddress().toLowerCase().trim();
+		final int validatedProviderPort = request.getProviderSystem().getPort().intValue();
+		
+		try {
+			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(validatedServiceDefinition);
+			final ServiceDefinition serviceDefinition = optServiceDefinition.isPresent() ? optServiceDefinition.get() : createServiceDefinition(validatedServiceDefinition);
+			
+			final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(validatedProviderName, validatedProviderAddress, validatedProviderPort);
+			System provider;
+			if (optProvider.isPresent()) {
+				provider = optProvider.get();
+				if (!Objects.equals(request.getProviderSystem().getAuthenticationInfo(), provider.getAuthenticationInfo())) { // authentication info has changed
+					provider.setAuthenticationInfo(request.getProviderSystem().getAuthenticationInfo());
+					provider = systemRepository.saveAndFlush(provider);
+				}
+			} else {
+				provider = createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
+			}
+														
+			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : ZonedDateTime.parse(request.getEndOfValidity().trim());
+			final String metadataStr = Utilities.map2Text(request.getMetadata());
+			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
+			updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
+																  request.getInterfaces());
+		
+			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
+		} catch (final DateTimeParseException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new InvalidParameterException("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", ex);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
@@ -537,6 +591,68 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceRegistry updateServiceRegistry(final eu.arrowhead.common.database.entity.ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider, final String serviceUri, final ZonedDateTime endOfValidity,
+												 final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
+		logger.debug("createServiceRegistry started...");
+		Assert.notNull(serviceDefinition, "Service definition is not specified.");
+		Assert.notNull(provider, "Provider is not specified.");
+		
+		checkConstraintOfSystemRegistryTable(serviceDefinition, provider);
+		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
+		checkSRServiceInterfacesList(interfaces);
+		
+		try {
+			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
+			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();		
+			if( serviceDefinition != null ) {
+				srEntry.setServiceDefinition(serviceDefinition);
+			}
+			
+			srEntry.setSystem(provider);
+			
+			if ( validatedServiceUri != null ) {
+				srEntry.setServiceUri(validatedServiceUri);
+			}
+			
+			srEntry.setEndOfValidity(endOfValidity);
+			srEntry.setSecure(secure);
+			
+			if( metadataStr != null ) {
+				srEntry.setMetadata(metadataStr);
+			}
+			
+			srEntry.setVersion(version);
+			
+			//Set<ServiceRegistryInterfaceConnection> newInterfaceConnectionsSet = new HashSet<>();
+			//Set<ServiceRegistryInterfaceConnection> oldInterfaceConnectionsSet = srEntry.getInterfaceConnections();
+            //
+			//final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);
+			//
+			//srEntry.getInterfaceConnections().clear();
+			//for (final ServiceInterface serviceInterface : serviceInterfaces) {				
+			//	final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
+			//	newInterfaceConnectionsSet.add(connection);
+			//	
+			//	srEntry.getInterfaceConnections().add(connection);
+			//}
+			//
+			//
+			//newInterfaceConnectionsSet.removeAll(oldInterfaceConnectionsSet);
+			//if(newInterfaceConnectionsSet != null && newInterfaceConnectionsSet.size() > 0) {
+			//	
+			//	serviceRegistryInterfaceConnectionRepository.saveAll(newInterfaceConnectionsSet);
+			//	
+			//}
+			
+			return serviceRegistryRepository.saveAndFlush(srEntry);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}	
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
