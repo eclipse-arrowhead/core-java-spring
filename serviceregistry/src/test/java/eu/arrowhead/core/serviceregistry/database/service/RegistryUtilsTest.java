@@ -217,6 +217,36 @@ public class RegistryUtilsTest {
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(0).getId());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnVersionMinMaxNoMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnVersion(providedServices, 3, 5);
+		Assert.assertEquals(0, providedServices.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnVersionMinMaxOneMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnVersion(providedServices, 5, 12);
+		Assert.assertEquals(1, providedServices.size());
+		Assert.assertEquals(3, providedServices.get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnVersionMinMaxTwoMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnVersion(providedServices, 2, 10);
+		Assert.assertEquals(2, providedServices.size());
+		Assert.assertEquals(2, providedServices.get(0).getId());
+		Assert.assertEquals(3, providedServices.get(1).getId());
+	}
  	
 	//=================================================================================================
 	// assistant methods

@@ -29,7 +29,7 @@ public class RegistryUtils {
 			return List.of();
 		}
 		
-		return interfaceNames.stream().filter(Objects::nonNull).filter(e -> !e.isBlank()).map(e -> e.toUpperCase().trim()).collect(Collectors.toList());
+		return interfaceNames.parallelStream().filter(Objects::nonNull).filter(e -> !e.isBlank()).map(e -> e.toUpperCase().trim()).collect(Collectors.toList());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ public class RegistryUtils {
 			return List.of();
 		}
 		
-		return securityTypes.stream().filter(Objects::nonNull).collect(Collectors.toList());
+		return securityTypes.parallelStream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -87,10 +87,17 @@ public class RegistryUtils {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	// This method may CHANGE the content of providerServices
+	// This method may CHANGE the content of providedServices
 	public static void filterOnVersion(final List<ServiceRegistry> providedServices, final int targetVersion) {
-		logger.debug("filterOnVersion started...");
+		logger.debug("filterOnVersion(List, int) started...");
 		providedServices.removeIf(sr -> sr.getVersion() == null || sr.getVersion().intValue() != targetVersion);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of providedServices
+	public static void filterOnVersion(final List<ServiceRegistry> providedServices, final int minVersion, final int maxVersion) {
+		logger.debug("filterOnVersion(List, int, int) started...");
+		providedServices.removeIf(sr -> sr.getVersion() == null || sr.getVersion().intValue() < minVersion || sr.getVersion().intValue() > maxVersion);
 	}
 
 	//=================================================================================================
