@@ -1,6 +1,8 @@
 package eu.arrowhead.core.serviceregistry;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -40,12 +42,18 @@ import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.AutoCompleteDataResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.IdValueDTO;
+import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
+import eu.arrowhead.common.dto.ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO;
+import eu.arrowhead.common.dto.ServicesGrouppedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
@@ -225,7 +233,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	public void testGetServiceRegistryEntriesWithoutParameter() throws Exception {
 		final int numOfServices = 4;
 		final int numOfSystems = 3;		
-		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems);
+		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, "JSON", "XML");
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
 		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
@@ -243,7 +251,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	public void testGetServiceRegistryEntriesWithPageAndSizeParameter() throws Exception {
 		final int numOfServices = 4;
 		final int numOfSystems = 3;		
-		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems);
+		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, "JSON", "XML");
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
 		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
@@ -334,6 +342,52 @@ public class ServiceRegistryControllerServiceRegistryTest {
 				.andExpect(status().isBadRequest());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of getServiceRegistryGrouppedData
+	
+	@Test
+	public void testGetServiceRegistryGrouppedDataToCheckDTO() throws Exception {
+		final int numOfServices = 4;
+		final int numOfSystems = 2;		
+		final String interface1 = "JSON";
+		final String interface2 = "XML";
+		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
+		final ServiceRegistryGrouppedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceReqistryEntriesForServiceRegistryGrouppedResponse()).thenReturn(dto);
+		
+		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/groupped")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final ServiceRegistryGrouppedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGrouppedResponseDTO.class);
+		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
+		final List<ServicesGrouppedBySystemsResponseDTO> servicesGrouppedBySystems = readValue.getServicesGrouppedBySystems();
+		final List<ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesGrouppedByServiceDefinitionAndInterface = readValue.getServicesGrouppedByServiceDefinitionAndInterface();
+		
+		assertNotNull(autoCompleteData);
+		assertNotNull(servicesGrouppedBySystems);
+		assertNotNull(servicesGrouppedByServiceDefinitionAndInterface);
+		
+		//Testing autoCompleteData object
+		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
+		assertEquals(2, interfaceList.size());
+		assertTrue(interfaceList.get(0).getValue().equals(interface1) || interfaceList.get(1).getValue().equals(interface1) ? true : false);
+		assertTrue(interfaceList.get(0).getValue().equals(interface2) || interfaceList.get(1).getValue().equals(interface2) ? true : false);		
+		assertEquals(numOfServices, autoCompleteData.getServiceList().size());
+		assertEquals(numOfSystems, autoCompleteData.getSystemList().size());
+		
+		//Testing servicesGrouppedBySystems object
+		assertEquals(numOfSystems, servicesGrouppedBySystems.size());
+		assertEquals(numOfServices, servicesGrouppedBySystems.get(0).getServices().size());
+		final String oneOfTheInterfaces = servicesGrouppedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
+		assertTrue(oneOfTheInterfaces.equals(interface1) || oneOfTheInterfaces.equals(interface2) ? true :false);
+		
+		//Testing servicesGrouppedByServiceDefinitionAndInterface object
+		assertEquals(numOfServices * 2, servicesGrouppedByServiceDefinitionAndInterface.size());
+		assertEquals(numOfSystems, servicesGrouppedByServiceDefinitionAndInterface.get(0).getProviderServices().size());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -358,22 +412,22 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Page<ServiceRegistry> createServiceRegistryPageForDBMocking(final int amountOfServiceDefinition, final int amountOfSystem) {
+	private Page<ServiceRegistry> createServiceRegistryPageForDBMocking(final int amountOfServiceDefinition, final int amountOfSystem, final String interface1Name, final String imterface2Name) {
 		final ZonedDateTime timeStamp = ZonedDateTime.now();
 		
 		final List<System> systemList = new ArrayList<>();
 		final List<ServiceDefinition> serviceRegistryDefinitionList = new ArrayList<>();
 		final List<ServiceRegistry> serviceRegistryList = new ArrayList<>();
 		
-		final ServiceInterface serviceInterfaceJSON = new ServiceInterface("JSON");
-		serviceInterfaceJSON.setId(1);
-		serviceInterfaceJSON.setCreatedAt(timeStamp);
-		serviceInterfaceJSON.setUpdatedAt(timeStamp);
+		final ServiceInterface serviceInterface1 = new ServiceInterface(interface1Name);
+		serviceInterface1.setId(1);
+		serviceInterface1.setCreatedAt(timeStamp);
+		serviceInterface1.setUpdatedAt(timeStamp);
 		
-		final ServiceInterface serviceInterfaceXML = new ServiceInterface("XML");
-		serviceInterfaceXML.setId(2);
-		serviceInterfaceXML.setCreatedAt(timeStamp);
-		serviceInterfaceXML.setUpdatedAt(timeStamp);
+		final ServiceInterface serviceInterface2 = new ServiceInterface(imterface2Name);
+		serviceInterface2.setId(2);
+		serviceInterface2.setCreatedAt(timeStamp);
+		serviceInterface2.setUpdatedAt(timeStamp);
 		
 		for (int i = 1; i <= amountOfServiceDefinition; i++) {				
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
@@ -398,8 +452,8 @@ public class ServiceRegistryControllerServiceRegistryTest {
 				serviceRegistry.setCreatedAt(timeStamp);
 				serviceRegistry.setUpdatedAt(timeStamp);
 				serviceRegistry.setInterfaceConnections(new HashSet<>());
-				serviceRegistry.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(serviceRegistry, serviceInterfaceJSON));
-				serviceRegistry.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(serviceRegistry, serviceInterfaceXML));
+				serviceRegistry.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(serviceRegistry, serviceInterface1));
+				serviceRegistry.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(serviceRegistry, serviceInterface2));
 				serviceRegistryList.add(serviceRegistry);
 			}
 		}

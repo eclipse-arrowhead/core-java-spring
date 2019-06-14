@@ -76,7 +76,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.ofNullable(null));
 		serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintion("serviceNotExists", 0, 10, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 	}
-		
+			
 	//-------------------------------------------------------------------------------------------------
 	//Tests of removeServiceRegistryEntryById
 		
