@@ -418,7 +418,7 @@ public class ServiceRegistryDBService {
 	public ServiceRegistryListResponseDTO getServiceReqistryEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceReqistryEntriesResponse started..");
 		
-		final Page<ServiceRegistry> serviceReqistryEntries = getServiceReqistryEntries(page, size, direction, sortField);
+		final Page<ServiceRegistry> serviceReqistryEntries = getServiceRegistryEntries(page, size, direction, sortField);
 		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceReqistryEntries);
 	}
 	
@@ -426,7 +426,7 @@ public class ServiceRegistryDBService {
 	public ServiceRegistryGrouppedResponseDTO getServiceReqistryEntriesForServiceRegistryGrouppedResponse() {
 		logger.debug("getServiceReqistryEntriesForAutoCompleteDataResponse started..");
 		
-		final Page<ServiceRegistry> serviceReqistryEntries = getServiceReqistryEntries(-1, -1, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+		final Page<ServiceRegistry> serviceReqistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 		return DTOConverter.convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(serviceReqistryEntries);
 	}
 	
