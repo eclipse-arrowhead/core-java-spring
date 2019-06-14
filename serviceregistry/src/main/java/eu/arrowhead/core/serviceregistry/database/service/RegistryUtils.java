@@ -85,6 +85,13 @@ public class RegistryUtils {
 		
 		providedServices.removeAll(toBeRemoved);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of providerServices
+	public static void filterOnVersion(final List<ServiceRegistry> providedServices, final int targetVersion) {
+		logger.debug("filterOnVersion started...");
+		providedServices.removeIf(sr -> sr.getVersion() == null || sr.getVersion().intValue() != targetVersion);
+	}
 
 	//=================================================================================================
 	// assistant methods

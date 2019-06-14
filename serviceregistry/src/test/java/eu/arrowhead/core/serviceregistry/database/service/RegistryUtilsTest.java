@@ -198,6 +198,25 @@ public class RegistryUtilsTest {
 		Assert.assertEquals(3, providedServices.size());
 		Assert.assertEquals(expected, providedServices);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnVersionExactNoMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnVersion(providedServices, 1);
+		Assert.assertEquals(0, providedServices.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testFilterOnVersionExactOneMatch() {
+		final List<ServiceRegistry> providedServices = getProvidedServices();
+		Assert.assertEquals(3, providedServices.size());
+		RegistryUtils.filterOnVersion(providedServices, 2);
+		Assert.assertEquals(1, providedServices.size());
+		Assert.assertEquals(2, providedServices.get(0).getId());
+	}
  	
 	//=================================================================================================
 	// assistant methods
@@ -215,16 +234,19 @@ public class RegistryUtilsTest {
 		
 		final ServiceRegistry srEntry1 = new ServiceRegistry();
 		srEntry1.setId(1);
+		srEntry1.setVersion(null);
 		srEntry1.setSecure(ServiceSecurityType.TOKEN);
 		srEntry1.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry1, intf1));
 		
 		final ServiceRegistry srEntry2 = new ServiceRegistry();
 		srEntry2.setId(2);
+		srEntry2.setVersion(2);
 		srEntry2.setSecure(ServiceSecurityType.CERTIFICATE);
 		srEntry2.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry2, intf3));
 		
 		final ServiceRegistry srEntry3 = new ServiceRegistry();
 		srEntry3.setId(3);
+		srEntry3.setVersion(10);
 		srEntry3.setSecure(ServiceSecurityType.CERTIFICATE);
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf1));
 		srEntry3.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(srEntry3, intf2));

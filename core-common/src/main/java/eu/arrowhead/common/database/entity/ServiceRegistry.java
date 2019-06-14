@@ -77,7 +77,7 @@ public class ServiceRegistry {
 	}
 
 	public ServiceRegistry(final ServiceDefinition serviceDefinition, final System system, final String serviceUri,
-			final ZonedDateTime endOfValidity, final ServiceSecurityType secure, final String metadata, final int version) {
+						   final ZonedDateTime endOfValidity, final ServiceSecurityType secure, final String metadata, final Integer version) {
 		this.serviceDefinition = serviceDefinition;
 		this.system = system;
 		this.serviceUri = serviceUri;
@@ -154,11 +154,11 @@ public class ServiceRegistry {
 		this.metadata = metadata;
 	}
 
-	public int getVersion() {
+	public Integer getVersion() {
 		return version;
 	}
 
-	public void setVersion(final int version) {
+	public void setVersion(final Integer version) {
 		this.version = version;
 	}
 
