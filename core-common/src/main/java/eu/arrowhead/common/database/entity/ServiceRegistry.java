@@ -3,6 +3,7 @@ package eu.arrowhead.common.database.entity;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -190,5 +191,27 @@ public class ServiceRegistry {
 		return "ServiceRegistry [id=" + id + ", serviceDefinition=" + serviceDefinition + ", system=" + system
 				+ ", endOfValidity=" + endOfValidity + ", version=" + version + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		
+		if (obj == null) {
+			return false;
+		}
+		
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		
+		final ServiceRegistry other = (ServiceRegistry) obj;
+		return id == other.id;
+	}
 }

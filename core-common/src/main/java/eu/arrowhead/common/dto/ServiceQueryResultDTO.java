@@ -16,13 +16,16 @@ public class ServiceQueryResultDTO implements Serializable {
 	private static final long serialVersionUID = -1822444510232108526L;
 	
 	private List<ServiceRegistryResponseDTO> serviceQueryData = new ArrayList<>();
+	private int unfilteredHits = 0;
 
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<ServiceRegistryResponseDTO> getServiceQueryData() { return serviceQueryData; }
+	public int getUnfilteredHits() { return unfilteredHits; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceQueryData(final List<ServiceRegistryResponseDTO> serviceQueryData) { this.serviceQueryData = serviceQueryData; }
+	public void setUnfilteredHits(final int unfilteredHits) { this.unfilteredHits = unfilteredHits; }
 }

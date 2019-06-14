@@ -100,10 +100,12 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static ServiceQueryResultDTO convertListOfServiceRegistryEntriesToServiceQueryResultDTO(final List<ServiceRegistry> entries) {
+	public static ServiceQueryResultDTO convertListOfServiceRegistryEntriesToServiceQueryResultDTO(final List<ServiceRegistry> entries, final int unfilteredHits) {
 		final ServiceQueryResultDTO result = new ServiceQueryResultDTO();
 		
 		if (entries != null) {
+			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits:" + unfilteredHits);
+			result.setUnfilteredHits(unfilteredHits);
 			for (final ServiceRegistry srEntry : entries) {
 				result.getServiceQueryData().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 			}
