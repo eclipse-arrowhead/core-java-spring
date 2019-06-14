@@ -111,7 +111,10 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
 	public static final String REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
 	
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "systemName";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
 	
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;

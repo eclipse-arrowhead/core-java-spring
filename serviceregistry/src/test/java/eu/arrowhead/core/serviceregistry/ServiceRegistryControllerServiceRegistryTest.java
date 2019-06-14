@@ -1,11 +1,15 @@
 package eu.arrowhead.core.serviceregistry;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,6 +41,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -65,6 +70,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//=================================================================================================
 	// members
 	
+	private static final String SERVICE_REGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
+	private static final String SERVICE_REGISTRY_UNREGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
+
 	private static final String SERVICEREGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 	private static final String SERVICEREGISTRY_REGISTER_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI;
 	private static final String SERVICEREGISTRY_REGISTER_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/servicedef";
@@ -99,7 +107,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(new ServiceRegistryRequestDTO(), status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
 	}
 	
@@ -112,7 +120,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
 	}
 	
@@ -130,7 +138,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", error.getErrorMessage());
 	}
 	
@@ -146,7 +154,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
 	}
 	
@@ -162,7 +170,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
 	}
 	
@@ -177,7 +185,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -193,7 +201,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -211,7 +219,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICEREGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Specified interface name is not valid: " + intf, error.getErrorMessage());
 	}
 	
@@ -391,16 +399,125 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of unregisterService
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceNoParameter() throws Exception {
+		deleteUnregisterService(null, status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceNoServiceDefinitionParameter() throws Exception {
+		final String queryStr = createQueryStringForUnregister(null, "x", "a", 1);
+		deleteUnregisterService(queryStr, status().isBadRequest());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceNoSystemNameParameter() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", null, "a", 1);
+		deleteUnregisterService(queryStr, status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceNoAddressParameter() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "x", null, 1);
+		deleteUnregisterService(queryStr, status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceNoPortParameter() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "x", "a", null);
+		deleteUnregisterService(queryStr, status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceServiceDefinitionEmpty() throws Exception {
+		final String queryStr = createQueryStringForUnregister("", "x", "a", 1);
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Service definition is blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceSystemNameEmpty() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "", "a", 1);
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Name of the provider system is blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceAddressEmpty() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "x", "", 1);
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Address of the provider system is blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServicePortNumberTooLow() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "x", "a", -1);
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServicePortNumberTooHigh() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "x", "a", 66000);
+		final MvcResult result = deleteUnregisterService(queryStr, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUnregisterServiceEverythingIsOk() throws Exception {
+		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
+		doNothing().when(serviceRegistryDBService).removeServiceRegistry(any(String.class), any(String.class), any(String.class), anyInt());
+		deleteUnregisterService(queryStr, status().isOk());
+	}
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult postRegisterService(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(post(SERVICEREGISTRY_REGISTER_URI)
-				    	   .contentType(MediaType.APPLICATION_JSON)
-				    	   .content(objectMapper.writeValueAsBytes(request))
-				    	   .accept(MediaType.APPLICATION_JSON))
-				    	   .andExpect(matcher)
-				    	   .andReturn();
+		return this.mockMvc.perform(post(SERVICE_REGISTRY_REGISTER_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult deleteUnregisterService(final String queryStr, final ResultMatcher matcher) throws Exception {
+		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
+		return this.mockMvc.perform(delete(SERVICE_REGISTRY_UNREGISTER_URI + validatedQueryStr)
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -461,5 +578,28 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		}
 		final Page<ServiceRegistry> entries = new PageImpl<ServiceRegistry>(serviceRegistryList);
 		return entries;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String createQueryStringForUnregister(final String serviceDefinition, final String providerName, final String providerAddress, final Integer providerPort) {
+		final StringBuilder sb = new StringBuilder();
+		
+		if (serviceDefinition != null) {
+			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION).append("=").append(serviceDefinition).append("&");
+		}
+		
+		if (providerName != null) {
+			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME).append("=").append(providerName).append("&");
+		}
+		
+		if (providerAddress != null) {
+			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS).append("=").append(providerAddress).append("&");
+		}
+		
+		if (providerPort != null) {
+			sb.append(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT).append("=").append(providerPort.intValue()).append("&");
+		}
+		
+		return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
 	}
 }
