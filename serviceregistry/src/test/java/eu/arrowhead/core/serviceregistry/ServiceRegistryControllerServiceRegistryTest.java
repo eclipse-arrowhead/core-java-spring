@@ -32,6 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
@@ -49,6 +51,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	private static final String SERVICE_REGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 	private static final String SERVICE_REGISTRY_UNREGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
+	private static final String SERVICE_REGISTRY_QUERY_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -309,6 +312,42 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of queryService
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceServiceDefinitionRequirementNull() throws Exception {
+		final MvcResult result = postQueryService(new ServiceQueryFormDTO(), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceServiceDefinitionRequirementEmpty() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("  ");
+		final MvcResult result = postQueryService(form, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // beacuse of false positive in sonar
+	@Test
+	public void testQueryServiceEverythingIsOk() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testservice");
+		when(serviceRegistryDBService.queryRegistry(any(ServiceQueryFormDTO.class))).thenReturn(new ServiceQueryResultDTO());
+		
+		postQueryService(form, status().isOk());
+	}
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -325,6 +364,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult deleteUnregisterService(final String queryStr, final ResultMatcher matcher) throws Exception {
 		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
 		return this.mockMvc.perform(delete(SERVICE_REGISTRY_UNREGISTER_URI + validatedQueryStr)
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postQueryService(final ServiceQueryFormDTO form, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(form))
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();
