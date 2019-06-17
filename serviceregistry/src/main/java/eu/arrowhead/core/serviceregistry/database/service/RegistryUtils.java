@@ -134,7 +134,7 @@ public class RegistryUtils {
 		}
 		
 		return metadata.entrySet().parallelStream().filter(e -> e.getValue() != null).collect(Collectors.toMap(e -> e.getKey().trim(),
-																	  		 								   e -> e.getValue() != null ? e.getValue().trim() : null));
+																	  		 								   e -> e.getValue().trim()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------

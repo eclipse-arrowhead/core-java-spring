@@ -86,8 +86,8 @@ public class DTOConverter {
 		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
 		dto.setVersion(entry.getVersion());
 		dto.setInterfaces(collectInterfaces(entry.getInterfaceConnections()));
-		dto.setCreatedAt(entry.getCreatedAt().toString());
-		dto.setUpdatedAt(entry.getUpdatedAt().toString());
+		dto.setCreatedAt(String.valueOf(entry.getCreatedAt()));
+		dto.setUpdatedAt(String.valueOf(entry.getUpdatedAt()));
 		
 		return dto;
 	}
@@ -96,7 +96,7 @@ public class DTOConverter {
 	public static ServiceInterfaceResponseDTO convertServiceInterfaceToServiceInterfaceResponseDTO(final ServiceInterface intf) {
 		Assert.notNull(intf, "Interface entry is null.");
 		
-		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), intf.getCreatedAt().toString(), intf.getUpdatedAt().toString());
+		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), String.valueOf(intf.getCreatedAt()), String.valueOf(intf.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
