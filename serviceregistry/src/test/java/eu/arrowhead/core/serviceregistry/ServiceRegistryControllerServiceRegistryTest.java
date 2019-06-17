@@ -422,10 +422,28 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		assertEquals(numOfSystems, servicesGrouppedByServiceDefinitionAndInterface.get(0).getProviderServices().size());
 	}
 	
-	//=================================================================================================
-	// Tests of unregisterService
 
 	//-------------------------------------------------------------------------------------------------
+	// Tests of removeServiceRegistryEntryById
+	
+	@Test
+	public void testRemoveServiceRegistryEntryByIdWithExistingId( ) throws Exception {
+		this.mockMvc.perform(delete(SERVICE_REGISTRY_MGMT_URI + "/4")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveServiceRegistryEntryByIdWithNotExistingId() throws Exception {
+		this.mockMvc.perform(delete(SERVICE_REGISTRY_MGMT_URI + "/0")
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// Tests of unregisterService
+	
 	@Test
 	public void testUnregisterServiceNoParameter() throws Exception {
 		deleteUnregisterService(null, status().isBadRequest());

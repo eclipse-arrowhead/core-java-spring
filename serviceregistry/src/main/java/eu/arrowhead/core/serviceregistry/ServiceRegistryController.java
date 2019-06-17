@@ -104,13 +104,14 @@ public class ServiceRegistryController {
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
 	
 	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.MGMT_URI;
-	private static final String SERVICE_REGISTRY_MGMT_URI_BY_ID = SERVICE_REGISTRY_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "serviceDefinition";
-	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICE_REGISTRY_MGMT_URI + "/servicedef" + "/{" + PATH_VARIABLE_SERVICE_DEFINITION + "}";
 	private static final String SERVICE_REGISTRY_MGMT_BY_ID_URI = SERVICE_REGISTRY_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "serviceDefinition";
+	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICE_REGISTRY_MGMT_URI + "/servicedef" + "/{" + PATH_VARIABLE_SERVICE_DEFINITION + "}";	
 	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = SERVICE_REGISTRY_MGMT_URI + "/groupped";
 	private static final String GET_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
 	private static final String GET_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrive service registry entries";
+	private static final String DELETE_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entry removed";
+	private static final String DELETE_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not remove service registry entry";
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryController.class);
 
@@ -508,6 +509,26 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove the specified service registry entry")
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICE_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI)
+	public void removeServiceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New Service Registry delete request recieved with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
+		}
+		
+		serviceRegistryDBService.removeServiceRegistryEntryById(id);;
+		logger.debug("Service Registry with id: '{}' succesfully deleted", id);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICE_REGISTRY_REGISTER_DESCRIPTION, response = ServiceRegistryResponseDTO.class)
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = SERVICE_REGISTRY_REGISTER_201_MESSAGE),
@@ -556,7 +577,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@PutMapping(path = SERVICE_REGISTRY_MGMT_URI_BY_ID, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO updateMgmtService(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 			@RequestBody final ServiceRegistryRequestDTO request) { 
 		logger.debug("New service registration request recieved");
