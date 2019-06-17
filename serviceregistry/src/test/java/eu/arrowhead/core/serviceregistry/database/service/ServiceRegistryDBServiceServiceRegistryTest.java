@@ -54,6 +54,15 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
+	//Tests of getServiceRegistryEntryById
+	
+	@Test (expected = InvalidParameterException.class)
+	public void testgetServiceRegistryEntryByIdWithNotExistingId() {
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		serviceRegistryDBService.getServiceRegistryEntryById(-2);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	//Tests of getServiceReqistryEntries
 		
 	@Test (expected = InvalidParameterException.class)

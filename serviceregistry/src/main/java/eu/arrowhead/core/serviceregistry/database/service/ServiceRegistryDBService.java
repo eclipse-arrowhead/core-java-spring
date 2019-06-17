@@ -397,6 +397,31 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistry getServiceRegistryEntryById(final long id) {
+		logger.debug("getServiceRegistryEntryById started...");
+		
+		try {
+			final Optional<ServiceRegistry> find = serviceRegistryRepository.findById(id);
+			if (find.isPresent()) {
+				return find.get();
+			} else {
+				throw new InvalidParameterException("Service Registry with id of '" + id + "' not exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryResponseDTO getServiceRegistryEntryByIdResponse(final long id) {
+		logger.debug("getServiceRegistryEntryByIdResponse started..");
+		return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(getServiceRegistryEntryById(id));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> getServiceRegistryEntries(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getAllServiceReqistryEntries started..");
 		final int validatedPage = page < 0 ? 0 : page;
