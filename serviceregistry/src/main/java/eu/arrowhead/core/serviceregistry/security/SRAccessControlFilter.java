@@ -88,7 +88,6 @@ public class SRAccessControlFilter extends AccessControlFilter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO: test in SRAccessControlFilterTest after query is implemented
 	private void checkIfClientIsAllowed(final String clientCN, final String requestTarget, final String cloudCN) {
 		for (final String coreSystemName : allowedCoreSystemsForQuery) {
 			final String coreSystemCN = coreSystemName + "." + cloudCN;

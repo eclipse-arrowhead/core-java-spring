@@ -337,7 +337,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("squid:S2699") // beacuse of false positive in sonar
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
 	public void testQueryServiceEverythingIsOk() throws Exception {
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
