@@ -458,6 +458,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> getServiceReqistryEntriesByServiceDefintion(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceReqistryEntriesByServiceDefintion started..");
+		Assert.notNull(serviceDefinition, "serviceDefinition is null");
 		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
