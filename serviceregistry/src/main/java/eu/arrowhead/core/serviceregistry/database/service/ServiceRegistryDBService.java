@@ -525,7 +525,7 @@ public class ServiceRegistryDBService {
 				provider = createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
 			}
 														
-			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : ZonedDateTime.parse(request.getEndOfValidity().trim());
+			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
 			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
@@ -534,7 +534,7 @@ public class ServiceRegistryDBService {
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new InvalidParameterException("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", ex);
+			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -588,7 +588,7 @@ public class ServiceRegistryDBService {
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new InvalidParameterException("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", ex);
+			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
