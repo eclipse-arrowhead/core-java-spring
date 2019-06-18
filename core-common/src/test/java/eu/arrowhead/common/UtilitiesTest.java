@@ -5,6 +5,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -271,5 +277,52 @@ public class UtilitiesTest {
 	public void testIsKeyStoreCNArrowheadValidCompareWithCloudCNDifferentCloud() {
 		final boolean result = Utilities.isKeyStoreCNArrowheadValid("service.cloud2.operator.arrowhead.eu", "cloud.OPERATOR.arrowhead.eu");
 		Assert.assertFalse(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertZonedDateTimeToUTCStringNull() {
+		Assert.assertNull(Utilities.convertZonedDateTimeToUTCString(null));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertZonedDateTimeToUTCStringNotNull() {
+		final ZonedDateTime time = ZonedDateTime.of(2019, 6, 18, 14, 31, 10, 800, ZoneId.of("+3"));
+		final String result = Utilities.convertZonedDateTimeToUTCString(time);
+		Assert.assertEquals("2019-06-18 11:31:10", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testParseUTCStringToLocalZonedDateTimeNull() {
+		Assert.assertNull(Utilities.parseUTCStringToLocalZonedDateTime(null));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testParseUTCStringToLocalZonedDateTimeEmpty() {
+		Assert.assertNull(Utilities.parseUTCStringToLocalZonedDateTime("  "));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = DateTimeParseException.class)
+	public void testParseUTCStringToLocalZonedDateTimeIllFormed() {
+		Utilities.parseUTCStringToLocalZonedDateTime("2019/06/18 12:45:31");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testParseUTCStringToLocalZonedDateTimeWellFormed() {
+		final String timeStr = "2019-06-18 12:45:31";
+		LocalDateTime ldt = LocalDateTime.parse(timeStr, Utilities.dateTimeFormatter);
+		final ZoneOffset offset = OffsetDateTime.now().getOffset();
+		ldt = ldt.plusSeconds(offset.getTotalSeconds());
+		
+		final ZonedDateTime result = Utilities.parseUTCStringToLocalZonedDateTime(timeStr);
+		Assert.assertEquals(ldt.getDayOfMonth(), result.getDayOfMonth());
+		Assert.assertEquals(ldt.getHour(), result.getHour());
+		Assert.assertEquals(ldt.getMinute(), result.getMinute());
+		Assert.assertEquals(ldt.getSecond(), result.getSecond());
 	}
 }

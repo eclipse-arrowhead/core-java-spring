@@ -31,8 +31,8 @@ public class DTOConverter {
 				system.getAddress(),
 				system.getPort(),
 				system.getAuthenticationInfo(),
-				String.valueOf(system.getCreatedAt()),
-				String.valueOf(system.getUpdatedAt()));		
+				Utilities.convertZonedDateTimeToUTCString(system.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(system.getUpdatedAt()));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -52,8 +52,8 @@ public class DTOConverter {
 	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
 		Assert.notNull(serviceDefinition, "ServiceDefinition is null");
 		
-		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), String.valueOf(serviceDefinition.getCreatedAt()),
-												String.valueOf(serviceDefinition.getUpdatedAt()));
+		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getCreatedAt()),
+												Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -84,13 +84,13 @@ public class DTOConverter {
 		dto.setServiceDefinition(serviceDefinitionDTO);
 		dto.setProvider(systemDTO);
 		dto.setServiceUri(entry.getServiceUri());
-		dto.setEndOfValidity(entry.getEndOfValidity() != null ? entry.getEndOfValidity().toString() : null);
+		dto.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(entry.getEndOfValidity()));
 		dto.setSecure(entry.getSecure());
 		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
 		dto.setVersion(entry.getVersion());
 		dto.setInterfaces(collectInterfaces(entry.getInterfaceConnections()));
-		dto.setCreatedAt(String.valueOf(entry.getCreatedAt()));
-		dto.setUpdatedAt(String.valueOf(entry.getUpdatedAt()));
+		dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()));
+		dto.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 		
 		return dto;
 	}
@@ -182,7 +182,8 @@ public class DTOConverter {
 	public static ServiceInterfaceResponseDTO convertServiceInterfaceToServiceInterfaceResponseDTO(final ServiceInterface intf) {
 		Assert.notNull(intf, "Interface entry is null.");
 		
-		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), String.valueOf(intf.getCreatedAt()), String.valueOf(intf.getUpdatedAt()));
+		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), Utilities.convertZonedDateTimeToUTCString(intf.getCreatedAt()), 
+											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
