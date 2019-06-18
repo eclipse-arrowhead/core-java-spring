@@ -4,12 +4,14 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -32,6 +34,8 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
@@ -66,6 +70,9 @@ public class ServiceRegistryDBService {
 	
 	@Autowired
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
+	
+	@Value(CommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
+	private int pingTimeout;
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
@@ -721,9 +728,78 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({"squid:S3655", "squid:S3776"})
+	public ServiceQueryResultDTO queryRegistry(final ServiceQueryFormDTO form) {
+		logger.debug("queryRegistry is started...");
+		Assert.notNull(form, "Form is null.");
+		Assert.isTrue(!Utilities.isEmpty(form.getServiceDefinitionRequirement()), "Service definition requirement is null or blank");
+		
+		final String serviceDefinitionRequirement = form.getServiceDefinitionRequirement().toLowerCase().trim();
+		try {
+			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionRequirement);
+			if (optServiceDefinition.isEmpty()) {
+				// no service definition found
+				logger.debug("Service definition not found: {}", serviceDefinitionRequirement);
+				return DTOConverter.convertListOfServiceRegistryEntriesToServiceQueryResultDTO(null, 0);
+			}
+			
+			final List<ServiceRegistry> providedServices = new ArrayList<>(serviceRegistryRepository.findByServiceDefinition(optServiceDefinition.get()));
+			final int unfilteredHits = providedServices.size();
+			logger.debug("Potential service providers before filtering: {}", unfilteredHits);
+			if (providedServices.isEmpty()) {
+				// no providers found
+				return DTOConverter.convertListOfServiceRegistryEntriesToServiceQueryResultDTO(providedServices, unfilteredHits);
+			}
+			
+			// filter on interfaces
+			if (form.getInterfaceRequirements() != null && !form.getInterfaceRequirements().isEmpty()) {
+				final List<String> normalizedInterfaceRequirements = RegistryUtils.normalizeInterfaceNames(form.getInterfaceRequirements());
+				RegistryUtils.filterOnInterfaces(providedServices, normalizedInterfaceRequirements);
+			}
+			
+			// filter on security type
+			if (!providedServices.isEmpty() && form.getSecurityRequirements() != null && !form.getSecurityRequirements().isEmpty()) {
+				final List<ServiceSecurityType> normalizedSecurityTypes = RegistryUtils.normalizeSecurityTypes(form.getSecurityRequirements());
+				RegistryUtils.filterOnSecurityType(providedServices, normalizedSecurityTypes);
+			}
+			
+			// filter on version
+			if (!providedServices.isEmpty()) {
+				if (form.getVersionRequirement() != null) {
+					RegistryUtils.filterOnVersion(providedServices, form.getVersionRequirement().intValue());
+				} else if (form.getMinVersionRequirement() != null || form.getMaxVersionRequirement() != null) {
+					final int minVersion = form.getMinVersionRequirement() == null ? 1 : form.getMinVersionRequirement().intValue();
+					final int maxVersion = form.getMaxVersionRequirement() == null ? Integer.MAX_VALUE : form.getMaxVersionRequirement().intValue();
+					RegistryUtils.filterOnVersion(providedServices, minVersion, maxVersion);
+				}
+			}
+			
+			// filter on metadata
+			if (!providedServices.isEmpty() && form.getMetadataRequirements() != null && !form.getMetadataRequirements().isEmpty()) {
+				final Map<String,String> normalizedMetadata = RegistryUtils.normalizeMetadata(form.getMetadataRequirements());
+				RegistryUtils.filterOnMeta(providedServices, normalizedMetadata);
+			}
+			
+			// filter on ping
+			if (!providedServices.isEmpty() && form.getPingProviders()) {
+				RegistryUtils.filterOnPing(providedServices, pingTimeout);
+			}
+			
+			logger.debug("Potential service providers after filtering: {}", providedServices.size());
+			
+			return DTOConverter.convertListOfServiceRegistryEntriesToServiceQueryResultDTO(providedServices, unfilteredHits);
+		} catch (final IllegalStateException e) {
+			throw new InvalidParameterException("Invalid keys in the metadata requirements (whitespace only differences)");
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeServiceRegistryEntryById(final long id) {
-		logger.debug("removeServiceRegistryEntryById started..");
+		logger.debug("removeServiceRegistryEntryById started...");
 		if (!serviceRegistryRepository.existsById(id)) {
 			throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
 		}
@@ -922,8 +998,7 @@ public class ServiceRegistryDBService {
 	private void checkSRSecurityValue(final ServiceSecurityType type, final String providerSystemAuthenticationInfo) {
 		logger.debug("checkSRSecurityValue started...");
 		final ServiceSecurityType validatedType = type == null ? ServiceSecurityType.NOT_SECURE : type;
-		Assert.isTrue((validatedType == ServiceSecurityType.NOT_SECURE && providerSystemAuthenticationInfo == null) ||
-					  (validatedType != ServiceSecurityType.NOT_SECURE && providerSystemAuthenticationInfo != null), 
+		Assert.isTrue(validatedType == ServiceSecurityType.NOT_SECURE || (validatedType != ServiceSecurityType.NOT_SECURE && providerSystemAuthenticationInfo != null), 
 					  "Security type is in conflict with the availability of the authentication info.");
 	}
 	

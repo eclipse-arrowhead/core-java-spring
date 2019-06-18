@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ public interface ServiceRegistryRepository extends JpaRepository<ServiceRegistry
 	
 	//-------------------------------------------------------------------------------------------------
 	public Optional<ServiceRegistry> findByServiceDefinitionAndSystem(final ServiceDefinition serviceDefinition, final System system);
+	public List<ServiceRegistry> findByServiceDefinition(final ServiceDefinition serviceDefinition);
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> findAllByServiceDefinition(final ServiceDefinition serviceDefinition, Pageable page);

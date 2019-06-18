@@ -3,6 +3,7 @@ package eu.arrowhead.common.database.entity;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -76,7 +77,7 @@ public class ServiceRegistry {
 	}
 
 	public ServiceRegistry(final ServiceDefinition serviceDefinition, final System system, final String serviceUri,
-			final ZonedDateTime endOfValidity, final ServiceSecurityType secure, final String metadata, final int version) {
+						   final ZonedDateTime endOfValidity, final ServiceSecurityType secure, final String metadata, final Integer version) {
 		this.serviceDefinition = serviceDefinition;
 		this.system = system;
 		this.serviceUri = serviceUri;
@@ -153,11 +154,11 @@ public class ServiceRegistry {
 		this.metadata = metadata;
 	}
 
-	public int getVersion() {
+	public Integer getVersion() {
 		return version;
 	}
 
-	public void setVersion(final int version) {
+	public void setVersion(final Integer version) {
 		this.version = version;
 	}
 
@@ -190,5 +191,27 @@ public class ServiceRegistry {
 		return "ServiceRegistry [id=" + id + ", serviceDefinition=" + serviceDefinition + ", system=" + system
 				+ ", endOfValidity=" + endOfValidity + ", version=" + version + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		
+		if (obj == null) {
+			return false;
+		}
+		
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		
+		final ServiceRegistry other = (ServiceRegistry) obj;
+		return id == other.id;
+	}
 }

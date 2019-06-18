@@ -30,6 +30,8 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
@@ -93,6 +95,9 @@ public class ServiceRegistryController {
 	private static final String SERVICE_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered service";
 	private static final String SERVICE_REGISTRY_UNREGISTER_200_MESSAGE = "Registered service removed";
 	private static final String SERVICE_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove service";
+	private static final String SERVICE_REGISTRY_QUERY_DESCRIPTION = "Return Service Registry data that fits the specification";
+	private static final String SERVICE_REGISTRY_QUERY_200_MESSAGE = "Service Registry data returned";
+	private static final String SERVICE_REGISTRY_QUERY_400_MESSAGE = "Could not query Service Registry";
 	private static final String SERVICE_REGISTRY_UPDATE_DESCRIPTION = "Update a service";
 	private static final String SERVICE_REGISTRY_UPDATE_201_MESSAGE = "Service updated";
 	private static final String SERVICE_REGISTRY_UPDATE_400_MESSAGE = "Could not update service";
@@ -538,7 +543,7 @@ public class ServiceRegistryController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ServiceRegistryResponseDTO registerService(@RequestBody final ServiceRegistryRequestDTO request) {
+	@ResponseBody public ServiceRegistryResponseDTO registerService(@RequestBody final ServiceRegistryRequestDTO request) {
 		logger.debug("New service registration request recieved");
 		checkServiceRegistryRequest(request);
 		
@@ -606,7 +611,29 @@ public class ServiceRegistryController {
 		checkUnregisterServiceParameters(serviceDefinition, providerName, providerAddress, providerPort);
 		
 		serviceRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort);
-		logger.debug("{} successfully removied its service {}", providerName, serviceDefinition);
+		logger.debug("{} successfully removed its service {}", providerName, serviceDefinition);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_QUERY_DESCRIPTION, response = ServiceQueryResultDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_QUERY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_QUERY_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceQueryResultDTO queryRegistry(@RequestBody final ServiceQueryFormDTO form) {
+		logger.debug("Service query request received");
+		if (Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
+			throw new BadPayloadException("Service definition requirement is null or blank" , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI +
+										  CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI);
+		}
+		
+		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		logger.debug("Return {} providers for service {}", result.getServiceQueryData().size(), form.getServiceDefinitionRequirement());
+		
+		return result;
 	}
 		
 	//=================================================================================================
@@ -772,8 +799,7 @@ public class ServiceRegistryController {
 		}
 		
 		final ServiceSecurityType type = request.getSecure() == null ? ServiceSecurityType.NOT_SECURE : request.getSecure();
-		if ((type == ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() != null) ||
-			 type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+		if (type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
 			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
 		}
 		

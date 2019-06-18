@@ -1,6 +1,5 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;

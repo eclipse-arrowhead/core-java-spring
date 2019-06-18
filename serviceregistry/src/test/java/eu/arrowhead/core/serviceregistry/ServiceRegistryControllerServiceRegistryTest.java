@@ -49,6 +49,8 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.AutoCompleteDataResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.IdValueDTO;
 import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
@@ -71,6 +73,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	private static final String SERVICE_REGISTRY_REGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 	private static final String SERVICE_REGISTRY_UNREGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
+	private static final String SERVICE_REGISTRY_QUERY_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
 
 	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI;
 	private static final String SERVICE_REGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/servicedef";
@@ -148,22 +151,6 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12T15:51:30+02:00[Europe/Budapest]");
 		request.setSecure(ServiceSecurityType.CERTIFICATE);
-		
-		final MvcResult result = postRegisterService(request, status().isBadRequest());
-		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
-		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testRegisterServiceNotSecuredButWithAuthenticationInfo() throws Exception {
-		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
-		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.getProviderSystem().setAuthenticationInfo("1234");
-		request.setEndOfValidity("2019-06-12T15:51:30+02:00[Europe/Budapest]");
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -541,6 +528,42 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of queryService
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceServiceDefinitionRequirementNull() throws Exception {
+		final MvcResult result = postQueryService(new ServiceQueryFormDTO(), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceServiceDefinitionRequirementEmpty() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("  ");
+		final MvcResult result = postQueryService(form, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_QUERY_URI, error.getOrigin());
+		Assert.assertEquals("Service definition requirement is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryServiceEverythingIsOk() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
+		form.setServiceDefinitionRequirement("testservice");
+		when(serviceRegistryDBService.queryRegistry(any(ServiceQueryFormDTO.class))).thenReturn(new ServiceQueryResultDTO());
+		
+		postQueryService(form, status().isOk());
+	}
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -557,6 +580,16 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult deleteUnregisterService(final String queryStr, final ResultMatcher matcher) throws Exception {
 		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
 		return this.mockMvc.perform(delete(SERVICE_REGISTRY_UNREGISTER_URI + validatedQueryStr)
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postQueryService(final ServiceQueryFormDTO form, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(SERVICE_REGISTRY_QUERY_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(form))
 						   .accept(MediaType.APPLICATION_JSON))
 						   .andExpect(matcher)
 						   .andReturn();
