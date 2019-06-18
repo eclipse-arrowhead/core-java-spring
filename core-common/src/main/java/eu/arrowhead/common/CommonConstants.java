@@ -2,6 +2,9 @@ package eu.arrowhead.common;
 
 public class CommonConstants {
 	
+	//=================================================================================================
+	// members
+	
 	public static final String APPLICATION_PROPERTIES = "application.properties";
 	
 	public static final String BASE_PACKAGE = "eu.arrowhead";
@@ -38,15 +41,18 @@ public class CommonConstants {
 	
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
+	public static final String JSON = "JSON";
+	public static final String XML = "XML";
+	
 	public static final String LOCALHOST = "127.0.0.1";
 	public static final int HTTP_PORT = 80;
 	
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
-	public static final String SERVICEREGISTRY_URI = "/serviceregistry";
-	public static final String OP_SERVICEREGISTRY_REGISTER_URI = "/register";
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_URI = "/unregister";
-	public static final String OP_SERVICEREGISTRY_QUERY_URI = "/query";
+	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
+	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
+	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -95,13 +101,19 @@ public class CommonConstants {
 	public static final String $SERVICE_REGISTRY_TTL_SCHEDULED_WD = "${" + SERVICE_REGISTRY_TTL_SCHEDULED + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED + "}";
 	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
+	public static final String SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = "use_strict_service_intf_name_verifier";
+	public static final String $SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" +
+																							Defaults.DEFAULT_SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
 	
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
 	
-	public static final String OP_SERVICEREGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "systemName";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
+	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
 	
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
@@ -110,7 +122,11 @@ public class CommonConstants {
 	
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
-	
+
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	private CommonConstants() {
 		throw new UnsupportedOperationException();
 	}

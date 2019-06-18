@@ -3,10 +3,13 @@ package eu.arrowhead.common.database.entity;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,6 +26,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.dto.ServiceSecurityType;
 
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
@@ -42,20 +46,21 @@ public class ServiceRegistry {
 	@JoinColumn (name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column (nullable = true, length = Defaults.VARCHAR_BASIC)
 	private String serviceUri;
 	
 	@Column (nullable = true)
 	private ZonedDateTime endOfValidity;
 	
-	@Column (nullable = false)
-	private boolean secure = false;
+	@Column (nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'NOT_SECURE'")
+	@Enumerated(EnumType.STRING)
+	private ServiceSecurityType secure = ServiceSecurityType.NOT_SECURE;
 	
 	@Column (nullable = true, columnDefinition = "TEXT")
 	private String metadata;
 	
 	@Column (nullable = true)
-	private int version = 1;
+	private Integer version = 1;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
@@ -72,7 +77,7 @@ public class ServiceRegistry {
 	}
 
 	public ServiceRegistry(final ServiceDefinition serviceDefinition, final System system, final String serviceUri,
-			final ZonedDateTime endOfValidity, final boolean secure, final String metadata, final int version) {
+						   final ZonedDateTime endOfValidity, final ServiceSecurityType secure, final String metadata, final Integer version) {
 		this.serviceDefinition = serviceDefinition;
 		this.system = system;
 		this.serviceUri = serviceUri;
@@ -133,11 +138,11 @@ public class ServiceRegistry {
 		this.endOfValidity = endOfValidity;
 	}
 
-	public boolean getSecure() {
+	public ServiceSecurityType getSecure() {
 		return secure;
 	}
 
-	public void setSecure(final boolean secure) {
+	public void setSecure(final ServiceSecurityType secure) {
 		this.secure = secure;
 	}
 
@@ -149,11 +154,11 @@ public class ServiceRegistry {
 		this.metadata = metadata;
 	}
 
-	public int getVersion() {
+	public Integer getVersion() {
 		return version;
 	}
 
-	public void setVersion(final int version) {
+	public void setVersion(final Integer version) {
 		this.version = version;
 	}
 
@@ -186,5 +191,27 @@ public class ServiceRegistry {
 		return "ServiceRegistry [id=" + id + ", serviceDefinition=" + serviceDefinition + ", system=" + system
 				+ ", endOfValidity=" + endOfValidity + ", version=" + version + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		
+		if (obj == null) {
+			return false;
+		}
+		
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		
+		final ServiceRegistry other = (ServiceRegistry) obj;
+		return id == other.id;
+	}
 }

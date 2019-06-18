@@ -23,9 +23,17 @@ import eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper;
 
 public abstract class AccessControlFilter extends ArrowheadFilter {
 	
+	//=================================================================================================
+	// members
+
+	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	protected Map<String,String> arrowheadContext;
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {
@@ -53,6 +61,10 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 		}
 	}
 	
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		if (!Utilities.isKeyStoreCNArrowheadValid(clientCN)) {
 			log.debug("{} is not a valid common name, access denied!", clientCN);
@@ -66,6 +78,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 	    }
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	protected String getServerCloudCN() {
 		final String serverCN = arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
 	    final String[] serverFields = serverCN.split("\\.", 2); // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
@@ -74,6 +87,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 	    return serverFields[1];
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	private String getCertificateCNFromRequest(final HttpServletRequest request) {
 		final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);

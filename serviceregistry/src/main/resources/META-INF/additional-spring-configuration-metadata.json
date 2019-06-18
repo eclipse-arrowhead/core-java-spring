@@ -33,5 +33,10 @@
     "name": "log_all_request_and_response",
     "type": "java.lang.Boolean",
     "description": "A description for 'log_all_request_and_response'"
+  },
+  {
+    "name": "use_strict_service_intf_name_verifier",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'use_strict_service_intf_name_verifier'"
   }
 ]}

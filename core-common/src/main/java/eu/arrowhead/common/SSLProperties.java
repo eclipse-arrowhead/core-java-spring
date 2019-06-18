@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class SSLProperties {
 	
+	//=================================================================================================
+	// members
+	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	

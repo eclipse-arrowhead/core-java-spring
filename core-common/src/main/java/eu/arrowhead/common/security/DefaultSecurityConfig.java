@@ -15,13 +15,20 @@ import eu.arrowhead.common.filter.PayloadSizeFilter;
 
 public class DefaultSecurityConfig extends WebSecurityConfigurerAdapter {
 	
+	//=================================================================================================
+	// members
+
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	
 	@Value(CommonConstants.$LOG_ALL_REQUEST_AND_RESPONSE_WD)
 	private boolean debugMode;
 	
-    @Override
+	//=================================================================================================
+	// assistant methods
+
+    //-------------------------------------------------------------------------------------------------
+	@Override
     protected void configure(final HttpSecurity http) throws Exception {
     	http.httpBasic().disable()
     	    .csrf().disable()

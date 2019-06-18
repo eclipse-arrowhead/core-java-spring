@@ -26,6 +26,7 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
+import eu.arrowhead.common.dto.ServiceSecurityType;
 
 @RunWith (SpringRunner.class)
 public class ProviderReachabilityTaskTest {
@@ -43,10 +44,10 @@ public class ProviderReachabilityTaskTest {
 	public void setUp() {
 		final List<ServiceRegistry> sreviceRegistryEntries = new ArrayList<>();
 					
-		sreviceRegistryEntries.add(new ServiceRegistry(serviceDefinition, testSystem, "testUri", ZonedDateTime.now(), true, "", 1));
+		sreviceRegistryEntries.add(new ServiceRegistry(serviceDefinition, testSystem, "testUri", ZonedDateTime.now(), ServiceSecurityType.TOKEN, "", 1));
 			
 		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(sreviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceReqistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
+		when(serviceRegistryDBService.getServiceRegistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
 		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
 	

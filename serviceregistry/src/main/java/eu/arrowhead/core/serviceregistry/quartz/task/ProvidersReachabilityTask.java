@@ -1,8 +1,5 @@
 package eu.arrowhead.core.serviceregistry.quartz.task;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.core.serviceregistry.database.service.RegistryUtils;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @Component
@@ -48,7 +46,7 @@ public class ProvidersReachabilityTask implements Job {
 		int pageIndexCounter = 0;
 		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
-			pageOfServiceEntries = serviceRegistryDBService.getServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
 				logger.debug("Servise Registry database is empty");
 			} else {
@@ -56,7 +54,7 @@ public class ProvidersReachabilityTask implements Job {
 				removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
-					pageOfServiceEntries = serviceRegistryDBService.getServiceReqistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+					pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 					removedServiceRegistryEntries.addAll(pingAndRemoveRegisteredServices(pageOfServiceEntries));
 					pageIndexCounter++;
 				}
@@ -74,7 +72,7 @@ public class ProvidersReachabilityTask implements Job {
 			final System provider = serviceRegistryEntry.getSystem();
 			final String address = provider.getAddress();
 			final int port = provider.getPort();
-			if (! pingService(address, port)) {				
+			if (!RegistryUtils.pingService(address, port, timeout)) {				
 				toBeRemoved.add(serviceRegistryEntry);
 				logger.debug("REMOVED: {}", serviceRegistryEntry);
 			}
@@ -82,15 +80,5 @@ public class ProvidersReachabilityTask implements Job {
 		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);
 		
 		return toBeRemoved;
-	}
-	
-	private boolean pingService(final String address, final int port) {
-		final InetSocketAddress providerHost = new InetSocketAddress(address, port);
-		try (Socket socket = new Socket()) {
-			socket.connect(providerHost, timeout);
-			return true;
-		} catch (final IOException exception) {
-			return false;
-		}
 	}
 }

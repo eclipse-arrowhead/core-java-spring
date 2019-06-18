@@ -17,6 +17,9 @@ import eu.arrowhead.common.CommonConstants;
 
 public class JDBCConnectionFactoryForLog4J2 {
 	
+	//=================================================================================================
+	// members
+	
 	private static Properties props;
 	private static DataSource dataSource;
 
@@ -29,7 +32,11 @@ public class JDBCConnectionFactoryForLog4J2 {
 			ex.printStackTrace(); //NOSONAR no logging at this point
 		}
 	}
-	
+
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	public static Connection getConnection() throws SQLException {
 		if (dataSource == null) {
 			final HikariConfig config = new HikariConfig();
@@ -44,6 +51,10 @@ public class JDBCConnectionFactoryForLog4J2 {
 		return dataSource.getConnection();
 	}
 	
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	private static void init() throws IOException {
 		InputStream propStream = null;
 		File propertiesFile = new File(CommonConstants.APPLICATION_PROPERTIES);
@@ -59,6 +70,7 @@ public class JDBCConnectionFactoryForLog4J2 {
 		props = temp;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	private JDBCConnectionFactoryForLog4J2() {
 		throw new UnsupportedOperationException();
 	}

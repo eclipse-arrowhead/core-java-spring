@@ -15,7 +15,11 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import eu.arrowhead.common.Utilities;
 
 public class OutboundDebugFilter extends ArrowheadFilter {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {

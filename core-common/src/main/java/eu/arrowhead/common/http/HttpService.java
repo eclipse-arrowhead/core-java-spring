@@ -48,6 +48,9 @@ import eu.arrowhead.common.exception.UnavailableServerException;
 
 @Component
 public class HttpService {
+	
+	//=================================================================================================
+	// members
 
 	private static final String ERROR_MESSAGE_PART_PKIX_PATH = "PKIX path";
 	
@@ -76,6 +79,10 @@ public class HttpService {
 	private RestTemplate template;
 	private RestTemplate sslTemplate;
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@PostConstruct
 	public void init() throws Exception { //NOSONAR Exception needs here
 		logger.debug("Initializing HttpService...");
@@ -95,6 +102,7 @@ public class HttpService {
 		logger.debug("HttpService is initialized.");
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final P payload, final SSLContext givenContext) {
 		Assert.notNull(method, "Request method is not defined.");
 		logger.debug("Sending {} request to: {}", method, uri);
@@ -137,18 +145,25 @@ public class HttpService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public <T,P> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final P payload) {
 		return sendRequest(uri, method, responseType, payload, null);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public <T> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType, final SSLContext givenContext) {
 		return sendRequest(uri, method, responseType, null, givenContext);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public <T> ResponseEntity<T> sendRequest(final UriComponents uri, final HttpMethod method, final Class<T> responseType) {
 		return sendRequest(uri, method, responseType, null, null);
 	}
-		
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
 	private <P> HttpEntity<P> getHttpEntity(final P payload) {
 		final MultiValueMap<String,String> headers = new LinkedMultiValueMap<>();
 		headers.put(HttpHeaders.ACCEPT, Arrays.asList(MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE));
@@ -159,6 +174,7 @@ public class HttpService {
 		return payload != null ? new HttpEntity<>(payload, headers) : new HttpEntity<>(headers);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	private RestTemplate createTemplate(final SSLContext sslContext) {
 		final HttpClient client = createClient(sslContext);
 		final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(client);
@@ -167,6 +183,7 @@ public class HttpService {
 		return restTemplate;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	private HttpClient createClient(final SSLContext sslContext) {
 		HttpClient client;
 		
@@ -189,6 +206,7 @@ public class HttpService {
 		return client;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	private SSLContext createSSLContext() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, KeyManagementException, UnrecoverableKeyException {
 		final String messageNotDefined = " is not defined.";
 		Assert.isTrue(!Utilities.isEmpty(sslProperties.getKeyStoreType()), CommonConstants.KEYSTORE_TYPE + messageNotDefined);
@@ -208,6 +226,7 @@ public class HttpService {
 							   		  .build();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	private RequestConfig createRequestConfig() {
 		return RequestConfig.custom().setConnectTimeout(connectionTimeout)
 									 .setSocketTimeout(socketTimeout)
