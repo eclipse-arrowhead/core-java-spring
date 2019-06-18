@@ -27,8 +27,7 @@ public class ApplicationInitListener {
 	//=================================================================================================
 	// members
 
-
-	private Logger logger = LogManager.getLogger(ApplicationInitListener.class);
+	private final Logger logger = LogManager.getLogger(ApplicationInitListener.class);
 
 	@Autowired
 	private SSLProperties sslProperties;

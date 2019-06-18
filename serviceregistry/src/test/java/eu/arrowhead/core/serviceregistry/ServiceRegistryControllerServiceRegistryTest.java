@@ -135,22 +135,6 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testRegisterServiceNotSecuredButWithAuthenticationInfo() throws Exception {
-		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
-		request.setServiceDefinition("s");
-		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.getProviderSystem().setAuthenticationInfo("1234");
-		request.setEndOfValidity("2019-06-12T15:51:30+02:00[Europe/Budapest]");
-		
-		final MvcResult result = postRegisterService(request, status().isBadRequest());
-		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
-		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
 	public void testRegisterServiceInterfaceListNull() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");

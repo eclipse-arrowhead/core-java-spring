@@ -803,8 +803,7 @@ public class ServiceRegistryDBService {
 	private void checkSRSecurityValue(final ServiceSecurityType type, final String providerSystemAuthenticationInfo) {
 		logger.debug("checkSRSecurityValue started...");
 		final ServiceSecurityType validatedType = type == null ? ServiceSecurityType.NOT_SECURE : type;
-		Assert.isTrue((validatedType == ServiceSecurityType.NOT_SECURE && providerSystemAuthenticationInfo == null) ||
-					  (validatedType != ServiceSecurityType.NOT_SECURE && providerSystemAuthenticationInfo != null), 
+		Assert.isTrue(validatedType == ServiceSecurityType.NOT_SECURE || (validatedType != ServiceSecurityType.NOT_SECURE && providerSystemAuthenticationInfo != null), 
 					  "Security type is in conflict with the availability of the authentication info.");
 	}
 	

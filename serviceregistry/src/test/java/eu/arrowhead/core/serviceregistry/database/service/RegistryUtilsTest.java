@@ -135,7 +135,7 @@ public class RegistryUtilsTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testNormalizeSecurityTypesDoesNothing() {
-		final List<ServiceSecurityType> result = RegistryUtils.normalizeSecurityTypes(Arrays.asList(ServiceSecurityType.TOKEN));
+		final List<ServiceSecurityType> result = RegistryUtils.normalizeSecurityTypes(List.of(ServiceSecurityType.TOKEN));
 		Assert.assertEquals(1, result.size());
 		Assert.assertEquals(ServiceSecurityType.TOKEN, result.get(0));
 	}
