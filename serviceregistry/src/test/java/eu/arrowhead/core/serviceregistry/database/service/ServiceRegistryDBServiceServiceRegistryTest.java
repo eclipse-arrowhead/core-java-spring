@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -55,6 +56,9 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Mock
 	private SystemRepository systemRepository;
 	
+	@Mock
+	private SSLProperties sslProperties;
+	
 	@Spy
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 	
@@ -64,8 +68,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	//Tests of getServiceRegistryEntryById
 	
-	@Test (expected = InvalidParameterException.class)
-	public void testgetServiceRegistryEntryByIdWithNotExistingId() {
+	@Test(expected = InvalidParameterException.class)
+	public void testGetServiceRegistryEntryByIdWithNotExistingId() {
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		serviceRegistryDBService.getServiceRegistryEntryById(-2);
 	}
@@ -73,7 +77,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	//Tests of getServiceReqistryEntries
 		
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceReqistryEntriesWithNotValidSortField() {
 		serviceRegistryDBService.getServiceRegistryEntries(0, 10, Direction.ASC, "notValid");
 	}
@@ -81,13 +85,13 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	//Tests of getServiceReqistryEntriesByServiceDefintion
 			
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceReqistryEntriesByServiceDefintionWithNotValidSortField() {
 		serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintion("testService", 0, 10, Direction.ASC, "notValid");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceReqistryEntriesByServiceDefintionWithNotValidServiceDefinition() {
 		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.ofNullable(null));
 		serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintion("serviceNotExists", 0, 10, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
@@ -96,7 +100,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	//Tests of removeServiceRegistryEntryById
 		
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void testRemoveServiceRegistryEntryByIdWithNotExistingId() {
 		when(serviceRegistryRepository.existsById(anyLong())).thenReturn(false);
 		serviceRegistryDBService.removeServiceRegistryEntryById(1);
@@ -241,6 +245,16 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
+		final System provider = new System();
+		provider.setAuthenticationInfo("abcd");
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		when(sslProperties.isSslEnabled()).thenReturn(false);
+		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), provider, null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
