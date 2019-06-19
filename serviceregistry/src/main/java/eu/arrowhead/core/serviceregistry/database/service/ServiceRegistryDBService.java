@@ -542,7 +542,7 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
 		} catch (final InvalidParameterException ex) {
-					throw ex;	
+			throw ex;	
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -657,7 +657,7 @@ public class ServiceRegistryDBService {
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
 			
-			final List<String> valideatedInterfacesTemp = new ArrayList(srEntry.getInterfaceConnections().size());
+			final List<String> valideatedInterfacesTemp = new ArrayList<>(srEntry.getInterfaceConnections().size());
 			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
 			for (final ServiceRegistryInterfaceConnection serviceRegistryInterfaceConnection : interfaceConnections) {
 				valideatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
@@ -1139,13 +1139,12 @@ public class ServiceRegistryDBService {
 		logger.debug("checkSRSecurityValue started...");
 		
 		final ServiceSecurityType validatedType = type == null ? ServiceSecurityType.NOT_SECURE : type;
-
-//		if (!sslProperties.isSslEnabled() && type != ServiceSecurityType.NOT_SECURE ) {
-//			 throw new InvalidParameterException("ServiceRegistry insequre mode can not handle secure services") ;
-//		}
-		
 		Assert.isTrue(validatedType == ServiceSecurityType.NOT_SECURE || (validatedType != ServiceSecurityType.NOT_SECURE && providerSystemAuthenticationInfo != null), 
-					  "Security type is in conflict with the availability of the authentication info.");
+				"Security type is in conflict with the availability of the authentication info.");
+
+		if (!sslProperties.isSslEnabled() && type != ServiceSecurityType.NOT_SECURE ) {
+			 throw new InvalidParameterException("ServiceRegistry insequre mode can not handle secure services") ;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
