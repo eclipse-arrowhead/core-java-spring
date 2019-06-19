@@ -11,11 +11,20 @@
   	<name>Arrowhead Authorization</name>
   	<description>Arrowhead Authorization core service</description>
   
+   	<properties>
+  		<jose4j.version>0.6.5</jose4j.version>
+  	</properties>
+  
     <dependencies>
 	    <dependency>
 	      	<groupId>eu.arrowhead</groupId>
 	      	<artifactId>arrowhead-core-common</artifactId>
 	      	<version>${revision}</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.bitbucket.b_c</groupId>
+	    	<artifactId>jose4j</artifactId>
+	    	<version>${jose4j.version}</version>
 	    </dependency>
   	</dependencies>
   	

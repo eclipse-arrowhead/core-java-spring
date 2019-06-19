@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class SystemRequestDTO implements Serializable {
 
@@ -29,4 +30,26 @@ public class SystemRequestDTO implements Serializable {
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final Integer port) { this.port = port; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(address, port, systemName);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final SystemRequestDTO other = (SystemRequestDTO) obj;
+		return Objects.equals(address, other.address) && Objects.equals(port, other.port) && Objects.equals(systemName, other.systemName);
+	}
 }
