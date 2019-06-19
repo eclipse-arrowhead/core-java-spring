@@ -21,6 +21,7 @@ import org.mockito.Spy;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -42,7 +43,6 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//=================================================================================================
 	// members
-	
 	@InjectMocks
 	private ServiceRegistryDBService serviceRegistryDBService; 
 	
@@ -60,19 +60,50 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//=================================================================================================
 	// methods
-		
+	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testGetAllServiceRegistryEntriesWithInvalidSortField() {
+	//Tests of getServiceRegistryEntryById
+	
+	@Test (expected = InvalidParameterException.class)
+	public void testgetServiceRegistryEntryByIdWithNotExistingId() {
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		serviceRegistryDBService.getServiceRegistryEntryById(-2);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of getServiceReqistryEntries
+		
+	@Test (expected = InvalidParameterException.class)
+	public void testGetServiceReqistryEntriesWithNotValidSortField() {
 		serviceRegistryDBService.getServiceRegistryEntries(0, 10, Direction.ASC, "notValid");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testRemoveServiceRegistryEntryByIdWithNonExistentId() {
+	//Tests of getServiceReqistryEntriesByServiceDefintion
+			
+	@Test (expected = InvalidParameterException.class)
+	public void testGetServiceReqistryEntriesByServiceDefintionWithNotValidSortField() {
+		serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintion("testService", 0, 10, Direction.ASC, "notValid");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test (expected = InvalidParameterException.class)
+	public void testGetServiceReqistryEntriesByServiceDefintionWithNotValidServiceDefinition() {
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.ofNullable(null));
+		serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintion("serviceNotExists", 0, 10, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+	}
+			
+	//-------------------------------------------------------------------------------------------------
+	//Tests of removeServiceRegistryEntryById
+		
+	@Test (expected = InvalidParameterException.class)
+	public void testRemoveServiceRegistryEntryByIdWithNotExistingId() {
 		when(serviceRegistryRepository.existsById(anyLong())).thenReturn(false);
 		serviceRegistryDBService.removeServiceRegistryEntryById(1);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of registerServiceResponse
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
@@ -182,6 +213,9 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of createServiceRegistry		
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)

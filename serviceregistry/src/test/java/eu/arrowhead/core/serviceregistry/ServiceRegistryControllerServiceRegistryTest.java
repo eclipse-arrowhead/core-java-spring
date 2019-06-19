@@ -1,14 +1,22 @@
 package eu.arrowhead.core.serviceregistry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Assert;
@@ -18,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,12 +41,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.ServiceInterface;
+import eu.arrowhead.common.database.entity.ServiceRegistry;
+import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.AutoCompleteDataResponseDTO;
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.IdValueDTO;
+import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
+import eu.arrowhead.common.dto.ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO;
+import eu.arrowhead.common.dto.ServicesGrouppedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
@@ -53,6 +75,10 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private static final String SERVICE_REGISTRY_UNREGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 	private static final String SERVICE_REGISTRY_QUERY_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
 
+	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI;
+	private static final String SERVICE_REGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/servicedef";
+	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/groupped";
+	
 	@Autowired
 	private WebApplicationContext wac;
 	
@@ -114,7 +140,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
-		Assert.assertEquals("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", error.getErrorMessage());
+		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -123,7 +149,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12T15:51:30+02:00[Europe/Budapest]");
+		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setSecure(ServiceSecurityType.CERTIFICATE);
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
@@ -139,7 +165,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12T15:51:30+02:00[Europe/Budapest]");
+		request.setEndOfValidity("2019-06-12 13:51:30");
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -154,7 +180,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12T15:51:30+01:00[Europe/Budapest]");
+		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setInterfaces(Collections.<String>emptyList());
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
@@ -172,7 +198,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12T15:51:30+02:00[Europe/Budapest]");
+		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setInterfaces(List.of(intf));
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
@@ -188,7 +214,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
-		request.setEndOfValidity("2019-06-12T15:51:30+02:00[Europe/Budapest]");
+		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
 		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
 		
@@ -196,9 +222,215 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
-	// Tests of unregisterService
+	// Test of getServiceRegistryEntries
+	
+	@Test
+	public void testGetServiceRegistryEntriesWithoutParameter() throws Exception {
+		final int numOfServices = 4;
+		final int numOfSystems = 3;		
+		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, "JSON", "XML");
+		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
+		
+		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final ServiceRegistryListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryListResponseDTO.class);
+		assertEquals(numOfServices * numOfSystems, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesWithPageAndSizeParameter() throws Exception {
+		final int numOfServices = 4;
+		final int numOfSystems = 3;		
+		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, "JSON", "XML");
+		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
+		
+		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+				.param("page", "0")
+				.param("item_per_page", String.valueOf(numOfServices * numOfSystems))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final ServiceRegistryListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryListResponseDTO.class);
+		assertEquals(numOfServices * numOfSystems, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesWithNullPageButDefinedSizeParameter() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+				.param("item_per_page", "1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test 
+	public void testGetServiceRegistryEntriesWithDefinedPageButNullSizeParameter() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+				.param("page", "0")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesWithInvalidSortDirectionFlagParameter() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
+				.param("direction", "invalid")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//=================================================================================================
+	// Test of getServiceRegistryEntriesById
+	
+	@Test
+	public void testGetServiceRegistryEntriesByIdWithExistingId() throws Exception {
+		final Page<ServiceRegistry> page = createServiceRegistryPageForDBMocking(1, 1, "JSON", "XML");
+		final ServiceRegistryResponseDTO dto = DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(page.getContent().get(0));
+		when(serviceRegistryDBService.getServiceRegistryEntryByIdResponse(anyLong())).thenReturn(dto);
+		
+		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI + "/1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final ServiceRegistryResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryResponseDTO.class);
+		
+		assertEquals(1, readValue.getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByIdWithInvalidId() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI + "/0")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//=================================================================================================
+	// Test of getServiceRegistryEntriesByServiceDefinition
+	
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithOnlyServiceDefInput() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithEmptyServiceDefInput() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/ ")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndNullPageButDefinedSizeParameter() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+				.param("service_definition", "test")
+				.param("item_per_page", "1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndDefinedPageButNullSizeParameter() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+				.param("service_definition", "test")
+				.param("page", "1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndInvalidSortDirectionFlagParameter() throws Exception {
+		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
+				.param("service_definition", "test")
+				.param("direction", "invalid")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of getServiceRegistryGrouppedData
+	
+	@Test
+	public void testGetServiceRegistryGrouppedDataToCheckDTO() throws Exception {
+		final int numOfServices = 4;
+		final int numOfSystems = 2;		
+		final String interface1 = "JSON";
+		final String interface2 = "XML";
+		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
+		final ServiceRegistryGrouppedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceReqistryEntriesForServiceRegistryGrouppedResponse()).thenReturn(dto);
+		
+		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPPED_URI)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final ServiceRegistryGrouppedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGrouppedResponseDTO.class);
+		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
+		final List<ServicesGrouppedBySystemsResponseDTO> servicesGrouppedBySystems = readValue.getServicesGrouppedBySystems();
+		final List<ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesGrouppedByServiceDefinitionAndInterface = readValue.getServicesGrouppedByServiceDefinitionAndInterface();
+		
+		assertNotNull(autoCompleteData);
+		assertNotNull(servicesGrouppedBySystems);
+		assertNotNull(servicesGrouppedByServiceDefinitionAndInterface);
+		
+		//Testing autoCompleteData object
+		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
+		assertEquals(2, interfaceList.size());
+		assertTrue(interfaceList.get(0).getValue().equals(interface1) || interfaceList.get(1).getValue().equals(interface1) ? true : false);
+		assertTrue(interfaceList.get(0).getValue().equals(interface2) || interfaceList.get(1).getValue().equals(interface2) ? true : false);		
+		assertEquals(numOfServices, autoCompleteData.getServiceList().size());
+		assertEquals(numOfSystems, autoCompleteData.getSystemList().size());
+		
+		//Testing servicesGrouppedBySystems object
+		assertEquals(numOfSystems, servicesGrouppedBySystems.size());
+		assertEquals(numOfServices, servicesGrouppedBySystems.get(0).getServices().size());
+		final String oneOfTheInterfaces = servicesGrouppedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
+		assertTrue(oneOfTheInterfaces.equals(interface1) || oneOfTheInterfaces.equals(interface2) ? true :false);
+		
+		//Testing servicesGrouppedByServiceDefinitionAndInterface object
+		assertEquals(numOfServices * 2, servicesGrouppedByServiceDefinitionAndInterface.size());
+		assertEquals(numOfSystems, servicesGrouppedByServiceDefinitionAndInterface.get(0).getProviderServices().size());
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	// Tests of removeServiceRegistryEntryById
+	
+	@Test
+	public void testRemoveServiceRegistryEntryByIdWithExistingId( ) throws Exception {
+		this.mockMvc.perform(delete(SERVICE_REGISTRY_MGMT_URI + "/4")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveServiceRegistryEntryByIdWithNotExistingId() throws Exception {
+		this.mockMvc.perform(delete(SERVICE_REGISTRY_MGMT_URI + "/0")
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// Tests of unregisterService
+	
 	@Test
 	public void testUnregisterServiceNoParameter() throws Exception {
 		deleteUnregisterService(null, status().isBadRequest());
@@ -371,6 +603,56 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		result.setPort(1234);
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Page<ServiceRegistry> createServiceRegistryPageForDBMocking(final int amountOfServiceDefinition, final int amountOfSystem, final String interface1Name, final String imterface2Name) {
+		final ZonedDateTime timeStamp = ZonedDateTime.now();
+		
+		final List<System> systemList = new ArrayList<>();
+		final List<ServiceDefinition> serviceRegistryDefinitionList = new ArrayList<>();
+		final List<ServiceRegistry> serviceRegistryList = new ArrayList<>();
+		
+		final ServiceInterface serviceInterface1 = new ServiceInterface(interface1Name);
+		serviceInterface1.setId(1);
+		serviceInterface1.setCreatedAt(timeStamp);
+		serviceInterface1.setUpdatedAt(timeStamp);
+		
+		final ServiceInterface serviceInterface2 = new ServiceInterface(imterface2Name);
+		serviceInterface2.setId(2);
+		serviceInterface2.setCreatedAt(timeStamp);
+		serviceInterface2.setUpdatedAt(timeStamp);
+		
+		for (int i = 1; i <= amountOfServiceDefinition; i++) {				
+			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
+			serviceDefinition.setId(i);
+			serviceDefinition.setCreatedAt(timeStamp);
+			serviceDefinition.setUpdatedAt(timeStamp);
+			serviceRegistryDefinitionList.add(serviceDefinition);
+		}
+		for (int i = 1; i <= amountOfSystem; i++) {										
+			final System system = new System("testSystem" + i, "testAddress" + i, i * 1000, null);
+			system.setId(i);
+			system.setCreatedAt(timeStamp);
+			system.setUpdatedAt(timeStamp);			
+			systemList.add(system);
+		}
+		for (int i = 1; i <= amountOfServiceDefinition; i++) {
+			final ServiceDefinition serviceDefinition = serviceRegistryDefinitionList.get(i-1);
+			for (int j = 1; j <= amountOfSystem; j++) {
+				final System system = systemList.get(j-1);
+				final ServiceRegistry serviceRegistry = new ServiceRegistry(serviceDefinition, system, "testUri" + i, null, ServiceSecurityType.NOT_SECURE, "testMeta : testData", 0);
+				serviceRegistry.setId(i);
+				serviceRegistry.setCreatedAt(timeStamp);
+				serviceRegistry.setUpdatedAt(timeStamp);
+				serviceRegistry.setInterfaceConnections(new HashSet<>());
+				serviceRegistry.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(serviceRegistry, serviceInterface1));
+				serviceRegistry.getInterfaceConnections().add(new ServiceRegistryInterfaceConnection(serviceRegistry, serviceInterface2));
+				serviceRegistryList.add(serviceRegistry);
+			}
+		}
+		final Page<ServiceRegistry> entries = new PageImpl<ServiceRegistry>(serviceRegistryList);
+		return entries;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
