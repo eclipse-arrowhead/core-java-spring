@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -579,7 +580,7 @@ public class ServiceRegistryDBService {
 				provider = createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
 			}
 														
-			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : ZonedDateTime.parse(request.getEndOfValidity().trim());
+			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
 			updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
@@ -631,11 +632,14 @@ public class ServiceRegistryDBService {
 												 final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
 		logger.debug("createServiceRegistry started...");
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
-		Assert.notNull(provider, "Provider is not specified.");
+		Assert.notNull(provider, "Provider is not specified.");		
 		
-		checkConstraintOfSystemRegistryTable(serviceDefinition, provider);
-		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
-		checkSRServiceInterfacesList(interfaces);
+		if ( checkServiceRegistryIfUniqueValidationNeeded(srEntry, serviceDefinition, provider) ) {
+				checkConstraintOfSystemRegistryTable(serviceDefinition, provider);
+				checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
+				checkSRServiceInterfacesList(interfaces);
+			
+		}
 		
 		try {
 			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
@@ -658,27 +662,17 @@ public class ServiceRegistryDBService {
 			}
 			
 			srEntry.setVersion(version);
+
+			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
+			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);
 			
-			//Set<ServiceRegistryInterfaceConnection> newInterfaceConnectionsSet = new HashSet<>();
-			//Set<ServiceRegistryInterfaceConnection> oldInterfaceConnectionsSet = srEntry.getInterfaceConnections();
-            //
-			//final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);
-			//
-			//srEntry.getInterfaceConnections().clear();
-			//for (final ServiceInterface serviceInterface : serviceInterfaces) {				
-			//	final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
-			//	newInterfaceConnectionsSet.add(connection);
-			//	
-			//	srEntry.getInterfaceConnections().add(connection);
-			//}
-			//
-			//
-			//newInterfaceConnectionsSet.removeAll(oldInterfaceConnectionsSet);
-			//if(newInterfaceConnectionsSet != null && newInterfaceConnectionsSet.size() > 0) {
-			//	
-			//	serviceRegistryInterfaceConnectionRepository.saveAll(newInterfaceConnectionsSet);
-			//	
-			//}
+			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
+			for (final ServiceInterface serviceInterface : serviceInterfaces) {
+				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
+				srEntry.getInterfaceConnections().add(connection);
+			}
+			serviceRegistryInterfaceConnectionRepository.saveAll(srEntry.getInterfaceConnections());
+			
 			
 			return serviceRegistryRepository.saveAndFlush(srEntry);
 		} catch (final Exception ex) {
@@ -686,7 +680,7 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}	
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class) 
@@ -1043,5 +1037,19 @@ public class ServiceRegistryDBService {
 		}
 		
 		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------	
+	private boolean checkServiceRegistryIfUniqueValidationNeeded(final ServiceRegistry srEntry,
+			final ServiceDefinition serviceDefinition, final System provider) {
+		
+		boolean isUniqueValidationNeeded = true;
+		
+		if ( !checkSystemIfUniqueValidationNeeded(srEntry.getSystem(), provider.getSystemName(), provider.getAddress(), provider.getPort()) &&
+				srEntry.getServiceDefinition().getServiceDefinition().equalsIgnoreCase(serviceDefinition.getServiceDefinition().trim())) {
+			isUniqueValidationNeeded = false;
+		}
+		
+		return isUniqueValidationNeeded;
 	}
 }

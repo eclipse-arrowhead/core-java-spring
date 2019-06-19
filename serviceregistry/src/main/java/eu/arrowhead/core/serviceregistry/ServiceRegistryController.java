@@ -1,6 +1,5 @@
 package eu.arrowhead.core.serviceregistry;
 
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
 import org.apache.http.HttpStatus;
@@ -576,12 +575,12 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICE_REGISTRY_UPDATE_DESCRIPTION, response = ServiceRegistryResponseDTO.class)
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = SERVICE_REGISTRY_UPDATE_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_UPDATE_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_UPDATE_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@ResponseStatus(value = org.springframework.http.HttpStatus.OK)
 	@PutMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO updateMgmtService(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 			@RequestBody final ServiceRegistryRequestDTO request) { 
@@ -593,7 +592,7 @@ public class ServiceRegistryController {
 	
 		return response;
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICE_REGISTRY_UNREGISTER_DESCRIPTION)
 	@ApiResponses(value = {
@@ -826,10 +825,12 @@ public class ServiceRegistryController {
 		
 		if (!Utilities.isEmpty(request.getEndOfValidity())) {
 			try {
-				ZonedDateTime.parse(request.getEndOfValidity().trim());
+				
+				Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
+				
 			} catch (final DateTimeParseException ex) {
-				throw new BadPayloadException("End of validity is specified in the wrong format. See java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME for details.", HttpStatus.SC_BAD_REQUEST,
-											  origin);
+				throw new BadPayloadException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", HttpStatus.SC_BAD_REQUEST,
+						  origin);
 			}
 		}
 		
