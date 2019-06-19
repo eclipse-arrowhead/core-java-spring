@@ -98,8 +98,11 @@ public class ServiceRegistryController {
 	private static final String SERVICE_REGISTRY_QUERY_200_MESSAGE = "Service Registry data returned";
 	private static final String SERVICE_REGISTRY_QUERY_400_MESSAGE = "Could not query Service Registry";
 	private static final String SERVICE_REGISTRY_UPDATE_DESCRIPTION = "Update a service";
-	private static final String SERVICE_REGISTRY_UPDATE_201_MESSAGE = "Service updated";
+	private static final String SERVICE_REGISTRY_UPDATE_200_MESSAGE = "Service updated";
 	private static final String SERVICE_REGISTRY_UPDATE_400_MESSAGE = "Could not update service";
+	private static final String SERVICE_REGISTRY_MERGE_DESCRIPTION = "Merge/Patch a service";
+	private static final String SERVICE_REGISTRY_MERGE_200_MESSAGE = "Service merged";
+	private static final String SERVICE_REGISTRY_MERGE_400_MESSAGE = "Could not merge service";	
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater then 0. ";
@@ -575,7 +578,7 @@ public class ServiceRegistryController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICE_REGISTRY_UPDATE_DESCRIPTION, response = ServiceRegistryResponseDTO.class)
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_UPDATE_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_UPDATE_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_UPDATE_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
@@ -584,7 +587,7 @@ public class ServiceRegistryController {
 	@PutMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO updateMgmtService(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 			@RequestBody final ServiceRegistryRequestDTO request) { 
-		logger.debug("New service registration request recieved");
+		logger.debug("New service update request recieved");
 		checkServiceRegistryUpdateRequest(request, SERVICE_REGISTRY_MGMT_URI, id);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.updateServiceByIdResponse(request, id);
@@ -593,6 +596,28 @@ public class ServiceRegistryController {
 		return response;
 	}
 	
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_MERGE_DESCRIPTION, response = ServiceRegistryResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_MERGE_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_MERGE_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.OK)
+	@PatchMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody ServiceRegistryResponseDTO mergeMgmtService(@PathVariable(value = PATH_VARIABLE_ID) final long id,
+			@RequestBody final ServiceRegistryRequestDTO request) { 
+		logger.debug("New service merge request recieved");
+		checkServiceRegistryMergeRequest(request, SERVICE_REGISTRY_MGMT_URI, id);
+		
+		final ServiceRegistryResponseDTO response = serviceRegistryDBService.mergeServiceByIdResponse(request, id);
+		logger.debug("{} successfully merged its service {}", response.getProvider().getSystemName(), request.getServiceDefinition());
+	
+		return response;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = SERVICE_REGISTRY_UNREGISTER_DESCRIPTION)
 	@ApiResponses(value = {
@@ -782,35 +807,8 @@ public class ServiceRegistryController {
 		logger.debug("checkServiceRegistryRequest started ...");
 
 		final String origin = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
-		if (Utilities.isEmpty(request.getServiceDefinition())) {
-			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
-		}
 
-		checkSystemRequest(request.getProviderSystem(), origin);
-		
-		if (!Utilities.isEmpty(request.getEndOfValidity())) {
-			try {
-				Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
-			} catch (final DateTimeParseException ex) {
-				throw new BadPayloadException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", HttpStatus.SC_BAD_REQUEST,
-											  origin);
-			}
-		}
-		
-		final ServiceSecurityType type = request.getSecure() == null ? ServiceSecurityType.NOT_SECURE : request.getSecure();
-		if (type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
-			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
-		}
-		
-		if (request.getInterfaces() == null || request.getInterfaces().isEmpty()) {
-			throw new BadPayloadException("Interfaces list is null or empty.", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		for (final String intf : request.getInterfaces()) {
-			if (!interfaceNameVerifier.isValid(intf)) {
-				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
-			}
-		}
+		checkServiceRegistryRequest(request, origin);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -835,8 +833,7 @@ public class ServiceRegistryController {
 		}
 		
 		final ServiceSecurityType type = request.getSecure() == null ? ServiceSecurityType.NOT_SECURE : request.getSecure();
-		if ((type == ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() != null) ||
-			 type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+		if (type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
 			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
 		}
 		
@@ -882,6 +879,76 @@ public class ServiceRegistryController {
 		}
 		
 		checkServiceRegistryRequest(request, origin);
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRegistryMergeRequest(ServiceRegistryRequestDTO request, String serviceRegistryMgmtUri,
+			long id) {
+		
+		if ( id <= 0) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+		}
+		
+		boolean needChange = false;
+		
+
+		if ( request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) {
+			needChange = true;
+		}
+		
+		if ( request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getSystemName())) {
+			needChange = true;
+		}
+		
+		if ( request.getProviderSystem() != null && request.getProviderSystem().getPort() != null) {
+			
+			final Integer validatedPort = request.getProviderSystem().getPort();
+			if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+				throw new BadPayloadException("Port must be between " + 
+											  CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
+											  CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+			}
+			
+			needChange = true;
+		}
+		
+		if (request.getProviderSystem() != null && request.getProviderSystem().getAuthenticationInfo() != null) {
+			needChange = true;
+		}
+		
+		if (request.getEndOfValidity() != null) {
+			needChange = true;
+		}
+		
+		if (request.getMetadata() != null) {
+			needChange = true;
+		}
+		
+		if (request.getInterfaces() != null) {
+			needChange = true;
+		}
+		
+		if (request.getSecure() != null) {
+			needChange = true;
+		}
+		
+		if (request.getServiceDefinition() != null) {
+			needChange = true;
+		}
+		
+		if (request.getServiceUri() != null) {
+			needChange = true;
+		}
+		
+		if (request.getVersion() != null) {
+			needChange = true;
+		}
+		
+		if (!needChange) {
+			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, serviceRegistryMgmtUri);
+		}
+		
 		
 	}
 
