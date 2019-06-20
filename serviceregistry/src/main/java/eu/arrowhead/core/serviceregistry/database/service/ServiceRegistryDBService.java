@@ -558,8 +558,8 @@ public class ServiceRegistryDBService {
 		
 		checkServiceRegistryRequest(request);
 		
-		final eu.arrowhead.common.database.entity.ServiceRegistry srEntry;
-		final Optional<eu.arrowhead.common.database.entity.ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
+		final ServiceRegistry srEntry;
+		final Optional<ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
 		if (srEntryOptional.isPresent()) {
 			srEntry = srEntryOptional.get();
 		} else {
@@ -613,9 +613,8 @@ public class ServiceRegistryDBService {
 		Assert.notNull(request, "request is null.");
 		Assert.isTrue(0 < id, "id is not greather then zero");
 		
-		
-		final eu.arrowhead.common.database.entity.ServiceRegistry srEntry;
-		final Optional<eu.arrowhead.common.database.entity.ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
+		final ServiceRegistry srEntry;
+		final Optional<ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
 		if (srEntryOptional.isPresent()) {
 			srEntry = srEntryOptional.get();
 		} else {
