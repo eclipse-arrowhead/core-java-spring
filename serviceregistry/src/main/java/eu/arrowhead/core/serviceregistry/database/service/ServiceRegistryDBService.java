@@ -750,6 +750,7 @@ public class ServiceRegistryDBService {
 			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);
 			
 			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
+			serviceRegistryRepository.refresh(srEntry);
 			for (final ServiceInterface serviceInterface : serviceInterfaces) {
 				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
 				srEntry.getInterfaceConnections().add(connection);
@@ -804,6 +805,7 @@ public class ServiceRegistryDBService {
 			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
 			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);
 			
+			serviceRegistryRepository.refresh(srEntry);
 			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
 			for (final ServiceInterface serviceInterface : serviceInterfaces) {
 				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
