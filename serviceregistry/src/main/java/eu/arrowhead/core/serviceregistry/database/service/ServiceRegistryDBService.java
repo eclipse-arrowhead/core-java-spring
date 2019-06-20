@@ -1111,9 +1111,7 @@ public class ServiceRegistryDBService {
 		Assert.notNull(interfaces, "Interfaces list is not specified.");
 		Assert.isTrue(!interfaces.isEmpty(), "Interfaces is is empty.");
 		
-		for (final String intf : interfaces) {
-			Assert.isTrue(interfaceNameVerifier.isValid(intf), "Specified interface name is not valid: " + intf);
-		}
+		checkSRServiceInterfacesListOnlyForValidNames(interfaces);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
