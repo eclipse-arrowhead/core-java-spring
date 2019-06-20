@@ -718,6 +718,7 @@ public class ServiceRegistryDBService {
 	public ServiceRegistry updateServiceRegistry(final ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider, final String serviceUri, final ZonedDateTime endOfValidity,
 												 final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
 		logger.debug("updateServiceRegistry started...");
+		Assert.notNull(srEntry, "ServiceRegistry Entry is not specified.");	
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
 		Assert.notNull(provider, "Provider is not specified.");		
 		
