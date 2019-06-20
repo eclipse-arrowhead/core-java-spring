@@ -590,10 +590,9 @@ public class ServiceRegistryDBService {
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
-			updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
-																  request.getInterfaces());
+			ServiceRegistry response  = updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,																  request.getInterfaces());
 		
-			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
+			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(response);
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
