@@ -564,7 +564,7 @@ public class ServiceRegistryController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ServiceRegistryResponseDTO registerMgmtService(@RequestBody final ServiceRegistryRequestDTO request) {
+	public @ResponseBody ServiceRegistryResponseDTO addServiceRegistry(@RequestBody final ServiceRegistryRequestDTO request) {
 		logger.debug("New service registration request recieved");
 		checkServiceRegistryRequest(request, CommonConstants.MGMT_URI);
 		
