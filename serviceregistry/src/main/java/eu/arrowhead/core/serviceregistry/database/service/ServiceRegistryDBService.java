@@ -732,23 +732,18 @@ public class ServiceRegistryDBService {
 		try {
 			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
 			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();
-			if( serviceDefinition != null ) {
-				srEntry.setServiceDefinition(serviceDefinition);
-			}
+			
+			srEntry.setServiceDefinition(serviceDefinition);
 			
 			srEntry.setSystem(provider);
 			
-			if ( validatedServiceUri != null ) {
-				srEntry.setServiceUri(validatedServiceUri);
-			}
-			
+			srEntry.setServiceUri(validatedServiceUri);
+						
 			srEntry.setEndOfValidity(endOfValidity);
 			srEntry.setSecure(secure);
 			
-			if( metadataStr != null ) {
-				srEntry.setMetadata(metadataStr);
-			}
-			
+			srEntry.setMetadata(metadataStr);
+						
 			srEntry.setVersion(version);
 
 			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
