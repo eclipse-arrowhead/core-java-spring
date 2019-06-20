@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
 
 @RunWith(SpringRunner.class)
@@ -256,6 +257,31 @@ public class UtilitiesTest {
 		keystore.load(null, null);
 		Utilities.getPrivateKey(keystore, "abc");
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromBase64EncodedStringNull() {
+		Utilities.getPublicKeyFromBase64EncodedString(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromBase64EncodedStringEmpty() {
+		Utilities.getPublicKeyFromBase64EncodedString("  ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromBase64EncodedStringNotBase64() {
+		Utilities.getPublicKeyFromBase64EncodedString(";");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testGetPublicKeyFromBase64EncodedStringNotAKey() {
+		Utilities.getPublicKeyFromBase64EncodedString("bm90IGEga2V5");
+	}
+
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test

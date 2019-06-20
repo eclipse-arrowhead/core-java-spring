@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -18,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 
 public class Utilities {
 	
@@ -57,6 +63,9 @@ public class Utilities {
 	private static final String AH_MASTER_SUFFIX = "eu";
 	private static final String AH_MASTER_NAME = "arrowhead";
 	
+	private static final String KEY_FACTORY_ALGORHITM_NAME = "RSA";
+	private static final KeyFactory keyFactory;
+	
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final String dateTimePattern = "yyyy-MM-dd HH:mm:ss";
@@ -64,6 +73,12 @@ public class Utilities {
 	
 	static {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		try {
+			keyFactory = KeyFactory.getInstance(KEY_FACTORY_ALGORHITM_NAME);
+		} catch (final NoSuchAlgorithmException ex) {
+			logger.fatal("KeyFactory.getInstance(String) throws NoSuchAlgorithmException, code needs to be changed!");
+			throw new ServiceConfigurationError("KeyFactory.getInstance(String) throws NoSuchAlgorithmException, code needs to be changed!", ex);
+		}
 	}
 	
 	//=================================================================================================
@@ -315,6 +330,19 @@ public class Utilities {
 	    }
 	    
 	    return privateKey;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static PublicKey getPublicKeyFromBase64EncodedString(final String encodedKey) {
+		Assert.isTrue(!isEmpty(encodedKey), "Encoded key is null or blank");
+		
+		final byte[] keyBytes = Base64.getDecoder().decode(encodedKey);
+		try {
+			return keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
+		} catch (final InvalidKeySpecException ex) {
+		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
+		      throw new AuthException("Public key decoding failed due wrong input key", ex);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
