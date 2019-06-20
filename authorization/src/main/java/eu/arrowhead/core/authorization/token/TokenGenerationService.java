@@ -75,7 +75,7 @@ public class TokenGenerationService {
 		
 		String signedJWT;
 		try {
-			signedJWT = generateSignedJWT(consumerInfo, request.getDuration());
+			signedJWT = generateSignedJWT(consumerInfo, request.getService(), request.getDuration());
 		} catch (final JoseException ex) {
 			logger.error("Problem occured when trying to sign JWT token", ex);
 			throw new ArrowheadException("Token generation failed");
@@ -204,8 +204,8 @@ public class TokenGenerationService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String generateSignedJWT(final String consumerInfo, final Integer duration) throws JoseException {
-		final JwtClaims claims = generateTokenPayload(consumerInfo, duration);
+	private String generateSignedJWT(final String consumerInfo, final String service, final Integer duration) throws JoseException {
+		final JwtClaims claims = generateTokenPayload(consumerInfo, service, duration);
 		final JsonWebSignature jws = new JsonWebSignature();
 		jws.setPayload(claims.toJson());
 		
@@ -221,7 +221,7 @@ public class TokenGenerationService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private JwtClaims generateTokenPayload(final String consumerInfo, final Integer duration) {
+	private JwtClaims generateTokenPayload(final String consumerInfo, final String service, final Integer duration) {
 		final JwtClaims claims = new JwtClaims();
 		claims.setGeneratedJwtId();
 		claims.setIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION);
@@ -231,6 +231,7 @@ public class TokenGenerationService {
 			claims.setExpirationTimeMinutesInTheFuture(duration.floatValue());
 		}
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
+		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service);
 		
 		return claims;
 	}
