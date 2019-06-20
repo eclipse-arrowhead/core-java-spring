@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.google.common.base.Optional;
-
 import eu.arrowhead.common.database.entity.Cloud;
 
 @Repository
