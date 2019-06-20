@@ -658,7 +658,7 @@ public class ServiceRegistryDBService {
 			final String metadataStr = request.getMetadata() != null ? 
 					Utilities.map2Text(request.getMetadata()) : srEntry.getMetadata() ;
 					
-			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
+			final int version = request.getVersion() == null ? srEntry.getVersion() : request.getVersion().intValue();
 			
 			final List<String> valideatedInterfacesTemp = new ArrayList<>(srEntry.getInterfaceConnections().size());
 			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
