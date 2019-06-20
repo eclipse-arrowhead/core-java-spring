@@ -69,8 +69,34 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	private static final System validTestProviderWithAuthenticationInfo = new System("test_system", "localhost", 1234, "authenticationInfo");
 	private static final String validTestMetadataStr = "key=value, key2=value2";
 	private static final List<String> validTestInterfaces = Arrays.asList(new String[]{"HTTP-SECURE-JSON", "HTTP-SECURE-XML"});
+	private static final List<String> inValidTestInterfaces = Arrays.asList(new String[]{"HTTP-NONSECURE-JSON", "HTTP-NONSECURE-XML"});
 	private static final String validTestServiceUri = "testServiceUri";
-	private static final ZonedDateTime validTestZonedDateTime = ZonedDateTime.parse("2112-06-30T12:30:40Z[UTC]");;
+	private static final ZonedDateTime validTestEndOFValidity = ZonedDateTime.parse("2112-06-30T12:30:40Z[UTC]");
+	private static final long validId = 1;
+	private static final long inValidId = -1;
+	private static final long notPresentId = Long.MAX_VALUE;
+	
+	private static final ServiceRegistryRequestDTO SERVICE_REGISTRY_REQUEST_DTO = new ServiceRegistryRequestDTO();
+	private static final ServiceRegistryRequestDTO SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT = new ServiceRegistryRequestDTO();
+	private static final SystemRequestDTO SYSTEM_REQUEST_DTO = new SystemRequestDTO();
+	static {
+		SYSTEM_REQUEST_DTO.setSystemName("test_system");
+		SYSTEM_REQUEST_DTO.setAddress("localhost");
+		SYSTEM_REQUEST_DTO.setPort(1234);
+		SYSTEM_REQUEST_DTO.setAuthenticationInfo(null);
+	}
+	static {
+		SERVICE_REGISTRY_REQUEST_DTO.setServiceDefinition(validTestServiceDefinition.getServiceDefinition());
+		SERVICE_REGISTRY_REQUEST_DTO.setProviderSystem(SYSTEM_REQUEST_DTO);
+		SERVICE_REGISTRY_REQUEST_DTO.setEndOfValidity("21120620 12:00:00");
+		
+	}
+	static {
+		SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT.setServiceDefinition(validTestServiceDefinition.getServiceDefinition());
+		SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT.setProviderSystem(SYSTEM_REQUEST_DTO);
+		SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT.setEndOfValidity("2112-06-20T12:00:00.371+01:00[Europe/London]");
+		
+	}
 
 	
 	//=================================================================================================
@@ -538,7 +564,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 				null,
 				validTestProvider,
 				validTestServiceUri,
-				validTestZonedDateTime,
+				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
 				validTestMetadataStr,
 				1,
@@ -552,7 +578,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 				validTestServiceDefinition,
 				null,
 				validTestServiceUri,
-				validTestZonedDateTime,
+				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
 				validTestMetadataStr,
 				1,
@@ -567,7 +593,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 				validTestServiceDefinition,
 				validTestProvider,
 				validTestServiceUri,
-				validTestZonedDateTime,
+				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
 				validTestMetadataStr,
 				1,
@@ -582,7 +608,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 				validTestServiceDefinition,
 				validTestProvider,
 				validTestServiceUri,
-				validTestZonedDateTime,
+				validTestEndOFValidity,
 				ServiceSecurityType.CERTIFICATE,
 				validTestMetadataStr,
 				1,
@@ -592,15 +618,13 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
-		final System provider = new System();
-		provider.setAuthenticationInfo("abcd");
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		when(sslProperties.isSslEnabled()).thenReturn(false);
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
 				validTestServiceDefinition,
-				validTestProvider,
+				validTestProviderWithAuthenticationInfo,
 				validTestServiceUri,
-				validTestZonedDateTime,
+				validTestEndOFValidity,
 				ServiceSecurityType.CERTIFICATE,
 				validTestMetadataStr,
 				1,
@@ -618,15 +642,62 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryInterfacesListEmpty() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, Collections.<String>emptyList());
-	}
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
+				validTestServiceDefinition,
+				validTestProvider,
+				validTestServiceUri,
+				validTestEndOFValidity,
+				ServiceSecurityType.NOT_SECURE,
+				validTestMetadataStr,
+				1,
+				null);
+		}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryInvalidInterface() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
+				validTestServiceDefinition,
+				validTestProvider,
+				validTestServiceUri,
+				validTestEndOFValidity,
+				ServiceSecurityType.NOT_SECURE,
+				validTestMetadataStr,
+				1,
+				inValidTestInterfaces);
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateServiceByIdResponseInvalidId() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(new ServiceRegistry()));
+		serviceRegistryDBService.updateServiceByIdResponse(SERVICE_REGISTRY_REQUEST_DTO, inValidId);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected =  InvalidParameterException.class)
+	public void testUpdateServiceByIdResponseNotPresentId() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.empty());
+		serviceRegistryDBService.updateServiceByIdResponse(SERVICE_REGISTRY_REQUEST_DTO, notPresentId);
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	//@Test(expected =  InvalidParameterException.class)
+	//public void testUpdateServiceByIdResponseInvalidEndOfValidityFormat() {
+	//	when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0)));
+	//	serviceRegistryDBService.updateServiceRegistry(any(ServiceRegistry.class),
+	//			any(ServiceDefinition.class),
+	//			any(System.class),
+	//			any(String.class),
+	//			any(ZonedDateTime.class),
+	//			any(ServiceSecurityType.class),
+	//			any(String.class),
+	//			anyInt(),
+	//			any);
+	//	serviceRegistryDBService.updateServiceByIdResponse( SERVICE_REGISTRY_REQUEST_DTO, validId);//SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT, validId);
+	//}
+	
 	//=================================================================================================
 	// assistant methods
 	
