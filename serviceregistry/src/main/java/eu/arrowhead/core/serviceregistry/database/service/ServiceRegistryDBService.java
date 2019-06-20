@@ -771,6 +771,7 @@ public class ServiceRegistryDBService {
 			final String serviceUri, final ZonedDateTime endOfValidity, final ServiceSecurityType securityType, final String metadataStr, final int version,
 			final List<String> interfaces) {
 		logger.debug("mergeServiceRegistry started...");
+		Assert.notNull(srEntry, "ServiceRegistry Entry definition is not specified.");
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
 		Assert.notNull(provider, "Provider is not specified.");		
 		
