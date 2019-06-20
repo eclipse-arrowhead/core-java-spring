@@ -596,6 +596,9 @@ public class ServiceRegistryDBService {
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
+		} catch (final InvalidParameterException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
