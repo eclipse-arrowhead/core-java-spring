@@ -1185,8 +1185,7 @@ public class ServiceRegistryDBService {
 		
 		boolean isUniqueValidationNeeded = true;
 		
-		if ( !checkSystemIfUniqueValidationNeeded(srEntry.getSystem(), provider.getSystemName(), provider.getAddress(), provider.getPort()) &&
-				srEntry.getServiceDefinition().getServiceDefinition().equalsIgnoreCase(serviceDefinition.getServiceDefinition().trim())) {
+		if (srEntry.getSystem().getId() != provider.getId() || srEntry.getServiceDefinition().getId() != serviceDefinition.getId()) {
 			isUniqueValidationNeeded = false;
 		}
 		
