@@ -709,7 +709,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public ServiceRegistry updateServiceRegistry(final eu.arrowhead.common.database.entity.ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider, final String serviceUri, final ZonedDateTime endOfValidity,
+	public ServiceRegistry updateServiceRegistry(final ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider, final String serviceUri, final ZonedDateTime endOfValidity,
 												 final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
 		logger.debug("updateServiceRegistry started...");
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
@@ -724,7 +724,7 @@ public class ServiceRegistryDBService {
 		
 		try {
 			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
-			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();		
+			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();
 			if( serviceDefinition != null ) {
 				srEntry.setServiceDefinition(serviceDefinition);
 			}

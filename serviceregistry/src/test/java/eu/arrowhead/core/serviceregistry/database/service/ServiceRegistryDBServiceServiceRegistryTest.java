@@ -5,7 +5,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +63,15 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	@Spy
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
+	
+	private static final ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
+	private static final System validTestProvider = new System("test_system", "localhost", 1234, null);
+	private static final System validTestProviderWithAuthenticationInfo = new System("test_system", "localhost", 1234, "authenticationInfo");
+	private static final String validTestMetadataStr = "key=value, key2=value2";
+	private static final List<String> validTestInterfaces = Arrays.asList(new String[]{"HTTP-SECURE-JSON", "HTTP-SECURE-XML"});
+	private static final String validTestServiceUri = "testServiceUri";
+	private static final ZonedDateTime validTestZonedDateTime = ZonedDateTime.parse("2112-06-30T12:30:40Z[UTC]");;
+
 	
 	//=================================================================================================
 	// methods
@@ -522,38 +533,79 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryServiceDefinitionNull() {
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), null, null, null, null, null, null, 1, null);
+		serviceRegistryDBService.updateServiceRegistry(
+				getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
+				null,
+				validTestProvider,
+				validTestServiceUri,
+				validTestZonedDateTime,
+				ServiceSecurityType.NOT_SECURE,
+				validTestMetadataStr,
+				1,
+				validTestInterfaces);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryProviderNull() {
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), new ServiceDefinition(), null, null, null, null, null, 1, null);
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
+				validTestServiceDefinition,
+				null,
+				validTestServiceUri,
+				validTestZonedDateTime,
+				ServiceSecurityType.NOT_SECURE,
+				validTestMetadataStr,
+				1,
+				validTestInterfaces);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateServiceRegistryUniqueConstraintViolation() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), new ServiceDefinition(), new System(), null, null, null, null, 1, null);
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
+				validTestServiceDefinition,
+				validTestProvider,
+				validTestServiceUri,
+				validTestZonedDateTime,
+				ServiceSecurityType.NOT_SECURE,
+				validTestMetadataStr,
+				1,
+				validTestInterfaces);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0) , new ServiceDefinition(), new System(), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
+				validTestServiceDefinition,
+				validTestProvider,
+				validTestServiceUri,
+				validTestZonedDateTime,
+				ServiceSecurityType.CERTIFICATE,
+				validTestMetadataStr,
+				1,
+				validTestInterfaces);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//@Test(expected = InvalidParameterException.class)
-	//public void testUpdateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
-	//	final System provider = new System();
-	//	provider.setAuthenticationInfo("abcd");
-	//	when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
-	//	when(sslProperties.isSslEnabled()).thenReturn(false);
-	//	serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0) , new ServiceDefinition(), new System(), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
-	//}
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
+		final System provider = new System();
+		provider.setAuthenticationInfo("abcd");
+		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		when(sslProperties.isSslEnabled()).thenReturn(false);
+		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
+				validTestServiceDefinition,
+				validTestProvider,
+				validTestServiceUri,
+				validTestZonedDateTime,
+				ServiceSecurityType.CERTIFICATE,
+				validTestMetadataStr,
+				1,
+				validTestInterfaces);
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
