@@ -660,14 +660,14 @@ public class ServiceRegistryDBService {
 					
 			final int version = request.getVersion() == null ? srEntry.getVersion() : request.getVersion().intValue();
 			
-			final List<String> valideatedInterfacesTemp = new ArrayList<>(srEntry.getInterfaceConnections().size());
+			final List<String> validatedInterfacesTemp = new ArrayList<>(srEntry.getInterfaceConnections().size());
 			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
 			for (final ServiceRegistryInterfaceConnection serviceRegistryInterfaceConnection : interfaceConnections) {
-				valideatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
+				validatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
 			}
-			final List<String> valideatedInterfaces = request.getInterfaces() != null && request.getInterfaces().size() > 0 ? request.getInterfaces() : valideatedInterfacesTemp;
+			final List<String> validatedInterfaces = request.getInterfaces() != null && request.getInterfaces().size() > 0 ? request.getInterfaces() : validatedInterfacesTemp;
 			mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
-					valideatedInterfaces);
+					validatedInterfaces);
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
 		} catch (final DateTimeParseException ex) {
