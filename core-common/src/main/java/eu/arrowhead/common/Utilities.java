@@ -6,6 +6,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -281,9 +284,38 @@ public class Utilities {
             final String alias = enumeration.nextElement();
             return (X509Certificate) keystore.getCertificate(alias);
         } catch (final KeyStoreException | NoSuchElementException ex) {
+        	logger.error("Getting the first cert from key store failed...", ex);
             throw new ServiceConfigurationError("Getting the first cert from keystore failed...", ex);
         }
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	public static PrivateKey getPrivateKey(final KeyStore keystore, final String keyPass) {
+		Assert.notNull(keystore, "Key store is not defined.");
+		Assert.notNull(keyPass, "Password is not defined.");
+		
+	    PrivateKey privateKey = null;
+	    String element;
+	    try {
+	    	final Enumeration<String> enumeration = keystore.aliases();
+	    	while (enumeration.hasMoreElements()) {
+	    		element = enumeration.nextElement();
+	    		privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
+	    		if (privateKey != null) {
+	    			break;
+	    		}
+	    	}
+	    } catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
+	    	logger.error("Getting the private key from key store failed...", ex);
+	    	throw new ServiceConfigurationError("Getting the private key from key store failed...", ex);
+		}
+
+	    if (privateKey == null) {
+	    	throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
+	    }
+	    
+	    return privateKey;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static boolean isKeyStoreCNArrowheadValid(final String commonName) {

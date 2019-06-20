@@ -209,6 +209,12 @@ public class UtilitiesTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetFirstCertFromKeyStoreNullKeyStore() throws KeyStoreException {
+		Utilities.getFirstCertFromKeyStore(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ServiceConfigurationError.class)
 	public void testGetFirstCertFromKeyStoreNotInitializedKeyStore() throws KeyStoreException {
 		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -221,6 +227,34 @@ public class UtilitiesTest {
 		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keystore.load(null, null);
 		Utilities.getFirstCertFromKeyStore(keystore);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPrivateKeyNullKeyStore() throws KeyStoreException {
+		Utilities.getPrivateKey(null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPrivateKeyNullKeyPass() throws KeyStoreException {
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		Utilities.getPrivateKey(keystore, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ServiceConfigurationError.class)
+	public void testGetPrivateKeyNotInitializedKeyStore() throws KeyStoreException {
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		Utilities.getPrivateKey(keystore, "abc");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ServiceConfigurationError.class)
+	public void testGetPrivateKeyEmptyKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		keystore.load(null, null);
+		Utilities.getPrivateKey(keystore, "abc");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
