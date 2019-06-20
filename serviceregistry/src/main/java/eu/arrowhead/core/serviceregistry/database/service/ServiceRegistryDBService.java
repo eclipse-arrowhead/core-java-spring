@@ -666,10 +666,10 @@ public class ServiceRegistryDBService {
 				validatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
 			}
 			final List<String> validatedInterfaces = request.getInterfaces() != null && request.getInterfaces().size() > 0 ? request.getInterfaces() : validatedInterfacesTemp;
-			mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
+			ServiceRegistry response = mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
 					validatedInterfaces);
 		
-			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
+			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(response);
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
