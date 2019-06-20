@@ -885,11 +885,8 @@ public class ServiceRegistryController {
 		
 		if ( id <= 0) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
-		}
-		
+		}		
 		boolean needChange = false;
-		
-
 		if ( request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) {
 			needChange = true;
 		}
