@@ -50,7 +50,7 @@ public class ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
-	public Map<String,String> getArrowheadContext() {
+	public Map<String,Object> getArrowheadContext() {
 		return new ConcurrentHashMap<>();
 	}
 	
@@ -76,7 +76,7 @@ public class ApplicationInitListener {
 		}
 		
 		@SuppressWarnings("unchecked")
-		final Map<String,String> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 		context.put(CommonConstants.SERVER_COMMON_NAME, serverCN);
 	}
 }

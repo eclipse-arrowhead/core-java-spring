@@ -7,8 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Optional;
-
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.repository.CloudRepository;
