@@ -110,11 +110,10 @@ public class ServiceRegistryController {
 	private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
 	
-	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.MGMT_URI;
-	private static final String SERVICE_REGISTRY_MGMT_BY_ID_URI = SERVICE_REGISTRY_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String SERVICE_REGISTRY_MGMT_BY_ID_URI = CommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "serviceDefinition";
-	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = SERVICE_REGISTRY_MGMT_URI + "/servicedef" + "/{" + PATH_VARIABLE_SERVICE_DEFINITION + "}";	
-	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = SERVICE_REGISTRY_MGMT_URI + "/groupped";
+	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = CommonConstants.MGMT_URI + "/servicedef" + "/{" + PATH_VARIABLE_SERVICE_DEFINITION + "}";	
+	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = CommonConstants.MGMT_URI + "/groupped";
 	private static final String GET_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
 	private static final String GET_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrive service registry entries";
 	private static final String DELETE_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entry removed";
@@ -411,7 +410,7 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = SERVICE_REGISTRY_MGMT_URI)
+	@GetMapping(path = CommonConstants.MGMT_URI)
 	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntries(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
@@ -426,14 +425,14 @@ public class ServiceRegistryController {
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_URI);
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}
 		}
 		
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_URI);
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI);
 		final ServiceRegistryListResponseDTO serviceReqistryEntriesResponse = serviceRegistryDBService.getServiceReqistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);		
 		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
 		
@@ -564,10 +563,10 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@PostMapping(path = SERVICE_REGISTRY_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO registerMgmtService(@RequestBody final ServiceRegistryRequestDTO request) {
 		logger.debug("New service registration request recieved");
-		checkServiceRegistryRequest(request, SERVICE_REGISTRY_MGMT_URI);
+		checkServiceRegistryRequest(request, CommonConstants.MGMT_URI);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
 		logger.debug("{} successfully registers its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
@@ -588,7 +587,7 @@ public class ServiceRegistryController {
 	public @ResponseBody ServiceRegistryResponseDTO updateMgmtService(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 			@RequestBody final ServiceRegistryRequestDTO request) { 
 		logger.debug("New service update request recieved");
-		checkServiceRegistryUpdateRequest(request, SERVICE_REGISTRY_MGMT_URI, id);
+		checkServiceRegistryUpdateRequest(request, CommonConstants.MGMT_URI, id);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.updateServiceByIdResponse(request, id);
 		logger.debug("{} successfully updated its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
@@ -610,7 +609,7 @@ public class ServiceRegistryController {
 	public @ResponseBody ServiceRegistryResponseDTO mergeMgmtService(@PathVariable(value = PATH_VARIABLE_ID) final long id,
 			@RequestBody final ServiceRegistryRequestDTO request) { 
 		logger.debug("New service merge request recieved");
-		checkServiceRegistryMergeRequest(request, SERVICE_REGISTRY_MGMT_URI, id);
+		checkServiceRegistryMergeRequest(request, CommonConstants.MGMT_URI, id);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.mergeServiceByIdResponse(request, id);
 		logger.debug("{} successfully merged its service {}", response.getProvider().getSystemName(), request.getServiceDefinition());
