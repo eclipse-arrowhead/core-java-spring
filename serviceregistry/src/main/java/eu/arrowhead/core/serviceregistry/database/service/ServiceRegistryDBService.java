@@ -733,24 +733,19 @@ public class ServiceRegistryDBService {
 			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
 			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();
 			
-			srEntry.setServiceDefinition(serviceDefinition);
-			
+			srEntry.setServiceDefinition(serviceDefinition);			
 			srEntry.setSystem(provider);
-			
 			srEntry.setServiceUri(validatedServiceUri);
-						
 			srEntry.setEndOfValidity(endOfValidity);
 			srEntry.setSecure(secure);
-			
 			srEntry.setMetadata(metadataStr);
-						
 			srEntry.setVersion(version);
 
 			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
 			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);
+			serviceRegistryRepository.refresh(srEntry);
 			
 			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
-			serviceRegistryRepository.refresh(srEntry);
 			for (final ServiceInterface serviceInterface : serviceInterfaces) {
 				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
 				srEntry.getInterfaceConnections().add(connection);
@@ -795,9 +790,9 @@ public class ServiceRegistryDBService {
 			srEntry.setVersion(version);
 
 			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
-			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);
-			
+			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);			
 			serviceRegistryRepository.refresh(srEntry);
+			
 			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
 			for (final ServiceInterface serviceInterface : serviceInterfaces) {
 				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
