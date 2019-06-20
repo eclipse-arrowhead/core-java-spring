@@ -766,7 +766,8 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private ServiceRegistry mergeServiceRegistry(final ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider,
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceRegistry mergeServiceRegistry(final ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider,
 			final String serviceUri, final ZonedDateTime endOfValidity, final ServiceSecurityType securityType, final String metadataStr, final int version,
 			final List<String> interfaces) {
 		logger.debug("mergeServiceRegistry started...");
