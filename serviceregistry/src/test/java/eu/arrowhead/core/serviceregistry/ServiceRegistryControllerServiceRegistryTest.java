@@ -49,16 +49,16 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.AutoCompleteDataResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.IdValueDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.IdValueDTO;
-import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServicesGrouppedBySystemsResponseDTO;
+import eu.arrowhead.common.dto.ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO;
+import eu.arrowhead.common.dto.ServicesGroupedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
@@ -77,7 +77,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 
 	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI;
 	private static final String SERVICE_REGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/servicedef";
-	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/groupped";
+	private static final String SERVICE_REGISTRY_MGMT_GROUPED_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/grouped";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -230,7 +230,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final int numOfSystems = 3;		
 		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, "JSON", "XML");
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
+		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
 				.accept(MediaType.APPLICATION_JSON))
@@ -248,7 +248,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final int numOfSystems = 3;		
 		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, "JSON", "XML");
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesDTO = DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceReqistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
+		when(serviceRegistryDBService.getServiceRegistryEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceRegistryEntriesDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_URI)
 				.param("page", "0")
@@ -337,7 +337,6 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndNullPageButDefinedSizeParameter() throws Exception {
 		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
-				.param("service_definition", "test")
 				.param("item_per_page", "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -347,7 +346,6 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndDefinedPageButNullSizeParameter() throws Exception {
 		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
-				.param("service_definition", "test")
 				.param("page", "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -357,38 +355,37 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	@Test
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithServiceDefInputAndInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_SERVICEDEF_URI + "/testDef")
-				.param("service_definition", "test")
 				.param("direction", "invalid")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//Tests of getServiceRegistryGrouppedData
+	//Tests of getServiceRegistryGroupedData
 	
 	@Test
-	public void testGetServiceRegistryGrouppedDataToCheckDTO() throws Exception {
+	public void testGetServiceRegistryGroupedDataToCheckDTO() throws Exception {
 		final int numOfServices = 4;
 		final int numOfSystems = 2;		
 		final String interface1 = "JSON";
 		final String interface2 = "XML";
 		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
-		final ServiceRegistryGrouppedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(serviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceReqistryEntriesForServiceRegistryGrouppedResponse()).thenReturn(dto);
+		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse()).thenReturn(dto);
 		
-		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPPED_URI)
+		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPED_URI)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
 		
-		final ServiceRegistryGrouppedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGrouppedResponseDTO.class);
+		final ServiceRegistryGroupedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGroupedResponseDTO.class);
 		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
-		final List<ServicesGrouppedBySystemsResponseDTO> servicesGrouppedBySystems = readValue.getServicesGrouppedBySystems();
-		final List<ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesGrouppedByServiceDefinitionAndInterface = readValue.getServicesGrouppedByServiceDefinitionAndInterface();
+		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems = readValue.getServicesGroupedBySystems();
+		final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterface = readValue.getServicesGroupedByServiceDefinitionAndInterface();
 		
 		assertNotNull(autoCompleteData);
-		assertNotNull(servicesGrouppedBySystems);
-		assertNotNull(servicesGrouppedByServiceDefinitionAndInterface);
+		assertNotNull(servicesGroupedBySystems);
+		assertNotNull(servicesGroupedByServiceDefinitionAndInterface);
 		
 		//Testing autoCompleteData object
 		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
@@ -398,15 +395,15 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		assertEquals(numOfServices, autoCompleteData.getServiceList().size());
 		assertEquals(numOfSystems, autoCompleteData.getSystemList().size());
 		
-		//Testing servicesGrouppedBySystems object
-		assertEquals(numOfSystems, servicesGrouppedBySystems.size());
-		assertEquals(numOfServices, servicesGrouppedBySystems.get(0).getServices().size());
-		final String oneOfTheInterfaces = servicesGrouppedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
+		//Testing servicesGroupedBySystems object
+		assertEquals(numOfSystems, servicesGroupedBySystems.size());
+		assertEquals(numOfServices, servicesGroupedBySystems.get(0).getServices().size());
+		final String oneOfTheInterfaces = servicesGroupedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
 		assertTrue(oneOfTheInterfaces.equals(interface1) || oneOfTheInterfaces.equals(interface2) ? true :false);
 		
-		//Testing servicesGrouppedByServiceDefinitionAndInterface object
-		assertEquals(numOfServices * 2, servicesGrouppedByServiceDefinitionAndInterface.size());
-		assertEquals(numOfSystems, servicesGrouppedByServiceDefinitionAndInterface.get(0).getProviderServices().size());
+		//Testing servicesGroupedByServiceDefinitionAndInterface object
+		assertEquals(numOfServices * 2, servicesGroupedByServiceDefinitionAndInterface.size());
+		assertEquals(numOfSystems, servicesGroupedByServiceDefinitionAndInterface.get(0).getProviderServices().size());
 	}
 	
 

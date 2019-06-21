@@ -3,7 +3,7 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO implements Serializable {
+public class ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO implements Serializable {
 
 	private static final long serialVersionUID = 8564324985631020025L;
 	
@@ -19,9 +19,9 @@ public class ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO implemen
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO() {}
+	public ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO() {}
 	
-	public ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO(final long serviceDefinitionId, final String serviceDefinition, final String interfaceName, final List<ServiceRegistryResponseDTO> providerServices) {
+	public ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(final long serviceDefinitionId, final String serviceDefinition, final String interfaceName, final List<ServiceRegistryResponseDTO> providerServices) {
 		this.serviceDefinitionId = serviceDefinitionId;
 		this.serviceDefinition = serviceDefinition;
 		this.interfaceName = interfaceName;
@@ -32,5 +32,11 @@ public class ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO implemen
 	public long getServiceDefinitionId() {return serviceDefinitionId;}
 	public String getServiceDefinition() {return serviceDefinition;}
 	public String getInterfaceName() {return interfaceName;}
-	public List<ServiceRegistryResponseDTO> getProviderServices() {return providerServices;}	
+	public List<ServiceRegistryResponseDTO> getProviderServices() {return providerServices;}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setServiceDefinitionId(final long serviceDefinitionId) {this.serviceDefinitionId = serviceDefinitionId;}
+	public void setServiceDefinition(final String serviceDefinition) {this.serviceDefinition = serviceDefinition;}
+	public void setInterfaceName(final String interfaceName) {this.interfaceName = interfaceName;}
+	public void setProviderServices(final List<ServiceRegistryResponseDTO> providerServices) {this.providerServices = providerServices;}	
 }
