@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 import io.swagger.annotations.ApiOperation;
@@ -32,9 +34,13 @@ public class AuthorizationController {
 	//=================================================================================================
 	// members
 	
+	private static final String PATH_VARIABLE_ID = "id";
+	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater then 0.";
+	
 	private static final String ECHO_URI = "/echo";
 	
 	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_URI = CommonConstants.MGMT_URI + "/intracloud";
+	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI = INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization returned";
 	private static final String GET_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not retrieve IntraCloudAuthorization";
 	
@@ -93,6 +99,27 @@ public class AuthorizationController {
 		final IntraCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getIntraCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
 		return intraCloudAuthorizationEntriesResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested IntraCloudAuthorization entry", response = IntraCloudAuthorizationResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI)
+	@ResponseBody public IntraCloudAuthorizationResponseDTO getIntraCloudAuthorizationById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New IntraCloudAuthorization get request recieved with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+		}
+		
+		final IntraCloudAuthorizationResponseDTO intraCloudAuthorizationEntryByIdResponse = authorizationDBService.getIntraCloudAuthorizationEntryByIdResponse(id);
+		logger.debug("IntraCloudAuthorization entry with id: {} successfully retrieved", id);
+		return intraCloudAuthorizationEntryByIdResponse;
 	}
 	
 	//=================================================================================================

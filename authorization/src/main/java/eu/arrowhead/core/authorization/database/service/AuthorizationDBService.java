@@ -1,5 +1,7 @@
 package eu.arrowhead.core.authorization.database.service;
 
+import java.util.Optional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -72,5 +75,31 @@ public class AuthorizationDBService {
 		logger.debug("getIntraCloudAuthorizationEntriesResponse started..");
 		final Page<IntraCloudAuthorization> intraCloudAuthorizationEntries = getIntraCloudAuthorizationEntries(page, size, direction, sortField);
 		return DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public IntraCloudAuthorization getIntraCloudAuthorizationEntryById(final long id) {
+		logger.debug("getIntraCloudAuthorizationEntryById started...");
+		
+		try {
+			final Optional<IntraCloudAuthorization> find = intraCloudAuthorizationRepository.findById(id);
+			if (find.isPresent()) {
+				return find.get();
+			} else {
+				throw new InvalidParameterException("IntraCloudAuthorization with id of '" + id + "' not exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public IntraCloudAuthorizationResponseDTO getIntraCloudAuthorizationEntryByIdResponse(final long id) {
+		logger.debug("getIntraCloudAuthorizationByIdEntryResponse started...");		
+		final IntraCloudAuthorization intraCloudAuthorizationEntry = getIntraCloudAuthorizationEntryById(id);
+		return DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(intraCloudAuthorizationEntry);
 	}
 }
