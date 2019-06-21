@@ -1,6 +1,5 @@
 package eu.arrowhead.core.authorization.token;
 
-import java.security.InvalidParameterException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 // works only in secure mode
 @Service
