@@ -38,7 +38,7 @@ import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
@@ -436,7 +436,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> getServiceRegistryEntries(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getAllServiceReqistryEntries started..");
+		logger.debug("getAllServiceRegistryEntries started..");
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
@@ -453,25 +453,25 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryListResponseDTO getServiceReqistryEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getServiceReqistryEntriesResponse started..");
+	public ServiceRegistryListResponseDTO getServiceRegistryEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceRegistryEntriesResponse started..");
 		
-		final Page<ServiceRegistry> serviceReqistryEntries = getServiceRegistryEntries(page, size, direction, sortField);
-		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceReqistryEntries);
+		final Page<ServiceRegistry> serviceRegistryEntries = getServiceRegistryEntries(page, size, direction, sortField);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryGrouppedResponseDTO getServiceReqistryEntriesForServiceRegistryGrouppedResponse() {
-		logger.debug("getServiceReqistryEntriesForAutoCompleteDataResponse started..");
+	public ServiceRegistryGroupedResponseDTO getServiceRegistryEntriesForServiceRegistryGroupedResponse() {
+		logger.debug("getServiceRegistryEntriesForAutoCompleteDataResponse started..");
 		
-		final Page<ServiceRegistry> serviceReqistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-		return DTOConverter.convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(serviceReqistryEntries);
+		final Page<ServiceRegistry> serviceRegistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+		return DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Page<ServiceRegistry> getServiceReqistryEntriesByServiceDefintion(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getServiceReqistryEntriesByServiceDefintion started..");
-		Assert.notNull(serviceDefinition, "serviceDefinition is null");
+	public Page<ServiceRegistry> getServiceRegistryEntriesByServiceDefinition(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceRegistryEntriesByServiceDefinition started..");
+		Assert.isTrue(Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
 		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
@@ -497,11 +497,11 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryListResponseDTO getServiceReqistryEntriesByServiceDefintionResponse(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getServiceReqistryEntriesByServiceDefintionResponse started..");
+	public ServiceRegistryListResponseDTO getServiceRegistryEntriesByServiceDefinitionResponse(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getServiceRegistryEntriesByServiceDefinitionResponse started..");
 		
-		final Page<ServiceRegistry> serviceReqistryEntriesByServiceDefintion = getServiceReqistryEntriesByServiceDefintion(serviceDefinition, page, size, direction, sortField);
-		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceReqistryEntriesByServiceDefintion);		
+		final Page<ServiceRegistry> serviceRegistryEntriesByServiceDefinition = getServiceRegistryEntriesByServiceDefinition(serviceDefinition, page, size, direction, sortField);
+		return DTOConverter.convertServiceRegistryListToServiceRegistryListResponseDTO(serviceRegistryEntriesByServiceDefinition);		
 	}
 		
 	//-------------------------------------------------------------------------------------------------
@@ -590,7 +590,7 @@ public class ServiceRegistryDBService {
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
-			ServiceRegistry response  = updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,																  request.getInterfaces());
+			final ServiceRegistry response  = updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,																  request.getInterfaces());
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(response);
 		} catch (final DateTimeParseException ex) {
@@ -666,7 +666,7 @@ public class ServiceRegistryDBService {
 				validatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
 			}
 			final List<String> validatedInterfaces = request.getInterfaces() != null && request.getInterfaces().size() > 0 ? request.getInterfaces() : validatedInterfacesTemp;
-			ServiceRegistry response = mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
+			final ServiceRegistry response = mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
 					validatedInterfaces);
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(response);
@@ -1150,9 +1150,9 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private ServiceRegistry setModifyedValuesOfServiceRegistryEntryFields(ServiceRegistry srEntry,
-			ServiceDefinition serviceDefinition, System provider, String serviceUri, ZonedDateTime endOfValidity,
-			ServiceSecurityType securityType, String metadataStr, int version, List<String> interfaces) {
+	private ServiceRegistry setModifyedValuesOfServiceRegistryEntryFields(final ServiceRegistry srEntry,
+			final ServiceDefinition serviceDefinition, final System provider, final String serviceUri, final ZonedDateTime endOfValidity,
+			final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
 		
 		logger.debug("setModifyedValuesOfServiceRegistryEntryFields started ...");
 		

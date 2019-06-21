@@ -86,26 +86,26 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//Tests of getServiceReqistryEntries
+	//Tests of getServiceRegistryEntries
 		
 	@Test(expected = InvalidParameterException.class)
-	public void testGetServiceReqistryEntriesWithNotValidSortField() {
+	public void testGetServiceRegistryEntriesWithNotValidSortField() {
 		serviceRegistryDBService.getServiceRegistryEntries(0, 10, Direction.ASC, "notValid");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//Tests of getServiceReqistryEntriesByServiceDefintion
+	//Tests of getServiceRegistryEntriesByServiceDefintion
 			
 	@Test(expected = InvalidParameterException.class)
-	public void testGetServiceReqistryEntriesByServiceDefintionWithNotValidSortField() {
-		serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintion("testService", 0, 10, Direction.ASC, "notValid");
+	public void testGetServiceRegistryEntriesByServiceDefintionWithNotValidSortField() {
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinition("testService", 0, 10, Direction.ASC, "notValid");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testGetServiceReqistryEntriesByServiceDefintionWithNotValidServiceDefinition() {
+	public void testGetServiceRegistryEntriesByServiceDefintionWithNotValidServiceDefinition() {
 		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.ofNullable(null));
-		serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintion("serviceNotExists", 0, 10, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinition("serviceNotExists", 0, 10, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 	}
 			
 	//-------------------------------------------------------------------------------------------------
@@ -590,6 +590,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
 		final System provider = new System();
