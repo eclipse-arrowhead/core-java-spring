@@ -471,7 +471,7 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------
 	public Page<ServiceRegistry> getServiceRegistryEntriesByServiceDefinition(final String serviceDefinition, final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getServiceRegistryEntriesByServiceDefinition started..");
-		Assert.isTrue(Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
+		Assert.isTrue(! Utilities.isEmpty(serviceDefinition), "serviceDefinition is empty");
 		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
