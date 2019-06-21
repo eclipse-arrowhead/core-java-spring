@@ -558,8 +558,8 @@ public class ServiceRegistryDBService {
 		
 		checkServiceRegistryRequest(request);
 		
-		final eu.arrowhead.common.database.entity.ServiceRegistry srEntry;
-		final Optional<eu.arrowhead.common.database.entity.ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
+		final ServiceRegistry srEntry;
+		final Optional<ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
 		if (srEntryOptional.isPresent()) {
 			srEntry = srEntryOptional.get();
 		} else {
@@ -590,13 +590,15 @@ public class ServiceRegistryDBService {
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
-			updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
-																  request.getInterfaces());
+			ServiceRegistry response  = updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,																  request.getInterfaces());
 		
-			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
+			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(response);
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
+		} catch (final InvalidParameterException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -611,9 +613,8 @@ public class ServiceRegistryDBService {
 		Assert.notNull(request, "request is null.");
 		Assert.isTrue(0 < id, "id is not greather then zero");
 		
-		
-		final eu.arrowhead.common.database.entity.ServiceRegistry srEntry;
-		final Optional<eu.arrowhead.common.database.entity.ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
+		final ServiceRegistry srEntry;
+		final Optional<ServiceRegistry> srEntryOptional = serviceRegistryRepository.findById(id);
 		if (srEntryOptional.isPresent()) {
 			srEntry = srEntryOptional.get();
 		} else {
@@ -654,23 +655,28 @@ public class ServiceRegistryDBService {
 			}
 																	
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? srEntry.getEndOfValidity() : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
-			final String metadataStr = Utilities.map2Text(request.getMetadata());
-			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
+			final String metadataStr = request.getMetadata() != null ? 
+					Utilities.map2Text(request.getMetadata()) : srEntry.getMetadata() ;
+					
+			final int version = request.getVersion() == null ? srEntry.getVersion() : request.getVersion().intValue();
 			
-			final List<String> valideatedInterfacesTemp = new ArrayList<>(srEntry.getInterfaceConnections().size());
+			final List<String> validatedInterfacesTemp = new ArrayList<>(srEntry.getInterfaceConnections().size());
 			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
 			for (final ServiceRegistryInterfaceConnection serviceRegistryInterfaceConnection : interfaceConnections) {
-				valideatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
+				validatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
 			}
-			final List<String> valideatedInterfaces = request.getInterfaces() != null && request.getInterfaces().size() > 0 ? request.getInterfaces() : valideatedInterfacesTemp;
-			mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
-					valideatedInterfaces);
+			final List<String> validatedInterfaces = request.getInterfaces() != null && request.getInterfaces().size() > 0 ? request.getInterfaces() : validatedInterfacesTemp;
+			ServiceRegistry response = mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
+					validatedInterfaces);
 		
-			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
+			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(response);
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
-		} catch (final Exception ex) {
+		} catch (final InvalidParameterException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw ex;
+			} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -712,6 +718,7 @@ public class ServiceRegistryDBService {
 	public ServiceRegistry updateServiceRegistry(final ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider, final String serviceUri, final ZonedDateTime endOfValidity,
 												 final ServiceSecurityType securityType, final String metadataStr, final int version, final List<String> interfaces) {
 		logger.debug("updateServiceRegistry started...");
+		Assert.notNull(srEntry, "ServiceRegistry Entry is not specified.");	
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
 		Assert.notNull(provider, "Provider is not specified.");		
 		
@@ -722,51 +729,25 @@ public class ServiceRegistryDBService {
 		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
 		checkSRServiceInterfacesList(interfaces);
 		
-		try {
-			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
-			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();
-			if( serviceDefinition != null ) {
-				srEntry.setServiceDefinition(serviceDefinition);
-			}
-			
-			srEntry.setSystem(provider);
-			
-			if ( validatedServiceUri != null ) {
-				srEntry.setServiceUri(validatedServiceUri);
-			}
-			
-			srEntry.setEndOfValidity(endOfValidity);
-			srEntry.setSecure(secure);
-			
-			if( metadataStr != null ) {
-				srEntry.setMetadata(metadataStr);
-			}
-			
-			srEntry.setVersion(version);
+		return setModifyedValuesOfServiceRegistryEntryFields(srEntry, 
+			serviceDefinition, 
+			provider, 
+			serviceUri, 
+			endOfValidity,
+			securityType, 
+			metadataStr,
+			version,
+			interfaces);
 
-			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
-			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);
-			
-			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
-			for (final ServiceInterface serviceInterface : serviceInterfaces) {
-				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
-				srEntry.getInterfaceConnections().add(connection);
-			}
-			serviceRegistryInterfaceConnectionRepository.saveAll(srEntry.getInterfaceConnections());
-			
-			
-			return serviceRegistryRepository.saveAndFlush(srEntry);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------	
-	private ServiceRegistry mergeServiceRegistry(final ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider,
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public ServiceRegistry mergeServiceRegistry(final ServiceRegistry srEntry, final ServiceDefinition serviceDefinition, final System provider,
 			final String serviceUri, final ZonedDateTime endOfValidity, final ServiceSecurityType securityType, final String metadataStr, final int version,
 			final List<String> interfaces) {
 		logger.debug("mergeServiceRegistry started...");
+		Assert.notNull(srEntry, "ServiceRegistry Entry definition is not specified.");
 		Assert.notNull(serviceDefinition, "Service definition is not specified.");
 		Assert.notNull(provider, "Provider is not specified.");		
 		
@@ -777,45 +758,15 @@ public class ServiceRegistryDBService {
 		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
 		checkSRServiceInterfacesListOnlyForValidNames(interfaces);
 		
-		try {
-			final ServiceSecurityType secure = securityType == null ? srEntry.getSecure() : securityType;
-			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? srEntry.getServiceUri() : serviceUri.trim();		
-			if( serviceDefinition != null ) {
-				srEntry.setServiceDefinition(serviceDefinition);
-			}
-			
-			srEntry.setSystem(provider);
-			
-			if ( validatedServiceUri != null ) {
-				srEntry.setServiceUri(validatedServiceUri);
-			}
-			
-			srEntry.setEndOfValidity(endOfValidity);
-			srEntry.setSecure(secure);
-			
-			if( metadataStr != null ) {
-				srEntry.setMetadata(metadataStr);
-			}
-			
-			srEntry.setVersion(version);
-
-			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
-			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);
-			
-			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
-			for (final ServiceInterface serviceInterface : serviceInterfaces) {
-				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
-				srEntry.getInterfaceConnections().add(connection);
-			}
-			serviceRegistryInterfaceConnectionRepository.saveAll(srEntry.getInterfaceConnections());
-						
-			return serviceRegistryRepository.saveAndFlush(srEntry);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-
-		
+		return setModifyedValuesOfServiceRegistryEntryFields(srEntry, 
+				serviceDefinition, 
+				provider, 
+				serviceUri, 
+				endOfValidity,
+				securityType, 
+				metadataStr,
+				version,
+				interfaces);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -1120,9 +1071,7 @@ public class ServiceRegistryDBService {
 		Assert.notNull(interfaces, "Interfaces list is not specified.");
 		Assert.isTrue(!interfaces.isEmpty(), "Interfaces is is empty.");
 		
-		for (final String intf : interfaces) {
-			Assert.isTrue(interfaceNameVerifier.isValid(intf), "Specified interface name is not valid: " + intf);
-		}
+		checkSRServiceInterfacesListOnlyForValidNames(interfaces);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1193,15 +1142,49 @@ public class ServiceRegistryDBService {
 	//-------------------------------------------------------------------------------------------------	
 	private boolean checkServiceRegistryIfUniqueValidationNeeded(final ServiceRegistry srEntry,
 			final ServiceDefinition serviceDefinition, final System provider) {
+		logger.debug("checkServiceRegistryIfUniqueValidationNeeded started ...");
+
 		
-		boolean isUniqueValidationNeeded = true;
-		
-		if ( !checkSystemIfUniqueValidationNeeded(srEntry.getSystem(), provider.getSystemName(), provider.getAddress(), provider.getPort()) &&
-				srEntry.getServiceDefinition().getServiceDefinition().equalsIgnoreCase(serviceDefinition.getServiceDefinition().trim())) {
-			isUniqueValidationNeeded = false;
-		}
-		
-		return isUniqueValidationNeeded;
+		return srEntry.getSystem().getId() != provider.getId() || srEntry.getServiceDefinition().getId() != serviceDefinition.getId();
+
 	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private ServiceRegistry setModifyedValuesOfServiceRegistryEntryFields(ServiceRegistry srEntry,
+			ServiceDefinition serviceDefinition, System provider, String serviceUri, ZonedDateTime endOfValidity,
+			ServiceSecurityType securityType, String metadataStr, int version, List<String> interfaces) {
+		
+		logger.debug("setModifyedValuesOfServiceRegistryEntryFields started ...");
+		
+		try {
+			final ServiceSecurityType secure = securityType == null ? ServiceSecurityType.NOT_SECURE : securityType;
+			final String validatedServiceUri = Utilities.isEmpty(serviceUri) ? null : serviceUri.trim();
+			
+			final Set<ServiceRegistryInterfaceConnection> connectionList = srEntry.getInterfaceConnections();
+			serviceRegistryInterfaceConnectionRepository.deleteInBatch(connectionList);			
+			serviceRegistryRepository.refresh(srEntry);
+			
+			final List<ServiceInterface> serviceInterfaces = findOrCreateServiceInterfaces(interfaces);			
+			for (final ServiceInterface serviceInterface : serviceInterfaces) {
+				final ServiceRegistryInterfaceConnection connection = new ServiceRegistryInterfaceConnection(srEntry, serviceInterface);
+				srEntry.getInterfaceConnections().add(connection);
+			}
+			serviceRegistryInterfaceConnectionRepository.saveAll(srEntry.getInterfaceConnections());
+			
+			srEntry.setServiceDefinition(serviceDefinition);
+			srEntry.setSystem(provider);
+			srEntry.setServiceUri(validatedServiceUri);
+			srEntry.setEndOfValidity(endOfValidity);
+			srEntry.setSecure(secure);
+			srEntry.setMetadata(metadataStr);
+			srEntry.setVersion(version);
+				
+			return serviceRegistryRepository.saveAndFlush(srEntry);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 
 }
