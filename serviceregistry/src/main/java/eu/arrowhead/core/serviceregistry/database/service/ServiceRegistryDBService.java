@@ -882,13 +882,15 @@ public class ServiceRegistryDBService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeServiceRegistryEntryById(final long id) {
 		logger.debug("removeServiceRegistryEntryById started...");
-		if (!serviceRegistryRepository.existsById(id)) {
-			throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
-		}
 		
 		try {
+			if (!serviceRegistryRepository.existsById(id)) {
+				throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
+			}
 			serviceRegistryRepository.deleteById(id);
 			serviceRegistryRepository.flush();
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
