@@ -756,7 +756,7 @@ public class ServiceRegistryDBService {
 		}
 		
 		checkSRSecurityValue(securityType, provider.getAuthenticationInfo());
-		checkSRServiceInterfacesListOnlyForValidNames(interfaces);
+		checkSRServiceInterfacesList(interfaces);
 		
 		return setModifyedValuesOfServiceRegistryEntryFields(srEntry, 
 				serviceDefinition, 
@@ -1071,16 +1071,10 @@ public class ServiceRegistryDBService {
 		Assert.notNull(interfaces, "Interfaces list is not specified.");
 		Assert.isTrue(!interfaces.isEmpty(), "Interfaces is is empty.");
 		
-		checkSRServiceInterfacesListOnlyForValidNames(interfaces);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkSRServiceInterfacesListOnlyForValidNames(final List<String> interfaces) {
-		logger.debug("checkSRServiceInterfacesList started...");
-		
 		for (final String intf : interfaces) {
 			Assert.isTrue(interfaceNameVerifier.isValid(intf), "Specified interface name is not valid: " + intf);
 		}
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
