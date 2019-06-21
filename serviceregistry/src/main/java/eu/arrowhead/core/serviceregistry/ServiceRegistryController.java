@@ -31,7 +31,7 @@ import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryGrouppedResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
@@ -113,9 +113,9 @@ public class ServiceRegistryController {
 	private static final String SERVICE_REGISTRY_MGMT_BY_ID_URI = CommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "serviceDefinition";
 	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = CommonConstants.MGMT_URI + "/servicedef" + "/{" + PATH_VARIABLE_SERVICE_DEFINITION + "}";	
-	private static final String SERVICE_REGISTRY_MGMT_GROUPPED_URI = CommonConstants.MGMT_URI + "/groupped";
+	private static final String SERVICE_REGISTRY_MGMT_GROUPED_URI = CommonConstants.MGMT_URI + "/grouped";
 	private static final String GET_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
-	private static final String GET_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrive service registry entries";
+	private static final String GET_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrieve service registry entries";
 	private static final String DELETE_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entry removed";
 	private static final String DELETE_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not remove service registry entry";
 	
@@ -433,10 +433,10 @@ public class ServiceRegistryController {
 		}
 		
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI);
-		final ServiceRegistryListResponseDTO serviceReqistryEntriesResponse = serviceRegistryDBService.getServiceReqistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);		
+		final ServiceRegistryListResponseDTO serviceRegistryEntriesResponse = serviceRegistryDBService.getServiceRegistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);		
 		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
 		
-		return serviceReqistryEntriesResponse;
+		return serviceRegistryEntriesResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -455,7 +455,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
 		}
 		final ServiceRegistryResponseDTO serviceRegistryEntryByIdResponse = serviceRegistryDBService.getServiceRegistryEntryByIdResponse(id);
-		logger.debug("Service Registry entry with id: {} succesfully retrived", id);
+		logger.debug("Service Registry entry with id: {} succesfully retrieved", id);
 		return serviceRegistryEntryByIdResponse;
 	}	
 	
@@ -474,7 +474,7 @@ public class ServiceRegistryController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New Service Registry get by Service Defintition request recieved with page: {} and item_per page: {}", page, size);
+		logger.debug("New Service Registry get by Service Definitition request recieved with page: {} and item_per page: {}", page, size);
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
 			throw new BadPayloadException("Service definition cannot be empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
@@ -493,25 +493,25 @@ public class ServiceRegistryController {
 			}
 		}		
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
-		final ServiceRegistryListResponseDTO serviceReqistryEntries = serviceRegistryDBService.getServiceReqistryEntriesByServiceDefintionResponse(serviceDefinition, validatedPage, validatedSize, validatedDirection, sortField);
+		final ServiceRegistryListResponseDTO serviceRegistryEntries = serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitionResponse(serviceDefinition, validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
-		return serviceReqistryEntries;
+		return serviceRegistryEntries;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return all service registry entries groupped for frontend usage", response = ServiceRegistryGrouppedResponseDTO.class)
+	@ApiOperation(value = "Return all service registry entries grouped for frontend usage", response = ServiceRegistryGroupedResponseDTO.class)
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = SERVICE_REGISTRY_MGMT_GROUPPED_URI)
-	@ResponseBody public ServiceRegistryGrouppedResponseDTO getServiceRegistryGrouppedData() {
-		logger.debug("New get request for groupped service registry data");
-		final ServiceRegistryGrouppedResponseDTO serviceReqistryEntriesForServiceRegistryGrouppedResponse = serviceRegistryDBService.getServiceReqistryEntriesForServiceRegistryGrouppedResponse();
-		logger.debug("Groupped service registry data succesfully retrived");
-		return serviceReqistryEntriesForServiceRegistryGrouppedResponse;
+	@GetMapping(path = SERVICE_REGISTRY_MGMT_GROUPED_URI)
+	@ResponseBody public ServiceRegistryGroupedResponseDTO getServiceRegistryGroupedData() {
+		logger.debug("New get request for grouped service registry data");
+		final ServiceRegistryGroupedResponseDTO serviceRegistryEntriesForServiceRegistryGroupedResponse = serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse();
+		logger.debug("Grouped service registry data succesfully retrieved");
+		return serviceRegistryEntriesForServiceRegistryGroupedResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -880,8 +880,8 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryMergeRequest(ServiceRegistryRequestDTO request, String serviceRegistryMgmtUri,
-			long id) {
+	private void checkServiceRegistryMergeRequest(final ServiceRegistryRequestDTO request, final String serviceRegistryMgmtUri,
+			final long id) {
 		
 		if ( id <= 0) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
