@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -151,6 +152,24 @@ public class AuthorizationControllerIntraCloudTest {
 	@Test
 	public void testGetIntraCloudAuthorizationsWithInvalidId() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// Test of removeIntraCloudAuthorizationById
+	
+	@Test
+	public void testRemoveIntraCloudAuthorizationByIdWithExistingId() throws Exception {
+		this.mockMvc.perform(delete(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveIntraCloudAuthorizationByIdWithInvalidId() throws Exception {
+		this.mockMvc.perform(delete(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}

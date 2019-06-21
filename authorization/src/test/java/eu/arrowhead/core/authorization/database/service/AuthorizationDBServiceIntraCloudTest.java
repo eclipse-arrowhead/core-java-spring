@@ -66,6 +66,15 @@ public class AuthorizationDBServiceIntraCloudTest {
 		authorizationDBService.getIntraCloudAuthorizationEntryById(-1);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of removeIntraCloudAuthorizationEntryById
+	
+	@Test (expected = InvalidParameterException.class)
+	public void testRemoveIntraCloudAuthorizationEntryByIdWithNotExistingId() {
+		when(intraCloudAuthorizationRepository.existsById(anyLong())).thenReturn(false);
+		authorizationDBService.removeIntraCloudAuthorizationEntryById(1);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
