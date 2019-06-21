@@ -3,6 +3,7 @@ package eu.arrowhead.core.authorization;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,6 +35,7 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 
 @RunWith(SpringRunner.class)
@@ -124,6 +126,31 @@ public class AuthorizationControllerIntraCloudTest {
 	public void testGetIntraCloudAuthorizationsWithInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// Tests of getIntraCloudAuthorizations
+	
+	@Test
+	public void testGetIntraCloudAuthorizationsWithExistingId() throws Exception {
+		final IntraCloudAuthorizationResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(createPageForMockingAuthorizationDBService(1).getContent().get(0));
+		when(authorizationDBService.getIntraCloudAuthorizationEntryByIdResponse(anyLong())).thenReturn(dto);
+		
+		final MvcResult response = this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/1")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final IntraCloudAuthorizationResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationResponseDTO.class);
+		assertEquals(responseBody.getServiceDefinition().getServiceDefinition(), "testService");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetIntraCloudAuthorizationsWithInvalidId() throws Exception {
+		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}

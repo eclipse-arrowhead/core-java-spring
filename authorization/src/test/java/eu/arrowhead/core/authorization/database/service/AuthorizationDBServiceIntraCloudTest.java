@@ -2,10 +2,12 @@ package eu.arrowhead.core.authorization.database.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +54,16 @@ public class AuthorizationDBServiceIntraCloudTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testGetIntraCloudAuthorizationEntriesWithNotValidSortField() {
 		authorizationDBService.getIntraCloudAuthorizationEntries(0, 10, Direction.ASC, "notValid");
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	//Tests of getIntraCloudAuthorizationEntryById
+	
+	@Test (expected = InvalidParameterException.class)
+	public void testGetIntraCloudAuthorizationEntryByIdWithNotExistingId() {
+		when(intraCloudAuthorizationRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		authorizationDBService.getIntraCloudAuthorizationEntryById(-1);
 	}
 	
 	//=================================================================================================
