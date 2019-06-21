@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.InterCloudAuthorizationRepository;
 import eu.arrowhead.common.database.repository.IntraCloudAuthorizationRepository;
@@ -121,5 +123,74 @@ public class AuthorizationDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public IntraCloudAuthorization createIntraCloudAuthorization(final long consumerId, final long providerId, final long serviceDefinitionId) {
+		logger.debug("createIntraCloudAuthorization started..");
+		
+		final boolean consumerIdIsInvalid = consumerId < 1;
+		final boolean providerIdIsInvalid = providerId < 1;
+		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
+		try {
+			if (consumerIdIsInvalid || providerIdIsInvalid || serviceDefinitionIdIsInvalid) {
+				String exceptionMessage = "Following id parameters are invalid: ";
+				exceptionMessage = consumerIdIsInvalid ? exceptionMessage : exceptionMessage + "consumerId" ;
+				exceptionMessage = providerIdIsInvalid ? exceptionMessage : exceptionMessage + " providerId";
+				exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " serviceDefinitionId";
+				throw new InvalidParameterException(exceptionMessage);
+			}	
+			
+			checkConstraintsOfIntraCloudAuthorizationTable(consumerId, providerId, serviceDefinitionId);
+			
+			final Optional<System> consumer = systemRepository.findById(consumerId);
+			final Optional<System> provider = systemRepository.findById(providerId);
+			final Optional<ServiceDefinition> serviceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
+			if (consumer.isEmpty() || provider.isEmpty() || serviceDefinition.isEmpty()) {
+				String exceptionMessage = "Following entities are not availabels: ";
+				exceptionMessage = consumer.isEmpty() ? exceptionMessage + "consumer" : exceptionMessage;
+				exceptionMessage = provider.isEmpty() ? exceptionMessage + " provider" : exceptionMessage;
+				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition" : exceptionMessage;
+				throw new InvalidParameterException(exceptionMessage);
+			}
+			
+			final IntraCloudAuthorization intraCloudAuthorization = new IntraCloudAuthorization(consumer.get(), provider.get(), serviceDefinition.get());
+			return intraCloudAuthorizationRepository.saveAndFlush(intraCloudAuthorization);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public IntraCloudAuthorizationResponseDTO createIntraCloudAuthorizationResponse(final long consumerId, final long providerId, final long serviceDefinitionId) {
+		logger.debug("createIntraCloudAuthorizationResponse started..");
+		final IntraCloudAuthorization entry = createIntraCloudAuthorization(consumerId, providerId, serviceDefinitionId);
+		return DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(entry);
+	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkConstraintsOfIntraCloudAuthorizationTable(final long consumerId, final long providerId, final long serviceDefinitionId) {
+		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started..");
+		
+		try {
+			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
+			if (optional.isPresent()) {
+				throw new InvalidParameterException("IntraCloudAuthorization entry with this conusmer, provider and serviceDefinition already exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 }

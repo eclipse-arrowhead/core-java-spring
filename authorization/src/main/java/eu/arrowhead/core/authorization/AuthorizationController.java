@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
@@ -143,6 +146,31 @@ public class AuthorizationController {
 		
 		authorizationDBService.removeIntraCloudAuthorizationEntryById(id);
 		logger.debug("IntraCloudAuthorization with id: '{}' successfully deleted", id);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@PostMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+	@ResponseBody public IntraCloudAuthorizationListResponseDTO registerIntraCloudAuthorization(@RequestBody final IntraCloudAuthorizationRequestDTO request) {
+		logger.debug("New IntraCloudAuthorization registration request recieved");
+		
+		boolean isConsumerIdInvalid = request.getConsumerId() < 1 || request.getConsumerId() == null;
+		boolean isProviderListEmpty = request.getProviderIds().isEmpty();
+		boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds().isEmpty();
+		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty) {
+			String exceptionMsg = isConsumerIdInvalid ? "invalid consumer id" : "";
+			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty" : exceptionMsg;
+			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " serviceDefinitionList is empty" : exceptionMsg;
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+		}
+		
+		for (long providerId : request.getProviderIds()) {
+			for (long serviceDefinitionId : request.getServiceDefinitionIds()) {
+				IntraCloudAuthorizationResponseDTO createIntraCloudAuthorizationResponse = authorizationDBService.createIntraCloudAuthorizationResponse(request.getConsumerId(), providerId, serviceDefinitionId);
+				//TODO
+			}
+		}
+		
+		
 	}
 	
 	//=================================================================================================
