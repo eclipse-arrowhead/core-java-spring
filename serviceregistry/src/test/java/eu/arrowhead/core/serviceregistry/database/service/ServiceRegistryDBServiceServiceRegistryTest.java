@@ -65,7 +65,15 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 	
 	private static final ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
+	static {validTestServiceDefinition.setId(1);}
+	private static final ServiceDefinition validTestServiceDefinitionForUniqueConstraintCheck = new ServiceDefinition("validTestServiceDefinition");
+	static {validTestServiceDefinitionForUniqueConstraintCheck.setId(Integer.MAX_VALUE);}
+	
 	private static final System validTestProvider = new System("test_system", "localhost", 1234, null);
+	static {validTestProvider.setId(1);}
+	private static final System validTestProviderForUniqueConstraintCheck = new System("test_system", "localhost", 1234, null);
+	static {validTestProviderForUniqueConstraintCheck.setId(Integer.MAX_VALUE);}
+	
 	private static final System validTestProviderWithAuthenticationInfo = new System("test_system", "localhost", 1234, "authenticationInfo");
 	private static final String validTestMetadataStr = "key=value, key2=value2";
 	private static final List<String> validTestInterfaces = Arrays.asList(new String[]{"HTTP-SECURE-JSON", "HTTP-SECURE-XML"});
@@ -563,9 +571,9 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateServiceRegistryUniqueConstraintViolation() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
-		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProvider,
+		serviceRegistryDBService.updateServiceRegistry(getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0),
+				getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0).getServiceDefinition(),
+				validTestProviderForUniqueConstraintCheck, 
 				validTestServiceUri,
 				validTestZonedDateTime,
 				ServiceSecurityType.NOT_SECURE,
@@ -599,7 +607,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(sslProperties.isSslEnabled()).thenReturn(false);
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
 				validTestServiceDefinition,
-				validTestProvider,
+				validTestProviderWithAuthenticationInfo,
 				validTestServiceUri,
 				validTestZonedDateTime,
 				ServiceSecurityType.CERTIFICATE,
@@ -671,6 +679,63 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		srEntry5.setInterfaceConnections(Set.of(conn5));
 		result.add(srEntry5);
 		
+		final ServiceRegistry srEntry6 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 1);
+		srEntry6.setId(6);
+		final ServiceRegistryInterfaceConnection conn6 = new ServiceRegistryInterfaceConnection(srEntry6, xmlInterface); 
+		srEntry6.setInterfaceConnections(Set.of(conn6));
+		result.add(srEntry6);
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<ServiceRegistry> getTestProvidersWithIdsForUniqueConstrantCheck(final ServiceDefinition definition) {
+		final List<ServiceRegistry> result = new ArrayList<ServiceRegistry>(6);
+		
+		definition.setId(1);
+		final System provider = new System("test_system", "localhost", 1234, null);
+		final String metadataStr = "key=value, key2=value2";
+		
+		
+		final ServiceInterface jsonInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		final ServiceInterface xmlInterface = new ServiceInterface("HTTP-SECURE-XML");
+		
+		provider.setId(1);
+		final ServiceRegistry srEntry1 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 1);
+		srEntry1.setId(1);
+		final ServiceRegistryInterfaceConnection conn1 = new ServiceRegistryInterfaceConnection(srEntry1, jsonInterface); 
+		srEntry1.setInterfaceConnections(Set.of(conn1));
+		result.add(srEntry1);
+		
+		provider.setId(2);
+		final ServiceRegistry srEntry2 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 1);
+		srEntry2.setId(2);
+		final ServiceRegistryInterfaceConnection conn2 = new ServiceRegistryInterfaceConnection(srEntry2, jsonInterface); 
+		srEntry2.setInterfaceConnections(Set.of(conn2));
+		result.add(srEntry2);
+		
+		provider.setId(3);
+		final ServiceRegistry srEntry3 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, "abc=def", 1);
+		srEntry3.setId(3);
+		final ServiceRegistryInterfaceConnection conn3 = new ServiceRegistryInterfaceConnection(srEntry3, jsonInterface); 
+		srEntry3.setInterfaceConnections(Set.of(conn3));
+		result.add(srEntry3);
+		
+		provider.setId(4);
+		final ServiceRegistry srEntry4 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 5);
+		srEntry4.setId(4);
+		final ServiceRegistryInterfaceConnection conn4 = new ServiceRegistryInterfaceConnection(srEntry4, jsonInterface); 
+		srEntry4.setInterfaceConnections(Set.of(conn4));
+		result.add(srEntry4);
+		
+		provider.setId(5);
+		final ServiceRegistry srEntry5 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.CERTIFICATE, metadataStr, 1);
+		srEntry5.setId(5);
+		final ServiceRegistryInterfaceConnection conn5 = new ServiceRegistryInterfaceConnection(srEntry5, jsonInterface); 
+		srEntry5.setInterfaceConnections(Set.of(conn5));
+		result.add(srEntry5);
+		
+		provider.setId(6);
 		final ServiceRegistry srEntry6 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 1);
 		srEntry6.setId(6);
 		final ServiceRegistryInterfaceConnection conn6 = new ServiceRegistryInterfaceConnection(srEntry6, xmlInterface); 
