@@ -74,6 +74,7 @@ public class TokenGenerationServiceTest {
 		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(provider), "testservice", 10);
 		Map<SystemRequestDTO,String> tokens = tokenGenerationService.generateTokens(request);
 		final String encryptedToken = tokens.get(provider);
+		System.out.println(encryptedToken);
 		System.out.println(encryptedToken.length());
 		
 		final AlgorithmConstraints jwsAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG);
@@ -86,8 +87,11 @@ public class TokenGenerationServiceTest {
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/provider.p12"), "123456".toCharArray());
 		final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, "123456");
 		
-		final JwtConsumer jwtConsumer = new JwtConsumerBuilder().setRequireJwtId()
+		final JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+								.setRequireJwtId()
 								.setRequireNotBefore()
+								.setEnableRequireEncryption()
+								.setEnableRequireIntegrity()
 								.setExpectedIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION)
 								.setDecryptionKey(providerPrivateKey)
 								.setVerificationKey(authPublicKey)
