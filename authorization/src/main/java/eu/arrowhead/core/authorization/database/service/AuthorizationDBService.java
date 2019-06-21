@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -102,4 +103,23 @@ public class AuthorizationDBService {
 		final IntraCloudAuthorization intraCloudAuthorizationEntry = getIntraCloudAuthorizationEntryById(id);
 		return DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(intraCloudAuthorizationEntry);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeIntraCloudAuthorizationEntryById(final long id) {
+		logger.debug("removeIntraCloudAuthorizationEntryById started..");
+		
+		try {
+			if (!intraCloudAuthorizationRepository.existsById(id)) {
+				throw new InvalidParameterException("IntraCloudAuthorization with id of '" + id + "' not exists");
+			}
+			intraCloudAuthorizationRepository.deleteById(id);
+			intraCloudAuthorizationRepository.flush();
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}	
 }

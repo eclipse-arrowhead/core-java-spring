@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,8 @@ public class AuthorizationController {
 	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI = INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization returned";
 	private static final String GET_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not retrieve IntraCloudAuthorization";
+	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization removed";
+	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not remove IntraCloudAuthorization";
 	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
@@ -120,6 +123,26 @@ public class AuthorizationController {
 		final IntraCloudAuthorizationResponseDTO intraCloudAuthorizationEntryByIdResponse = authorizationDBService.getIntraCloudAuthorizationEntryByIdResponse(id);
 		logger.debug("IntraCloudAuthorization entry with id: {} successfully retrieved", id);
 		return intraCloudAuthorizationEntryByIdResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove the requested IntraCloudAuthorization entry")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI)
+	public void removeIntraCloudAuthorizationById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New IntraCloudAuthorization delete request recieved with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+		}
+		
+		authorizationDBService.removeIntraCloudAuthorizationEntryById(id);
+		logger.debug("IntraCloudAuthorization with id: '{}' successfully deleted", id);
 	}
 	
 	//=================================================================================================
