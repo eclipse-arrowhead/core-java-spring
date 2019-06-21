@@ -210,7 +210,7 @@ public class TokenGenerationServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = ArrowheadException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void testGenerateTokenProviderHasNoKey() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
@@ -221,7 +221,7 @@ public class TokenGenerationServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = ArrowheadException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void testGenerateTokenProviderHasNotValidKey() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");

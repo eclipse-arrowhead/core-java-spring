@@ -25,8 +25,10 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
+import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -97,7 +99,13 @@ public class TokenGenerationService {
 		
 		return result;
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	public TokenGenerationResponseDTO generateTokensResponse(final TokenGenerationRequestDTO request) {
+		logger.debug("generateTokensResponse started...");
+		final Map<SystemRequestDTO,String> tokenMap = generateTokens(request);
+		return DTOConverter.convertTokenMapToTokenGenerationResponseDTO(tokenMap);
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -197,7 +205,7 @@ public class TokenGenerationService {
 		}
 		
 		if (result.isEmpty())  { // means no provider contains valid key
-			throw new ArrowheadException("Token generation failed for all the provider systems.");
+			throw new InvalidParameterException("Token generation failed for all the provider systems.");
 		}
 		
 		return result;
@@ -231,7 +239,7 @@ public class TokenGenerationService {
 			claims.setExpirationTimeMinutesInTheFuture(duration.floatValue());
 		}
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
-		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service);
+		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());
 		
 		return claims;
 	}
