@@ -1,11 +1,14 @@
 package eu.arrowhead.core.authorization.database.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -142,13 +145,16 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException(exceptionMessage);
 			}	
 			
-			checkConstraintsOfIntraCloudAuthorizationTable(consumerId, providerId, serviceDefinitionId);
+			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
+			if (optional.isPresent()) {
+				throw new InvalidParameterException("IntraCloudAuthorization already exists");
+			}
 			
 			final Optional<System> consumer = systemRepository.findById(consumerId);
 			final Optional<System> provider = systemRepository.findById(providerId);
 			final Optional<ServiceDefinition> serviceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
 			if (consumer.isEmpty() || provider.isEmpty() || serviceDefinition.isEmpty()) {
-				String exceptionMessage = "Following entities are not availabels: ";
+				String exceptionMessage = "Following entities are not availables: ";
 				exceptionMessage = consumer.isEmpty() ? exceptionMessage + "consumer" : exceptionMessage;
 				exceptionMessage = provider.isEmpty() ? exceptionMessage + " provider" : exceptionMessage;
 				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition" : exceptionMessage;
@@ -174,23 +180,41 @@ public class AuthorizationDBService {
 		return DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(entry);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public IntraCloudAuthorizationListResponseDTO createBulkIntraCloudAuthorizationResponse(final long consumerId, final List<Long> providerIds, final List<Long> serviceDefinitionIds) {
+		logger.debug("createBulkIntraCloudAuthorizationResponse started..");
+		
+		if (consumerId < 1) {
+			throw new InvalidParameterException("Consumer id can't be null and must be greater than 0.");
+		}
+		for (final Long id : providerIds) {
+			if (id == null || id < 1) {
+				throw new InvalidParameterException("Provider id can't be null and must be greater than 0.");
+			}
+		}
+		for (final Long id : serviceDefinitionIds) {
+			if (id == null || id < 1) {
+				throw new InvalidParameterException("SerdviceDefinition id can't be null and must be greater than 0.");
+			}
+		}
+				
+		final List<IntraCloudAuthorization> savedEntries = new ArrayList<>(providerIds.size() * serviceDefinitionIds.size());
+		for (final Long providerId : providerIds) {
+			for (final Long serviceId : serviceDefinitionIds) {
+				try {
+					final IntraCloudAuthorization savedIntraCloudAuthorization = createIntraCloudAuthorization(consumerId, providerId, serviceId);			
+					savedEntries.add(savedIntraCloudAuthorization);
+				} catch (final Exception ex) {
+					logger.debug(ex.getMessage(), ex);
+				}
+			}
+		}
+		
+		final Page<IntraCloudAuthorization> savedEntriesPage = new PageImpl<IntraCloudAuthorization>(savedEntries);
+		return DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(savedEntriesPage);
+	}
+	
 	//=================================================================================================
 	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkConstraintsOfIntraCloudAuthorizationTable(final long consumerId, final long providerId, final long serviceDefinitionId) {
-		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started..");
-		
-		try {
-			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
-			if (optional.isPresent()) {
-				throw new InvalidParameterException("IntraCloudAuthorization entry with this conusmer, provider and serviceDefinition already exists");
-			}
-		} catch (final InvalidParameterException ex) {
-			throw ex;
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-	}
 }

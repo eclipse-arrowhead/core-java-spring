@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
@@ -49,6 +51,8 @@ public class AuthorizationController {
 	private static final String GET_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not retrieve IntraCloudAuthorization";
 	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization removed";
 	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not remove IntraCloudAuthorization";
+	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE = "IntraCloudAuthorizations created";
+	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not create IntraCloudAuthorization";
 	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
@@ -79,7 +83,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+	@GetMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public IntraCloudAuthorizationListResponseDTO getIntraCloudAuthorizations(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
@@ -115,7 +119,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI)
+	@GetMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public IntraCloudAuthorizationResponseDTO getIntraCloudAuthorizationById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New IntraCloudAuthorization get request recieved with id: {}", id);
 		
@@ -149,13 +153,21 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@PostMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+	@ApiOperation(value = "Create the requested IntraCloudAuthorization entries")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_INTRA_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = INTRA_CLOUD_AUTHORIZATION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@ResponseBody public IntraCloudAuthorizationListResponseDTO registerIntraCloudAuthorization(@RequestBody final IntraCloudAuthorizationRequestDTO request) {
 		logger.debug("New IntraCloudAuthorization registration request recieved");
 		
-		boolean isConsumerIdInvalid = request.getConsumerId() < 1 || request.getConsumerId() == null;
-		boolean isProviderListEmpty = request.getProviderIds().isEmpty();
-		boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds().isEmpty();
+		final boolean isConsumerIdInvalid = request.getConsumerId() < 1 || request.getConsumerId() == null;
+		final boolean isProviderListEmpty = request.getProviderIds().isEmpty();
+		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds().isEmpty();
 		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty) {
 			String exceptionMsg = isConsumerIdInvalid ? "invalid consumer id" : "";
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty" : exceptionMsg;
@@ -163,13 +175,9 @@ public class AuthorizationController {
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
-		for (long providerId : request.getProviderIds()) {
-			for (long serviceDefinitionId : request.getServiceDefinitionIds()) {
-				IntraCloudAuthorizationResponseDTO createIntraCloudAuthorizationResponse = authorizationDBService.createIntraCloudAuthorizationResponse(request.getConsumerId(), providerId, serviceDefinitionId);
-				//TODO
-			}
-		}
-		
+		final IntraCloudAuthorizationListResponseDTO response = authorizationDBService.createBulkIntraCloudAuthorizationResponse(request.getConsumerId(), request.getProviderIds(), request.getServiceDefinitionIds());
+		logger.debug("registerIntraCloudAuthorization has been finished");
+		return response;
 		
 	}
 	
