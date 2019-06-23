@@ -145,19 +145,16 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException(exceptionMessage);
 			}	
 			
-			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
-			if (optional.isPresent()) {
-				throw new InvalidParameterException("IntraCloudAuthorization already exists");
-			}
+			checkConstraintsOfIntraCloudAuthorizationTable(consumerId, providerId, serviceDefinitionId);
 			
 			final Optional<System> consumer = systemRepository.findById(consumerId);
 			final Optional<System> provider = systemRepository.findById(providerId);
 			final Optional<ServiceDefinition> serviceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
 			if (consumer.isEmpty() || provider.isEmpty() || serviceDefinition.isEmpty()) {
 				String exceptionMessage = "Following entities are not availables: ";
-				exceptionMessage = consumer.isEmpty() ? exceptionMessage + "consumer" : exceptionMessage;
-				exceptionMessage = provider.isEmpty() ? exceptionMessage + " provider" : exceptionMessage;
-				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition" : exceptionMessage;
+				exceptionMessage = consumer.isEmpty() ? exceptionMessage + "consumer with id: " + consumerId : exceptionMessage;
+				exceptionMessage = provider.isEmpty() ? exceptionMessage + " provider with id: " + providerId : exceptionMessage;
+				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition with id: " + serviceDefinitionId : exceptionMessage;
 				throw new InvalidParameterException(exceptionMessage);
 			}
 			
@@ -205,7 +202,7 @@ public class AuthorizationDBService {
 				try {
 					final IntraCloudAuthorization savedIntraCloudAuthorization = createIntraCloudAuthorization(consumerId, providerId, serviceId);			
 					savedEntries.add(savedIntraCloudAuthorization);
-				} catch (final Exception ex) {
+				} catch (final InvalidParameterException ex) {
 					logger.debug(ex.getMessage(), ex);
 				}
 			}
@@ -217,4 +214,21 @@ public class AuthorizationDBService {
 	
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkConstraintsOfIntraCloudAuthorizationTable(final long consumerId, final long providerId, final long serviceDefinitionId) {
+		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started..");
+		
+		try {
+			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
+			if (optional.isPresent()) {
+				throw new InvalidParameterException("IntraCloudAuthorization entry with this" +  consumerId + ", " + providerId + " and " + serviceDefinitionId + " already exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 }
