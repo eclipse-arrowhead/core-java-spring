@@ -80,7 +80,7 @@ public class TokenUtilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String extractConsumerName(final JwtClaims claims) throws InvalidJwtException {
+	private static String extractConsumerName(final JwtClaims claims) throws InvalidJwtException {
 		if (!claims.hasClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID)) {
 			throw new InvalidJwtException("Missing consumer information.", null, null, null);
 		}
@@ -96,7 +96,7 @@ public class TokenUtilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String extractService(final JwtClaims claims) throws InvalidJwtException {
+	private static String extractService(final JwtClaims claims) throws InvalidJwtException {
 		if (!claims.hasClaim(CommonConstants.JWT_CLAIM_SERVICE_ID)) {
 			throw new InvalidJwtException("Missing service information.", null, null, null);
 		}
@@ -109,7 +109,7 @@ public class TokenUtilities {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private Long extractExpirationTime(final JwtClaims claims) throws InvalidJwtException {
+	private static Long extractExpirationTime(final JwtClaims claims) throws InvalidJwtException {
 		try {
 			return claims.hasClaim(ReservedClaimNames.EXPIRATION_TIME) ? claims.getExpirationTime().getValueInMillis() : null;
 		} catch (MalformedClaimException ex) {
