@@ -35,7 +35,7 @@ public class TokenUtilities {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public TokenInfo validateTokenAndExtractTokenInfo(final String token, final PublicKey authorizationPublicKey, final PrivateKey privateKey) {
+	public static TokenInfo validateTokenAndExtractTokenInfo(final String token, final PublicKey authorizationPublicKey, final PrivateKey privateKey) {
 		logger.debug("validateTokenAndExtractTokenInfo started...");
 		Assert.notNull(authorizationPublicKey, "Authorization public key is null.");
 		Assert.notNull(privateKey, "Caller's private key is null.");
