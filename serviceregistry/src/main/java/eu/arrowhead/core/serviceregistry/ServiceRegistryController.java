@@ -253,7 +253,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		serviceRegistryDBService.removeSystemById(id);
-		logger.debug("System with id: '{}' succesfully deleted", id);
+		logger.debug("System with id: '{}' successfully deleted", id);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ public class ServiceRegistryController {
 
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
 		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
-		logger.debug("Service definition  with page: {} and item_per page: {} succesfully retrived", page, size);
+		logger.debug("Service definition  with page: {} and item_per page: {} successfully retrieved", page, size);
 		
 		return serviceDefinitionEntries;
 	}
@@ -310,7 +310,7 @@ public class ServiceRegistryController {
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionEntry = serviceRegistryDBService.getServiceDefinitionByIdResponse(id);
-		logger.debug("Service definition with id: '{}' succesfully retrived", id);
+		logger.debug("Service definition with id: '{}' successfully retrieved", id);
 		
 		return serviceDefinitionEntry;
 	}
@@ -334,7 +334,7 @@ public class ServiceRegistryController {
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
-		logger.debug("{} service definition succesfully registered.", serviceDefinition);
+		logger.debug("{} service definition successfully registered.", serviceDefinition);
 		
 		return serviceDefinitionResponse;
 	}
@@ -362,7 +362,7 @@ public class ServiceRegistryController {
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
-		logger.debug("Service definition with id: '{}' succesfully updated with definition '{}'.", id, serviceDefinition);
+		logger.debug("Service definition with id: '{}' successfully updated with definition '{}'.", id, serviceDefinition);
 		
 		return serviceDefinitionResponse;
 	}
@@ -399,7 +399,7 @@ public class ServiceRegistryController {
 		}
 		
 		serviceRegistryDBService.removeServiceDefinitionById(id);
-		logger.debug("Service definition with id: '{}' succesfully deleted", id);
+		logger.debug("Service definition with id: '{}' successfully deleted", id);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ public class ServiceRegistryController {
 		
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI);
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesResponse = serviceRegistryDBService.getServiceRegistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);		
-		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
+		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 		
 		return serviceRegistryEntriesResponse;
 	}
@@ -448,14 +448,14 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path =  SERVICE_REGISTRY_MGMT_BY_ID_URI)
-	public ServiceRegistryResponseDTO getServiceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+	@ResponseBody public ServiceRegistryResponseDTO getServiceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New Service Registry get request recieved with id: {}", id);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
 		}
 		final ServiceRegistryResponseDTO serviceRegistryEntryByIdResponse = serviceRegistryDBService.getServiceRegistryEntryByIdResponse(id);
-		logger.debug("Service Registry entry with id: {} succesfully retrieved", id);
+		logger.debug("Service Registry entry with id: {} successfully retrieved", id);
 		return serviceRegistryEntryByIdResponse;
 	}	
 	
@@ -494,7 +494,7 @@ public class ServiceRegistryController {
 		}		
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
 		final ServiceRegistryListResponseDTO serviceRegistryEntries = serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitionResponse(serviceDefinition, validatedPage, validatedSize, validatedDirection, sortField);
-		logger.debug("Service Registry entries with page: {} and item_per page: {} succesfully retrived", page, size);
+		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 		return serviceRegistryEntries;
 	}
 	
@@ -510,7 +510,7 @@ public class ServiceRegistryController {
 	@ResponseBody public ServiceRegistryGroupedResponseDTO getServiceRegistryGroupedData() {
 		logger.debug("New get request for grouped service registry data");
 		final ServiceRegistryGroupedResponseDTO serviceRegistryEntriesForServiceRegistryGroupedResponse = serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse();
-		logger.debug("Grouped service registry data succesfully retrieved");
+		logger.debug("Grouped service registry data successfully retrieved");
 		return serviceRegistryEntriesForServiceRegistryGroupedResponse;
 	}
 	
@@ -531,7 +531,7 @@ public class ServiceRegistryController {
 		}
 		
 		serviceRegistryDBService.removeServiceRegistryEntryById(id);;
-		logger.debug("Service Registry with id: '{}' succesfully deleted", id);
+		logger.debug("Service Registry with id: '{}' successfully deleted", id);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
