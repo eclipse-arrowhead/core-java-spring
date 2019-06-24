@@ -1,9 +1,7 @@
 package eu.arrowhead.core.serviceregistry.database.service;
 
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -74,18 +72,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	@Spy
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
-	
-	private static final ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
-	static {validTestServiceDefinition.setId(1);}
-	private static final ServiceDefinition validTestServiceDefinitionForUniqueConstraintCheck = new ServiceDefinition("validTestServiceDefinition");
-	static {validTestServiceDefinitionForUniqueConstraintCheck.setId(Integer.MAX_VALUE);}
-	
-	private static final System validTestProvider = new System("test_system", "localhost", 1234, null);
 
-	private static final System validTestProviderForUniqueConstraintCheck = new System("test_system", "localhost", 1234, null);
-	static {validTestProviderForUniqueConstraintCheck.setId(Integer.MAX_VALUE);}
-	
-	private static final System validTestProviderWithAuthenticationInfo = new System("test_system", "localhost", 1234, "authenticationInfo");
+
 	private static final String validTestMetadataStr = "key=value, key2=value2";
 	private static final String jsonInterFace = "HTTP-SECURE-JSON";
 	private static final List<String> validTestInterfaces = Arrays.asList(new String[]{"HTTP-SECURE-JSON", "HTTP-SECURE-XML"});
@@ -100,60 +88,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	private static final long validId = 1;
 	private static final long inValidId = -1;
 	private static final long notPresentId = Long.MAX_VALUE;
-	
-	private static final ServiceRegistryRequestDTO SERVICE_REGISTRY_REQUEST_DTO = new ServiceRegistryRequestDTO();
-	private static final ServiceRegistryRequestDTO SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT = new ServiceRegistryRequestDTO();
-	private static final SystemRequestDTO SYSTEM_REQUEST_DTO = new SystemRequestDTO();
-	static {
-		SYSTEM_REQUEST_DTO.setSystemName("test_system");
-		SYSTEM_REQUEST_DTO.setAddress("localhost");
-		SYSTEM_REQUEST_DTO.setPort(1234);
-		SYSTEM_REQUEST_DTO.setAuthenticationInfo(null);
-	}
-	static {
-		SERVICE_REGISTRY_REQUEST_DTO.setServiceDefinition(validTestServiceDefinition.getServiceDefinition());
-		SERVICE_REGISTRY_REQUEST_DTO.setProviderSystem(SYSTEM_REQUEST_DTO);
-		SERVICE_REGISTRY_REQUEST_DTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
-		
-	}
-	static {
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT.setServiceDefinition(validTestServiceDefinition.getServiceDefinition());
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT.setProviderSystem(SYSTEM_REQUEST_DTO);
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT.setEndOfValidity("2112-06-20T12:00:00.371+01:00[Europe/London]");
-		
-	}
-	
-	private static final ServiceRegistryRequestDTO SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION = new ServiceRegistryRequestDTO();
-	static {
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setServiceDefinition(null);
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setProviderSystem(SYSTEM_REQUEST_DTO);
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setInterfaces(validTestInterfaces);	
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setMetadata(validTestMetadataForRequestDTO);
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setSecure(ServiceSecurityType.NOT_SECURE);
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setServiceUri(validTestServiceUri);
-		SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION.setVersion(0);
-	}
-	
-	private static final ServiceRegistry validServiceRegistry = new ServiceRegistry();
 
-	
-	private static final ServiceRegistryInterfaceConnection validServiceRegistryInterfaceConnection = new ServiceRegistryInterfaceConnection( validServiceRegistry, new ServiceInterface(jsonInterFace));
-	private static final Set<ServiceRegistryInterfaceConnection> validTestIntefacesSet = new HashSet<ServiceRegistryInterfaceConnection>();
-	static {
-		validTestIntefacesSet.add(validServiceRegistryInterfaceConnection);
-	}
-	static {
-		validServiceRegistry.setId(1);
-		validServiceRegistry.setServiceDefinition(validTestServiceDefinition);
-		validServiceRegistry.setSystem(validTestProvider);
-		validServiceRegistry.setEndOfValidity(validTestEndOFValidity);
-		validServiceRegistry.setInterfaceConnections(validTestIntefacesSet);	
-		validServiceRegistry.setMetadata(validTestMetadataStr);
-		validServiceRegistry.setSecure(ServiceSecurityType.NOT_SECURE);
-		validServiceRegistry.setServiceUri(validTestServiceUri);
-		validServiceRegistry.setVersion(0);
-	}
+
 	//=================================================================================================
 	// methods
 	
@@ -168,7 +104,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	//Tests of getServiceRegistryEntries
-		
+
 	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceRegistryEntriesWithNotValidSortField() {
 		serviceRegistryDBService.getServiceRegistryEntries(0, 10, Direction.ASC, "notValid");
@@ -616,8 +552,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testUpdateServiceRegistryEntryNull() {
 		serviceRegistryDBService.mergeServiceRegistry(
 				null,
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -631,7 +567,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryDBService.updateServiceRegistry(
 				getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
 				null,
-				validTestProvider,
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -644,7 +580,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryProviderNull() {
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
+				getValidTestServiceDefinition(),
 				null,
 				validTestServiceUri,
 				validTestEndOFValidity,
@@ -660,7 +596,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
 		serviceRegistryDBService.updateServiceRegistry(getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0),
 				getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0).getServiceDefinition(),
-				validTestProviderForUniqueConstraintCheck, 
+				getValidTestProviderForUniqueConstraintCheck(), 
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -674,8 +610,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testUpdateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.CERTIFICATE,
@@ -691,8 +627,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		when(sslProperties.isSslEnabled()).thenReturn(false);
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProviderWithAuthenticationInfo,
+				getValidTestServiceDefinition(),
+				getValidTestProviderWithAuthenticationInfo(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.CERTIFICATE,
@@ -713,8 +649,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testUpdateServiceRegistryInterfacesListEmpty() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -728,8 +664,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testUpdateServiceRegistryInvalidInterface() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -741,7 +677,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceByIdResponseInvalidId() {
-		serviceRegistryDBService.updateServiceByIdResponse(SERVICE_REGISTRY_REQUEST_DTO, inValidId);
+		serviceRegistryDBService.updateServiceByIdResponse(getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO()), inValidId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -754,7 +690,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected =  InvalidParameterException.class)
 	public void testUpdateServiceByIdResponseNotPresentId() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.empty());
-		serviceRegistryDBService.updateServiceByIdResponse(SERVICE_REGISTRY_REQUEST_DTO, notPresentId);
+		serviceRegistryDBService.updateServiceByIdResponse(getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO()), notPresentId);
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -762,7 +698,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testUpdateServiceByIdResponseInvalidEndOfValidityFormat() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0)));
 
-		serviceRegistryDBService.updateServiceByIdResponse( SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT, validId);//SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT, validId);
+		serviceRegistryDBService.updateServiceByIdResponse( getValidServiceRegistryRequestDTOWithInvalidEndOfValidityFormat(new ServiceRegistryRequestDTO()), validId);//SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT, validId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -773,8 +709,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testMergeServiceRegistryEntryNull() {
 		serviceRegistryDBService.mergeServiceRegistry(
 				null,
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -789,7 +725,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryDBService.mergeServiceRegistry(
 				getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
 				null,
-				validTestProvider,
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -802,7 +738,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testMergeServiceRegistryProviderNull() {
 		serviceRegistryDBService.mergeServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
+				getValidTestServiceDefinition(),
 				null,
 				validTestServiceUri,
 				validTestEndOFValidity,
@@ -818,7 +754,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
 		serviceRegistryDBService.mergeServiceRegistry(getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0),
 				getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0).getServiceDefinition(),
-				validTestProviderForUniqueConstraintCheck, 
+				getValidTestProviderForUniqueConstraintCheck(), 
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -832,8 +768,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testMergeServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.mergeServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.CERTIFICATE,
@@ -848,8 +784,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		when(sslProperties.isSslEnabled()).thenReturn(false);
 		serviceRegistryDBService.mergeServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProviderWithAuthenticationInfo,
+				getValidTestServiceDefinition(),
+				getValidTestProviderWithAuthenticationInfo(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.CERTIFICATE,
@@ -870,8 +806,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testMergeServiceRegistryInterfacesListEmpty() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.mergeServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -885,8 +821,8 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testMergeServiceRegistryInvalidInterface() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		serviceRegistryDBService.mergeServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),
-				validTestServiceDefinition,
-				validTestProvider,
+				getValidTestServiceDefinition(),
+				getValidTestProvider(),
 				validTestServiceUri,
 				validTestEndOFValidity,
 				ServiceSecurityType.NOT_SECURE,
@@ -898,7 +834,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testMergeServiceByIdResponseInvalidId() {
-		serviceRegistryDBService.mergeServiceByIdResponse(SERVICE_REGISTRY_REQUEST_DTO, inValidId);
+		serviceRegistryDBService.mergeServiceByIdResponse(getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO()), inValidId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -911,7 +847,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected =  InvalidParameterException.class)
 	public void testMergeServiceByIdResponseNotPresentId() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.empty());
-		serviceRegistryDBService.mergeServiceByIdResponse(SERVICE_REGISTRY_REQUEST_DTO, notPresentId);
+		serviceRegistryDBService.mergeServiceByIdResponse(getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO()), notPresentId);
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -919,19 +855,103 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testMergeServiceByIdResponseInvalidEndOfValidityFormat() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0)));
 
-		serviceRegistryDBService.mergeServiceByIdResponse( SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT, validId);
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithInvalidEndOfValidityFormat(new ServiceRegistryRequestDTO()), validId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testMergeServiceByIdResponseNullServiceDefinition() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
-		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(validTestServiceDefinition));
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(validTestProvider));
-		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(validServiceRegistry);
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
 		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
 		
-		serviceRegistryDBService.mergeServiceByIdResponse( SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION, validId);
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithNullServiceDefinition(new ServiceRegistryRequestDTO()), validId);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseEmptyServiceDefinition() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithEmptyServiceDefinition(new ServiceRegistryRequestDTO()), validId);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseNullProviderSystem() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithNullProviderSystem(new ServiceRegistryRequestDTO()), validId);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseNullEndOfValidity() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithNullEndOfValidity(new ServiceRegistryRequestDTO()), validId);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseNullInterfaces() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithNullInterfaces(new ServiceRegistryRequestDTO()), validId);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseNullMetadata() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithNullMetadata(new ServiceRegistryRequestDTO()), validId);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseNullServiceSecurityType() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithNullServiceSecurityType(new ServiceRegistryRequestDTO()), validId);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseNullServiceUri() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(getValidTestServiceDefinition()));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(getValidTestProvider()));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(getValidServiceRegistry(new ServiceRegistry()));
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( getValidServiceRegistryRequestDTOWithNullServiceUri(new ServiceRegistryRequestDTO()), validId);
 	}
 	
 	//=================================================================================================
@@ -1102,4 +1122,237 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		
 		return result;
 	}
+	
+	//-------------------------------------------------------------------------------------------------		
+	private static SystemRequestDTO getValidSystemReqestDTO(final SystemRequestDTO systemRequestDTO) {
+		
+		systemRequestDTO.setSystemName("test_system");
+		systemRequestDTO.setAddress("localhost");
+		systemRequestDTO.setPort(1234);
+		systemRequestDTO.setAuthenticationInfo(null);
+		
+		return systemRequestDTO;
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTO(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
+		validTestServiceDefinition.setId(1);
+		
+		serviceRegistryRequestDTO.setServiceDefinition(validTestServiceDefinition.getServiceDefinition());
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithInvalidEndOfValidityFormat(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
+		validTestServiceDefinition.setId(1);
+		
+		serviceRegistryRequestDTO.setServiceDefinition(validTestServiceDefinition.getServiceDefinition());
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity("2112-06-20T12:00:00.371+01:00[Europe/London]");
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceDefinition(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition(null);
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
+		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullProviderSystem(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
+		serviceRegistryRequestDTO.setProviderSystem(null);
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
+		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullEndOfValidity(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(null);
+		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
+		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullInterfaces(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		serviceRegistryRequestDTO.setInterfaces(null);	
+		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullMetadata(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
+		serviceRegistryRequestDTO.setMetadata(null);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceSecurityType(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
+		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
+		serviceRegistryRequestDTO.setSecure(null);
+		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithNullServiceUri(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition("validTestServiceDefinition");
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
+		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setServiceUri(null);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistryRequestDTO getValidServiceRegistryRequestDTOWithEmptyServiceDefinition(
+			final ServiceRegistryRequestDTO serviceRegistryRequestDTO) {
+		
+		serviceRegistryRequestDTO.setServiceDefinition(" ");
+		serviceRegistryRequestDTO.setProviderSystem(getValidSystemReqestDTO(new SystemRequestDTO()));
+		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
+		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
+		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
+		serviceRegistryRequestDTO.setVersion(0);
+		
+		return serviceRegistryRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceRegistry getValidServiceRegistry(final ServiceRegistry serviceRegistry) {
+		
+		ServiceRegistryInterfaceConnection validServiceRegistryInterfaceConnection = new ServiceRegistryInterfaceConnection( serviceRegistry, new ServiceInterface(jsonInterFace));
+		
+
+		Set<ServiceRegistryInterfaceConnection> validTestIntefacesSet = new HashSet<ServiceRegistryInterfaceConnection>();
+		validTestIntefacesSet.add(validServiceRegistryInterfaceConnection);	
+		
+		ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
+		validTestServiceDefinition.setId(1);
+		
+		serviceRegistry.setId(1);
+		serviceRegistry.setServiceDefinition(validTestServiceDefinition);
+		serviceRegistry.setSystem(getValidTestProvider());
+		serviceRegistry.setEndOfValidity(validTestEndOFValidity);
+		serviceRegistry.setInterfaceConnections(validTestIntefacesSet);	
+		serviceRegistry.setMetadata(validTestMetadataStr);
+		serviceRegistry.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistry.setServiceUri(validTestServiceUri);
+		serviceRegistry.setVersion(0);
+		
+		return serviceRegistry;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static ServiceDefinition getValidTestServiceDefinition() {
+		
+		ServiceDefinition validTestServiceDefinition = new ServiceDefinition("validTestServiceDefinition");
+		validTestServiceDefinition.setId(1);
+		
+		return validTestServiceDefinition;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static System getValidTestProvider() {
+		
+		System system = new System("test_system", "localhost", 1234, null);
+		system.setId(1);
+		
+		return system;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static System getValidTestProviderForUniqueConstraintCheck() {
+		
+		System system = new System("test_system", "localhost", 1234, null);
+		system.setId(Integer.MAX_VALUE);
+		
+		return system;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static System getValidTestProviderWithAuthenticationInfo() {
+		
+		System system = new System("test_system", "localhost", 1234, null);
+		system.setId(1);
+		system.setAuthenticationInfo("authenticationInfo");
+		
+		return system;
+	}
+	
+	
+	 
 }
