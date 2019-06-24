@@ -108,7 +108,7 @@ public class AuthorizationController {
 		}
 		
 		if (request.getProviders() == null || request.getProviders().isEmpty()) {
-			throw new BadPayloadException("Provider list is null or empty.", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Provider list is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		for (final SystemRequestDTO provider : request.getProviders()) {
@@ -116,7 +116,7 @@ public class AuthorizationController {
 		}
 		
 		if (Utilities.isEmpty(request.getService())) {
-			throw new BadPayloadException("Service is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Service is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 
