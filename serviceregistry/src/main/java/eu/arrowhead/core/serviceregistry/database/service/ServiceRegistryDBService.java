@@ -655,18 +655,21 @@ public class ServiceRegistryDBService {
 			}
 																	
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? srEntry.getEndOfValidity() : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
-			final String metadataStr = request.getMetadata() != null ? 
+			final String validatedMetadataStr = request.getMetadata() != null ? 
 					Utilities.map2Text(request.getMetadata()) : srEntry.getMetadata() ;
 					
-			final int version = request.getVersion() == null ? srEntry.getVersion() : request.getVersion().intValue();
+			final int validatedVersion = request.getVersion() == null ? srEntry.getVersion() : request.getVersion().intValue();
 			
 			final List<String> validatedInterfacesTemp = new ArrayList<>(srEntry.getInterfaceConnections().size());
 			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
 			for (final ServiceRegistryInterfaceConnection serviceRegistryInterfaceConnection : interfaceConnections) {
 				validatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
 			}
+			
+			final ServiceSecurityType validatedSecurityType = request.getSecure() != null ? request.getSecure() : srEntry.getSecure();
+			final String validatedServiceUri = request.getServiceUri() != null ? request.getServiceUri() : srEntry.getServiceUri();
 			final List<String> validatedInterfaces = request.getInterfaces() != null && request.getInterfaces().size() > 0 ? request.getInterfaces() : validatedInterfacesTemp;
-			final ServiceRegistry response = mergeServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
+			final ServiceRegistry response = mergeServiceRegistry(srEntry, serviceDefinition, provider, validatedServiceUri , endOfValidity,  validatedSecurityType, validatedMetadataStr, validatedVersion,
 					validatedInterfaces);
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(response);
