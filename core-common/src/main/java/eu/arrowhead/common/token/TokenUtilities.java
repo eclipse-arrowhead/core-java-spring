@@ -112,7 +112,8 @@ public class TokenUtilities {
 	private static Long extractExpirationTime(final JwtClaims claims) throws InvalidJwtException {
 		try {
 			return claims.hasClaim(ReservedClaimNames.EXPIRATION_TIME) ? claims.getExpirationTime().getValueInMillis() : null;
-		} catch (MalformedClaimException ex) {
+		} catch (final MalformedClaimException ex) {
+			// never happens at this point
 			throw new InvalidJwtException("Invalid expiration time.", null, ex, null);
 		}
 	}
