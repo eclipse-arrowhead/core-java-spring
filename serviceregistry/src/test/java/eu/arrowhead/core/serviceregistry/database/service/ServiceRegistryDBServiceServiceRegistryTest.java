@@ -145,7 +145,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	static {
 		validServiceRegistry.setId(1);
-		validServiceRegistry.setServiceDefinition(null);
+		validServiceRegistry.setServiceDefinition(validTestServiceDefinition);
 		validServiceRegistry.setSystem(validTestProvider);
 		validServiceRegistry.setEndOfValidity(validTestEndOFValidity);
 		validServiceRegistry.setInterfaceConnections(validTestIntefacesSet);	
@@ -922,19 +922,17 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryDBService.mergeServiceByIdResponse( SERVICE_REGISTRY_REQUEST_DTO_WITH_INVALID_ENDOFVALIDITY_FORMAT, validId);
 	}
 	
-	////-------------------------------------------------------------------------------------------------
-	//@Test
-	//public void testMergeServiceByIdResponseNullServiceDefinition() {
-	//	when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0)));
-	//	when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(validTestServiceDefinition));
-	//	when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(validTestProvider));
-	//	when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(validServiceRegistry);
-	//	when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
-	//	
-	//	serviceRegistryDBService.mergeServiceByIdResponse( SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION, validId);
-	////TODO fixit setModifyedValuesOfServiceRegistryEntryFields ben a srEntry.getInterfaceConncetions().add(connection) - unsuportedoperationExceptiont ad
-	//
-	//}
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceByIdResponseNullServiceDefinition() {
+		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(validTestServiceDefinition));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(validTestProvider));
+		when(serviceRegistryRepository.saveAndFlush(any(ServiceRegistry.class))).thenReturn(validServiceRegistry);
+		when(serviceInterfaceRepository.findByInterfaceName(any(String.class))).thenReturn(Optional.empty());
+		
+		serviceRegistryDBService.mergeServiceByIdResponse( SERVICE_REGISTRY_REQUEST_DTO_WITH_NULL_SERVICEDEFINITION, validId);
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -1040,6 +1038,66 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		srEntry6.setId(6);
 		final ServiceRegistryInterfaceConnection conn6 = new ServiceRegistryInterfaceConnection(srEntry6, xmlInterface); 
 		srEntry6.setInterfaceConnections(Set.of(conn6));
+		result.add(srEntry6);
+		
+		return result;
+	}
+	//-------------------------------------------------------------------------------------------------
+	private List<ServiceRegistry> getTestProvidersWithMofifyableCollections(final ServiceDefinition definition) {
+		final List<ServiceRegistry> result = new ArrayList<ServiceRegistry>(6);
+		
+		final System provider = new System("test_system", "localhost", 1234, null);
+		final String metadataStr = "key=value, key2=value2";
+		
+		final ServiceInterface jsonInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		final ServiceInterface xmlInterface = new ServiceInterface("HTTP-SECURE-XML");
+		
+		final ServiceRegistry srEntry1 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 1);
+		srEntry1.setId(1);
+		final ServiceRegistryInterfaceConnection conn1 = new ServiceRegistryInterfaceConnection(srEntry1, jsonInterface); 
+		Set<ServiceRegistryInterfaceConnection> connectionSet1 = new HashSet();
+		connectionSet1.add(conn1);
+		srEntry1.setInterfaceConnections(connectionSet1);
+		result.add(srEntry1);
+		
+		final ServiceRegistry srEntry2 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 1);
+		srEntry2.setId(2);
+		final ServiceRegistryInterfaceConnection conn2 = new ServiceRegistryInterfaceConnection(srEntry2, jsonInterface); 
+		Set<ServiceRegistryInterfaceConnection> connectionSet2 = new HashSet();
+		connectionSet2.add(conn2);
+		srEntry2.setInterfaceConnections(connectionSet2);
+		result.add(srEntry2);
+		
+		final ServiceRegistry srEntry3 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, "abc=def", 1);
+		srEntry3.setId(3);
+		final ServiceRegistryInterfaceConnection conn3 = new ServiceRegistryInterfaceConnection(srEntry3, jsonInterface); 
+		Set<ServiceRegistryInterfaceConnection> connectionSet3 = new HashSet();
+		connectionSet3.add(conn3);
+		srEntry3.setInterfaceConnections(connectionSet3);
+		result.add(srEntry3);
+		
+		final ServiceRegistry srEntry4 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 5);
+		srEntry4.setId(4);
+		final ServiceRegistryInterfaceConnection conn4 = new ServiceRegistryInterfaceConnection(srEntry4, jsonInterface); 
+		Set<ServiceRegistryInterfaceConnection> connectionSet4 = new HashSet();
+		connectionSet4.add(conn4);
+		srEntry4.setInterfaceConnections(connectionSet4);
+		result.add(srEntry4);
+		
+		final ServiceRegistry srEntry5 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.CERTIFICATE, metadataStr, 1);
+		srEntry5.setId(5);
+		final ServiceRegistryInterfaceConnection conn5 = new ServiceRegistryInterfaceConnection(srEntry5, jsonInterface);
+		Set<ServiceRegistryInterfaceConnection> connectionSet5 = new HashSet();
+		connectionSet5.add(conn5);
+		srEntry5.setInterfaceConnections(connectionSet5);
+		result.add(srEntry5);
+		
+		final ServiceRegistry srEntry6 = new ServiceRegistry(definition, provider, null, null, ServiceSecurityType.NOT_SECURE, metadataStr, 1);
+		srEntry6.setId(6);
+		final ServiceRegistryInterfaceConnection conn6 = new ServiceRegistryInterfaceConnection(srEntry6, xmlInterface); 
+		Set<ServiceRegistryInterfaceConnection> connectionSet6 = new HashSet();
+		connectionSet6.add(conn6);
+		srEntry6.setInterfaceConnections(connectionSet6);
 		result.add(srEntry6);
 		
 		return result;
