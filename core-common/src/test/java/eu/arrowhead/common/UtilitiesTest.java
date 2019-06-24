@@ -1,9 +1,11 @@
 package eu.arrowhead.common;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -281,7 +283,29 @@ public class UtilitiesTest {
 	public void testGetPublicKeyFromBase64EncodedStringNotAKey() {
 		Utilities.getPublicKeyFromBase64EncodedString("bm90IGEga2V5");
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromPEMFileInputStreamNull() {
+		Utilities.getPublicKeyFromPEMFile(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPublicKeyFromPEMFileIOException() throws IOException {
+		final InputStream is = InputStream.nullInputStream();
+		is.close();
+		Utilities.getPublicKeyFromPEMFile(is);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicKeyFromPEMFileOk() throws IOException {
+		final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.pub");
+		final PublicKey publicKey = Utilities.getPublicKeyFromPEMFile(is);
+		Assert.assertEquals("RSA", publicKey.getAlgorithm());
+		Assert.assertEquals("X.509", publicKey.getFormat());
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test

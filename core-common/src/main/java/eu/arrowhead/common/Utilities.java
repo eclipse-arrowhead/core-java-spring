@@ -1,6 +1,8 @@
 package eu.arrowhead.common;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.ServiceConfigurationError;
+import java.util.regex.Pattern;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -65,6 +68,7 @@ public class Utilities {
 	
 	private static final String KEY_FACTORY_ALGORHITM_NAME = "RSA";
 	private static final KeyFactory keyFactory;
+	private static final Pattern PEM_PATTERN = Pattern.compile("(?m)(?s)^---*BEGIN.*---*$(.*)^---*END.*---*$.*");
 	
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -337,12 +341,28 @@ public class Utilities {
 		Assert.isTrue(!isEmpty(encodedKey), "Encoded key is null or blank");
 		
 		final byte[] keyBytes = Base64.getDecoder().decode(encodedKey);
+		return generatePublicKeyFromByteArray(keyBytes);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static PublicKey getPublicKeyFromPEMFile(final InputStream is) {
+		Assert.notNull(is, "Input stream is null");
 		try {
-			return keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
-		} catch (final InvalidKeySpecException ex) {
-		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
-		      throw new AuthException("Public key decoding failed due wrong input key", ex);
-		}
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			final byte[] buf = new byte[1024];
+			for (int read = 0; read != -1; read = is.read(buf)) {
+				baos.write(buf, 0, read);
+			}
+			
+		    final String pem = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
+		    baos.close();
+		    final String encoded = PEM_PATTERN.matcher(pem).replaceFirst("$1");
+		    final byte[] keyBytes = Base64.getMimeDecoder().decode(encoded);
+		    
+		    return generatePublicKeyFromByteArray(keyBytes);
+		} catch (final IOException ex) {
+		      throw new ArrowheadException("IOException occurred during PEM file loading from input stream.", ex);
+		} 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -375,5 +395,15 @@ public class Utilities {
 	//-------------------------------------------------------------------------------------------------
 	private Utilities() {
 		throw new UnsupportedOperationException();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static PublicKey generatePublicKeyFromByteArray(final byte[] keyBytes) {
+		try {
+			return keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
+		} catch (final InvalidKeySpecException ex) {
+		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
+		      throw new AuthException("Public key decoding failed due wrong input key", ex);
+		}
 	}
 }
