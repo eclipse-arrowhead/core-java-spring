@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.InterCloudAuthorization;
 import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -237,6 +239,60 @@ public class DTOConverter {
 		}
 		
 		return result;
+	}
+	//-------------------------------------------------------------------------------------------------	
+	public static CloudResponseDTO convertCloudToCloudResponseDTO(Cloud entity) {
+		
+		Assert.notNull(entity, "Cloud is null" );
+		Assert.notNull(entity.getOperator(), "Cloud.Operator is null" );
+		Assert.notNull(entity.getName(), "Cloud.Name is null" );
+		Assert.notNull(entity.getAddress(), "Cloud.Address is null" );
+		Assert.notNull(entity.getGatekeeperServiceUri(), "Cloud.GateKeeperServiceUri is null" );
+		Assert.notNull(entity.getCreatedAt(), "Cloud.CreatedAt is null" );
+		Assert.notNull(entity.getUpdatedAt(), "Cloud.UpdatedAt is null" );
+		
+		return new CloudResponseDTO(
+				entity.getId(),
+				entity.getOperator(),
+				entity.getName(),
+				entity.getAddress(),
+				entity.getPort(),
+				entity.getGatekeeperServiceUri(),
+				entity.getSecure(),
+				entity.getNeighbor(),
+				entity.getOwnCloud(),
+				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static InterCloudAuthorizationListResponseDTO convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(final Page<InterCloudAuthorization> entries) {
+		Assert.notNull(entries, "InterCloudAuthorizationList is null");
+		
+		final List<InterCloudAuthorizationResponseDTO> interCloudAuthorizationEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final InterCloudAuthorization entry : entries) {
+			interCloudAuthorizationEntries.add(convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(entry));
+		}
+		
+		return new InterCloudAuthorizationListResponseDTO(interCloudAuthorizationEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static InterCloudAuthorizationResponseDTO convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(InterCloudAuthorization entity) {
+		
+		Assert.notNull(entity, "InterCloudAuthorization is null" );
+		Assert.notNull(entity.getCloud(), "InterCloudAuthorization.Cloud is null" );
+		Assert.notNull(entity.getServiceDefinition(), "InterCloudAuthorization.ServiceDefinition is null" );
+		Assert.notNull(entity.getCreatedAt(), "InterCloudAuthorization.CreatedAt is null" );
+		Assert.notNull(entity.getUpdatedAt(), "InterCloudAuthorization.UpdatedAt is null" );
+		
+		return new InterCloudAuthorizationResponseDTO(
+				entity.getId(),
+				convertCloudToCloudResponseDTO(entity.getCloud()),
+				convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
+				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+		
 	}
 	
 	//=================================================================================================

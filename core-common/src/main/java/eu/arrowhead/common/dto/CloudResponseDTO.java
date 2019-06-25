@@ -26,6 +26,26 @@ public class CloudResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
+	public CloudResponseDTO() {}
+	
+	//-------------------------------------------------------------------------------------------------
+	public CloudResponseDTO(long id, String operator, String name, String address, int port,
+			String gateKeeperServiceUri, Boolean secure, Boolean neighbor, Boolean ownCloud, String createdAt,
+			String updatedAt) {
+		this.id = id;
+		this.operator = operator;
+		this.name = name;
+		this.address = address;
+		this.port = port;
+		this.gateKeeperServiceUri = gateKeeperServiceUri;
+		this.secure = secure;
+		this.neighbor = neighbor;
+		this.ownCloud = ownCloud;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id;	}
 	public String getOperator() { return operator; }
 	public String getName() { return name; }
