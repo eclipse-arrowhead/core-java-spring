@@ -20,10 +20,10 @@ import javax.persistence.UniqueConstraint;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerSystemId", "providerSystemId", "serviceId"}))
 public class IntraCloudAuthorization {
 	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
-	
 	//=================================================================================================
 	// members
+	
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
