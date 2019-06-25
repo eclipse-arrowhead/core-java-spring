@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationRequestDTO;
@@ -292,6 +293,34 @@ public class AuthorizationController {
 		return interCloudAuthorizationEntryByIdResponse;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Create the requested InterCloudAuthorization entries")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@ResponseBody public InterCloudAuthorizationListResponseDTO addInterCloudAuthorization(@RequestBody final InterCloudAuthorizationRequestDTO request) {
+		logger.debug("New InterCloudAuthorization registration request recieved");
+		
+		final boolean isCloudIdNotValid = request.getCloudId() == null || request.getCloudId() < 1  ;
+		final boolean isServiceDefinitionNotValid = request.getServiceDefinitionIdList() == null || request.getServiceDefinitionIdList().isEmpty() ;
+		if (isCloudIdNotValid || isServiceDefinitionNotValid) {
+			String exceptionMsg = isCloudIdNotValid ? "Cloud Id is not valid" : "";
+			exceptionMsg = isServiceDefinitionNotValid ? exceptionMsg + " ServiceDefinition is null" :  exceptionMsg ;
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		}
+		
+		final InterCloudAuthorizationListResponseDTO response = authorizationDBService.createInterCloudAuthorizationResponse(
+				request.getCloudId(),
+				request.getServiceDefinitionIdList());
+		logger.debug("registerInterCloudAuthorization has been finished");
+		return response;
+		
+	}
 	
 	//=================================================================================================
 	// assistant methods

@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class InterCloudAuthorizationRequestDTO implements Serializable {
 
@@ -9,8 +10,8 @@ public class InterCloudAuthorizationRequestDTO implements Serializable {
 	
 	private static final long serialVersionUID = 5349360773532348565L;
 	
-	private CloudRequestDTO cloud; 
-	private ServiceDefinitionRequestDTO serviceDefinition;
+	private Long cloudId; 
+	private List<Long> serviceDefinitionIdList;
 	
 	//=================================================================================================
 	// methods
@@ -19,20 +20,20 @@ public class InterCloudAuthorizationRequestDTO implements Serializable {
 	public InterCloudAuthorizationRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public InterCloudAuthorizationRequestDTO(CloudRequestDTO cloud,
-			ServiceDefinitionRequestDTO serviceDefinition) {
+	public InterCloudAuthorizationRequestDTO(long cloudId,
+			List<Long> serviceDefinitionIdList) {
 
-		this.cloud = cloud;
-		this.serviceDefinition = serviceDefinition;
+		this.cloudId = cloudId;
+		this.serviceDefinitionIdList = serviceDefinitionIdList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudRequestDTO getCloud() { return cloud; }
-	public ServiceDefinitionRequestDTO getServiceDefinition() { return serviceDefinition;	}
+	public Long getCloudId() { return cloudId; }
+	public List<Long> getServiceDefinitionIdList() { return serviceDefinitionIdList;	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setCloud(CloudRequestDTO cloud) { this.cloud = cloud; }
-	public void setServiceDefinition(ServiceDefinitionRequestDTO serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setCloudId(Long cloudId) { this.cloudId = cloudId; }
+	public void setServiceDefinitionIdList(List<Long> serviceDefinitionIdList) { this.serviceDefinitionIdList = serviceDefinitionIdList; }
 }
 
 
