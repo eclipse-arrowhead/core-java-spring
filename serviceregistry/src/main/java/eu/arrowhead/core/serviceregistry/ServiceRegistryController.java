@@ -884,7 +884,7 @@ public class ServiceRegistryController {
 			final long id) {
 		
 		if ( id <= 0) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, serviceRegistryMgmtUri);
 		}		
 		boolean needChange = false;
 		if ( request.getProviderSystem() != null && !Utilities.isEmpty(request.getProviderSystem().getAddress())) {
@@ -901,7 +901,7 @@ public class ServiceRegistryController {
 			if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 				throw new BadPayloadException("Port must be between " + 
 											  CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + 
-											  CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+											  CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST, serviceRegistryMgmtUri);
 			}
 			
 			needChange = true;

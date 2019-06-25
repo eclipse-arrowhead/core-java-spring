@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -821,6 +822,38 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	}
 	
 	//=================================================================================================
+	// Tests of mergeService
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceInValidId() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("s");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setInterfaces(List.of("HTTP-SECURE-XML"));
+		
+		final MvcResult result = mergeServiceRegistryWithInValidId(new ServiceRegistryRequestDTO(), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Id must be greater then 0. ", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMergeServiceEverythingIsOk() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("s");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setInterfaces(List.of("HTTP-SECURE-XML"));
+		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
+		
+		mergeServiceRegistry(request, status().isOk());
+	}
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -859,9 +892,35 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//-------------------------------------------------------------------------------------------------
 	private MvcResult updateServiceRegistryWithInValidId(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		
-		long validServiceRegistryId = -1;
+		long inValidServiceRegistryId = -1;
 		
-		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI+"/"+validServiceRegistryId)
+		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI+"/"+inValidServiceRegistryId)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult mergeServiceRegistryWithInValidId(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
+		
+		long inValidServiceRegistryId = -1;
+		
+		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI+"/"+inValidServiceRegistryId)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request))
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult mergeServiceRegistry(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
+		
+		long validServiceRegistryId = 1;
+		
+		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI+"/"+validServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
