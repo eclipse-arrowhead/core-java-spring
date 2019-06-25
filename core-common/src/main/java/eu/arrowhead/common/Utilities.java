@@ -7,6 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +56,8 @@ public class Utilities {
 	
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final String dateTimePattern = "yyyy-MM-dd HH:mm:ss";
+	static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateTimePattern);
 	
 	static {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -69,6 +79,38 @@ public class Utilities {
 	    }
 	    
 	    return uri;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static String convertZonedDateTimeToUTCString(final ZonedDateTime time) {
+		if (time == null) {
+			return null;
+		}
+		
+		final LocalDateTime localDateTime = LocalDateTime.ofInstant(time.toInstant(), ZoneOffset.UTC);
+		return dateTimeFormatter.format(localDateTime);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static ZonedDateTime parseUTCStringToLocalZonedDateTime(final String timeStr) throws DateTimeParseException {
+		if (isEmpty(timeStr)) {
+			return null;
+		}
+		
+		final TemporalAccessor tempAcc = dateTimeFormatter.parse(timeStr);
+		final ZonedDateTime parsedDateTime = ZonedDateTime.of(tempAcc.get(ChronoField.YEAR),
+															  tempAcc.get(ChronoField.MONTH_OF_YEAR),
+															  tempAcc.get(ChronoField.DAY_OF_MONTH),
+															  tempAcc.get(ChronoField.HOUR_OF_DAY),
+															  tempAcc.get(ChronoField.MINUTE_OF_HOUR),
+															  tempAcc.get(ChronoField.SECOND_OF_MINUTE),
+															  0,
+															  ZoneOffset.UTC);
+														
+		final ZoneOffset offset = OffsetDateTime.now().getOffset();
+		ZonedDateTime dateTime = ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
+		
+		return dateTime;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -263,6 +305,9 @@ public class Utilities {
 	    
 	    return clientFields.length >= 2 && cloudCN.equalsIgnoreCase(clientFields[1]);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static String getDatetimePattern() { return dateTimePattern; }
 	
 	//=================================================================================================
 	// assistant methods

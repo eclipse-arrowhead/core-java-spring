@@ -1,7 +1,10 @@
 package eu.arrowhead.common.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
@@ -28,8 +31,8 @@ public class DTOConverter {
 				system.getAddress(),
 				system.getPort(),
 				system.getAuthenticationInfo(),
-				String.valueOf(system.getCreatedAt()),
-				String.valueOf(system.getUpdatedAt()));		
+				Utilities.convertZonedDateTimeToUTCString(system.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(system.getUpdatedAt()));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -49,8 +52,8 @@ public class DTOConverter {
 	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
 		Assert.notNull(serviceDefinition, "ServiceDefinition is null");
 		
-		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), String.valueOf(serviceDefinition.getCreatedAt()),
-												String.valueOf(serviceDefinition.getUpdatedAt()));
+		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getCreatedAt()),
+												Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -81,22 +84,106 @@ public class DTOConverter {
 		dto.setServiceDefinition(serviceDefinitionDTO);
 		dto.setProvider(systemDTO);
 		dto.setServiceUri(entry.getServiceUri());
-		dto.setEndOfValidity(entry.getEndOfValidity() != null ? entry.getEndOfValidity().toString() : null);
+		dto.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(entry.getEndOfValidity()));
 		dto.setSecure(entry.getSecure());
 		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
 		dto.setVersion(entry.getVersion());
 		dto.setInterfaces(collectInterfaces(entry.getInterfaceConnections()));
-		dto.setCreatedAt(String.valueOf(entry.getCreatedAt()));
-		dto.setUpdatedAt(String.valueOf(entry.getUpdatedAt()));
+		dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()));
+		dto.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 		
 		return dto;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceRegistryListResponseDTO convertServiceRegistryListToServiceRegistryListResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
+		
+		final List<ServiceRegistryResponseDTO> serviceRegistryEntryDTOs = new ArrayList<>(serviceRegistryEntries.getNumberOfElements());
+		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
+			serviceRegistryEntryDTOs.add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+		}
+		
+		return new ServiceRegistryListResponseDTO(serviceRegistryEntryDTOs, serviceRegistryEntries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
+		
+		final Map<Long, ServicesGroupedBySystemsResponseDTO> servicesBySystemId = new HashMap<>();
+		final Map<String, ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
+		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
+		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
+		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();		
+		final Set<Long> serviceIdsForAutoComplete = new HashSet<>();
+		final Set<Long> systemIdsForAutoComplete = new HashSet<>();
+		final Set<Long> interfaceIdsForAutoComplete = new HashSet<>();
+						
+		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
+			final long systemId = srEntry.getSystem().getId();
+			final String systemName = srEntry.getSystem().getSystemName();
+			final String systemAddress = srEntry.getSystem().getAddress();
+			final int systemPort = srEntry.getSystem().getPort();
+			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
+			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();		
+			
+			// Creating ServicesGroupedBySystemsResponseDTO
+			if (servicesBySystemId.containsKey(systemId)) {
+				servicesBySystemId.get(systemId).getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+			} else {
+				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, new ArrayList<>());
+				dto.getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+				servicesBySystemId.put(systemId, dto);
+			}
+			
+			// Filling up AutoCompleteDataResponseDTO						
+			if (!serviceIdsForAutoComplete.contains(serviceDefinitionId)) {
+				serviceIdsForAutoComplete.add(serviceDefinitionId);
+				servicesForAutoComplete.add(new IdValueDTO(serviceDefinitionId, serviceDefinition));
+			}
+			if (!systemIdsForAutoComplete.contains(systemId)) {
+				systemIdsForAutoComplete.add(systemId);
+				systemsForAutoComplete.add(new SystemResponseDTO(systemId, systemName, systemAddress, systemPort, null, null, null));
+			}
+						
+			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
+			for (final ServiceRegistryInterfaceConnection connection : interfaceConnections) {
+				final long interfId = connection.getServiceInterface().getId();
+				final String interfaceName = connection.getServiceInterface().getInterfaceName();
+				
+				if (!interfaceIdsForAutoComplete.contains(interfId)) {
+					interfaceIdsForAutoComplete.add(interfId);
+					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
+				}
+				
+				// Creating ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO
+				final String key = serviceDefinitionId + "-" + interfId;
+				if (servicesByServiceDefinitionAndInterface.containsKey(key)) {
+					servicesByServiceDefinitionAndInterface.get(key).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+				} else {
+					final ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition, interfaceName,  new ArrayList<>());
+					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+					servicesByServiceDefinitionAndInterface.put(key, dto);
+				}
+			}
+		}
+		
+		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
+		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystemsResponseDTOList = new ArrayList<>();
+		servicesGroupedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
+		final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
+		servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList.addAll(servicesByServiceDefinitionAndInterface.values());
+		
+		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList, autoCompleteDataResponseDTO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceInterfaceResponseDTO convertServiceInterfaceToServiceInterfaceResponseDTO(final ServiceInterface intf) {
 		Assert.notNull(intf, "Interface entry is null.");
 		
-		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), String.valueOf(intf.getCreatedAt()), String.valueOf(intf.getUpdatedAt()));
+		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), Utilities.convertZonedDateTimeToUTCString(intf.getCreatedAt()), 
+											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------

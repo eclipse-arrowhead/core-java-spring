@@ -43,7 +43,7 @@ import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBServi
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
-@ContextConfiguration (classes = { ServiceRegistryDBSerrviceTestContext.class })
+@ContextConfiguration (classes = { ServiceRegistryDBServiceTestContext.class })
 public class ServiceRegistryControllerServiceDefinitionTest {
 	
 	//=================================================================================================
@@ -198,7 +198,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	//Tests of putUpdateServiceDefinition
 	
 	@Test
-	public void putUpdateServiceDefinitionTestWithValidDefintion() throws Exception {
+	public void putUpdateServiceDefinitionTestWithValidDefinition() throws Exception {
 		final String serviceDefinition = "testDefinition";
 		final int id = 5;
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(id, serviceDefinition,"","");
@@ -216,7 +216,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	@Test
-	public void putUpdateServiceDefinitionTestWithNullDefintion() throws Exception {
+	public void putUpdateServiceDefinitionTestWithNullDefinition() throws Exception {
 		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
 				.content("{}")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -225,7 +225,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	@Test
-	public void putUpdateServiceDefinitionTestWithBlankDefintion() throws Exception {
+	public void putUpdateServiceDefinitionTestWithBlankDefinition() throws Exception {
 		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
 				.content("{\"serviceDefinition\": \"     \"}")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -237,7 +237,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	//Tests of patchUpdateServiceDefinition
 	
 	@Test
-	public void patchUpdateServiceDefinitionTestWithValidDefintion() throws Exception {
+	public void patchUpdateServiceDefinitionTestWithValidDefinition() throws Exception {
 		final String serviceDefinition = "testDefinition";
 		final int id = 5;
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(id, serviceDefinition,"","");
@@ -255,7 +255,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	@Test
-	public void patchUpdateServiceDefinitionTestWithNullDefintion() throws Exception {
+	public void patchUpdateServiceDefinitionTestWithNullDefinition() throws Exception {
 		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
 				.content("{}")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -264,7 +264,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	@Test
-	public void patchUpdateServiceDefinitionTestWithBlankDefintion() throws Exception {
+	public void patchUpdateServiceDefinitionTestWithBlankDefinition() throws Exception {
 		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
 				.content("{\"serviceDefinition\": \"      \"}")
 				.contentType(MediaType.APPLICATION_JSON)

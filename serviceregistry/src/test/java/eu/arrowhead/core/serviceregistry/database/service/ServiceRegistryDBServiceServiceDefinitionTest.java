@@ -44,7 +44,7 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 	//Tests of getServiceDefinitionEntries
 	
 	@Test (expected = InvalidParameterException.class)
-	public void getServiceDefinitionEntriesTestWithInvalidDirectionFlag( ) {
+	public void getServiceDefinitionEntriesTestWithInvalidSortField() {
 		serviceRegistryDBService.getServiceDefinitionEntries(0, 10, Direction.ASC, "notValid");
 	}
 	
