@@ -1,6 +1,8 @@
 package eu.arrowhead.core.authorization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -11,7 +13,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +40,8 @@ import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckRequestDTO;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
@@ -50,6 +56,7 @@ public class AuthorizationControllerIntraCloudTest {
 	// members
 	
 	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_URI = "/authorization/mgmt/intracloud";
+	private static final String INTRA_CLOUD_AUTHORIZATION_CHECK_URI = "/authorization/intracloud/check";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -225,6 +232,63 @@ public class AuthorizationControllerIntraCloudTest {
 		assertEquals("Consumer", responseBody.getData().get(0).getConsumerSystem().getSystemName());
 		assertEquals(1, responseBody.getData().size());
 		assertEquals(1, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// Test of checkIntraCloudAuthorizationRequest
+	
+	@Test
+	public void testCheckIntraCloudAuthorizationRequestWithInvalidConsumerId() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO((long) 0, (long) 1, createIdList(1, 2))))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckIntraCloudAuthorizationRequestWithInvalidServiceDefinitionId() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO((long) 1, null, createIdList(1, 2))))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckIntraCloudAuthorizationRequestWithEmptyProviderIdList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO((long) 1, (long) 2, new ArrayList<>())))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckIntraCloudAuthorizationRequestDBCall() throws Exception {
+		final Long consumerId = (long) 1;
+		final Long serviceDefinitionId = (long) 3;
+		final int providerIdA = 4;
+		final int providerIdB = 5;
+		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
+		providerIdAuthorizationState.put((long) providerIdA, true);
+		providerIdAuthorizationState.put((long) providerIdB, false);
+		when(authorizationDBService.checkIntraCloudAuthorizationRequestResponse(anyLong(), anyLong(), any()))
+			.thenReturn(new IntraCloudAuthorizationCheckResponseDTO(consumerId, serviceDefinitionId, providerIdAuthorizationState));
+		
+		final MvcResult response = this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO(consumerId, serviceDefinitionId, createIdList(providerIdA, providerIdB))))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final IntraCloudAuthorizationCheckResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationCheckResponseDTO.class);
+		assertTrue(responseBody.getProviderIdAuthorizationState().get((long) providerIdA));
+		assertFalse(responseBody.getProviderIdAuthorizationState().get((long) providerIdB));
 	}
 	
 	//=================================================================================================
