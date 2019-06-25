@@ -11,14 +11,18 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @Configuration
 public class GWSwaggerConfig extends DefaultSwaggerConfig {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	public GWSwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_GATEWAY);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public Docket customizeSwagger() {
 		return configureSwaggerForCoreSystem(this.getClass().getPackageName());
 	}
-
 }

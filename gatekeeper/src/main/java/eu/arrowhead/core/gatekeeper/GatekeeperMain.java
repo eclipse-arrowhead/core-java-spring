@@ -16,7 +16,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableJpaRepositories (basePackages = CommonConstants.DATABASE_REPOSITORY_PACKAGE, repositoryBaseClass = RefreshableRepositoryImpl.class)
 @EnableSwagger2
 public class GatekeeperMain {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	public static void main(final String[] args) {
 		SpringApplication.run(GatekeeperMain.class, args);
 	}

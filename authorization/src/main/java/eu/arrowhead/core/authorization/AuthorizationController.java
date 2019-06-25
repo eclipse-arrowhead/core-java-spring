@@ -85,16 +85,13 @@ public class AuthorizationController {
 	
 	@Autowired
 	private AuthorizationDBService authorizationDBService;
-	
+		
+        private TokenGenerationService tokenGenerationService;
+
 
 	//=================================================================================================
 	// methods
 	
-	private TokenGenerationService tokenGenerationService;
-	
-	//=================================================================================================
-	// methods
-
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
 	@ApiResponses(value = {

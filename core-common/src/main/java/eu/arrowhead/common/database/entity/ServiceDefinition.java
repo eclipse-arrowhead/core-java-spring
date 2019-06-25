@@ -28,7 +28,10 @@ import eu.arrowhead.common.Defaults;
 			@NamedAttributeNode (value = "serviceRegistryEntries")
 	})
 public class ServiceDefinition {
-	
+
+	//=================================================================================================
+	// members
+
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 
 	@Id
@@ -56,84 +59,51 @@ public class ServiceDefinition {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<>();
 	
-	public ServiceDefinition() {
-		
-	}
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	public ServiceDefinition() {}
+
+	//-------------------------------------------------------------------------------------------------
 	public ServiceDefinition(final String serviceDefinition) {
 		this.serviceDefinition = serviceDefinition;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public String getServiceDefinition() { return serviceDefinition; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
+	public Set<IntraCloudAuthorization> getIntraCloudAuthorizations() { return intraCloudAuthorizations; }
+	public Set<InterCloudAuthorization> getInterCloudAuthorizations() { return interCloudAuthorizations; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
+	public void setIntraCloudAuthorizations(final Set<IntraCloudAuthorization> intraCloudAuthorizations) { this.intraCloudAuthorizations = intraCloudAuthorizations; }
+	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) { this.interCloudAuthorizations = interCloudAuthorizations; }
 
-	public String getServiceDefinition() {
-		return serviceDefinition;
-	}
-
-	public void setServiceDefinition(final String serviceDefinition) {
-		this.serviceDefinition = serviceDefinition;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-	
-	public Set<ServiceRegistry> getServiceRegistryEntries() {
-		return serviceRegistryEntries;
-	}
-
-	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) {
-		this.serviceRegistryEntries = serviceRegistryEntries;
-	}
-		
-	public Set<IntraCloudAuthorization> getIntraCloudAuthorizations() {
-		return intraCloudAuthorizations;
-	}
-
-	public void setIntraCloudAuthorizations(final Set<IntraCloudAuthorization> intraCloudAuthorizations) {
-		this.intraCloudAuthorizations = intraCloudAuthorizations;
-	}
-		
-	public Set<InterCloudAuthorization> getInterCloudAuthorizations() {
-		return interCloudAuthorizations;
-	}
-
-	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) {
-		this.interCloudAuthorizations = interCloudAuthorizations;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ServiceDefinition [id=" + id + ", serviceDefinition=" + serviceDefinition + "]";
+		return "ServiceDefinition [id = " + id + ", serviceDefinition = " + serviceDefinition + "]";
 	}
-		
 }

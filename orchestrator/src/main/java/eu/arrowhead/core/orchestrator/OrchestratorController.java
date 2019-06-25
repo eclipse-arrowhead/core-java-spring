@@ -17,9 +17,17 @@ allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACC
 )
 @RestController
 public class OrchestratorController {
+
+	//=================================================================================================
+	// members
+
+	private static final String ECHO_URI = "/echo";
 	
-private static final String ECHO_URI = "/echo";
+	//=================================================================================================
+	// methods
+
 	
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
@@ -30,5 +38,4 @@ private static final String ECHO_URI = "/echo";
 	public String echoService() {
 		return "Got it!";
 	}
-	
 }

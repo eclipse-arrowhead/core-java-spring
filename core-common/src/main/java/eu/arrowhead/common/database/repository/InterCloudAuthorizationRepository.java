@@ -8,7 +8,7 @@ import eu.arrowhead.common.database.entity.InterCloudAuthorization;
 import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
 
 @Repository
-public interface InterCloudAuthorizationRepository extends RefreshableRepository<InterCloudAuthorization, Long> {
+public interface InterCloudAuthorizationRepository extends RefreshableRepository<InterCloudAuthorization,Long> {
 
 	Optional<IntraCloudAuthorization> findByCloudIdAndServiceDefinitionId(long cloudId, long serviceDefinitionId);
 

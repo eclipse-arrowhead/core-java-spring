@@ -50,24 +50,22 @@ public class ServiceRegistryControllerDBExceptionHandlerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void dbServiceThrowInvalidParameterExceptionTest() throws Exception {
 		when(serviceRegistryDBService.getServiceDefinitionEntriesResponse(anyInt(), anyInt(), any(), any())).thenThrow(new InvalidParameterException("test"));
 		
 		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Test
 	public void dbServiceThrowArrowheadExceptionTest() throws Exception {
 		when(serviceRegistryDBService.getServiceDefinitionEntriesResponse(anyInt(), anyInt(), any(), any())).thenThrow(new ArrowheadException("test"));
 		
 		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isInternalServerError());
 	}
 }

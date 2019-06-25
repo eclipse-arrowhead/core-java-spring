@@ -19,6 +19,9 @@ import javax.persistence.UniqueConstraint;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceRegistryId", "interfaceId"}))
 public class ServiceRegistryInterfaceConnection {
 	
+	//=================================================================================================
+	// members
+	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
@@ -37,70 +40,48 @@ public class ServiceRegistryInterfaceConnection {
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 
-	public ServiceRegistryInterfaceConnection() {
+	//=================================================================================================
+	// methods
 	
-	}
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryInterfaceConnection() {}
 
+	//-------------------------------------------------------------------------------------------------
 	public ServiceRegistryInterfaceConnection(final ServiceRegistry serviceRegistryEntry, final ServiceInterface serviceInterface) {
 		this.serviceRegistryEntry = serviceRegistryEntry;
 		this.serviceInterface = serviceInterface;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public ServiceRegistry getServiceRegistryEntry() { return serviceRegistryEntry; }
+	public ServiceInterface getServiceInterface() { return serviceInterface; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setServiceRegistryEntry(final ServiceRegistry serviceRegistryEntry) { this.serviceRegistryEntry = serviceRegistryEntry; }
+	public void setServiceInterface(final ServiceInterface serviceInterface) { this.serviceInterface = serviceInterface; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-	public ServiceRegistry getServiceRegistryEntry() {
-		return serviceRegistryEntry;
-	}
-
-	public void setServiceRegistryEntry(final ServiceRegistry serviceRegistryEntry) {
-		this.serviceRegistryEntry = serviceRegistryEntry;
-	}
-
-	public ServiceInterface getServiceInterface() {
-		return serviceInterface;
-	}
-
-	public void setServiceInterface(final ServiceInterface serviceInterface) {
-		this.serviceInterface = serviceInterface;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ServiceRegistryInterfaceConnection [id=" + id + ", serviceRegistryEntry=" + serviceRegistryEntry
-				+ ", serviceInterface=" + serviceInterface + "]";
+		return "ServiceRegistryInterfaceConnection [id = " + id + ", serviceRegistryEntry = " + serviceRegistryEntry + ", serviceInterface = " + serviceInterface + "]";
 	}
-	
 }

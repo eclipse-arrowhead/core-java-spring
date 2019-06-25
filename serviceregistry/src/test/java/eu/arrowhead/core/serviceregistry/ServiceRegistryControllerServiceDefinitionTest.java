@@ -64,15 +64,15 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	//Tests of getServiceDefinitions
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceDefinitionsTestWithoutParameter() throws Exception  {
 		final int numOfEntries = 5;
@@ -81,14 +81,15 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		when(serviceRegistryDBService.getServiceDefinitionEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceDefinitionEntriesDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/services")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final ServiceDefinitionsListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionsListResponseDTO.class);
 		assertEquals(numOfEntries, responseBody.getCount());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceDefinitionsTestWithPageAndSizeParameter() throws Exception {
 		final int numOfEntries = 8;
@@ -97,43 +98,47 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		when(serviceRegistryDBService.getServiceDefinitionEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceDefinitionEntriesDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/services")
-				.param("page", "0")
-				.param("item_per_page", String.valueOf(numOfEntries))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .param("page", "0")
+											   .param("item_per_page", String.valueOf(numOfEntries))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final ServiceDefinitionsListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionsListResponseDTO.class);
 		assertEquals(numOfEntries, responseBody.getCount());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceDefinitionsTestWithNullPageButDefinedSizeParameter() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
-				.param("item_per_page", "1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
-	}
-	
-	@Test 
-	public void getServiceDefinitionsTestWithDefinedPageButNullSizeParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
-				.param("page", "0")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
-	}
-	
-	@Test
-	public void getServiceDefinitionsTestWithInvalidSortDirectionFlagParameter() throws Exception {
-		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
-				.param("direction", "invalid")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param("item_per_page", "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getServiceDefinitionsTestWithDefinedPageButNullSizeParameter() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
+					.param("page", "0")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getServiceDefinitionsTestWithInvalidSortDirectionFlagParameter() throws Exception {
+		this.mockMvc.perform(get("/serviceregistry/mgmt/services")
+					.param("direction", "invalid")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//=================================================================================================
 	//Tests of getServiceDefinitionsById
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceDefinitionByIdTestWithExistingId() throws Exception {
 		final int requestedId = 1;
@@ -141,24 +146,26 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		when(serviceRegistryDBService.getServiceDefinitionByIdResponse(anyLong())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/services/" + requestedId)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
 		assertEquals(requestedId, responseBody.getId());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceDefinitionByIdTestWithInvalidId() throws Exception {
 		this.mockMvc.perform(get("/serviceregistry/mgmt/services/-1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	//Tests of addServiceDefinition
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addServiceDefinitionTestWithValidDefinition() throws Exception {
 		final String serviceDefinition = "testDefinition";
@@ -166,37 +173,40 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		when(serviceRegistryDBService.createServiceDefinitionResponse(anyString())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post("/serviceregistry/mgmt/services")
-				.content("{\"serviceDefinition\": \"" + serviceDefinition + "\"}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated())
-				.andReturn();
+											   .content("{\"serviceDefinition\": \"" + serviceDefinition + "\"}")
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isCreated())
+											   .andReturn();
 		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
 		assertEquals(serviceDefinition, responseBody.getServiceDefinition());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addServiceDefinitionTestWithNullDefinition() throws Exception {
 		this.mockMvc.perform(post("/serviceregistry/mgmt/services")
-				.content("{}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
-	}
-	
-	@Test
-	public void addServiceDefinitionTestWithBlankDefinition() throws Exception {
-		this.mockMvc.perform(post("/serviceregistry/mgmt/services")
-				.content("{\"serviceDefinition\": \"      \"}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content("{}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void addServiceDefinitionTestWithBlankDefinition() throws Exception {
+		this.mockMvc.perform(post("/serviceregistry/mgmt/services")
+					.content("{\"serviceDefinition\": \"      \"}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//=================================================================================================
 	//Tests of putUpdateServiceDefinition
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void putUpdateServiceDefinitionTestWithValidDefinition() throws Exception {
 		final String serviceDefinition = "testDefinition";
@@ -205,37 +215,40 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		when(serviceRegistryDBService.updateServiceDefinitionByIdResponse(anyLong(), anyString())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(put("/serviceregistry/mgmt/services/" + id)
-				.content("{\"serviceDefinition\": \"" + serviceDefinition + "\"}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .content("{\"serviceDefinition\": \"" + serviceDefinition + "\"}")
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
 		assertEquals(serviceDefinition, responseBody.getServiceDefinition());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void putUpdateServiceDefinitionTestWithNullDefinition() throws Exception {
 		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
-				.content("{}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
-	}
-	
-	@Test
-	public void putUpdateServiceDefinitionTestWithBlankDefinition() throws Exception {
-		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
-				.content("{\"serviceDefinition\": \"     \"}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content("{}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void putUpdateServiceDefinitionTestWithBlankDefinition() throws Exception {
+		this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
+					.content("{\"serviceDefinition\": \"     \"}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//=================================================================================================
 	//Tests of patchUpdateServiceDefinition
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void patchUpdateServiceDefinitionTestWithValidDefinition() throws Exception {
 		final String serviceDefinition = "testDefinition";
@@ -244,56 +257,61 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		when(serviceRegistryDBService.updateServiceDefinitionByIdResponse(anyLong(), anyString())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(patch("/serviceregistry/mgmt/services/" + id)
-				.content("{\"serviceDefinition\": \"" + serviceDefinition + "\"}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .content("{\"serviceDefinition\": \"" + serviceDefinition + "\"}")
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
 		assertEquals(serviceDefinition, responseBody.getServiceDefinition());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void patchUpdateServiceDefinitionTestWithNullDefinition() throws Exception {
 		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
-				.content("{}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
-	}
-	
-	@Test
-	public void patchUpdateServiceDefinitionTestWithBlankDefinition() throws Exception {
-		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
-				.content("{\"serviceDefinition\": \"      \"}")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content("{}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void patchUpdateServiceDefinitionTestWithBlankDefinition() throws Exception {
+		this.mockMvc.perform(patch("/serviceregistry/mgmt/services/5")
+					.content("{\"serviceDefinition\": \"      \"}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//=================================================================================================
 	//Tests of removeServiceDefinition
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeServiceDefinitionTestWithValidId( ) throws Exception {
 		this.mockMvc.perform(delete("/serviceregistry/mgmt/services/4")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeServiceDefinitionTestWithInvalidId( ) throws Exception {
 		this.mockMvc.perform(delete("/serviceregistry/mgmt/services/0")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//=================================================================================================
 	// assistant methods
 	
+	//-------------------------------------------------------------------------------------------------
 	private Page<ServiceDefinition> createServiceDefinitionPageForDBMocking(final int amountOfEntry) {
-		final List<ServiceDefinition> serviceDefinitionList = new ArrayList<>();
+		final List<ServiceDefinition> serviceDefinitionList = new ArrayList<>(amountOfEntry);
 		for (int i = 0; i < amountOfEntry; i++) {
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("mockedService" + i);
 			serviceDefinition.setId(i);
@@ -302,7 +320,9 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 			serviceDefinition.setUpdatedAt(timeStamp);
 			serviceDefinitionList.add(serviceDefinition);
 		}
+		
 		final Page<ServiceDefinition> entries = new PageImpl<ServiceDefinition>(serviceDefinitionList);
+		
 		return entries;
 	}
 }

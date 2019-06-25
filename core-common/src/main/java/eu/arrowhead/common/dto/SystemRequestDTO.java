@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class SystemRequestDTO implements Serializable {
-
 	
 	//=================================================================================================
 	// members

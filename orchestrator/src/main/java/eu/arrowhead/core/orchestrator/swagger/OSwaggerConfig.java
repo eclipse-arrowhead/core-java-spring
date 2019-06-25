@@ -10,15 +10,19 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class OSwaggerConfig extends DefaultSwaggerConfig{
+public class OSwaggerConfig extends DefaultSwaggerConfig {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	public OSwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_ORCHESTRATOR);
-		}
+	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public Docket customizeSwagger() {
 		return configureSwaggerForCoreSystem(this.getClass().getPackageName());
 	}
-	
 }

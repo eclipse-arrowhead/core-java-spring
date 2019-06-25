@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 
 @Repository
-public interface ServiceRegistryInterfaceConnectionRepository extends RefreshableRepository<ServiceRegistryInterfaceConnection, Long> {
+public interface ServiceRegistryInterfaceConnectionRepository extends RefreshableRepository<ServiceRegistryInterfaceConnection,Long> {
 
 }
