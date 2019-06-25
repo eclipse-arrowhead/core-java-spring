@@ -539,7 +539,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
 		}
 		
-		serviceRegistryDBService.removeServiceRegistryEntryById(id);;
+		serviceRegistryDBService.removeServiceRegistryEntryById(id);
 		logger.debug("Service Registry with id: '{}' successfully deleted", id);
 	}
 	
@@ -879,6 +879,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3776")
 	private void checkServiceRegistryMergeRequest(final long id, final ServiceRegistryRequestDTO request, final String origin) {
 		logger.debug("checkServiceRegistryMergeRequest started...");
 		

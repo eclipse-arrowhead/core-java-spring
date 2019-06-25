@@ -535,20 +535,8 @@ public class ServiceRegistryDBService {
 		final String validatedProviderAddress = request.getProviderSystem().getAddress().toLowerCase().trim();
 		final int validatedProviderPort = request.getProviderSystem().getPort().intValue();
 		try {
-			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(validatedServiceDefinition);
-			final ServiceDefinition serviceDefinition = optServiceDefinition.isPresent() ? optServiceDefinition.get() : createServiceDefinition(validatedServiceDefinition);
-			
-			final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(validatedProviderName, validatedProviderAddress, validatedProviderPort);
-			System provider;
-			if (optProvider.isPresent()) {
-				provider = optProvider.get();
-				if (!Objects.equals(request.getProviderSystem().getAuthenticationInfo(), provider.getAuthenticationInfo())) { // authentication info has changed
-					provider.setAuthenticationInfo(request.getProviderSystem().getAuthenticationInfo());
-					provider = systemRepository.saveAndFlush(provider);
-				}
-			} else {
-				provider = createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
-			}
+			final ServiceDefinition serviceDefinition = findOrCreateServiceDefinition(validatedServiceDefinition);
+			final System provider = findOrCreateSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
 														
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
@@ -567,7 +555,7 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceRegistryResponseDTO updateServiceByIdResponse(final long id, final ServiceRegistryRequestDTO request) {
@@ -591,21 +579,8 @@ public class ServiceRegistryDBService {
 			final String validatedProviderAddress = request.getProviderSystem().getAddress().toLowerCase().trim();
 			final int validatedProviderPort = request.getProviderSystem().getPort().intValue();
 			
-			final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(validatedServiceDefinition);
-			final ServiceDefinition serviceDefinition = optServiceDefinition.isPresent() ? optServiceDefinition.get() : createServiceDefinition(validatedServiceDefinition);
-			
-			final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(validatedProviderName, validatedProviderAddress, validatedProviderPort);
-			System provider;
-			if (optProvider.isPresent()) {
-				provider = optProvider.get();
-				if (!Objects.equals(request.getProviderSystem().getAuthenticationInfo(), provider.getAuthenticationInfo())) { // authentication info has changed
-					provider.setAuthenticationInfo(request.getProviderSystem().getAuthenticationInfo());
-					provider = systemRepository.saveAndFlush(provider);
-				}
-			} else {
-				provider = createSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
-			}
-														
+			final ServiceDefinition serviceDefinition = findOrCreateServiceDefinition(validatedServiceDefinition); 
+			final System provider = findOrCreateSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
@@ -624,6 +599,7 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3776")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public ServiceRegistryResponseDTO mergeServiceByIdResponse(final long id, final ServiceRegistryRequestDTO request) {
 		logger.debug("mergeServiceByIdResponse started...");
@@ -687,12 +663,12 @@ public class ServiceRegistryDBService {
 										   validatedInterfaces);
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final DateTimeParseException ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
-		} catch (final InvalidParameterException ex) {
-			throw ex;
-			} catch (final Exception ex) {
+		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
@@ -894,6 +870,7 @@ public class ServiceRegistryDBService {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S1126")
 	private boolean checkSystemIfUniqueValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress, final Integer validatedPort) {		
 		logger.debug("checkSystemIfUniqueValidationNeeded started...");
 		
@@ -1080,6 +1057,29 @@ public class ServiceRegistryDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private System findOrCreateSystem(final String systemName, final String address, final int port, final String authenticationInfo) {
+		final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
+		System provider;
+		if (optProvider.isPresent()) {
+			provider = optProvider.get();
+			if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo())) { // authentication info has changed
+				provider.setAuthenticationInfo(authenticationInfo);
+				provider = systemRepository.saveAndFlush(provider);
+			}
+		} else {
+			provider = createSystem(systemName, address, port, authenticationInfo);
+		}
+		return provider;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ServiceDefinition findOrCreateServiceDefinition(final String serviceDef) {
+		final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(serviceDef);
+		
+		return optServiceDefinition.isPresent() ? optServiceDefinition.get() : createServiceDefinition(serviceDef);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -92,6 +92,7 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
 	public static ZonedDateTime parseUTCStringToLocalZonedDateTime(final String timeStr) throws DateTimeParseException {
 		if (isEmpty(timeStr)) {
 			return null;

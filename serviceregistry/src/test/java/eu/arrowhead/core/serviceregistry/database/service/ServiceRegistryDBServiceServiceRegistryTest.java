@@ -687,6 +687,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseNullServiceDefinition() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
@@ -699,6 +700,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseEmptyServiceDefinition() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
@@ -711,6 +713,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseNullProviderSystem() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
@@ -723,6 +726,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseNullEndOfValidity() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
@@ -735,6 +739,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseNullInterfaces() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
@@ -747,6 +752,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseNullMetadata() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
@@ -759,6 +765,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseNullServiceSecurityType() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
@@ -771,6 +778,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testMergeServiceByIdResponseNullServiceUri() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.of(getTestProvidersWithMofifyableCollections(new ServiceDefinition("testServiceDefinition")).get(0)));
