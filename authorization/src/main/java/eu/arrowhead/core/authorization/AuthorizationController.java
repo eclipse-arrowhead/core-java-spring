@@ -47,12 +47,14 @@ public class AuthorizationController {
 	
 	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_URI = CommonConstants.MGMT_URI + "/intracloud";
 	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI = INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-	private static final String GET_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization returned";
-	private static final String GET_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not retrieve IntraCloudAuthorization";
-	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization removed";
-	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not remove IntraCloudAuthorization";
-	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE = "IntraCloudAuthorizations created";
-	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not create IntraCloudAuthorization";
+	private static final String GET_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_200_MESSAGE = "IntraCloudAuthorization returned";
+	private static final String GET_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE = "Could not retrieve IntraCloudAuthorization";
+	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_200_MESSAGE = "IntraCloudAuthorization removed";
+	private static final String DELETE_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE = "Could not remove IntraCloudAuthorization";
+	private static final String POST_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_201_MESSAGE = "IntraCloudAuthorizations created";
+	private static final String POST_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE = "Could not create IntraCloudAuthorization";
+	
+	private static final String INTRA_CLOUD_AUTHORIZATION_CHECK_URI = "/intracloud/check";
 	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
@@ -78,8 +80,8 @@ public class AuthorizationController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested IntraCloudAuthorization entries by the given parameters", response = IntraCloudAuthorizationListResponseDTO.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -114,8 +116,8 @@ public class AuthorizationController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested IntraCloudAuthorization entry", response = IntraCloudAuthorizationResponseDTO.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -135,8 +137,8 @@ public class AuthorizationController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Remove the requested IntraCloudAuthorization entry")
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -155,8 +157,8 @@ public class AuthorizationController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Create the requested IntraCloudAuthorization entries")
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_INTRA_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -180,6 +182,8 @@ public class AuthorizationController {
 		return response;
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
 	
 	//=================================================================================================
 	// assistant methods
