@@ -48,7 +48,7 @@ import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBServi
 
 @RunWith (SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryMain.class)
-@ContextConfiguration (classes = { ServiceRegistryDBSerrviceTestContext.class })
+@ContextConfiguration (classes = { ServiceRegistryDBServiceTestContext.class })
 public class ServiceRegistryControllerSystemTest {
 	
 	//=================================================================================================
