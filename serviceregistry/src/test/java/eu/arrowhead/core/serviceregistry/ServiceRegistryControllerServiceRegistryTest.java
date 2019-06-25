@@ -62,6 +62,7 @@ import eu.arrowhead.common.dto.ServiceSecurityType;
 import eu.arrowhead.common.dto.ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO;
 import eu.arrowhead.common.dto.ServicesGroupedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -816,7 +817,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
-		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
+		when(serviceRegistryDBService.updateServiceByIdResponse(any(ServiceRegistryRequestDTO.class), anyLong())).thenReturn(new ServiceRegistryResponseDTO());
 		
 		updateServiceRegistry(request, status().isOk());
 	}
@@ -842,13 +843,41 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testMergeServiceEmptyRequest() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition(" ");
+		
+		final SystemRequestDTO provider = getAValidSystemRequestDTO();
+		provider.setSystemName(" ");
+		provider.setAddress(" ");
+		provider.setPort(null);
+		provider.setAuthenticationInfo(null);
+		
+		request.setProviderSystem(provider);
+		request.setEndOfValidity(null);
+		request.setInterfaces(null);
+		
+		final MvcResult result = mergeServiceRegistry(new ServiceRegistryRequestDTO(), status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals("Patch request is empty.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testMergeServiceEverythingIsOk() throws Exception {
 		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
 		request.setInterfaces(List.of("HTTP-SECURE-XML"));
-		when(serviceRegistryDBService.registerServiceResponse(request)).thenReturn(new ServiceRegistryResponseDTO());
+		
+		final SystemResponseDTO provider = new SystemResponseDTO();
+		provider.setSystemName("testSystem");
+		final ServiceRegistryResponseDTO response = new ServiceRegistryResponseDTO();
+		response.setProvider(provider);
+		when(serviceRegistryDBService.mergeServiceByIdResponse(any(ServiceRegistryRequestDTO.class), anyLong())).thenReturn(response);
 		
 		mergeServiceRegistry(request, status().isOk());
 	}
