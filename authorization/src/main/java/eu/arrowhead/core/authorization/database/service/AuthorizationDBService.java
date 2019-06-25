@@ -27,6 +27,7 @@ import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -240,6 +241,34 @@ public class AuthorizationDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public InterCloudAuthorizationResponseDTO getInterCloudAuthorizationEntryByIdResponse(final long id) {
+		logger.debug("getInterCloudAuthorizationByIdEntryResponse started...");		
+		final InterCloudAuthorization interCloudAuthorizationEntry = getInterCloudAuthorizationEntryById(id);
+		return DTOConverter.convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(interCloudAuthorizationEntry);
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	public InterCloudAuthorization getInterCloudAuthorizationEntryById(final long id) {
+		logger.debug("getInterCloudAuthorizationEntryById started...");
+		
+		try {
+			final Optional<InterCloudAuthorization> find = interCloudAuthorizationRepository.findById(id);
+			if (find.isPresent()) {
+				return find.get();
+			} else {
+				throw new InvalidParameterException("InterCloudAuthorization with id of '" + id + "' not exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	

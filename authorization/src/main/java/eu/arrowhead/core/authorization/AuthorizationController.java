@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
@@ -140,43 +141,7 @@ public class AuthorizationController {
 		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
 		return intraCloudAuthorizationEntriesResponse;
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested InterCloudAuthorization entries by the given parameters", response = InterCloudAuthorizationListResponseDTO.class)
-	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public InterCloudAuthorizationListResponseDTO getInterCloudAuthorizations(
-			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
-			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New InterCloudAuthorization get request recieved with page: {} and item_per page: {}", page, size);
 		
-		int validatedPage;
-		int validatedSize;
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}
-		}
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
-		
-		final InterCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getInterCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
-		logger.debug("InterCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
-		return intraCloudAuthorizationEntriesResponse;
-	}
-	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested IntraCloudAuthorization entry", response = IntraCloudAuthorizationResponseDTO.class)
 	@ApiResponses (value = {
@@ -269,6 +234,64 @@ public class AuthorizationController {
 		
 		return response;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested InterCloudAuthorization entries by the given parameters", response = InterCloudAuthorizationListResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public InterCloudAuthorizationListResponseDTO getInterCloudAuthorizations(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New InterCloudAuthorization get request recieved with page: {} and item_per page: {}", page, size);
+		
+		int validatedPage;
+		int validatedSize;
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		
+		final InterCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getInterCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		logger.debug("InterCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
+		return intraCloudAuthorizationEntriesResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested InterCloudAuthorization entry", response = InterCloudAuthorizationResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public InterCloudAuthorizationResponseDTO getInterCloudAuthorizationById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New InterCloudAuthorization get request recieved with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+		}
+		
+		final InterCloudAuthorizationResponseDTO interCloudAuthorizationEntryByIdResponse = authorizationDBService.getInterCloudAuthorizationEntryByIdResponse(id);
+		logger.debug("InterCloudAuthorization entry with id: {} successfully retrieved", id);
+		return interCloudAuthorizationEntryByIdResponse;
+	}
+
 	
 	//=================================================================================================
 	// assistant methods
