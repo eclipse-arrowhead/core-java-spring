@@ -337,6 +337,24 @@ public class AuthorizationDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeInterCloudAuthorizationEntryById(final long id) {
+		logger.debug("removeInterCloudAuthorizationEntryById started..");
+		
+		try {
+			if (!interCloudAuthorizationRepository.existsById(id)) {
+				throw new InvalidParameterException("InterCloudAuthorization with id of '" + id + "' not exists");
+			}
+			interCloudAuthorizationRepository.deleteById(id);
+			interCloudAuthorizationRepository.flush();
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
 	
 	
 	//=================================================================================================

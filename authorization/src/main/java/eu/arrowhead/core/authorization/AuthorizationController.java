@@ -322,6 +322,26 @@ public class AuthorizationController {
 		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove the requested InterCloudAuthorization entry")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI)
+	public void removeInterCloudAuthorizationById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New InterCloudAuthorization delete request recieved with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+		}
+		
+		authorizationDBService.removeInterCloudAuthorizationEntryById(id);
+		logger.debug("InterCloudAuthorization with id: '{}' successfully deleted", id);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
