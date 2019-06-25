@@ -32,6 +32,9 @@ import eu.arrowhead.common.dto.ServiceSecurityType;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
 public class ServiceRegistry {
 	
+	//=================================================================================================
+	// members
+	
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
@@ -72,12 +75,15 @@ public class ServiceRegistry {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistryInterfaceConnection> interfaceConnections = new HashSet<>();
 
-	public ServiceRegistry() {
-		
-	}
+	//=================================================================================================
+	// methods
 
-	public ServiceRegistry(final ServiceDefinition serviceDefinition, final System system, final String serviceUri,
-						   final ZonedDateTime endOfValidity, final ServiceSecurityType secure, final String metadata, final Integer version) {
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistry() {}
+
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistry(final ServiceDefinition serviceDefinition, final System system, final String serviceUri, final ZonedDateTime endOfValidity, final ServiceSecurityType secure,
+						   final String metadata, final Integer version) {
 		this.serviceDefinition = serviceDefinition;
 		this.system = system;
 		this.serviceUri = serviceUri;
@@ -87,116 +93,58 @@ public class ServiceRegistry {
 		this.version = version;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
+	public System getSystem() {	return system; }
+	public String getServiceUri() { return serviceUri; }
+	public ZonedDateTime getEndOfValidity() { return endOfValidity; }
+	public ServiceSecurityType getSecure() { return secure; }
+	public String getMetadata() { return metadata; }
+	public Integer getVersion() { return version; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public Set<ServiceRegistryInterfaceConnection> getInterfaceConnections() { return interfaceConnections; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setSystem(final System system) { this.system = system; }
+	public void setServiceUri(final String serviceUri) { this.serviceUri = serviceUri; }
+	public void setEndOfValidity(final ZonedDateTime endOfValidity) { this.endOfValidity = endOfValidity; }
+	public void setSecure(final ServiceSecurityType secure) { this.secure = secure; }
+	public void setMetadata(final String metadata) { this.metadata = metadata; }
+	public void setVersion(final Integer version) { this.version = version; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setInterfaceConnections(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; }
 
-	public ServiceDefinition getServiceDefinition() {
-		return serviceDefinition;
-	}
-
-	public void setServiceDefinition(final ServiceDefinition serviceDefinition) {
-		this.serviceDefinition = serviceDefinition;
-	}
-
-	public System getSystem() {
-		return system;
-	}
-
-	public void setSystem(final System system) {
-		this.system = system;
-	}
-
-	public String getServiceUri() {
-		return serviceUri;
-	}
-
-	public void setServiceUri(final String serviceUri) {
-		this.serviceUri = serviceUri;
-	}
-
-	public ZonedDateTime getEndOfValidity() {
-		return endOfValidity;
-	}
-
-	public void setEndOfValidity(final ZonedDateTime endOfValidity) {
-		this.endOfValidity = endOfValidity;
-	}
-
-	public ServiceSecurityType getSecure() {
-		return secure;
-	}
-
-	public void setSecure(final ServiceSecurityType secure) {
-		this.secure = secure;
-	}
-
-	public String getMetadata() {
-		return metadata;
-	}
-
-	public void setMetadata(final String metadata) {
-		this.metadata = metadata;
-	}
-
-	public Integer getVersion() {
-		return version;
-	}
-
-	public void setVersion(final Integer version) {
-		this.version = version;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-	
-	public Set<ServiceRegistryInterfaceConnection> getInterfaceConnections() {
-		return interfaceConnections;
-	}
-
-	public void setInterfaceConnections(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
-		this.interfaceConnections = interfaceConnections;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ServiceRegistry [id=" + id + ", serviceDefinition=" + serviceDefinition + ", system=" + system
-				+ ", endOfValidity=" + endOfValidity + ", version=" + version + "]";
+		return "ServiceRegistry [id = " + id + ", serviceDefinition = " + serviceDefinition + ", system = " + system + ", endOfValidity = " + endOfValidity + ", version = " + version + "]";
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {

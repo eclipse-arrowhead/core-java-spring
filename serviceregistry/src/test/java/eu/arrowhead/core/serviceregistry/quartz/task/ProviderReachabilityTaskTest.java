@@ -31,6 +31,9 @@ import eu.arrowhead.common.dto.ServiceSecurityType;
 @RunWith (SpringRunner.class)
 public class ProviderReachabilityTaskTest {
 	
+	//=================================================================================================
+	// members
+	
 	@InjectMocks
 	ProvidersReachabilityTask providersReachabilityTask = new ProvidersReachabilityTask();
 	
@@ -39,7 +42,11 @@ public class ProviderReachabilityTaskTest {
 	
 	final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
 	final System testSystem = new System("testSystem", "testAddress*/$", 1, "testAuthenticationInfo");
-	
+
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setUp() {
 		final List<ServiceRegistry> sreviceRegistryEntries = new ArrayList<>();
@@ -51,10 +58,10 @@ public class ProviderReachabilityTaskTest {
 		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckProvidersReachabilityConnectionFailure() {
 		final List<ServiceRegistry> removedEntries = providersReachabilityTask.checkProvidersReachability();
 		assertEquals(1, removedEntries.size());
 	}
-	
 }

@@ -11,7 +11,11 @@ import eu.arrowhead.common.security.AccessControlFilter;
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
 public class EHAccessControlFilter extends AccessControlFilter {
+	
+	//=================================================================================================
+	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);

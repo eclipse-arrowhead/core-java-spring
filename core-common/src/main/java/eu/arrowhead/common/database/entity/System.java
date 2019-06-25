@@ -32,6 +32,9 @@ import eu.arrowhead.common.Defaults;
 	})
 public class System {
 	
+	//=================================================================================================
+	// members
+	
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "systemName", "address", "port"); //NOSONAR
 	
 	@Id
@@ -68,10 +71,13 @@ public class System {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<>();
 	
-	public System() {
-		
-	}
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	public System() {}
+
+	//-------------------------------------------------------------------------------------------------
 	public System(final String systemName, final String address, final int port, final String authenticationInfo) {
 		this.systemName = systemName;
 		this.address = address;
@@ -79,100 +85,46 @@ public class System {
 		this.authenticationInfo = authenticationInfo;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public String getSystemName() { return systemName; }
+	public String getAddress() { return address; }
+	public int getPort() { return port; }
+	public String getAuthenticationInfo() { return authenticationInfo; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
+	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() { return authorizationsAsConsumer; }
+	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() { return authorizationsAsProvider; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setSystemName(final String systemName) { this.systemName = systemName; }
+	public void setAddress(final String address) { this.address = address; }
+	public void setPort(final int port) { this.port = port; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
+	public void setAuthorizationsAsConsumer(final Set<IntraCloudAuthorization> authorizationsAsConsumer) { this.authorizationsAsConsumer = authorizationsAsConsumer; }
+	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) { this.authorizationsAsProvider = authorizationsAsProvider; }
 
-	public String getSystemName() {
-		return systemName;
-	}
-
-	public void setSystemName(final String systemName) {
-		this.systemName = systemName;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(final String address) {
-		this.address = address;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(final int port) {
-		this.port = port;
-	}
-
-	public String getAuthenticationInfo() {
-		return authenticationInfo;
-	}
-
-	public void setAuthenticationInfo(final String authenticationInfo) {
-		this.authenticationInfo = authenticationInfo;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-	
-	public Set<ServiceRegistry> getServiceRegistryEntries() {
-		return serviceRegistryEntries;
-	}
-
-	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) {
-		this.serviceRegistryEntries = serviceRegistryEntries;
-	}
-		
-	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() {
-		return authorizationsAsConsumer;
-	}
-
-	public void setAuthorizationsAsConsumer(final Set<IntraCloudAuthorization> authorizationsAsConsumer) {
-		this.authorizationsAsConsumer = authorizationsAsConsumer;
-	}
-
-	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() {
-		return authorizationsAsProvider;
-	}
-
-	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) {
-		this.authorizationsAsProvider = authorizationsAsProvider;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "System [id=" + id + ", systemName=" + systemName + ", address=" + address + ", port=" + port + "]";
+		return "System [id = " + id + ", systemName = " + systemName + ", address = " + address + ", port = " + port + "]";
 	}
-	
 }

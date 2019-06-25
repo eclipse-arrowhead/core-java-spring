@@ -3,12 +3,16 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class ServicesGrouppedBySystemsResponseDTO implements Serializable {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-	private static final long serialVersionUID = -6701946599623393658L;
-	
+@JsonInclude(Include.NON_NULL)
+public class ServicesGroupedBySystemsResponseDTO implements Serializable {
+
 	//=================================================================================================
 	// members
+	
+	private static final long serialVersionUID = -6701946599623393658L;
 	
 	private long systemId;
 	private String systemName;
@@ -20,9 +24,10 @@ public class ServicesGrouppedBySystemsResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServicesGrouppedBySystemsResponseDTO() {}
+	public ServicesGroupedBySystemsResponseDTO() {}
 	
-	public ServicesGrouppedBySystemsResponseDTO(final long systemId, final String systemName, final String address, final int port, final List<ServiceRegistryResponseDTO> services) {
+	//-------------------------------------------------------------------------------------------------
+	public ServicesGroupedBySystemsResponseDTO(final long systemId, final String systemName, final String address, final int port, final List<ServiceRegistryResponseDTO> services) {
 		this.systemId = systemId;
 		this.systemName = systemName;
 		this.address = address;

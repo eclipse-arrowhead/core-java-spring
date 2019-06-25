@@ -32,15 +32,21 @@ import eu.arrowhead.common.dto.ServiceSecurityType;
 @RunWith (SpringRunner.class)
 public class ServiceEndOfValidityCheckTaskTest {
 	
+	//=================================================================================================
+	// members
+	
 	@InjectMocks
 	ServiceEndOfValidityCheckTask serviceEndOfValidityCheckTask = new ServiceEndOfValidityCheckTask();
 	
 	@Mock
 	ServiceRegistryDBService serviceRegistryDBService; 
-	
+
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setUp() {
-		
 		final List<ServiceRegistry> sreviceRegistryEntries = new ArrayList<>();
 		
 		final ZonedDateTime now = ZonedDateTime.now();		
@@ -64,6 +70,7 @@ public class ServiceEndOfValidityCheckTaskTest {
 		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckServicesEndOfValidity() {
 		final List<ServiceRegistry> removedEntries = serviceEndOfValidityCheckTask.checkServicesEndOfValidity();
@@ -71,5 +78,4 @@ public class ServiceEndOfValidityCheckTaskTest {
 		final long id = removedEntries.get(0).getId();
 		assertEquals(1, id);
 	}
-
 }

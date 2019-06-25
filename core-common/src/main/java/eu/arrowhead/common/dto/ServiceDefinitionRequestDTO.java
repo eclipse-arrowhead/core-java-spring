@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 public class ServiceDefinitionRequestDTO implements Serializable {
 
-	private static final long serialVersionUID = -1966787184376371095L;
-	
 	//=================================================================================================
 	// members
+	
+	private static final long serialVersionUID = -1966787184376371095L;
 	
 	private String serviceDefinition;
 			

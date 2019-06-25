@@ -7,10 +7,6 @@
 
 package eu.arrowhead.common.exception;
 
-/**
- * Usually thrown by the Core System resources if a crucial database query (for example the query of the Service Registry or the Authorization) comes
- * back empty during the servicing of the request.
- */
 @SuppressWarnings("serial")
 public class DataNotFoundException extends ArrowheadException {
 

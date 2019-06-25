@@ -25,7 +25,7 @@ public abstract class ArrowheadFilter extends GenericFilterBean {
 	
 	//=================================================================================================
 	// members
-
+	
 	protected final Logger log = LogManager.getLogger(ArrowheadFilter.class);
 	protected final ObjectMapper mapper = new ObjectMapper();
 	

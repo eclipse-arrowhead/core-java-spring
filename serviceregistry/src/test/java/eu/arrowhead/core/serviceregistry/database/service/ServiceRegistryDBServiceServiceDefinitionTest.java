@@ -32,36 +32,41 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 	//=================================================================================================
 	// methods
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of getServiceDefinitionById
+	//=================================================================================================
+	// Tests of getServiceDefinitionById
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void getServiceDefinitionByIdTestWithNotExistingId() {
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		serviceRegistryDBService.getServiceDefinitionById(1);
 	}
-	//-------------------------------------------------------------------------------------------------
+	
+	//=================================================================================================
 	//Tests of getServiceDefinitionEntries
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void getServiceDefinitionEntriesTestWithInvalidSortField() {
 		serviceRegistryDBService.getServiceDefinitionEntries(0, 10, Direction.ASC, "notValid");
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	//Tests of createServiceDefinition
 	
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void createServiceDefinitionTestWithNullInput() {
 		serviceRegistryDBService.createServiceDefinition(null);
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void createServiceDefinitionTestWithBlankStringInput() {
 		serviceRegistryDBService.createServiceDefinition("       ");
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void createServiceDefinitionTestOfUniqueKeyViolation() {
 		final String testDefinition = "alreadyexiststest";
 		final Optional<ServiceDefinition> serviceDefinitionEntry = Optional.of(new ServiceDefinition(testDefinition));
@@ -69,7 +74,8 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 		serviceRegistryDBService.createServiceDefinition(testDefinition);
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void createServiceDefinitionTestCaseInsensitivityOfUniqueKeyViolation() {
 		final String testDefinition = "alreadyexiststest";
 		final Optional<ServiceDefinition> serviceDefinitionEntry = Optional.of(new ServiceDefinition(testDefinition));
@@ -77,7 +83,8 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 		serviceRegistryDBService.createServiceDefinition(testDefinition.toUpperCase());
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void createServiceDefinitionTestLeadingTrailingSpaceSensitivityOfUniqueKeyViolation() {
 		final String testDefinition = "alreadyexiststest";
 		final Optional<ServiceDefinition> serviceDefinitionEntry = Optional.of(new ServiceDefinition(testDefinition));
@@ -85,27 +92,30 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 		serviceRegistryDBService.createServiceDefinition("  " + testDefinition + "  ");
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	//Tests of updateServiceDefinitionById
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void updateServiceDefinitionByIdTestWithNullInput() {
 		serviceRegistryDBService.updateServiceDefinitionById(1, null);
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void updateServiceDefinitionByIdTestWithBlankStringInput() {
 		serviceRegistryDBService.updateServiceDefinitionById(1, "   ");
 	}
 	
-
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void updateServiceDefinitionByIdTestWithNotExistingId() {
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		serviceRegistryDBService.updateServiceDefinitionById(1, "test");;
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void updateServiceDefinitionByIdTestOfUniqueKeyViolation() {		
 		final String testDefinition2 = "testdefinition2";
 		final long testId2 = 2;
@@ -124,7 +134,8 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 		serviceRegistryDBService.updateServiceDefinitionById(testId2, testDefinition1);
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void updateServiceDefinitionByIdTestCaseInsensitivityOfUniqueKeyViolation() {
 		final String testDefinition0 = "testdefinition0";
 		final long testId0 = 0;
@@ -145,7 +156,8 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 		serviceRegistryDBService.updateServiceDefinitionById(testId0, testDefinition1.toUpperCase());
 	}
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void updateServiceDefinitionByIdTestLeadingTrailingSpaceSensitivityOfUniqueKeyViolation() {
 		final String testDefinition0 = "testdefinition0";
 		final long testId0 = 0;
@@ -166,10 +178,11 @@ public class ServiceRegistryDBServiceServiceDefinitionTest {
 		serviceRegistryDBService.updateServiceDefinitionById(testId0, "  " + testDefinition1 + "  ");
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	//Tests of removeServiceDefinitionById
 	
-	@Test (expected = InvalidParameterException.class)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void removeServiceDefinitionByIdTest() {
 		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
 		serviceRegistryDBService.removeServiceDefinitionById(0);
