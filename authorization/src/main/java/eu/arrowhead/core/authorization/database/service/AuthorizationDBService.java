@@ -275,10 +275,32 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public InterCloudAuthorizationListResponseDTO createInterCloudAuthorizationResponse(Long cloudId,
 			List<Long> serviceDefinitionIds) {
 		logger.debug("createInterCloudAuthorizationResponse started..");
+		
+		try {						
+			
+			final Page<InterCloudAuthorization> savedEntriesPage = createInterCloudAuthorization(cloudId, serviceDefinitionIds);
+			
+			return DTOConverter.convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(savedEntriesPage);
+					
+		} catch (final InvalidParameterException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+				
+	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)	
+	public Page<InterCloudAuthorization> createInterCloudAuthorization(Long cloudId, List<Long> serviceDefinitionIds) {
+		
 		if (cloudId < 1) {
 			throw new InvalidParameterException("Cloud id can't be null and must be greater than 0.");
 		}
@@ -287,58 +309,27 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException("SerdviceDefinition id can't be null and must be greater than 0.");
 			}
 		}
+		
+		try {						
+			
+			final List<InterCloudAuthorization> entriesToSave = new ArrayList<>(serviceDefinitionIds.size());
+			
+			for (final Long serviceId : serviceDefinitionIds) {
+				entriesToSave.add(createNewInterCloudAuthorization(cloudId, serviceId));
+			}
 				
-		final List<InterCloudAuthorization> savedEntries = new ArrayList<>(serviceDefinitionIds.size());
-		
-		for (final Long serviceId : serviceDefinitionIds) {
-			try {
-				final InterCloudAuthorization savedInterCloudAuthorization = createInterCloudAuthorization(cloudId, serviceId);			
-				savedEntries.add(savedInterCloudAuthorization);
-			} catch (final InvalidParameterException ex) {
-				logger.debug(ex.getMessage(), ex);
-			}
+			return new PageImpl<InterCloudAuthorization>(interCloudAuthorizationRepository.saveAll(entriesToSave));
+			
+		} catch (final InvalidParameterException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
-		final Page<InterCloudAuthorization> savedEntriesPage = new PageImpl<InterCloudAuthorization>(savedEntries);
-		return DTOConverter.convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(savedEntriesPage);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
-	public InterCloudAuthorization createInterCloudAuthorization(final Long cloudId, final Long serviceDefinitionId) {
-		logger.debug("createInterCloudAuthorization started..");
-		
-		final boolean cloudIdIsInvalid = cloudId < 1;
-		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
-		try {
-			if ( cloudIdIsInvalid || serviceDefinitionIdIsInvalid) {
-				String exceptionMessage = "Following id parameters are invalid: ";
-				exceptionMessage = cloudIdIsInvalid ? exceptionMessage : exceptionMessage + "cloudId" ;
-				exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " serviceDefinitionId";
-				throw new InvalidParameterException(exceptionMessage);
-			}	
-			
-			checkConstraintsOfInterCloudAuthorizationTable(cloudId, serviceDefinitionId);
-			
-			final Optional<Cloud> cloud = cloudRepository.findById(cloudId);
-			final Optional<ServiceDefinition> serviceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
-			if (cloud.isEmpty() || serviceDefinition.isEmpty()) {
-				String exceptionMessage = "Following entities are not availables: ";
-				exceptionMessage = cloud.isEmpty() ? exceptionMessage + "consumer with id: " + cloudId : exceptionMessage;
-				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition with id: " + serviceDefinitionId : exceptionMessage;
-				throw new InvalidParameterException(exceptionMessage);
-			}
-			
-			final InterCloudAuthorization interCloudAuthorization = new InterCloudAuthorization(cloud.get(), serviceDefinition.get());
-			return interCloudAuthorizationRepository.saveAndFlush(interCloudAuthorization);
-	
-			} catch (final InvalidParameterException ex) {
-                       		 throw ex;
-                	} catch (final Exception ex) {
-                        logger.debug(ex.getMessage(), ex);
-                        throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-			}
-	}
 	public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequestResponse(final long consumerId, final long serviceDefinitionId, final List<Long> providerIds) {
 		logger.debug("checkIntraCloudAuthorizationRequestResponse started..");
 				
@@ -433,6 +424,37 @@ public class AuthorizationDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private InterCloudAuthorization createNewInterCloudAuthorization(final Long cloudId, final Long serviceDefinitionId) {
+		logger.debug("createInterCloudAuthorizationLis started..");
+		
+		final boolean cloudIdIsInvalid = cloudId < 1;
+		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
+		
+		if ( cloudIdIsInvalid || serviceDefinitionIdIsInvalid) {
+			String exceptionMessage = "Following id parameters are invalid: ";
+			exceptionMessage = cloudIdIsInvalid ? exceptionMessage : exceptionMessage + "cloudId" ;
+			exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " serviceDefinitionId";
+			throw new InvalidParameterException(exceptionMessage);
+		}	
+		
+		checkConstraintsOfInterCloudAuthorizationTable(cloudId, serviceDefinitionId);
+		
+		final Optional<Cloud> cloud = cloudRepository.findById(cloudId);
+		final Optional<ServiceDefinition> serviceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
+		if (cloud.isEmpty() || serviceDefinition.isEmpty()) {
+			String exceptionMessage = "Following entities are not availables: ";
+			exceptionMessage = cloud.isEmpty() ? exceptionMessage + "consumer with id: " + cloudId : exceptionMessage;
+			exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition with id: " + serviceDefinitionId : exceptionMessage;
+			throw new InvalidParameterException(exceptionMessage);
+		}
+		
+		final InterCloudAuthorization interCloudAuthorization = new InterCloudAuthorization(cloud.get(), serviceDefinition.get());
+		
+		return interCloudAuthorization;
+		
 	}
 
 }
