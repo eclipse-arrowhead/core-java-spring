@@ -28,7 +28,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	protected Map<String,String> arrowheadContext;
+	protected Map<String,Object> arrowheadContext;
 	
 	//=================================================================================================
 	// methods
@@ -80,7 +80,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 	
 	//-------------------------------------------------------------------------------------------------
 	protected String getServerCloudCN() {
-		final String serverCN = arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
+		final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
 	    final String[] serverFields = serverCN.split("\\.", 2); // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
 	    Assert.isTrue(serverFields.length >= 2, "Server common name is invalid: " + serverCN);
 	    

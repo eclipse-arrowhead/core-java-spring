@@ -1,5 +1,9 @@
 package eu.arrowhead.common;
 
+import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
+import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
+import org.jose4j.jws.AlgorithmIdentifiers;
+
 public class CommonConstants {
 	
 	//=================================================================================================
@@ -33,6 +37,14 @@ public class CommonConstants {
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
 	public static final String SERVER_COMMON_NAME = "server.common.name";
+	public static final String SERVER_PUBLIC_KEY = "server.public.key";
+	public static final String SERVER_PRIVATE_KEY = "server.private.key";
+	
+	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
+	public static final String JWT_CLAIM_SERVICE_ID = "sid";
+	public static final String JWE_KEY_MANAGEMENT_ALG = KeyManagementAlgorithmIdentifiers.RSA_OAEP_256;
+	public static final String JWE_ENCRYPTION_ALG = ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
+	public static final String JWS_SIGN_ALG = AlgorithmIdentifiers.RSA_USING_SHA512;
 	
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
@@ -54,6 +66,8 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
+	
+	public static final String AUTHORIZATION_URI = "/authorization";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

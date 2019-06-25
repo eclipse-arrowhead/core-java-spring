@@ -1,12 +1,21 @@
 package eu.arrowhead.common;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -15,12 +24,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.ServiceConfigurationError;
+import java.util.regex.Pattern;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
@@ -39,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 
 public class Utilities {
 	
@@ -54,6 +66,10 @@ public class Utilities {
 	private static final String AH_MASTER_SUFFIX = "eu";
 	private static final String AH_MASTER_NAME = "arrowhead";
 	
+	private static final String KEY_FACTORY_ALGORHITM_NAME = "RSA";
+	private static final KeyFactory keyFactory;
+	private static final Pattern PEM_PATTERN = Pattern.compile("(?m)(?s)^---*BEGIN.*---*$(.*)^---*END.*---*$.*");
+	
 	private static final Logger logger = LogManager.getLogger(Utilities.class);
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private static final String dateTimePattern = "yyyy-MM-dd HH:mm:ss";
@@ -61,6 +77,12 @@ public class Utilities {
 	
 	static {
 	    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		try {
+			keyFactory = KeyFactory.getInstance(KEY_FACTORY_ALGORHITM_NAME);
+		} catch (final NoSuchAlgorithmException ex) {
+			logger.fatal("KeyFactory.getInstance(String) throws NoSuchAlgorithmException, code needs to be changed!");
+			throw new ServiceConfigurationError("KeyFactory.getInstance(String) throws NoSuchAlgorithmException, code needs to be changed!", ex);
+		}
 	}
 	
 	//=================================================================================================
@@ -281,9 +303,67 @@ public class Utilities {
             final String alias = enumeration.nextElement();
             return (X509Certificate) keystore.getCertificate(alias);
         } catch (final KeyStoreException | NoSuchElementException ex) {
+        	logger.error("Getting the first cert from key store failed...", ex);
             throw new ServiceConfigurationError("Getting the first cert from keystore failed...", ex);
         }
     }
+	
+	//-------------------------------------------------------------------------------------------------
+	public static PrivateKey getPrivateKey(final KeyStore keystore, final String keyPass) {
+		Assert.notNull(keystore, "Key store is not defined.");
+		Assert.notNull(keyPass, "Password is not defined.");
+		
+	    PrivateKey privateKey = null;
+	    String element;
+	    try {
+	    	final Enumeration<String> enumeration = keystore.aliases();
+	    	while (enumeration.hasMoreElements()) {
+	    		element = enumeration.nextElement();
+	    		privateKey = (PrivateKey) keystore.getKey(element, keyPass.toCharArray());
+	    		if (privateKey != null) {
+	    			break;
+	    		}
+	    	}
+	    } catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
+	    	logger.error("Getting the private key from key store failed...", ex);
+	    	throw new ServiceConfigurationError("Getting the private key from key store failed...", ex);
+		}
+
+	    if (privateKey == null) {
+	    	throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
+	    }
+	    
+	    return privateKey;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static PublicKey getPublicKeyFromBase64EncodedString(final String encodedKey) {
+		Assert.isTrue(!isEmpty(encodedKey), "Encoded key is null or blank");
+		
+		final byte[] keyBytes = Base64.getDecoder().decode(encodedKey);
+		return generatePublicKeyFromByteArray(keyBytes);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static PublicKey getPublicKeyFromPEMFile(final InputStream is) {
+		Assert.notNull(is, "Input stream is null");
+		try {
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			final byte[] buf = new byte[1024];
+			for (int read = 0; read != -1; read = is.read(buf)) {
+				baos.write(buf, 0, read);
+			}
+			
+		    final String pem = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
+		    baos.close();
+		    final String encoded = PEM_PATTERN.matcher(pem).replaceFirst("$1");
+		    final byte[] keyBytes = Base64.getMimeDecoder().decode(encoded);
+		    
+		    return generatePublicKeyFromByteArray(keyBytes);
+		} catch (final IOException ex) {
+		      throw new ArrowheadException("IOException occurred during PEM file loading from input stream.", ex);
+		} 
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static boolean isKeyStoreCNArrowheadValid(final String commonName) {
@@ -315,5 +395,15 @@ public class Utilities {
 	//-------------------------------------------------------------------------------------------------
 	private Utilities() {
 		throw new UnsupportedOperationException();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static PublicKey generatePublicKeyFromByteArray(final byte[] keyBytes) {
+		try {
+			return keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
+		} catch (final InvalidKeySpecException ex) {
+		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
+		      throw new AuthException("Public key decoding failed due wrong input key", ex);
+		}
 	}
 }

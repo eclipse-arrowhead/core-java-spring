@@ -1,9 +1,11 @@
 package eu.arrowhead.common;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -24,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
 
 @RunWith(SpringRunner.class)
@@ -209,6 +212,12 @@ public class UtilitiesTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetFirstCertFromKeyStoreNullKeyStore() throws KeyStoreException {
+		Utilities.getFirstCertFromKeyStore(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ServiceConfigurationError.class)
 	public void testGetFirstCertFromKeyStoreNotInitializedKeyStore() throws KeyStoreException {
 		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -221,6 +230,81 @@ public class UtilitiesTest {
 		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keystore.load(null, null);
 		Utilities.getFirstCertFromKeyStore(keystore);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPrivateKeyNullKeyStore() throws KeyStoreException {
+		Utilities.getPrivateKey(null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPrivateKeyNullKeyPass() throws KeyStoreException {
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		Utilities.getPrivateKey(keystore, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ServiceConfigurationError.class)
+	public void testGetPrivateKeyNotInitializedKeyStore() throws KeyStoreException {
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		Utilities.getPrivateKey(keystore, "abc");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ServiceConfigurationError.class)
+	public void testGetPrivateKeyEmptyKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		keystore.load(null, null);
+		Utilities.getPrivateKey(keystore, "abc");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromBase64EncodedStringNull() {
+		Utilities.getPublicKeyFromBase64EncodedString(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromBase64EncodedStringEmpty() {
+		Utilities.getPublicKeyFromBase64EncodedString("  ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromBase64EncodedStringNotBase64() {
+		Utilities.getPublicKeyFromBase64EncodedString(";");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testGetPublicKeyFromBase64EncodedStringNotAKey() {
+		Utilities.getPublicKeyFromBase64EncodedString("bm90IGEga2V5");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testGetPublicKeyFromPEMFileInputStreamNull() {
+		Utilities.getPublicKeyFromPEMFile(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPublicKeyFromPEMFileIOException() throws IOException {
+		final InputStream is = InputStream.nullInputStream();
+		is.close();
+		Utilities.getPublicKeyFromPEMFile(is);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicKeyFromPEMFileOk() throws IOException {
+		final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.pub");
+		final PublicKey publicKey = Utilities.getPublicKeyFromPEMFile(is);
+		Assert.assertEquals("RSA", publicKey.getAlgorithm());
+		Assert.assertEquals("X.509", publicKey.getFormat());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

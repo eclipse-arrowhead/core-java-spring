@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
@@ -224,6 +225,18 @@ public class DTOConverter {
 		}
 		
 		return new IntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries, entries.getTotalElements());
+	}
+
+
+	public static TokenGenerationResponseDTO convertTokenMapToTokenGenerationResponseDTO(final Map<SystemRequestDTO,String> tokenMap) {
+		Assert.notNull(tokenMap, "Token map is null.");
+		
+		final TokenGenerationResponseDTO result = new TokenGenerationResponseDTO();
+		for (final Entry<SystemRequestDTO,String> entry : tokenMap.entrySet()) {
+			result.getTokenData().add(new TokenDataDTO(entry.getKey(), entry.getValue()));
+		}
+		
+		return result;
 	}
 	
 	//=================================================================================================
