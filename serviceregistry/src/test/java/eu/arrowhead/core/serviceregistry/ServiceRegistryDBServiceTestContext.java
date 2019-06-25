@@ -8,10 +8,14 @@ import org.springframework.context.annotation.Primary;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @Configuration
-public class ServiceRegistryDBSerrviceTestContext {
+public class ServiceRegistryDBServiceTestContext {
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Bean
-	@Primary //This bean is primary only in test context
+	@Primary // This bean is primary only in test context
 	public ServiceRegistryDBService mockServiceRegistryDBService() {
 		return Mockito.mock(ServiceRegistryDBService.class);
 	}

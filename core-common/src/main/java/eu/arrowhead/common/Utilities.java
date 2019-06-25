@@ -92,6 +92,7 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:RedundantThrowsDeclarationCheck")
 	public static ZonedDateTime parseUTCStringToLocalZonedDateTime(final String timeStr) throws DateTimeParseException {
 		if (isEmpty(timeStr)) {
 			return null;
@@ -108,9 +109,7 @@ public class Utilities {
 															  ZoneOffset.UTC);
 														
 		final ZoneOffset offset = OffsetDateTime.now().getOffset();
-		final ZonedDateTime dateTime = ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
-		
-		return dateTime;
+		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

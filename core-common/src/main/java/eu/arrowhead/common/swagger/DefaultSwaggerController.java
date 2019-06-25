@@ -8,6 +8,10 @@ import eu.arrowhead.common.CommonConstants;
 @Controller
 public class DefaultSwaggerController {
 	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	/*
 	 * Necessary controller due to Swagger UI default path is hard coded and can't be configured. 
 	 */

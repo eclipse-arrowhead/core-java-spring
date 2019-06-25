@@ -7,15 +7,20 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.repository.RefreshableRepositoryImpl;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @ComponentScan (CommonConstants.BASE_PACKAGE)
 @EntityScan (CommonConstants.DATABASE_ENTITY_PACKAGE)
-@EnableJpaRepositories (CommonConstants.DATABASE_REPOSITORY_PACKAGE)
+@EnableJpaRepositories (basePackages = CommonConstants.DATABASE_REPOSITORY_PACKAGE, repositoryBaseClass = RefreshableRepositoryImpl.class)
 @EnableSwagger2
 public class GatewayMain {
+	
+	//=================================================================================================
+	// members
 
+	//-------------------------------------------------------------------------------------------------
 	public static void main(final String[] args) {
 		SpringApplication.run(GatewayMain.class, args);
 	}

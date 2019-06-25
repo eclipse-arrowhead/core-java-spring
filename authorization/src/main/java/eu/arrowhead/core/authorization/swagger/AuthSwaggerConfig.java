@@ -11,14 +11,18 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @Configuration
 public class AuthSwaggerConfig extends DefaultSwaggerConfig {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	public AuthSwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_AUTHORIZATION);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public Docket customizeSwagger() {
 		return configureSwaggerForCoreSystem(this.getClass().getPackageName());
 	}
-
 }

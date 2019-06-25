@@ -18,7 +18,10 @@ import eu.arrowhead.core.serviceregistry.quartz.AutoWiringSpringBeanQuartzTaskFa
 @Configuration
 public class ServiceEndOfValidityCheckTaskConfig {
 	
-protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.class);
+	//=================================================================================================
+	// members
+
+	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.class);
 	
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
@@ -34,6 +37,10 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 	private static final String NAME_OF_TRIGGER = "Services_End_OF_Validity_Check_Task_Trigger";
 	private static final String NAME_OF_TASK = "Services_End_OF_Validity_Check_Task_Detail";	
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public SchedulerFactoryBean servicesEndOfValidityCheckSheduler() {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
@@ -52,6 +59,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
 		return schedulerFactory;        
     }
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
     public SimpleTriggerFactoryBean servicesEndOfValidityCheckTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
@@ -63,6 +71,7 @@ protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.c
         return trigger;
     }
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
     public JobDetailFactoryBean servicesEndOfValidityCheckTaskDetail() {
         final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();

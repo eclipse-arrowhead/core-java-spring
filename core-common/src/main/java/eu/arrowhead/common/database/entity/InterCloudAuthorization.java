@@ -19,6 +19,9 @@ import javax.persistence.UniqueConstraint;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerCloudId", "serviceId"}))
 public class InterCloudAuthorization {
 	
+	//=================================================================================================
+	// members
+	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
@@ -36,71 +39,49 @@ public class InterCloudAuthorization {
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
-
-	public InterCloudAuthorization() {
 	
-	}
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	public InterCloudAuthorization() {}
+
+	//-------------------------------------------------------------------------------------------------
 	public InterCloudAuthorization(final Cloud cloud, final ServiceDefinition serviceDefinition) {
 		this.cloud = cloud;
 		this.serviceDefinition = serviceDefinition;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public Cloud getCloud() { return cloud; }
+	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setCloud(final Cloud cloud) { this.cloud = cloud; }
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-	public Cloud getCloud() {
-		return cloud;
-	}
-
-	public void setCloud(final Cloud cloud) {
-		this.cloud = cloud;
-	}
-
-	public ServiceDefinition getServiceDefinition() {
-		return serviceDefinition;
-	}
-
-	public void setServiceDefinition(final ServiceDefinition serviceDefinition) {
-		this.serviceDefinition = serviceDefinition;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "InterCloudAuthorization [id=" + id + ", cloud=" + cloud + ", serviceDefinition=" + serviceDefinition
-				+ "]";
+		return "InterCloudAuthorization [id = " + id + ", cloud = " + cloud + ", serviceDefinition = " + serviceDefinition + "]";
 	}
-	
 }

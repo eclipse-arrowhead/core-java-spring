@@ -10,15 +10,19 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class EHSwaggerConfig extends DefaultSwaggerConfig{
+public class EHSwaggerConfig extends DefaultSwaggerConfig {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	public EHSwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_EVENT_HANDLER);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public Docket customizeSwagger() {
 		return configureSwaggerForCoreSystem(this.getClass().getPackageName());
 	}
-	
 }

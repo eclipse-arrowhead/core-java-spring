@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 public class SystemListResponseDTO implements Serializable {
 
 	//=================================================================================================
@@ -28,22 +32,10 @@ public class SystemListResponseDTO implements Serializable {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<SystemResponseDTO> getData() {
-		return data;
-	}
+	public List<SystemResponseDTO> getData() { return data; }
+	public long getCount() { return count; }
 
 	//-------------------------------------------------------------------------------------------------
-	public long getCount() {
-		return count;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<SystemResponseDTO> data) {
-		this.data = data;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public void setCount(final long count) {
-		this.count = count;
-	}
+	public void setData(final List<SystemResponseDTO> data) { this.data = data; }
+	public void setCount(final long count) { this.count = count; }
 }

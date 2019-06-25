@@ -27,13 +27,8 @@ public class DTOConverter {
 	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
 		
-		return new SystemResponseDTO(system.getId(),
-				system.getSystemName(),
-				system.getAddress(),
-				system.getPort(),
-				system.getAuthenticationInfo(),
-				Utilities.convertZonedDateTimeToUTCString(system.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(system.getUpdatedAt()));		
+		return new SystemResponseDTO(system.getId(), system.getSystemName(), system.getAddress(), system.getPort(), system.getAuthenticationInfo(),
+									 Utilities.convertZonedDateTimeToUTCString(system.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(system.getUpdatedAt()));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -46,11 +41,10 @@ public class DTOConverter {
 		systemListResponseDTO.setData(systemEntryListToSystemResponeDTOList(systemEntryList.getContent()));
 		
 		return systemListResponseDTO;
-		
 	}
 		
 	//-------------------------------------------------------------------------------------------------
-	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO (final ServiceDefinition serviceDefinition) {
+	public static ServiceDefinitionResponseDTO convertServiceDefinitionToServiceDefinitionResponseDTO(final ServiceDefinition serviceDefinition) {
 		Assert.notNull(serviceDefinition, "ServiceDefinition is null");
 		
 		return new ServiceDefinitionResponseDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition(), Utilities.convertZonedDateTimeToUTCString(serviceDefinition.getCreatedAt()),
@@ -109,11 +103,12 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static ServiceRegistryGrouppedResponseDTO convertServiceRegistryEntriesToServiceRegistryGrouppedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+	@SuppressWarnings("squid:S3776")
+	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
 		
-		final Map<Long, ServicesGrouppedBySystemsResponseDTO> servicesBySystemId= new HashMap<>();
-		final Map<String, ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
+		final Map<Long,ServicesGroupedBySystemsResponseDTO> servicesBySystemId = new HashMap<>();
+		final Map<String,ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
 		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
 		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
 		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();		
@@ -129,20 +124,21 @@ public class DTOConverter {
 			final long serviceDefinitionId = srEntry.getServiceDefinition().getId();
 			final String serviceDefinition = srEntry.getServiceDefinition().getServiceDefinition();		
 			
-			//Creating ServicesGrouppedBySystemsResponseDTO
+			// Creating ServicesGroupedBySystemsResponseDTO
 			if (servicesBySystemId.containsKey(systemId)) {
 				servicesBySystemId.get(systemId).getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 			} else {
-				final ServicesGrouppedBySystemsResponseDTO dto = new ServicesGrouppedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, new ArrayList<>());
+				final ServicesGroupedBySystemsResponseDTO dto = new ServicesGroupedBySystemsResponseDTO(systemId, systemName, systemAddress, systemPort, new ArrayList<>());
 				dto.getServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				servicesBySystemId.put(systemId, dto);
 			}
 			
-			//Filling up AutoCompleteDataResponseDTO						
+			// Filling up AutoCompleteDataResponseDTO						
 			if (!serviceIdsForAutoComplete.contains(serviceDefinitionId)) {
 				serviceIdsForAutoComplete.add(serviceDefinitionId);
 				servicesForAutoComplete.add(new IdValueDTO(serviceDefinitionId, serviceDefinition));
 			}
+			
 			if (!systemIdsForAutoComplete.contains(systemId)) {
 				systemIdsForAutoComplete.add(systemId);
 				systemsForAutoComplete.add(new SystemResponseDTO(systemId, systemName, systemAddress, systemPort, null, null, null));
@@ -158,12 +154,12 @@ public class DTOConverter {
 					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
 				}
 				
-				//Creating ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO
+				// Creating ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO
 				final String key = serviceDefinitionId + "-" + interfId;
 				if (servicesByServiceDefinitionAndInterface.containsKey(key)) {
 					servicesByServiceDefinitionAndInterface.get(key).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				} else {
-					final ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition, interfaceName,  new ArrayList<>());
+					final ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition, interfaceName,  new ArrayList<>());
 					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 					servicesByServiceDefinitionAndInterface.put(key, dto);
 				}
@@ -171,12 +167,12 @@ public class DTOConverter {
 		}
 		
 		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
-		final List<ServicesGrouppedBySystemsResponseDTO> servicesGrouppedBySystemsResponseDTOList = new ArrayList<>();
-		servicesGrouppedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
-		final List<ServicesGrouppedByServiceDefinitionAndInterfaceResponseDTO> servicesGrouppedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
-		servicesGrouppedByServiceDefinitionAndInterfaceResponseDTOList.addAll(servicesByServiceDefinitionAndInterface.values());
+		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystemsResponseDTOList = new ArrayList<>();
+		servicesGroupedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
+		final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
+		servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList.addAll(servicesByServiceDefinitionAndInterface.values());
 		
-		return new ServiceRegistryGrouppedResponseDTO(servicesGrouppedBySystemsResponseDTOList, servicesGrouppedByServiceDefinitionAndInterfaceResponseDTOList, autoCompleteDataResponseDTO);
+		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList, autoCompleteDataResponseDTO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -251,6 +247,7 @@ public class DTOConverter {
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
 			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
 		}
+		
 		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
 		
 		return result;

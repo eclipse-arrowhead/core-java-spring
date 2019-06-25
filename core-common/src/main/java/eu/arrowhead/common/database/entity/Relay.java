@@ -18,6 +18,9 @@ import eu.arrowhead.common.Defaults;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
 public class Relay {
 	
+	//=================================================================================================
+	// members
+	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
@@ -37,78 +40,51 @@ public class Relay {
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 
-	public Relay() {
-		
-	}
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	public Relay() {}
+
+	//-------------------------------------------------------------------------------------------------
 	public Relay(final String address, final int port, final boolean secure) {
 		this.address = address;
 		this.port = port;
 		this.secure = secure;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 	
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public String getAddress() { return address; }
+	public int getPort() { return port; }
+	public boolean getSecure() { return secure; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setAddress(final String address) { this.address = address; }
+	public void setPort(final int port) { this.port = port; }
+	public void setSecure(final boolean secure) { this.secure = secure; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(final String address) {
-		this.address = address;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(final int port) {
-		this.port = port;
-	}
-
-	public boolean getSecure() {
-		return secure;
-	}
-
-	public void setSecure(final boolean secure) {
-		this.secure = secure;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "Relay [id=" + id + ", address=" + address + ", port=" + port + "]";
+		return "Relay [id = " + id + ", address = " + address + ", port = " + port + "]";
 	}
-	
 }

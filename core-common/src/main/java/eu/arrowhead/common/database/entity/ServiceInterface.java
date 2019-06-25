@@ -22,6 +22,9 @@ import eu.arrowhead.common.Defaults;
 @Entity
 public class ServiceInterface {
 	
+	//=================================================================================================
+	// members
+	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
@@ -39,68 +42,47 @@ public class ServiceInterface {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistryInterfaceConnection> serviceConnections = new HashSet<>();
 	
-	public ServiceInterface() {
+	//=================================================================================================
+	// methods
 	
-	}
+	//-------------------------------------------------------------------------------------------------
+	public ServiceInterface() {}
 
+	//-------------------------------------------------------------------------------------------------
 	public ServiceInterface(final String interfaceName) {
 		this.interfaceName = interfaceName;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public String getInterfaceName() { return interfaceName; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public Set<ServiceRegistryInterfaceConnection> getServiceConnections() { return serviceConnections; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setInterfaceName(final String interfaceName) { this.interfaceName = interfaceName; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setServiceConnections(final Set<ServiceRegistryInterfaceConnection> serviceConnections) { this.serviceConnections = serviceConnections; }
 
-	public String getInterfaceName() {
-		return interfaceName;
-	}
-
-	public void setInterfaceName(final String interfaceName) {
-		this.interfaceName = interfaceName;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-	
-	public Set<ServiceRegistryInterfaceConnection> getServiceConnections() {
-		return serviceConnections;
-	}
-
-	public void setServiceConnections(final Set<ServiceRegistryInterfaceConnection> serviceConnections) {
-		this.serviceConnections = serviceConnections;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ServiceInterface [id=" + id + ", interfaceName=" + interfaceName + "]";
+		return "ServiceInterface [id = " + id + ", interfaceName = " + interfaceName + "]";
 	}
-	
 }

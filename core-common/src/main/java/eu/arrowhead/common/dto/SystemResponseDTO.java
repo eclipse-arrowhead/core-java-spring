@@ -28,14 +28,7 @@ public class SystemResponseDTO implements Serializable {
 	public SystemResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO(final long systemId,
-			final String systemName,
-			final String address,
-			final int port,
-			final String authenticationInfo,
-			final String createdAt,
-			final String upDatedAt) {
-		
+	public SystemResponseDTO(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo, final String createdAt, final String upDatedAt) {
 		this.id = systemId;
 		this.systemName = systemName;
 		this.address = address;

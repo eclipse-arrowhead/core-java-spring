@@ -25,6 +25,9 @@ import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBServi
 @DisallowConcurrentExecution
 public class ProvidersReachabilityTask implements Job {
 	
+	//=================================================================================================
+	// members
+	
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);
 	private static final int PAGE_SIZE = 1000;
 	
@@ -34,19 +37,25 @@ public class ProvidersReachabilityTask implements Job {
 	@Value(CommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
 	private int timeout;
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: Providers reachability task");
+		
 		final List<ServiceRegistry> removedServiceRegistries = checkProvidersReachability();
+		
 		logger.debug("FINISHED: Providers reachability task. Number of removed service registry entry: {}", removedServiceRegistries.size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public List<ServiceRegistry> checkProvidersReachability() {
 		final List<ServiceRegistry> removedServiceRegistryEntries = new ArrayList<>();
 		int pageIndexCounter = 0;
-		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
-			pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
 				logger.debug("Servise Registry database is empty");
 			} else {
@@ -59,13 +68,17 @@ public class ProvidersReachabilityTask implements Job {
 					pageIndexCounter++;
 				}
 			}
-		} catch (final IllegalArgumentException exception) {
-			logger.debug(exception.getMessage());
+		} catch (final IllegalArgumentException ex) {
+			logger.debug(ex.getMessage(), ex);
 		}
 		
 		return removedServiceRegistryEntries;
 	}
 	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
 	private List<ServiceRegistry> pingAndRemoveRegisteredServices(final Page<ServiceRegistry> pageOfServiceEntries) {
 		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
 		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
@@ -77,6 +90,7 @@ public class ProvidersReachabilityTask implements Job {
 				logger.debug("REMOVED: {}", serviceRegistryEntry);
 			}
 		}
+		
 		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);
 		
 		return toBeRemoved;
