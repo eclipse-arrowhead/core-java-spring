@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckRequestDTO;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
@@ -55,6 +57,8 @@ public class AuthorizationController {
 	private static final String POST_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE = "Could not create IntraCloudAuthorization";
 	
 	private static final String INTRA_CLOUD_AUTHORIZATION_CHECK_URI = "/intracloud/check";
+	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization result returned";
+	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not check IntraCloudAuthorization";
 	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
@@ -155,7 +159,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Create the requested IntraCloudAuthorization entries")
+	@ApiOperation(value = "Create the requested IntraCloudAuthorization entries", response = IntraCloudAuthorizationListResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTRA_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE),
@@ -167,13 +171,14 @@ public class AuthorizationController {
 	@ResponseBody public IntraCloudAuthorizationListResponseDTO registerIntraCloudAuthorization(@RequestBody final IntraCloudAuthorizationRequestDTO request) {
 		logger.debug("New IntraCloudAuthorization registration request recieved");
 		
-		final boolean isConsumerIdInvalid = request.getConsumerId() < 1 || request.getConsumerId() == null;
+		final boolean isConsumerIdInvalid = request.getConsumerId() == null || request.getConsumerId() < 1;
 		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
 		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds() == null || request.getServiceDefinitionIds().isEmpty();
 		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty) {
-			String exceptionMsg = isConsumerIdInvalid ? "invalid consumer id" : "";
-			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty" : exceptionMsg;
-			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " serviceDefinitionList is empty" : exceptionMsg;
+			String exceptionMsg = "Payload is invalid due to the following reasons:";
+			exceptionMsg = isConsumerIdInvalid ? exceptionMsg +" 'invalid consumer id'" : exceptionMsg;
+			exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'providerId list is empty'" : exceptionMsg;
+			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " 'serviceDefinitionList is empty'" : exceptionMsg;
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
@@ -184,6 +189,32 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Checks whether the consumer System can use a Service from a list of provider Systems", response = IntraCloudAuthorizationCheckResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
+	@ResponseBody public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequest(@RequestBody final IntraCloudAuthorizationCheckRequestDTO request) {
+		logger.debug("New IntraCloudAuthorization check request recieved");
+		
+		final boolean isConsumerIdInvalid = request.getConsumerId() == null || request.getConsumerId() < 1;
+		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
+		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
+		if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
+			String exceptionMsg = "Payload is invalid due to the following reasons:";
+			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " 'invalid consumer id'" : exceptionMsg;
+			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'invalid serviceDefinition id'" : exceptionMsg;
+			exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'providerId list is empty'" : exceptionMsg;
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_CHECK_URI);
+		}
+		
+		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequestResponse(request.getConsumerId(), request.getServiceDefinitionId(), request.getProviderIds());
+		logger.debug("checkIntraCloudAuthorizationRequest has been finished");
+		return response;
+	}
 	
 	//=================================================================================================
 	// assistant methods

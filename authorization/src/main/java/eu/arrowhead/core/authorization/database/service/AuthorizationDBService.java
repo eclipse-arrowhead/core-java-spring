@@ -1,7 +1,9 @@
 package eu.arrowhead.core.authorization.database.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -25,6 +27,7 @@ import eu.arrowhead.common.database.repository.IntraCloudAuthorizationRepository
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -138,10 +141,10 @@ public class AuthorizationDBService {
 		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
 		try {
 			if (consumerIdIsInvalid || providerIdIsInvalid || serviceDefinitionIdIsInvalid) {
-				String exceptionMessage = "Following id parameters are invalid: ";
-				exceptionMessage = consumerIdIsInvalid ? exceptionMessage : exceptionMessage + "consumerId" ;
-				exceptionMessage = providerIdIsInvalid ? exceptionMessage : exceptionMessage + " providerId";
-				exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " serviceDefinitionId";
+				String exceptionMessage = "Following id parameters are invalid:";
+				exceptionMessage = consumerIdIsInvalid ? exceptionMessage : exceptionMessage + " 'consumerId'" ;
+				exceptionMessage = providerIdIsInvalid ? exceptionMessage : exceptionMessage + " 'providerId'";
+				exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " 'serviceDefinitionId'";
 				throw new InvalidParameterException(exceptionMessage);
 			}	
 			
@@ -151,10 +154,10 @@ public class AuthorizationDBService {
 			final Optional<System> provider = systemRepository.findById(providerId);
 			final Optional<ServiceDefinition> serviceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
 			if (consumer.isEmpty() || provider.isEmpty() || serviceDefinition.isEmpty()) {
-				String exceptionMessage = "Following entities are not availables: ";
-				exceptionMessage = consumer.isEmpty() ? exceptionMessage + "consumer with id: " + consumerId : exceptionMessage;
-				exceptionMessage = provider.isEmpty() ? exceptionMessage + " provider with id: " + providerId : exceptionMessage;
-				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition with id: " + serviceDefinitionId : exceptionMessage;
+				String exceptionMessage = "Following entities are not availables:";
+				exceptionMessage = consumer.isEmpty() ? exceptionMessage + " 'consumer with id: " + consumerId + "'" : exceptionMessage;
+				exceptionMessage = provider.isEmpty() ? exceptionMessage + " 'provider with id: " + providerId + "'" : exceptionMessage;
+				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " 'serviceDefinition with id: " + serviceDefinitionId + "'" : exceptionMessage;
 				throw new InvalidParameterException(exceptionMessage);
 			}
 			
@@ -210,6 +213,46 @@ public class AuthorizationDBService {
 		
 		final Page<IntraCloudAuthorization> savedEntriesPage = new PageImpl<IntraCloudAuthorization>(savedEntries);
 		return DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(savedEntriesPage);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequestResponse(final long consumerId, final long serviceDefinitionId, final List<Long> providerIds) {
+		logger.debug("checkIntraCloudAuthorizationRequestResponse started..");
+				
+		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
+		try {
+			final boolean isConsumerIdInvalid = consumerId < 1 || !systemRepository.existsById(consumerId);
+			final boolean isServiceDefinitionIdInvalid = serviceDefinitionId < 1 || !serviceDefinitionRepository.existsById(serviceDefinitionId);
+			final boolean isProviderListEmpty = providerIds == null || providerIds.isEmpty();
+			if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
+				String exceptionMsg = "Following parameters are invalid:";
+				exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " 'consumer id'" : exceptionMsg;
+				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'serviceDefinition id'" : exceptionMsg;
+				exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'empty providerId list'" : exceptionMsg;
+				throw new InvalidParameterException(exceptionMsg);
+			}
+			
+			for (final Long providerId : providerIds) {
+				if (providerId == null || providerId < 1 || !systemRepository.existsById(providerId)) {
+					logger.debug("Invalid provider id: {}", providerId);
+				} else {
+					final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
+					providerIdAuthorizationState.put(optional.get().getProviderSystem().getId(), optional.isPresent());			
+				}
+			}
+			
+			if (providerIdAuthorizationState.isEmpty()) {
+				throw new InvalidParameterException("Have no valid id in providerId list");
+			}			
+			return new IntraCloudAuthorizationCheckResponseDTO(consumerId, serviceDefinitionId, providerIdAuthorizationState);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
 	}
 	
 	//=================================================================================================
