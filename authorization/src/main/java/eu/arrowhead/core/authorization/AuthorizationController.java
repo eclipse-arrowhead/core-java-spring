@@ -166,8 +166,8 @@ public class AuthorizationController {
 		logger.debug("New IntraCloudAuthorization registration request recieved");
 		
 		final boolean isConsumerIdInvalid = request.getConsumerId() < 1 || request.getConsumerId() == null;
-		final boolean isProviderListEmpty = request.getProviderIds().isEmpty();
-		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds().isEmpty();
+		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
+		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds() == null || request.getServiceDefinitionIds().isEmpty();
 		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty) {
 			String exceptionMsg = isConsumerIdInvalid ? "invalid consumer id" : "";
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty" : exceptionMsg;

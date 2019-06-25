@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.IntraCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 
@@ -145,7 +147,7 @@ public class AuthorizationControllerIntraCloudTest {
 				.andReturn();
 		
 		final IntraCloudAuthorizationResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationResponseDTO.class);
-		assertEquals(responseBody.getServiceDefinition().getServiceDefinition(), "testService");
+		assertEquals(responseBody.getConsumerSystem().getSystemName(), "Consumer");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -174,16 +176,68 @@ public class AuthorizationControllerIntraCloudTest {
 				.andExpect(status().isBadRequest());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	// Test of registerIntraCloudAuthorization
+	
+	@Test
+	public void testRegisterIntraCloudAuthorizationWithInvalidConsumerId() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 0, createIdList(1, 2), createIdList(1, 2))))
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterIntraCloudAuthorizationWithEmptyProviderIdList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, new ArrayList<>(), createIdList(1, 2))))
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterIntraCloudAuthorizationWithEmptyServiceDefinitionIdList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 2), null)))
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterIntraCloudAuthorizationDBCall() throws Exception {
+		final Page<IntraCloudAuthorization> entries = createPageForMockingAuthorizationDBService(1);
+		when(authorizationDBService.createBulkIntraCloudAuthorizationResponse(anyLong(), any(), any())).thenReturn(DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(entries));
+		
+		final MvcResult response = this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 1), createIdList(1, 1))))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated())
+				.andReturn();
+		
+		final IntraCloudAuthorizationListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationListResponseDTO.class);
+		assertEquals("Consumer", responseBody.getData().get(0).getConsumerSystem().getSystemName());
+		assertEquals(1, responseBody.getData().size());
+		assertEquals(1, responseBody.getCount());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	private Page<IntraCloudAuthorization> createPageForMockingAuthorizationDBService(final int numberOfRequestedEntry) {
 		final List<IntraCloudAuthorization> entries = new ArrayList<>(numberOfRequestedEntry);
-		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
+		final System consumer = new System("Consumer", "0.0.0.0.", 1000, null);
+		consumer.setId(1);
 		for (int i = 1; i <= numberOfRequestedEntry; i++ ) {
-			final System consumer = new System("Consumer" + i, i + "." + i +"." + i + "." + i, i * 1000, null);
-			consumer.setId(i);
+			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
+			serviceDefinition.setId(i);
 			final System provider = new System("Provider" + i, i + "." + i +"." + i + "." + i, i * 1000, null);
 			provider.setId(i);
 			final IntraCloudAuthorization entry = new IntraCloudAuthorization(consumer, provider, serviceDefinition);
@@ -193,4 +247,12 @@ public class AuthorizationControllerIntraCloudTest {
 		return new PageImpl<IntraCloudAuthorization>(entries);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private List<Long> createIdList(final int firstNum, final int lastNum) {
+		final List<Long> idList = new ArrayList<>(lastNum);
+		for (int i = firstNum; i <= lastNum; i++) {
+			idList.add((long) i);
+		}
+		return idList;
+	}
 }

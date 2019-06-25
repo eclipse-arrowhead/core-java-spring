@@ -205,7 +205,7 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	public static IntraCloudAuthorizationResponseDTO convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(final IntraCloudAuthorization entry) {
 		Assert.notNull(entry, "IntraCloudAuthorization is null");
-		Assert.notNull(entry.getConsumerSystem(), "Consumer ins null");
+		Assert.notNull(entry.getConsumerSystem(), "Consumer is null");
 		Assert.notNull(entry.getProviderSystem(), "Provider is null");
 		Assert.notNull(entry.getServiceDefinition(), "ServiceDefintion is null");
 		
