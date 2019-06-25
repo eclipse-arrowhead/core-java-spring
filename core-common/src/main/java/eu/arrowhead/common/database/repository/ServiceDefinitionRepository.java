@@ -7,8 +7,11 @@ import org.springframework.stereotype.Repository;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 
 @Repository
-public interface ServiceDefinitionRepository extends RefreshableRepository<ServiceDefinition, Long> {
+public interface ServiceDefinitionRepository extends RefreshableRepository<ServiceDefinition,Long> {
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	Optional<ServiceDefinition> findByServiceDefinition(final String serviceDefinition);	
-	
 }

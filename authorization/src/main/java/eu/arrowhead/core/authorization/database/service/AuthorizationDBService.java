@@ -12,6 +12,9 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 @Service
 public class AuthorizationDBService {
 	
+	//=================================================================================================
+	// members
+	
 	@Autowired
 	private IntraCloudAuthorizationRepository intraCloudAuthorizationRepository;
 	
@@ -26,5 +29,4 @@ public class AuthorizationDBService {
 	
 	@Autowired
 	private ServiceDefinitionRepository serviceDefinitionRepository;
-
 }

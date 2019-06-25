@@ -3,12 +3,16 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 public class ServiceDefinitionsListResponseDTO implements Serializable {
 
-	private static final long serialVersionUID = 6737069652359698446L;
-	
 	//=================================================================================================
 	// members
+	
+	private static final long serialVersionUID = 6737069652359698446L;
 	
 	private List<ServiceDefinitionResponseDTO> data;
 	private long count;

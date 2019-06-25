@@ -23,25 +23,34 @@ import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBServi
 @DisallowConcurrentExecution
 public class ServiceEndOfValidityCheckTask implements Job {
 	
+	//=================================================================================================
+	// members
+
 	protected Logger logger = LogManager.getLogger(ServiceEndOfValidityCheckTask.class);
 	private static final int PAGE_SIZE = 1000;
 	
 	@Autowired
 	private ServiceRegistryDBService serviceRegistryDBService;
 
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: Services end of validity check task");
+		
 		final List<ServiceRegistry> removedServiceRegistries = checkServicesEndOfValidity();
+		
 		logger.debug("FINISHED: Services end of validity check task. Number of removed service registry entry: {}", removedServiceRegistries.size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public List<ServiceRegistry> checkServicesEndOfValidity() {
 		final List<ServiceRegistry> removedServiceRegistryEntries = new ArrayList<>();
 		int pageIndexCounter = 0;
-		Page<ServiceRegistry> pageOfServiceEntries;
 		try {
-			pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
 				logger.debug("Servise Registry database is empty");
 			} else {
@@ -61,6 +70,10 @@ public class ServiceEndOfValidityCheckTask implements Job {
 		return removedServiceRegistryEntries;
 	}
 	
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
 	private List<ServiceRegistry> removeRegisteredServicesWithInvalidTTL(final Page<ServiceRegistry> pageOfServiceEntries) {
 		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
 		for (final ServiceRegistry serviceRegistryEntry : pageOfServiceEntries) {
@@ -70,11 +83,13 @@ public class ServiceEndOfValidityCheckTask implements Job {
 				logger.debug("REMOVED: {}", serviceRegistryEntry);
 			}
 		}
+		
 		serviceRegistryDBService.removeBulkOfServiceRegistryEntries(toBeRemoved);
 		
 		return toBeRemoved;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	private boolean isTTLValid(final ZonedDateTime endOfValidity) {
 		return endOfValidity.isAfter(ZonedDateTime.now());
 	}

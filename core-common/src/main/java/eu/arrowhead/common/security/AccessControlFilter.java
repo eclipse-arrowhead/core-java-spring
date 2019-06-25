@@ -25,7 +25,6 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 	
 	//=================================================================================================
 	// members
-
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	protected Map<String,String> arrowheadContext;

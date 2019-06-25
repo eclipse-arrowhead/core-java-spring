@@ -11,14 +11,18 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @Configuration
 public class SRSwaggerConfig extends DefaultSwaggerConfig {
-
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	public SRSwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_SERVICE_REGISTRY);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public Docket customizeSwagger() {
 		return configureSwaggerForCoreSystem(this.getClass().getPackageName());
 	}
-	
 }

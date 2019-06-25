@@ -7,7 +7,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.database.repository.RefreshableRepository;
 import eu.arrowhead.common.database.repository.RefreshableRepositoryImpl;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -17,7 +16,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableJpaRepositories (basePackages = CommonConstants.DATABASE_REPOSITORY_PACKAGE, repositoryBaseClass = RefreshableRepositoryImpl.class)
 @EnableSwagger2
 public class ServiceRegistryMain {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	public static void main(final String[] args) {
 		SpringApplication.run(ServiceRegistryMain.class, args);
 	}

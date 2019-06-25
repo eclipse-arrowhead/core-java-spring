@@ -31,31 +31,15 @@ public class SSLProperties {
 	@Value(CommonConstants.$TRUSTSTORE_PASSWORD)
 	private String trustStorePassword;
 	
-	public boolean isSslEnabled() {
-		return sslEnabled;
-	}
+	//=================================================================================================
+	// methods
 
-	public String getKeyStoreType() {
-		return keyStoreType;
-	}
-
-	public Resource getKeyStore() {
-		return keyStore;
-	}
-
-	public String getKeyStorePassword() {
-		return keyStorePassword;
-	}
-
-	public String getKeyPassword() {
-		return keyPassword;
-	}
-
-	public Resource getTrustStore() {
-		return trustStore;
-	}
-
-	public String getTrustStorePassword() {
-		return trustStorePassword;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public boolean isSslEnabled() { return sslEnabled; }
+	public String getKeyStoreType() { return keyStoreType; }
+	public Resource getKeyStore() { return keyStore; }
+	public String getKeyStorePassword() { return keyStorePassword; }
+	public String getKeyPassword() { return keyPassword; }
+	public Resource getTrustStore() { return trustStore; }
+	public String getTrustStorePassword() { return trustStorePassword; }
 }

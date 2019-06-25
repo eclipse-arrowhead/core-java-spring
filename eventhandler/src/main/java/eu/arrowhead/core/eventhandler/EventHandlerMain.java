@@ -17,6 +17,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class EventHandlerMain {
 
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	public static void main(final String[] args) {
 		SpringApplication.run(EventHandlerMain.class, args);
 	}

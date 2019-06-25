@@ -18,6 +18,9 @@ import eu.arrowhead.core.serviceregistry.quartz.AutoWiringSpringBeanQuartzTaskFa
 @Configuration
 public class ProvidersReachabilityTaskConfig {
 	
+	//=================================================================================================
+	// members
+
 	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.class);
 	
 	@Autowired
@@ -34,6 +37,10 @@ public class ProvidersReachabilityTaskConfig {
 	private static final String NAME_OF_TRIGGER = "Providers_Reachability_Task_Trigger";
 	private static final String NAME_OF_TASK = "Providers_Reachability_Task_Detail";
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	@Bean
     public SchedulerFactoryBean providersReachabilityTaskScheduler() {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
@@ -53,6 +60,7 @@ public class ProvidersReachabilityTaskConfig {
 		return schedulerFactory;        
     }
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
     public SimpleTriggerFactoryBean providersReachabilityTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
@@ -64,6 +72,7 @@ public class ProvidersReachabilityTaskConfig {
         return trigger;
     }
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
     public JobDetailFactoryBean providersReachabilityTaskDetail() {
         final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();

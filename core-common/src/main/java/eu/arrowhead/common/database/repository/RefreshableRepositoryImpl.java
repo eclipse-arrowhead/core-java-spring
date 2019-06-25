@@ -7,19 +7,27 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.io.Serializable;
 
-public class RefreshableRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
-    implements RefreshableRepository<T, ID> {
+public class RefreshableRepositoryImpl<T,ID extends Serializable> extends SimpleJpaRepository<T,ID> implements RefreshableRepository<T,ID> {
+	
+	//=================================================================================================
+	// members
 
-  private final EntityManager entityManager;
+	private final EntityManager entityManager;
+	
+	//=================================================================================================
+	// methods
 
-  public RefreshableRepositoryImpl(JpaEntityInformation entityInformation, EntityManager entityManager) {
-    super(entityInformation, entityManager);
-    this.entityManager = entityManager;
-  }
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public RefreshableRepositoryImpl(final JpaEntityInformation entityInformation, final EntityManager entityManager) {
+		super(entityInformation, entityManager);
+		this.entityManager = entityManager;
+	}
 
-  @Override
-  @Transactional
-  public void refresh(T t) {
-    entityManager.refresh(t);
-  }
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	@Transactional
+	public void refresh(final T t) {
+		entityManager.refresh(t);
+	}
 }

@@ -18,6 +18,9 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerSystemId", "providerSystemId", "serviceId"}))
 public class IntraCloudAuthorization {
+	
+	//=================================================================================================
+	// members
 
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -40,80 +43,52 @@ public class IntraCloudAuthorization {
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
+	
+	//=================================================================================================
+	// methods
 
-	public IntraCloudAuthorization() {
-		
-	}
+	//-------------------------------------------------------------------------------------------------
+	public IntraCloudAuthorization() {}
 
+	//-------------------------------------------------------------------------------------------------
 	public IntraCloudAuthorization(final System consumerSystem, final System providerSystem, final ServiceDefinition serviceDefinition) {
 		this.consumerSystem = consumerSystem;
 		this.providerSystem = providerSystem;
 		this.serviceDefinition = serviceDefinition;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
 
-	public long getId() {
-		return id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public System getConsumerSystem() { return consumerSystem; }
+	public System getProviderSystem() { return providerSystem; }
+	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
-	public void setId(final long id) {
-		this.id = id;
-	}
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+	public void setConsumerSystem(final System consumerSystem) { this.consumerSystem = consumerSystem; }
+	public void setProviderSystem(final System providerSystem) { this.providerSystem = providerSystem; }
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-	public System getConsumerSystem() {
-		return consumerSystem;
-	}
-
-	public void setConsumerSystem(final System consumerSystem) {
-		this.consumerSystem = consumerSystem;
-	}
-
-	public System getProviderSystem() {
-		return providerSystem;
-	}
-
-	public void setProviderSystem(final System providerSystem) {
-		this.providerSystem = providerSystem;
-	}
-
-	public ServiceDefinition getServiceDefinition() {
-		return serviceDefinition;
-	}
-
-	public void setServiceDefinition(final ServiceDefinition serviceDefinition) {
-		this.serviceDefinition = serviceDefinition;
-	}
-
-	public ZonedDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(final ZonedDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public ZonedDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(final ZonedDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
+	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "IntraCloudAuthorization [id=" + id + ", consumerSystem=" + consumerSystem + ", providerSystem="
-				+ providerSystem + ", serviceDefinition=" + serviceDefinition + "]";
+		return "IntraCloudAuthorization [id = " + id + ", consumerSystem = " + consumerSystem + ", providerSystem = " + providerSystem + ", serviceDefinition = " + serviceDefinition + "]";
 	}
-	
 }

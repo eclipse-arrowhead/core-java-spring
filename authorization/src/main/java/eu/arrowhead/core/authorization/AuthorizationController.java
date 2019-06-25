@@ -20,10 +20,17 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 public class AuthorizationController {
 	
+	//=================================================================================================
+	// members
+	
 	private static final String ECHO_URI = "/echo";
 	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),

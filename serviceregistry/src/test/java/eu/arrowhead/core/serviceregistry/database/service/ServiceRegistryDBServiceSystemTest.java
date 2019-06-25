@@ -26,6 +26,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith (SpringRunner.class)
 public class ServiceRegistryDBServiceSystemTest {
+	
 	//=================================================================================================
 	// members
 	
@@ -39,26 +40,22 @@ public class ServiceRegistryDBServiceSystemTest {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void getSystemByIdTest() {
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		serviceRegistryDBService.getSystemById(1);		
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test (expected = InvalidParameterException.class)
+	@Test(expected = InvalidParameterException.class)
 	public void getSystemEntriesInvalidSortFieldValueTest() {
-	
 		final int validatedPage = 1;
 		final int validatedSize = 1;
 		final Direction validatedDirection = Direction.ASC;
-	
 		final String invalidSortField = "invalidSortField";
 		
 		serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, validatedDirection, invalidSortField);
-	
 	}
-	
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -87,9 +84,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}
-	
 	}
-	
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -123,40 +118,31 @@ public class ServiceRegistryDBServiceSystemTest {
 		
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void crateSystemSystemNameNullTest() {
-		
+	public void createSystemSystemNameNullTest() {
 		serviceRegistryDBService.createSystem(null, "x", 1, "x");
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void crateSystemAddressNullTest() {
-
+	public void createSystemAddressNullTest() {
 		serviceRegistryDBService.createSystem("x", null, 1, "x");
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void crateSystemSystemNameEmptyStringTest() {
-
+	public void createSystemSystemNameEmptyStringTest() {
 		serviceRegistryDBService.createSystem("", "x", 1, "x");
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void crateSystemAddressEmptyStringTest() {
-
+	public void createSystemAddressEmptyStringTest() {
 		serviceRegistryDBService.createSystem("x", "", 1, "x");
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void uniqueKeyViolationTest() {
-		
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
@@ -165,13 +151,11 @@ public class ServiceRegistryDBServiceSystemTest {
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
 		serviceRegistryDBService.createSystem(systemName, address, port, null);
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void uniqueKeyViolationNoEffectOfWhiteSpaceTest() {
-		
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
@@ -180,13 +164,11 @@ public class ServiceRegistryDBServiceSystemTest {
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
 		serviceRegistryDBService.createSystem(" "+systemName+" ", " "+address+" ", port, null);
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void uniqueKeyViolationNoEffectOfCaseDifferenceTest() {
-		
 		final String systemName = "alreadyexiststest";
 		final String address = "alreadyexiststest";
 		final int port = 1;
@@ -195,7 +177,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		when(systemRepository.findBySystemNameAndAddressAndPort(eq(systemName), eq(address), eq(port))).thenReturn(system);
 		
 		serviceRegistryDBService.createSystem(systemName.toUpperCase(), address.toUpperCase(), port, null);
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -208,7 +189,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -221,7 +201,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-				
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -234,7 +213,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-		
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -247,7 +225,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -260,7 +237,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -273,7 +249,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -286,7 +261,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -299,7 +273,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -312,7 +285,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-			
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -325,7 +297,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		final String authenticationInfo0 = null;
 		
 		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);
-				
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -431,7 +402,6 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}
-			
 	}
 	
 	//-------------------------------------------------------------------------------------------------

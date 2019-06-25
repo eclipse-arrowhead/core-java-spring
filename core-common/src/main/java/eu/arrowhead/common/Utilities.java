@@ -108,9 +108,7 @@ public class Utilities {
 															  ZoneOffset.UTC);
 														
 		final ZoneOffset offset = OffsetDateTime.now().getOffset();
-		ZonedDateTime dateTime = ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
-		
-		return dateTime;
+		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
