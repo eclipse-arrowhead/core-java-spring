@@ -323,8 +323,8 @@ public class AuthorizationController {
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
-		long validatedCloudId = request.getCloudId();
-		Set<Long> serviceDefinitionIdSet = convertServiceDefinitionIdListToSet(request.getServiceDefinitionIdList(), INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		final long validatedCloudId = request.getCloudId();
+		final Set<Long> serviceDefinitionIdSet = convertServiceDefinitionIdListToSet(request.getServiceDefinitionIdList(), INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		
 		final InterCloudAuthorizationListResponseDTO response = authorizationDBService.createInterCloudAuthorizationResponse(
 				validatedCloudId,
@@ -466,10 +466,10 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Set<Long> convertServiceDefinitionIdListToSet(List<Long> serviceDefinitionIdList, String origin) {
+	private Set<Long> convertServiceDefinitionIdListToSet(final List<Long> serviceDefinitionIdList, final String origin) {
 		try {
 			return Set.copyOf(serviceDefinitionIdList);
-		}catch (NullPointerException ex) {
+		}catch (final NullPointerException ex) {
 			throw new BadPayloadException("ServiceDefinition Id list element is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
