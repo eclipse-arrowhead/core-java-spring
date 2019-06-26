@@ -410,7 +410,7 @@ public class AuthorizationController {
 		final long validCloudId = request.getCloudId();
 		final long validServiceDefinitionId = request.getServiceDefinitionId(); 
 		
-		final InterCloudAuthorizationCheckResponseDTO response = authorizationDBService.createInterCloudAuthorizationResponse(validCloudId, validServiceDefinitionId);
+		final InterCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkInterCloudAuthorizationResponse(validCloudId, validServiceDefinitionId);
 		logger.debug("checkInterCloudAuthorizationRequest has been finished");
 		return response;
 	}
