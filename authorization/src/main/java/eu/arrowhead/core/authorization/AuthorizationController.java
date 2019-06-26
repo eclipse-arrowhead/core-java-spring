@@ -413,7 +413,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Checks whether the consumer System can use a Service from a list of provider Systems", response = InterCloudAuthorizationCheckResponseDTO.class)
+	@ApiOperation(value = "Checks whether a Cloud is authorized to use a Service", response = InterCloudAuthorizationCheckResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
