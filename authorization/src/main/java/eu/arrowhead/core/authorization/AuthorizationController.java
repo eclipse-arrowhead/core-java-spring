@@ -271,9 +271,9 @@ public class AuthorizationController {
 		}
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		
-		final InterCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getInterCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		final InterCloudAuthorizationListResponseDTO interCloudAuthorizationEntriesResponse = authorizationDBService.getInterCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("InterCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
-		return intraCloudAuthorizationEntriesResponse;
+		return interCloudAuthorizationEntriesResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
