@@ -20,7 +20,7 @@ public class InterCloudAuthorizationRequestDTO implements Serializable {
 	public InterCloudAuthorizationRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public InterCloudAuthorizationRequestDTO(final long cloudId,
+	public InterCloudAuthorizationRequestDTO(final Long cloudId,
 			final List<Long> serviceDefinitionIdList) {
 
 		this.cloudId = cloudId;
