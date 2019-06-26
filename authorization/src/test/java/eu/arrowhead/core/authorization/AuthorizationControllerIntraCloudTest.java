@@ -190,7 +190,7 @@ public class AuthorizationControllerIntraCloudTest {
 	public void testRegisterIntraCloudAuthorizationWithInvalidConsumerId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 0, createIdList(1, 2), createIdList(1, 2))))
+			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 0, createIdList(1, 1), createIdList(1, 2))))
 			.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isBadRequest());
 	}
@@ -211,6 +211,16 @@ public class AuthorizationControllerIntraCloudTest {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 2), null)))
+			.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterIntraCloudAuthorizationWithMultipleElementsInBothList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 2), createIdList(1, 2))))
 			.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isBadRequest());
 	}

@@ -1,5 +1,8 @@
 package eu.arrowhead.core.authorization;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -182,8 +185,29 @@ public class AuthorizationController {
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length()-1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
+		if (request.getProviderIds().size() > 1 && request.getServiceDefinitionIds().size() > 1) {
+			throw new BadPayloadException("providerIds list or serviceDefinitionIds list should contain only one element, but both contain more",
+					HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+		}
 		
-		final IntraCloudAuthorizationListResponseDTO response = authorizationDBService.createBulkIntraCloudAuthorizationResponse(request.getConsumerId(), request.getProviderIds(), request.getServiceDefinitionIds());
+		final Set<Long> providerIdSet = new HashSet<>();
+		for (final Long id : request.getProviderIds()) {
+			if (id != null && id > 0) {
+				providerIdSet.add(id);
+			} else {
+				logger.debug("Invalid provider system id: {}", id);
+			}
+		}
+		final Set<Long> serviceIdSet = new HashSet<>();
+		for (final Long id : request.getServiceDefinitionIds()) {
+			if (id != null && id > 0) {
+				serviceIdSet.add(id);
+			} else {
+				logger.debug("Invalid ServiceDefinition id: {}", id);
+			}
+		}
+		
+		final IntraCloudAuthorizationListResponseDTO response = authorizationDBService.createBulkIntraCloudAuthorizationResponse(request.getConsumerId(), providerIdSet, serviceIdSet);
 		logger.debug("registerIntraCloudAuthorization has been finished");
 		return response;
 		
