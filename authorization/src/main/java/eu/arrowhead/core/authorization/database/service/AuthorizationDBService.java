@@ -445,17 +445,13 @@ public class AuthorizationDBService {
 		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
 		
 		if (serviceDefinitionIdIsInvalid) {
-			String exceptionMessage = "Following id parameters are invalid: ";
-			exceptionMessage =  exceptionMessage + " serviceDefinitionId";
-			throw new InvalidParameterException(exceptionMessage);
+			throw new InvalidParameterException("Following id parameters are invalid: serviceDefinitionId - "+serviceDefinitionId);
 		}	
 		
 		
 		final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findById(serviceDefinitionId);
 		if (serviceDefinitionOptional.isEmpty()) {
-			String exceptionMessage = "Following id parameters are not present in database: ";
-			exceptionMessage =  exceptionMessage + " serviceDefinitionId :" + serviceDefinitionId;
-			throw new InvalidParameterException(exceptionMessage);
+			throw new InvalidParameterException("Following id parameters are not present in database: serviceDefinitionId -" + serviceDefinitionId);
 		}else {
 			final ServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
 			
