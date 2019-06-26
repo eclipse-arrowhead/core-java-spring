@@ -1,6 +1,7 @@
 package eu.arrowhead.core.authorization.database.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.InterCloudAuthorizationRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
+import eu.arrowhead.common.dto.InterCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
@@ -143,6 +145,60 @@ public class AuthorizationDBServiceInterCloudTest {
 		
 		final Page<InterCloudAuthorization> entry = authorizationDBService.createInterCloudAuthorization(1L, Set.of(1L));
 		assertEquals(getValidTestCloud().getPort(), entry.getContent().get(0).getCloud().getPort());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//Tests of checkInterCloudAuthorizationResponse
+	
+	@Test (expected = InvalidParameterException.class)
+	public void testCheckInterCloudAuthorizationRequestResponseWithInvalidCloudId() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkInterCloudAuthorizationResponse(0, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test (expected = InvalidParameterException.class)
+	public void testCheckInterCloudAuthorizationRequestResponseWithNotExistingCloud() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(false);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkInterCloudAuthorizationResponse(1, 1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test (expected = InvalidParameterException.class)
+	public void testCheckInterCloudAuthorizationRequestResponseWithInvalidServiceDefintitionId() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkInterCloudAuthorizationResponse(1, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test (expected = InvalidParameterException.class)
+	public void testCheckInterCloudAuthorizationRequestResponseWithNotExistingServiceDefintition() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
+		authorizationDBService.checkInterCloudAuthorizationResponse(1, 1);
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckInterCloudAuthorizationRequestResponseDBCall() {
+		final Cloud cloud = getValidTestCloud();
+		cloud.setId(8);
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
+		serviceDefinition.setId(3);
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(new Cloud()));
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of( new ServiceDefinition()));
+		when(interCloudAuthorizationRepository.findByCloudAndServiceDefinition(any(Cloud.class), any(ServiceDefinition.class)))
+			.thenReturn(Optional.of(new InterCloudAuthorization(cloud,  serviceDefinition)));
+		
+		final InterCloudAuthorizationCheckResponseDTO dto = authorizationDBService.checkInterCloudAuthorizationResponse(1, 1);
+		
+		assertTrue(dto.getCloudIdAuthorizationState());
 	}
 	
 	//=================================================================================================
