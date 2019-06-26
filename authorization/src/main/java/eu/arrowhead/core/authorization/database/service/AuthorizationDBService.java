@@ -223,7 +223,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public InterCloudAuthorizationListResponseDTO getInterCloudAuthorizationEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getIntraCloudAuthorizationEntriesResponse started...");
+		logger.debug("getInterCloudAuthorizationEntriesResponse started...");
 		final Page<InterCloudAuthorization> interCloudAuthorizationEntries = getInterCloudAuthorizationEntries(page, size, direction, sortField);
 		return DTOConverter.convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(interCloudAuthorizationEntries);
 	}
@@ -277,8 +277,8 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public InterCloudAuthorizationListResponseDTO createInterCloudAuthorizationResponse(long cloudId,
-			Set<Long> serviceDefinitionIdSet) {
+	public InterCloudAuthorizationListResponseDTO createInterCloudAuthorizationResponse(final long cloudId,
+			final Set<Long> serviceDefinitionIdSet) {
 		logger.debug("createInterCloudAuthorizationResponse started...");
 		
 		try {						
@@ -300,7 +300,8 @@ public class AuthorizationDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)	
-	public Page<InterCloudAuthorization> createInterCloudAuthorization(long cloudId, Set<Long> serviceDefinitionIdSet) {
+	public Page<InterCloudAuthorization> createInterCloudAuthorization(final long cloudId, final Set<Long> serviceDefinitionIdSet) {
+		logger.debug("createInterCloudAuthorization started...");
 		
 		if (cloudId < 1) {
 			throw new InvalidParameterException("Cloud id must be greater than 0.");
@@ -321,15 +322,15 @@ public class AuthorizationDBService {
 			if(cloudOptional.isEmpty()) {
 				throw new InvalidParameterException("No Cloud with id : "+cloudId);
 			}
-			Cloud cloud = cloudOptional.get();
+			final Cloud cloud = cloudOptional.get();
 			
 			final List<InterCloudAuthorization> entriesToSave = new ArrayList<>(serviceDefinitionIdSet.size());			
 			for (final Long serviceId : serviceDefinitionIdSet) {
-				InterCloudAuthorization interCloudAuthorization = createNewInterCloudAuthorization(cloud, serviceId);
+				
+				final InterCloudAuthorization interCloudAuthorization = createNewInterCloudAuthorization(cloud, serviceId);
 				if(interCloudAuthorization != null) {
 					entriesToSave.add(createNewInterCloudAuthorization(cloud, serviceId));
-				}
-				
+				}				
 			}
 				
 			return new PageImpl<InterCloudAuthorization>(interCloudAuthorizationRepository.saveAll(entriesToSave));
@@ -465,7 +466,7 @@ public class AuthorizationDBService {
 				final InterCloudAuthorization interCloudAuthorization = new InterCloudAuthorization(cloud, serviceDefinition);				
 				return interCloudAuthorization;
 				
-			}catch(InvalidParameterException ex) {
+			}catch(final InvalidParameterException ex) {
 				logger.info(ex.getMessage());
 				return null;
 			}
