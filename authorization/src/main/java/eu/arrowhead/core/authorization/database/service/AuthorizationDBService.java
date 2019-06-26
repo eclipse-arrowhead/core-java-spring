@@ -305,9 +305,13 @@ public class AuthorizationDBService {
 		if (cloudId < 1) {
 			throw new InvalidParameterException("Cloud id must be greater than 0.");
 		}
+		
+		if ( serviceDefinitionIdSet == null) {
+			throw new InvalidParameterException("SerdviceDefinitionSet is null.");
+		}
 		for (final Long id : serviceDefinitionIdSet) {
-			if (id == null || id < 1) {
-				throw new InvalidParameterException("SerdviceDefinition id can't be null and must be greater than 0.");
+			if ( id < 1) {
+				throw new InvalidParameterException("SerdviceDefinition id must be greater than 0.");
 			}
 		}		
 		
