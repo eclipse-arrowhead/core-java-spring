@@ -426,10 +426,13 @@ public class AuthorizationDBService {
 			
 			final Optional<InterCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(validCloud, validServiceDefinition);
 			if (optional.isEmpty()) {
-				throw new InvalidParameterException("No Atuthorization available.");
+			
+				return new InterCloudAuthorizationCheckResponseDTO(cloudId, serviceDefinitionId, false);
+			
+			} else {
+				
+				return new InterCloudAuthorizationCheckResponseDTO(cloudId, serviceDefinitionId, true);
 			}		
-						
-			return new InterCloudAuthorizationCheckResponseDTO(cloudId, serviceDefinitionId, true);
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
