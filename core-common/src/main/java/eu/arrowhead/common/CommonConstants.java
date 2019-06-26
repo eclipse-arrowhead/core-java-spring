@@ -39,6 +39,7 @@ public class CommonConstants {
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
+	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
@@ -56,8 +57,8 @@ public class CommonConstants {
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
 	
-	public static final String LOCALHOST = "127.0.0.1";
-	public static final int HTTP_PORT = 80;
+	public static final String LOCALHOST = "localhost";
+	public static final int HTTP_PORT = 8080;
 	
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
@@ -102,6 +103,10 @@ public class CommonConstants {
 	public static final String HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT = "http.client.connection.manager.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_MANAGER_TIMEOUT + "}";
 	
+	public static final String SERVER_ADDRESS = "server.address";
+	public static final String $SERVER_ADDRESS = "${" + SERVER_ADDRESS + "}";
+	public static final String SERVER_PORT = "server.port";
+	public static final String $SERVER_PORT = "${" + SERVER_PORT + "}";
 	public static final String CORE_SYSTEM_NAME = "core_system_name";
 	public static final String $CORE_SYSTEM_NAME = "${" + CORE_SYSTEM_NAME + "}";
 	public static final String LOG_ALL_REQUEST_AND_RESPONSE = "log_all_request_and_response";
