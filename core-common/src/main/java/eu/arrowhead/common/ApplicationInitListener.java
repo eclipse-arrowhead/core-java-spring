@@ -9,11 +9,13 @@ import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
+import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -21,6 +23,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.AuthException;
 
 @Component
@@ -34,6 +37,9 @@ public class ApplicationInitListener {
 	@Autowired
 	private SSLProperties sslProperties;
 	
+	@Value(CommonConstants.$CORE_SYSTEM_NAME)
+	private String coreSystemName;
+	
 	//=================================================================================================
 	// methods
 
@@ -42,6 +48,9 @@ public class ApplicationInitListener {
 	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		logger.debug("Initialization in onApplicationEvent()...");
 		
+		final CoreSystem coreSystem = findCoreSystem();
+		
+		logger.info("Core system name: {}", coreSystem.name());
 		logger.info("Server mode: {}", sslProperties.isSslEnabled() ? "SECURED" : "NOT SECURED");
 		if (sslProperties.isSslEnabled()) {
 			final KeyStore keyStore = initializeKeyStore();
@@ -60,6 +69,22 @@ public class ApplicationInitListener {
 	
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private CoreSystem findCoreSystem() {
+		logger.debug("findCoreSystem started...");
+		
+		if (Utilities.isEmpty(coreSystemName)) {
+			throw new ServiceConfigurationError("Core system name is not specified in the application.properties file");
+		}
+		
+		try {
+			return CoreSystem.valueOf(coreSystemName.trim().toUpperCase());
+		} catch (final IllegalArgumentException ex) {
+			throw new ServiceConfigurationError("Core system name " + coreSystemName + " is not recognized.", ex);
+		}
+	}
+
 	
 	//-------------------------------------------------------------------------------------------------
 	private KeyStore initializeKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
