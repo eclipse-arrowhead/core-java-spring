@@ -303,7 +303,7 @@ public class AuthorizationDBService {
 	public Page<InterCloudAuthorization> createInterCloudAuthorization(long cloudId, Set<Long> serviceDefinitionIdSet) {
 		
 		if (cloudId < 1) {
-			throw new InvalidParameterException("Cloud id can't be null and must be greater than 0.");
+			throw new InvalidParameterException("Cloud id must be greater than 0.");
 		}
 		for (final Long id : serviceDefinitionIdSet) {
 			if (id == null || id < 1) {
