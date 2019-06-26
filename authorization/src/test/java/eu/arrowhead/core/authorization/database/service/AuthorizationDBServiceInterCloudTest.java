@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,13 +93,13 @@ public class AuthorizationDBServiceInterCloudTest {
 	
 	@Test (expected = InvalidParameterException.class)
 	public void testCreateInterCloudAuthorizationResponseWithInvalidCloudId() {
-		authorizationDBService.createInterCloudAuthorization(-1L, List.of(1L));		
+		authorizationDBService.createInterCloudAuthorization(-1L, Set.of(1L));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test (expected = InvalidParameterException.class)
 	public void testCreateInterCloudAuthorizationResponseWithInvalidServiceDefinitionId() {
-		authorizationDBService.createInterCloudAuthorization(1L, List.of(-1L));		
+		authorizationDBService.createInterCloudAuthorization(1L, Set.of(-1L));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -106,8 +107,8 @@ public class AuthorizationDBServiceInterCloudTest {
 	public void testCreateInterCloudAuthorizationResponseWithNotExistingCloud() {
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(new ServiceDefinition()));
-		when(interCloudAuthorizationRepository.findByCloudIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
-		authorizationDBService.createInterCloudAuthorization(Long.MAX_VALUE, List.of(1L));
+		when(interCloudAuthorizationRepository.findByCloudAndServiceDefinition(any(), any())).thenReturn(Optional.ofNullable(null));
+		authorizationDBService.createInterCloudAuthorization(Long.MAX_VALUE, Set.of(1L));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -115,15 +116,15 @@ public class AuthorizationDBServiceInterCloudTest {
 	public void testCreateInterCloudAuthorizationResponseWithNotExistingServiceDefintition() {
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(new Cloud()));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-		when(interCloudAuthorizationRepository.findByCloudIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
-		authorizationDBService.createInterCloudAuthorization(1L, List.of(Long.MAX_VALUE));
+		when(interCloudAuthorizationRepository.findByCloudAndServiceDefinition(any(), any())).thenReturn(Optional.ofNullable(null));
+		authorizationDBService.createInterCloudAuthorization(1L, Set.of(Long.MAX_VALUE));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test (expected = InvalidParameterException.class)
 	public void testCreateInterCloudAuthorizationResponseWithDBConstraintViolation() {
-		when(interCloudAuthorizationRepository.findByCloudIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
-		authorizationDBService.createInterCloudAuthorization(1L, List.of(1L));
+		when(interCloudAuthorizationRepository.findByCloudAndServiceDefinition(any(), any())).thenReturn(Optional.ofNullable(null));
+		authorizationDBService.createInterCloudAuthorization(1L, Set.of(1L));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -137,11 +138,11 @@ public class AuthorizationDBServiceInterCloudTest {
 		
 		final List<InterCloudAuthorization> entriesToSave = createPageForMockingInterCloudAuthorizationRepository(1).getContent();
 		when(interCloudAuthorizationRepository.saveAll(any())).thenReturn(entriesToSave);
-		when(interCloudAuthorizationRepository.findByCloudIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
+		when(interCloudAuthorizationRepository.findByCloudAndServiceDefinition(any(), any())).thenReturn(Optional.ofNullable(null));
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(getValidTestCloud()));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(serviceDefinition));
 		
-		final Page<InterCloudAuthorization> entry = authorizationDBService.createInterCloudAuthorization(1L, List.of(1L));
+		final Page<InterCloudAuthorization> entry = authorizationDBService.createInterCloudAuthorization(1L, Set.of(1L));
 		assertEquals(getValidTestCloud().getPort(), entry.getContent().get(0).getCloud().getPort());
 	}
 	

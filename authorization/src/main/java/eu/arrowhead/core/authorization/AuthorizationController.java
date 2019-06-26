@@ -1,5 +1,8 @@
 package eu.arrowhead.core.authorization;
 
+import java.util.List;
+import java.util.Set;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -320,14 +323,16 @@ public class AuthorizationController {
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
+		Set<Long> serviceDefinitionIdSet = convertServiceDefinitionIdListToSet(request.getServiceDefinitionIdList(), INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		
 		final InterCloudAuthorizationListResponseDTO response = authorizationDBService.createInterCloudAuthorizationResponse(
 				request.getCloudId(),
-				request.getServiceDefinitionIdList());
+				serviceDefinitionIdSet);
 		logger.debug("registerInterCloudAuthorization has been finished");
 		return response;
 		
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Remove the requested InterCloudAuthorization entry")
 	@ApiResponses (value = {
@@ -457,5 +462,14 @@ public class AuthorizationController {
 			throw new BadPayloadException("System authentication info is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Set<Long> convertServiceDefinitionIdListToSet(List<Long> serviceDefinitionIdList, String origin) {
+		try {
+			return Set.copyOf(serviceDefinitionIdList);
+		}catch (NullPointerException ex) {
+			throw new BadPayloadException("ServiceDefinition Id list element is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
 	}
 }
