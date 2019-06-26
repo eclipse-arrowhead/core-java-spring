@@ -56,11 +56,14 @@ public class CommonConstants {
 	public static final String HTTP = "http";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
+	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
+	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON; 
 	
 	public static final String LOCALHOST = "localhost";
 	public static final int HTTP_PORT = 8080;
 	
 	public static final String SERVER_ERROR_URI = "/error";
+	public static final String ECHO_URI = "/echo";
 	public static final String MGMT_URI = "/mgmt";
 	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
