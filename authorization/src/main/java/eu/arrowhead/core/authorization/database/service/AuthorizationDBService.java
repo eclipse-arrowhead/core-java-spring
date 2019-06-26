@@ -429,7 +429,7 @@ public class AuthorizationDBService {
 		logger.debug("checkConstraintsOfInterCloudAuthorizationTable started...");
 		
 		
-		final Optional<IntraCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(cloud, serviceDefinition);
+		final Optional<InterCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(cloud, serviceDefinition);
 		if (optional.isPresent()) {
 			throw new InvalidParameterException(
 					"InterCloudAuthorization entry with this cloudId: " +  cloud.getId()  + 
