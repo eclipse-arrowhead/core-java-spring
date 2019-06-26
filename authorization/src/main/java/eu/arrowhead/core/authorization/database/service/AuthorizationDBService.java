@@ -461,7 +461,7 @@ public class AuthorizationDBService {
 				return  new InterCloudAuthorization(cloud, serviceDefinition);
 				
 			}catch(final InvalidParameterException ex) {
-				logger.info(ex.getMessage());
+				logger.debug(ex.getMessage());
 				return null;
 			}
 
