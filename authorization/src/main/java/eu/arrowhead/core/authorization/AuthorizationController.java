@@ -94,8 +94,7 @@ public class AuthorizationController {
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
 	@Autowired
-	private AuthorizationDBService authorizationDBService;
-	
+	private AuthorizationDBService authorizationDBService;	
 
 	@Autowired
 	private TokenGenerationService tokenGenerationService;
@@ -279,28 +278,6 @@ public class AuthorizationController {
 		return response;
 	}
 	
-	//=================================================================================================
-	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------
-	private Direction calculateDirection(final String direction, final String origin) {
-		logger.debug("calculateDirection started ...");
-		final String directionStr = direction != null ? direction.toUpperCase() : "";
-		Direction validatedDirection;
-		switch (directionStr) {
-			case CommonConstants.SORT_ORDER_ASCENDING:
-				validatedDirection = Direction.ASC;
-				break;
-			case CommonConstants.SORT_ORDER_DESCENDING:
-				validatedDirection = Direction.DESC;
-				break;
-			default:
-				throw new BadPayloadException("Invalid sort direction flag", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		return validatedDirection;
-	}
-	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = TOKEN_DESCRIPTION, response = TokenGenerationResponseDTO.class)
 	@ApiResponses(value = {
@@ -338,6 +315,25 @@ public class AuthorizationController {
 
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private Direction calculateDirection(final String direction, final String origin) {
+		logger.debug("calculateDirection started ...");
+		final String directionStr = direction != null ? direction.toUpperCase() : "";
+		Direction validatedDirection;
+		switch (directionStr) {
+			case CommonConstants.SORT_ORDER_ASCENDING:
+				validatedDirection = Direction.ASC;
+				break;
+			case CommonConstants.SORT_ORDER_DESCENDING:
+				validatedDirection = Direction.DESC;
+				break;
+			default:
+				throw new BadPayloadException("Invalid sort direction flag", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		return validatedDirection;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkTokenGenerationRequest(final TokenGenerationRequestDTO request) {
