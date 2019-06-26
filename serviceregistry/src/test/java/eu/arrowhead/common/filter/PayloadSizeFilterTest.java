@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,7 +22,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
-import eu.arrowhead.core.serviceregistry.security.SRAccessControlFilter;
 
 /**
  * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
@@ -37,9 +35,6 @@ public class PayloadSizeFilterTest {
 	//=================================================================================================
 	// members
 
-	@Autowired
-	private ApplicationContext appContext;
-	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
 	
@@ -56,10 +51,8 @@ public class PayloadSizeFilterTest {
 	public void setup() {
 		assumeTrue(secure);
 		
-		final SRAccessControlFilter sracFilter = appContext.getBean(SRAccessControlFilter.class);
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
 									  .apply(springSecurity())
-									  .addFilters(sracFilter)
 									  .build();
 	}
 	
@@ -81,6 +74,7 @@ public class PayloadSizeFilterTest {
 					.secure(true)
 					.with(x509("certificates/valid.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
+					.content("")
 				    .accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}

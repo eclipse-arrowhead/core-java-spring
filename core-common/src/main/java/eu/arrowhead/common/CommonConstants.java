@@ -124,6 +124,7 @@ public class CommonConstants {
 	public static final String REQUEST_PARAM_DIRECTION = "direction";
 	public static final String REQUEST_PARAM_SORT_FIELD = "sort_field";
 	public static final String REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
+	public static final String REQUEST_PARAM_TOKEN = "token";
 	
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";

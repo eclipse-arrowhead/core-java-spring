@@ -1,17 +1,25 @@
 package eu.arrowhead.core.authorization;
 
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -43,6 +51,7 @@ public class AuthorizationControllerTokenTest {
 	// members
 	
 	private static final String AUTH_TOKEN_GENERATION_URI = CommonConstants.AUTHORIZATION_URI + "/token";
+	private static final String AUTH_PUBLIC_KEY_URI = CommonConstants.AUTHORIZATION_URI + "/publickey";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -55,13 +64,21 @@ public class AuthorizationControllerTokenTest {
 	@MockBean(name = "mockTokenGenerationService") 
 	private TokenGenerationService tokenGenerationService;
 	
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
+	
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	private boolean secure;
+	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setup() {
+		MockitoAnnotations.initMocks(this);
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		//TODO: when AuthAccessControlFilter is implemented we may need appropriate certificates to test these endpoints 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -395,6 +412,45 @@ public class AuthorizationControllerTokenTest {
 		when(tokenGenerationService.generateTokensResponse(any(TokenGenerationRequestDTO.class))).thenReturn(new TokenGenerationResponseDTO());
 		postGenerateTokens(request, status().isOk());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicKeyNotSecure() throws Exception {
+		assumeFalse(secure);
+		final MvcResult result = getPublicKey(status().isInternalServerError());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.ARROWHEAD, error.getExceptionType());
+		Assert.assertEquals(AUTH_PUBLIC_KEY_URI, error.getOrigin());
+		Assert.assertEquals("Authorization core service runs in insecure mode.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicKeyNotAvailable() throws Exception {
+		assumeTrue(secure);
+
+		final Object publicKey = arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		try {
+			arrowheadContext.remove(CommonConstants.SERVER_PUBLIC_KEY);
+			final MvcResult result = getPublicKey(status().isInternalServerError());
+			final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+			
+			Assert.assertEquals(ExceptionType.ARROWHEAD, error.getExceptionType());
+			Assert.assertEquals(AUTH_PUBLIC_KEY_URI, error.getOrigin());
+			Assert.assertEquals("Public key is not available.", error.getErrorMessage());
+		} finally {
+			arrowheadContext.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testGetPublicKeyOk() throws Exception {
+		assumeTrue(secure);
+		getPublicKey(status().isOk());
+	}
 		
 	//=================================================================================================
 	// assistant methods
@@ -405,6 +461,14 @@ public class AuthorizationControllerTokenTest {
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult getPublicKey(final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(get((AUTH_PUBLIC_KEY_URI))
+						   .accept(MediaType.TEXT_PLAIN))
 						   .andExpect(matcher)
 						   .andReturn();
 	}
