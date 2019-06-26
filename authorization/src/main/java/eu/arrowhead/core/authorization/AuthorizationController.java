@@ -2,20 +2,18 @@ package eu.arrowhead.core.authorization;
 
 import java.security.PublicKey;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,28 +26,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
-import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.core.authorization.token.TokenGenerationService;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
+import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
+import eu.arrowhead.core.authorization.token.TokenGenerationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -218,7 +211,7 @@ public class AuthorizationController {
 			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
 			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " serviceDefinitionList is empty," : exceptionMsg;
-			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length()-1);
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		if (request.getProviderIds().size() > 1 && request.getServiceDefinitionIds().size() > 1) {
@@ -269,11 +262,20 @@ public class AuthorizationController {
 			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
 			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " invalid serviceDefinition id," : exceptionMsg;
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
-			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length()-1);
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_CHECK_URI);
 		}
 		
-		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequest(request.getConsumerId(), request.getServiceDefinitionId(), request.getProviderIds());
+		final Set<Long> providerIdSet = new HashSet<>();
+		for (final Long id : request.getProviderIds()) {
+			if (id != null && id > 0) {
+				providerIdSet.add(id);
+			} else {
+				logger.debug("Invalid provider system id: {}", id);
+			}
+		}
+		
+		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequest(request.getConsumerId(), request.getServiceDefinitionId(), providerIdSet);
 		logger.debug("checkIntraCloudAuthorizationRequest has been finished");
 		return response;
 	}

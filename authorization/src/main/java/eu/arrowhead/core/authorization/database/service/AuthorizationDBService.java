@@ -146,7 +146,7 @@ public class AuthorizationDBService {
 				exceptionMessage = consumerIdIsInvalid ? exceptionMessage : exceptionMessage + " consumerId," ;
 				exceptionMessage = providerIdIsInvalid ? exceptionMessage : exceptionMessage + " providerId,";
 				exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " serviceDefinitionId,";
-				exceptionMessage = exceptionMessage.substring(0, exceptionMessage.length()-1);
+				exceptionMessage = exceptionMessage.substring(0, exceptionMessage.length() - 1);
 				throw new InvalidParameterException(exceptionMessage);
 			}	
 			
@@ -158,7 +158,7 @@ public class AuthorizationDBService {
 				exceptionMessage = consumer.isEmpty() ? exceptionMessage + " consumer with id: " + consumerId + "," : exceptionMessage;
 				exceptionMessage = provider.isEmpty() ? exceptionMessage + " provider with id: " + providerId + "," : exceptionMessage;
 				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition with id: " + serviceDefinitionId + "," : exceptionMessage;
-				exceptionMessage = exceptionMessage.substring(0, exceptionMessage.length()-1);
+				exceptionMessage = exceptionMessage.substring(0, exceptionMessage.length() - 1);
 				throw new InvalidParameterException(exceptionMessage);
 			}
 			checkConstraintsOfIntraCloudAuthorizationTable(consumer.get(), provider.get(), serviceDefinition.get());
@@ -224,65 +224,13 @@ public class AuthorizationDBService {
 				
 				//Case: One provider with more or one service
 				final Long providerId = providerIds.iterator().next();
-				final Optional<System> providerOpt = systemRepository.findById(providerId);
-				System provider;
-				if (providerOpt.isPresent()) {
-					final List<IntraCloudAuthorization> toBeSaved = new ArrayList<>(serviceDefinitionIds.size());
-					provider = providerOpt.get();
-					for (final Long serviceId : serviceDefinitionIds) {
-						final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findById(serviceId);
-						ServiceDefinition service;
-						if (serviceOpt.isPresent()) {
-							service = serviceOpt.get();
-							try {
-								checkConstraintsOfIntraCloudAuthorizationTable(consumer, provider, service);
-								toBeSaved.add(new IntraCloudAuthorization(consumer, provider, service));
-							} catch (final InvalidParameterException ex) {
-								//not throwing towards as in this bulk operation case should be only a warning
-								logger.debug(ex.getMessage());
-							}
-						} else {
-							//not throwing exception as in this bulk operation case should be only a warning
-							logger.debug("ServiceDefinition with id of " + serviceId + " not exists");
-						}
-					}
-					final List<IntraCloudAuthorization> savedEntries = intraCloudAuthorizationRepository.saveAll(toBeSaved);
-					intraCloudAuthorizationRepository.flush();
-					return savedEntries;
-				} else {
-					throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
-				}
+				return createBulkIntraCloudAuthorizationWithOneProviderAndMoreServiceDefinition(consumer, providerId, serviceDefinitionIds);
 				
 			} else {
 				
 				//Case: One service with more or one provider
 				final Long serviceId = serviceDefinitionIds.iterator().next();
-				final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findById(serviceId);
-				if (serviceOpt.isPresent()) {
-					final List<IntraCloudAuthorization> toBeSaved = new ArrayList<>(providerIds.size());
-					final ServiceDefinition service = serviceOpt.get();
-					for (final Long providerId : providerIds) {
-						final Optional<System> providerOpt = systemRepository.findById(providerId);
-						if (providerOpt.isPresent()) {
-							final System provider = providerOpt.get();
-							try {
-								checkConstraintsOfIntraCloudAuthorizationTable(consumer, provider, service);
-								toBeSaved.add(new IntraCloudAuthorization(consumer, provider, service));
-							} catch (final InvalidParameterException ex) {
-								//not throwing towards as in this bulk operation case should be only a warning
-								logger.debug(ex.getMessage());
-							}
-						} else {
-							//not throwing exception as in this bulk operation case should be only a warning
-							logger.debug("Provider system with id of " + providerId + " not exists");
-						}
-					}
-					final List<IntraCloudAuthorization> savedEntries = intraCloudAuthorizationRepository.saveAll(toBeSaved);
-					intraCloudAuthorizationRepository.flush();
-					return savedEntries;
-				} else {
-					throw new InvalidParameterException("ServiceDefinition with id of " + serviceId + " not exists");
-				}
+				return createBulkIntraCloudAuthorizationWithOneServiceDefinitionAndMoreProvider(consumer, providerIds, serviceId);
 			}
 			
 		} catch (final InvalidParameterException ex) {
@@ -303,7 +251,7 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequest(final long consumerId, final long serviceDefinitionId, final List<Long> providerIds) {
+	public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequest(final long consumerId, final long serviceDefinitionId, final Set<Long> providerIds) {
 		logger.debug("checkIntraCloudAuthorizationRequest started...");
 				
 		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
@@ -316,7 +264,7 @@ public class AuthorizationDBService {
 				exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " consumer id," : exceptionMsg;
 				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " serviceDefinition id," : exceptionMsg;
 				exceptionMsg = isProviderListEmpty ? exceptionMsg + " empty providerId list," : exceptionMsg;
-				exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length()-1);
+				exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 				throw new InvalidParameterException(exceptionMsg);
 			}
 			
@@ -349,16 +297,71 @@ public class AuthorizationDBService {
 	private void checkConstraintsOfIntraCloudAuthorizationTable(final System consumer, final System provider, final ServiceDefinition serviceDefinition) {
 		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started...");
 		
-		try {
-			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerSystemAndProviderSystemAndServiceDefinition(consumer, provider, serviceDefinition);
-			if (optional.isPresent()) {
-				throw new InvalidParameterException("IntraCloudAuthorization entry with consumer id" +  consumer.getId() + ", provider id " + provider.getId() + " and serviceDefinitionId" + serviceDefinition.getId() + " already exists");
+		final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerSystemAndProviderSystemAndServiceDefinition(consumer, provider, serviceDefinition);
+		if (optional.isPresent()) {
+			throw new InvalidParameterException("IntraCloudAuthorization entry with consumer id" +  consumer.getId() + ", provider id " + provider.getId() + " and serviceDefinitionId" + serviceDefinition.getId() + " already exists");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<IntraCloudAuthorization> createBulkIntraCloudAuthorizationWithOneProviderAndMoreServiceDefinition(final System consumer, final Long providerId, final Set<Long> serviceDefinitionIds) {
+		logger.debug("createBulkIntraCloudAuthorizationWithOneProviderAndMoreServiceDefinition started...");
+		
+		final Optional<System> providerOpt = systemRepository.findById(providerId);
+		if (providerOpt.isPresent()) {
+			final List<IntraCloudAuthorization> toBeSaved = new ArrayList<>(serviceDefinitionIds.size());
+			final System provider = providerOpt.get();
+			for (final Long serviceId : serviceDefinitionIds) {
+				final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findById(serviceId);
+				if (serviceOpt.isPresent()) {
+					final ServiceDefinition service = serviceOpt.get();
+					try {
+						checkConstraintsOfIntraCloudAuthorizationTable(consumer, provider, service);
+						toBeSaved.add(new IntraCloudAuthorization(consumer, provider, service));
+					} catch (final InvalidParameterException ex) {
+						//not throwing towards as in this bulk operation case should be only a warning
+						logger.debug(ex.getMessage());
+					}
+				} else {
+					throw new InvalidParameterException("ServiceDefinition with id of " + serviceId + " not exists");
+				}
 			}
-		} catch (final InvalidParameterException ex) {
-			throw ex;
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			final List<IntraCloudAuthorization> savedEntries = intraCloudAuthorizationRepository.saveAll(toBeSaved);
+			intraCloudAuthorizationRepository.flush();
+			return savedEntries;
+		} else {
+			throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<IntraCloudAuthorization> createBulkIntraCloudAuthorizationWithOneServiceDefinitionAndMoreProvider(final System consumer, final Set<Long> providerIds, final Long serviceId) {
+		logger.debug("createBulkIntraCloudAuthorizationWithOneServiceDefinitionAndMoreProvider started...");
+		
+		final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findById(serviceId);
+		if (serviceOpt.isPresent()) {
+			final List<IntraCloudAuthorization> toBeSaved = new ArrayList<>(providerIds.size());
+			final ServiceDefinition service = serviceOpt.get();
+			for (final Long providerId : providerIds) {
+				final Optional<System> providerOpt = systemRepository.findById(providerId);
+				if (providerOpt.isPresent()) {
+					final System provider = providerOpt.get();
+					try {
+						checkConstraintsOfIntraCloudAuthorizationTable(consumer, provider, service);
+						toBeSaved.add(new IntraCloudAuthorization(consumer, provider, service));
+					} catch (final InvalidParameterException ex) {
+						//not throwing towards as in this bulk operation case should be only a warning
+						logger.debug(ex.getMessage());
+					}
+				} else {
+					throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
+				}
+			}
+			final List<IntraCloudAuthorization> savedEntries = intraCloudAuthorizationRepository.saveAll(toBeSaved);
+			intraCloudAuthorizationRepository.flush();
+			return savedEntries;
+		} else {
+			throw new InvalidParameterException("ServiceDefinition with id of " + serviceId + " not exists");
 		}
 	}
 }
