@@ -1,10 +1,10 @@
-package eu.arrowhead.common.security;
+package eu.arrowhead.common.token;
 
 import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -19,71 +19,69 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.filter.ArrowheadFilter;
-import eu.arrowhead.common.filter.thirdparty.MultiReadRequestWrapper;
+import eu.arrowhead.common.token.TokenUtilities.TokenInfo;
 
-public abstract class AccessControlFilter extends ArrowheadFilter {
-	
+public abstract class TokenSecurityFilter extends ArrowheadFilter {
+
 	//=================================================================================================
 	// members
-	
-	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	protected Map<String,Object> arrowheadContext;
+
+	private PublicKey authorizationPublicKey;
+	private PrivateKey myPrivateKey;
 	
 	//=================================================================================================
 	// methods
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		if (request instanceof HttpServletRequest) {
-			log.debug("Checking access in AccessControlFilter...");
+			log.debug("Checking access in TokenSecurityFilter...");
 			try {
-				final MultiReadRequestWrapper requestWrapper = new MultiReadRequestWrapper((HttpServletRequest) request);
-				final String requestTarget = Utilities.stripEndSlash(requestWrapper.getRequestURL().toString());
-				final String requestJSON = requestWrapper.getCachedBody();
-				final Map<String,String[]> queryParams = requestWrapper.getParameterMap();
-				final String clientCN = getCertificateCNFromRequest(requestWrapper);
+				final HttpServletRequest httpRequest = (HttpServletRequest) request;
+				final String requestTarget = Utilities.stripEndSlash(httpRequest.getRequestURL().toString());
+				final String clientCN = getCertificateCNFromRequest(httpRequest);
 				if (clientCN == null) {
 					log.error("Unauthorized access: {}", requestTarget);
 					throw new AuthException("Unauthorized access: " + requestTarget);
 				}
 				
-				checkClientAuthorized(clientCN, requestWrapper.getMethod(), requestTarget, requestJSON, queryParams);
+				final String token = httpRequest.getParameter(CommonConstants.REQUEST_PARAM_TOKEN);
+				if (Utilities.isEmpty(token)) {
+					log.error("Unauthorized access: {}, no token is specified", requestTarget);
+					throw new AuthException("Unauthorized access: " + requestTarget + ", no token is specified");
+				}
 				
-				log.debug("Using MultiReadRequestWrapper in the filter chain from now...");
-				chain.doFilter(requestWrapper, response);
+				checkToken(clientCN, token, requestTarget);
 			} catch (final ArrowheadException ex) {
 				handleException(ex, response);
 			}
-		} else {
-			chain.doFilter(request, response);
 		}
+		
+		chain.doFilter(request, response);
 	}
 	
 	//=================================================================================================
 	// assistant methods
-
+	
 	//-------------------------------------------------------------------------------------------------
-	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
-		if (!Utilities.isKeyStoreCNArrowheadValid(clientCN)) {
-			log.debug("{} is not a valid common name, access denied!", clientCN);
-	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
-		}
-
-	    // All requests from the local cloud are allowed
-	    if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, getServerCloudCN())) {
-	        log.debug("{} is unauthorized to access {}", clientCN, requestTarget);
-	        throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
-	    }
+	protected TokenSecurityFilter(final PrivateKey myPrivateKey, final PublicKey authorizationPublicKey) {
+		super();
+		Assert.notNull(myPrivateKey, "My private key is null.");
+		Assert.notNull(authorizationPublicKey, "Authorization public key is null.");
+		
+		this.myPrivateKey = myPrivateKey;
+		this.authorizationPublicKey = authorizationPublicKey;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	protected String getServerCloudCN() {
-		final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
-	    final String[] serverFields = serverCN.split("\\.", 2); // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
-	    Assert.isTrue(serverFields.length >= 2, "Server common name is invalid: " + serverCN);
-	    
-	    return serverFields[1];
+	protected void checkToken(final String clientCN, final String token, final String requestTarget) {
+		final String clientName = clientCN.split("\\.")[0];
+		final TokenInfo tokenInfo = TokenUtilities.validateTokenAndExtractTokenInfo(token, authorizationPublicKey, myPrivateKey); // expiration (if set) is already checked in this method
+		if (!clientName.equalsIgnoreCase(tokenInfo.getConsumerName())) {
+			log.error("Client CN ({}) and token information ({}) is mismatched at: {}", clientCN, tokenInfo.getConsumerName(), requestTarget);
+			throw new AuthException("Unauthorized accesss: " + requestTarget + ", invalid token.");
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -97,4 +95,5 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 		
 		return null;
 	}
+
 }

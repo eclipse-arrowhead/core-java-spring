@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -42,7 +44,9 @@ public class ApplicationInitListener {
 		
 		logger.info("Server mode: {}", sslProperties.isSslEnabled() ? "SECURED" : "NOT SECURED");
 		if (sslProperties.isSslEnabled()) {
-			checkServerCertificate(event.getApplicationContext());
+			final KeyStore keyStore = initializeKeyStore();
+			checkServerCertificate(keyStore, event.getApplicationContext());
+			obtainKeys(keyStore, event.getApplicationContext());
 		}
 		
 		logger.debug("Initialization in onApplicationEvent() is done.");
@@ -50,25 +54,33 @@ public class ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
-	public Map<String,String> getArrowheadContext() {
+	public Map<String,Object> getArrowheadContext() {
 		return new ConcurrentHashMap<>();
 	}
 	
 	//=================================================================================================
 	// assistant methods
-
+	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServerCertificate(final ApplicationContext appContext) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+	private KeyStore initializeKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		logger.debug("initializeKeyStore started...");
 		Assert.isTrue(sslProperties.isSslEnabled(), "SSL is not enabled.");
 		final String messageNotDefined = " is not defined.";
 		Assert.isTrue(!Utilities.isEmpty(sslProperties.getKeyStoreType()), CommonConstants.KEYSTORE_TYPE + messageNotDefined);
 		Assert.notNull(sslProperties.getKeyStore(), CommonConstants.KEYSTORE_PATH + messageNotDefined);
 		Assert.isTrue(sslProperties.getKeyStore().exists(), CommonConstants.KEYSTORE_PATH + " file is not found.");
 		Assert.notNull(sslProperties.getKeyStorePassword(), CommonConstants.KEYSTORE_PASSWORD + messageNotDefined);
-
+		
 		final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
 		keystore.load(sslProperties.getKeyStore().getInputStream(), sslProperties.getKeyStorePassword().toCharArray());
-		final X509Certificate serverCertificate = Utilities.getFirstCertFromKeyStore(keystore);
+
+		return keystore;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkServerCertificate(final KeyStore keyStore, final ApplicationContext appContext) {
+		logger.debug("checkServerCertificate started...");
+		final X509Certificate serverCertificate = Utilities.getFirstCertFromKeyStore(keyStore);
 		final String serverCN = Utilities.getCertCNFromSubject(serverCertificate.getSubjectDN().getName());
 		if (!Utilities.isKeyStoreCNArrowheadValid(serverCN)) {
 			logger.info("Server CN ({}) is not compliant with the Arrowhead certificate structure, since it does not have 5 parts, or does not end with \"arrowhead.eu\".", serverCN);
@@ -76,7 +88,20 @@ public class ApplicationInitListener {
 		}
 		
 		@SuppressWarnings("unchecked")
-		final Map<String,String> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 		context.put(CommonConstants.SERVER_COMMON_NAME, serverCN);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void obtainKeys(final KeyStore keyStore, final ApplicationContext appContext) {
+		logger.debug("obtainKeys started...");
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		
+		final PublicKey publicKey = Utilities.getFirstCertFromKeyStore(keyStore).getPublicKey();
+		context.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
+		
+		final PrivateKey privateKey = Utilities.getPrivateKey(keyStore, sslProperties.getKeyPassword());
+		context.put(CommonConstants.SERVER_PRIVATE_KEY, privateKey);
 	}
 }
