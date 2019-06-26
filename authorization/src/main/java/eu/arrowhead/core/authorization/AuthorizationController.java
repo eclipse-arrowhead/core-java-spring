@@ -313,8 +313,10 @@ public class AuthorizationController {
 		final boolean isCloudIdNotValid = request.getCloudId() == null || request.getCloudId() < 1  ;
 		final boolean isServiceDefinitionNotValid = request.getServiceDefinitionIdList() == null || request.getServiceDefinitionIdList().isEmpty() ;
 		if (isCloudIdNotValid || isServiceDefinitionNotValid) {
-			String exceptionMsg = isCloudIdNotValid ? "Cloud Id is not valid" : "";
-			exceptionMsg = isServiceDefinitionNotValid ? exceptionMsg + " ServiceDefinition is null" :  exceptionMsg ;
+			String exceptionMsg = isCloudIdNotValid ? "Cloud Id is not valid," : "";
+			exceptionMsg = isServiceDefinitionNotValid ? exceptionMsg + " ServiceDefinition is null or blank," :  exceptionMsg ;
+			
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() -1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
