@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.AccessControlFilter;
@@ -19,8 +20,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 	//=================================================================================================
 	// members
 	
-	private static final String[] allowedCoreSystemsForQuery = { CommonConstants.CORE_SYSTEM_ORCHESTRATOR_NAME, CommonConstants.CORE_SYSTEM_GATEKEEPER_NAME, CommonConstants.CORE_SYSTEM_CA_NAME,
-																 CommonConstants.CORE_SYSTEM_CA_NAME_2 };
+	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY };
 	
 	//=================================================================================================
 	// assistant methods
@@ -89,8 +89,8 @@ public class SRAccessControlFilter extends AccessControlFilter {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkIfClientIsAllowed(final String clientCN, final String requestTarget, final String cloudCN) {
-		for (final String coreSystemName : allowedCoreSystemsForQuery) {
-			final String coreSystemCN = coreSystemName + "." + cloudCN;
+		for (final CoreSystem coreSystem : allowedCoreSystemsForQuery) {
+			final String coreSystemCN = coreSystem.name().toLowerCase() + "." + cloudCN;
 			if (clientCN.equalsIgnoreCase(coreSystemCN)) {
 				return;
 			}

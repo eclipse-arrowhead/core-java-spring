@@ -28,10 +28,10 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
-	public static final String CORE_SYSTEM_ORCHESTRATOR_NAME = "orchestrator";
-	public static final String CORE_SYSTEM_GATEKEEPER_NAME = "gatekeeper";
-	public static final String CORE_SYSTEM_CA_NAME = "certificateauthority"; // for future use
-	public static final String CORE_SYSTEM_CA_NAME_2 = "certificate_authority";  // for future use
+	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
+	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "public-key";
+	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
+	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -67,6 +67,10 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
 	
 	public static final String AUTHORIZATION_URI = "/authorization";
+	public static final String OP_AUTH_TOKEN_URI = "/token";
+	public static final String OP_AUTH_KEY_URI = "/publickey";
+	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
+	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

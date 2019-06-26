@@ -45,12 +45,10 @@ public class AuthorizationController {
 	
 	private static final String ECHO_URI = "/echo";
 	
-	private static final String TOKEN_URI = "/token";
 	private static final String TOKEN_DESCRIPTION = "Generates tokens for a consumer which can be used to access the specified service of the specified providers";
 	private static final String TOKEN_HTTP_200_MESSAGE = "Tokens returned";
 	private static final String TOKEN_HTTP_400_MESSAGE = "Could not generate tokens";
 	
-	private static final String PUBLIC_KEY_URI = "/publickey";
 	private static final String PUBLIC_KEY_DESCRIPTION = "Returns the public key of the Authorization core service as a Base64 encoded text";
 	private static final String PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	
@@ -88,7 +86,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = TOKEN_URI)
+	@PostMapping(path = CommonConstants.OP_AUTH_TOKEN_URI)
 	@ResponseBody public TokenGenerationResponseDTO generateTokens(@RequestBody final TokenGenerationRequestDTO request) {
 		logger.debug("New token generation request received");
 		checkTokenGenerationRequest(request);
@@ -110,7 +108,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = PUBLIC_KEY_URI)
+	@GetMapping(path = CommonConstants.OP_AUTH_KEY_URI)
 	public String getPublicKey() {
 		return acquireAndConvertPublicKey();
 	}
@@ -122,7 +120,7 @@ public class AuthorizationController {
 	private void checkTokenGenerationRequest(final TokenGenerationRequestDTO request) {
 		logger.debug("checkTokenGenerationRequest started...");
 		
-		final String origin = CommonConstants.AUTHORIZATION_URI + TOKEN_URI;
+		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_TOKEN_URI;
 		if (request.getConsumer() == null) {
 			throw new BadPayloadException("Consumer system is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -179,7 +177,7 @@ public class AuthorizationController {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String acquireAndConvertPublicKey() {
-		final String origin = CommonConstants.AUTHORIZATION_URI + PUBLIC_KEY_URI;
+		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_KEY_URI;
 		
 		if (!secure) {
 			throw new ArrowheadException("Authorization core service runs in insecure mode.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
