@@ -325,7 +325,11 @@ public class AuthorizationDBService {
 			
 			final List<InterCloudAuthorization> entriesToSave = new ArrayList<>(serviceDefinitionIdSet.size());			
 			for (final Long serviceId : serviceDefinitionIdSet) {
-				entriesToSave.add(createNewInterCloudAuthorization(cloud, serviceId));
+				InterCloudAuthorization interCloudAuthorization = createNewInterCloudAuthorization(cloud, serviceId);
+				if(interCloudAuthorization != null) {
+					entriesToSave.add(createNewInterCloudAuthorization(cloud, serviceId));
+				}
+				
 			}
 				
 			return new PageImpl<InterCloudAuthorization>(interCloudAuthorizationRepository.saveAll(entriesToSave));
@@ -433,10 +437,7 @@ public class AuthorizationDBService {
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
+		} 
 	}
 	//-------------------------------------------------------------------------------------------------
 	private InterCloudAuthorization createNewInterCloudAuthorization(final Cloud cloud, final long serviceDefinitionId) {
@@ -456,15 +457,21 @@ public class AuthorizationDBService {
 			String exceptionMessage = "Following id parameters are not present in database: ";
 			exceptionMessage =  exceptionMessage + " serviceDefinitionId :" + serviceDefinitionId;
 			throw new InvalidParameterException(exceptionMessage);
+		}else {
+			final ServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
+			
+			try {
+				checkConstraintsOfInterCloudAuthorizationTable(cloud, serviceDefinition);
+				final InterCloudAuthorization interCloudAuthorization = new InterCloudAuthorization(cloud, serviceDefinition);				
+				return interCloudAuthorization;
+				
+			}catch(InvalidParameterException ex) {
+				logger.info(ex.getMessage());
+				return null;
+			}
+
 		}
 		
-		final ServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
-		
-		checkConstraintsOfInterCloudAuthorizationTable(cloud, serviceDefinition);
-		
-		final InterCloudAuthorization interCloudAuthorization = new InterCloudAuthorization(cloud, serviceDefinition);
-		
-		return interCloudAuthorization;
 		
 	}
 
