@@ -102,6 +102,8 @@ public class CommonConstants {
 	public static final String HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT = "http.client.connection.manager.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_MANAGER_TIMEOUT + "}";
 	
+	public static final String CORE_SYSTEM_NAME = "core_system_name";
+	public static final String $CORE_SYSTEM_NAME = "${" + CORE_SYSTEM_NAME + "}";
 	public static final String LOG_ALL_REQUEST_AND_RESPONSE = "log_all_request_and_response";
 	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + Defaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
 	
