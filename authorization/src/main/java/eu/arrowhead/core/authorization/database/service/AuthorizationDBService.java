@@ -307,11 +307,11 @@ public class AuthorizationDBService {
 		}
 		
 		if ( serviceDefinitionIdSet == null) {
-			throw new InvalidParameterException("SerdviceDefinitionSet is null.");
+			throw new InvalidParameterException("ServiceDefinitionSet is null.");
 		}
 		for (final Long id : serviceDefinitionIdSet) {
 			if ( id < 1) {
-				throw new InvalidParameterException("SerdviceDefinition id must be greater than 0.");
+				throw new InvalidParameterException("ServiceDefinition id must be greater than 0.");
 			}
 		}		
 		
