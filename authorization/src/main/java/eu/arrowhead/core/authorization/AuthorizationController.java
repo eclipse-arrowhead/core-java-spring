@@ -1,9 +1,16 @@
 package eu.arrowhead.core.authorization;
 
+import java.security.PublicKey;
+import java.util.Base64;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +26,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.authorization.token.TokenGenerationService;
 import io.swagger.annotations.ApiOperation;
@@ -42,10 +50,20 @@ public class AuthorizationController {
 	private static final String TOKEN_HTTP_200_MESSAGE = "Tokens returned";
 	private static final String TOKEN_HTTP_400_MESSAGE = "Could not generate tokens";
 	
+	private static final String PUBLIC_KEY_URI = "/publickey";
+	private static final String PUBLIC_KEY_DESCRIPTION = "Returns the public key of the Authorization core service as a Base64 encoded text";
+	private static final String PUBLIC_KEY_200_MESSAGE = "Public key returned";
+	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
 	@Autowired
 	private TokenGenerationService tokenGenerationService;
+	
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
+	
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	private boolean secure;
 	
 	//=================================================================================================
 	// methods
@@ -83,6 +101,18 @@ public class AuthorizationController {
 		logger.debug("{} token(s) are generated for {}", response.getTokenData().size(), request.getConsumer().getSystemName());
 		
 		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = PUBLIC_KEY_DESCRIPTION, response = String.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUBLIC_KEY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = PUBLIC_KEY_URI)
+	public String getPublicKey() {
+		return acquireAndConvertPublicKey();
 	}
 
 	//=================================================================================================
@@ -145,5 +175,22 @@ public class AuthorizationController {
 		if (mandatoryAuthInfo && Utilities.isEmpty(system.getAuthenticationInfo())) {
 			throw new BadPayloadException("System authentication info is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String acquireAndConvertPublicKey() {
+		final String origin = CommonConstants.AUTHORIZATION_URI + PUBLIC_KEY_URI;
+		
+		if (!secure) {
+			throw new ArrowheadException("Authorization core service runs in insecure mode.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
+		}
+		
+		if (!arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)) {
+			throw new ArrowheadException("Public key is not available.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
+		}
+		
+		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		
+		return Base64.getEncoder().encodeToString(publicKey.getEncoded());
 	}
 }
