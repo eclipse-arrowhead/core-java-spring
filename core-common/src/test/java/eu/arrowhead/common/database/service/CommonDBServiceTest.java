@@ -1,0 +1,46 @@
+package eu.arrowhead.common.database.service;
+
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.repository.CloudRepository;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+
+@RunWith(SpringRunner.class)
+public class CommonDBServiceTest {
+	
+	//=================================================================================================
+	// members
+	
+	@InjectMocks
+	private CommonDBService commonDBService; 
+
+	@Mock
+	private CloudRepository cloudRepository;
+
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = DataNotFoundException.class)
+	public void testGetOwnCloudNoResult() {
+		when(cloudRepository.findByOwnCloudAndSecure(true, true)).thenReturn(List.of());
+		commonDBService.getOwnCloud(true);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetOwnCloudTooMuchResult() {
+		when(cloudRepository.findByOwnCloudAndSecure(true, true)).thenReturn(List.of(new Cloud(), new Cloud()));
+		commonDBService.getOwnCloud(true);
+	}
+}
