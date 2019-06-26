@@ -323,10 +323,11 @@ public class AuthorizationController {
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
+		long validatedCloudId = request.getCloudId();
 		Set<Long> serviceDefinitionIdSet = convertServiceDefinitionIdListToSet(request.getServiceDefinitionIdList(), INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		
 		final InterCloudAuthorizationListResponseDTO response = authorizationDBService.createInterCloudAuthorizationResponse(
-				request.getCloudId(),
+				validatedCloudId,
 				serviceDefinitionIdSet);
 		logger.debug("registerInterCloudAuthorization has been finished");
 		return response;

@@ -277,7 +277,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public InterCloudAuthorizationListResponseDTO createInterCloudAuthorizationResponse(Long cloudId,
+	public InterCloudAuthorizationListResponseDTO createInterCloudAuthorizationResponse(long cloudId,
 			Set<Long> serviceDefinitionIdSet) {
 		logger.debug("createInterCloudAuthorizationResponse started...");
 		
@@ -300,7 +300,7 @@ public class AuthorizationDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)	
-	public Page<InterCloudAuthorization> createInterCloudAuthorization(Long cloudId, Set<Long> serviceDefinitionIdSet) {
+	public Page<InterCloudAuthorization> createInterCloudAuthorization(long cloudId, Set<Long> serviceDefinitionIdSet) {
 		
 		if (cloudId < 1) {
 			throw new InvalidParameterException("Cloud id can't be null and must be greater than 0.");
