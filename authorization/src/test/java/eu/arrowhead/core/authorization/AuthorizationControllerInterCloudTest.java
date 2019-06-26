@@ -187,7 +187,7 @@ public class AuthorizationControllerInterCloudTest {
 	public void testRegisterInterCloudAuthorizationWithInvalidCloudId() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationRequestDTO((long) 0, createIdList(1, 2))))
+			.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationRequestDTO(0L, createIdList(1, 2))))
 			.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isBadRequest());
 	}
@@ -197,7 +197,7 @@ public class AuthorizationControllerInterCloudTest {
 	public void testRegisterInterCloudAuthorizationWithEmptyServiceDefinitionIdList() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationRequestDTO((long) 1, null)))
+			.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationRequestDTO(1L, null)))
 			.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isBadRequest());
 	}
@@ -210,7 +210,7 @@ public class AuthorizationControllerInterCloudTest {
 		
 		final MvcResult response = this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationRequestDTO((long) 1,createIdList(1, 1))))
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationRequestDTO(1L,createIdList(1, 1))))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated())
 				.andReturn();
