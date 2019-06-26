@@ -104,6 +104,12 @@ public class AuthorizationDBServiceInterCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test (expected = InvalidParameterException.class)
+	public void testCreateInterCloudAuthorizationResponseWithNullServiceDefinitionIdSet() {
+		authorizationDBService.createInterCloudAuthorization(1L, null);		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test (expected = InvalidParameterException.class)
 	public void testCreateInterCloudAuthorizationResponseWithNotExistingCloud() {
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(new ServiceDefinition()));
