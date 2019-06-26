@@ -121,13 +121,6 @@ public class AuthorizationDBServiceInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test (expected = InvalidParameterException.class)
-	public void testCreateInterCloudAuthorizationResponseWithDBConstraintViolation() {
-		when(interCloudAuthorizationRepository.findByCloudAndServiceDefinition(any(), any())).thenReturn(Optional.ofNullable(null));
-		authorizationDBService.createInterCloudAuthorization(1L, Set.of(1L));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCreateInterCloudAuthorizationResponseDBCall() {
 		
