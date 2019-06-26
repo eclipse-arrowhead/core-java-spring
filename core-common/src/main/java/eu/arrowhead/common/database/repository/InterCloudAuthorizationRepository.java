@@ -12,6 +12,6 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 @Repository
 public interface InterCloudAuthorizationRepository extends RefreshableRepository<InterCloudAuthorization,Long> {
 
-	Optional<IntraCloudAuthorization> findByCloudAndServiceDefinition(Cloud cloud, ServiceDefinition serviceDefinition);
+	Optional<IntraCloudAuthorization> findByCloudAndServiceDefinition(final Cloud cloud, final ServiceDefinition serviceDefinition);
 
 }
