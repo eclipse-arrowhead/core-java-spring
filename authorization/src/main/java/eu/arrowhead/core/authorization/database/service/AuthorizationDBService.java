@@ -428,17 +428,15 @@ public class AuthorizationDBService {
 	private void checkConstraintsOfInterCloudAuthorizationTable(final Cloud cloud, final ServiceDefinition serviceDefinition) {
 		logger.debug("checkConstraintsOfInterCloudAuthorizationTable started...");
 		
-		try {
-			final Optional<IntraCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(cloud, serviceDefinition);
-			if (optional.isPresent()) {
-				throw new InvalidParameterException(
-						"InterCloudAuthorization entry with this cloudId: " +  cloud.getId()  + 
-						" and serviceDefinition :" + serviceDefinition.getServiceDefinition() + 
-						" already exists");
-			}
-		} catch (final InvalidParameterException ex) {
-			throw ex;
-		} 
+		
+		final Optional<IntraCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(cloud, serviceDefinition);
+		if (optional.isPresent()) {
+			throw new InvalidParameterException(
+					"InterCloudAuthorization entry with this cloudId: " +  cloud.getId()  + 
+					" and serviceDefinition :" + serviceDefinition.getServiceDefinition() + 
+					" already exists");
+		}
+
 	}
 	//-------------------------------------------------------------------------------------------------
 	private InterCloudAuthorization createNewInterCloudAuthorization(final Cloud cloud, final long serviceDefinitionId) {
