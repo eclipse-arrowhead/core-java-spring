@@ -131,7 +131,6 @@ public class Utilities {
 															  ZoneOffset.UTC);
 														
 		final ZoneOffset offset = OffsetDateTime.now().getOffset();
-		
 		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
 	}
 	
