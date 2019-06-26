@@ -67,7 +67,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<IntraCloudAuthorization> getIntraCloudAuthorizationEntries(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getIntraCloudAuthorizationEntries started..");
+		logger.debug("getIntraCloudAuthorizationEntries started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
@@ -87,7 +87,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public IntraCloudAuthorizationListResponseDTO getIntraCloudAuthorizationEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getIntraCloudAuthorizationEntriesResponse started..");
+		logger.debug("getIntraCloudAuthorizationEntriesResponse started...");
 		final Page<IntraCloudAuthorization> intraCloudAuthorizationEntries = getIntraCloudAuthorizationEntries(page, size, direction, sortField);
 		return DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries);
 	}
@@ -121,7 +121,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeIntraCloudAuthorizationEntryById(final long id) {
-		logger.debug("removeIntraCloudAuthorizationEntryById started..");
+		logger.debug("removeIntraCloudAuthorizationEntryById started...");
 		
 		try {
 			if (!intraCloudAuthorizationRepository.existsById(id)) {
@@ -140,7 +140,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorization createIntraCloudAuthorization(final long consumerId, final long providerId, final long serviceDefinitionId) {
-		logger.debug("createIntraCloudAuthorization started..");
+		logger.debug("createIntraCloudAuthorization started...");
 		
 		final boolean consumerIdIsInvalid = consumerId < 1;
 		final boolean providerIdIsInvalid = providerId < 1;
@@ -181,7 +181,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorizationResponseDTO createIntraCloudAuthorizationResponse(final long consumerId, final long providerId, final long serviceDefinitionId) {
-		logger.debug("createIntraCloudAuthorizationResponse started..");
+		logger.debug("createIntraCloudAuthorizationResponse started...");
 		final IntraCloudAuthorization entry = createIntraCloudAuthorization(consumerId, providerId, serviceDefinitionId);
 		return DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(entry);
 	}
@@ -189,7 +189,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorizationListResponseDTO createBulkIntraCloudAuthorizationResponse(final long consumerId, final List<Long> providerIds, final List<Long> serviceDefinitionIds) {
-		logger.debug("createBulkIntraCloudAuthorizationResponse started..");
+		logger.debug("createBulkIntraCloudAuthorizationResponse started...");
 		
 		if (consumerId < 1) {
 			throw new InvalidParameterException("Consumer id can't be null and must be greater than 0.");
@@ -223,14 +223,14 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public InterCloudAuthorizationListResponseDTO getInterCloudAuthorizationEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getIntraCloudAuthorizationEntriesResponse started..");
+		logger.debug("getIntraCloudAuthorizationEntriesResponse started...");
 		final Page<InterCloudAuthorization> interCloudAuthorizationEntries = getInterCloudAuthorizationEntries(page, size, direction, sortField);
 		return DTOConverter.convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(interCloudAuthorizationEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<InterCloudAuthorization> getInterCloudAuthorizationEntries(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getInterCloudAuthorizationEntries started..");
+		logger.debug("getInterCloudAuthorizationEntries started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
@@ -279,7 +279,7 @@ public class AuthorizationDBService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public InterCloudAuthorizationListResponseDTO createInterCloudAuthorizationResponse(Long cloudId,
 			Set<Long> serviceDefinitionIdSet) {
-		logger.debug("createInterCloudAuthorizationResponse started..");
+		logger.debug("createInterCloudAuthorizationResponse started...");
 		
 		try {						
 			
@@ -337,7 +337,7 @@ public class AuthorizationDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequestResponse(final long consumerId, final long serviceDefinitionId, final List<Long> providerIds) {
-		logger.debug("checkIntraCloudAuthorizationRequestResponse started..");
+		logger.debug("checkIntraCloudAuthorizationRequestResponse started...");
 				
 		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
 		try {
@@ -377,7 +377,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeInterCloudAuthorizationEntryById(final long id) {
-		logger.debug("removeInterCloudAuthorizationEntryById started..");
+		logger.debug("removeInterCloudAuthorizationEntryById started...");
 		
 		try {
 			if (!interCloudAuthorizationRepository.existsById(id)) {
@@ -400,7 +400,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkConstraintsOfIntraCloudAuthorizationTable(final long consumerId, final long providerId, final long serviceDefinitionId) {
-		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started..");
+		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started...");
 		
 		try {
 			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
@@ -417,7 +417,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkConstraintsOfInterCloudAuthorizationTable(final Cloud cloud, final ServiceDefinition serviceDefinition) {
-		logger.debug("checkConstraintsOfInterCloudAuthorizationTable started..");
+		logger.debug("checkConstraintsOfInterCloudAuthorizationTable started...");
 		
 		try {
 			final Optional<IntraCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(cloud, serviceDefinition);
@@ -436,7 +436,7 @@ public class AuthorizationDBService {
 	}
 	//-------------------------------------------------------------------------------------------------
 	private InterCloudAuthorization createNewInterCloudAuthorization(final Cloud cloud, final long serviceDefinitionId) {
-		logger.debug("createInterCloudAuthorizationLis started..");
+		logger.debug("createInterCloudAuthorizationLis started...");
 		
 		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
 		
