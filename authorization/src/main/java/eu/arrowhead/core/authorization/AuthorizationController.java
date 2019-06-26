@@ -43,7 +43,7 @@ public class AuthorizationController {
 	// members
 	
 	private static final String PATH_VARIABLE_ID = "id";
-	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater then 0.";
+	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0.";
 	
 	private static final String ECHO_URI = "/echo";
 	
@@ -113,7 +113,7 @@ public class AuthorizationController {
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		
 		final IntraCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getIntraCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
-		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
+		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return intraCloudAuthorizationEntriesResponse;
 	}
 	
@@ -176,9 +176,10 @@ public class AuthorizationController {
 		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds() == null || request.getServiceDefinitionIds().isEmpty();
 		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
-			exceptionMsg = isConsumerIdInvalid ? exceptionMsg +" 'invalid consumer id'" : exceptionMsg;
-			exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'providerId list is empty'" : exceptionMsg;
-			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " 'serviceDefinitionList is empty'" : exceptionMsg;
+			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
+			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
+			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " serviceDefinitionList is empty," : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length()-1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
@@ -205,13 +206,14 @@ public class AuthorizationController {
 		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
 		if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
-			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " 'invalid consumer id'" : exceptionMsg;
-			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'invalid serviceDefinition id'" : exceptionMsg;
-			exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'providerId list is empty'" : exceptionMsg;
+			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
+			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " invalid serviceDefinition id," : exceptionMsg;
+			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length()-1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_CHECK_URI);
 		}
 		
-		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequestResponse(request.getConsumerId(), request.getServiceDefinitionId(), request.getProviderIds());
+		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequest(request.getConsumerId(), request.getServiceDefinitionId(), request.getProviderIds());
 		logger.debug("checkIntraCloudAuthorizationRequest has been finished");
 		return response;
 	}

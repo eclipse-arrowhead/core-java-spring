@@ -276,7 +276,7 @@ public class AuthorizationControllerIntraCloudTest {
 		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
 		providerIdAuthorizationState.put((long) providerIdA, true);
 		providerIdAuthorizationState.put((long) providerIdB, false);
-		when(authorizationDBService.checkIntraCloudAuthorizationRequestResponse(anyLong(), anyLong(), any()))
+		when(authorizationDBService.checkIntraCloudAuthorizationRequest(anyLong(), anyLong(), any()))
 			.thenReturn(new IntraCloudAuthorizationCheckResponseDTO(consumerId, serviceDefinitionId, providerIdAuthorizationState));
 		
 		final MvcResult response = this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)

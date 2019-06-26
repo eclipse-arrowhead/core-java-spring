@@ -61,7 +61,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<IntraCloudAuthorization> getIntraCloudAuthorizationEntries(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getIntraCloudAuthorizationEntries started..");
+		logger.debug("getIntraCloudAuthorizationEntries started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
@@ -81,7 +81,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public IntraCloudAuthorizationListResponseDTO getIntraCloudAuthorizationEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
-		logger.debug("getIntraCloudAuthorizationEntriesResponse started..");
+		logger.debug("getIntraCloudAuthorizationEntriesResponse started...");
 		final Page<IntraCloudAuthorization> intraCloudAuthorizationEntries = getIntraCloudAuthorizationEntries(page, size, direction, sortField);
 		return DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries);
 	}
@@ -115,7 +115,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeIntraCloudAuthorizationEntryById(final long id) {
-		logger.debug("removeIntraCloudAuthorizationEntryById started..");
+		logger.debug("removeIntraCloudAuthorizationEntryById started...");
 		
 		try {
 			if (!intraCloudAuthorizationRepository.existsById(id)) {
@@ -134,7 +134,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorization createIntraCloudAuthorization(final long consumerId, final long providerId, final long serviceDefinitionId) {
-		logger.debug("createIntraCloudAuthorization started..");
+		logger.debug("createIntraCloudAuthorization started...");
 		
 		final boolean consumerIdIsInvalid = consumerId < 1;
 		final boolean providerIdIsInvalid = providerId < 1;
@@ -142,9 +142,10 @@ public class AuthorizationDBService {
 		try {
 			if (consumerIdIsInvalid || providerIdIsInvalid || serviceDefinitionIdIsInvalid) {
 				String exceptionMessage = "Following id parameters are invalid:";
-				exceptionMessage = consumerIdIsInvalid ? exceptionMessage : exceptionMessage + " 'consumerId'" ;
-				exceptionMessage = providerIdIsInvalid ? exceptionMessage : exceptionMessage + " 'providerId'";
-				exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " 'serviceDefinitionId'";
+				exceptionMessage = consumerIdIsInvalid ? exceptionMessage : exceptionMessage + " consumerId," ;
+				exceptionMessage = providerIdIsInvalid ? exceptionMessage : exceptionMessage + " providerId,";
+				exceptionMessage = serviceDefinitionIdIsInvalid ? exceptionMessage : exceptionMessage + " serviceDefinitionId,";
+				exceptionMessage = exceptionMessage.substring(0, exceptionMessage.length()-1);
 				throw new InvalidParameterException(exceptionMessage);
 			}	
 			
@@ -154,10 +155,11 @@ public class AuthorizationDBService {
 			final Optional<System> provider = systemRepository.findById(providerId);
 			final Optional<ServiceDefinition> serviceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
 			if (consumer.isEmpty() || provider.isEmpty() || serviceDefinition.isEmpty()) {
-				String exceptionMessage = "Following entities are not availables:";
-				exceptionMessage = consumer.isEmpty() ? exceptionMessage + " 'consumer with id: " + consumerId + "'" : exceptionMessage;
-				exceptionMessage = provider.isEmpty() ? exceptionMessage + " 'provider with id: " + providerId + "'" : exceptionMessage;
-				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " 'serviceDefinition with id: " + serviceDefinitionId + "'" : exceptionMessage;
+				String exceptionMessage = "Following entities are not available:";
+				exceptionMessage = consumer.isEmpty() ? exceptionMessage + " consumer with id: " + consumerId + "," : exceptionMessage;
+				exceptionMessage = provider.isEmpty() ? exceptionMessage + " provider with id: " + providerId + "," : exceptionMessage;
+				exceptionMessage = serviceDefinition.isEmpty() ? exceptionMessage + " serviceDefinition with id: " + serviceDefinitionId + "," : exceptionMessage;
+				exceptionMessage = exceptionMessage.substring(0, exceptionMessage.length()-1);
 				throw new InvalidParameterException(exceptionMessage);
 			}
 			
@@ -175,7 +177,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorizationResponseDTO createIntraCloudAuthorizationResponse(final long consumerId, final long providerId, final long serviceDefinitionId) {
-		logger.debug("createIntraCloudAuthorizationResponse started..");
+		logger.debug("createIntraCloudAuthorizationResponse started...");
 		final IntraCloudAuthorization entry = createIntraCloudAuthorization(consumerId, providerId, serviceDefinitionId);
 		return DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(entry);
 	}
@@ -183,7 +185,7 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorizationListResponseDTO createBulkIntraCloudAuthorizationResponse(final long consumerId, final List<Long> providerIds, final List<Long> serviceDefinitionIds) {
-		logger.debug("createBulkIntraCloudAuthorizationResponse started..");
+		logger.debug("createBulkIntraCloudAuthorizationResponse started...");
 		
 		if (consumerId < 1) {
 			throw new InvalidParameterException("Consumer id can't be null and must be greater than 0.");
@@ -207,6 +209,7 @@ public class AuthorizationDBService {
 					savedEntries.add(savedIntraCloudAuthorization);
 				} catch (final InvalidParameterException ex) {
 					logger.debug(ex.getMessage(), ex);
+					//not throwing towards as in this controller related case it should be only a warning
 				}
 			}
 		}
@@ -216,8 +219,8 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequestResponse(final long consumerId, final long serviceDefinitionId, final List<Long> providerIds) {
-		logger.debug("checkIntraCloudAuthorizationRequestResponse started..");
+	public IntraCloudAuthorizationCheckResponseDTO checkIntraCloudAuthorizationRequest(final long consumerId, final long serviceDefinitionId, final List<Long> providerIds) {
+		logger.debug("checkIntraCloudAuthorizationRequestResponse started...");
 				
 		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
 		try {
@@ -226,9 +229,10 @@ public class AuthorizationDBService {
 			final boolean isProviderListEmpty = providerIds == null || providerIds.isEmpty();
 			if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
 				String exceptionMsg = "Following parameters are invalid:";
-				exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " 'consumer id'" : exceptionMsg;
-				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'serviceDefinition id'" : exceptionMsg;
-				exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'empty providerId list'" : exceptionMsg;
+				exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " consumer id," : exceptionMsg;
+				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " serviceDefinition id," : exceptionMsg;
+				exceptionMsg = isProviderListEmpty ? exceptionMsg + " empty providerId list," : exceptionMsg;
+				exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length()-1);
 				throw new InvalidParameterException(exceptionMsg);
 			}
 			
@@ -237,7 +241,7 @@ public class AuthorizationDBService {
 					logger.debug("Invalid provider id: {}", providerId);
 				} else {
 					final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
-					providerIdAuthorizationState.put(optional.get().getProviderSystem().getId(), optional.isPresent());			
+					providerIdAuthorizationState.put(providerId, optional.isPresent());			
 				}
 			}
 			
@@ -259,7 +263,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkConstraintsOfIntraCloudAuthorizationTable(final long consumerId, final long providerId, final long serviceDefinitionId) {
-		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started..");
+		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started...");
 		
 		try {
 			final Optional<IntraCloudAuthorization> optional = intraCloudAuthorizationRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId, serviceDefinitionId);
