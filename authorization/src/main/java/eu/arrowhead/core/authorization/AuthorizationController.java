@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.InterCloudAuthorizationCheckRequestDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
@@ -78,7 +80,11 @@ public class AuthorizationController {
 	private static final String DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "InterCloudAuthorization removed";
 	private static final String DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not remove InterCloudAuthorization";
 	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE = "InterCloudAuthorizations created";
-	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not create InterCloudAuthorization";
+	private static final String POST_INTER_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE = "Could not create InterCloudAuthorization";
+	
+	private static final String INTER_CLOUD_AUTHORIZATION_CHECK_URI = "/intercloud/check";
+	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "InterCloudAuthorization result returned";
+	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not check InterCloudAuthorization";
 	
 	private static final String TOKEN_URI = "/token";
 	private static final String TOKEN_DESCRIPTION = "Generates tokens for a consumer which can be used to access the specified service of the specified providers";
@@ -299,7 +305,7 @@ public class AuthorizationController {
 	@ApiOperation(value = "Create the requested InterCloudAuthorization entries")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTER_CLOUD_AUTHORIZATION_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -375,6 +381,37 @@ public class AuthorizationController {
 		
 		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequestResponse(request.getConsumerId(), request.getServiceDefinitionId(), request.getProviderIds());
 		logger.debug("checkIntraCloudAuthorizationRequest has been finished");
+		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Checks whether the consumer System can use a Service from a list of provider Systems", response = InterCloudAuthorizationCheckResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+	@ResponseBody public InterCloudAuthorizationCheckResponseDTO checkInterCloudAuthorizationRequest(@RequestBody final InterCloudAuthorizationCheckRequestDTO request) {
+		logger.debug("New InterCloudAuthorization check request recieved");
+		
+		final boolean isCloudIdInvalid = request.getCloudId() == null || request.getCloudId() < 1;
+		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
+		if (isCloudIdInvalid || isServiceDefinitionIdInvalid ) {
+			String exceptionMsg = "Payload is invalid due to the following reasons:";
+			exceptionMsg = isCloudIdInvalid ? exceptionMsg + " 'invalid consumer id' ," : exceptionMsg;
+			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'invalid serviceDefinition id' ," : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() -1);
+			
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_CHECK_URI);
+		}
+		
+		final long validCloudId = request.getCloudId();
+		final long validServiceDefinitionId = request.getServiceDefinitionId(); 
+		
+		final InterCloudAuthorizationCheckResponseDTO response = authorizationDBService.createInterCloudAuthorizationResponse(validCloudId, validServiceDefinitionId);
+		logger.debug("checkInterCloudAuthorizationRequest has been finished");
 		return response;
 	}
 	

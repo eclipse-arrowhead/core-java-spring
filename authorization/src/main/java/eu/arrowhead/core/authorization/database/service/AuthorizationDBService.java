@@ -31,6 +31,7 @@ import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.InterCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckResponseDTO;
@@ -402,7 +403,12 @@ public class AuthorizationDBService {
 		}		
 	}
 	
-	
+	//-------------------------------------------------------------------------------------------------
+	public InterCloudAuthorizationCheckResponseDTO createInterCloudAuthorizationResponse(long validCloudId,
+			long validServiceDefinitionId) {
+		// TODO implement it ...
+		return null;
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -440,6 +446,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} 
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	private InterCloudAuthorization createNewInterCloudAuthorization(final Cloud cloud, final long serviceDefinitionId) {
 		logger.debug("createInterCloudAuthorizationLis started...");
@@ -475,5 +482,6 @@ public class AuthorizationDBService {
 		
 		
 	}
+
 
 }
