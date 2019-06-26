@@ -16,9 +16,9 @@ public class CloudResponseDTO implements Serializable {
 	private String address;
 	private int port;
 	private String gateKeeperServiceUri;
-	private Boolean secure;
-	private Boolean neighbor;
-	private Boolean ownCloud;
+	private boolean secure;
+	private boolean neighbor;
+	private boolean ownCloud;
 	private String createdAt;
 	private String updatedAt;
 	
@@ -29,9 +29,9 @@ public class CloudResponseDTO implements Serializable {
 	public CloudResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudResponseDTO(long id, String operator, String name, String address, int port,
-			String gateKeeperServiceUri, Boolean secure, Boolean neighbor, Boolean ownCloud, String createdAt,
-			String updatedAt) {
+	public CloudResponseDTO(final long id, final String operator, final String name, final String address, final int port,
+			final String gateKeeperServiceUri, final boolean secure, final boolean neighbor, final boolean ownCloud, final String createdAt,
+			final String updatedAt) {
 		this.id = id;
 		this.operator = operator;
 		this.name = name;
@@ -52,21 +52,21 @@ public class CloudResponseDTO implements Serializable {
 	public String getAddress() { return address; }
 	public Integer getPort() { return port; }
 	public String getGateKeeperServiceUri() { return gateKeeperServiceUri; }
-	public Boolean getSecure() { return secure; }
-	public Boolean getNeighbor() { return neighbor; }
-	public Boolean getOwnCloud() { return ownCloud; }
+	public boolean getSecure() { return secure; }
+	public boolean getNeighbor() { return neighbor; }
+	public boolean getOwnCloud() { return ownCloud; }
 	public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 	//-------------------------------------------------------------------------------------------------
-	public void setId(long id) { this.id = id; }
+	public void setId(final long id) { this.id = id; }
 	public void setOperator(final String operator) { this.operator = operator; }
 	public void setName(final String name) { this.name = name; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final Integer port) { this.port = port; }
 	public void setGateKeeperServiceUri(final String gateKeeperServiceUri) { this.gateKeeperServiceUri = gateKeeperServiceUri; }
-	public void setSecure(final Boolean secure) { this.secure = secure; }
-	public void setNeighbor(final Boolean neighbor) { this.neighbor = neighbor; }
-	public void setOwnCloud(final Boolean ownCloud) { this.ownCloud = ownCloud; }
-	public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+	public void setSecure(final boolean secure) { this.secure = secure; }
+	public void setNeighbor(final boolean neighbor) { this.neighbor = neighbor; }
+	public void setOwnCloud(final boolean ownCloud) { this.ownCloud = ownCloud; }
+	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 }

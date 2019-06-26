@@ -20,8 +20,8 @@ public class InterCloudAuthorizationRequestDTO implements Serializable {
 	public InterCloudAuthorizationRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public InterCloudAuthorizationRequestDTO(long cloudId,
-			List<Long> serviceDefinitionIdList) {
+	public InterCloudAuthorizationRequestDTO(final long cloudId,
+			final List<Long> serviceDefinitionIdList) {
 
 		this.cloudId = cloudId;
 		this.serviceDefinitionIdList = serviceDefinitionIdList;
@@ -32,8 +32,8 @@ public class InterCloudAuthorizationRequestDTO implements Serializable {
 	public List<Long> getServiceDefinitionIdList() { return serviceDefinitionIdList;	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setCloudId(Long cloudId) { this.cloudId = cloudId; }
-	public void setServiceDefinitionIdList(List<Long> serviceDefinitionIdList) { this.serviceDefinitionIdList = serviceDefinitionIdList; }
+	public void setCloudId(final Long cloudId) { this.cloudId = cloudId; }
+	public void setServiceDefinitionIdList(final List<Long> serviceDefinitionIdList) { this.serviceDefinitionIdList = serviceDefinitionIdList; }
 }
 
 
