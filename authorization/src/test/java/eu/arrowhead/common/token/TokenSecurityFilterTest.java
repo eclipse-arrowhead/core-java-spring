@@ -116,21 +116,6 @@ public class TokenSecurityFilterTest {
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/provider.p12"), "123456".toCharArray());
 		final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, "123456");
 
-		return new TestTokenSecurityFilter(providerPrivateKey, authPublicKey);
-	}
-	
-	//=================================================================================================
-	// nested classes
-	
-	//-------------------------------------------------------------------------------------------------
-	private static class TestTokenSecurityFilter extends TokenSecurityFilter {
-		
-		//=================================================================================================
-		// methods
-
-		//-------------------------------------------------------------------------------------------------
-		public TestTokenSecurityFilter(final PrivateKey myPrivateKey, final PublicKey authorizationPublicKey) {
-			super(myPrivateKey, authorizationPublicKey);
-		}
+		return new TokenSecurityFilter(providerPrivateKey, authPublicKey) {};
 	}
 }
