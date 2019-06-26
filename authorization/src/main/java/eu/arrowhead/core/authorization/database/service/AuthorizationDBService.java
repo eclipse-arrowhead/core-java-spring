@@ -456,9 +456,9 @@ public class AuthorizationDBService {
 			final ServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
 			
 			try {
-				checkConstraintsOfInterCloudAuthorizationTable(cloud, serviceDefinition);
-				final InterCloudAuthorization interCloudAuthorization = new InterCloudAuthorization(cloud, serviceDefinition);				
-				return interCloudAuthorization;
+				checkConstraintsOfInterCloudAuthorizationTable(cloud, serviceDefinition);			
+				
+				return  new InterCloudAuthorization(cloud, serviceDefinition);
 				
 			}catch(final InvalidParameterException ex) {
 				logger.info(ex.getMessage());
