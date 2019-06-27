@@ -2,6 +2,7 @@ package eu.arrowhead.core.authorization.token;
 
 import static org.mockito.Mockito.when;
 
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -54,9 +55,6 @@ public class TokenGenerationServiceTest {
 	@Mock
 	private Map<String,Object> arrowheadContext;
 	
-	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	private Map<String,Object> validArrowheadContext;
-
 	//=================================================================================================
 	// methods
 	
@@ -281,8 +279,11 @@ public class TokenGenerationServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testTokenGenerationOk() throws Exception {
+		final KeyStore authKeystore = KeyStore.getInstance("PKCS12");
+		authKeystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.p12"), "123456".toCharArray());
+		final PrivateKey authPrivateKey = Utilities.getPrivateKey(authKeystore, "123456");
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(true);
-		when(arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(validArrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY));
+		when(arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(authPrivateKey);
 		
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
@@ -302,7 +303,9 @@ public class TokenGenerationServiceTest {
 		final AlgorithmConstraints jwsAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG);
 		final AlgorithmConstraints jweAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_KEY_MANAGEMENT_ALG);
 		final AlgorithmConstraints jweEncConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_ENCRYPTION_ALG);
-		final PublicKey authPublicKey = (PublicKey) validArrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+
+		final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.pub");
+		final PublicKey authPublicKey = Utilities.getPublicKeyFromPEMFile(is);
 		
 		final KeyStore keystore = KeyStore.getInstance("PKCS12");
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/provider.p12"), "123456".toCharArray());
