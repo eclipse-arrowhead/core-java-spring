@@ -438,8 +438,8 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public InterCloudAuthorizationCheckResponseDTO checkInterCloudAuthorizationResponse(long cloudId,
-			long serviceDefinitionId) {
+	public InterCloudAuthorizationCheckResponseDTO checkInterCloudAuthorizationResponse(final long cloudId,
+			final long serviceDefinitionId) {
 		
 		logger.debug("checkInterCloudAuthorizationRequestResponse started...");
 		
@@ -455,8 +455,8 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException(exceptionMsg);
 			}
 			
-			Cloud validCloud = cloudRepository.findById(cloudId).get();
-			ServiceDefinition validServiceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId).get();
+			final Cloud validCloud = cloudRepository.findById(cloudId).get();
+			final ServiceDefinition validServiceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId).get();
 			
 			final Optional<InterCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(validCloud, validServiceDefinition);
 			if (optional.isEmpty()) {
