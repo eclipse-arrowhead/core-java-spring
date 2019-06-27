@@ -55,7 +55,7 @@ public class AuthorizationControllerInterCloudTest {
 	// members
 	
 	private static final String INTER_CLOUD_AUTHORIZATION_MGMT_URI = "/authorization/mgmt/intercloud";
-	private static final String INTER_CLOUD_AUTHORIZATION_CHECK_URI = "/intercloud/check";
+	private static final String INTER_CLOUD_AUTHORIZATION_CHECK_URI = "/authorization/intercloud/check";
 	
 	@Autowired
 	private WebApplicationContext wac;
