@@ -9,8 +9,6 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwt.JwtClaims;
