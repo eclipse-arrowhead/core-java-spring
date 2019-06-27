@@ -23,6 +23,7 @@ public class InterCloudAuthorizationCheckResponseDTO implements Serializable {
 	public InterCloudAuthorizationCheckResponseDTO(final long cloudId, final long serviceDefinitionId, final boolean cloudIdAuthorizationState) {
 		this.cloudId = cloudId;
 		this.serviceDefinitionId = serviceDefinitionId;
+		this.cloudIdAuthorizationState = cloudIdAuthorizationState;
 	}
 
 	//-------------------------------------------------------------------------------------------------
