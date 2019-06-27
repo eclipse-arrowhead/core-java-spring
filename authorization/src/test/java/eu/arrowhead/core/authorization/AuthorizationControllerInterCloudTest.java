@@ -158,7 +158,7 @@ public class AuthorizationControllerInterCloudTest {
 				.andReturn();
 		
 		final InterCloudAuthorizationResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), InterCloudAuthorizationResponseDTO.class);
-		assertEquals(responseBody.getCloud().getName(), "testCloudName");
+		assertEquals("testCloudName", responseBody.getCloud().getName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -329,7 +329,7 @@ public class AuthorizationControllerInterCloudTest {
 			entry.setUpdatedAt(zdTime);
 			entries.add(entry);
 		}
-		return new PageImpl<InterCloudAuthorization>(entries);
+		return new PageImpl<>(entries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -358,5 +358,4 @@ public class AuthorizationControllerInterCloudTest {
 
 		return cloud;
 	}	
-
 }

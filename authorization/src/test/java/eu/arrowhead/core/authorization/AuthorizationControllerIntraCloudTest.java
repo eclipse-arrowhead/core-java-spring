@@ -159,7 +159,7 @@ public class AuthorizationControllerIntraCloudTest {
 				.andReturn();
 		
 		final IntraCloudAuthorizationResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationResponseDTO.class);
-		assertEquals(responseBody.getConsumerSystem().getSystemName(), "Consumer");
+		assertEquals("Consumer", responseBody.getConsumerSystem().getSystemName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
