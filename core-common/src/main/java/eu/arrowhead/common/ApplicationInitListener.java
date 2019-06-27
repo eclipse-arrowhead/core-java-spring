@@ -31,10 +31,12 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 
 @Component
@@ -157,13 +159,20 @@ public class ApplicationInitListener {
 		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 		checkServiceRegistryConnection(scheme);
 		
-//		final SystemRequestDTO coreSystemDTO = getCoreSystemRequestDTO();
-//		for (final CoreSystemService coreService : coreSystem.getServices()) {
-//			final UriComponents registerUri = createRegisterUri(scheme);
-//			final ServiceRegistryRequestDTO request = getCoreSystemServiceRegistryRequestDTO(coreSystemDTO, coreService);
-//			final ResponseEntity<ServiceRegistryResponseDTO> response = httpService.sendRequest(registerUri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
-//			// TODO cont
-//		}
+		final SystemRequestDTO coreSystemDTO = getCoreSystemRequestDTO();
+		for (final CoreSystemService coreService : coreSystem.getServices()) {
+			final UriComponents registerUri = createRegisterUri(scheme);
+			final ServiceRegistryRequestDTO request = getCoreSystemServiceRegistryRequestDTO(coreSystemDTO, coreService);
+			try {
+				httpService.sendRequest(registerUri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
+			} catch (final InvalidParameterException ex) { // means service already registered => delete the old and register again
+				final UriComponents unregisterUri = createUnregisterUri(scheme, coreService);
+				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
+				httpService.sendRequest(registerUri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
+			} 
+		}
+		
+		logger.info("Core system {} published {} service(s).", coreSystem.name(), coreSystem.getServices().size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
