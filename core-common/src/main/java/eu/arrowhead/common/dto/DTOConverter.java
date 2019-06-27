@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -196,6 +197,30 @@ public class DTOConverter {
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static IntraCloudAuthorizationResponseDTO convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(final IntraCloudAuthorization entry) {
+		Assert.notNull(entry, "IntraCloudAuthorization is null");
+		Assert.notNull(entry.getConsumerSystem(), "Consumer is null");
+		Assert.notNull(entry.getProviderSystem(), "Provider is null");
+		Assert.notNull(entry.getServiceDefinition(), "ServiceDefintion is null");
+		
+		return new IntraCloudAuthorizationResponseDTO(entry.getId(), convertSystemToSystemResponseDTO(entry.getConsumerSystem()), convertSystemToSystemResponseDTO(entry.getProviderSystem()), 
+				convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition()), 
+				Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static IntraCloudAuthorizationListResponseDTO convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(final Page<IntraCloudAuthorization> entries) {
+		Assert.notNull(entries, "IntraCloudAuthorizationList is null");
+		
+		final List<IntraCloudAuthorizationResponseDTO> intraCloudAuthorizationEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final IntraCloudAuthorization entry : entries) {
+			intraCloudAuthorizationEntries.add(convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(entry));
+		}
+		
+		return new IntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -61,6 +61,7 @@ public class CommonConstants {
 	
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
+	public static final String AUTHORIZATIOIN_URI = "/authorization";
 	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
