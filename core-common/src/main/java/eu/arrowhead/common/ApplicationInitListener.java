@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +51,6 @@ public class ApplicationInitListener {
 	
 	private static final int MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES = 3;
 	private static final int WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS = 15;
-	private static final long WAITING_PERIOD_BETWEEN_RETRIES_IN_MILISECONDS = WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS * 1000L;
 
 	@Autowired
 	private SSLProperties sslProperties;
@@ -61,6 +62,8 @@ public class ApplicationInitListener {
 	private HttpService httpService;
 	
 	private PublicKey publicKey;
+	
+	private boolean standaloneMode = false;
 	
 	//=================================================================================================
 	// methods
@@ -84,6 +87,33 @@ public class ApplicationInitListener {
 		registerCoreSystemServicesToServiceRegistry(event.getApplicationContext());
 		
 		logger.debug("Initialization in onApplicationEvent() is done.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@PreDestroy
+	public void destroy() throws InterruptedException {
+		logger.debug("destroy called...");
+		
+		final CoreSystem coreSystem = coreSystemRegistrationProperties.getCoreSystem();
+		if (skipSROperations(coreSystem)) {
+			return;
+		}
+		
+		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+		checkServiceRegistryConnection(scheme, 0, 1);
+		
+		int count = coreSystem.getServices().size();
+		for (final CoreSystemService coreService : coreSystem.getServices()) {
+			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService);
+			try {
+				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
+			} catch (final InvalidParameterException ex) {
+				// core service not found
+				count--;
+			}
+		}
+		
+		logger.info("Core system {} revoked {} service(s).", coreSystem.name(), count);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -145,19 +175,15 @@ public class ApplicationInitListener {
 		
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-		if (context.containsKey(CommonConstants.SERVER_STANDALONE_MODE)) {
-			// skip the registration
-			return;
-		}
+		standaloneMode = context.containsKey(CommonConstants.SERVER_STANDALONE_MODE);
 		
 		final CoreSystem coreSystem = coreSystemRegistrationProperties.getCoreSystem();
-		if (CoreSystem.SERVICE_REGISTRY == coreSystem) {
-			// do nothing
+		if (skipSROperations(coreSystem)) {
 			return;
 		}
 		
 		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
-		checkServiceRegistryConnection(scheme);
+		checkServiceRegistryConnection(scheme, MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES, WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS);
 		
 		final SystemRequestDTO coreSystemDTO = getCoreSystemRequestDTO();
 		for (final CoreSystemService coreService : coreSystem.getServices()) {
@@ -176,11 +202,16 @@ public class ApplicationInitListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryConnection(final String scheme) throws InterruptedException {
+	private boolean skipSROperations(final CoreSystem coreSystem) {
+		return standaloneMode || CoreSystem.SERVICE_REGISTRY == coreSystem; 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRegistryConnection(final String scheme, final int retries, final int period) throws InterruptedException {
 		logger.debug("checkServiceRegistryConnection started...");
 	
 		final UriComponents echoUri = createEchoUri(scheme);
-		for (int i = 0; i <= MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES; ++i) {
+		for (int i = 0; i <= retries; ++i) {
 			try {
 				httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
 				logger.info("Service Registry is accessible...");
@@ -191,8 +222,8 @@ public class ApplicationInitListener {
 				if (i == MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES) {
 					throw ex;
 				} else {
-					logger.info("Service Registry is unavailable at the moment, retrying in {} seconds...", WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS);
-					Thread.sleep(WAITING_PERIOD_BETWEEN_RETRIES_IN_MILISECONDS);
+					logger.info("Service Registry is unavailable at the moment, retrying in {} seconds...", period);
+					Thread.sleep(period * CommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
 				}
 			}
 		}
