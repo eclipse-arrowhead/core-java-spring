@@ -6,12 +6,10 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Map;
-
-import javax.annotation.Resource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,9 +44,6 @@ public class TokenSecurityFilterTest {
 	
 	@Autowired
 	private WebApplicationContext wac;
-	
-	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	private Map<String,Object> arrowheadContext;
 	
 	private MockMvc mockMvc;
 
@@ -111,7 +106,9 @@ public class TokenSecurityFilterTest {
 
 	//-------------------------------------------------------------------------------------------------
 	public TokenSecurityFilter getTokenSecurityFilter() throws Exception {
-		final PublicKey authPublicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.pub");
+		final PublicKey authPublicKey = Utilities.getPublicKeyFromPEMFile(is);
+
 		final KeyStore keystore = KeyStore.getInstance("PKCS12");
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/provider.p12"), "123456".toCharArray());
 		final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, "123456");
