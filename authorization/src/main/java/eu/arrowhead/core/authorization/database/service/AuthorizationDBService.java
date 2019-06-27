@@ -326,28 +326,11 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)	
 	public Page<InterCloudAuthorization> createInterCloudAuthorization(final long cloudId, final Set<Long> serviceDefinitionIdSet) {
-		logger.debug("createInterCloudAuthorization started...");
-		
-		if (cloudId < 1) {
-			throw new InvalidParameterException("Cloud id must be greater than 0.");
-		}
-		
-		if ( serviceDefinitionIdSet == null) {
-			throw new InvalidParameterException("ServiceDefinitionSet is null.");
-		}
-		for (final Long id : serviceDefinitionIdSet) {
-			if ( id < 1) {
-				throw new InvalidParameterException("ServiceDefinition id must be greater than 0.");
-			}
-		}		
+		logger.debug("createInterCloudAuthorization started...");	
 		
 		try {						
 		
-			final Optional<Cloud> cloudOptional = cloudRepository.findById(cloudId);
-			if(cloudOptional.isEmpty()) {
-				throw new InvalidParameterException("No Cloud with id : "+cloudId);
-			}
-			final Cloud cloud = cloudOptional.get();
+			final Cloud cloud = validateCloudId(cloudId);
 			
 			final List<InterCloudAuthorization> entriesToSave = new ArrayList<>(serviceDefinitionIdSet.size());			
 			for (final Long serviceId : serviceDefinitionIdSet) {
@@ -439,24 +422,13 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public InterCloudAuthorizationCheckResponseDTO checkInterCloudAuthorizationResponse(final long cloudId,
-			final long serviceDefinitionId) {
-		
+			final long serviceDefinitionId) {	
 		logger.debug("checkInterCloudAuthorizationRequestResponse started...");
 		
 		try {
-			final boolean isCloudIdInvalid = cloudId < 1 || !cloudRepository.existsById(cloudId);
-			final boolean isServiceDefinitionIdInvalid = serviceDefinitionId < 1 || !serviceDefinitionRepository.existsById(serviceDefinitionId);
-		
-			if (isCloudIdInvalid || isServiceDefinitionIdInvalid) {
-				String exceptionMsg = "Following parameters are invalid:";
-				exceptionMsg = isCloudIdInvalid ? exceptionMsg + " 'cloud id' ," : exceptionMsg;
-				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'serviceDefinition id' ," : exceptionMsg;
-				exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() -1);
-				throw new InvalidParameterException(exceptionMsg);
-			}
 			
-			final Cloud validCloud = cloudRepository.findById(cloudId).get();
-			final ServiceDefinition validServiceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId).get();
+			final Cloud validCloud = validateCloudId(cloudId);;		
+			final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(serviceDefinitionId);
 			
 			final Optional<InterCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(validCloud, validServiceDefinition);
 			if (optional.isEmpty()) {
@@ -479,6 +451,7 @@ public class AuthorizationDBService {
 	//=================================================================================================
 	// assistant methods
 	
+
 	//-------------------------------------------------------------------------------------------------
 	private void checkConstraintsOfIntraCloudAuthorizationTable(final System consumer, final System provider, final ServiceDefinition serviceDefinition) {
 		logger.debug("checkConstraintsOfIntraCloudAuthorizationTable started...");
@@ -568,35 +541,50 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private InterCloudAuthorization createNewInterCloudAuthorization(final Cloud cloud, final long serviceDefinitionId) {
-		logger.debug("createInterCloudAuthorizationLis started...");
+		logger.debug("createNewInterCloudAuthorization started...");
+				
+		final ServiceDefinition serviceDefinition = validateServiceDefinitionId(serviceDefinitionId);
 		
-		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
-		
-		if (serviceDefinitionIdIsInvalid) {
-			throw new InvalidParameterException("Following id parameters are invalid: serviceDefinitionId - "+serviceDefinitionId);
-		}	
-		
-		
-		final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findById(serviceDefinitionId);
-		if (serviceDefinitionOptional.isEmpty()) {
-			throw new InvalidParameterException("Following id parameters are not present in database: serviceDefinitionId -" + serviceDefinitionId);
-		}else {
-			final ServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
+		try {
+			checkConstraintsOfInterCloudAuthorizationTable(cloud, serviceDefinition);			
 			
-			try {
-				checkConstraintsOfInterCloudAuthorizationTable(cloud, serviceDefinition);			
-				
-				return  new InterCloudAuthorization(cloud, serviceDefinition);
-				
-			}catch(final InvalidParameterException ex) {
-				logger.debug(ex.getMessage());
-				return null;
-			}
-
+			return  new InterCloudAuthorization(cloud, serviceDefinition);
+			
+		}catch(final InvalidParameterException ex) {
+			logger.debug(ex.getMessage());
+			return null;
 		}
-		
 		
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private Cloud validateCloudId(long cloudId) {		
+		logger.debug("validateCloudId started...");
+		
+		if (cloudId < 1) {
+			throw new InvalidParameterException("Not valid Cloud id: "+cloudId);
+		}	
+		
+		Optional<Cloud>  optionalCloud = cloudRepository.findById(cloudId);
+		if (optionalCloud.isEmpty()) {
+			throw new InvalidParameterException("No Cloud in database by id: " + cloudId);
+		}
+		return optionalCloud.get();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ServiceDefinition validateServiceDefinitionId(long serviceDefinitionId) {		
+		logger.debug("validateServiceDefinitionId started...");
+		
+		if (serviceDefinitionId < 1) {
+			throw new InvalidParameterException("Not valid ServiceDefinitionId id: "+serviceDefinitionId);
+		}
+		
+		Optional<ServiceDefinition>  optionalServiceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
+		if (optionalServiceDefinition.isEmpty()) {
+			throw new InvalidParameterException("No ServiceDefinition in database by id: " + serviceDefinitionId);
+		}
+		return optionalServiceDefinition.get();
+	}
 
 }
