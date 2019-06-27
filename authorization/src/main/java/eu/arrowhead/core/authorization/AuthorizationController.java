@@ -1,19 +1,21 @@
 package eu.arrowhead.core.authorization;
 
 
-import java.util.List;
-import java.util.Set;
 import java.security.PublicKey;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -63,9 +65,18 @@ public class AuthorizationController {
 	// members
 	
 	private static final String PATH_VARIABLE_ID = "id";
-	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater then 0.";
+	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0.";
 	
 	private static final String ECHO_URI = "/echo";
+	
+	private static final String TOKEN_URI = "/token";
+	private static final String TOKEN_DESCRIPTION = "Generates tokens for a consumer which can be used to access the specified service of the specified providers";
+	private static final String TOKEN_HTTP_200_MESSAGE = "Tokens returned";
+	private static final String TOKEN_HTTP_400_MESSAGE = "Could not generate tokens";
+	
+	private static final String PUBLIC_KEY_URI = "/publickey";
+	private static final String PUBLIC_KEY_DESCRIPTION = "Returns the public key of the Authorization core service as a Base64 encoded text";
+	private static final String PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	
 	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_URI = CommonConstants.MGMT_URI + "/intracloud";
 	private static final String INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI = INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
@@ -93,21 +104,13 @@ public class AuthorizationController {
 	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "InterCloudAuthorization result returned";
 	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not check InterCloudAuthorization";
 	
-	private static final String TOKEN_URI = "/token";
-	private static final String TOKEN_DESCRIPTION = "Generates tokens for a consumer which can be used to access the specified service of the specified providers";
-	private static final String TOKEN_HTTP_200_MESSAGE = "Tokens returned";
-	private static final String TOKEN_HTTP_400_MESSAGE = "Could not generate tokens";
-	
-	private static final String PUBLIC_KEY_URI = "/publickey";
-	private static final String PUBLIC_KEY_DESCRIPTION = "Returns the public key of the Authorization core service as a Base64 encoded text";
-	private static final String PUBLIC_KEY_200_MESSAGE = "Public key returned";
-	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
 	@Autowired
-	private AuthorizationDBService authorizationDBService;
-		
-    private TokenGenerationService tokenGenerationService;
+	private AuthorizationDBService authorizationDBService;	
+
+	@Autowired
+	private TokenGenerationService tokenGenerationService;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -128,41 +131,6 @@ public class AuthorizationController {
 	@GetMapping(path = ECHO_URI)
 	public String echoService() {
 		return "Got it!";
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = TOKEN_DESCRIPTION, response = TokenGenerationResponseDTO.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = TOKEN_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = TOKEN_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PostMapping(path = TOKEN_URI)
-	@ResponseBody public TokenGenerationResponseDTO generateTokens(@RequestBody final TokenGenerationRequestDTO request) {
-		logger.debug("New token generation request received");
-		checkTokenGenerationRequest(request);
-		
-		if (request.getDuration() != null && request.getDuration().intValue() <= 0) {
-			request.setDuration(null);
-		}
-
-		final TokenGenerationResponseDTO response = tokenGenerationService.generateTokensResponse(request);
-		logger.debug("{} token(s) are generated for {}", response.getTokenData().size(), request.getConsumer().getSystemName());
-		
-		return response;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = PUBLIC_KEY_DESCRIPTION, response = String.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = PUBLIC_KEY_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(path = PUBLIC_KEY_URI)
-	public String getPublicKey() {
-		return acquireAndConvertPublicKey();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -197,7 +165,7 @@ public class AuthorizationController {
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		
 		final IntraCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getIntraCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
-		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
+		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return intraCloudAuthorizationEntriesResponse;
 	}
 		
@@ -260,13 +228,35 @@ public class AuthorizationController {
 		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds() == null || request.getServiceDefinitionIds().isEmpty();
 		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
-			exceptionMsg = isConsumerIdInvalid ? exceptionMsg +" 'invalid consumer id'" : exceptionMsg;
-			exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'providerId list is empty'" : exceptionMsg;
-			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " 'serviceDefinitionList is empty'" : exceptionMsg;
+			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
+			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
+			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " serviceDefinitionList is empty," : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
+		if (request.getProviderIds().size() > 1 && request.getServiceDefinitionIds().size() > 1) {
+			throw new BadPayloadException("providerIds list or serviceDefinitionIds list should contain only one element, but both contain more",
+					HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+		}
 		
-		final IntraCloudAuthorizationListResponseDTO response = authorizationDBService.createBulkIntraCloudAuthorizationResponse(request.getConsumerId(), request.getProviderIds(), request.getServiceDefinitionIds());
+		final Set<Long> providerIdSet = new HashSet<>();
+		for (final Long id : request.getProviderIds()) {
+			if (id != null && id > 0) {
+				providerIdSet.add(id);
+			} else {
+				logger.debug("Invalid provider system id: {}", id);
+			}
+		}
+		final Set<Long> serviceIdSet = new HashSet<>();
+		for (final Long id : request.getServiceDefinitionIds()) {
+			if (id != null && id > 0) {
+				serviceIdSet.add(id);
+			} else {
+				logger.debug("Invalid ServiceDefinition id: {}", id);
+			}
+		}
+		
+		final IntraCloudAuthorizationListResponseDTO response = authorizationDBService.createBulkIntraCloudAuthorizationResponse(request.getConsumerId(), providerIdSet, serviceIdSet);
 		logger.debug("registerIntraCloudAuthorization has been finished");
 		return response;
 		
@@ -401,13 +391,23 @@ public class AuthorizationController {
 		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
 		if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
-			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " 'invalid consumer id'" : exceptionMsg;
-			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'invalid serviceDefinition id'" : exceptionMsg;
-			exceptionMsg = isProviderListEmpty ? exceptionMsg + " 'providerId list is empty'" : exceptionMsg;
+			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
+			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " invalid serviceDefinition id," : exceptionMsg;
+			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_CHECK_URI);
 		}
 		
-		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequestResponse(request.getConsumerId(), request.getServiceDefinitionId(), request.getProviderIds());
+		final Set<Long> providerIdSet = new HashSet<>();
+		for (final Long id : request.getProviderIds()) {
+			if (id != null && id > 0) {
+				providerIdSet.add(id);
+			} else {
+				logger.debug("Invalid provider system id: {}", id);
+			}
+		}
+		
+		final IntraCloudAuthorizationCheckResponseDTO response = authorizationDBService.checkIntraCloudAuthorizationRequest(request.getConsumerId(), request.getServiceDefinitionId(), providerIdSet);
 		logger.debug("checkIntraCloudAuthorizationRequest has been finished");
 		return response;
 	}
@@ -443,6 +443,41 @@ public class AuthorizationController {
 		return response;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = TOKEN_DESCRIPTION, response = TokenGenerationResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = TOKEN_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = TOKEN_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = TOKEN_URI)
+	@ResponseBody public TokenGenerationResponseDTO generateTokens(@RequestBody final TokenGenerationRequestDTO request) {
+		logger.debug("New token generation request received");
+		checkTokenGenerationRequest(request);
+		
+		if (request.getDuration() != null && request.getDuration().intValue() <= 0) {
+			request.setDuration(null);
+		}
+
+		final TokenGenerationResponseDTO response = tokenGenerationService.generateTokensResponse(request);
+		logger.debug("{} token(s) are generated for {}", response.getTokenData().size(), request.getConsumer().getSystemName());
+		
+		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = PUBLIC_KEY_DESCRIPTION, response = String.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUBLIC_KEY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = PUBLIC_KEY_URI)
+	public String getPublicKey() {
+		return acquireAndConvertPublicKey();
+	}
+
 	//=================================================================================================
 	// assistant methods
 	
@@ -463,7 +498,7 @@ public class AuthorizationController {
 		}
 		
 		return validatedDirection;
-	}	
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkTokenGenerationRequest(final TokenGenerationRequestDTO request) {

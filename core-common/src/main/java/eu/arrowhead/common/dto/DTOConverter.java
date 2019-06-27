@@ -224,8 +224,8 @@ public class DTOConverter {
 		
 		return new IntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries, entries.getTotalElements());
 	}
-
-
+	
+	//-------------------------------------------------------------------------------------------------
 	public static TokenGenerationResponseDTO convertTokenMapToTokenGenerationResponseDTO(final Map<SystemRequestDTO,String> tokenMap) {
 		Assert.notNull(tokenMap, "Token map is null.");
 		
@@ -236,6 +236,7 @@ public class DTOConverter {
 		
 		return result;
 	}
+
 	//-------------------------------------------------------------------------------------------------	
 	public static CloudResponseDTO convertCloudToCloudResponseDTO(Cloud entity) {
 		
