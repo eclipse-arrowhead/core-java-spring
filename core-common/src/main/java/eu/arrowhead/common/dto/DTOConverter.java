@@ -1,5 +1,6 @@
 package eu.arrowhead.common.dto;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.InterCloudAuthorization;
 import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
+import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -289,6 +291,30 @@ public class DTOConverter {
 				convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(OrchestratorStore entity) {
+		
+		Assert.notNull(entity, "OrchestratorStore is null");
+		Assert.notNull(entity.getId(), "OrchestratorStore.id is null");                
+		Assert.notNull(entity.getServiceDefinition(),"OrchestratorStore.ServiceDefinition is null"); 
+		Assert.notNull(entity.getConsumerSystem(),"OrchestratorStore.ConsumerSystem is null");    
+		Assert.notNull(entity.getProviderSystem(), "OrchestratorStore.ProviderSystem is null");                 
+        Assert.notNull(entity.getCreatedAt(), "OrchestratorStore.CreatedAt is null");        
+        Assert.notNull(entity.getUpdatedAt(),  "OrchestratorStore.UpdatedAt is null");          
+	
+		return new OrchestratorStoreResponseDTO(
+			entity.getId(),
+			entity.getServiceDefinition(),
+			entity.getConsumerSystem(),
+			entity.getProviderSystem(),
+			entity.getProviderCloud(),
+			entity.getPriority(),
+			entity.getAttribute(),
+			entity.getCreatedAt(),
+			entity.getUpdatedAt());
 		
 	}
 	

@@ -17,7 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority"}))
-public class OrchestrationStore {
+public class OrchestratorStore {
 
 	//=================================================================================================
 	// members
@@ -58,10 +58,10 @@ public class OrchestrationStore {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationStore() {}
+	public OrchestratorStore() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationStore(ServiceDefinition serviceDefinition, System consumerSystem, System providerSystem,
+	public OrchestratorStore(ServiceDefinition serviceDefinition, System consumerSystem, System providerSystem,
 			Cloud providerCloud, Integer priority, String attribute, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
 		super();
 		this.serviceDefinition = serviceDefinition;
@@ -112,7 +112,7 @@ public class OrchestrationStore {
 	//-------------------------------------------------------------------------------------------------	
 	@Override
 	public String toString() {
-		return "OrchestrationStore [id=" + id + ", serviceDefinition=" + serviceDefinition + ", consumerSystem="
+		return "OrchestratorStore [id=" + id + ", serviceDefinition=" + serviceDefinition + ", consumerSystem="
 				+ consumerSystem + ", providerSystem=" + providerSystem + ", providerCloud=" + providerCloud
 				+ ", priority=" + priority + ", attribute=" + attribute + ", createdAt=" + createdAt + ", updatedAt="
 				+ updatedAt + "]";
