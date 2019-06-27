@@ -138,6 +138,7 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorization createIntraCloudAuthorization(final long consumerId, final long providerId, final long serviceDefinitionId) {
 		logger.debug("createIntraCloudAuthorization started...");
@@ -341,8 +342,7 @@ public class AuthorizationDBService {
 				}				
 			}
 				
-			return new PageImpl<InterCloudAuthorization>(interCloudAuthorizationRepository.saveAll(entriesToSave));
-			
+			return new PageImpl<>(interCloudAuthorizationRepository.saveAll(entriesToSave));
 		} catch (final InvalidParameterException ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw ex;
@@ -357,7 +357,7 @@ public class AuthorizationDBService {
 	public IntraCloudAuthorizationListResponseDTO createBulkIntraCloudAuthorizationResponse(final long consumerId, final Set<Long> providerIds, final Set<Long> serviceDefinitionIds) {
 		logger.debug("createBulkIntraCloudAuthorization started...");
 		final List<IntraCloudAuthorization> entries = createBulkIntraCloudAuthorization(consumerId, providerIds, serviceDefinitionIds);
-		final Page<IntraCloudAuthorization> entryPage = new PageImpl<IntraCloudAuthorization>(entries);
+		final Page<IntraCloudAuthorization> entryPage = new PageImpl<>(entries);
 		return DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(entryPage);
 	}
 	
@@ -427,7 +427,7 @@ public class AuthorizationDBService {
 		
 		try {
 			
-			final Cloud validCloud = validateCloudId(cloudId);;		
+			final Cloud validCloud = validateCloudId(cloudId);		
 			final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(serviceDefinitionId);
 			
 			final Optional<InterCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(validCloud, validServiceDefinition);
@@ -558,14 +558,15 @@ public class AuthorizationDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private Cloud validateCloudId(long cloudId) {		
+	@SuppressWarnings("squid:S3655")
+	private Cloud validateCloudId(final long cloudId) {		
 		logger.debug("validateCloudId started...");
 		
 		if (cloudId < 1) {
-			throw new InvalidParameterException("Not valid Cloud id: "+cloudId);
+			throw new InvalidParameterException("Not valid Cloud id: " + cloudId);
 		}	
 		
-		Optional<Cloud>  optionalCloud = cloudRepository.findById(cloudId);
+		final Optional<Cloud> optionalCloud = cloudRepository.findById(cloudId);
 		if (optionalCloud.isEmpty()) {
 			throw new InvalidParameterException("No Cloud in database by id: " + cloudId);
 		}
@@ -573,18 +574,18 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ServiceDefinition validateServiceDefinitionId(long serviceDefinitionId) {		
+	@SuppressWarnings("squid:S3655")
+	private ServiceDefinition validateServiceDefinitionId(final long serviceDefinitionId) {		
 		logger.debug("validateServiceDefinitionId started...");
 		
 		if (serviceDefinitionId < 1) {
-			throw new InvalidParameterException("Not valid ServiceDefinitionId id: "+serviceDefinitionId);
+			throw new InvalidParameterException("Not valid ServiceDefinitionId id: " + serviceDefinitionId);
 		}
 		
-		Optional<ServiceDefinition>  optionalServiceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
+		final Optional<ServiceDefinition> optionalServiceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
 		if (optionalServiceDefinition.isEmpty()) {
 			throw new InvalidParameterException("No ServiceDefinition in database by id: " + serviceDefinitionId);
 		}
 		return optionalServiceDefinition.get();
 	}
-
 }

@@ -156,7 +156,7 @@ public class AuthorizationController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		
 		final IntraCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getIntraCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -285,7 +285,7 @@ public class AuthorizationController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
 		
 		final InterCloudAuthorizationListResponseDTO interCloudAuthorizationEntriesResponse = authorizationDBService.getInterCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("InterCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
@@ -475,25 +475,6 @@ public class AuthorizationController {
 	//=================================================================================================
 	// assistant methods
 	
-	//-------------------------------------------------------------------------------------------------
-	private Direction calculateDirection(final String direction, final String origin) {
-		logger.debug("calculateDirection started ...");
-		final String directionStr = direction != null ? direction.toUpperCase() : "";
-		Direction validatedDirection;
-		switch (directionStr) {
-			case CommonConstants.SORT_ORDER_ASCENDING:
-				validatedDirection = Direction.ASC;
-				break;
-			case CommonConstants.SORT_ORDER_DESCENDING:
-				validatedDirection = Direction.DESC;
-				break;
-			default:
-				throw new BadPayloadException("Invalid sort direction flag", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		return validatedDirection;
-	}
-
 	//-------------------------------------------------------------------------------------------------
 	private void checkTokenGenerationRequest(final TokenGenerationRequestDTO request) {
 		logger.debug("checkTokenGenerationRequest started...");

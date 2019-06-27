@@ -78,6 +78,7 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Tests of getIntraCloudAuthorizations
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetIntraCloudAuthorizationsWithoutParameters() throws Exception {
 		final int numOfEntries = 4;
@@ -114,6 +115,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithNullPageButDefinedSizeParameter() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -123,6 +125,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithDefinedPageButNullSizeParameter() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -132,6 +135,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -143,6 +147,7 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Tests of getIntraCloudAuthorizations
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetIntraCloudAuthorizationsWithExistingId() throws Exception {
 		final IntraCloudAuthorizationResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(createPageForMockingAuthorizationDBService(1).getContent().get(0));
@@ -158,6 +163,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithInvalidId() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
@@ -168,6 +174,8 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Test of removeIntraCloudAuthorizationById
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRemoveIntraCloudAuthorizationByIdWithExistingId() throws Exception {
 		this.mockMvc.perform(delete(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/1")
@@ -176,6 +184,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRemoveIntraCloudAuthorizationByIdWithInvalidId() throws Exception {
 		this.mockMvc.perform(delete(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
@@ -186,6 +195,8 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Test of registerIntraCloudAuthorization
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithInvalidConsumerId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -196,6 +207,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithEmptyProviderIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -206,6 +218,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithEmptyServiceDefinitionIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -216,6 +229,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithMultipleElementsInBothList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -247,6 +261,8 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Test of checkIntraCloudAuthorizationRequest
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckIntraCloudAuthorizationRequestWithInvalidConsumerId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
@@ -257,6 +273,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckIntraCloudAuthorizationRequestWithInvalidServiceDefinitionId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
@@ -267,6 +284,7 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckIntraCloudAuthorizationRequestWithEmptyProviderIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)

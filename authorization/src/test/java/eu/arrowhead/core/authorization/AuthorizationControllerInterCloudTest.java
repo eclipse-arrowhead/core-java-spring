@@ -115,6 +115,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetInterCloudAuthorizationsWithNullPageButDefinedSizeParameter() throws Exception {
 		this.mockMvc.perform(get(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -124,6 +125,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetInterCloudAuthorizationsWithDefinedPageButNullSizeParameter() throws Exception {
 		this.mockMvc.perform(get(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -133,6 +135,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetInterCloudAuthorizationsWithInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -159,6 +162,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetInterCloudAuthorizationsWithInvalidId() throws Exception {
 		this.mockMvc.perform(get(INTER_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
@@ -169,6 +173,8 @@ public class AuthorizationControllerInterCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Test of removeInterCloudAuthorizationById
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRemoveInterCloudAuthorizationByIdWithExistingId() throws Exception {
 		this.mockMvc.perform(delete(INTER_CLOUD_AUTHORIZATION_MGMT_URI + "/1")
@@ -177,6 +183,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRemoveInterCloudAuthorizationByIdWithInvalidId() throws Exception {
 		this.mockMvc.perform(delete(INTER_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
@@ -187,6 +194,8 @@ public class AuthorizationControllerInterCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Test of registerInterCloudAuthorization
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterInterCloudAuthorizationWithInvalidCloudId() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -197,6 +206,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterInterCloudAuthorizationWithEmptyServiceDefinitionIdList() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_MGMT_URI)
@@ -228,6 +238,8 @@ public class AuthorizationControllerInterCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	// Test of checkInterCloudAuthorizationRequest
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckInterCloudAuthorizationRequestWithInvalidCloudId() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
@@ -238,6 +250,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckInterCloudAuthorizationRequestWithNullCloudId() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
@@ -248,6 +261,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckInterCloudAuthorizationRequestWithInvalidServiceDefinitionId() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
@@ -258,6 +272,7 @@ public class AuthorizationControllerInterCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckInterCloudAuthorizationRequestWithNullServiceDefinitionId() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)

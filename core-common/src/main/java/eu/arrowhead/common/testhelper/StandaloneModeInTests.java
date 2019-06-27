@@ -12,12 +12,12 @@ import org.springframework.core.annotation.Order;
 
 import eu.arrowhead.common.CommonConstants;
 
-public abstract class StandaloneModeInTest {
+public abstract class StandaloneModeInTests {
 	
 	//=================================================================================================
 	// members
 
-	private final Logger logger = LogManager.getLogger(StandaloneModeInTest.class);
+	private final Logger logger = LogManager.getLogger(StandaloneModeInTests.class);
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;

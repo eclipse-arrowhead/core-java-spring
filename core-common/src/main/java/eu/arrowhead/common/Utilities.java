@@ -39,6 +39,7 @@ import javax.naming.ldap.Rdn;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -51,6 +52,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
 
 public class Utilities {
 	
@@ -132,6 +134,25 @@ public class Utilities {
 														
 		final ZoneOffset offset = OffsetDateTime.now().getOffset();
 		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static Direction calculateDirection(final String direction, final String origin) {
+		logger.debug("calculateDirection started ...");
+		final String directionStr = direction != null ? direction.toUpperCase().trim() : "";
+		Direction validatedDirection;
+		switch (directionStr) {
+			case CommonConstants.SORT_ORDER_ASCENDING:
+				validatedDirection = Direction.ASC;
+				break;
+			case CommonConstants.SORT_ORDER_DESCENDING:
+				validatedDirection = Direction.DESC;
+				break;
+			default:
+				throw new BadPayloadException("Invalid sort direction flag", org.apache.http.HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		return validatedDirection;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

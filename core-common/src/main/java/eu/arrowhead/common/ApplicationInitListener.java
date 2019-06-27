@@ -66,7 +66,7 @@ public class ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@EventListener
 	@Order(10)
-	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InterruptedException {
 		logger.debug("Initialization in onApplicationEvent()...");
 		
 		final CoreSystem coreSystem = coreSystemRegistrationProperties.getCoreSystem();
@@ -138,7 +138,7 @@ public class ApplicationInitListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void registerCoreSystemServicesToServiceRegistry(final ApplicationContext appContext) {
+	private void registerCoreSystemServicesToServiceRegistry(final ApplicationContext appContext) throws InterruptedException {
 		logger.debug("registerCoreSystemServicesToServiceRegistry started...");
 		
 		@SuppressWarnings("unchecked")
@@ -167,7 +167,7 @@ public class ApplicationInitListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryConnection(final String scheme) {
+	private void checkServiceRegistryConnection(final String scheme) throws InterruptedException {
 		logger.debug("checkServiceRegistryConnection started...");
 	
 		final UriComponents echoUri = createEchoUri(scheme);
@@ -183,11 +183,7 @@ public class ApplicationInitListener {
 					throw ex;
 				} else {
 					logger.info("Service Registry is unavailable at the moment, retrying in {} seconds...", WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS);
-					try {
-						Thread.sleep(WAITING_PERIOD_BETWEEN_RETRIES_IN_MILISECONDS);
-					} catch (final InterruptedException iex) {
-						logger.trace(iex.getMessage(), iex);
-					}
+					Thread.sleep(WAITING_PERIOD_BETWEEN_RETRIES_IN_MILISECONDS);
 				}
 			}
 		}

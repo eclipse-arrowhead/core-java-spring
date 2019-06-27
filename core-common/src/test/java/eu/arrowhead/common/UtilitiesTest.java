@@ -21,12 +21,14 @@ import java.util.ServiceConfigurationError;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.ExceptionType;
 
 @RunWith(SpringRunner.class)
@@ -40,6 +42,32 @@ public class UtilitiesTest {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testCalculateDirectionDirectionNull() {
+		Utilities.calculateDirection(null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testCalculateDirectionDirectionEmpty() {
+		Utilities.calculateDirection(" ", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCalculateDirectionDirectionAsc() {
+		final Direction direction = Utilities.calculateDirection(" ASC ", null);
+		Assert.assertEquals(Direction.ASC, direction);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCalculateDirectionDirectionDesc() {
+		final Direction direction = Utilities.calculateDirection("desc", null);
+		Assert.assertEquals(Direction.DESC, direction);
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test

@@ -47,8 +47,8 @@ public class CloudResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id;	}
-	public String getOperator() { return operator; }
 	public String getName() { return name; }
+	public String getOperator() { return operator; }
 	public String getAddress() { return address; }
 	public Integer getPort() { return port; }
 	public String getGateKeeperServiceUri() { return gateKeeperServiceUri; }
@@ -59,8 +59,8 @@ public class CloudResponseDTO implements Serializable {
 	public String getUpdatedAt() { return updatedAt; }
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setOperator(final String operator) { this.operator = operator; }
 	public void setName(final String name) { this.name = name; }
+	public void setOperator(final String operator) { this.operator = operator; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final Integer port) { this.port = port; }
 	public void setGateKeeperServiceUri(final String gateKeeperServiceUri) { this.gateKeeperServiceUri = gateKeeperServiceUri; }
