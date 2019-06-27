@@ -64,7 +64,7 @@ public class ServiceEndOfValidityCheckTaskConfig {
     public SimpleTriggerFactoryBean servicesEndOfValidityCheckTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(servicesEndOfValidityCheckTaskDetail().getObject());
-        trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTES);
+        trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
         

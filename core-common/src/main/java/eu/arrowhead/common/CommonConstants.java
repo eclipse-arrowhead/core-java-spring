@@ -148,7 +148,8 @@ public class CommonConstants {
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
 	
-	public static final long CONVERSION_MILLISECOND_TO_MINUTES = 60000;
+	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
+	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
 	
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
