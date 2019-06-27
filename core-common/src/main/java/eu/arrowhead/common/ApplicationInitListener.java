@@ -174,6 +174,8 @@ public class ApplicationInitListener {
 		for (int i = 0; i <= MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES; ++i) {
 			try {
 				httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
+				logger.info("Service Registry is accessible...");
+				break;
 			} catch (final AuthException ex) {
 				throw ex;
 			} catch (final ArrowheadException ex) {
