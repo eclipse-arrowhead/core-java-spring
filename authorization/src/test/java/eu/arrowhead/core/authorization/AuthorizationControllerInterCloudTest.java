@@ -1,6 +1,7 @@
 package eu.arrowhead.core.authorization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -38,6 +39,8 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.InterCloudAuthorization;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.InterCloudAuthorizationCheckRequestDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationRequestDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
@@ -52,6 +55,7 @@ public class AuthorizationControllerInterCloudTest {
 	// members
 	
 	private static final String INTER_CLOUD_AUTHORIZATION_MGMT_URI = "/authorization/mgmt/intercloud";
+	private static final String INTER_CLOUD_AUTHORIZATION_CHECK_URI = "/authorization/intercloud/check";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -221,6 +225,68 @@ public class AuthorizationControllerInterCloudTest {
 		assertEquals(1, responseBody.getCount());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	// Test of checkInterCloudAuthorizationRequest
+	
+	@Test
+	public void testCheckInterCloudAuthorizationRequestWithInvalidCloudId() throws Exception {
+		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(0L, 1L)))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckInterCloudAuthorizationRequestWithNullCloudId() throws Exception {
+		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(null, 1L)))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckInterCloudAuthorizationRequestWithInvalidServiceDefinitionId() throws Exception {
+		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(1L, 0L)))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckInterCloudAuthorizationRequestWithNullServiceDefinitionId() throws Exception {
+		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(1L, null)))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckInterCloudAuthorizationRequestDBCall() throws Exception {
+		final long cloudId = 1L;
+		final long serviceDefinitionId =  3L;
+		when(authorizationDBService.checkInterCloudAuthorizationResponse(anyLong(), anyLong()))
+			.thenReturn(new InterCloudAuthorizationCheckResponseDTO(cloudId, serviceDefinitionId, true));
+		
+		final MvcResult response = this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(cloudId, serviceDefinitionId)))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		final InterCloudAuthorizationCheckResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), InterCloudAuthorizationCheckResponseDTO.class);
+		assertTrue(responseBody.getCloudIdAuthorizationState());
+	}
+	
+
 	//=================================================================================================
 	// assistant methods
 
