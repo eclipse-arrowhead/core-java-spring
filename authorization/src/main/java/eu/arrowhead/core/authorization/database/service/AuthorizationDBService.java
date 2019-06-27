@@ -29,7 +29,6 @@ import eu.arrowhead.common.database.repository.InterCloudAuthorizationRepository
 import eu.arrowhead.common.database.repository.IntraCloudAuthorizationRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.InterCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
