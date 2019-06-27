@@ -239,10 +239,30 @@ public class AuthorizationControllerInterCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testCheckInterCloudAuthorizationRequestWithNullCloudId() throws Exception {
+		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(null, 1L)))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testCheckInterCloudAuthorizationRequestWithInvalidServiceDefinitionId() throws Exception {
 		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(1L, 0L)))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckInterCloudAuthorizationRequestWithNullServiceDefinitionId() throws Exception {
+		this.mockMvc.perform(post(INTER_CLOUD_AUTHORIZATION_CHECK_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(new InterCloudAuthorizationCheckRequestDTO(1L, null)))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
