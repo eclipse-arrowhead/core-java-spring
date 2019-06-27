@@ -1,4 +1,4 @@
-package eu.arrowhead.common;
+package eu.arrowhead.common.testhelper;
 
 import java.util.Map;
 
@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+
+import eu.arrowhead.common.CommonConstants;
 
 public abstract class StandaloneModeInTest {
 	
