@@ -69,6 +69,10 @@ public class Cloud {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<>();
 	
+	@OneToMany (mappedBy = "providerCloud", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<OrchestrationStore> orchestrationStores = new HashSet<>();
+	
 	//=================================================================================================
 	// methods
 
@@ -116,6 +120,7 @@ public class Cloud {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<InterCloudAuthorization> getInterCloudAuthorizations() { return interCloudAuthorizations; }
+	public Set<OrchestrationStore> getOrchestrationStores() { return orchestrationStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -131,6 +136,7 @@ public class Cloud {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) { this.interCloudAuthorizations = interCloudAuthorizations; }
+	public void setOrchestrationStores(Set<OrchestrationStore> orchestrationStores) { this.orchestrationStores = orchestrationStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -26,10 +27,20 @@ import eu.arrowhead.common.Defaults;
 
 @Entity
 @Table (name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
-@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
+@NamedEntityGraphs({
+	@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
+			attributeNodes = {
+					@NamedAttributeNode (value = "serviceRegistryEntries")
+	}),
+	@NamedEntityGraph (name = "systemWithOrchestrationStoresAsConsumer",
 	attributeNodes = {
-		@NamedAttributeNode (value = "serviceRegistryEntries")
-	})
+			@NamedAttributeNode (value = "orchestrationStoresAsConsumer")
+	}),
+	@NamedEntityGraph (name = "systemWithOrchestrationStoresAsProvider",
+	attributeNodes = {
+			@NamedAttributeNode (value = "orchestrationStoresAsProvider")
+	}),
+})
 public class System {
 	
 	//=================================================================================================
@@ -71,6 +82,14 @@ public class System {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<>();
 	
+	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<OrchestrationStore> orchestrationStoresAsConsumer = new HashSet<>();
+	
+	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<OrchestrationStore> orchestrationStoresAsProvider = new HashSet<>();
+	
 	//=================================================================================================
 	// methods
 
@@ -109,6 +128,8 @@ public class System {
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
 	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() { return authorizationsAsConsumer; }
 	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() { return authorizationsAsProvider; }
+	public Set<OrchestrationStore> getOrchestrationStoresAsConsumer() { return orchestrationStoresAsConsumer; }
+	public Set<OrchestrationStore> getOrchestrationStoresAsProvider() { return orchestrationStoresAsProvider; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -121,7 +142,10 @@ public class System {
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
 	public void setAuthorizationsAsConsumer(final Set<IntraCloudAuthorization> authorizationsAsConsumer) { this.authorizationsAsConsumer = authorizationsAsConsumer; }
 	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) { this.authorizationsAsProvider = authorizationsAsProvider; }
-
+	public void setOrchestrationStoresAsConsumer(Set<OrchestrationStore> orchestrationStoresAsConsumer) { this.orchestrationStoresAsConsumer = orchestrationStoresAsConsumer; }
+	public void setOrchestrationStoresAsProvider(Set<OrchestrationStore> orchestrationStoresAsProvider) { this.orchestrationStoresAsProvider = orchestrationStoresAsProvider;
+	
+	}
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
