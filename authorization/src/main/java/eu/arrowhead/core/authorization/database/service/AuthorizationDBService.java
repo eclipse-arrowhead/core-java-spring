@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.InterCloudAuthorization;
 import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
@@ -27,7 +29,10 @@ import eu.arrowhead.common.database.repository.InterCloudAuthorizationRepository
 import eu.arrowhead.common.database.repository.IntraCloudAuthorizationRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationResponseDTO;
@@ -242,6 +247,129 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public InterCloudAuthorizationListResponseDTO getInterCloudAuthorizationEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getInterCloudAuthorizationEntriesResponse started...");
+		final Page<InterCloudAuthorization> interCloudAuthorizationEntries = getInterCloudAuthorizationEntries(page, size, direction, sortField);
+		return DTOConverter.convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(interCloudAuthorizationEntries);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<InterCloudAuthorization> getInterCloudAuthorizationEntries(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getInterCloudAuthorizationEntries started...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		
+		if (!InterCloudAuthorization.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+		}
+		try {
+			return interCloudAuthorizationRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public InterCloudAuthorizationResponseDTO getInterCloudAuthorizationEntryByIdResponse(final long id) {
+		logger.debug("getInterCloudAuthorizationByIdEntryResponse started...");		
+		final InterCloudAuthorization interCloudAuthorizationEntry = getInterCloudAuthorizationEntryById(id);
+		return DTOConverter.convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(interCloudAuthorizationEntry);
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	public InterCloudAuthorization getInterCloudAuthorizationEntryById(final long id) {
+		logger.debug("getInterCloudAuthorizationEntryById started...");
+		
+		try {
+			final Optional<InterCloudAuthorization> find = interCloudAuthorizationRepository.findById(id);
+			if (find.isPresent()) {
+				return find.get();
+			} else {
+				throw new InvalidParameterException("InterCloudAuthorization with id of '" + id + "' not exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public InterCloudAuthorizationListResponseDTO createInterCloudAuthorizationResponse(final long cloudId,
+			final Set<Long> serviceDefinitionIdSet) {
+		logger.debug("createInterCloudAuthorizationResponse started...");
+		
+		try {						
+			
+			final Page<InterCloudAuthorization> savedEntriesPage = createInterCloudAuthorization(cloudId, serviceDefinitionIdSet);
+			
+			return DTOConverter.convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(savedEntriesPage);
+					
+		} catch (final InvalidParameterException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+				
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)	
+	public Page<InterCloudAuthorization> createInterCloudAuthorization(final long cloudId, final Set<Long> serviceDefinitionIdSet) {
+		logger.debug("createInterCloudAuthorization started...");
+		
+		if (cloudId < 1) {
+			throw new InvalidParameterException("Cloud id must be greater than 0.");
+		}
+		
+		if ( serviceDefinitionIdSet == null) {
+			throw new InvalidParameterException("ServiceDefinitionSet is null.");
+		}
+		for (final Long id : serviceDefinitionIdSet) {
+			if ( id < 1) {
+				throw new InvalidParameterException("ServiceDefinition id must be greater than 0.");
+			}
+		}		
+		
+		try {						
+		
+			final Optional<Cloud> cloudOptional = cloudRepository.findById(cloudId);
+			if(cloudOptional.isEmpty()) {
+				throw new InvalidParameterException("No Cloud with id : "+cloudId);
+			}
+			final Cloud cloud = cloudOptional.get();
+			
+			final List<InterCloudAuthorization> entriesToSave = new ArrayList<>(serviceDefinitionIdSet.size());			
+			for (final Long serviceId : serviceDefinitionIdSet) {
+				
+				final InterCloudAuthorization interCloudAuthorization = createNewInterCloudAuthorization(cloud, serviceId);
+				if(interCloudAuthorization != null) {
+					entriesToSave.add(createNewInterCloudAuthorization(cloud, serviceId));
+				}				
+			}
+				
+			return new PageImpl<InterCloudAuthorization>(interCloudAuthorizationRepository.saveAll(entriesToSave));
+			
+		} catch (final InvalidParameterException ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public IntraCloudAuthorizationListResponseDTO createBulkIntraCloudAuthorizationResponse(final long consumerId, final Set<Long> providerIds, final Set<Long> serviceDefinitionIds) {
 		logger.debug("createBulkIntraCloudAuthorization started...");
@@ -287,8 +415,29 @@ public class AuthorizationDBService {
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeInterCloudAuthorizationEntryById(final long id) {
+		logger.debug("removeInterCloudAuthorizationEntryById started...");
+		
+		try {
+			if (!interCloudAuthorizationRepository.existsById(id)) {
+				throw new InvalidParameterException("InterCloudAuthorization with id of '" + id + "' not exists");
+			}
+			interCloudAuthorizationRepository.deleteById(id);
+			interCloudAuthorizationRepository.flush();
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
+	
+	
 	
 	//=================================================================================================
 	// assistant methods
@@ -364,4 +513,51 @@ public class AuthorizationDBService {
 			throw new InvalidParameterException("ServiceDefinition with id of " + serviceId + " not exists");
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkConstraintsOfInterCloudAuthorizationTable(final Cloud cloud, final ServiceDefinition serviceDefinition) {
+		logger.debug("checkConstraintsOfInterCloudAuthorizationTable started...");
+		
+		
+		final Optional<InterCloudAuthorization> optional = interCloudAuthorizationRepository.findByCloudAndServiceDefinition(cloud, serviceDefinition);
+		if (optional.isPresent()) {
+			throw new InvalidParameterException(
+					"InterCloudAuthorization entry with this cloudId: " +  cloud.getId()  + 
+					" and serviceDefinition :" + serviceDefinition.getServiceDefinition() + 
+					" already exists");
+		}
+
+	}
+	//-------------------------------------------------------------------------------------------------
+	private InterCloudAuthorization createNewInterCloudAuthorization(final Cloud cloud, final long serviceDefinitionId) {
+		logger.debug("createInterCloudAuthorizationLis started...");
+		
+		final boolean serviceDefinitionIdIsInvalid = serviceDefinitionId < 1;
+		
+		if (serviceDefinitionIdIsInvalid) {
+			throw new InvalidParameterException("Following id parameters are invalid: serviceDefinitionId - "+serviceDefinitionId);
+		}	
+		
+		
+		final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findById(serviceDefinitionId);
+		if (serviceDefinitionOptional.isEmpty()) {
+			throw new InvalidParameterException("Following id parameters are not present in database: serviceDefinitionId -" + serviceDefinitionId);
+		}else {
+			final ServiceDefinition serviceDefinition = serviceDefinitionOptional.get();
+			
+			try {
+				checkConstraintsOfInterCloudAuthorizationTable(cloud, serviceDefinition);			
+				
+				return  new InterCloudAuthorization(cloud, serviceDefinition);
+				
+			}catch(final InvalidParameterException ex) {
+				logger.debug(ex.getMessage());
+				return null;
+			}
+
+		}
+		
+		
+	}
+
 }

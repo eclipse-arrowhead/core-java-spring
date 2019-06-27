@@ -1,8 +1,10 @@
 package eu.arrowhead.core.authorization;
 
+
 import java.security.PublicKey;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.InterCloudAuthorizationListResponseDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationRequestDTO;
+import eu.arrowhead.common.dto.InterCloudAuthorizationResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckRequestDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationCheckResponseDTO;
 import eu.arrowhead.common.dto.IntraCloudAuthorizationListResponseDTO;
@@ -84,6 +89,15 @@ public class AuthorizationController {
 	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "IntraCloudAuthorization result returned";
 	private static final String POST_INTRA_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not check IntraCloudAuthorization";
 	
+	private static final String INTER_CLOUD_AUTHORIZATION_MGMT_URI = CommonConstants.MGMT_URI + "/intercloud";
+	private static final String INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI = INTER_CLOUD_AUTHORIZATION_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String GET_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "InterCloudAuthorization returned";
+	private static final String GET_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not retrieve InterCloudAuthorization";
+	private static final String DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE = "InterCloudAuthorization removed";
+	private static final String DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not remove InterCloudAuthorization";
+	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE = "InterCloudAuthorizations created";
+	private static final String POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE = "Could not create InterCloudAuthorization";
+	
 	private final Logger logger = LogManager.getLogger(AuthorizationController.class);
 	
 	@Autowired
@@ -136,19 +150,19 @@ public class AuthorizationController {
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		
 		final IntraCloudAuthorizationListResponseDTO intraCloudAuthorizationEntriesResponse = authorizationDBService.getIntraCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("IntraCloudAuthorizations  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return intraCloudAuthorizationEntriesResponse;
 	}
-	
+		
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested IntraCloudAuthorization entry", response = IntraCloudAuthorizationResponseDTO.class)
 	@ApiResponses (value = {
@@ -162,7 +176,7 @@ public class AuthorizationController {
 		logger.debug("New IntraCloudAuthorization get request recieved with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
 		}
 		
 		final IntraCloudAuthorizationResponseDTO intraCloudAuthorizationEntryByIdResponse = authorizationDBService.getIntraCloudAuthorizationEntryByIdResponse(id);
@@ -183,7 +197,7 @@ public class AuthorizationController {
 		logger.debug("New IntraCloudAuthorization delete request recieved with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
 		}
 		
 		authorizationDBService.removeIntraCloudAuthorizationEntryById(id);
@@ -212,11 +226,11 @@ public class AuthorizationController {
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
 			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " serviceDefinitionList is empty," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
-			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		if (request.getProviderIds().size() > 1 && request.getServiceDefinitionIds().size() > 1) {
 			throw new BadPayloadException("providerIds list or serviceDefinitionIds list should contain only one element, but both contain more",
-					HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+					HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
 		final Set<Long> providerIdSet = new HashSet<>();
@@ -243,6 +257,118 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested InterCloudAuthorization entries by the given parameters", response = InterCloudAuthorizationListResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public InterCloudAuthorizationListResponseDTO getInterCloudAuthorizations(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New InterCloudAuthorization get request recieved with page: {} and item_per page: {}", page, size);
+		
+		int validatedPage;
+		int validatedSize;
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		
+		final InterCloudAuthorizationListResponseDTO interCloudAuthorizationEntriesResponse = authorizationDBService.getInterCloudAuthorizationEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		logger.debug("InterCloudAuthorizations  with page: {} and item_per page: {} succesfully retrived", page, size);
+		return interCloudAuthorizationEntriesResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested InterCloudAuthorization entry", response = InterCloudAuthorizationResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public InterCloudAuthorizationResponseDTO getInterCloudAuthorizationById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New InterCloudAuthorization get request recieved with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+		}
+		
+		final InterCloudAuthorizationResponseDTO interCloudAuthorizationEntryByIdResponse = authorizationDBService.getInterCloudAuthorizationEntryByIdResponse(id);
+		logger.debug("InterCloudAuthorization entry with id: {} successfully retrieved", id);
+		return interCloudAuthorizationEntryByIdResponse;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Create the requested InterCloudAuthorization entries")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@ResponseBody public InterCloudAuthorizationListResponseDTO addInterCloudAuthorization(@RequestBody final InterCloudAuthorizationRequestDTO request) {
+		logger.debug("New InterCloudAuthorization registration request recieved");
+		
+		final boolean isCloudIdNotValid = request.getCloudId() == null || request.getCloudId() < 1  ;
+		final boolean isServiceDefinitionNotValid = request.getServiceDefinitionIdList() == null || request.getServiceDefinitionIdList().isEmpty() ;
+		if (isCloudIdNotValid || isServiceDefinitionNotValid) {
+			String exceptionMsg = isCloudIdNotValid ? "Cloud Id is not valid," : "";
+			exceptionMsg = isServiceDefinitionNotValid ? exceptionMsg + " ServiceDefinition is null or blank," :  exceptionMsg ;
+			
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() -1);
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		}
+		
+		final long validatedCloudId = request.getCloudId();
+		final Set<Long> serviceDefinitionIdSet = convertServiceDefinitionIdListToSet(request.getServiceDefinitionIdList(), INTER_CLOUD_AUTHORIZATION_MGMT_URI);
+		
+		final InterCloudAuthorizationListResponseDTO response = authorizationDBService.createInterCloudAuthorizationResponse(
+				validatedCloudId,
+				serviceDefinitionIdSet);
+		logger.debug("registerInterCloudAuthorization has been finished");
+		return response;
+		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove the requested InterCloudAuthorization entry")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI)
+	public void removeInterCloudAuthorizationById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New InterCloudAuthorization delete request recieved with id: {}", id);
+		
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTER_CLOUD_AUTHORIZATION_MGMT_BY_ID_URI);
+		}
+		
+		authorizationDBService.removeInterCloudAuthorizationEntryById(id);
+		logger.debug("InterCloudAuthorization with id: '{}' successfully deleted", id);
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Checks whether the consumer System can use a Service from a list of provider Systems", response = IntraCloudAuthorizationCheckResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INTRA_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
@@ -263,7 +389,7 @@ public class AuthorizationController {
 			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " invalid serviceDefinition id," : exceptionMsg;
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
-			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATIOIN_URI + INTRA_CLOUD_AUTHORIZATION_CHECK_URI);
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_CHECK_URI);
 		}
 		
 		final Set<Long> providerIdSet = new HashSet<>();
@@ -393,6 +519,16 @@ public class AuthorizationController {
 		
 		if (mandatoryAuthInfo && Utilities.isEmpty(system.getAuthenticationInfo())) {
 			throw new BadPayloadException("System authentication info is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Set<Long> convertServiceDefinitionIdListToSet(final List<Long> serviceDefinitionIdList, final String origin) {
+		try {
+			return Set.copyOf(serviceDefinitionIdList);
+		}catch (final NullPointerException ex) {
+			throw new BadPayloadException("ServiceDefinition Id list element is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 	
