@@ -1,15 +1,15 @@
 package eu.arrowhead.core.authorization;
 
 
-import java.util.List;
-import java.util.Set;
 import java.security.PublicKey;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
