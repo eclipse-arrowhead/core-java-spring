@@ -428,7 +428,7 @@ public class AuthorizationController {
 		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
 		if (isCloudIdInvalid || isServiceDefinitionIdInvalid ) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
-			exceptionMsg = isCloudIdInvalid ? exceptionMsg + " 'invalid consumer id' ," : exceptionMsg;
+			exceptionMsg = isCloudIdInvalid ? exceptionMsg + " 'invalid cloud id' ," : exceptionMsg;
 			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'invalid serviceDefinition id' ," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() -1);
 			
