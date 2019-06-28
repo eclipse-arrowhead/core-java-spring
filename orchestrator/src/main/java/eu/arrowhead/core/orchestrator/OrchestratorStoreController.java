@@ -70,8 +70,8 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(ORCHESTRATOR_STORE_MGMT_BY_ID_URI)
-	@ResponseBody public OrchestratorStoreResponseDTO getSystemById(@PathVariable(value = PATH_VARIABLE_ID) final long orchestratorStoreId) {		
-		logger.debug("getSystemById started ...");
+	@ResponseBody public OrchestratorStoreResponseDTO getOrchestratorStoreById(@PathVariable(value = PATH_VARIABLE_ID) final long orchestratorStoreId) {		
+		logger.debug("getOrchestratorStoreById started ...");
 		
 		if (orchestratorStoreId < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, ORCHESTRATOR_STORE_MGMT_BY_ID_URI);
