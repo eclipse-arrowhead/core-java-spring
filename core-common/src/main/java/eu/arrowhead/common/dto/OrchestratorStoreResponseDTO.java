@@ -15,10 +15,10 @@ public class OrchestratorStoreResponseDTO implements Serializable {
 	private static final long serialVersionUID = -6099079027561380554L;
 
 	private long id;
-	private ServiceDefinition serviceDefinition;	
-	private System consumerSystem;	
-	private System providerSystem; 	
-	private Cloud providerCloud;	
+	private ServiceDefinitionResponseDTO serviceDefinition;	
+	private SystemResponseDTO consumerSystem;	
+	private SystemResponseDTO providerSystem; 	
+	private CloudResponseDTO providerCloud;	
 	private Integer priority;	
 	private String attribute;	
 	private ZonedDateTime createdAt;	
@@ -31,8 +31,8 @@ public class OrchestratorStoreResponseDTO implements Serializable {
 	public OrchestratorStoreResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreResponseDTO(long id, ServiceDefinition serviceDefinition, System consumerSystem,
-			System providerSystem, Cloud providerCloud, Integer priority, String attribute, ZonedDateTime createdAt,
+	public OrchestratorStoreResponseDTO(long id, ServiceDefinitionResponseDTO serviceDefinition, SystemResponseDTO consumerSystem,
+			SystemResponseDTO providerSystem, CloudResponseDTO providerCloud, Integer priority, String attribute, ZonedDateTime createdAt,
 			ZonedDateTime updatedAt) {
 		super();
 		this.id = id;
@@ -48,10 +48,10 @@ public class OrchestratorStoreResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
-	public System getConsumerSystem() { return consumerSystem; }
-	public System getProviderSystem() { return providerSystem; }
-	public Cloud getProviderCloud() { return providerCloud; }
+	public ServiceDefinitionResponseDTO getServiceDefinition() { return serviceDefinition; }
+	public SystemResponseDTO getConsumerSystem() { return consumerSystem; }
+	public SystemResponseDTO getProviderSystem() { return providerSystem; }
+	public CloudResponseDTO getProviderCloud() { return providerCloud; }
 	public Integer getPriority() { return priority; }
 	public String getAttribute() { return attribute; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
@@ -59,10 +59,10 @@ public class OrchestratorStoreResponseDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(long id) { this.id = id; }
-	public void setServiceDefinition(ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setConsumerSystem(System consumerSystem) { this.consumerSystem = consumerSystem; }
-	public void setProviderSystem(System providerSystem) { this.providerSystem = providerSystem; }
-	public void setProviderCloud(Cloud providerCloud) { this.providerCloud = providerCloud; }
+	public void setServiceDefinition(ServiceDefinitionResponseDTO serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setConsumerSystem(SystemResponseDTO consumerSystem) { this.consumerSystem = consumerSystem; }
+	public void setProviderSystem(SystemResponseDTO providerSystem) { this.providerSystem = providerSystem; }
+	public void setProviderCloud(CloudResponseDTO providerCloud) { this.providerCloud = providerCloud; }
 	public void setPriority(Integer priority) { this.priority = priority; }
 	public void setAttribute(String attribute) { this.attribute = attribute; }
 	public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }

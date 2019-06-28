@@ -307,10 +307,10 @@ public class DTOConverter {
 	
 		return new OrchestratorStoreResponseDTO(
 			entity.getId(),
-			entity.getServiceDefinition(),
-			entity.getConsumerSystem(),
-			entity.getProviderSystem(),
-			entity.getProviderCloud(),
+			convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
+			convertSystemToSystemResponseDTO(entity.getConsumerSystem()),
+			convertSystemToSystemResponseDTO(entity.getProviderSystem()),
+			convertCloudToCloudResponseDTO(entity.getProviderCloud()),
 			entity.getPriority(),
 			entity.getAttribute(),
 			entity.getCreatedAt(),
