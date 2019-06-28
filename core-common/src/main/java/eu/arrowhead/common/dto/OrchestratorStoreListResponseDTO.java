@@ -25,10 +25,10 @@ public class OrchestratorStoreListResponseDTO implements Serializable {
 	public OrchestratorStoreListResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreListResponseDTO(final List<OrchestratorStoreResponseDTO> systemResponeDTOList, final int totalNumberOfSystems) {
+	public OrchestratorStoreListResponseDTO(final List<OrchestratorStoreResponseDTO> orchestratorStoreResponeDTOList, final long totalNumberOfOrchestratorStores) {
 		super();
-		this.data = systemResponeDTOList;
-		this.count = totalNumberOfSystems;
+		this.data = orchestratorStoreResponeDTOList;
+		this.count = totalNumberOfOrchestratorStores;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

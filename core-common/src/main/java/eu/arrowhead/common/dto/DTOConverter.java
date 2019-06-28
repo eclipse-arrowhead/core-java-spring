@@ -318,6 +318,19 @@ public class DTOConverter {
 			entity.getUpdatedAt());
 		
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
+			Page<OrchestratorStore> entries) {
+		Assert.notNull(entries, "OrchestratorStoreList is null");
+		
+		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final OrchestratorStore entry : entries) {
+			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
+		}
+
+		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.getTotalElements());
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -349,4 +362,5 @@ public class DTOConverter {
 		
 		return result;
 	}
+
 }
