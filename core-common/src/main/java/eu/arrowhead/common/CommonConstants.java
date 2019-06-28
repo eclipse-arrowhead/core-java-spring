@@ -65,8 +65,8 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
-	public static final String ORCHESTRATOR_STORE_MGMT_URI = "orchestrator/mgmt/store";
-	
+	public static final String ORCHESTRATOR_URI = "/orchestrator";
+	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	public static final String AUTHORIZATION_URI = "/authorization";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";

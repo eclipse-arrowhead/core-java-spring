@@ -30,7 +30,7 @@ import io.swagger.annotations.ApiResponses;
 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+@RequestMapping(CommonConstants.ORCHESTRATOR_URI)
 public class OrchestratorStoreController {
 
 	//=================================================================================================
