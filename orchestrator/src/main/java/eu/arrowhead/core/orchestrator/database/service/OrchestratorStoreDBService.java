@@ -81,4 +81,26 @@ public class OrchestratorStoreDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestratorStoreListResponseDTO getAllTopPriorityOrchestratorStoreEntriesResponse(int page, int size,
+			Direction direction, String sortField) {
+		logger.debug("getOrchestratorStoreEntriesResponse started...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		
+		if (!System.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+		}
+		
+		try {
+			return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.findAllByPriority(CommonConstants.TOP_PRIORITY, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 }

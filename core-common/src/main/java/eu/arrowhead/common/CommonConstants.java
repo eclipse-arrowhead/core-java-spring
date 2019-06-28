@@ -142,6 +142,8 @@ public class CommonConstants {
 	
 	public static final String IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $IS_GATEKEEPER_PRESENT_WD = "${" + IS_GATEKEEPER_PRESENT + ":" + Defaults.DEFAULT_IS_GATEKEEPER_PRESENT+ "}";
+	
+	public static final int TOP_PRIORITY = 1;
 
 	//=================================================================================================
 	// assistant methods

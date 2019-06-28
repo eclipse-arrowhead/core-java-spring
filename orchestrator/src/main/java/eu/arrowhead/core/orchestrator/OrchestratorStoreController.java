@@ -40,6 +40,7 @@ public class OrchestratorStoreController {
 	
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String ORCHESTRATOR_STORE_MGMT_BY_ID_URI = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "Systems by requested parameters returned";
@@ -122,6 +123,42 @@ public class OrchestratorStoreController {
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
 		final OrchestratorStoreListResponseDTO intraCloudAuthorizationEntriesResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
+		return intraCloudAuthorizationEntriesResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested OrchestratorStore entries by the given parameters", response = OrchestratorStoreListResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public OrchestratorStoreListResponseDTO getAllTopPriorityOrchestratorStores(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
+		
+		int validatedPage;
+		int validatedSize;
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		
+		final OrchestratorStoreListResponseDTO intraCloudAuthorizationEntriesResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return intraCloudAuthorizationEntriesResponse;
 	}
