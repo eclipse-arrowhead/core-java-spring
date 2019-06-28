@@ -16,7 +16,10 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority"}))
+@Table (uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority"}),
+		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "providerSystemId"})
+		})
 public class OrchestratorStore {
 
 	//=================================================================================================
@@ -42,7 +45,7 @@ public class OrchestratorStore {
 	@JoinColumn (name = "providerCloudId", referencedColumnName = "id", nullable = true)
 	private Cloud providerCloud;
 	
-	@Column (nullable = true)
+	@Column (nullable = false)
 	private Integer priority;
 	
 	@Column (nullable = true, columnDefinition = "TEXT")

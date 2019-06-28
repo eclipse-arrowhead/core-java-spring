@@ -159,16 +159,17 @@ CREATE TABLE `orchestration_store` (
   `provider_cloud_id` bigint(20) DEFAULT NULL,
   `provider_system_id` bigint(20) NOT NULL,
   `service_id` bigint(20) NOT NULL,
-  `priority` int(11) DEFAULT NULL,
+  `priority` int(11) NOT NULL,
   `attribute` text,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique` (`service_id`,`consumer_system_id`,`priority`),
-  CONSTRAINT `provider_orch` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`),
-  CONSTRAINT `cloud_orch` FOREIGN KEY (`provider_cloud_id`) REFERENCES `cloud` (`id`),
-  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`),
-  CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`)
+  UNIQUE KEY `priority_rule` (`service_id`,`consumer_system_id`,`priority`),
+  UNIQUE KEY `duplication_rule` (`service_id`,`consumer_system_id`,`provider_system_id`),
+  CONSTRAINT `provider_orch` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `cloud_orch` FOREIGN KEY (`provider_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #DROP TABLE IF EXISTS `logs`;
