@@ -139,6 +139,9 @@ public class CommonConstants {
 	
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
+	
+	public static final String IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
+	public static final String $IS_GATEKEEPER_PRESENT_WD = "${" + IS_GATEKEEPER_PRESENT + ":" + Defaults.DEFAULT_IS_GATEKEEPER_PRESENT+ "}";
 
 	//=================================================================================================
 	// assistant methods

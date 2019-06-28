@@ -18,5 +18,10 @@
     "name": "log_all_request_and_response",
     "type": "java.lang.Boolean",
     "description": "A description for 'log_all_request_and_response'"
+  },
+  {
+    "name": "gatekeeper_is_present",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'gatekeeper_is_present'"
   }
 ]}

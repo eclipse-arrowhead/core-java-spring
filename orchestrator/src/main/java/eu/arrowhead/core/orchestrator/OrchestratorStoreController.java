@@ -4,6 +4,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,6 +49,9 @@ public class OrchestratorStoreController {
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorStoreController.class);
+	
+	@Value(CommonConstants.$IS_GATEKEEPER_PRESENT_WD)
+	private boolean gateKeeperIsPresent;
 	
 	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
