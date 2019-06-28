@@ -78,7 +78,6 @@ public class AuthorizationControllerTokenTest {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-		//TODO: when AuthAccessControlFilter is implemented we may need appropriate certificates to test these endpoints 
 	}
 	
 	//-------------------------------------------------------------------------------------------------

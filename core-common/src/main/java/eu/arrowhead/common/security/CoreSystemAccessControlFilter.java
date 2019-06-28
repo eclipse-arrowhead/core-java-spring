@@ -10,7 +10,7 @@ public abstract class CoreSystemAccessControlFilter extends AccessControlFilter 
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	protected void checkIfLocalSystemOperator(final String clientCN, final String requestTarget, final String cloudCN) {
+	protected void checkIfLocalSystemOperator(final String clientCN, final String cloudCN, final String requestTarget) {
 		final String sysopCN = CommonConstants.LOCAL_SYSTEM_OPERATOR_NAME + "." + cloudCN;
 		if (!clientCN.equalsIgnoreCase(sysopCN)) {
 			log.debug("Only the local system operator can use {}, access denied!", requestTarget);
