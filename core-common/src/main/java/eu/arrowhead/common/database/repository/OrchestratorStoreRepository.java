@@ -12,5 +12,9 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE priority = ?1 ")
 	public Page<OrchestratorStore> findAllByPriority(final int priority, PageRequest regRequest);
+
+	@Query("SELECT entry FROM OrchestratorStore entry WHERE  consumerSystem.id = ?1 AND serviceDefinition.id = ?2 ")
+	public Page<OrchestratorStore> findAllByConsumerIdAndServiceDefinitionId(long systemId,
+			long serviceDefinitionId, PageRequest of);
 	
 }
