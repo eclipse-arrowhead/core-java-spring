@@ -189,7 +189,7 @@ CREATE TABLE `event` (
   `provider_system_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  UNIQUE KEY `pair` (`type`, `provider_system_id`)
+  UNIQUE KEY `pair` (`type`, `provider_system_id`),
   CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
