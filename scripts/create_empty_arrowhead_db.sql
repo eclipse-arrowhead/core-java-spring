@@ -1,11 +1,11 @@
-CREATE DATABASE  IF NOT EXISTS `arrowhead`;
+DROP DATABASE `arrowhead`;
+CREATE DATABASE IF NOT EXISTS `arrowhead`;
 USE `arrowhead`;
 
 # Dump of table system
 # ------------------------------------------------------------
 
 DROP TABLE IF EXISTS `system_`;
-
 CREATE TABLE `system_` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `system_name` varchar(255) NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE `service_registry_interface_connection` (
   CONSTRAINT `service_registry` FOREIGN KEY (`service_registry_id`) REFERENCES `service_registry` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `cloud`;
+DROP TABLE IF EXISTS `cloud`;
 CREATE TABLE `cloud` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `operator` varchar(255) NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE `cloud` (
   UNIQUE KEY `cloud` (`operator`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `intra_cloud_authorization`;
+DROP TABLE IF EXISTS `intra_cloud_authorization`;
 CREATE TABLE `intra_cloud_authorization` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -125,7 +125,7 @@ CREATE TABLE `intra_cloud_authorization` (
   CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `inter_cloud_authorization`;
+DROP TABLE IF EXISTS `inter_cloud_authorization`;
 CREATE TABLE `inter_cloud_authorization` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -140,7 +140,7 @@ CREATE TABLE `inter_cloud_authorization` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-#DROP TABLE IF EXISTS `relay`;
+DROP TABLE IF EXISTS `relay`;
 CREATE TABLE `relay` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `address` varchar(255) NOT NULL,
@@ -152,7 +152,7 @@ CREATE TABLE `relay` (
   UNIQUE KEY `pair` (`address`, `port`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `orchestration_store`;
+DROP TABLE IF EXISTS `orchestration_store`;
 CREATE TABLE `orchestration_store` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `consumer_system_id` bigint(20) NOT NULL,
@@ -171,7 +171,7 @@ CREATE TABLE `orchestration_store` (
   CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `logs`;
+DROP TABLE IF EXISTS `logs`;
 CREATE TABLE `logs` (
   `log_id` varchar(100) NOT NULL,
   `entry_date` timestamp NULL DEFAULT NULL,
@@ -182,7 +182,7 @@ CREATE TABLE `logs` (
   PRIMARY KEY (`log_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `event`;
+DROP TABLE IF EXISTS `event`;
 CREATE TABLE `event` (
   `id` bigint(20) AUTO_INCREMENT PRIMARY KEY,
   `type` varchar(255) NOT NULL,
@@ -190,24 +190,24 @@ CREATE TABLE `event` (
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
   UNIQUE KEY `pair` (`type`, `provider_system_id`),
-  CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system` (`id`)
+  CONSTRAINT `event_provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `event_subscriber`;
+DROP TABLE IF EXISTS `event_subscriber`;
 CREATE TABLE `event_subscriber` (
   `id` bigint(20) AUTO_INCREMENT PRIMARY KEY,
   `event_id` bigint(20) NOT NULL,
   `consumer_system_id` bigint(20) NOT NULL,
   `notify_uri` varchar(255) DEFAULT NULL,
-  `filter_metadata` text DEFAULT '',
+  `filter_metadata` text,
   `start_date` timestamp DEFAULT NULL,
   `end_date` timestamp DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system` (`id`)
+  CONSTRAINT `event_consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `plan`;
+DROP TABLE IF EXISTS `plan`;
 CREATE TABLE `plan` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -216,34 +216,33 @@ CREATE TABLE `plan` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
-#DROP TABLE IF EXISTS `plan_step`;
+DROP TABLE IF EXISTS `plan_step`;
 CREATE TABLE `plan_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `plan_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  CONSTRAINT `FKaxgcwgyga50fsi9tyupu19xp` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE CASCADE
+  CONSTRAINT `FKaxgcwgyga50fsi9tyupu19xp` FOREIGN KEY (`plan_id`) REFERENCES `plan` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
-#DROP TABLE IF EXISTS `plan_step_service`;
+DROP TABLE IF EXISTS `plan_step_service`;
 CREATE TABLE `plan_step_service` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `plan_step_id` bigint(20) NOT NULL,
   `service_id` bigint(20) NOT NULL,
   KEY `FK62jllkni532a5e757u1x7jjnw` (`service_id`),
-  CONSTRAINT `FK62jllkni532a5e757u1x7jjnw` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FKfvq70kdu6sibc1i3acutbnqp2` FOREIGN KEY (`plan_step_id`) REFERENCES `plan_steps` (`id`) ON DELETE CASCADE
+  CONSTRAINT `FK62jllkni532a5e757u1x7jjnw` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FKfvq70kdu6sibc1i3acutbnqp2` FOREIGN KEY (`plan_step_id`) REFERENCES `plan_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-#DROP TABLE IF EXISTS `next_step`;
+DROP TABLE IF EXISTS `next_step`;
 CREATE TABLE `next_steps` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `plan_step_id` bigint(20) NOT NULL,
   `next_step_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`plan_step_id`,`next_step_id`),
   KEY `FKkc9vycv0onpa957jdey7f7rdm` (`next_step_id`),
-  CONSTRAINT `FK5x0k6luexx1mmtci9iqmangig` FOREIGN KEY (`plan_step_id`) REFERENCES `plan_steps` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FKkc9vycv0onpa957jdey7f7rdm` FOREIGN KEY (`next_step_id`) REFERENCES `plan_steps` (`id`) ON DELETE CASCADE
+  CONSTRAINT `FK5x0k6luexx1mmtci9iqmangig` FOREIGN KEY (`plan_step_id`) REFERENCES `plan_step` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FKkc9vycv0onpa957jdey7f7rdm` FOREIGN KEY (`next_step_id`) REFERENCES `plan_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
