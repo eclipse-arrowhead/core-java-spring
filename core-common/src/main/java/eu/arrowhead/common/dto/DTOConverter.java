@@ -1,6 +1,5 @@
 package eu.arrowhead.common.dto;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -320,7 +319,7 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(
 			Page<OrchestratorStore> entries) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
 		
@@ -330,6 +329,19 @@ public class DTOConverter {
 		}
 
 		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
+			List<OrchestratorStore> entries) {
+		Assert.notNull(entries, "OrchestratorStoreList is null");
+		
+		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.size());
+		for (final OrchestratorStore entry : entries) {
+			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
+		}
+
+		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.size());
 	}
 	
 	//=================================================================================================

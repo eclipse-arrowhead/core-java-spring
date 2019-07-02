@@ -1,5 +1,7 @@
 package eu.arrowhead.core.orchestrator;
 
+import java.util.List;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,9 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -44,20 +49,28 @@ public class OrchestratorStoreController {
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String ORCHESTRATOR_STORE_MGMT_BY_ID_URI = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority";
-	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
-	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
-	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "Systems by requested parameters returned";
-	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE = "No Such System by requested parameters";
+	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE = "OrchestratorStore by requested id returned";
+	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE = "No Such OrchestratorStore by requested id";
+	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters returned";
+	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE = "No Such OrchestratorStore by requested parameters";
+	private static final String POST_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters created";
+	private static final String POST_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE = "Could not create OrchestratorStore by requested parameters";
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	private static final String NULL_PARAMETERS_ERROR_MESSAGE = " is null.";
-	
+	private static final String EMPTY_PARAMETERS_ERROR_MESSAGE = " is empty.";
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorStoreController.class);
 	
 	@Value(CommonConstants.$IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
+	
+	@Value(CommonConstants.$SERVICE_REGISTRY_ADDRESS_WD)
+	private String serviceRegistryAddress;
+	
+	@Value(CommonConstants.$SERVICE_REGISTRY_PORT_WD)
+	private Integer serviceRegistryPort;
 	
 	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
@@ -128,9 +141,9 @@ public class OrchestratorStoreController {
 		}
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
-		final OrchestratorStoreListResponseDTO intraCloudAuthorizationEntriesResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
-		return intraCloudAuthorizationEntriesResponse;
+		return orchestratorStoreListResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -165,9 +178,9 @@ public class OrchestratorStoreController {
 		}
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
-		final OrchestratorStoreListResponseDTO intraCloudAuthorizationEntriesResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
-		return intraCloudAuthorizationEntriesResponse;
+		return orchestratorStoreResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -183,7 +196,7 @@ public class OrchestratorStoreController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
-			@RequestBody final OrchestratorStoreRequestDTO request) {
+			@RequestBody final OrchestratorStoreRequestByIdDTO request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
 		int validatedPage;
@@ -204,7 +217,7 @@ public class OrchestratorStoreController {
 		
 		checkOrchestratorStoreRequestDTOForByConsumerIdAndServiceDefinitionId(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		
-		final OrchestratorStoreListResponseDTO intraCloudAuthorizationEntriesResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(
 				validatedPage, 
 				validatedSize, 
 				validatedDirection, 
@@ -213,14 +226,35 @@ public class OrchestratorStoreController {
 				request.getServiceDefinitionId());
 		
 		logger.debug("OrchestratorStores  with ConsumerSystemId : {} and ServiceDefinitionId : {} and  page: {} and item_per page: {} retrieved successfully", request.getConsumerSystemId(), request.getServiceDefinitionId(), page, size);
-		return intraCloudAuthorizationEntriesResponse;
+		return orchestratorStoreResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Create requested OrchestratorStore entries.", response = OrchestratorStoreListResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public OrchestratorStoreListResponseDTO addOrchestratorStoreEntries( @RequestBody final List<OrchestratorStoreRequestByIdDTO> request) {
+		logger.debug("getOrchestratorStoresByConsumer started ...");
+		
+		checkOrchestratorStoreRequestByIdDTOList(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
+		
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresByIdResponse(
+				request);
+		
+		logger.debug(orchestratorStoreResponse.getCount() + " out of " + request.size() + " OrchestratorStore entries created successfully");
+		return orchestratorStoreResponse;
 	}
 	
 	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
-	private void checkOrchestratorStoreRequestDTOForByConsumerIdAndServiceDefinitionId(final OrchestratorStoreRequestDTO request, final String origin) {
+	private void checkOrchestratorStoreRequestDTOForByConsumerIdAndServiceDefinitionId(final OrchestratorStoreRequestByIdDTO request, final String origin) {
 		logger.debug("checkOrchestratorStoreRequestDTOForByConsumerRequest started ...");
 		
 		
@@ -247,6 +281,35 @@ public class OrchestratorStoreController {
 		
 	}
 
+	//-------------------------------------------------------------------------------------------------	
+	private void checkOrchestratorStoreRequestDTOList(final List<OrchestratorStoreRequestDTO> request, final String origin) {
+		logger.debug("checkOrchestratorStoreRequestDTOList started ...");
+		
+		if (request == null) {
+			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if ( request.isEmpty()) {
+			throw new BadPayloadException("Request "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+		//TODO Additional validations/REST-call chechs, etc.
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private void checkOrchestratorStoreRequestByIdDTOList(final List<OrchestratorStoreRequestByIdDTO> request, final String origin) {
+		logger.debug("checkOrchestratorStoreRequestDTOList started ...");
+		
+		if (request == null) {
+			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if ( request.isEmpty()) {
+			throw new BadPayloadException("Request "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	private Direction calculateDirection(final String direction, final String origin) {
 		logger.debug("calculateDirection started ...");
@@ -265,5 +328,12 @@ public class OrchestratorStoreController {
 		}
 		
 		return validatedDirection;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String getserviceRegistryURL() {
+		
+		return "http://" + serviceRegistryAddress + ":" + serviceRegistryPort + CommonConstants.SERVICE_REGISTRY_URI;
+
 	}
 }

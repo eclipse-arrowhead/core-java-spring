@@ -2,17 +2,17 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
-public class OrchestratorStoreRequestDTO implements Serializable {
+public class OrchestratorStoreRequestDTO implements Serializable{
 
 	//=================================================================================================
 	// members
+
+	private static final long serialVersionUID = 6496923524186210327L;
 	
-	private static final long serialVersionUID = 6339446605691363945L;
-	
-	private Long serviceDefinitionId;
-	private Long consumerSystemId;
-	private Long providerSystemId;
-	private Long cloudId;
+	private ServiceDefinitionRequestDTO serviceDefinitionDTO;
+	private SystemRequestDTO consumerSystemDTO;
+	private SystemRequestDTO providerSystemDTO;
+	private CloudRequestDTO cloudDTO;
 	private Integer priority;	
 	private String attribute;
 	
@@ -21,29 +21,32 @@ public class OrchestratorStoreRequestDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreRequestDTO() {}
-
-	public OrchestratorStoreRequestDTO(final Long serviceDefinitionId, final Long consumerSystemId, final Long providerSystemId, final Long cloudId, final Integer priority, final String attribute) {
-		this.serviceDefinitionId = serviceDefinitionId;
-		this.consumerSystemId = consumerSystemId;
-		this.providerSystemId = providerSystemId;
-		this.cloudId = cloudId;
+	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestratorStoreRequestDTO(final ServiceDefinitionRequestDTO serviceDefinitionDTO, final SystemRequestDTO consumerSystemDTO,
+			final SystemRequestDTO providerSystemDTO, final CloudRequestDTO cloudDTO, final Integer priority, final String attribute) {
+		super();
+		this.serviceDefinitionDTO = serviceDefinitionDTO;
+		this.consumerSystemDTO = consumerSystemDTO;
+		this.providerSystemDTO = providerSystemDTO;
+		this.cloudDTO = cloudDTO;
 		this.priority = priority;
 		this.attribute = attribute;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Long getServiceDefinitionId() {return serviceDefinitionId;}
-	public Long getConsumerSystemId() {return consumerSystemId;}
-	public Long getProviderSystemId() {return providerSystemId;}
-	public Long getCloudId() {return cloudId;}
+	public ServiceDefinitionRequestDTO getServiceDefinition() {return serviceDefinitionDTO;}
+	public SystemRequestDTO getConsumerSystemDTO() {return consumerSystemDTO;}
+	public SystemRequestDTO getProviderSystemDTO() {return providerSystemDTO;}
+	public CloudRequestDTO getCloudDTO() {return cloudDTO;}
 	public Integer getPriority() {return priority;}
 	public String getAttribute() {return attribute;}	
 
 	//-------------------------------------------------------------------------------------------------
-	public void setServiceDefinitionId(final Long serviceDefinitionId) {this.serviceDefinitionId = serviceDefinitionId;}
-	public void setConsumerSystemId(final Long consumerSystemId) {this.consumerSystemId = consumerSystemId;}
-	public void setProviderSystemId(final Long providerSystemId) {this.providerSystemId = providerSystemId;}
-	public void setCloudId(final Long cloudId) {this.cloudId = cloudId;}
+	public void setServiceDefinitionId(final ServiceDefinitionRequestDTO serviceDefinitionDTO) {this.serviceDefinitionDTO = serviceDefinitionDTO;}
+	public void setConsumerSystemId(final SystemRequestDTO consumerSystemDTO) {this.consumerSystemDTO = consumerSystemDTO;}
+	public void setProviderSystemId(final SystemRequestDTO providerSystemDTO) {this.providerSystemDTO = providerSystemDTO;}
+	public void setCloudId(final CloudRequestDTO cloudDTO) {this.cloudDTO = cloudDTO;}
 	public void setPriority(final Integer priority) {this.priority = priority;}
 	public void setAttribute(final String attribute) {this.attribute = attribute;}
 }
