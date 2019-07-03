@@ -1,6 +1,7 @@
 package eu.arrowhead.core.orchestrator;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
@@ -50,6 +52,7 @@ public class OrchestratorStoreController {
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String ORCHESTRATOR_STORE_MGMT_BY_ID_URI = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority";
+	private static final String ORCHESTRATOR_STORE_MGMT_MODIFY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE = "OrchestratorStore by requested id returned";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE = "No Such OrchestratorStore by requested id";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters returned";
@@ -58,6 +61,8 @@ public class OrchestratorStoreController {
 	private static final String POST_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE = "Could not create OrchestratorStore by requested parameters";
 	private static final String DELETE_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "OrchestratorStore removed";
 	private static final String DELETE_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE = "Could not remove OrchestratorStore";
+	private static final String POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters created";
+	private static final String POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_400_MESSAGE = "Could not create OrchestratorStore by requested parameters";
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
@@ -272,6 +277,26 @@ public class OrchestratorStoreController {
 		orchestratorStoreDBService.removeOrchestratorStoreById(id);
 		logger.debug("OrchestratorStore with id: '{}' successfully deleted", id);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Modify prioities of OrchestratorStore entries.")
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = ORCHESTRATOR_STORE_MGMT_MODIFY, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public void modifyPriorities( @RequestBody final OrchestratorStoreModifyPriorityRequestDTO request) {
+		logger.debug("modifyPriorities started ...");
+		
+		checkOrchestratorStoreModifyPriorityRequestDTO(request, ORCHESTRATOR_STORE_MGMT_MODIFY );
+		
+		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(request);
+		
+		logger.debug("Priorities modified successfully");
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -330,7 +355,7 @@ public class OrchestratorStoreController {
 			throw new BadPayloadException("Request "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		for (OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
+		for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
 			if (orchestratorStoreRequestByIdDTO == null) {
 				throw new BadPayloadException("OrchestratorStoreRequestByIdDTO "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
@@ -364,8 +389,33 @@ public class OrchestratorStoreController {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String getserviceRegistryURL() {
+		logger.debug("getserviceRegistryURL started ...");
 		
 		return "http://" + serviceRegistryAddress + ":" + serviceRegistryPort + CommonConstants.SERVICE_REGISTRY_URI;
 
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkOrchestratorStoreModifyPriorityRequestDTO(final OrchestratorStoreModifyPriorityRequestDTO request,
+			final String origin) {
+		
+		if (request == null) {
+			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if ( request.getPriorityMap().isEmpty()) {
+			throw new BadPayloadException("PriorityMap "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final Map<Long, Integer> priorityMap = request.getPriorityMap();
+		
+		for (final Long consumerSystemId : priorityMap.keySet()) {
+			if (consumerSystemId == null) {
+				throw new BadPayloadException("PriorityMap.ConsumerSystemId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			if (priorityMap.get(consumerSystemId) == null) {
+				throw new BadPayloadException("PriorityMap.PriorityValue "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+		}
 	}
 }

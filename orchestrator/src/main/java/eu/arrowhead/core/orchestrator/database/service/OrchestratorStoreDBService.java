@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -29,6 +30,7 @@ import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -40,7 +42,7 @@ public class OrchestratorStoreDBService {
 	//=================================================================================================
 	// members
 	
-	private final Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
+	private final static Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
 	
 	@Autowired
 	private OrchestratorStoreRepository orchestratorStoreRepository;
@@ -189,6 +191,7 @@ public class OrchestratorStoreDBService {
 //	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public OrchestratorStoreListResponseDTO createOrchestratorStoresByIdResponse(
 			final List<OrchestratorStoreRequestByIdDTO> request) {
 		logger.debug("createOrchestratorStoresResponse started...");
@@ -209,6 +212,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeOrchestratorStoreById(final long id) {
 		logger.debug("removeOrchestratorStoreById started...");
 		
@@ -250,7 +254,35 @@ public class OrchestratorStoreDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void modifyOrchestratorStorePriorityResponse(final OrchestratorStoreModifyPriorityRequestDTO request) {
+		logger.debug("modifyOrchestratorStorePriorityResponse started...");
+		
+		try {
+			if (request == null || request.getPriorityMap().isEmpty()) {
+				throw new InvalidParameterException("OrchestratorStoreRequestDTOList " + EMPTY_OR_NULL_ERROR_MESAGE);
+			}
+			
+			final Map<Long, Integer> modifyedPriorityMap = request.getPriorityMap();		
+			final List<OrchestratorStore> orchestratorStoreList = getOrchestratorStoreListByPriorityMap(modifyedPriorityMap);	
+			final List<OrchestratorStore> updatedOrchestratorStoreList = updateOrchestratorStoreListByModifyedPriorityMap(orchestratorStoreList, modifyedPriorityMap);
+			
+			//TODO change it to not modify the OrchestratorStore entity id
+			orchestratorStoreRepository.deleteAll(orchestratorStoreList);
+			orchestratorStoreRepository.flush();
+			
+			saveAllInAscPriorityOrder(updatedOrchestratorStoreList);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+	}
 	//=================================================================================================
 	// assistant methods
 
@@ -281,7 +313,7 @@ public class OrchestratorStoreDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStore validateOrchestratorStoreRequestById(
-			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO, int priorityPositionInRequest) {
+			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO, final int priorityPositionInRequest) {
 		logger.debug("validateOrchestratorStoreRequestById started...");
 		
 		try {
@@ -441,7 +473,7 @@ public class OrchestratorStoreDBService {
 		
 		final Map<Long, Integer> modifyedPriorityMap = new HashMap(priorityMap.size() - 1);
 		
-		for (Long orchestratorStoreId : priorityMap.keySet()) {
+		for (final Long orchestratorStoreId : priorityMap.keySet()) {
 			if (orchestratorStoreId != id) {
 				int orchestratorStorePriority = priorityMap.get(orchestratorStoreId);
 				if (orchestratorStorePriority > priority) {
@@ -462,34 +494,34 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
 		}
 		
-		List<OrchestratorStore> updatedOrchestratorStoreList = new ArrayList(orchestratorStoreList.size());
-		
 		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
 			orchestratorStore.setPriority(priorityMap.get(orchestratorStore.getId()));
-			updatedOrchestratorStoreList.add(orchestratorStore);
 		}
 		
-		return updatedOrchestratorStoreList;
+		return orchestratorStoreList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void saveAllInAscPriorityOrder(List<OrchestratorStore> updatedOrchestratorStoreList) {
+	private void saveAllInAscPriorityOrder(final List<OrchestratorStore> updatedOrchestratorStoreList) {
 		logger.debug("saveAllInAscPriorityOrder started...");
 		
 		Collections.sort(updatedOrchestratorStoreList, getOrchestratorStorePriorityComparator());
 		
-		for (OrchestratorStore orchestratorStore : updatedOrchestratorStoreList) {
+		for (final OrchestratorStore orchestratorStore : updatedOrchestratorStoreList) {
 			
 			orchestratorStoreRepository.saveAndFlush(orchestratorStore);
+			orchestratorStoreRepository.refresh(orchestratorStore);
 
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private static Comparator<OrchestratorStore> getOrchestratorStorePriorityComparator() {
-		Comparator<OrchestratorStore> compareByPriority = new Comparator<OrchestratorStore>() {
+		logger.debug("getOrchestratorStorePriorityComparato started...");
+		
+		final Comparator<OrchestratorStore> compareByPriority = new Comparator<OrchestratorStore>() {
 		    @Override
-		    public int compare(OrchestratorStore o1, OrchestratorStore o2) {
+		    public int compare(final OrchestratorStore o1, final OrchestratorStore o2) {
 		        return o1.getPriority().compareTo(o2.getPriority());
 		    }
 		};
@@ -499,15 +531,55 @@ public class OrchestratorStoreDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static Comparator<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOPriorityComparator() {
-		Comparator<OrchestratorStoreRequestByIdDTO> compareByPriority = new Comparator<OrchestratorStoreRequestByIdDTO>() {
+		logger.debug("getOrchestratorStoreRequestByIdDTOPriorityComparator started...");
+		
+		final Comparator<OrchestratorStoreRequestByIdDTO> compareByPriority = new Comparator<OrchestratorStoreRequestByIdDTO>() {
 		    @Override
-		    public int compare(OrchestratorStoreRequestByIdDTO o1, OrchestratorStoreRequestByIdDTO o2) {
+		    public int compare(final OrchestratorStoreRequestByIdDTO o1, final OrchestratorStoreRequestByIdDTO o2) {
 		    	
 		        return o1.getPriority().compareTo(o2.getPriority());
 		    }
 		};
 		
 		return compareByPriority;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStore> getOrchestratorStoreListByPriorityMap(final Map<Long, Integer> modifyedPriorityMap) {
+		logger.debug("getOrchestratorStoreList started...");
+
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList<OrchestratorStore>(modifyedPriorityMap.size()); 
+		
+		for (final Long orchestratorStoreId : modifyedPriorityMap.keySet()) {		
+			
+			final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findById(orchestratorStoreId);
+			if(orchestratorStoreOptional.isEmpty()) {
+				throw new InvalidParameterException("OrchestratorStore by id: " + orchestratorStoreId + NOT_IN_DB_ERROR_MESAGE );
+			}
+			orchestratorStoreList.add(orchestratorStoreOptional.get());
+		}
+		
+		long anyConsumerIdForValidation = orchestratorStoreList.get(orchestratorStoreList.size() - 1).getConsumerSystem().getId();
+		long anyServiceDefinitionId = orchestratorStoreList.get(0).getServiceDefinition().getId();
+		
+		validateOrchestratorStoreList(anyConsumerIdForValidation, anyServiceDefinitionId, modifyedPriorityMap.size());
+
+		return orchestratorStoreList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateOrchestratorStoreList(long anyConsumerIdForValidation, long anyServiceDefinitionId, int modifyedPriorityMapSize) {
+		
+		Optional<List<OrchestratorStore>> orchestratorStoreListOption = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyConsumerIdForValidation, anyServiceDefinitionId);
+		if (orchestratorStoreListOption.isEmpty()) {
+			throw new InvalidParameterException("Priorities for consumerSystemId : " + anyConsumerIdForValidation + ", and serviceDefinitionId : " + anyServiceDefinitionId + ", " + NOT_IN_DB_ERROR_MESAGE );
+		}
+		List<OrchestratorStore> validOrchestratorStoreList = orchestratorStoreListOption.get();
+		
+		if (validOrchestratorStoreList.size() != modifyedPriorityMapSize) {
+			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
+		}
+		
 	}
 	
 //	//-------------------------------------------------------------------------------------------------	
