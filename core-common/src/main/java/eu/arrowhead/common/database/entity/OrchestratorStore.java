@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,6 +26,8 @@ public class OrchestratorStore {
 	//=================================================================================================
 	// members
 
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "priority"); //NOSONAR
+	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
