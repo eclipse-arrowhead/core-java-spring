@@ -67,6 +67,7 @@ public class OrchestratorStoreDBService {
 	private static final String ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE = "Exception in OrchestratorStoreRequestByIdDTO validation, entry not going to be added to save list." ;
 	private static final String VIOLATES_UNIQUECONSTRAINT = " violates uniqueConstraint rules";
 	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "OrchestratorStore entry List size != PriorityMap size ";
+
 	//=================================================================================================
 	// methods
 
@@ -265,15 +266,15 @@ public class OrchestratorStoreDBService {
 				throw new InvalidParameterException("OrchestratorStoreRequestDTOList " + EMPTY_OR_NULL_ERROR_MESAGE);
 			}
 			
-			final Map<Long, Integer> modifyedPriorityMap = request.getPriorityMap();		
+			final Map<Long, Integer> modifyedPriorityMap = request.getPriorityMap();
+			
 			final List<OrchestratorStore> orchestratorStoreList = getOrchestratorStoreListByPriorityMap(modifyedPriorityMap);	
-			final List<OrchestratorStore> updatedOrchestratorStoreList = updateOrchestratorStoreListByModifyedPriorityMap(orchestratorStoreList, modifyedPriorityMap);
 			
-			//TODO change it to not modify the OrchestratorStore entity id
-			orchestratorStoreRepository.deleteAll(orchestratorStoreList);
-			orchestratorStoreRepository.flush();
+			final long consumerIdForPriorityMapValidation = orchestratorStoreList.get(orchestratorStoreList.size() - 1).getConsumerSystem().getId();
+			final long serviceDefinitionIdForPriorityMapValidation = orchestratorStoreList.get(0).getServiceDefinition().getId();			
+			validateModifyedPriorityMapSize(consumerIdForPriorityMapValidation, serviceDefinitionIdForPriorityMapValidation, modifyedPriorityMap.size());	
 			
-			saveAllInAscPriorityOrder(updatedOrchestratorStoreList);
+			refreshOrchestratorStoreListByModifyedPriorityMap(orchestratorStoreList, modifyedPriorityMap);
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -502,6 +503,34 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	private void refreshOrchestratorStoreListByModifyedPriorityMap(final List<OrchestratorStore> orchestratorStoreList, final Map<Long, Integer> priorityMap ) {
+		logger.debug("updateOrchestratorStoreListByModifyedPriorityMap started...");
+		
+		if (orchestratorStoreList.size() != priorityMap.size()) {
+			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
+		}
+		
+		final List<OrchestratorStore> updatedOrchestratorStore = new ArrayList(orchestratorStoreList.size());
+		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
+			orchestratorStore.setPriority(priorityMap.get(orchestratorStore.getId()) * -1);
+			updatedOrchestratorStore.add(orchestratorStore);
+		}
+		orchestratorStoreRepository.saveAll(updatedOrchestratorStore);
+		orchestratorStoreRepository.flush();
+
+		updatedOrchestratorStore.clear();
+		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
+			orchestratorStore.setPriority(priorityMap.get(orchestratorStore.getId()));
+			updatedOrchestratorStore.add(orchestratorStore);
+		}
+		orchestratorStoreRepository.saveAll(updatedOrchestratorStore);
+		orchestratorStoreRepository.flush();
+		
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private void saveAllInAscPriorityOrder(final List<OrchestratorStore> updatedOrchestratorStoreList) {
 		logger.debug("saveAllInAscPriorityOrder started...");
 		
@@ -558,23 +587,19 @@ public class OrchestratorStoreDBService {
 			}
 			orchestratorStoreList.add(orchestratorStoreOptional.get());
 		}
-		
-		long anyConsumerIdForValidation = orchestratorStoreList.get(orchestratorStoreList.size() - 1).getConsumerSystem().getId();
-		long anyServiceDefinitionId = orchestratorStoreList.get(0).getServiceDefinition().getId();
-		
-		validateOrchestratorStoreList(anyConsumerIdForValidation, anyServiceDefinitionId, modifyedPriorityMap.size());
 
 		return orchestratorStoreList;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validateOrchestratorStoreList(long anyConsumerIdForValidation, long anyServiceDefinitionId, int modifyedPriorityMapSize) {
+	private void validateModifyedPriorityMapSize(final long anyConsumerIdForValidation, final long anyServiceDefinitionId, final int modifyedPriorityMapSize) {
+		logger.debug("validateModifyedPriorityMapSize started...");
 		
-		Optional<List<OrchestratorStore>> orchestratorStoreListOption = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyConsumerIdForValidation, anyServiceDefinitionId);
+		final Optional<List<OrchestratorStore>> orchestratorStoreListOption = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyConsumerIdForValidation, anyServiceDefinitionId);
 		if (orchestratorStoreListOption.isEmpty()) {
 			throw new InvalidParameterException("Priorities for consumerSystemId : " + anyConsumerIdForValidation + ", and serviceDefinitionId : " + anyServiceDefinitionId + ", " + NOT_IN_DB_ERROR_MESAGE );
 		}
-		List<OrchestratorStore> validOrchestratorStoreList = orchestratorStoreListOption.get();
+		final List<OrchestratorStore> validOrchestratorStoreList = orchestratorStoreListOption.get();
 		
 		if (validOrchestratorStoreList.size() != modifyedPriorityMapSize) {
 			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);

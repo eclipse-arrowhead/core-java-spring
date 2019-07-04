@@ -20,7 +20,7 @@ public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 	public OrchestratorStoreModifyPriorityRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreModifyPriorityRequestDTO(Map<Long, Integer> priorityMap) {
+	public OrchestratorStoreModifyPriorityRequestDTO(final Map<Long, Integer> priorityMap) {
 		super();
 		this.priorityMap = priorityMap;
 	}
@@ -29,6 +29,6 @@ public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 	public Map<Long, Integer> getPriorityMap() { return priorityMap; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setPriorityMap(Map<Long, Integer> priorityMap) { this.priorityMap = priorityMap; }
+	public void setPriorityMap(final Map<Long, Integer> priorityMap) { this.priorityMap = priorityMap; }
 
 }

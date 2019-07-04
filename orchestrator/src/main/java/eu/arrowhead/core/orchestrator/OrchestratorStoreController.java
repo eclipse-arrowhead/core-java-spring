@@ -1,7 +1,9 @@
 package eu.arrowhead.core.orchestrator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +34,7 @@ import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -68,6 +71,7 @@ public class OrchestratorStoreController {
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	private static final String NULL_PARAMETERS_ERROR_MESSAGE = " is null.";
 	private static final String EMPTY_PARAMETERS_ERROR_MESSAGE = " is empty.";
+	private static final String MODIFY_PRIORITY_MAP_PRIORITY_DUPLICATION_ERROR_MESSAGE = "PriorityMap has duplicated priority value";
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorStoreController.class);
 	
@@ -417,5 +421,13 @@ public class OrchestratorStoreController {
 				throw new BadPayloadException("PriorityMap.PriorityValue "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
+		
+		final int mapSize = priorityMap.size();
+		final Collection<Integer> valuesSet = priorityMap.values();
+		if (mapSize != valuesSet.size()) {
+			throw new BadPayloadException(MODIFY_PRIORITY_MAP_PRIORITY_DUPLICATION_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+
 	}
+
 }

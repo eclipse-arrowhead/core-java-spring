@@ -239,7 +239,7 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public static CloudResponseDTO convertCloudToCloudResponseDTO(Cloud entity) {
+	public static CloudResponseDTO convertCloudToCloudResponseDTO(final Cloud entity) {
 		
 		Assert.notNull(entity, "Cloud is null" );
 		Assert.notNull(entity.getOperator(), "Cloud.Operator is null" );
@@ -276,7 +276,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static InterCloudAuthorizationResponseDTO convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(InterCloudAuthorization entity) {
+	public static InterCloudAuthorizationResponseDTO convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(final InterCloudAuthorization entity) {
 		
 		Assert.notNull(entity, "InterCloudAuthorization is null" );
 		Assert.notNull(entity.getCloud(), "InterCloudAuthorization.Cloud is null" );
@@ -294,7 +294,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(OrchestratorStore entity) {
+	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity) {
 		
 		Assert.notNull(entity, "OrchestratorStore is null");
 		Assert.notNull(entity.getId(), "OrchestratorStore.id is null");                
@@ -320,7 +320,7 @@ public class DTOConverter {
 
 	//-------------------------------------------------------------------------------------------------
 	public static OrchestratorStoreListResponseDTO convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(
-			Page<OrchestratorStore> entries) {
+			final Page<OrchestratorStore> entries) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
 		
 		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.getNumberOfElements());
@@ -333,7 +333,7 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
-			List<OrchestratorStore> entries) {
+			final List<OrchestratorStore> entries) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
 		
 		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.size());
