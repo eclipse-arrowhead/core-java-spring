@@ -172,24 +172,6 @@ public class OrchestratorStoreDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-
-//	//-------------------------------------------------------------------------------------------------	
-//	public OrchestratorStoreListResponseDTO createOrchestratorStoresResponse(
-//			final List<OrchestratorStoreRequestDTO> request) {
-//		logger.debug("createOrchestratorStoresResponse started...");
-//		
-//		try {
-//			final Set<OrchestratorStore> validatedOrchestratorStoreEtrysToSave = validateOrchestratorStoreRequestList(request);
-//			
-//			return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.saveAll(validatedOrchestratorStoreEtrysToSave));
-//			
-//		} catch (final Exception ex) {
-//			logger.debug(ex.getMessage(), ex);
-//			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-//			
-//		}
-//		
-//	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
@@ -197,10 +179,10 @@ public class OrchestratorStoreDBService {
 			final List<OrchestratorStoreRequestByIdDTO> request) {
 		logger.debug("createOrchestratorStoresResponse started...");
 		
-		try {
-			final Set<OrchestratorStore> validatedOrchestratorStoreEtrysToSave = validateOrchestratorStoreRequestByIdList(request);
+		try {			
+			final List<OrchestratorStore> savedOrchestratorStoreEntries = createOrchestratorStoresById(request);
 			
-			return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.saveAll(validatedOrchestratorStoreEtrysToSave));
+			return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(savedOrchestratorStoreEntries);
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -210,6 +192,42 @@ public class OrchestratorStoreDBService {
 			
 		}
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public List<OrchestratorStore> createOrchestratorStoresById(final List<OrchestratorStoreRequestByIdDTO> request) {
+		logger.debug("createOrchestratorStoresById started...");
+		
+		if (request == null || request.isEmpty()) {
+			throw new InvalidParameterException("OrchestratorStoreRequestDTOList " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		
+		try {
+			
+			final List<OrchestratorStore> savedOrchestratorStoreEntries = new ArrayList<OrchestratorStore>();
+
+			for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
+				
+				try {
+					final OrchestratorStore orchestratorStore = validateOrchestratorStoreRequestById(orchestratorStoreRequestByIdDTO);						
+					savedOrchestratorStoreEntries.add(saveWithPriorityCheck(orchestratorStore));
+				
+				} catch (final Exception e) {
+					logger.debug( ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+			
+			return savedOrchestratorStoreEntries;
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -228,6 +246,7 @@ public class OrchestratorStoreDBService {
 				throw new InvalidParameterException("OrchestratorStore" + NOT_IN_DB_ERROR_MESAGE );
 			}
 			final OrchestratorStore orchestratorStore = orchestratorStoreOption.get();
+			
 			final long consumerSystemId = orchestratorStore.getConsumerSystem().getId();
 			final long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
 			final int priority = orchestratorStore.getPriority();
@@ -242,12 +261,11 @@ public class OrchestratorStoreDBService {
 			}
 			final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreListOption.get();
 			final Map<Long, Integer> originalPriorityMap = getPriorityMap(orchestratorStoreList);
-			final Map<Long, Integer> modifyedPriorityMap = modifyFromPriorityMap(id, priority, originalPriorityMap);
+			final Map<Long, Integer> modifyedPriorityMap = shiftLeftInvolvedPrioritiesInPriorityMap(priority, originalPriorityMap);
 			final List<OrchestratorStore> updatedOrchestratorStoreList = updateOrchestratorStoreListByModifyedPriorityMap(orchestratorStoreList, modifyedPriorityMap);
 			
 			saveAllInAscPriorityOrder(updatedOrchestratorStoreList);
-			
-			
+	
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -268,11 +286,11 @@ public class OrchestratorStoreDBService {
 			
 			final Map<Long, Integer> modifyedPriorityMap = request.getPriorityMap();
 			
-			final List<OrchestratorStore> orchestratorStoreList = getOrchestratorStoreListByPriorityMap(modifyedPriorityMap);	
+			final List<OrchestratorStore> orchestratorStoreList = getInvolvedOrchestratorStoreListByPriorityMap(modifyedPriorityMap);	
 			
-			final long consumerIdForPriorityMapValidation = orchestratorStoreList.get(orchestratorStoreList.size() - 1).getConsumerSystem().getId();
+			final long consumerSystemIdForPriorityMapValidation = orchestratorStoreList.get(orchestratorStoreList.size() - 1).getConsumerSystem().getId();
 			final long serviceDefinitionIdForPriorityMapValidation = orchestratorStoreList.get(0).getServiceDefinition().getId();			
-			validateModifyedPriorityMapSize(consumerIdForPriorityMapValidation, serviceDefinitionIdForPriorityMapValidation, modifyedPriorityMap.size());	
+			validateModifyedPriorityMapSize(consumerSystemIdForPriorityMapValidation, serviceDefinitionIdForPriorityMapValidation, modifyedPriorityMap.size());	
 			
 			refreshOrchestratorStoreListByModifyedPriorityMap(orchestratorStoreList, modifyedPriorityMap);
 			
@@ -288,77 +306,27 @@ public class OrchestratorStoreDBService {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private Set<OrchestratorStore> validateOrchestratorStoreRequestByIdList(
-		final List<OrchestratorStoreRequestByIdDTO> request) {
-		logger.debug("validateOrchestratorStoreRequestByIdList started...");
-		
-		if (request == null || request.isEmpty()) {
-			throw new InvalidParameterException("OrchestratorStoreRequestDTOList " + EMPTY_OR_NULL_ERROR_MESAGE);
-		}
-	
-		Collections.sort(request, getOrchestratorStoreRequestByIdDTOPriorityComparator());
-		
-		final List<OrchestratorStore> temporalOrchestratorList = new ArrayList(request.size());
-		int priorityPositionInRequest = 0;
-		for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
-			
-			final OrchestratorStore validatedOrchestratorStore = validateOrchestratorStoreRequestById(orchestratorStoreRequestByIdDTO, priorityPositionInRequest);
-			if (validatedOrchestratorStore != null) {
-				++priorityPositionInRequest;
-				temporalOrchestratorList.add(validatedOrchestratorStore);
-			}
-		}
-		
-		return Set.copyOf(temporalOrchestratorList);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStore validateOrchestratorStoreRequestById(
-			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO, final int priorityPositionInRequest) {
+			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO) {
 		logger.debug("validateOrchestratorStoreRequestById started...");
 		
-		try {
-			if (orchestratorStoreRequestByIdDTO.getConsumerSystemId() == null) {
-				throw new InvalidParameterException("ConsumerSystem " + NULL_ERROR_MESAGE);
-			}
-			final System validConsumerSystem = validateSystemId(orchestratorStoreRequestByIdDTO.getConsumerSystemId()); 
-			
-			if (orchestratorStoreRequestByIdDTO.getProviderSystemId() == null) {
-				throw new InvalidParameterException("ProviderSystem " + NULL_ERROR_MESAGE);
-			}
-			final System validProviderSystem = validateSystemId(orchestratorStoreRequestByIdDTO.getProviderSystemId());
-			
-			if (orchestratorStoreRequestByIdDTO.getServiceDefinitionId() == null) {
-				throw new InvalidParameterException("ServiceDefinition " + NULL_ERROR_MESAGE);
-			}
-			final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(orchestratorStoreRequestByIdDTO.getServiceDefinitionId());
-			
-			if (orchestratorStoreRequestByIdDTO.getPriority() == null) {
-				throw new InvalidParameterException("Priority " + NULL_ERROR_MESAGE);
-			} 
-			final int validPriority = validatePriority(orchestratorStoreRequestByIdDTO.getPriority(), validConsumerSystem.getId(), validServiceDefinition.getId(), priorityPositionInRequest);
-			
-			checkUniqueConstraintByConsumerSystemIdAndServiceIdAndPriority(validConsumerSystem.getId(), validServiceDefinition.getId(), validPriority);
-			checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem.getId(), validServiceDefinition.getId(), validProviderSystem.getId());
-
-			final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestByIdDTO.getCloudId());
-			
-			return new OrchestratorStore(
-					validServiceDefinition,
-					validConsumerSystem,
-					validProviderSystem,
-					validProviderCloud,
-					validPriority,
-					orchestratorStoreRequestByIdDTO.getAttribute(),
-					null,
-					null);
+		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestByIdDTO.getConsumerSystemId()); 
+		final System validProviderSystem = validateSystemId(orchestratorStoreRequestByIdDTO.getProviderSystemId());		
+		final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(orchestratorStoreRequestByIdDTO.getServiceDefinitionId());	
+		final int validPriority = validatePriority(orchestratorStoreRequestByIdDTO.getPriority());
+		final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestByIdDTO.getCloudId());		
 		
-		} catch (final Exception e) {
-			logger.debug( ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage());
-			e.printStackTrace();
-			return null;
-		}
-		
+		checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem.getId(), validServiceDefinition.getId(), validProviderSystem.getId());
+	
+		return new OrchestratorStore(
+				validServiceDefinition,
+				validConsumerSystem,
+				validProviderSystem,
+				validProviderCloud,
+				validPriority,
+				orchestratorStoreRequestByIdDTO.getAttribute(),
+				null,
+				null);	
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -366,11 +334,11 @@ public class OrchestratorStoreDBService {
 		logger.debug("validateSystemId started...");
 		
 		if (systemId == null) {
-			throw new InvalidParameterException("System " + NULL_ERROR_MESAGE);
+			throw new InvalidParameterException("SystemId " + NULL_ERROR_MESAGE);
 		}
 		
 		if (systemId < 1) {
-			throw new InvalidParameterException("System " + LESS_THEN_ONE_ERROR_MESAGE);
+			throw new InvalidParameterException("SystemId " + LESS_THEN_ONE_ERROR_MESAGE);
 		}
 		
 		final Optional<System> systemOptional = systemRepository.findById(systemId);
@@ -386,7 +354,7 @@ public class OrchestratorStoreDBService {
 		logger.debug("validateServiceDefinitionId started...");
 		
 		if (serviceDefinitionId == null) {
-			throw new InvalidParameterException("ServiceDefinition " + NULL_ERROR_MESAGE);
+			throw new InvalidParameterException("ServiceDefinitionId " + NULL_ERROR_MESAGE);
 		}
 		
 		if (serviceDefinitionId < 1) {
@@ -400,17 +368,6 @@ public class OrchestratorStoreDBService {
 		
 		return serviceDefinitionOptional.get();
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkUniqueConstraintByConsumerSystemIdAndServiceIdAndPriority(final long consumerSystemId, final long serviceDefinitionId, final int priority) {
-		logger.debug("checkUniqueConstraintByConsumerSystemIdAndServiceIdAndPriority started...");
-		
-		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerIdAndServiceDefinitionIdAndPriority( consumerSystemId, serviceDefinitionId, priority);
-		if (orchestratorStoreOptional.isPresent()) {
-			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndPriority " + VIOLATES_UNIQUECONSTRAINT );
-		}
-		
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(final long consumerSystemId, final long serviceDefinitionId, final long providerSystemId) {
@@ -420,7 +377,6 @@ public class OrchestratorStoreDBService {
 		if (orchestratorStoreOptional.isPresent()) {
 			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId " + VIOLATES_UNIQUECONSTRAINT );
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -440,19 +396,18 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private int validatePriority(final Integer priority, final long consumerSystemId, final long serviceDefinitionId, final int priorityPositionInRequest) {
+	private int validatePriority(final Integer priority) {
 		logger.debug("validatePriority started...");
 		
-		if(priority != null && priority < 1) {
-			throw new InvalidParameterException("Priority " + LESS_THEN_ONE_ERROR_MESAGE );
-		}
+		if (priority == null) {
+			throw new InvalidParameterException("Priority " + NULL_ERROR_MESAGE);
+		} 
 		
-		final Optional<List<OrchestratorStore>> orchestratorStoreOptionalList = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId);
-		if (orchestratorStoreOptionalList.isEmpty()) {
-			return CommonConstants.TOP_PRIORITY + priorityPositionInRequest;
-		}else {
-			return orchestratorStoreOptionalList.get().size() + 1 + priorityPositionInRequest;	
+		if( priority < 1) {
+			throw new InvalidParameterException("Priority " + LESS_THEN_ONE_ERROR_MESAGE );
 		}		
+
+		return priority;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -469,19 +424,17 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, Integer> modifyFromPriorityMap(final Long id, final int priority, final Map<Long, Integer> priorityMap) {
+	private Map<Long, Integer> shiftLeftInvolvedPrioritiesInPriorityMap(final int priority, final Map<Long, Integer> priorityMap) {
 		logger.debug("modifyFromPriorityMap started...");
 		
 		final Map<Long, Integer> modifyedPriorityMap = new HashMap(priorityMap.size() - 1);
 		
 		for (final Long orchestratorStoreId : priorityMap.keySet()) {
-			if (orchestratorStoreId != id) {
-				int orchestratorStorePriority = priorityMap.get(orchestratorStoreId);
-				if (orchestratorStorePriority > priority) {
-					orchestratorStorePriority = orchestratorStorePriority - 1;
-				}
-				modifyedPriorityMap.put(orchestratorStoreId, orchestratorStorePriority);
+			int orchestratorStorePriority = priorityMap.get(orchestratorStoreId);
+			if (orchestratorStorePriority > priority) {
+				orchestratorStorePriority = orchestratorStorePriority - 1;
 			}
+			modifyedPriorityMap.put(orchestratorStoreId, orchestratorStorePriority);
 		}
 		
 		return modifyedPriorityMap;
@@ -526,8 +479,6 @@ public class OrchestratorStoreDBService {
 		}
 		orchestratorStoreRepository.saveAll(updatedOrchestratorStore);
 		orchestratorStoreRepository.flush();
-		
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -540,7 +491,6 @@ public class OrchestratorStoreDBService {
 			
 			orchestratorStoreRepository.saveAndFlush(orchestratorStore);
 			orchestratorStoreRepository.refresh(orchestratorStore);
-
 		}
 	}
 	
@@ -559,22 +509,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static Comparator<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOPriorityComparator() {
-		logger.debug("getOrchestratorStoreRequestByIdDTOPriorityComparator started...");
-		
-		final Comparator<OrchestratorStoreRequestByIdDTO> compareByPriority = new Comparator<OrchestratorStoreRequestByIdDTO>() {
-		    @Override
-		    public int compare(final OrchestratorStoreRequestByIdDTO o1, final OrchestratorStoreRequestByIdDTO o2) {
-		    	
-		        return o1.getPriority().compareTo(o2.getPriority());
-		    }
-		};
-		
-		return compareByPriority;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> getOrchestratorStoreListByPriorityMap(final Map<Long, Integer> modifyedPriorityMap) {
+	private List<OrchestratorStore> getInvolvedOrchestratorStoreListByPriorityMap(final Map<Long, Integer> modifyedPriorityMap) {
 		logger.debug("getOrchestratorStoreList started...");
 
 		final List<OrchestratorStore> orchestratorStoreList = new ArrayList<OrchestratorStore>(modifyedPriorityMap.size()); 
@@ -604,127 +539,63 @@ public class OrchestratorStoreDBService {
 		if (validOrchestratorStoreList.size() != modifyedPriorityMapSize) {
 			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
 		}
-		
 	}
 	
-//	//-------------------------------------------------------------------------------------------------	
-//	private Set<OrchestratorStore> validateOrchestratorStoreRequestList(
-//			final List<OrchestratorStoreRequestDTO> request) {
-//		logger.debug("validateOrchestratorStoreRequestList started...");
-//		
-//		if (request == null || request.isEmpty()) {
-//			throw new InvalidParameterException("OrchestratorStoreRequestDTOList " + EMPTY_OR_NULL_ERROR_MESAGE);
-//		}
-//		
-//		final List<OrchestratorStore> temporalOrchestratorList = new ArrayList(request.size());
-//		for (final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO : request) {
-//			
-//			final OrchestratorStore validatedOrchestratorStore = validateOrchestratorStoreRequest(orchestratorStoreRequestDTO);
-//			temporalOrchestratorList.add(validatedOrchestratorStore);
-//		}
-//		
-//		return Set.copyOf(temporalOrchestratorList);
-//	}
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	private OrchestratorStore saveWithPriorityCheck(final OrchestratorStore orchestratorStore) {
+		logger.debug("saveWithPriorityCheck started...");
 
-//	//-------------------------------------------------------------------------------------------------
-//	
-//	private OrchestratorStore validateOrchestratorStoreRequest(
-//			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
-//		logger.debug("validateOrchestratorStoreRequest started ...");
-//		
-//		if (orchestratorStoreRequestDTO.getConsumerSystemDTO == null) {
-//			throw new InvalidParameterException("ConsumerSystem " + NULL_ERROR_MESAGE);
-//		}
-//		System validConsumerSystem = validateSystem(orchestratorStoreRequestDTO.getConsumerSystemDTO()); 
-//		
-//		if (orchestratorStoreRequestDTO.getProviderSystemDTO() == null) {
-//			throw new InvalidParameterException("ProviderSystem " + NULL_ERROR_MESAGE);
-//		}
-//		System validProviderSystem = validateSystem(orchestratorStoreRequestDTO.getProviderSystemDTO());
-//		
-//		if (orchestratorStoreRequestDTO.getServiceDefinition() == null) {
-//			throw new InvalidParameterException("ServiceDefinition " + NULL_ERROR_MESAGE);
-//		}
-//		ServiceDefinition validatedServiceDefinition = validateServiceDefinition(orchestratorStoreRequestDTO.getServiceDefinition());
-//		
-//		if (orchestratorStoreRequestDTO.getPriority() == null) {
-//			throw new InvalidParameterException("Priority " + NULL_ERROR_MESAGE);
-//		} 
-//		int validatedPriority = orchestratorStoreRequestDTO.getPriority();
-//		
-//		
-//		
-//		return null;
-//	}
-//
-//	//-------------------------------------------------------------------------------------------------
-//	private System validateSystem(final SystemRequestDTO systemDTO) {
-//		logger.debug("validateSystem started ...");
-//		
-//		if (Utilities.isEmpty(systemDTO.getSystemName())) {
-//			throw new InvalidParameterException("System name is null or empty");
-//		}
-//		
-//		if (Utilities.isEmpty(systemDTO.getAddress())) {
-//			throw new InvalidParameterException("System address is null or empty");
-//		}
-//		
-//		if () {
-//			
-//		}
-//		if (port. < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-//			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
-//		}
-//		
-//		final String validatedSystemName = systemName.trim().toLowerCase();
-//		final String validatedAddress = address.trim().toLowerCase();
-//		final String validatedAuthenticationInfo = authenticationInfo;
-//		
-//		checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
-//		
-//		return new System(validatedSystemName, validatedAddress, port, validatedAuthenticationInfo);
-//	}
-//	
-//	//-------------------------------------------------------------------------------------------------
-//	private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress, final int validatedPort) {
-//		logger.debug("checkConstraintsOfSystemTable started...");
-//		
-//		try {
-//			final Optional<System> find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
-//			if (find.isPresent()) {
-//				throw new InvalidParameterException("System with name: " + validatedSystemName + ", address: " + validatedAddress +	", port: " + validatedPort + " already exists.");
-//			}
-//		} catch (final InvalidParameterException ex) {
-//			throw ex;
-//		} catch (final Exception ex) {
-//			logger.debug(ex.getMessage(), ex);
-//			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-//		}
-//	}
-//	
-//	//-------------------------------------------------------------------------------------------------
-//	private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo) {
-//		logger.debug("validateNonNullSystemParameters started...");
-//		
-//		if (Utilities.isEmpty(systemName)) {
-//			throw new InvalidParameterException("System name is null or empty");
-//		}
-//		
-//		if (Utilities.isEmpty(address)) {
-//			throw new InvalidParameterException("System address is null or empty");
-//		}
-//		
-//		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-//			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
-//		}
-//		
-//		final String validatedSystemName = systemName.trim().toLowerCase();
-//		final String validatedAddress = address.trim().toLowerCase();
-//		final String validatedAuthenticationInfo = authenticationInfo;
-//		
-//		checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
-//		
-//		return new System(validatedSystemName, validatedAddress, port, validatedAuthenticationInfo);
-//	}
+		final long consumerSystemId = orchestratorStore.getConsumerSystem().getId();
+		final long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
+		final int priority = orchestratorStore.getPriority();
+		
+		final Optional<List<OrchestratorStore>> orchestratorStoreOptionalList = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId);
+		if (orchestratorStoreOptionalList.isEmpty() || orchestratorStoreOptionalList.get().isEmpty()) {
+			orchestratorStore.setPriority(CommonConstants.TOP_PRIORITY);
+			
+			return orchestratorStoreRepository.saveAndFlush(orchestratorStore);
+			
+		}else {
+			final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreOptionalList.get();
+			final Map<Long, Integer> priorityMap = getPriorityMap(orchestratorStoreList);
+			
+			if (priorityMap.containsValue(priority)){
+				orchestratorStore.setPriority(priority);
+				
+				return insertOrchestratorStoreWithPriority(orchestratorStoreList, orchestratorStore, priority);
+				
+			}else {
+				orchestratorStore.setPriority(orchestratorStoreOptionalList.get().size() + 1);
+				
+				return orchestratorStoreRepository.saveAndFlush(orchestratorStore);
+			
+			}
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	private OrchestratorStore insertOrchestratorStoreWithPriority(final List<OrchestratorStore> orchestratorStoreList,
+			final OrchestratorStore orchestratorStoreToInsert, final int priority) {
+		logger.debug("insertOrchestratorStoreWithPriority started...");
+
+		Collections.sort(orchestratorStoreList, getOrchestratorStorePriorityComparator());
+		Collections.reverse(orchestratorStoreList);
+		
+		for (int i = 0; i < orchestratorStoreList.size(); i++) {
+			
+			final OrchestratorStore ochestratorStoreFromList = orchestratorStoreList.get(i);
+			final int priorityFromList = ochestratorStoreFromList.getPriority();
+			
+			if (priority <= priorityFromList) {
+				 ochestratorStoreFromList.setPriority(priorityFromList + 1);
+				 orchestratorStoreRepository.saveAndFlush( ochestratorStoreFromList);
+			} 
+			
+		}
+		
+		return orchestratorStoreRepository.saveAndFlush(orchestratorStoreToInsert);
+	}
 	
 }
