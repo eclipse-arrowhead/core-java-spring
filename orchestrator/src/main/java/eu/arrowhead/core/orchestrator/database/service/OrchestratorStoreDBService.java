@@ -275,7 +275,7 @@ public class OrchestratorStoreDBService {
 			}
 			final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreListOption.get();
 			final Map<Long, Integer> originalPriorityMap = getPriorityMap(orchestratorStoreList);
-			final Map<Long, Integer> modifyedPriorityMap = shiftLeftInvolvedPrioritiesInPriorityMap(priority, originalPriorityMap);
+			final Map<Long, Integer> modifyedPriorityMap = decreaseInvolvedPrioritiesInPriorityMap(priority, originalPriorityMap);
 			final List<OrchestratorStore> updatedOrchestratorStoreList = updateOrchestratorStoreListByModifyedPriorityMap(orchestratorStoreList, modifyedPriorityMap);
 			
 			saveAllInAscPriorityOrder(updatedOrchestratorStoreList);
@@ -443,7 +443,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, Integer> shiftLeftInvolvedPrioritiesInPriorityMap(final int priority, final Map<Long, Integer> priorityMap) {
+	private Map<Long, Integer> decreaseInvolvedPrioritiesInPriorityMap(final int priority, final Map<Long, Integer> priorityMap) {
 		logger.debug("modifyFromPriorityMap started...");
 		
 		final Map<Long, Integer> modifyedPriorityMap = new HashMap(priorityMap.size() - 1);
