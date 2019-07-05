@@ -76,6 +76,11 @@ public class OrchestratorStoreDBService {
 		logger.debug("getOrchestratorStoreById started...");
 		
 		try {
+			
+			if (orchestratorStoreId < 1) {
+				throw new InvalidParameterException("OrchestratorStoreId " + LESS_THEN_ONE_ERROR_MESAGE );
+			}
+		
 			final Optional<OrchestratorStore> orchestratorStoreOption = orchestratorStoreRepository.findById(orchestratorStoreId);
 			if (orchestratorStoreOption.isEmpty()){
 				throw new InvalidParameterException("OrchestratorStore with id " + orchestratorStoreId + " not found.");		
