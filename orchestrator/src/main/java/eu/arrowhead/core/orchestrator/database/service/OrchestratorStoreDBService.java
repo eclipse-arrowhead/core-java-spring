@@ -148,29 +148,31 @@ public class OrchestratorStoreDBService {
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
 		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
-		try {
-			
-			if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-				throw new InvalidParameterException(NOT_AVAILABLE_SHORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
+		
+		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException(NOT_AVAILABLE_SHORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
+		}
+		
+		if ( consumerSystemId < 1) {
+			throw new InvalidParameterException("ConsumerSystemId " + LESS_THEN_ONE_ERROR_MESAGE);
+		}
+		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
+			if ( consumerOption.isEmpty() ) {
+				throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESAGE);
 			}
-			
-			if ( consumerSystemId < 1) {
-				throw new InvalidParameterException("ConsumerSystemId " + LESS_THEN_ONE_ERROR_MESAGE);
-			}
-			final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
-				if ( consumerOption.isEmpty() ) {
-					throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESAGE);
-				}
-					
-			if ( serviceDefinitionId < 1) {
-				throw new InvalidParameterException("ServiceDefinitionId " + LESS_THEN_ONE_ERROR_MESAGE);
-			}
-			final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findById(serviceDefinitionId);
-				if ( serviceDefinitionOption.isEmpty() ) {
-					throw new InvalidParameterException("ServiceDefinitionId " + NOT_IN_DB_ERROR_MESAGE);
-				}
-					
-				return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
+				
+		if ( serviceDefinitionId < 1) {
+			throw new InvalidParameterException("ServiceDefinitionId " + LESS_THEN_ONE_ERROR_MESAGE);
+		}
+		
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findById(serviceDefinitionId);
+		if ( serviceDefinitionOption.isEmpty() ) {
+			throw new InvalidParameterException("ServiceDefinitionId " + NOT_IN_DB_ERROR_MESAGE);
+		}
+		
+		
+		try {		
+			return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
