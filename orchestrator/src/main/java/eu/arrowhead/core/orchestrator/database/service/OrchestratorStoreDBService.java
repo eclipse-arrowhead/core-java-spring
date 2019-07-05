@@ -464,7 +464,7 @@ public class OrchestratorStoreDBService {
 		logger.debug("updateOrchestratorStoreListByModifyedPriorityMap started...");
 		
 		if (orchestratorStoreList.size() != priorityMap.size()) {
-			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG + " - " + MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
 		}
 		
 		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
