@@ -401,6 +401,10 @@ public class OrchestratorStoreDBService {
 		if (cloudId == null) {
 			return null;
 		}
+		
+		if( cloudId < 1) {
+			throw new InvalidParameterException("CloudId " + LESS_THEN_ONE_ERROR_MESAGE );
+		}	
 
 		final Optional<Cloud> cloudOptional = cloudRepository.findById(cloudId);
 		if (cloudOptional.isEmpty()) {
