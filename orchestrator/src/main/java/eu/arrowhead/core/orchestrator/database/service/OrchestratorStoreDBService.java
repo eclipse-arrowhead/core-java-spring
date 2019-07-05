@@ -170,7 +170,6 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ServiceDefinitionId " + NOT_IN_DB_ERROR_MESAGE);
 		}
 		
-		
 		try {		
 			return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
 		} catch (final Exception ex) {
@@ -215,9 +214,8 @@ public class OrchestratorStoreDBService {
 
 			for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
 				
-				try {
-					final OrchestratorStore orchestratorStore = validateOrchestratorStoreRequestById(orchestratorStoreRequestByIdDTO);						
-					savedOrchestratorStoreEntries.add(saveWithPriorityCheck(orchestratorStore));
+				try {					
+					savedOrchestratorStoreEntries.add(createOrchestratorStoreEntityById(orchestratorStoreRequestByIdDTO));
 				
 				} catch (final Exception e) {
 					logger.debug( ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage());
@@ -236,6 +234,16 @@ public class OrchestratorStoreDBService {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public OrchestratorStore createOrchestratorStoreEntityById(final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO) {
+		logger.debug("createOrchestratorStoreEntityById started...");
+		
+			final OrchestratorStore orchestratorStore = validateOrchestratorStoreRequestById(orchestratorStoreRequestByIdDTO);						
+			
+			return saveWithPriorityCheck(orchestratorStore);
+	
+	}
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeOrchestratorStoreById(final long id) {
