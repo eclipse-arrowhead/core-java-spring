@@ -516,21 +516,20 @@ public class OrchestratorStoreDBService {
 	private static Comparator<OrchestratorStore> getOrchestratorStorePriorityComparator() {
 		logger.debug("getOrchestratorStorePriorityComparato started...");
 		
-		final Comparator<OrchestratorStore> compareByPriority = new Comparator<OrchestratorStore>() {
+		return new Comparator<OrchestratorStore>() {
 		    @Override
 		    public int compare(final OrchestratorStore o1, final OrchestratorStore o2) {
 		        return o1.getPriority().compareTo(o2.getPriority());
 		    }
 		};
 		
-		return compareByPriority;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStore> getInvolvedOrchestratorStoreListByPriorityMap(final Map<Long, Integer> modifyedPriorityMap) {
 		logger.debug("getOrchestratorStoreList started...");
 
-		final List<OrchestratorStore> orchestratorStoreList = new ArrayList<OrchestratorStore>(modifyedPriorityMap.size()); 
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(modifyedPriorityMap.size()); 
 		
 		for (final Long orchestratorStoreId : modifyedPriorityMap.keySet()) {		
 			
