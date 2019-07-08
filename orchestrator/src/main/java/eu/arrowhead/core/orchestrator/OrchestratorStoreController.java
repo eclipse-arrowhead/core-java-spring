@@ -132,7 +132,7 @@ public class OrchestratorStoreController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("getgetOrchestratorStores started ...");
+		logger.debug("getOrchestratorStores started ...");
 		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
 		
 		int validatedPage;
