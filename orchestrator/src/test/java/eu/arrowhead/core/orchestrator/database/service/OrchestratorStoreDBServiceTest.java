@@ -8,7 +8,9 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -31,6 +33,7 @@ import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.CloudResponseDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
@@ -68,7 +71,7 @@ public class OrchestratorStoreDBServiceTest {
 	@Test
 	public void getOrchestratorStoreByIdTest() {
 		
-		Optional<OrchestratorStore> orchestratorStoreOptional = Optional.of(getOrchestratorStore());
+		final Optional<OrchestratorStore> orchestratorStoreOptional = Optional.of(getOrchestratorStore());
 		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(orchestratorStoreOptional);
 		
 		orchestratorStoreDBService.getOrchestratorStoreById( 1);		
@@ -78,7 +81,7 @@ public class OrchestratorStoreDBServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void getOrchestratorStoreByIdWithInvalidIdTest() {
 		
-		Optional<OrchestratorStore> orchestratorStoreOptional = Optional.of(getOrchestratorStore());
+		final Optional<OrchestratorStore> orchestratorStoreOptional = Optional.of(getOrchestratorStore());
 		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(orchestratorStoreOptional);
 		
 		orchestratorStoreDBService.getOrchestratorStoreById( -1);		
@@ -494,6 +497,58 @@ public class OrchestratorStoreDBServiceTest {
 		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	// Test modifyOrchestratorStorePriorityResponse
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void modifyOrchestratorStorePriorityResponseOKTest() {
+		
+		final int testMapSize = 3;
+		
+		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(Optional.of(getOrchestratorStore()));
+		when(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(Optional.of(getOrchestratorStoreListForTest(testMapSize)));
+
+		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(getOrchestratorStoreModifyPriorityRequestDTO(testMapSize));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void modifyOrchestratorStorePriorityResponseNullRequestTest() {
+
+		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void modifyOrchestratorStorePriorityResponseEmptyRequestTest() {
+
+		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(getOrchestratorStoreModifyPriorityRequestDTOWithEmptyRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void modifyOrchestratorStorePriorityResponseMapKeyStoreIDNotInDBTest() {
+
+		final int testMapSize = 3;
+		
+		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(getOrchestratorStoreModifyPriorityRequestDTO(testMapSize));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void modifyOrchestratorStorePriorityResponseMapKeyConsumerAndServiceDefinitionCombinationNotInDBTest() {
+
+		final int testMapSize = 3;
+		
+		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(Optional.of(getOrchestratorStore()));
+		when(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(getOrchestratorStoreModifyPriorityRequestDTO(testMapSize));
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -724,9 +779,9 @@ public class OrchestratorStoreDBServiceTest {
 				attribute);
 	}
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForTest(int listSize) {
+	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForTest(final int listSize) {
 		
-		List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
 		
 		for (int i = 0; i < listSize; i++) {
 			
@@ -740,7 +795,7 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOEmptyListForTest() {
 		
-		List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList();
+		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList();
 		
 		return orchestratorStoreRequestByIdDTOList;
 	}
@@ -763,7 +818,7 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStore getOrchestratorStore() {
 		
-		OrchestratorStore orchestratorStore = new OrchestratorStore(
+		final OrchestratorStore orchestratorStore = new OrchestratorStore(
 				getServiceDefinitionForTest(),
 				getConsumerSystemForTest(),
 				getProviderSystemForTest(),
@@ -780,13 +835,14 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> getOrchestratorStoreListForTest(int listSize) {
+	private List<OrchestratorStore> getOrchestratorStoreListForTest(final int listSize) {
 		
-		List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
 		
 		for (int i = 0; i < listSize; i++) {
 			
 			final OrchestratorStore orchestratorStore = getOrchestratorStore();
+			orchestratorStore.setId(i + 1L);
 			orchestratorStore.getProviderSystem().setId(i + 1L);
 			orchestratorStore.setPriority(i + 1);
 			orchestratorStoreList.add(orchestratorStore);
@@ -795,9 +851,9 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> getOrchestratorStoreListForRemoveOrchestratorStoreTest(int listSize) {
+	private List<OrchestratorStore> getOrchestratorStoreListForRemoveOrchestratorStoreTest(final int listSize) {
 		
-		List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
 		
 		for (int i = 1; i < listSize+1; i++) {
 			
@@ -811,9 +867,9 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> getOrchestratorStoreListWithSomeEmptyOrchestratoreStoreForTest(int listSize) {
+	private List<OrchestratorStore> getOrchestratorStoreListWithSomeEmptyOrchestratoreStoreForTest(final int listSize) {
 		
-		List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
 		
 		for (int i = 0; i < listSize; i++) {
 			
@@ -830,9 +886,9 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListWithSomeEmptyOrchestratoreStoreForTest(int listSize) {
+	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListWithSomeEmptyOrchestratoreStoreForTest(final int listSize) {
 		
-		List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
 		
 		for (int i = 0; i < listSize; i++) {
 			
@@ -862,6 +918,28 @@ public class OrchestratorStoreDBServiceTest {
 		return new PageImpl<OrchestratorStore>(orchestratorStoreList);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreModifyPriorityRequestDTO getOrchestratorStoreModifyPriorityRequestDTO(final int size) {
+		final OrchestratorStoreModifyPriorityRequestDTO request = new OrchestratorStoreModifyPriorityRequestDTO();
+		
+		final Map<Long, Integer> priorityMap = new HashMap<Long, Integer>(size); 
+		for (int i = 0; i < size; i++) {
+			priorityMap.put(i + 1L, i + 1);
+		}		
+		request.setPriorityMap(priorityMap);
+		
+		return request;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreModifyPriorityRequestDTO getOrchestratorStoreModifyPriorityRequestDTOWithEmptyRequest() {
+		final OrchestratorStoreModifyPriorityRequestDTO request = new OrchestratorStoreModifyPriorityRequestDTO();
+		
+		final Map<Long, Integer> priorityMap = new HashMap(0); 
+		request.setPriorityMap(priorityMap);
+		
+		return request;
+	}
 	//-------------------------------------------------------------------------------------------------
 	private ZonedDateTime getUpdatedAtForTest() {
 			
@@ -913,7 +991,7 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private Cloud getProviderCloudForTest() {
 			
-		Cloud cloud =  new Cloud(
+		final Cloud cloud =  new Cloud(
 					"operator",
 					"name", 
 					"address", 
@@ -933,7 +1011,7 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private System getSystemForTest() {
 			
-		System system = new System(
+		final System system = new System(
 				"systemName",
 				"address", 
 				1234, 
@@ -961,7 +1039,7 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private ServiceDefinition getServiceDefinitionForTest() {
 			
-		ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
 		serviceDefinition.setId(getIdForTest());
 		serviceDefinition.setCreatedAt(getCreatedAtForTest());
 		serviceDefinition.setUpdatedAt(getUpdatedAtForTest());
