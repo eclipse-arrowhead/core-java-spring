@@ -3,10 +3,6 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.entity.System;
-
 public class OrchestratorStoreResponseDTO implements Serializable {
 	
 	//=================================================================================================
@@ -31,9 +27,9 @@ public class OrchestratorStoreResponseDTO implements Serializable {
 	public OrchestratorStoreResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreResponseDTO(long id, ServiceDefinitionResponseDTO serviceDefinition, SystemResponseDTO consumerSystem,
-			SystemResponseDTO providerSystem, CloudResponseDTO providerCloud, Integer priority, String attribute, ZonedDateTime createdAt,
-			ZonedDateTime updatedAt) {
+	public OrchestratorStoreResponseDTO(final long id, final ServiceDefinitionResponseDTO serviceDefinition, final SystemResponseDTO consumerSystem,
+			final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud, final Integer priority, final String attribute, final ZonedDateTime createdAt,
+			final ZonedDateTime updatedAt) {
 		super();
 		this.id = id;
 		this.serviceDefinition = serviceDefinition;
@@ -58,14 +54,14 @@ public class OrchestratorStoreResponseDTO implements Serializable {
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId(long id) { this.id = id; }
-	public void setServiceDefinition(ServiceDefinitionResponseDTO serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setConsumerSystem(SystemResponseDTO consumerSystem) { this.consumerSystem = consumerSystem; }
-	public void setProviderSystem(SystemResponseDTO providerSystem) { this.providerSystem = providerSystem; }
-	public void setProviderCloud(CloudResponseDTO providerCloud) { this.providerCloud = providerCloud; }
-	public void setPriority(Integer priority) { this.priority = priority; }
-	public void setAttribute(String attribute) { this.attribute = attribute; }
-	public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setId(final long id) { this.id = id; }
+	public void setServiceDefinition(final ServiceDefinitionResponseDTO serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setConsumerSystem(final SystemResponseDTO consumerSystem) { this.consumerSystem = consumerSystem; }
+	public void setProviderSystem(final SystemResponseDTO providerSystem) { this.providerSystem = providerSystem; }
+	public void setProviderCloud(final CloudResponseDTO providerCloud) { this.providerCloud = providerCloud; }
+	public void setPriority(final Integer priority) { this.priority = priority; }
+	public void setAttribute(final String attribute) { this.attribute = attribute; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
 }
