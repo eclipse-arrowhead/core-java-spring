@@ -41,7 +41,7 @@ public class OrchestratorStoreDBService {
 	//=================================================================================================
 	// members
 	
-	private final static Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
+	private static final Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
 	
 	@Autowired
 	private OrchestratorStoreRepository orchestratorStoreRepository;
@@ -210,7 +210,7 @@ public class OrchestratorStoreDBService {
 		
 		try {
 			
-			final List<OrchestratorStore> savedOrchestratorStoreEntries = new ArrayList<OrchestratorStore>();
+			final List<OrchestratorStore> savedOrchestratorStoreEntries = new ArrayList();
 
 			for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
 				
@@ -218,8 +218,7 @@ public class OrchestratorStoreDBService {
 					savedOrchestratorStoreEntries.add(createOrchestratorStoreEntityById(orchestratorStoreRequestByIdDTO));
 				
 				} catch (final Exception e) {
-					logger.debug( ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage());
-					e.printStackTrace();
+					logger.debug( ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage() + e);
 				}
 			}
 			
