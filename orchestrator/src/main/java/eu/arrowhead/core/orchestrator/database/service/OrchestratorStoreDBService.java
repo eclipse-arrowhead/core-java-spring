@@ -243,6 +243,7 @@ public class OrchestratorStoreDBService {
 			return saveWithPriorityCheck(orchestratorStore);
 	
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeOrchestratorStoreById(final long id) {
@@ -474,7 +475,6 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional(rollbackFor = ArrowheadException.class)
 	private void refreshOrchestratorStoreListByModifyedPriorityMap(final List<OrchestratorStore> orchestratorStoreList, final Map<Long, Integer> priorityMap ) {
 		logger.debug("updateOrchestratorStoreListByModifyedPriorityMap started...");
 		
@@ -559,7 +559,6 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	@Transactional(rollbackFor = ArrowheadException.class)
 	private OrchestratorStore saveWithPriorityCheck(final OrchestratorStore orchestratorStore) {
 		logger.debug("saveWithPriorityCheck started...");
 
@@ -592,7 +591,6 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	@Transactional(rollbackFor = ArrowheadException.class)
 	private OrchestratorStore insertOrchestratorStoreWithPriority(final List<OrchestratorStore> orchestratorStoreList,
 			final OrchestratorStore orchestratorStoreToInsert, final int priority) {
 		logger.debug("insertOrchestratorStoreWithPriority started...");
