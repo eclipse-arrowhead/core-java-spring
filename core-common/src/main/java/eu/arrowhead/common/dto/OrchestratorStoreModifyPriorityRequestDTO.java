@@ -11,7 +11,7 @@ public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 	// members
 	
 
-	Map<Long, Integer> priorityMap;
+	private Map<Long, Integer> priorityMap;
 	
 	//=================================================================================================
 	// methods
