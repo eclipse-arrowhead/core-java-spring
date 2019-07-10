@@ -29,7 +29,6 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
@@ -64,7 +63,6 @@ public class OrchestratorStoreController {
 	private static final String POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters modified";
 	private static final String POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_400_MESSAGE = "Could not modify OrchestratorStore by requested parameters";
 	
-	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	private static final String NULL_PARAMETERS_ERROR_MESSAGE = " is null.";
 	private static final String EMPTY_PARAMETERS_ERROR_MESSAGE = " is empty.";
@@ -328,21 +326,6 @@ public class OrchestratorStoreController {
 		}
 		
 	}
-
-	//-------------------------------------------------------------------------------------------------	
-	private void checkOrchestratorStoreRequestDTOList(final List<OrchestratorStoreRequestDTO> request, final String origin) {
-		logger.debug("checkOrchestratorStoreRequestDTOList started ...");
-		
-		if (request == null) {
-			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		if ( request.isEmpty()) {
-			throw new BadPayloadException("Request "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}
-
-		//TODO Additional validations/REST-call chechs, etc.
-	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	private void checkOrchestratorStoreRequestByIdDTOList(final List<OrchestratorStoreRequestByIdDTO> request, final String origin) {
@@ -386,14 +369,6 @@ public class OrchestratorStoreController {
 		}
 		
 		return validatedDirection;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private String getserviceRegistryURL() {
-		logger.debug("getserviceRegistryURL started ...");
-		
-		return "http://" + serviceRegistryAddress + ":" + serviceRegistryPort + CommonConstants.SERVICE_REGISTRY_URI;
-
 	}
 
 	//-------------------------------------------------------------------------------------------------
