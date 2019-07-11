@@ -28,6 +28,8 @@ public class OrchestratorFormRequestDTO implements Serializable {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------	
 	public OrchestratorFormRequestDTO() {
 		for (String key : flagKeys) {
 		  if (!orchestrationFlags.containsKey(key)) {
