@@ -17,6 +17,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.OrchestratorFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorFormResponseDTO;
+import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -62,7 +63,7 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public OrchestratorFormResponseDTO orchestrationProcess( @RequestBody final OrchestratorFormRequestDTO request) {
+	@ResponseBody public ServiceRegistryListResponseDTO orchestrationProcess( @RequestBody final OrchestratorFormRequestDTO request) {
 		logger.debug("orchestrationProcess started ...");
 		
 		//TODO Implement method logic here
