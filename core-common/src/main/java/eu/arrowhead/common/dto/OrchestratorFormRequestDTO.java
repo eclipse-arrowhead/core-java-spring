@@ -24,7 +24,6 @@ public class OrchestratorFormRequestDTO implements Serializable {
 	private List<String> interfaces;
 	private Map<String, Boolean> orchestrationFlags = new HashMap<>();
 	private List<PreferredProviderDataDTO> preferredProviders = new ArrayList<>();
-	private Map<String, String> requestedQoS = new HashMap<>();
 	private Map<String, String> commands = new HashMap<>();
 	
 	//=================================================================================================
@@ -44,7 +43,6 @@ public class OrchestratorFormRequestDTO implements Serializable {
 	public List<String> getInterfaces() { return interfaces; }
 	public Map<String, Boolean> getOrchestrationFlags() { return orchestrationFlags; }
 	public List<PreferredProviderDataDTO> getPreferredProviders() { return preferredProviders; }
-	public Map<String, String> getRequestedQoS() { return requestedQoS; }
 	public Map<String, String> getCommands() { return commands; }
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -54,6 +52,5 @@ public class OrchestratorFormRequestDTO implements Serializable {
 	public void setInterfaces(List<String> interfaces) { this.interfaces = interfaces; }
 	public void setOrchestrationFlags(Map<String, Boolean> orchestrationFlags) { this.orchestrationFlags = orchestrationFlags; }
 	public void setPreferredProviders(List<PreferredProviderDataDTO> preferredProviders) { this.preferredProviders = preferredProviders; }
-	public void setRequestedQoS(Map<String, String> requestedQoS) { this.requestedQoS = requestedQoS; }
 	public void setCommands(Map<String, String> commands) { this.commands = commands; }
 }
