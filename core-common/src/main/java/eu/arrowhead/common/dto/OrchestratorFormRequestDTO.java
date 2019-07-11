@@ -12,8 +12,8 @@ public class OrchestratorFormRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = 4528671997490263120L;
-	
+	private static final long serialVersionUID = -3595427649312358521L;
+
 	private static final List<String> flagKeys = List.of("triggerInterCloud", "externalServiceRequest", "enableInterCloud",
 			"metadataSearch", "pingProviders", "overrideStore", "matchmaking",
 			"onlyPreferred", "enableQoS");
