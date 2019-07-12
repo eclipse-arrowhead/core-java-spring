@@ -53,7 +53,7 @@ public class OrchestratorDBService {
 	public List<OrchestratorStore> queryOrchestrationStore( OrchestratorFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("queryOrchestrationStore started ...");
 		
-		final List<OrchestratorStore> retrievedList; 
+		final List<OrchestratorStore> orchestratorStoreEntyList; 
 		
 		final SystemRequestDTO requestedSystem = orchestratorFormRequestDTO.getRequesterSystem();
 		Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(requestedSystem.getSystemName(), requestedSystem.getAddress(), requestedSystem.getPort());
@@ -74,7 +74,7 @@ public class OrchestratorDBService {
 				 throw new InvalidParameterException("OrchestratorStore " + NOT_IN_DB_ERROR_MESAGE );
 			 }
 			 
-			 retrievedList = entryListPage.getContent();
+			 orchestratorStoreEntyList = entryListPage.getContent();
 		
 		}else {
 			
@@ -83,10 +83,10 @@ public class OrchestratorDBService {
 				throw new InvalidParameterException("OrchestratorStore " + NOT_IN_DB_ERROR_MESAGE );
 			}
 			
-			retrievedList = entryListOptional.get();
+			orchestratorStoreEntyList = entryListOptional.get();
 		}
 
-		return validateRetrievedList(retrievedList);
+		return removeNonValidEntriesFromOrchestratorStoreEntryList(orchestratorStoreEntyList);
 	}
 
 	//=================================================================================================
@@ -94,7 +94,7 @@ public class OrchestratorDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	
-	private List<OrchestratorStore> validateRetrievedList(List<OrchestratorStore> retrievedList) {
+	private List<OrchestratorStore> removeNonValidEntriesFromOrchestratorStoreEntryList(List<OrchestratorStore> retrievedList) {
 		// TODO implement method logic here 
 		return null;
 	}
