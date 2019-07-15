@@ -25,7 +25,6 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreRequestDTO(final ServiceDefinitionRequestDTO serviceDefinitionDTO, final SystemRequestDTO consumerSystemDTO,
 			final SystemRequestDTO providerSystemDTO, final CloudRequestDTO cloudDTO, final Integer priority, final String attribute) {
-		super();
 		this.serviceDefinitionDTO = serviceDefinitionDTO;
 		this.consumerSystemDTO = consumerSystemDTO;
 		this.providerSystemDTO = providerSystemDTO;

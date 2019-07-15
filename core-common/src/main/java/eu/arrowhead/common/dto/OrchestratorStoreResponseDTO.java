@@ -30,7 +30,6 @@ public class OrchestratorStoreResponseDTO implements Serializable {
 	public OrchestratorStoreResponseDTO(final long id, final ServiceDefinitionResponseDTO serviceDefinition, final SystemResponseDTO consumerSystem,
 			final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud, final Integer priority, final String attribute, final ZonedDateTime createdAt,
 			final ZonedDateTime updatedAt) {
-		super();
 		this.id = id;
 		this.serviceDefinition = serviceDefinition;
 		this.consumerSystem = consumerSystem;
