@@ -104,7 +104,7 @@ public class OrchestratorStoreDBService {
 		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-			throw new InvalidParameterException(NOT_AVAILABLE_SHORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
+			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
 		}
 		
 		try {
@@ -126,7 +126,7 @@ public class OrchestratorStoreDBService {
 		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-			throw new InvalidParameterException(NOT_AVAILABLE_SHORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
+			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
 		}
 		
 		try {
@@ -150,7 +150,7 @@ public class OrchestratorStoreDBService {
 		
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-			throw new InvalidParameterException(NOT_AVAILABLE_SHORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
+			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESAGE + validatedSortField);
 		}
 		
 		if ( consumerSystemId < 1) {
@@ -210,7 +210,7 @@ public class OrchestratorStoreDBService {
 		
 		try {
 			
-			final List<OrchestratorStore> savedOrchestratorStoreEntries = new ArrayList();
+			final List<OrchestratorStore> savedOrchestratorStoreEntries = new ArrayList<>();
 
 			for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
 				
