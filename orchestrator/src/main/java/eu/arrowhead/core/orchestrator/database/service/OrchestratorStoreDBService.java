@@ -431,7 +431,7 @@ public class OrchestratorStoreDBService {
 	private Map<Long, Integer> getPriorityMap(final List<OrchestratorStore> orchestratorStoreList) {
 		logger.debug("getPriorityMap started...");
 		
-		final Map<Long, Integer> priorityMap = new HashMap(orchestratorStoreList.size());
+		final Map<Long, Integer> priorityMap = new HashMap<>(orchestratorStoreList.size());
 		
 		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
 			priorityMap.put(orchestratorStore.getId(), orchestratorStore.getPriority());
@@ -480,7 +480,7 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
 		}
 		
-		final List<OrchestratorStore> updatedOrchestratorStore = new ArrayList(orchestratorStoreList.size());
+		final List<OrchestratorStore> updatedOrchestratorStore = new ArrayList<>(orchestratorStoreList.size());
 		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
 			orchestratorStore.setPriority(priorityMap.get(orchestratorStore.getId()) * -1);
 			updatedOrchestratorStore.add(orchestratorStore);
@@ -535,7 +535,7 @@ public class OrchestratorStoreDBService {
 	private List<OrchestratorStore> getInvolvedOrchestratorStoreListByPriorityMap(final Map<Long, Integer> modifiedPriorityMap) {
 		logger.debug("getOrchestratorStoreList started...");
 
-		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(modifiedPriorityMap.size()); 
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList<>(modifiedPriorityMap.size()); 
 		
 		for (final Long orchestratorStoreId : modifiedPriorityMap.keySet()) {		
 			
