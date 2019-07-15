@@ -58,7 +58,7 @@ public class OrchestratorStoreDBService {
 	@Autowired
 	private ServiceDefinitionRepository serviceDefinitionRepository;
 
-	private static final String LESS_THEN_ONE_ERROR_MESAGE= " must be greater then zero.";
+	private static final String LESS_THEN_ONE_ERROR_MESAGE= " must be greater than zero.";
 	private static final String NOT_AVAILABLE_SHORTABLE_FIELD_ERROR_MESAGE = "The following shortable field  is not available : ";
 	private static final String NOT_IN_DB_ERROR_MESAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESAGE = " is empty or null";
