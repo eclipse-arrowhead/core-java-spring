@@ -63,8 +63,8 @@ public class OrchestratorStoreDBService {
 	private static final String NOT_IN_DB_ERROR_MESAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESAGE = " is empty or null";
 	private static final String NULL_ERROR_MESAGE = " is null";
-	private static final String ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE = "Exception in OrchestratorStoreRequestByIdDTO validation, entry not going to be added to save list." ;
-	private static final String VIOLATES_UNIQUECONSTRAINT = " violates uniqueConstraint rules";
+	private static final String ORCHESTRATOR_STORE_REQUEST_BY_ID_DTO_VALIDATION_EXCEPTION_MESSAGE = "Exception in OrchestratorStoreRequestByIdDTO validation, entry not going to be added to save list." ;
+	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "The given PriorityMap has different size than the size of consumer-serviceDeffinition pars in DB";
 
 	//=================================================================================================
@@ -218,7 +218,7 @@ public class OrchestratorStoreDBService {
 					savedOrchestratorStoreEntries.add(createOrchestratorStoreEntityById(orchestratorStoreRequestByIdDTO));
 				
 				} catch (final Exception e) {
-					logger.debug( ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage() + e);
+					logger.debug( ORCHESTRATOR_STORE_REQUEST_BY_ID_DTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage() + e);
 				}
 			}
 			
@@ -390,7 +390,7 @@ public class OrchestratorStoreDBService {
 		
 		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerIdAndServiceDefinitionIdAndProviderId( consumerSystemId, serviceDefinitionId, providerSystemId);
 		if (orchestratorStoreOptional.isPresent()) {
-			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId " + VIOLATES_UNIQUECONSTRAINT );
+			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId " + VIOLATES_UNIQUE_CONSTRAINT );
 		}
 	}
 	
