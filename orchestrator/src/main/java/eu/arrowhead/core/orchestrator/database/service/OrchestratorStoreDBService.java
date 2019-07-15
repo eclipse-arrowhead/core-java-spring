@@ -444,7 +444,7 @@ public class OrchestratorStoreDBService {
 	private Map<Long, Integer> decreaseInvolvedPrioritiesInPriorityMap(final int priority, final Map<Long, Integer> priorityMap) {
 		logger.debug("modifyFromPriorityMap started...");
 		
-		final Map<Long, Integer> modifiedPriorityMap = new HashMap(priorityMap.size() - 1);
+		final Map<Long, Integer> modifiedPriorityMap = new HashMap<>(priorityMap.size() - 1);
 		
 		for (final Long orchestratorStoreId : priorityMap.keySet()) {
 			int orchestratorStorePriority = priorityMap.get(orchestratorStoreId);
