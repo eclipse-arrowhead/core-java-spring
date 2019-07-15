@@ -3,6 +3,7 @@ package eu.arrowhead.core.orchestrator;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -407,12 +408,14 @@ public class OrchestratorStoreController {
 		
 		final Map<Long, Integer> priorityMap = request.getPriorityMap();
 		
-		for (final Long consumerSystemId : priorityMap.keySet()) {
-			if (consumerSystemId == null) {
-				throw new BadPayloadException("PriorityMap.ConsumerSystemId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-			}
-			if (priorityMap.get(consumerSystemId) == null) {
+		for (final Entry<Long, Integer> entry : priorityMap.entrySet()) {
+
+			if (entry.getValue() == null) {
 				throw new BadPayloadException("PriorityMap.PriorityValue "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (entry.getValue() < 1) {
+				throw new BadPayloadException("PriorityMap.PriorityValue "+  ID_NOT_VALID_ERROR_MESSAGE,HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
 		
