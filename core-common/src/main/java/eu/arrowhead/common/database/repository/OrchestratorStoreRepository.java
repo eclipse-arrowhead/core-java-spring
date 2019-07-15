@@ -21,7 +21,7 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 			final long serviceDefinitionId, final PageRequest of);
 	
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE  consumerSystem.id = ?1 AND serviceDefinition.id = ?2 ")
-	public Optional<List<OrchestratorStore>> findAllByConsumerIdAndServiceDefinitionId(final long systemId,
+	public List<OrchestratorStore> findAllByConsumerIdAndServiceDefinitionId(final long systemId,
 			final long serviceDefinitionId);
 	
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE  consumerSystem.id = ?1 AND serviceDefinition.id = ?2 AND priority = ?3 ")
