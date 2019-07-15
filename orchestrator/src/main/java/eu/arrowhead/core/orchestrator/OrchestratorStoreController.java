@@ -282,7 +282,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Modify prioities of OrchestratorStore entries.")
+	@ApiOperation(value = "Modify priorities of OrchestratorStore entries.")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_400_MESSAGE),
@@ -315,18 +315,18 @@ public class OrchestratorStoreController {
 		
 		if (request.getConsumerSystemId() == null) {
 			throw new BadPayloadException(""+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}else {
-			if (request.getConsumerSystemId() < 1) {
-				throw new BadPayloadException("ConsumerSystemId : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-			}
+		}
+		
+		if (request.getConsumerSystemId() < 1) {
+			throw new BadPayloadException("ConsumerSystemId : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (request.getServiceDefinitionId() == null) {
 			throw new BadPayloadException("ServiceDefinitionId " + NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}else {
-			if (request.getConsumerSystemId() < 1) {
-				throw new BadPayloadException("ServiceDefinitionId : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-			}
+		}
+		
+		if (request.getConsumerSystemId() < 1) {
+			throw new BadPayloadException("ServiceDefinitionId : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 	}
