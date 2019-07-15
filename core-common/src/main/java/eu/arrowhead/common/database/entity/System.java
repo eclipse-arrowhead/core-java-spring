@@ -31,15 +31,7 @@ import eu.arrowhead.common.Defaults;
 	@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
 			attributeNodes = {
 					@NamedAttributeNode (value = "serviceRegistryEntries")
-	}),
-	@NamedEntityGraph (name = "systemWithOrchestratorStoresAsConsumer",
-	attributeNodes = {
-			@NamedAttributeNode (value = "orchestratorStoresAsConsumer")
-	}),
-	@NamedEntityGraph (name = "systemWithOrchestratorStoresAsProvider",
-	attributeNodes = {
-			@NamedAttributeNode (value = "orchestratorStoresAsProvider")
-	}),
+	})
 })
 public class System {
 	
@@ -82,14 +74,6 @@ public class System {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<>();
 	
-	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<OrchestratorStore> orchestratorStoresAsConsumer = new HashSet<>();
-	
-	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<OrchestratorStore> orchestratorStoresAsProvider = new HashSet<>();
-	
 	//=================================================================================================
 	// methods
 
@@ -128,8 +112,6 @@ public class System {
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
 	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() { return authorizationsAsConsumer; }
 	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() { return authorizationsAsProvider; }
-	public Set<OrchestratorStore> getOrchestratorStoresAsConsumer() { return orchestratorStoresAsConsumer; }
-	public Set<OrchestratorStore> getOrchestratorStoresAsProvider() { return orchestratorStoresAsProvider; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -141,11 +123,8 @@ public class System {
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
 	public void setAuthorizationsAsConsumer(final Set<IntraCloudAuthorization> authorizationsAsConsumer) { this.authorizationsAsConsumer = authorizationsAsConsumer; }
-	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) { this.authorizationsAsProvider = authorizationsAsProvider; }
-	public void setOrchestratorStoresAsConsumer(Set<OrchestratorStore> orchestratorStoresAsConsumer) { this.orchestratorStoresAsConsumer = orchestratorStoresAsConsumer; }
-	public void setOrchestratorStoresAsProvider(Set<OrchestratorStore> orchestratorStoresAsProvider) { this.orchestratorStoresAsProvider = orchestratorStoresAsProvider;
+	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) { this.authorizationsAsProvider = authorizationsAsProvider; }	
 	
-	}
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {

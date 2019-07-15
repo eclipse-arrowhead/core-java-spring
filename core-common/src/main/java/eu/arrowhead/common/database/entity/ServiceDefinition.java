@@ -59,11 +59,6 @@ public class ServiceDefinition {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<>();
 	
-	
-	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<OrchestratorStore> orchestratorStores = new HashSet<>();
-	
 	//=================================================================================================
 	// methods
 
@@ -96,7 +91,6 @@ public class ServiceDefinition {
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
 	public Set<IntraCloudAuthorization> getIntraCloudAuthorizations() { return intraCloudAuthorizations; }
 	public Set<InterCloudAuthorization> getInterCloudAuthorizations() { return interCloudAuthorizations; }
-	public Set<OrchestratorStore> getOrchestratorStores() { return orchestratorStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -106,8 +100,6 @@ public class ServiceDefinition {
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
 	public void setIntraCloudAuthorizations(final Set<IntraCloudAuthorization> intraCloudAuthorizations) { this.intraCloudAuthorizations = intraCloudAuthorizations; }
 	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) { this.interCloudAuthorizations = interCloudAuthorizations; }
-	public void setOrchestratorStores(Set<OrchestratorStore> orchestratorStores) { this.orchestratorStores = orchestratorStores; }
-
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
