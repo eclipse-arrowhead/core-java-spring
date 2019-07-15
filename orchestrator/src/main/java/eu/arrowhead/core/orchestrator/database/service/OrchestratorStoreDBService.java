@@ -65,7 +65,7 @@ public class OrchestratorStoreDBService {
 	private static final String NULL_ERROR_MESAGE = " is null";
 	private static final String ORCHESTRATORSTORE_REQUESTBYIDDTO_VALIDATION_EXCEPTION_MESSAGE = "Exception in OrchestratorStoreRequestByIdDTO validation, entry not going to be added to save list." ;
 	private static final String VIOLATES_UNIQUECONSTRAINT = " violates uniqueConstraint rules";
-	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "OrchestratorStore entry List size != PriorityMap size ";
+	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "The given PriorityMap has different size than the size of consumer-serviceDeffinition pars in DB";
 
 	//=================================================================================================
 	// methods
