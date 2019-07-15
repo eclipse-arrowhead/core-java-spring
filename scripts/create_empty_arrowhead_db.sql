@@ -269,6 +269,20 @@ CREATE TABLE `orchestrator_store` (
   CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `orchestrator_service_definition` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `orchestrator_interface_connection`;
+CREATE TABLE `orchestrator_interface_connection` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `store_id` bigint(20) NOT NULL,
+  `interface_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pair` (`store_id`,`interface_id`),
+  KEY `interface_sr` (`interface_id`),
+  CONSTRAINT `interface_store` FOREIGN KEY (`interface_id`) REFERENCES `orchestrator_service_interface` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `orch_store_interface` FOREIGN KEY (`store_id`) REFERENCES `orchestrator_store` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Logs
 
 DROP TABLE IF EXISTS `logs`;
@@ -384,25 +398,31 @@ GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_interface_connectio
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_service_definition` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_service_interface` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_system` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'service_registry'@'localhost';
 
--- Authorization
+-- Authorizazion
 DROP USER IF EXISTS 'authorization'@'localhost';
 CREATE USER 'authorization'@'localhost' IDENTIFIED BY 'arrowhead';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_cloud` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_inter_cloud` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_inter_cloud_interface_connection` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_intra_cloud` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_service_definition` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_service_interface` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_system` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'authorization'@'localhost';
 
 -- Orchestrator
 DROP USER IF EXISTS 'orchestrator'@'localhost';
 CREATE USER 'orchestrator'@'localhost' IDENTIFIED BY 'arrowhead';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_cloud` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_interface_connection` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_service_definition` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_service_interface` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_store` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_system` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'orchestrator'@'localhost';
 
 -- Event Handler
 DROP USER IF EXISTS 'event_handler'@'localhost';
@@ -410,6 +430,7 @@ CREATE USER 'event_handler'@'localhost' IDENTIFIED BY 'arrowhead';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`event_handler_event` TO 'event_handler'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`event_handler_event_subscriber` TO 'event_handler'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`event_handler_system` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'event_handler'@'localhost';
 
 -- Choreographer
 DROP USER IF EXISTS 'choreographer'@'localhost';
@@ -419,9 +440,11 @@ GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_plan` TO 'choreographe
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_plan_step` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_plan_step_service` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_service_definition` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'choreographer'@'localhost';
 
 -- Gatekeeper
 DROP USER IF EXISTS 'gatekeeper'@'localhost';
 CREATE USER 'gatekeeper'@'localhost' IDENTIFIED BY 'arrowhead';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`relay` TO 'gatekeeper'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'gatekeeper'@'localhost';
 FLUSH PRIVILEGES;
