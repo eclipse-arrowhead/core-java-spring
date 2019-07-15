@@ -51,7 +51,7 @@ public class OrchestratorStoreController {
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String ORCHESTRATOR_STORE_MGMT_BY_ID_URI = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority";
-	private static final String ORCHESTRATOR_STORE_MGMT_MODIFY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify";
+	private static final String ORCHESTRATOR_STORE_MGMT_MODIFY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE = "OrchestratorStore by requested id returned";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE = "No Such OrchestratorStore by requested id";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters returned";
