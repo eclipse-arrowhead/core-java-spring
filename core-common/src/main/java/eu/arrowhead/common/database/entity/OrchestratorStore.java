@@ -49,7 +49,7 @@ public class OrchestratorStore {
 	private Cloud providerCloud;
 	
 	@Column (nullable = false)
-	private Integer priority;
+	private int priority;
 	
 	@Column (nullable = true, columnDefinition = "TEXT")
 	private String attribute;
@@ -99,7 +99,7 @@ public class OrchestratorStore {
 	public System getConsumerSystem() {	return consumerSystem; }
 	public System getProviderSystem() {	return providerSystem; }
 	public Cloud getProviderCloud() { return providerCloud; }
-	public Integer getPriority() { return priority; }
+	public int getPriority() { return priority; }
 	public String getAttribute() { return attribute; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
@@ -110,7 +110,7 @@ public class OrchestratorStore {
 	public void setConsumerSystem(final System consumerSystem) { this.consumerSystem = consumerSystem; }
 	public void setProviderSystem(final System providerSystem) { this.providerSystem = providerSystem; }
 	public void setProviderCloud(final Cloud providerCloud) { this.providerCloud = providerCloud; }
-	public void setPriority(final Integer priority) { this.priority = priority; }
+	public void setPriority(final int priority) { this.priority = priority; }
 	public void setAttribute(final String attribute) { this.attribute = attribute; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
