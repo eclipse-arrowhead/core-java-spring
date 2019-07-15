@@ -136,7 +136,7 @@ public class Cloud {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) { this.interCloudAuthorizations = interCloudAuthorizations; }
-	public void setorchestratorStores(Set<OrchestratorStore> orchestratorStores) { this.orchestratorStores = orchestratorStores; }
+	public void setorchestratorStores(final Set<OrchestratorStore> orchestratorStores) { this.orchestratorStores = orchestratorStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

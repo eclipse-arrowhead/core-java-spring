@@ -67,8 +67,8 @@ public class OrchestratorStore {
 	public OrchestratorStore() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStore(ServiceDefinition serviceDefinition, System consumerSystem, System providerSystem,
-			Cloud providerCloud, Integer priority, String attribute, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
+	public OrchestratorStore(final ServiceDefinition serviceDefinition, final System consumerSystem, final System providerSystem,
+			final Cloud providerCloud, final Integer priority, final String attribute, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
 		super();
 		this.serviceDefinition = serviceDefinition;
 		this.consumerSystem = consumerSystem;
@@ -105,15 +105,15 @@ public class OrchestratorStore {
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId(long id) { this.id = id; }
-	public void setServiceDefinition(ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setConsumerSystem(System consumerSystem) { this.consumerSystem = consumerSystem; }
-	public void setProviderSystem(System providerSystem) { this.providerSystem = providerSystem; }
-	public void setProviderCloud(Cloud providerCloud) { this.providerCloud = providerCloud; }
-	public void setPriority(Integer priority) { this.priority = priority; }
-	public void setAttribute(String attribute) { this.attribute = attribute; }
-	public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setId(final long id) { this.id = id; }
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setConsumerSystem(final System consumerSystem) { this.consumerSystem = consumerSystem; }
+	public void setProviderSystem(final System providerSystem) { this.providerSystem = providerSystem; }
+	public void setProviderCloud(final Cloud providerCloud) { this.providerCloud = providerCloud; }
+	public void setPriority(final Integer priority) { this.priority = priority; }
+	public void setAttribute(final String attribute) { this.attribute = attribute; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------	
 	@Override
