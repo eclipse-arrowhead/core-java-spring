@@ -397,6 +397,10 @@ public class OrchestratorStoreController {
 			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
+		if (request.getPriorityMap() == null) {
+			throw new BadPayloadException("PriorityMap "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		if ( request.getPriorityMap().isEmpty()) {
 			throw new BadPayloadException("PriorityMap "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
