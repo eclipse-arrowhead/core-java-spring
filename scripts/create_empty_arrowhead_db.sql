@@ -385,7 +385,7 @@ GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_service_definition`
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_service_interface` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_system` TO 'service_registry'@'localhost';
 
--- Authorizazion
+-- Authorization
 DROP USER IF EXISTS 'authorization'@'localhost';
 CREATE USER 'authorization'@'localhost' IDENTIFIED BY 'arrowhead';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_cloud` TO 'authorization'@'localhost';
