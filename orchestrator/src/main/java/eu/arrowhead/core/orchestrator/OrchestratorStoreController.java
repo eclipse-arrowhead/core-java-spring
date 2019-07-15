@@ -226,7 +226,7 @@ public class OrchestratorStoreController {
 		
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
-		checkOrchestratorStoreRequestDTOForByConsumerIdAndServiceDefinitionId(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
+		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionId(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(
 				validatedPage, 
@@ -304,7 +304,7 @@ public class OrchestratorStoreController {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
-	private void checkOrchestratorStoreRequestDTOForByConsumerIdAndServiceDefinitionId(final OrchestratorStoreRequestByIdDTO request, final String origin) {
+	private void checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionId(final OrchestratorStoreRequestByIdDTO request, final String origin) {
 		logger.debug("checkOrchestratorStoreRequestDTOForByConsumerRequest started ...");
 		
 		
