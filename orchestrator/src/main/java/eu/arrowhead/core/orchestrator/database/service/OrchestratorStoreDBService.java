@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -259,24 +260,33 @@ public class OrchestratorStoreDBService {
 			}
 			final OrchestratorStore orchestratorStore = orchestratorStoreOption.get();
 			
-			final long consumerSystemId = orchestratorStore.getConsumerSystem().getId();
-			final long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
+			final System consumerSystem = orchestratorStore.getConsumerSystem();
+			final ServiceDefinition serviceDefinition = orchestratorStore.getServiceDefinition();
+			
 			final int priority = orchestratorStore.getPriority();
 			
 			orchestratorStoreRepository.deleteById(id);
 			orchestratorStoreRepository.flush();
 			
-			final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(
-					consumerSystemId, serviceDefinitionId );
+
+			final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
+					consumerSystem, serviceDefinition, Sort.by(Direction.ASC, "priority"));
+			
 			if (orchestratorStoreList.isEmpty()) {
 				return;
 			}
 
-			final Map<Long, Integer> originalPriorityMap = getPriorityMap(orchestratorStoreList);
-			final Map<Long, Integer> modifiedPriorityMap = decreaseInvolvedPrioritiesInPriorityMap(priority, originalPriorityMap);
-			final List<OrchestratorStore> updatedOrchestratorStoreList = updateOrchestratorStoreListBymodifiedPriorityMap(orchestratorStoreList, modifiedPriorityMap);
+			final List<OrchestratorStore> updatedOrchestratorStoreEntryList = new ArrayList<>();
+			for (OrchestratorStore orchestratorStoreInList : orchestratorStoreList) {
+				
+				int actualPriority = orchestratorStoreInList.getPriority();
+				if(actualPriority > priority) {
+					orchestratorStoreInList.setPriority( actualPriority - 1 );
+					updatedOrchestratorStoreEntryList.add(orchestratorStoreInList);
+				}
+			}
 			
-			saveAllInAscPriorityOrder(updatedOrchestratorStoreList);
+			saveAllInAscPriorityOrder(updatedOrchestratorStoreEntryList);
 	
 		} catch (final InvalidParameterException ex) {
 			throw ex;

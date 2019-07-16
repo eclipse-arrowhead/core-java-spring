@@ -460,7 +460,7 @@ public class OrchestratorStoreDBServiceTest {
 	public void removeOrchestratorStoreByIdWithLeftPriorityCombinationPresentInDBOkTest() {
 		
 		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(Optional.of(getOrchestratorStore()));
-		when(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(getOrchestratorStoreListForRemoveOrchestratorStoreTest(3));
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any())).thenReturn(getOrchestratorStoreListForRemoveOrchestratorStoreTest(3));
 		
 		orchestratorStoreDBService.removeOrchestratorStoreById(getIdForTest());
 		
@@ -471,7 +471,7 @@ public class OrchestratorStoreDBServiceTest {
 	public void removeOrchestratorStoreByIdWithLeftPriorityCombinationNotPresentInDBOkTest() {
 		
 		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(Optional.of(getOrchestratorStore()));
-		when(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(new ArrayList<OrchestratorStore>());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any())).thenReturn(new ArrayList<OrchestratorStore>());
 		
 		orchestratorStoreDBService.removeOrchestratorStoreById(getIdForTest());
 		
