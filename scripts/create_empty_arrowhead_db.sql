@@ -274,7 +274,7 @@ CREATE TABLE `choreographer_plan_step_service` (
   CONSTRAINT `FKfvq70kdu6sibc1i3acutbnqp2` FOREIGN KEY (`plan_step_id`) REFERENCES `choreographer_plan_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `choreographer_next_step`;
+DROP TABLE IF EXISTS `choreographer_next_steps`;
 CREATE TABLE `choreographer_next_steps` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `plan_step_id` bigint(20) NOT NULL,
@@ -299,7 +299,7 @@ GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'service_registry'@'localho
 -- Authorization
 DROP USER IF EXISTS 'authorization'@'localhost';
 CREATE USER IF NOT EXISTS 'authorization'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_cloud` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`cloud` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_inter_cloud` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_inter_cloud_interface_connection` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_intra_cloud` TO 'authorization'@'localhost';
@@ -312,7 +312,7 @@ GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'authorization'@'localhost'
 -- Orchestrator
 DROP USER IF EXISTS 'orchestrator'@'localhost';
 CREATE USER IF NOT EXISTS 'orchestrator'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_cloud` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`cloud` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_interface_connection` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_definition` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_interface` TO 'orchestrator'@'localhost';
@@ -341,6 +341,7 @@ GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'choreographer'@'localhost'
 -- Gatekeeper
 DROP USER IF EXISTS 'gatekeeper'@'localhost';
 CREATE USER IF NOT EXISTS 'gatekeeper'@'localhost' IDENTIFIED BY 'arrowhead';
+GRANT ALL PRIVILEGES ON `arrowhead_shared`.`cloud` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`relay` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'gatekeeper'@'localhost';
 FLUSH PRIVILEGES;
