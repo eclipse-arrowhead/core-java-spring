@@ -74,7 +74,7 @@ public abstract class ApplicationInitListener {
 		
 		final CoreSystem coreSystem = coreSystemRegistrationProperties.getCoreSystem();
 		logger.info("Core system name: {}", coreSystem.name());
-		logger.info("Server mode: {}", sslProperties.isSslEnabled() ? "SECURED" : "NOT SECURED");
+		logger.info("Server mode: {}", getModeString());
 		
 		if (sslProperties.isSslEnabled()) {
 			final KeyStore keyStore = initializeKeyStore();
@@ -87,7 +87,7 @@ public abstract class ApplicationInitListener {
 		
 		logger.debug("Initialization in onApplicationEvent() is done.");
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@PreDestroy
 	public void destroy() throws InterruptedException {
@@ -125,7 +125,12 @@ public abstract class ApplicationInitListener {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	protected void customInit(final ContextRefreshedEvent event) {} 
+	protected void customInit(final ContextRefreshedEvent event) {}
+	
+	//-------------------------------------------------------------------------------------------------
+	protected String getModeString() {
+		return sslProperties.isSslEnabled() ? "SECURED" : "NOT SECURED";
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private KeyStore initializeKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {

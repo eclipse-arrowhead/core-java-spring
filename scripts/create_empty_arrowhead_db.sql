@@ -290,6 +290,8 @@ CREATE TABLE `choreographer_next_steps` (
 -- Service Registry
 DROP USER IF EXISTS 'service_registry'@'localhost';
 CREATE USER IF NOT EXISTS 'service_registry'@'localhost' IDENTIFIED BY 'ZzNNpxrbZGVvfJ8';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'service_registry'@'localhost';
@@ -299,6 +301,8 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'service_registry'@'localhost';
 
 DROP USER IF EXISTS 'service_registry'@'%';
 CREATE USER IF NOT EXISTS 'service_registry'@'%' IDENTIFIED BY 'ZzNNpxrbZGVvfJ8';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'service_registry'@'%';
