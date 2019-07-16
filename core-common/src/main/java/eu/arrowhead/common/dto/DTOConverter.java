@@ -13,8 +13,8 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -202,27 +202,27 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static IntraCloudAuthorizationResponseDTO convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(final IntraCloudAuthorization entry) {
-		Assert.notNull(entry, "IntraCloudAuthorization is null");
+	public static AuthorizationIntraCloudResponseDTO convertAuthorizationIntraCloudToAuthorizationIntraCloudResponseDTO(final AuthorizationIntraCloud entry) {
+		Assert.notNull(entry, "AuthorizationIntraCloud is null");
 		Assert.notNull(entry.getConsumerSystem(), "Consumer is null");
 		Assert.notNull(entry.getProviderSystem(), "Provider is null");
 		Assert.notNull(entry.getServiceDefinition(), "ServiceDefintion is null");
 		
-		return new IntraCloudAuthorizationResponseDTO(entry.getId(), convertSystemToSystemResponseDTO(entry.getConsumerSystem()), convertSystemToSystemResponseDTO(entry.getProviderSystem()), 
+		return new AuthorizationIntraCloudResponseDTO(entry.getId(), convertSystemToSystemResponseDTO(entry.getConsumerSystem()), convertSystemToSystemResponseDTO(entry.getProviderSystem()), 
 				convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition()), 
 				Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static IntraCloudAuthorizationListResponseDTO convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(final Page<IntraCloudAuthorization> entries) {
-		Assert.notNull(entries, "IntraCloudAuthorizationList is null");
+	public static AuthorizationIntraCloudListResponseDTO convertAuthorizationIntraCloudListToAuthorizationIntraCloudListResponseDTO(final Page<AuthorizationIntraCloud> entries) {
+		Assert.notNull(entries, "AuthorizationIntraCloudList is null");
 		
-		final List<IntraCloudAuthorizationResponseDTO> intraCloudAuthorizationEntries = new ArrayList<>(entries.getNumberOfElements());
-		for (final IntraCloudAuthorization entry : entries) {
-			intraCloudAuthorizationEntries.add(convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(entry));
+		final List<AuthorizationIntraCloudResponseDTO> authorizationIntraCloudEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final AuthorizationIntraCloud entry : entries) {
+			authorizationIntraCloudEntries.add(convertAuthorizationIntraCloudToAuthorizationIntraCloudResponseDTO(entry));
 		}
 		
-		return new IntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries, entries.getTotalElements());
+		return new AuthorizationIntraCloudListResponseDTO(authorizationIntraCloudEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -53,7 +53,7 @@ public class ServiceDefinition {
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> intraCloudAuthorizations = new HashSet<>();
+	private Set<AuthorizationIntraCloud> authorizationIntraClouds = new HashSet<>();
 	
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
@@ -89,7 +89,7 @@ public class ServiceDefinition {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
-	public Set<IntraCloudAuthorization> getIntraCloudAuthorizations() { return intraCloudAuthorizations; }
+	public Set<AuthorizationIntraCloud> getAuthorizationIntraClouds() { return authorizationIntraClouds; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
 
 	//-------------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ public class ServiceDefinition {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
-	public void setIntraCloudAuthorizations(final Set<IntraCloudAuthorization> intraCloudAuthorizations) { this.intraCloudAuthorizations = intraCloudAuthorizations; }
+	public void setAuthorizationIntraClouds(final Set<AuthorizationIntraCloud> authorizationIntraClouds) { this.authorizationIntraClouds = authorizationIntraClouds; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
 
 	//-------------------------------------------------------------------------------------------------
