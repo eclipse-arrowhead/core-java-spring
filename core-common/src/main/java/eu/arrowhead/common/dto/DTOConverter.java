@@ -12,8 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.InterCloudAuthorization;
 import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -238,7 +238,7 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public static CloudResponseDTO convertCloudToCloudResponseDTO(Cloud entity) {
+	public static CloudResponseDTO convertCloudToCloudResponseDTO(final Cloud entity) {
 		
 		Assert.notNull(entity, "Cloud is null" );
 		Assert.notNull(entity.getOperator(), "Cloud.Operator is null" );
@@ -263,27 +263,27 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static InterCloudAuthorizationListResponseDTO convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(final Page<InterCloudAuthorization> entries) {
-		Assert.notNull(entries, "InterCloudAuthorizationList is null");
+	public static AuthorizationInterCloudListResponseDTO convertAuthorizationInterCloudListToAuthorizationInterCloudListResponseDTO(final Page<AuthorizationInterCloud> entries) {
+		Assert.notNull(entries, "AuthorizationInterCloudList is null");
 		
-		final List<InterCloudAuthorizationResponseDTO> interCloudAuthorizationEntries = new ArrayList<>(entries.getNumberOfElements());
-		for (final InterCloudAuthorization entry : entries) {
-			interCloudAuthorizationEntries.add(convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(entry));
+		final List<AuthorizationInterCloudResponseDTO> authorizationInterCloudEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final AuthorizationInterCloud entry : entries) {
+			authorizationInterCloudEntries.add(convertAuthorizationInterCloudToAuthorizationInterCloudResponseDTO(entry));
 		}
 		
-		return new InterCloudAuthorizationListResponseDTO(interCloudAuthorizationEntries, entries.getTotalElements());
+		return new AuthorizationInterCloudListResponseDTO(authorizationInterCloudEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static InterCloudAuthorizationResponseDTO convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(InterCloudAuthorization entity) {
+	public static AuthorizationInterCloudResponseDTO convertAuthorizationInterCloudToAuthorizationInterCloudResponseDTO(final AuthorizationInterCloud entity) {
 		
-		Assert.notNull(entity, "InterCloudAuthorization is null" );
-		Assert.notNull(entity.getCloud(), "InterCloudAuthorization.Cloud is null" );
-		Assert.notNull(entity.getServiceDefinition(), "InterCloudAuthorization.ServiceDefinition is null" );
-		Assert.notNull(entity.getCreatedAt(), "InterCloudAuthorization.CreatedAt is null" );
-		Assert.notNull(entity.getUpdatedAt(), "InterCloudAuthorization.UpdatedAt is null" );
+		Assert.notNull(entity, "AuthorizationInterCloud is null" );
+		Assert.notNull(entity.getCloud(), "AuthorizationInterCloud.Cloud is null" );
+		Assert.notNull(entity.getServiceDefinition(), "AuthorizationInterCloud.ServiceDefinition is null" );
+		Assert.notNull(entity.getCreatedAt(), "AuthorizationInterCloud.CreatedAt is null" );
+		Assert.notNull(entity.getUpdatedAt(), "AuthorizationInterCloud.UpdatedAt is null" );
 		
-		return new InterCloudAuthorizationResponseDTO(
+		return new AuthorizationInterCloudResponseDTO(
 				entity.getId(),
 				convertCloudToCloudResponseDTO(entity.getCloud()),
 				convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
