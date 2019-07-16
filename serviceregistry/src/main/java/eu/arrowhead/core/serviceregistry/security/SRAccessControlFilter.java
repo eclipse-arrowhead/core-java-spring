@@ -11,11 +11,11 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.security.AccessControlFilter;
+import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
-public class SRAccessControlFilter extends AccessControlFilter {
+public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	//=================================================================================================
 	// members
@@ -33,7 +33,7 @@ public class SRAccessControlFilter extends AccessControlFilter {
 		final String cloudCN = getServerCloudCN();
 		if (requestTarget.contains(CommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
-			checkIfLocalSystemOperator(clientCN, requestTarget, cloudCN);
+			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI)) {
 			// A provider system can only register its own services!
 			checkProviderAccessToRegister(clientCN, requestJSON, requestTarget);
@@ -42,19 +42,10 @@ public class SRAccessControlFilter extends AccessControlFilter {
 			checkProviderAccessToDeregister(clientCN, queryParams, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI)) {
 			// Only dedicated core systems can use this service
-			checkIfClientIsAllowed(clientCN, requestTarget, cloudCN);
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQuery, requestTarget);
 		}
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	private void checkIfLocalSystemOperator(final String clientCN, final String requestTarget, final String cloudCN) {
-		final String sysopCN = CommonConstants.LOCAL_SYSTEM_OPERATOR_NAME + "." + cloudCN;
-		if (!clientCN.equalsIgnoreCase(sysopCN)) {
-			log.debug("Only the local system operator can use {}, access denied!", requestTarget);
-		    throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
-		}
-	}
-	
 	//-------------------------------------------------------------------------------------------------
 	private void checkProviderAccessToRegister(final String clientCN, final String requestJSON, final String requestTarget) {
 		final String clientName = getClientNameFromCN(clientCN);
@@ -85,20 +76,6 @@ public class SRAccessControlFilter extends AccessControlFilter {
 			log.debug("Provider system name and certificate common name do not match! Registering denied!");
 			throw new AuthException("Provider system name(" + providerName + ") and certificate common name (" + clientCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkIfClientIsAllowed(final String clientCN, final String requestTarget, final String cloudCN) {
-		for (final CoreSystem coreSystem : allowedCoreSystemsForQuery) {
-			final String coreSystemCN = coreSystem.name().toLowerCase() + "." + cloudCN;
-			if (clientCN.equalsIgnoreCase(coreSystemCN)) {
-				return;
-			}
-		}
-		
-		// client is not an allowed core system
-		log.debug("Only dedicated core systems can use {}, access denied!", requestTarget);
-	    throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

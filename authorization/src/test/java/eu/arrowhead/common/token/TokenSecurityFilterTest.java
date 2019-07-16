@@ -27,10 +27,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.core.authorization.AuthorizationMain;
 
-/**
- * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
- *
- */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AuthorizationMain.class)
 @AutoConfigureMockMvc
