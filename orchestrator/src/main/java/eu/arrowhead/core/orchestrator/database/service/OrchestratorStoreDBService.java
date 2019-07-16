@@ -274,25 +274,7 @@ public class OrchestratorStoreDBService {
 			orchestratorStoreRepository.deleteById(id);
 			orchestratorStoreRepository.flush();
 			
-
-			final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
-					consumerSystem, serviceDefinition, Sort.by(Direction.ASC, "priority"));
-			
-			if (orchestratorStoreList.isEmpty()) {
-				return;
-			}
-
-			final List<OrchestratorStore> updatedOrchestratorStoreEntryList = new ArrayList<>();
-			for (OrchestratorStore orchestratorStoreInList : orchestratorStoreList) {
-				
-				int actualPriority = orchestratorStoreInList.getPriority();
-				if(actualPriority > priority) {
-					orchestratorStoreInList.setPriority( actualPriority - 1 );
-					updatedOrchestratorStoreEntryList.add(orchestratorStoreInList);
-				}
-			}
-			
-			saveAllInAscPriorityOrder(updatedOrchestratorStoreEntryList);
+			updateInvolvedPriorities(consumerSystem, serviceDefinition, priority);			
 	
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -301,7 +283,7 @@ public class OrchestratorStoreDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void modifyOrchestratorStorePriorityResponse(final OrchestratorStoreModifyPriorityRequestDTO request) {
@@ -482,19 +464,6 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void saveAllInAscPriorityOrder(final List<OrchestratorStore> updatedOrchestratorStoreList) {
-		logger.debug("saveAllInAscPriorityOrder started...");
-		
-		Collections.sort(updatedOrchestratorStoreList, getOrchestratorStorePriorityComparator());
-		
-		for (final OrchestratorStore orchestratorStore : updatedOrchestratorStoreList) {
-			
-			orchestratorStoreRepository.saveAndFlush(orchestratorStore);
-			orchestratorStoreRepository.refresh(orchestratorStore);
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	private static Comparator<OrchestratorStore> getOrchestratorStorePriorityComparator() {
 		logger.debug("getOrchestratorStorePriorityComparato started...");
 		
@@ -601,4 +570,32 @@ public class OrchestratorStoreDBService {
 		return orchestratorStoreRepository.saveAndFlush(orchestratorStoreToInsert);
 	}
 	
+	//-------------------------------------------------------------------------------------------------	
+	private void updateInvolvedPriorities(System consumerSystem, ServiceDefinition serviceDefinition, int priority) {
+		logger.debug("updateInvolvedPriorities started...");
+		
+		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
+				consumerSystem, serviceDefinition, Sort.by(Direction.ASC, "priority"));
+		
+		if (orchestratorStoreList.isEmpty()) {
+			return;
+		}
+
+		final List<OrchestratorStore> updatedOrchestratorStoreEntryList = new ArrayList<>();
+		for (OrchestratorStore orchestratorStoreInList : orchestratorStoreList) {
+			
+			int actualPriority = orchestratorStoreInList.getPriority();
+			if(actualPriority > priority) {
+				orchestratorStoreInList.setPriority( actualPriority - 1 );
+				updatedOrchestratorStoreEntryList.add(orchestratorStoreInList);
+			}
+		}
+		
+		for (final OrchestratorStore orchestratorStoreToUpdate : updatedOrchestratorStoreEntryList) {
+			
+			orchestratorStoreRepository.save(orchestratorStoreToUpdate);
+		}
+		orchestratorStoreRepository.flush();
+		
+	}
 }
