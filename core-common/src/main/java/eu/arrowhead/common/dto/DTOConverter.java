@@ -191,7 +191,7 @@ public class DTOConverter {
 		final ServiceQueryResultDTO result = new ServiceQueryResultDTO();
 		
 		if (entries != null) {
-			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits:" + unfilteredHits);
+			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits: " + unfilteredHits);
 			result.setUnfilteredHits(unfilteredHits);
 			for (final ServiceRegistry srEntry : entries) {
 				result.getServiceQueryData().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
@@ -238,23 +238,20 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public static CloudResponseDTO convertCloudToCloudResponseDTO(Cloud entity) {
-		
+	public static CloudResponseDTO convertCloudToCloudResponseDTO(final Cloud entity) {
 		Assert.notNull(entity, "Cloud is null" );
-		Assert.notNull(entity.getOperator(), "Cloud.Operator is null" );
-		Assert.notNull(entity.getName(), "Cloud.Name is null" );
-		Assert.notNull(entity.getAddress(), "Cloud.Address is null" );
-		Assert.notNull(entity.getGatekeeperServiceUri(), "Cloud.GateKeeperServiceUri is null" );
-		Assert.notNull(entity.getCreatedAt(), "Cloud.CreatedAt is null" );
-		Assert.notNull(entity.getUpdatedAt(), "Cloud.UpdatedAt is null" );
+		Assert.notNull(entity.getOperator(), "Cloud.operator is null" );
+		Assert.notNull(entity.getName(), "Cloud.name is null" );
+		Assert.notNull(entity.getCreatedAt(), "Cloud.createdAt is null" );
+		Assert.notNull(entity.getUpdatedAt(), "Cloud.cpdatedAt is null" );
 		
 		return new CloudResponseDTO(
 				entity.getId(),
 				entity.getOperator(),
 				entity.getName(),
-				entity.getAddress(),
-				entity.getPort(),
-				entity.getGatekeeperServiceUri(),
+				entity.getGatekeeper() != null ? entity.getGatekeeper().getAddress() : null,
+				entity.getGatekeeper() != null ? entity.getGatekeeper().getPort() : null,
+				entity.getGatekeeper() != null ? entity.getGatekeeper().getServiceUri() : null,
 				entity.getSecure(),
 				entity.getNeighbor(),
 				entity.getOwnCloud(),
@@ -275,13 +272,13 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static InterCloudAuthorizationResponseDTO convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(InterCloudAuthorization entity) {
+	public static InterCloudAuthorizationResponseDTO convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(final InterCloudAuthorization entity) {
 		
 		Assert.notNull(entity, "InterCloudAuthorization is null" );
-		Assert.notNull(entity.getCloud(), "InterCloudAuthorization.Cloud is null" );
-		Assert.notNull(entity.getServiceDefinition(), "InterCloudAuthorization.ServiceDefinition is null" );
-		Assert.notNull(entity.getCreatedAt(), "InterCloudAuthorization.CreatedAt is null" );
-		Assert.notNull(entity.getUpdatedAt(), "InterCloudAuthorization.UpdatedAt is null" );
+		Assert.notNull(entity.getCloud(), "InterCloudAuthorization.cloud is null" );
+		Assert.notNull(entity.getServiceDefinition(), "InterCloudAuthorization.serviceDefinition is null" );
+		Assert.notNull(entity.getCreatedAt(), "InterCloudAuthorization.createdAt is null" );
+		Assert.notNull(entity.getUpdatedAt(), "InterCloudAuthorization.updatedAt is null" );
 		
 		return new InterCloudAuthorizationResponseDTO(
 				entity.getId(),
