@@ -22,8 +22,8 @@ CREATE TABLE `cloud` (
   UNIQUE KEY `cloud` (`operator`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `system`;
-CREATE TABLE `system` (
+DROP TABLE IF EXISTS `system_`;
+CREATE TABLE `system_` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `system_name` varchar(255) NOT NULL,
   `address` varchar(255) NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE `service_registry` (
   UNIQUE KEY `pair` (`service_id`,`system_id`),
   KEY `system` (`system_id`),
   CONSTRAINT `service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `system` FOREIGN KEY (`system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE
+  CONSTRAINT `system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `service_registry_interface_connection`;
@@ -105,8 +105,8 @@ CREATE TABLE `authorization_intra_cloud` (
   KEY `provider` (`provider_system_id`),
   KEY `service_intra_auth` (`service_id`),
   CONSTRAINT `service_intra_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE
+  CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `authorization_inter_cloud`;
@@ -182,9 +182,9 @@ CREATE TABLE `orchestrator_store` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique` (`service_id`,`consumer_system_id`,`priority`),
-  CONSTRAINT `provider_orch` FOREIGN KEY (`provider_system_id`) REFERENCES `system` (`id`),
+  CONSTRAINT `provider_orch` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`),
   CONSTRAINT `cloud_orch` FOREIGN KEY (`provider_cloud_id`) REFERENCES `cloud` (`id`),
-  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system` (`id`),
+  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`),
   CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -225,7 +225,7 @@ CREATE TABLE `event_handler_event` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `pair` (`type`, `provider_system_id`),
-  CONSTRAINT `event_provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system` (`id`)
+  CONSTRAINT `event_provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `event_handler_event_subscriber`;
@@ -239,7 +239,7 @@ CREATE TABLE `event_handler_event_subscriber` (
   `end_date` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `event_consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system` (`id`)
+  CONSTRAINT `event_consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Choreographer
@@ -293,7 +293,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'service_registry'@'lo
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'service_registry'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'service_registry'@'localhost';
 
 DROP USER IF EXISTS 'service_registry'@'%';
@@ -302,7 +302,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'service_registry'@'%'
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'service_registry'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'service_registry'@'%';
 
 -- Authorization
@@ -315,7 +315,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'authorizatio
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'authorization'@'localhost';
 
 DROP USER IF EXISTS 'authorization'@'%';
@@ -327,7 +327,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'authorizatio
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'authorization'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'authorization'@'%';
 
 -- Orchestrator
@@ -338,7 +338,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_interface_connection` TO 'orch
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'localhost';
 
 DROP USER IF EXISTS 'orchestrator'@'%';
@@ -348,7 +348,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_interface_connection` TO 'orch
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'%';
 
 -- Event Handler
@@ -356,14 +356,14 @@ DROP USER IF EXISTS 'event_handler'@'localhost';
 CREATE USER IF NOT EXISTS 'event_handler'@'localhost' IDENTIFIED BY 'gRLjXbqu9YwYhfK';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event` TO 'event_handler'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event_subscriber` TO 'event_handler'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'event_handler'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'localhost';
 
 DROP USER IF EXISTS 'event_handler'@'%';
 CREATE USER IF NOT EXISTS 'event_handler'@'%' IDENTIFIED BY 'gRLjXbqu9YwYhfK';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event` TO 'event_handler'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event_subscriber` TO 'event_handler'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'event_handler'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'event_handler'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'%';
 
 -- Choreographer
