@@ -6,12 +6,10 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Map;
-
-import javax.annotation.Resource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,10 +27,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.core.authorization.AuthorizationMain;
 
-/**
- * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
- *
- */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AuthorizationMain.class)
 @AutoConfigureMockMvc
@@ -46,9 +40,6 @@ public class TokenSecurityFilterTest {
 	
 	@Autowired
 	private WebApplicationContext wac;
-	
-	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	private Map<String,Object> arrowheadContext;
 	
 	private MockMvc mockMvc;
 
@@ -87,7 +78,7 @@ public class TokenSecurityFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testTokenSecurityFilterSomebodyElsesToken() throws Exception {
-		final String token = "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiY3R5IjoiSldUIn0.CcwXpakkpOwganOeZLQcmeB3WZ-UZxZ7oZ1MbunWKetGty7NoQJRwfMBpD9HeK58-2glvRXMnirwRi7x-HeIj2FA4wKM7ptRvQQirtM4xUsUMyPSVgRWeRuvVN8UUf4L_O_M6fi0HgDKPE5aCq1x_mkCULvSo9SiVyePTddByWscYBRn-kHIZK9va_xt9GR9DTlAw-ooqv04z_rAo83iTuNZLob_LY6kYDvzcfHxE38vnPKDCzks6AHXLk0wU5XEqmiDBQmUtlc-Gzo43P4LR-ZopT5p0WUajP5HxPwrdGw9K88wSqWAYi3zKh2REd8NQCmnVobwg9VFXpwmW9S1MA.uDMJ5zVdMoa-Qa_mE-2vMQ.a56lUBtFO8R5AZS0FNIK_ABDXeX8nZWfSJra3fqlwKc9i8euMC9drd6cMnU9NUiRmMm7YOB_XQ97FrHvz6VkzljbVJIYxNO-xF-6p6h2hj2MYvO11Wnk8r9s8gh1JFbP2iU07ceZXCxDYlaRUNFc69Fn-ZRx8NS4WhDlqQtg5k6uw-qS5J5uOp-5zUtksRlz1Minda5oky-FHBMJD3aiUGrAFhziGV8ftax-89krnYEgqSJcUNUlm1rvLXdaaGBFHQ1KE8iXkS8ujgCexvwzXlBjLcqx1_gMJPojC-xZ10u9_7q4VVwpCiVNSrIb0m764vr4bjSs8wEQGVN5ACxADAh3flY2z-yrvfcHCZE4wbYSZeesRNkJ3EhETAqoPqM2yZx2ztY5u3dHmexQtFeSXbZalGUTbwu9HPUbJQJUR-4ux3dSeQxP6HQg_cvDMTGTb4LMZy08i6Nx8pbBXX9wZojdL38P20SQuFDYEcyED7PQtMdu1Ov4No9iXelhxqBrdldN461_AM-tPbdzQrXi4c3Iv8V-S-nrUTYVXIJB3vw5OL1ZfP0Bu3kD0_3GuJEfGluWJDCP2j-eic67LjGpfu7f6H5ik99t5lRhJovxvqo4dDZLuVCJlxgY20azSxICPcldnLxsFCSzG8CYrazPvMktBE1mmxkpA8NUPGsDcEM5XtSjHvpyafwaVVwETCRFCdQelUcGJmVv_ZCzXo7tqeqmAUYDdYlitb1ZllWjCmE.iE76xWS5HQWamApKUT3WBdq1rqBn6qrmStAz6zj2a8U";
+		final String token = "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiY3R5IjoiSldUIn0.zRR8VyqFDZZ5KSByd5jnRKQEHSAmOce99H02ABELKAMnlz-9OekZnJvsIxPP28Vv9CVtf1r_AACylBmVkZtuUoQE5PLlkiYq128rYCiYx7Aa5oCU2hRQIMfW_9KhUDMG5KdF9_9ZMqvt1ZfrP4tRc0b0I_DA20aZpH2-TR60JuX8eISKon131Rif3TmNpqXI6FHsAGvh4h4a9vt2nwCCTyCdqI2-9NJ8Gz-bze5cFEccADtnvcEPA8J7qDqq_bQWAFAECY8YUDKDrXmYbsyXqJ2LXhH_6aBWpq6PxgOq2g9HkHYR1M404sseMDY3rFpMll8pQjikcop0uAi-NE_l1g.EHG0BhIMqdEXJwOONU5CQw.NvgiIqYbD0ML_d9hcahUU3jFLWIMar8RdwQoflQolv-vVoXwqENRnKjQxujLbigM4buzPylLFF7dT8y1-x_SB-H1Eyqj_QSp1TFUAh3t0_8XWUfPztFh71GjvTPzhyoBjEqliayfIO_qBmsn9iI_4p0j7dmKOhj6ICjt0TIygwTUwGA2OK06kNE9YJeYkExE5gYJDvor8kFeBPZXe1Bhfw-8BBygMCrJ-Ej7orjCNpV0evoQ9b7AvQeATlwV7pWj6tn34uvId9X369ySzfyEf4WBaP4f48-ldbj3untQhRj8gKXvWlOXmQqr_DTrra8wPkAJXXVfeT5f3IknVCh2xkcthtPf4g2M9DyGRIGivbkwsQLNRzNSPszOnxg0OUvXoN3oOhtOdVBNcNdjF1C4kiht-krvUGvkf1W1aNc0EX35uIBkL-Z__eUeQwipsyz6r5FrKlk-54yFK0wDavFLy9790fF46m5U1RpaI43Wemt77iuUP9Mn_vV7gL7dEOgjej1Vcumwt_gSTSS5a-qttEwchb3p4sQfekGRxS5hz4ecQs5dbme8RoK9sFqVMyu3e2K7S9iXbHhw0vhWf2hjPSegRWwVF04ojcN1BQnIELfFnJ3QGzA82nz6t31b72_0AfKxw1A6j7r5JW0iuqMroEnC6OdD_7PJcHx0rF89qbS2Z2qahO4MVh9ZB6w2N8oAFloWtQV2SGkQQ6Dp-d6BS49on5utFR4PjdIXs0z0ETk.jasfCemk7jsQR5NFAvIVJ47r4XRBP9uTi90I1_yMg90";
 
 		this.mockMvc.perform(get("/authorization/echo?token=" + token)
 					.secure(true)
@@ -98,7 +89,7 @@ public class TokenSecurityFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testTokenSecurityFilterOk() throws Exception {
-		final String token = "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiY3R5IjoiSldUIn0.CcwXpakkpOwganOeZLQcmeB3WZ-UZxZ7oZ1MbunWKetGty7NoQJRwfMBpD9HeK58-2glvRXMnirwRi7x-HeIj2FA4wKM7ptRvQQirtM4xUsUMyPSVgRWeRuvVN8UUf4L_O_M6fi0HgDKPE5aCq1x_mkCULvSo9SiVyePTddByWscYBRn-kHIZK9va_xt9GR9DTlAw-ooqv04z_rAo83iTuNZLob_LY6kYDvzcfHxE38vnPKDCzks6AHXLk0wU5XEqmiDBQmUtlc-Gzo43P4LR-ZopT5p0WUajP5HxPwrdGw9K88wSqWAYi3zKh2REd8NQCmnVobwg9VFXpwmW9S1MA.uDMJ5zVdMoa-Qa_mE-2vMQ.a56lUBtFO8R5AZS0FNIK_ABDXeX8nZWfSJra3fqlwKc9i8euMC9drd6cMnU9NUiRmMm7YOB_XQ97FrHvz6VkzljbVJIYxNO-xF-6p6h2hj2MYvO11Wnk8r9s8gh1JFbP2iU07ceZXCxDYlaRUNFc69Fn-ZRx8NS4WhDlqQtg5k6uw-qS5J5uOp-5zUtksRlz1Minda5oky-FHBMJD3aiUGrAFhziGV8ftax-89krnYEgqSJcUNUlm1rvLXdaaGBFHQ1KE8iXkS8ujgCexvwzXlBjLcqx1_gMJPojC-xZ10u9_7q4VVwpCiVNSrIb0m764vr4bjSs8wEQGVN5ACxADAh3flY2z-yrvfcHCZE4wbYSZeesRNkJ3EhETAqoPqM2yZx2ztY5u3dHmexQtFeSXbZalGUTbwu9HPUbJQJUR-4ux3dSeQxP6HQg_cvDMTGTb4LMZy08i6Nx8pbBXX9wZojdL38P20SQuFDYEcyED7PQtMdu1Ov4No9iXelhxqBrdldN461_AM-tPbdzQrXi4c3Iv8V-S-nrUTYVXIJB3vw5OL1ZfP0Bu3kD0_3GuJEfGluWJDCP2j-eic67LjGpfu7f6H5ik99t5lRhJovxvqo4dDZLuVCJlxgY20azSxICPcldnLxsFCSzG8CYrazPvMktBE1mmxkpA8NUPGsDcEM5XtSjHvpyafwaVVwETCRFCdQelUcGJmVv_ZCzXo7tqeqmAUYDdYlitb1ZllWjCmE.iE76xWS5HQWamApKUT3WBdq1rqBn6qrmStAz6zj2a8U";
+		final String token = "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiY3R5IjoiSldUIn0.zRR8VyqFDZZ5KSByd5jnRKQEHSAmOce99H02ABELKAMnlz-9OekZnJvsIxPP28Vv9CVtf1r_AACylBmVkZtuUoQE5PLlkiYq128rYCiYx7Aa5oCU2hRQIMfW_9KhUDMG5KdF9_9ZMqvt1ZfrP4tRc0b0I_DA20aZpH2-TR60JuX8eISKon131Rif3TmNpqXI6FHsAGvh4h4a9vt2nwCCTyCdqI2-9NJ8Gz-bze5cFEccADtnvcEPA8J7qDqq_bQWAFAECY8YUDKDrXmYbsyXqJ2LXhH_6aBWpq6PxgOq2g9HkHYR1M404sseMDY3rFpMll8pQjikcop0uAi-NE_l1g.EHG0BhIMqdEXJwOONU5CQw.NvgiIqYbD0ML_d9hcahUU3jFLWIMar8RdwQoflQolv-vVoXwqENRnKjQxujLbigM4buzPylLFF7dT8y1-x_SB-H1Eyqj_QSp1TFUAh3t0_8XWUfPztFh71GjvTPzhyoBjEqliayfIO_qBmsn9iI_4p0j7dmKOhj6ICjt0TIygwTUwGA2OK06kNE9YJeYkExE5gYJDvor8kFeBPZXe1Bhfw-8BBygMCrJ-Ej7orjCNpV0evoQ9b7AvQeATlwV7pWj6tn34uvId9X369ySzfyEf4WBaP4f48-ldbj3untQhRj8gKXvWlOXmQqr_DTrra8wPkAJXXVfeT5f3IknVCh2xkcthtPf4g2M9DyGRIGivbkwsQLNRzNSPszOnxg0OUvXoN3oOhtOdVBNcNdjF1C4kiht-krvUGvkf1W1aNc0EX35uIBkL-Z__eUeQwipsyz6r5FrKlk-54yFK0wDavFLy9790fF46m5U1RpaI43Wemt77iuUP9Mn_vV7gL7dEOgjej1Vcumwt_gSTSS5a-qttEwchb3p4sQfekGRxS5hz4ecQs5dbme8RoK9sFqVMyu3e2K7S9iXbHhw0vhWf2hjPSegRWwVF04ojcN1BQnIELfFnJ3QGzA82nz6t31b72_0AfKxw1A6j7r5JW0iuqMroEnC6OdD_7PJcHx0rF89qbS2Z2qahO4MVh9ZB6w2N8oAFloWtQV2SGkQQ6Dp-d6BS49on5utFR4PjdIXs0z0ETk.jasfCemk7jsQR5NFAvIVJ47r4XRBP9uTi90I1_yMg90";
 
 		this.mockMvc.perform(get("/authorization/echo?token=" + token)
 					.secure(true)
@@ -111,7 +102,9 @@ public class TokenSecurityFilterTest {
 
 	//-------------------------------------------------------------------------------------------------
 	public TokenSecurityFilter getTokenSecurityFilter() throws Exception {
-		final PublicKey authPublicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.pub");
+		final PublicKey authPublicKey = Utilities.getPublicKeyFromPEMFile(is);
+
 		final KeyStore keystore = KeyStore.getInstance("PKCS12");
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/provider.p12"), "123456".toCharArray());
 		final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, "123456");

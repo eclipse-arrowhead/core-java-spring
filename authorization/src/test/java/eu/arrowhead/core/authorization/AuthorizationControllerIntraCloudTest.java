@@ -75,19 +75,21 @@ public class AuthorizationControllerIntraCloudTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of getIntraCloudAuthorizations
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetIntraCloudAuthorizationsWithoutParameters() throws Exception {
 		final int numOfEntries = 4;
-		final IntraCloudAuthorizationListResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(createPageForMockingAuthorizationDBService(numOfEntries));
+		final IntraCloudAuthorizationListResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(
+																																			createPageForMockingAuthorizationDBService(numOfEntries));
 		when(authorizationDBService.getIntraCloudAuthorizationEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final IntraCloudAuthorizationListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationListResponseDTO.class);
 		assertEquals(numOfEntries, responseBody.getData().size());
@@ -98,15 +100,16 @@ public class AuthorizationControllerIntraCloudTest {
 	@Test
 	public void testGetIntraCloudAuthorizationsWithPageAndSizeParameter() throws Exception {
 		final int numOfEntries = 4;
-		final IntraCloudAuthorizationListResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(createPageForMockingAuthorizationDBService(numOfEntries));
+		final IntraCloudAuthorizationListResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(
+																																			createPageForMockingAuthorizationDBService(numOfEntries));
 		when(authorizationDBService.getIntraCloudAuthorizationEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_PAGE, "0")
-				.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(numOfEntries))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .param(CommonConstants.REQUEST_PARAM_PAGE, "0")
+											   .param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(numOfEntries))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final IntraCloudAuthorizationListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationListResponseDTO.class);
 		assertEquals(numOfEntries, responseBody.getData().size());
@@ -114,129 +117,144 @@ public class AuthorizationControllerIntraCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithNullPageButDefinedSizeParameter() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(5))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(5))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithDefinedPageButNullSizeParameter() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_PAGE, "0")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_PAGE, "0")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of getIntraCloudAuthorizations
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetIntraCloudAuthorizationsWithExistingId() throws Exception {
-		final IntraCloudAuthorizationResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(createPageForMockingAuthorizationDBService(1).getContent().get(0));
+		final IntraCloudAuthorizationResponseDTO dto = DTOConverter.convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(createPageForMockingAuthorizationDBService(1).getContent().
+																																	   get(0));
 		when(authorizationDBService.getIntraCloudAuthorizationEntryByIdResponse(anyLong())).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final IntraCloudAuthorizationResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationResponseDTO.class);
-		assertEquals(responseBody.getConsumerSystem().getSystemName(), "Consumer");
+		assertEquals("Consumer", responseBody.getConsumerSystem().getSystemName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testGetIntraCloudAuthorizationsWithInvalidId() throws Exception {
 		this.mockMvc.perform(get(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of removeIntraCloudAuthorizationById
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRemoveIntraCloudAuthorizationByIdWithExistingId() throws Exception {
 		this.mockMvc.perform(delete(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRemoveIntraCloudAuthorizationByIdWithInvalidId() throws Exception {
 		this.mockMvc.perform(delete(INTRA_CLOUD_AUTHORIZATION_MGMT_URI + "/0")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of registerIntraCloudAuthorization
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithInvalidConsumerId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 0, createIdList(1, 1), createIdList(1, 2))))
-			.accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO(0L, createIdList(1, 1), createIdList(1, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithEmptyProviderIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, new ArrayList<>(), createIdList(1, 2))))
-			.accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO(1L, new ArrayList<>(), createIdList(1, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithEmptyServiceDefinitionIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 2), null)))
-			.accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO(1L, createIdList(1, 2), null)))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testRegisterIntraCloudAuthorizationWithMultipleElementsInBothList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 2), createIdList(1, 2))))
-			.accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO(1L, createIdList(1, 2), createIdList(1, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterIntraCloudAuthorizationDBCall() throws Exception {
 		final Page<IntraCloudAuthorization> entries = createPageForMockingAuthorizationDBService(1);
-		when(authorizationDBService.createBulkIntraCloudAuthorizationResponse(anyLong(), any(), any())).thenReturn(DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(entries));
+		when(authorizationDBService.createBulkIntraCloudAuthorizationResponse(anyLong(), any(), any())).thenReturn(
+																									DTOConverter.convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(entries));
 		
 		final MvcResult response = this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 1), createIdList(1, 1))))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated())
-				.andReturn();
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationRequestDTO((long) 1, createIdList(1, 1), createIdList(1, 1))))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isCreated())
+											   .andReturn();
 		
 		final IntraCloudAuthorizationListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationListResponseDTO.class);
 		assertEquals("Consumer", responseBody.getData().get(0).getConsumerSystem().getSystemName());
@@ -244,57 +262,62 @@ public class AuthorizationControllerIntraCloudTest {
 		assertEquals(1, responseBody.getCount());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of checkIntraCloudAuthorizationRequest
 	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckIntraCloudAuthorizationRequestWithInvalidConsumerId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO((long) 0, (long) 1, createIdList(1, 2))))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO(0L, 1L, createIdList(1, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckIntraCloudAuthorizationRequestWithInvalidServiceDefinitionId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO((long) 1, null, createIdList(1, 2))))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO(1L, null, createIdList(1, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckIntraCloudAuthorizationRequestWithEmptyProviderIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO((long) 1, (long) 2, new ArrayList<>())))
-				.accept(MediaType.APPLICATION_JSON))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO(1L, 2L, new ArrayList<>())))
+					.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckIntraCloudAuthorizationRequestDBCall() throws Exception {
-		final Long consumerId = (long) 1;
-		final Long serviceDefinitionId = (long) 3;
+		final Long consumerId = 1L;
+		final Long serviceDefinitionId = 3L;
 		final int providerIdA = 4;
 		final int providerIdB = 5;
 		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
 		providerIdAuthorizationState.put((long) providerIdA, true);
 		providerIdAuthorizationState.put((long) providerIdB, false);
-		when(authorizationDBService.checkIntraCloudAuthorizationRequest(anyLong(), anyLong(), any()))
-			.thenReturn(new IntraCloudAuthorizationCheckResponseDTO(consumerId, serviceDefinitionId, providerIdAuthorizationState));
+		when(authorizationDBService.checkIntraCloudAuthorizationRequest(anyLong(), anyLong(), any())).thenReturn(new IntraCloudAuthorizationCheckResponseDTO(consumerId, serviceDefinitionId,
+																																							 providerIdAuthorizationState));
 		
 		final MvcResult response = this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_CHECK_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO(consumerId, serviceDefinitionId, createIdList(providerIdA, providerIdB))))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .content(objectMapper.writeValueAsBytes(new IntraCloudAuthorizationCheckRequestDTO(consumerId, serviceDefinitionId, createIdList(providerIdA,
+													   																			  providerIdB))))
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final IntraCloudAuthorizationCheckResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), IntraCloudAuthorizationCheckResponseDTO.class);
 		assertTrue(responseBody.getProviderIdAuthorizationState().get((long) providerIdA));
@@ -309,24 +332,27 @@ public class AuthorizationControllerIntraCloudTest {
 		final List<IntraCloudAuthorization> entries = new ArrayList<>(numberOfRequestedEntry);
 		final System consumer = new System("Consumer", "0.0.0.0.", 1000, null);
 		consumer.setId(1);
-		for (int i = 1; i <= numberOfRequestedEntry; i++ ) {
+		
+		for (int i = 1; i <= numberOfRequestedEntry; ++i) {
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("testService" + i);
 			serviceDefinition.setId(i);
-			final System provider = new System("Provider" + i, i + "." + i +"." + i + "." + i, i * 1000, null);
+			final System provider = new System("Provider" + i, i + "." + i + "." + i + "." + i, i * 1000, null);
 			provider.setId(i);
 			final IntraCloudAuthorization entry = new IntraCloudAuthorization(consumer, provider, serviceDefinition);
 			entry.setId(i);
 			entries.add(entry);
 		}
+		
 		return new PageImpl<IntraCloudAuthorization>(entries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<Long> createIdList(final int firstNum, final int lastNum) {
 		final List<Long> idList = new ArrayList<>(lastNum);
-		for (int i = firstNum; i <= lastNum; i++) {
+		for (int i = firstNum; i <= lastNum; ++i) {
 			idList.add((long) i);
 		}
+		
 		return idList;
 	}
 }

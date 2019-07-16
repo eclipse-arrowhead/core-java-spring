@@ -28,10 +28,10 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
-	public static final String CORE_SYSTEM_ORCHESTRATOR_NAME = "orchestrator";
-	public static final String CORE_SYSTEM_GATEKEEPER_NAME = "gatekeeper";
-	public static final String CORE_SYSTEM_CA_NAME = "certificateauthority"; // for future use
-	public static final String CORE_SYSTEM_CA_NAME_2 = "certificate_authority";  // for future use
+	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
+	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "public-key";
+	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
+	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -39,6 +39,7 @@ public class CommonConstants {
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
+	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
@@ -55,11 +56,14 @@ public class CommonConstants {
 	public static final String HTTP = "http";
 	public static final String JSON = "JSON";
 	public static final String XML = "XML";
+	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
+	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON; 
 	
-	public static final String LOCALHOST = "127.0.0.1";
-	public static final int HTTP_PORT = 80;
+	public static final String LOCALHOST = "localhost";
+	public static final int HTTP_PORT = 8080;
 	
 	public static final String SERVER_ERROR_URI = "/error";
+	public static final String ECHO_URI = "/echo";
 	public static final String MGMT_URI = "/mgmt";
 	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
@@ -67,6 +71,10 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
 	
 	public static final String AUTHORIZATION_URI = "/authorization";
+	public static final String OP_AUTH_TOKEN_URI = "/token";
+	public static final String OP_AUTH_KEY_URI = "/publickey";
+	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
+	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -98,6 +106,12 @@ public class CommonConstants {
 	public static final String HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT = "http.client.connection.manager.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_MANAGER_TIMEOUT + "}";
 	
+	public static final String SERVER_ADDRESS = "server.address";
+	public static final String $SERVER_ADDRESS = "${" + SERVER_ADDRESS + "}";
+	public static final String SERVER_PORT = "server.port";
+	public static final String $SERVER_PORT = "${" + SERVER_PORT + "}";
+	public static final String CORE_SYSTEM_NAME = "core_system_name";
+	public static final String $CORE_SYSTEM_NAME = "${" + CORE_SYSTEM_NAME + "}";
 	public static final String LOG_ALL_REQUEST_AND_RESPONSE = "log_all_request_and_response";
 	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + Defaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
 	
@@ -134,7 +148,8 @@ public class CommonConstants {
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
 	
-	public static final long CONVERSION_MILLISECOND_TO_MINUTES = 60000;
+	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
+	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
 	
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
