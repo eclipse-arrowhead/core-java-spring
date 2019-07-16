@@ -127,6 +127,14 @@ public class OrchestratorStoreDBService {
 			final Direction direction, final String sortField) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
 		
+		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getAllTopPriorityOrchestratorStoreEntries(page, size, direction, sortField));		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<OrchestratorStore> getAllTopPriorityOrchestratorStoreEntries(final int page, final int size,
+			final Direction direction, final String sortField) {
+		logger.debug("getAllTopPriorityOrchestratorStoreEntries started...");
+		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
@@ -137,7 +145,7 @@ public class OrchestratorStoreDBService {
 		}
 		
 		try {
-			return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.findAllByPriority(CommonConstants.TOP_PRIORITY, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
+			return orchestratorStoreRepository.findAllByPriority(CommonConstants.TOP_PRIORITY, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -149,6 +157,15 @@ public class OrchestratorStoreDBService {
 			final int size, final Direction direction, final String sortField, final long consumerSystemId,
 			final long serviceDefinitionId) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
+				
+		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getOrchestratorStoresByConsumer(page, size, direction, sortField, consumerSystemId, serviceDefinitionId));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<OrchestratorStore> getOrchestratorStoresByConsumer(final int page,
+			final int size, final Direction direction, final String sortField, final long consumerSystemId,
+			final long serviceDefinitionId) {
+		logger.debug("getOrchestratorStoresByConsumer started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
@@ -178,13 +195,12 @@ public class OrchestratorStoreDBService {
 		}
 		
 		try {		
-			return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
+			return orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public OrchestratorStoreListResponseDTO createOrchestratorStoresByIdResponse(
