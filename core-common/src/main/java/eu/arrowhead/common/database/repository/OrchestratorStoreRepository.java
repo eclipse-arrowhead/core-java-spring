@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,12 +16,11 @@ import eu.arrowhead.common.database.entity.System;
 @Repository
 public interface OrchestratorStoreRepository extends RefreshableRepository<OrchestratorStore, Long> {
 	
-	@Query("SELECT entry FROM OrchestratorStore entry WHERE priority = ?1 ")
-	public Page<OrchestratorStore> findAllByPriority(final int priority, PageRequest regRequest);
+	public Page<OrchestratorStore> findAllByPriority(final int priority, final Pageable regRequest);
 
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE  consumerSystem.id = ?1 AND serviceDefinition.id = ?2 ")
 	public Page<OrchestratorStore> findAllByConsumerIdAndServiceDefinitionId(final long systemId,
-			final long serviceDefinitionId, final PageRequest of);
+			final long serviceDefinitionId, final Pageable regRequest);
 	
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE  consumerSystem.id = ?1 AND serviceDefinition.id = ?2 ")
 	public List<OrchestratorStore> findAllByConsumerIdAndServiceDefinitionId(final long systemId,
@@ -35,7 +34,7 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	public Optional<OrchestratorStore> findByConsumerIdAndServiceDefinitionIdAndProviderId(final long consumerId,
 			final long serviceDefinitionId, final long providerId);
 
-	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(System consumerSystem,
-			ServiceDefinition serviceDefinition, Sort sortByField);
+	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem,
+			final ServiceDefinition serviceDefinition,final Sort sortByField);
 	
 }
