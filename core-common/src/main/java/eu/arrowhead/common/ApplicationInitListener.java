@@ -24,7 +24,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,29 +40,28 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 
-@Component
-public class ApplicationInitListener {
+public abstract class ApplicationInitListener {
 	
 	//=================================================================================================
 	// members
 
-	private final Logger logger = LogManager.getLogger(ApplicationInitListener.class);
+	protected final Logger logger = LogManager.getLogger(ApplicationInitListener.class);
 	
 	private static final int MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES = 3;
 	private static final int WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS = 15;
 
 	@Autowired
-	private SSLProperties sslProperties;
+	protected SSLProperties sslProperties;
 	
 	@Autowired
-	private CoreSystemRegistrationProperties coreSystemRegistrationProperties;
+	protected CoreSystemRegistrationProperties coreSystemRegistrationProperties;
 	
 	@Autowired
-	private HttpService httpService;
+	protected HttpService httpService;
 	
-	private PublicKey publicKey;
+	protected PublicKey publicKey;
 	
-	private boolean standaloneMode = false;
+	protected boolean standaloneMode = false;
 	
 	//=================================================================================================
 	// methods
@@ -85,6 +83,7 @@ public class ApplicationInitListener {
 		}
 		
 		registerCoreSystemServicesToServiceRegistry(event.getApplicationContext());
+		customInit(event);
 		
 		logger.debug("Initialization in onApplicationEvent() is done.");
 	}
@@ -124,6 +123,9 @@ public class ApplicationInitListener {
 	
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	protected void customInit(final ContextRefreshedEvent event) {} 
 	
 	//-------------------------------------------------------------------------------------------------
 	private KeyStore initializeKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
