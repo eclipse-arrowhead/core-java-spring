@@ -9,10 +9,6 @@ CREATE TABLE `cloud` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `operator` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  `port` int(11) NOT NULL,
-  `gatekeeper_service_uri` varchar(255) NOT NULL,
-  `authentication_info` varchar(2047) DEFAULT NULL,
   `secure` int(1) NOT NULL DEFAULT 0 COMMENT 'Is secure?',
   `neighbor` int(1) NOT NULL DEFAULT 0 COMMENT 'Is neighbor cloud?',
   `own_cloud` int(1) NOT NULL DEFAULT 0 COMMENT 'Is own cloud?',
@@ -20,6 +16,22 @@ CREATE TABLE `cloud` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cloud` (`operator`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `cloud_gatekeeper`;
+CREATE TABLE `cloud_gatekeeper` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `cloud_id` bigint(20) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `port` int(11) NOT NULL,
+  `service_uri` varchar(255) NOT NULL,
+  `authentication_info` varchar(2047) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cloud` (`cloud_id`),
+  KEY `fk_cloud` (`cloud_id`),
+  CONSTRAINT `fk_cloud` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `system_`;
@@ -389,12 +401,14 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'%';
 DROP USER IF EXISTS 'gatekeeper'@'localhost';
 CREATE USER IF NOT EXISTS 'gatekeeper'@'localhost' IDENTIFIED BY 'fbJKYzKhU5t8QtT';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gatekeeper'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gatekeeper'@'localhost';
 
 DROP USER IF EXISTS 'gatekeeper'@'%';
 CREATE USER IF NOT EXISTS 'gatekeeper'@'%' IDENTIFIED BY 'fbJKYzKhU5t8QtT';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gatekeeper'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper` TO 'gatekeeper'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gatekeeper'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gatekeeper'@'%';
 
@@ -402,12 +416,14 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gatekeeper'@'%';
 DROP USER IF EXISTS 'gateway'@'localhost';
 CREATE USER IF NOT EXISTS 'gateway'@'localhost' IDENTIFIED BY 'LfiSM9DpGfDEP5g';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gateway'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper` TO 'gateway'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gateway'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gateway'@'localhost';
 
 DROP USER IF EXISTS 'gateway'@'%';
 CREATE USER IF NOT EXISTS 'gateway'@'%' IDENTIFIED BY 'LfiSM9DpGfDEP5g';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gateway'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gateway'@'%';
 
