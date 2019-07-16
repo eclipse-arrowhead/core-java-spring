@@ -195,7 +195,9 @@ public class OrchestratorStoreDBService {
 		}
 		
 		try {		
-			return orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+			Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(), PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+			
+			return orchestratorStorePage;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -314,9 +316,9 @@ public class OrchestratorStoreDBService {
 			
 			final List<OrchestratorStore> orchestratorStoreList = getInvolvedOrchestratorStoreListByPriorityMap(modifiedPriorityMap);	
 			
-			final long consumerSystemIdForPriorityMapValidation = orchestratorStoreList.get(orchestratorStoreList.size() - 1).getConsumerSystem().getId();
-			final long serviceDefinitionIdForPriorityMapValidation = orchestratorStoreList.get(0).getServiceDefinition().getId();			
-			validatemodifiedPriorityMapSize(consumerSystemIdForPriorityMapValidation, serviceDefinitionIdForPriorityMapValidation, modifiedPriorityMap.size());	
+			final System consumerSystemForPriorityMapValidation = orchestratorStoreList.get(0).getConsumerSystem();
+			final ServiceDefinition serviceDefinitionForPriorityMapValidation = orchestratorStoreList.get(0).getServiceDefinition();			
+			validatemodifiedPriorityMapSize(consumerSystemForPriorityMapValidation, serviceDefinitionForPriorityMapValidation, modifiedPriorityMap.size());	
 			
 			refreshOrchestratorStoreListBymodifiedPriorityMap(orchestratorStoreList, modifiedPriorityMap);
 			
@@ -343,7 +345,7 @@ public class OrchestratorStoreDBService {
 		final int validPriority = validatePriority(orchestratorStoreRequestByIdDTO.getPriority());
 		final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestByIdDTO.getCloudId());		
 		
-		checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem.getId(), validServiceDefinition.getId(), validProviderSystem.getId());
+		checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem, validServiceDefinition, validProviderSystem);
 	
 		return new OrchestratorStore(
 				validServiceDefinition,
@@ -397,10 +399,10 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(final long consumerSystemId, final long serviceDefinitionId, final long providerSystemId) {
+	private void checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(final System consumerSystem, final ServiceDefinition serviceDefinition, final System providerSystem) {
 		logger.debug("checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId started...");
 		
-		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerIdAndServiceDefinitionIdAndProviderId( consumerSystemId, serviceDefinitionId, providerSystemId);
+		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystem( consumerSystem, serviceDefinition, providerSystem);
 		if (orchestratorStoreOptional.isPresent()) {
 			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId " + VIOLATES_UNIQUE_CONSTRAINT );
 		}
@@ -519,12 +521,12 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validatemodifiedPriorityMapSize(final long anyConsumerIdForValidation, final long anyServiceDefinitionId, final int modifiedPriorityMapSize) {
+	private void validatemodifiedPriorityMapSize(final System anyConsumerSystemForValidation, final ServiceDefinition anyServiceDefinition, final int modifiedPriorityMapSize) {
 		logger.debug("validatemodifiedPriorityMapSize started...");
 		
-		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyConsumerIdForValidation, anyServiceDefinitionId);
+		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(anyConsumerSystemForValidation, anyServiceDefinition);
 		if (orchestratorStoreList.isEmpty()) {
-			throw new InvalidParameterException("Priorities for consumerSystemId : " + anyConsumerIdForValidation + ", and serviceDefinitionId : " + anyServiceDefinitionId + ", " + NOT_IN_DB_ERROR_MESAGE );
+			throw new InvalidParameterException("Priorities for consumerSystemId : " + anyConsumerSystemForValidation.getId() + ", and serviceDefinitionId : " + anyServiceDefinition.getId() + ", " + NOT_IN_DB_ERROR_MESAGE );
 		}
 		
 		if (orchestratorStoreList.size() != modifiedPriorityMapSize) {
@@ -536,11 +538,11 @@ public class OrchestratorStoreDBService {
 	private OrchestratorStore saveWithPriorityCheck(final OrchestratorStore orchestratorStore) {
 		logger.debug("saveWithPriorityCheck started...");
 
-		final long consumerSystemId = orchestratorStore.getConsumerSystem().getId();
-		final long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
+		final System consumerSystem = orchestratorStore.getConsumerSystem();
+		final ServiceDefinition serviceDefinition = orchestratorStore.getServiceDefinition();
 		final int priority = orchestratorStore.getPriority();
 		
-		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(consumerSystemId, serviceDefinitionId);
+		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerSystem, serviceDefinition);
 		if (orchestratorStoreList.isEmpty()) {
 			orchestratorStore.setPriority(CommonConstants.TOP_PRIORITY);
 			
