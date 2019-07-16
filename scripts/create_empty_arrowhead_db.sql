@@ -288,60 +288,127 @@ CREATE TABLE `choreographer_next_steps` (
 
 -- Service Registry
 DROP USER IF EXISTS 'service_registry'@'localhost';
-CREATE USER IF NOT EXISTS 'service_registry'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry` TO 'service_registry'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_registry_interface_connection` TO 'service_registry'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_definition` TO 'service_registry'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_interface` TO 'service_registry'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`system` TO 'service_registry'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'service_registry'@'localhost';
+CREATE USER IF NOT EXISTS 'service_registry'@'localhost' IDENTIFIED BY 'ZzNNpxrbZGVvfJ8';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'service_registry'@'localhost';
+
+DROP USER IF EXISTS 'service_registry'@'%';
+CREATE USER IF NOT EXISTS 'service_registry'@'%' IDENTIFIED BY 'ZzNNpxrbZGVvfJ8';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'service_registry'@'%';
 
 -- Authorization
 DROP USER IF EXISTS 'authorization'@'localhost';
-CREATE USER IF NOT EXISTS 'authorization'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`cloud` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_inter_cloud` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_inter_cloud_interface_connection` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_intra_cloud` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_definition` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_interface` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`system` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'authorization'@'localhost';
+CREATE USER IF NOT EXISTS 'authorization'@'localhost' IDENTIFIED BY 'hqZFUkuHxhekio3';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud_interface_connection` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'authorization'@'localhost';
+
+DROP USER IF EXISTS 'authorization'@'%';
+CREATE USER IF NOT EXISTS 'authorization'@'%' IDENTIFIED BY 'hqZFUkuHxhekio3';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud_interface_connection` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'authorization'@'%';
 
 -- Orchestrator
 DROP USER IF EXISTS 'orchestrator'@'localhost';
-CREATE USER IF NOT EXISTS 'orchestrator'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`cloud` TO 'orchestrator'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_interface_connection` TO 'orchestrator'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_definition` TO 'orchestrator'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_interface` TO 'orchestrator'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`orchestrator_store` TO 'orchestrator'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`system` TO 'orchestrator'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'orchestrator'@'localhost';
+CREATE USER IF NOT EXISTS 'orchestrator'@'localhost' IDENTIFIED BY 'KbgD2mTr8DQ4vtc';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_interface_connection` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'localhost';
+
+DROP USER IF EXISTS 'orchestrator'@'%';
+CREATE USER IF NOT EXISTS 'orchestrator'@'%' IDENTIFIED BY 'KbgD2mTr8DQ4vtc';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_interface_connection` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'%';
 
 -- Event Handler
 DROP USER IF EXISTS 'event_handler'@'localhost';
-CREATE USER IF NOT EXISTS 'event_handler'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`event_handler_event` TO 'event_handler'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`event_handler_event_subscriber` TO 'event_handler'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`system` TO 'event_handler'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'event_handler'@'localhost';
+CREATE USER IF NOT EXISTS 'event_handler'@'localhost' IDENTIFIED BY 'gRLjXbqu9YwYhfK';
+GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event_subscriber` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'localhost';
+
+DROP USER IF EXISTS 'event_handler'@'%';
+CREATE USER IF NOT EXISTS 'event_handler'@'%' IDENTIFIED BY 'gRLjXbqu9YwYhfK';
+GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event` TO 'event_handler'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event_subscriber` TO 'event_handler'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'event_handler'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'%';
 
 -- Choreographer
 DROP USER IF EXISTS 'choreographer'@'localhost';
-CREATE USER IF NOT EXISTS 'choreographer'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_next_steps` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_plan` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_plan_step` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`choreographer_plan_step_service` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_definition` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'choreographer'@'localhost';
+CREATE USER IF NOT EXISTS 'choreographer'@'localhost' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_steps` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step_service` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'localhost';
+
+DROP USER IF EXISTS 'choreographer'@'%';
+CREATE USER IF NOT EXISTS 'choreographer'@'%' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_steps` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step_service` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'%';
 
 -- Gatekeeper
 DROP USER IF EXISTS 'gatekeeper'@'localhost';
-CREATE USER IF NOT EXISTS 'gatekeeper'@'localhost' IDENTIFIED BY 'arrowhead';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`cloud` TO 'gatekeeper'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`relay` TO 'gatekeeper'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'gatekeeper'@'localhost';
+CREATE USER IF NOT EXISTS 'gatekeeper'@'localhost' IDENTIFIED BY 'fbJKYzKhU5t8QtT';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gatekeeper'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gatekeeper'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gatekeeper'@'localhost';
+
+DROP USER IF EXISTS 'gatekeeper'@'%';
+CREATE USER IF NOT EXISTS 'gatekeeper'@'%' IDENTIFIED BY 'fbJKYzKhU5t8QtT';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gatekeeper'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gatekeeper'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gatekeeper'@'%';
+
+-- Gateway
+DROP USER IF EXISTS 'gateway'@'localhost';
+CREATE USER IF NOT EXISTS 'gateway'@'localhost' IDENTIFIED BY 'LfiSM9DpGfDEP5g';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gateway'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gateway'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gateway'@'localhost';
+
+DROP USER IF EXISTS 'gateway'@'%';
+CREATE USER IF NOT EXISTS 'gateway'@'%' IDENTIFIED BY 'LfiSM9DpGfDEP5g';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gateway'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gateway'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gateway'@'%';
+
 FLUSH PRIVILEGES;
