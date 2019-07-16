@@ -11,7 +11,9 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -95,6 +97,14 @@ public class OrchestratorStoreDBService {
 			final Direction direction, final String sortField) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
 		
+		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getOrchestratorStoreEntries(page, size, direction, sortField));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Page<OrchestratorStore> getOrchestratorStoreEntries(final int page, final int size,
+			final Direction direction, final String sortField) {
+		logger.debug("getOrchestratorStoreEntriesResponse started...");
+		
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
@@ -105,7 +115,7 @@ public class OrchestratorStoreDBService {
 		}
 		
 		try {
-			return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(orchestratorStoreRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
+			return orchestratorStoreRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
