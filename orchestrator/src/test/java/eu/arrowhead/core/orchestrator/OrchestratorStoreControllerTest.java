@@ -477,6 +477,7 @@ public class OrchestratorStoreControllerTest {
 		final Long consumerSystemId = 1L;
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
+		final Long serviceInterfaceId = 1L;
 		final Integer priority = 1;
 		final Map<String,String> attribute = null;
 		
@@ -485,6 +486,7 @@ public class OrchestratorStoreControllerTest {
 				consumerSystemId,
 				providerSystemId,
 				cloudId,
+				serviceInterfaceId,
 				priority,
 				attribute);
 	}

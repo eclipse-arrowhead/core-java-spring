@@ -18,8 +18,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table (uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority"}),
-		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "providerSystemId"})
+		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority", "serviceInterfaceId"}),
+		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "providerSystemId", "serviceInterfaceId"})
 		})
 public class OrchestratorStore {
 
@@ -48,6 +48,10 @@ public class OrchestratorStore {
 	@JoinColumn (name = "providerCloudId", referencedColumnName = "id", nullable = true)
 	private Cloud providerCloud;
 	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "serviceInterfaceId", referencedColumnName = "id", nullable = true)
+	private ServiceInterface serviceInterface;
+	
 	@Column (nullable = false)
 	private int priority;
 	
@@ -68,12 +72,13 @@ public class OrchestratorStore {
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStore(final ServiceDefinition serviceDefinition, final System consumerSystem, final System providerSystem,
-			final Cloud providerCloud, final Integer priority, final String attribute, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
+			final Cloud providerCloud, final ServiceInterface serviceInterface, final Integer priority, final String attribute, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
 		super();
 		this.serviceDefinition = serviceDefinition;
 		this.consumerSystem = consumerSystem;
 		this.providerSystem = providerSystem;
 		this.providerCloud = providerCloud;
+		this.serviceInterface = serviceInterface;
 		this.priority = priority;
 		this.attribute = attribute;
 		this.createdAt = createdAt;
@@ -99,6 +104,7 @@ public class OrchestratorStore {
 	public System getConsumerSystem() {	return consumerSystem; }
 	public System getProviderSystem() {	return providerSystem; }
 	public Cloud getProviderCloud() { return providerCloud; }
+	public ServiceInterface serviceInterface() { return serviceInterface;}
 	public int getPriority() { return priority; }
 	public String getAttribute() { return attribute; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
@@ -110,6 +116,7 @@ public class OrchestratorStore {
 	public void setConsumerSystem(final System consumerSystem) { this.consumerSystem = consumerSystem; }
 	public void setProviderSystem(final System providerSystem) { this.providerSystem = providerSystem; }
 	public void setProviderCloud(final Cloud providerCloud) { this.providerCloud = providerCloud; }
+	public void setServiceInterface(final ServiceInterface serviceInterface) { this.serviceInterface = serviceInterface ;}
 	public void setPriority(final int priority) { this.priority = priority; }
 	public void setAttribute(final String attribute) { this.attribute = attribute; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
@@ -120,7 +127,7 @@ public class OrchestratorStore {
 	public String toString() {
 		return "OrchestratorStore [id=" + id + ", serviceDefinition=" + serviceDefinition + ", consumerSystem="
 				+ consumerSystem + ", providerSystem=" + providerSystem + ", providerCloud=" + providerCloud
-				+ ", priority=" + priority + ", attribute=" + attribute + ", createdAt=" + createdAt + ", updatedAt="
+				+ ", serviceInterface=" + serviceInterface + ", priority=" + priority + ", attribute=" + attribute + ", createdAt=" + createdAt + ", updatedAt="
 				+ updatedAt + "]";
 	}
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.System;
 
 @Repository
@@ -23,8 +24,8 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	public Optional<OrchestratorStore> findByConsumerSystemAndServiceDefinitionAndPriority(final System consumerSystem,
 			final ServiceDefinition serviceDefinition,final int priority);
 	
-	public Optional<OrchestratorStore> findByConsumerSystemAndServiceDefinitionAndProviderSystem(final System consumerSystem,
-			final ServiceDefinition serviceDefinition, final System providerSystem);
+	public Optional<OrchestratorStore> findByConsumerSystemAndServiceDefinitionAndProviderSystemAndServiceInterface(final System consumerSystem,
+			final ServiceDefinition serviceDefinition, final System providerSystem, final ServiceInterface serviceInterface);
 
 	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem,
 			final ServiceDefinition serviceDefinition,final Sort sortByField);

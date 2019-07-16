@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -24,10 +23,12 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
+import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
@@ -53,6 +54,9 @@ public class OrchestratorStoreDBService {
 	
 	@Autowired
 	private CloudRepository cloudRepository;
+	
+	@Autowired
+	private ServiceInterfaceRepository serviceInterfaceRepository;
 	
 	@Autowired
 	private ServiceDefinitionRepository serviceDefinitionRepository;
@@ -343,15 +347,17 @@ public class OrchestratorStoreDBService {
 		final System validProviderSystem = validateSystemId(orchestratorStoreRequestByIdDTO.getProviderSystemId());		
 		final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(orchestratorStoreRequestByIdDTO.getServiceDefinitionId());	
 		final int validPriority = validatePriority(orchestratorStoreRequestByIdDTO.getPriority());
-		final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestByIdDTO.getCloudId());		
+		final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestByIdDTO.getCloudId());	
+		final ServiceInterface validInterface = validateServiceInterface(orchestratorStoreRequestByIdDTO.getServiceInterfaceId());
 		
-		checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem, validServiceDefinition, validProviderSystem);
+		checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem, validServiceDefinition, validProviderSystem, validInterface);
 	
 		return new OrchestratorStore(
 				validServiceDefinition,
 				validConsumerSystem,
 				validProviderSystem,
 				validProviderCloud,
+				validInterface,
 				validPriority,
 				Utilities.map2Text(orchestratorStoreRequestByIdDTO.getAttribute()),
 				null,
@@ -399,10 +405,10 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(final System consumerSystem, final ServiceDefinition serviceDefinition, final System providerSystem) {
+	private void checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(final System consumerSystem, final ServiceDefinition serviceDefinition, final System providerSystem, final ServiceInterface serviceInterface) {
 		logger.debug("checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId started...");
 		
-		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystem( consumerSystem, serviceDefinition, providerSystem);
+		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemAndServiceInterface( consumerSystem, serviceDefinition, providerSystem, serviceInterface);
 		if (orchestratorStoreOptional.isPresent()) {
 			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId " + VIOLATES_UNIQUE_CONSTRAINT );
 		}
@@ -426,6 +432,26 @@ public class OrchestratorStoreDBService {
 		}
 		
 		return cloudOptional.get();
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private ServiceInterface validateServiceInterface(final Long serviceInterfaceId) {
+		logger.debug("validateServiceInterfaceId started...");
+		
+		if (serviceInterfaceId == null) {
+			return null;
+		}
+		
+		if( serviceInterfaceId < 1) {
+			throw new InvalidParameterException("CloudId " + LESS_THEN_ONE_ERROR_MESAGE );
+		}	
+
+		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findById(serviceInterfaceId);
+		if (serviceInterfaceOptional.isEmpty()) {
+			throw new InvalidParameterException("ServiceInterface by id :" + serviceInterfaceId + NOT_IN_DB_ERROR_MESAGE );
+		}
+		
+		return serviceInterfaceOptional.get();
 	}
 
 	//-------------------------------------------------------------------------------------------------
