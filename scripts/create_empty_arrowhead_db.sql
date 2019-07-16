@@ -296,7 +296,7 @@ GRANT ALL PRIVILEGES ON `arrowhead_shared`.`service_interface` TO 'service_regis
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`system` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`logs` TO 'service_registry'@'localhost';
 
--- Authorizazion
+-- Authorization
 DROP USER IF EXISTS 'authorization'@'localhost';
 CREATE USER IF NOT EXISTS 'authorization'@'localhost' IDENTIFIED BY 'arrowhead';
 GRANT ALL PRIVILEGES ON `arrowhead_shared`.`authorization_cloud` TO 'authorization'@'localhost';
