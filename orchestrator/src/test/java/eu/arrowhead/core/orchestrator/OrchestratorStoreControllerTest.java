@@ -478,7 +478,7 @@ public class OrchestratorStoreControllerTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -551,7 +551,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreResponseDTO> getOrchestratorStoreResponseDTOListForTest(final int size) {
 		
-		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList(size);
+		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList<>(size);
 		
 		for (int i = 0; i < size; i++) {
 			final OrchestratorStoreResponseDTO orchestratorStoreResponseDTO = getOrchestratorStoreResponseDTOForTest();
@@ -599,21 +599,21 @@ public class OrchestratorStoreControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ZonedDateTime getUpdatedAtForTest() {
+	private String getUpdatedAtForTest() {
 			
-		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04 14:43:19");
+		return "2019-07-04 14:43:19";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ZonedDateTime getCreatedAtForTest() {
+	private String getCreatedAtForTest() {
 			
-		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04 14:43:19");
+		return "2019-07-04 14:43:19";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String getAttributeForTest() {
+	private Map<String,String> getAttributeForTest() {
 			
-		return null;
+		return new HashMap<String, String>();
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -312,7 +312,7 @@ public class DTOConverter {
 			convertSystemToSystemResponseDTO(entity.getProviderSystem()),
 			entity.getProviderCloud() != null ? convertCloudToCloudResponseDTO(entity.getProviderCloud()) : null,
 			entity.getPriority(),
-			entity.getAttribute(),
+			Utilities.text2Map(entity.getAttribute()),
 			Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
 			Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 		

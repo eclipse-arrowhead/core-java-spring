@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class OrchestratorStoreRequestDTO implements Serializable{
 
@@ -14,7 +15,7 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	private SystemRequestDTO providerSystemDTO;
 	private CloudRequestDTO cloudDTO;
 	private Integer priority;	
-	private String attribute;
+	private Map<String,String> attribute;
 	
 	//=================================================================================================
 	// methods
@@ -24,7 +25,7 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreRequestDTO(final ServiceDefinitionRequestDTO serviceDefinitionDTO, final SystemRequestDTO consumerSystemDTO,
-			final SystemRequestDTO providerSystemDTO, final CloudRequestDTO cloudDTO, final Integer priority, final String attribute) {
+			final SystemRequestDTO providerSystemDTO, final CloudRequestDTO cloudDTO, final Integer priority, final Map<String,String> attribute) {
 		this.serviceDefinitionDTO = serviceDefinitionDTO;
 		this.consumerSystemDTO = consumerSystemDTO;
 		this.providerSystemDTO = providerSystemDTO;
@@ -39,7 +40,7 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	public SystemRequestDTO getProviderSystemDTO() {return providerSystemDTO;}
 	public CloudRequestDTO getCloudDTO() {return cloudDTO;}
 	public Integer getPriority() {return priority;}
-	public String getAttribute() {return attribute;}	
+	public Map<String,String> getAttribute() {return attribute;}	
 
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinitionId(final ServiceDefinitionRequestDTO serviceDefinitionDTO) {this.serviceDefinitionDTO = serviceDefinitionDTO;}
@@ -47,5 +48,5 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	public void setProviderSystemId(final SystemRequestDTO providerSystemDTO) {this.providerSystemDTO = providerSystemDTO;}
 	public void setCloudId(final CloudRequestDTO cloudDTO) {this.cloudDTO = cloudDTO;}
 	public void setPriority(final Integer priority) {this.priority = priority;}
-	public void setAttribute(final String attribute) {this.attribute = attribute;}
+	public void setAttribute(final Map<String,String> attribute) {this.attribute = attribute;}
 }

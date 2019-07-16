@@ -415,7 +415,7 @@ public class OrchestratorStoreDBServiceTest {
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(getProviderCloudForTest()));
 		when(orchestratorStoreRepository.findByConsumerIdAndServiceDefinitionIdAndProviderId(anyLong(), anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
-		when(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(new ArrayList());
+		when(orchestratorStoreRepository.findAllByConsumerIdAndServiceDefinitionId(anyLong(), anyLong())).thenReturn(new ArrayList<>());
 		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
 		
 		orchestratorStoreDBService.createOrchestratorStoreEntityById(getOrchestratorStoreRequestByIdDTOForTest());
@@ -558,7 +558,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -577,7 +577,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -596,7 +596,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -615,7 +615,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = -1L;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -634,7 +634,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = -1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -653,7 +653,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = -1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -672,7 +672,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -690,7 +690,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -709,7 +709,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = null;
 		final Long cloudId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -728,7 +728,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = null;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -747,7 +747,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = null;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -766,7 +766,7 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
 		final Integer priority = Integer.MAX_VALUE;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
@@ -793,24 +793,9 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOEmptyListForTest() {
 		
-		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList();
+		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<>();
 		
 		return orchestratorStoreRequestByIdDTOList;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private OrchestratorStoreResponseDTO getOrchestratorStoreResponseDTOForTest() {
-		
-		return new OrchestratorStoreResponseDTO(
-				getIdForTest(),
-				getServiceDefinitionResponseDTOForTest(),
-				getConsumerSystemResponseDTOForTest(),
-				getProviderSystemResponseDTOForTest(),
-				getProviderCloudResponseDTOForTest(),
-				getPriorityForTest(),
-				getAttributeForTest(),
-				getCreatedAtForTest(),
-				getUpdatedAtForTest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -822,7 +807,7 @@ public class OrchestratorStoreDBServiceTest {
 				getProviderSystemForTest(),
 				getProviderCloudForTest(),
 				getPriorityForTest(),
-				getAttributeForTest(),
+				getAttributeStringForTest(),
 				getCreatedAtForTest(),
 				getUpdatedAtForTest()
 				);
@@ -835,7 +820,7 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStore> getOrchestratorStoreListForTest(final int listSize) {
 		
-		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList<>(listSize);
 		
 		for (int i = 0; i < listSize; i++) {
 			
@@ -851,7 +836,7 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStore> getOrchestratorStoreListForRemoveOrchestratorStoreTest(final int listSize) {
 		
-		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
+		final List<OrchestratorStore> orchestratorStoreList = new ArrayList<>(listSize);
 		
 		for (int i = 1; i < listSize+1; i++) {
 			
@@ -861,25 +846,6 @@ public class OrchestratorStoreDBServiceTest {
 			orchestratorStore.setPriority(i + 1);
 			orchestratorStoreList.add(orchestratorStore);
 		}
-		return orchestratorStoreList;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> getOrchestratorStoreListWithSomeEmptyOrchestratoreStoreForTest(final int listSize) {
-		
-		final List<OrchestratorStore> orchestratorStoreList = new ArrayList(listSize);
-		
-		for (int i = 0; i < listSize; i++) {
-			
-			final OrchestratorStore orchestratorStore = getOrchestratorStore();
-			orchestratorStore.getProviderSystem().setId(i + 1L);
-			orchestratorStoreList.add(orchestratorStore);
-		}
-		
-		for (int i = 0; i < listSize; i++) {		
-			orchestratorStoreList.add(new OrchestratorStore());
-		}
-		
 		return orchestratorStoreList;
 	}
 	
@@ -933,7 +899,7 @@ public class OrchestratorStoreDBServiceTest {
 	private OrchestratorStoreModifyPriorityRequestDTO getOrchestratorStoreModifyPriorityRequestDTOWithEmptyRequest() {
 		final OrchestratorStoreModifyPriorityRequestDTO request = new OrchestratorStoreModifyPriorityRequestDTO();
 		
-		final Map<Long, Integer> priorityMap = new HashMap(0); 
+		final Map<Long, Integer> priorityMap = new HashMap<>(0); 
 		request.setPriorityMap(priorityMap);
 		
 		return request;
@@ -951,7 +917,7 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String getAttributeForTest() {
+	private String getAttributeStringForTest() {
 			
 		return null;
 	}
@@ -960,30 +926,6 @@ public class OrchestratorStoreDBServiceTest {
 	private Integer getPriorityForTest() {
 			
 		return 1;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private CloudResponseDTO getProviderCloudResponseDTOForTest() {
-			
-		return null;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private SystemResponseDTO getProviderSystemResponseDTOForTest() {
-			// TODO Auto-generated method stub
-		return null;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private SystemResponseDTO getConsumerSystemResponseDTOForTest() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-	
-	//-------------------------------------------------------------------------------------------------
-	private ServiceDefinitionResponseDTO getServiceDefinitionResponseDTOForTest() {
-			// TODO Auto-generated method stub
-		return null;
 	}
 
 	//-------------------------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class OrchestratorStoreRequestByIdDTO implements Serializable {
 
@@ -14,7 +15,7 @@ public class OrchestratorStoreRequestByIdDTO implements Serializable {
 	private Long providerSystemId;
 	private Long cloudId;
 	private Integer priority;	
-	private String attribute;
+	private Map<String,String> attribute;
 	
 	//=================================================================================================
 	// methods
@@ -22,7 +23,7 @@ public class OrchestratorStoreRequestByIdDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreRequestByIdDTO() {}
 
-	public OrchestratorStoreRequestByIdDTO(final Long serviceDefinitionId, final Long consumerSystemId, final Long providerSystemId, final Long cloudId, final Integer priority, final String attribute) {
+	public OrchestratorStoreRequestByIdDTO(final Long serviceDefinitionId, final Long consumerSystemId, final Long providerSystemId, final Long cloudId, final Integer priority, final Map<String,String> attribute) {
 		this.serviceDefinitionId = serviceDefinitionId;
 		this.consumerSystemId = consumerSystemId;
 		this.providerSystemId = providerSystemId;
@@ -37,7 +38,7 @@ public class OrchestratorStoreRequestByIdDTO implements Serializable {
 	public Long getProviderSystemId() {return providerSystemId;}
 	public Long getCloudId() {return cloudId;}
 	public Integer getPriority() {return priority;}
-	public String getAttribute() {return attribute;}	
+	public Map<String,String> getAttribute() {return attribute;}	
 
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinitionId(final Long serviceDefinitionId) {this.serviceDefinitionId = serviceDefinitionId;}
@@ -45,5 +46,5 @@ public class OrchestratorStoreRequestByIdDTO implements Serializable {
 	public void setProviderSystemId(final Long providerSystemId) {this.providerSystemId = providerSystemId;}
 	public void setCloudId(final Long cloudId) {this.cloudId = cloudId;}
 	public void setPriority(final Integer priority) {this.priority = priority;}
-	public void setAttribute(final String attribute) {this.attribute = attribute;}
+	public void setAttribute(final Map<String,String> attribute) {this.attribute = attribute;}
 }

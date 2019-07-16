@@ -347,7 +347,7 @@ public class OrchestratorStoreDBService {
 				validProviderSystem,
 				validProviderCloud,
 				validPriority,
-				orchestratorStoreRequestByIdDTO.getAttribute(),
+				Utilities.map2Text(orchestratorStoreRequestByIdDTO.getAttribute()),
 				null,
 				null);	
 	}
