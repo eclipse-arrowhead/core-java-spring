@@ -49,19 +49,22 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 	//-------------------------------------------------------------------------------------------------
 	private void registerOwnCloud(final ApplicationContext appContext) {
 		logger.debug("registerOwnCloud started...");
-		String name = Defaults.DEFAULT_OWN_CLOUD_NAME;
-		String operator = Defaults.DEFAULT_OWN_CLOUD_OPERATOR;
 		
-		if (sslProperties.isSslEnabled()) {
-			@SuppressWarnings("unchecked")
-			final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-			final String serverCN = (String) context.get(CommonConstants.SERVER_COMMON_NAME);
-			final String[] serverFields = serverCN.split("\\.");
-			name = serverFields[1];
-			operator = serverFields[2];
+		if (!standaloneMode) {
+			String name = Defaults.DEFAULT_OWN_CLOUD_NAME;
+			String operator = Defaults.DEFAULT_OWN_CLOUD_OPERATOR;
+			
+			if (sslProperties.isSslEnabled()) {
+				@SuppressWarnings("unchecked")
+				final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+				final String serverCN = (String) context.get(CommonConstants.SERVER_COMMON_NAME);
+				final String[] serverFields = serverCN.split("\\.");
+				name = serverFields[1];
+				operator = serverFields[2];
+			}
+			
+			commonDBService.insertOwnCloudWithoutGatekeeper(operator, name, sslProperties.isSslEnabled());
+			logger.info("{}.{} own cloud is registered in {} mode.", name, operator, getModeString());
 		}
-		
-		commonDBService.insertOwnCloudWithoutGatekeeper(operator, name, sslProperties.isSslEnabled());
-		logger.info("{}.{} own cloud is registered in {} mode.", name, operator, getModeString());
 	}
 }
