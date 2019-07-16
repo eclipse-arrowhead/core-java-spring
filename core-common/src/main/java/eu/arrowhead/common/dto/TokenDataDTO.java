@@ -44,8 +44,8 @@ public class TokenDataDTO implements Serializable {
 	public String getToken() { return token; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setProviderName(String providerName) { this.providerName = providerName; }
-	public void setProviderAddress(String providerAddress) { this.providerAddress = providerAddress; }
-	public void setProviderPort(int providerPort) { this.providerPort = providerPort; }
-	public void setToken(String token) { this.token = token; }
+	public void setProviderName(final String providerName) { this.providerName = providerName; }
+	public void setProviderAddress(final String providerAddress) { this.providerAddress = providerAddress; }
+	public void setProviderPort(final int providerPort) { this.providerPort = providerPort; }
+	public void setToken(final String token) { this.token = token; }
 }
