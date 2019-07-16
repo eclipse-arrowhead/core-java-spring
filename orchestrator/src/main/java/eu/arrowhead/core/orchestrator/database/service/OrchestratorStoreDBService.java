@@ -26,7 +26,6 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
-import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
@@ -46,9 +45,6 @@ public class OrchestratorStoreDBService {
 	
 	@Autowired
 	private OrchestratorStoreRepository orchestratorStoreRepository;
-	
-	@Autowired
-	private ServiceRegistryRepository serviceRegistryRepository;
 	
 	@Autowired
 	private SystemRepository systemRepository;
@@ -448,38 +444,6 @@ public class OrchestratorStoreDBService {
 		}
 		
 		return priorityMap;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private Map<Long, Integer> decreaseInvolvedPrioritiesInPriorityMap(final int priority, final Map<Long, Integer> priorityMap) {
-		logger.debug("modifyFromPriorityMap started...");
-		
-		final Map<Long, Integer> modifiedPriorityMap = new HashMap<>(priorityMap.size() - 1);
-		
-		for (final Long orchestratorStoreId : priorityMap.keySet()) {
-			int orchestratorStorePriority = priorityMap.get(orchestratorStoreId);
-			if (orchestratorStorePriority > priority) {
-				orchestratorStorePriority = orchestratorStorePriority - 1;
-			}
-			modifiedPriorityMap.put(orchestratorStoreId, orchestratorStorePriority);
-		}
-		
-		return modifiedPriorityMap;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> updateOrchestratorStoreListBymodifiedPriorityMap(final List<OrchestratorStore> orchestratorStoreList, final Map<Long, Integer> priorityMap ) {
-		logger.debug("updateOrchestratorStoreListBymodifiedPriorityMap started...");
-		
-		if (orchestratorStoreList.size() != priorityMap.size()) {
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG + " - " + MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
-		}
-		
-		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
-			orchestratorStore.setPriority(priorityMap.get(orchestratorStore.getId()));
-		}
-		
-		return orchestratorStoreList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
