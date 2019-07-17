@@ -1,4 +1,4 @@
-package eu.arrowhead.core.serviceregistry.intf;
+package eu.arrowhead.common.intf;
 
 import java.util.List;
 import java.util.regex.Matcher;

@@ -47,7 +47,7 @@ import eu.arrowhead.common.dto.SystemListResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.serviceregistry.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 
 @Service
 public class ServiceRegistryDBService {

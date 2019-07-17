@@ -42,7 +42,7 @@ import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.serviceregistry.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 
 @RunWith(SpringRunner.class)
 public class ServiceRegistryDBServiceServiceRegistryTest {
