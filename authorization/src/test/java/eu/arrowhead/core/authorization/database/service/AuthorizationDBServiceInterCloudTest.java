@@ -149,7 +149,7 @@ public class AuthorizationDBServiceInterCloudTest {
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(serviceDefinition));
 		
 		final Page<AuthorizationInterCloud> entry = authorizationDBService.createAuthorizationInterCloud(1L, Set.of(1L));
-		assertEquals(getValidTestCloud().getPort(), entry.getContent().get(0).getCloud().getPort());
+		assertEquals(getValidTestCloud().getName(), entry.getContent().get(0).getCloud().getName());
 	}
 	
 	//=================================================================================================
@@ -243,12 +243,11 @@ public class AuthorizationDBServiceInterCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static Cloud getValidTestCloud() {
-		final int port = 1234;
 		final boolean secure = true;
 		final boolean neighbor = false;
 		final boolean ownCloud = true;
 		
-		final Cloud cloud = new Cloud("testOperator", "testCloudName", "testcloudAddress", port, "testGatekeeperServiceUri", "testAuthenticationInfo", secure, neighbor, ownCloud);
+		final Cloud cloud = new Cloud("testOperator", "testCloudName", secure, neighbor, ownCloud);
 		cloud.setId(1);
 		cloud.setCreatedAt(zdTime);
 		cloud.setUpdatedAt(zdTime);
