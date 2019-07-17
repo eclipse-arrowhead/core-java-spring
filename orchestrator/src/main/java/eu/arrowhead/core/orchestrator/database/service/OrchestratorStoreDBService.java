@@ -266,15 +266,19 @@ public class OrchestratorStoreDBService {
 	public OrchestratorStore createOrchestratorStoreEntity(final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
 		logger.debug("createOrchestratorStoreEntity started...");
 		
-		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestDTO.getConsumerSystemId()); 
+		checkSystemIdValidity(orchestratorStoreRequestDTO.getConsumerSystemId()); 
 		
+		final Cloud validCloud = validateProviderCloud(orchestratorStoreRequestDTO.getCloudDTO());	
+		final boolean isLocalCloud = localCloudConditionCheck(validCloud);
 		
-			final OrchestratorStore orchestratorStore = validateOrchestratorStoreRequestById(orchestratorStoreRequestDTO);						
-			
-			return saveWithPriorityCheck(orchestratorStore);
+		if (isLocalCloud) {
+			return createLocalOrchestratorStoreEntry(orchestratorStoreRequestDTO);
+		}else {
+			return createForeignOrchestratorStoreEntry(orchestratorStoreRequestDTO);
+		}		
 	
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeOrchestratorStoreById(final long id) {
@@ -389,6 +393,24 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private void checkSystemIdValidity(final Long systemId) {
+		logger.debug("checkSystemIdValidity started...");
+		
+		if (systemId == null) {
+			throw new InvalidParameterException("SystemId " + NULL_ERROR_MESAGE);
+		}
+		
+		if (systemId < 1) {
+			throw new InvalidParameterException("SystemId " + LESS_THEN_ONE_ERROR_MESAGE);
+		}
+		
+		if (systemRepository.existsById(systemId)) {
+			throw new InvalidParameterException("System by id" + systemId + NOT_IN_DB_ERROR_MESAGE );
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private ServiceDefinition validateServiceDefinitionId(final Long serviceDefinitionId) {
 		logger.debug("validateServiceDefinitionId started...");
 		
@@ -443,12 +465,22 @@ public class OrchestratorStoreDBService {
 		logger.debug("validateProviderCloud started...");
 		
 		if (cloudRequestDTO == null) {
-			throw new InvalidParameterException("CloudRequestDTO " + NULL_ERROR_MESAGE );
+			return null;
 		}
 
-		final Optional<Cloud> cloudOptional = cloudRepository..findById(cloud);
+		if(Utilities.isEmpty(cloudRequestDTO.getOperator())) {
+			throw new InvalidParameterException("Cloud.Operator " + EMPTY_OR_NULL_ERROR_MESAGE );
+		}
+		final String operator = cloudRequestDTO.getOperator();
+		
+		if(Utilities.isEmpty(cloudRequestDTO.getName())) {
+			throw new InvalidParameterException("Cloud.Name " + EMPTY_OR_NULL_ERROR_MESAGE );
+		}
+		final String cloudName = cloudRequestDTO.getName();
+		
+		final Optional<Cloud> cloudOptional = cloudRepository.findByOperatorAndName(operator, cloudName);
 		if (cloudOptional.isEmpty()) {
-			throw new InvalidParameterException("Cloud by id :" + cloudId + NOT_IN_DB_ERROR_MESAGE );
+			throw new InvalidParameterException("Cloud by operator :" + operator + ", and name :"+ cloudName + NOT_IN_DB_ERROR_MESAGE );
 		}
 		
 		return cloudOptional.get();
@@ -662,4 +694,33 @@ public class OrchestratorStoreDBService {
 		orchestratorStoreRepository.flush();
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private boolean localCloudConditionCheck(Cloud cloud) {
+		
+		if (cloud == null || cloud.getOwnCloud()) {
+			return true;
+		}
+	
+		return false;
+	}
+
+	//-------------------------------------------------------------------------------------------------	
+	private OrchestratorStore createLocalOrchestratorStoreEntry(
+			OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+		logger.debug("createLocalOrchestratorStoreEntry started...");
+		
+		// TODO Implement method logic here
+		return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStore createForeignOrchestratorStoreEntry(
+			OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+		logger.debug("createForeignOrchestratorStoreEntry started...");
+		
+		// TODO Implement method logic here
+		return null;
+	}
+	
 }

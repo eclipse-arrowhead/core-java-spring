@@ -256,7 +256,7 @@ public class OrchestratorStoreController {
 		
 		checkOrchestratorStoreRequestDTOList(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		
-		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresByIdResponse(
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresResponse(
 				request);
 		
 		logger.debug(orchestratorStoreResponse.getCount() + " out of " + request.size() + " OrchestratorStore entries created successfully");
