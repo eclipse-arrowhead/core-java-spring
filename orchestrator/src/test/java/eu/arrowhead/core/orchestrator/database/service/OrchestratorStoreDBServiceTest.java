@@ -30,6 +30,7 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
+import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
@@ -59,6 +60,9 @@ public class OrchestratorStoreDBServiceTest {
 	
 	@Mock
 	CloudRepository cloudRepository;
+	
+	@Mock
+	ServiceInterfaceRepository serviceInterfaceRepository;
 	
 	//=================================================================================================
 	// methods
@@ -353,6 +357,7 @@ public class OrchestratorStoreDBServiceTest {
 		
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findById(anyLong())).thenReturn(Optional.of(getServiceIntefaceForTest()));
 
 		orchestratorStoreDBService.createOrchestratorStoreEntityById(getOrchestratorStoreRequestByIdDTOWithNullCloudIdForTest());
 	}
@@ -403,6 +408,7 @@ public class OrchestratorStoreDBServiceTest {
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(getProviderCloudForTest()));
+		when(serviceInterfaceRepository.findById(anyLong())).thenReturn(Optional.of(getServiceIntefaceForTest()));
 		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemAndServiceInterface(any(), any(), any(), any())).thenReturn(Optional.of(getOrchestratorStore()));
 		
 		orchestratorStoreDBService.createOrchestratorStoreEntityById(getOrchestratorStoreRequestByIdDTOForTest());
@@ -415,6 +421,7 @@ public class OrchestratorStoreDBServiceTest {
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(getProviderCloudForTest()));
+		when(serviceInterfaceRepository.findById(anyLong())).thenReturn(Optional.of(getServiceIntefaceForTest()));
 		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemAndServiceInterface(any(), any(), any(), any())).thenReturn(Optional.ofNullable(null));
 		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(new ArrayList<>());
 		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
@@ -430,6 +437,7 @@ public class OrchestratorStoreDBServiceTest {
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(getProviderCloudForTest()));
+		when(serviceInterfaceRepository.findById(anyLong())).thenReturn(Optional.of(getServiceIntefaceForTest()));
 		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemAndServiceInterface(any(), any(), any(), any())).thenReturn(Optional.ofNullable(null));
 		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
 		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
@@ -445,6 +453,7 @@ public class OrchestratorStoreDBServiceTest {
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
 		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(getProviderCloudForTest()));
+		when(serviceInterfaceRepository.findById(anyLong())).thenReturn(Optional.of(getServiceIntefaceForTest()));
 		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemAndServiceInterface(any(), any(), any(), any())).thenReturn(Optional.ofNullable(null));
 		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
 		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
