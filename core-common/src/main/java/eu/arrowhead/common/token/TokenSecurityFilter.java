@@ -95,5 +95,4 @@ public abstract class TokenSecurityFilter extends ArrowheadFilter {
 		
 		return null;
 	}
-
 }
