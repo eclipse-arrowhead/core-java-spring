@@ -1,9 +1,6 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,20 +10,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerCloudId", "serviceId"}))
-public class AuthorizationInterCloud {
-	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"authorizationInterCloudId", "interfaceId"}))
+public class AuthorizationInterCloudInterfaceConnection {
 
 	//=================================================================================================
 	// members
@@ -36,33 +27,33 @@ public class AuthorizationInterCloud {
 	private long id;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "consumerCloudId", referencedColumnName = "id", nullable = false)
-	private Cloud cloud;
+	@JoinColumn (name = "authorizationInterCloudId", referencedColumnName = "id", nullable = false)
+	private AuthorizationInterCloud authorizationInterCloudEntry; 
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
-	private ServiceDefinition serviceDefinition;
+	@JoinColumn (name = "interfaceId", referencedColumnName = "id", nullable = false)
+	private ServiceInterface serviceInterface;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
-	
-	@OneToMany (mappedBy = "authorizationInterCloudEntry", fetch = FetchType.EAGER, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<AuthorizationInterCloudInterfaceConnection> interfaceConnections = new HashSet<>();
-	
+
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public AuthorizationInterCloudInterfaceConnection() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloud() {}
-
-	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloud(final Cloud cloud, final ServiceDefinition serviceDefinition) {
-		this.cloud = cloud;
-		this.serviceDefinition = serviceDefinition;
+	public AuthorizationInterCloudInterfaceConnection(final long id, final AuthorizationInterCloud authorizationInterCloudEntry,
+			final ServiceInterface serviceInterface, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
+		this.id = id;
+		this.authorizationInterCloudEntry = authorizationInterCloudEntry;
+		this.serviceInterface = serviceInterface;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -79,24 +70,22 @@ public class AuthorizationInterCloud {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public long getId() { return id; }
-	public Cloud getCloud() { return cloud; }
-	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
+	public long getId() {return id;}
+	public AuthorizationInterCloud getAuthorizationInterCloudEntry() { return authorizationInterCloudEntry; }
+	public ServiceInterface getServiceInterface() { return serviceInterface; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public Set<AuthorizationInterCloudInterfaceConnection> getInterfaceConnections() { return interfaceConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setCloud(final Cloud cloud) { this.cloud = cloud; }
-	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setAuthorizationInterCloudEntry(final AuthorizationInterCloud authorizationInterCloudEntry) { this.authorizationInterCloudEntry = authorizationInterCloudEntry; }
+	public void setServiceInterface(final ServiceInterface serviceInterface) { this.serviceInterface = serviceInterface; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setInterfaceConnections(final Set<AuthorizationInterCloudInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "AuthorizationInterCloud [id = " + id + ", cloud = " + cloud + ", serviceDefinition = " + serviceDefinition + "]";
-	}
+		return "AuthorizationInterCloudInterfaceConnection [id = " + id + ", authorizationInterCloudEntry = " + authorizationInterCloudEntry + ", serviceInterface = " + serviceInterface + "]";
+	}	
 }

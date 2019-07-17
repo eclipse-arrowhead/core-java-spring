@@ -112,11 +112,11 @@ CREATE TABLE `authorization_intra_cloud` (
 DROP TABLE IF EXISTS `authorization_inter_cloud`;
 CREATE TABLE `authorization_inter_cloud` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `consumer_cloud_id` bigint(20) NOT NULL,
   `provider_system_id` bigint(20) NOT NULL,
   `service_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `rule` (`consumer_cloud_id`,`service_id`),
   KEY `service_inter_auth` (`service_id`),
