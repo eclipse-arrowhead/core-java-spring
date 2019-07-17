@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -29,10 +30,12 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.authorization.AuthorizationMain;
 
 @RunWith(SpringRunner.class)
@@ -49,6 +52,9 @@ public class TokenGenerationServiceTest {
 	
 	@Mock
 	private CommonDBService commonDBService;
+	
+	@Spy
+	private ServiceInterfaceNameVerifier interfaceNameVerifier; 
 	
 	@Mock
 	private Map<String,Object> arrowheadContext;
@@ -85,7 +91,7 @@ public class TokenGenerationServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testGenerateTokenConsumerNameNull() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -94,7 +100,7 @@ public class TokenGenerationServiceTest {
 	public void testGenerateTokenConsumerNameEmpty() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName(" ");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -103,7 +109,7 @@ public class TokenGenerationServiceTest {
 	public void testGenerateTokenConsumerCloudOperatorNull() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, new CloudRequestDTO(), List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, new CloudRequestDTO(), List.of(new TokenGenerationProviderDTO()), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -114,7 +120,7 @@ public class TokenGenerationServiceTest {
 		consumer.setSystemName("consumer");
 		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
 		consumerCloud.setOperator(" ");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -125,7 +131,7 @@ public class TokenGenerationServiceTest {
 		consumer.setSystemName("consumer");
 		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
 		consumerCloud.setOperator("aitia");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -137,7 +143,7 @@ public class TokenGenerationServiceTest {
 		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
 		consumerCloud.setOperator("aitia");
 		consumerCloud.setName(" ");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -146,7 +152,7 @@ public class TokenGenerationServiceTest {
 	public void testGenerateTokenProvidersListNull() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		request.setProviders(null);
 		tokenGenerationService.generateTokens(request);
 	}
@@ -156,8 +162,17 @@ public class TokenGenerationServiceTest {
 	public void testGenerateTokenProvidersListEmpty() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		request.setProviders(List.of());
+		tokenGenerationService.generateTokens(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class) 
+	public void testGenerateTokenProviderNull() {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new TokenGenerationProviderDTO()), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -166,7 +181,9 @@ public class TokenGenerationServiceTest {
 	public void testGenerateTokenProviderNameNull() {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(new SystemRequestDTO()), "testService", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(new SystemRequestDTO());
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -177,7 +194,50 @@ public class TokenGenerationServiceTest {
 		consumer.setSystemName("consumer");
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName(" ");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(provider), "testService", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
+		tokenGenerationService.generateTokens(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGenerateTokenServiceInterfacesNull() {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
+		tokenGenerationService.generateTokens(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGenerateTokenServiceInterfacesEmpty() {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of());
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
+		tokenGenerationService.generateTokens(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGenerateTokenServiceInterfaceInvalid() {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("INVALID"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -187,8 +247,11 @@ public class TokenGenerationServiceTest {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		final SystemRequestDTO provider = new SystemRequestDTO();
-		provider.setSystemName(" ");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(provider), "testService", null);
+		provider.setSystemName("provider");
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
 		request.setService(null);
 		tokenGenerationService.generateTokens(request);
 	}
@@ -199,8 +262,11 @@ public class TokenGenerationServiceTest {
 		final SystemRequestDTO consumer = new SystemRequestDTO();
 		consumer.setSystemName("consumer");
 		final SystemRequestDTO provider = new SystemRequestDTO();
-		provider.setSystemName(" ");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(provider), "testService", null);
+		provider.setSystemName("provider");
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
 		request.setService("  \t");
 		tokenGenerationService.generateTokens(request);
 	}
@@ -212,7 +278,10 @@ public class TokenGenerationServiceTest {
 		consumer.setSystemName("consumer");
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(provider), "testService", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -224,7 +293,10 @@ public class TokenGenerationServiceTest {
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
 		provider.setAuthenticationInfo("bm90IGEga2V5");
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(provider), "testService", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -238,7 +310,10 @@ public class TokenGenerationServiceTest {
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
 		provider.setAuthenticationInfo(authInfo);
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(provider), "testService", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, null, List.of(providerDTO), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -253,7 +328,10 @@ public class TokenGenerationServiceTest {
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
 		provider.setAuthenticationInfo(authInfo);
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, cloud, List.of(provider), "testService", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, cloud, List.of(providerDTO), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -270,7 +348,10 @@ public class TokenGenerationServiceTest {
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
 		provider.setAuthenticationInfo(authInfo);
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, cloud, List.of(provider), "testService", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, cloud, List.of(providerDTO), "testService", null);
 		tokenGenerationService.generateTokens(request);
 	}
 	
@@ -291,11 +372,17 @@ public class TokenGenerationServiceTest {
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
 		provider.setAuthenticationInfo(authInfo);
-		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, cloud, List.of(provider), "testservice", 10);
-		final Map<SystemRequestDTO,String> tokens = tokenGenerationService.generateTokens(request);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO();
+		providerDTO.setProvider(provider);
+		providerDTO.setServiceInterfaces(List.of("HTTP-SECURE-JSON"));
+		final TokenGenerationRequestDTO request = new TokenGenerationRequestDTO(consumer, cloud, List.of(providerDTO), "testservice", 10);
+		final Map<SystemRequestDTO,Map<String,String>> result = tokenGenerationService.generateTokens(request);
+		Assert.assertTrue(!result.isEmpty());
+		Assert.assertTrue(result.containsKey(provider));
+		final Map<String,String> tokens = result.get(provider);
+		Assert.assertNotNull(tokens);
 		Assert.assertTrue(!tokens.isEmpty());
-		Assert.assertTrue(tokens.containsKey(provider));
-		final String encryptedToken = tokens.get(provider);
+		final String encryptedToken = tokens.get("HTTP-SECURE-JSON");
 		Assert.assertTrue(!Utilities.isEmpty(encryptedToken));
 		
 		final AlgorithmConstraints jwsAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG);

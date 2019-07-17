@@ -31,7 +31,6 @@ import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
@@ -92,6 +91,7 @@ public class TokenGenerationService {
 							signedJWTs.put(intf, signedJWT);
 						} catch (final JoseException ex) {
 							logger.error("Problem occured when trying to sign JWT token", ex);
+							throw new ArrowheadException("Token generation failed"); // if there is a problem here, all calling cause the same problem 
 						}
 					}
 					
