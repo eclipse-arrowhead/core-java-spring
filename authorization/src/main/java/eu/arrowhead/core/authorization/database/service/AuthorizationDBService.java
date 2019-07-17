@@ -21,21 +21,25 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.AuthorizationInterCloudRepository;
+import eu.arrowhead.common.database.repository.AuthorizationIntraCloudInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.AuthorizationIntraCloudRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
+import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationInterCloudListResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationInterCloudResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -59,6 +63,12 @@ public class AuthorizationDBService {
 	
 	@Autowired
 	private ServiceDefinitionRepository serviceDefinitionRepository;
+	
+	@Autowired
+	private ServiceInterfaceRepository serviceInterfaceRepository;
+	
+	@Autowired
+	private AuthorizationIntraCloudInterfaceConnectionRepository authorizationIntraCloudInterfaceConnectionRepository;
 	
 	private final Logger logger = LogManager.getLogger(AuthorizationDBService.class);
 
@@ -197,7 +207,7 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public List<AuthorizationIntraCloud> createBulkAuthorizationIntraCloud(final long consumerId, final Set<Long> providerIds, final Set<Long> serviceDefinitionIds) {
+	public List<AuthorizationIntraCloud> createBulkAuthorizationIntraCloud(final long consumerId, final Set<Long> providerIds, final Set<Long> serviceDefinitionIds, final Set<Long> interfaceIds) {
 		logger.debug("createBulkAuthorizationIntraCloud started...");
 		
 		if (consumerId < 1) {
@@ -212,8 +222,16 @@ public class AuthorizationDBService {
 			throw new InvalidParameterException("serviceDefinitionIds list is empty");
 		}
 		
+		if (interfaceIds == null || interfaceIds.isEmpty()) {
+			throw new InvalidParameterException("interfaceIds list is empty");
+		}
+		
 		if (providerIds.size() > 1 && serviceDefinitionIds.size() > 1) {
 			throw new InvalidParameterException("providerIds list or serviceDefinitionIds list should contain only one element, but both contain more");
+		}
+		
+		if (serviceDefinitionIds.size() > 1 && interfaceIds.size() > 1) {
+			throw new InvalidParameterException("serviceDefinitionIds list or interfaceIds list should contain only one element, but both contain more");
 		}
 		
 		for (final Long id : providerIds) {
@@ -224,7 +242,13 @@ public class AuthorizationDBService {
 		
 		for (final Long id : serviceDefinitionIds) {
 			if (id == null || id < 1) {
-				throw new InvalidParameterException("SerdviceDefinition id can't be null and must be greater than 0.");
+				throw new InvalidParameterException("ServiceDefinition id can't be null and must be greater than 0.");
+			}
+		}
+		
+		for (final Long id : interfaceIds) {
+			if (id == null || id < 1) {
+				throw new InvalidParameterException("ServiceInterface id can't be null and must be greater than 0.");
 			}
 		}
 		
@@ -238,15 +262,17 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException("Consumer system with id of " + consumerId + " not exists");
 			}
 			
-			if (providerIds.size() <= serviceDefinitionIds.size()) {
-				// Case: One provider with more or one service
+			if (providerIds.size() <= serviceDefinitionIds.size() && serviceDefinitionIds.size() >= interfaceIds.size()) {
+				// Case: One provider with more or one service and with one interface
 				final Long providerId = providerIds.iterator().next();
-				return createBulkAuthorizationIntraCloudWithOneProviderAndMoreServiceDefinition(consumer, providerId, serviceDefinitionIds);
+				final Long interfaceId = interfaceIds.iterator().next();
+				return createBulkAuthorizationIntraCloudWithOneProviderAndMoreServiceDefinitionAndOneInterface(consumer, providerId, serviceDefinitionIds, interfaceId);
 			} else {
-				// Case: One service with more or one provider
+				// Case: One service with more or one provider and with more or one interface
 				final Long serviceId = serviceDefinitionIds.iterator().next();
-				return createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProvider(consumer, providerIds, serviceId);
+				return createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProviderAndMoreInterface(consumer, providerIds, serviceId, interfaceIds);
 			}
+			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -356,9 +382,9 @@ public class AuthorizationDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public AuthorizationIntraCloudListResponseDTO createBulkAuthorizationIntraCloudResponse(final long consumerId, final Set<Long> providerIds, final Set<Long> serviceDefinitionIds) {
+	public AuthorizationIntraCloudListResponseDTO createBulkAuthorizationIntraCloudResponse(final long consumerId, final Set<Long> providerIds, final Set<Long> serviceDefinitionIds, final Set<Long> interfaceIds) {
 		logger.debug("createBulkAuthorizationIntraCloudResponse started...");
-		final List<AuthorizationIntraCloud> entries = createBulkAuthorizationIntraCloud(consumerId, providerIds, serviceDefinitionIds);
+		final List<AuthorizationIntraCloud> entries = createBulkAuthorizationIntraCloud(consumerId, providerIds, serviceDefinitionIds, interfaceIds);
 		final Page<AuthorizationIntraCloud> entryPage = new PageImpl<>(entries);
 		
 		return DTOConverter.convertAuthorizationIntraCloudListToAuthorizationIntraCloudListResponseDTO(entryPage);
@@ -463,11 +489,17 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<AuthorizationIntraCloud> createBulkAuthorizationIntraCloudWithOneProviderAndMoreServiceDefinition(final System consumer, final Long providerId,
-																												   final Set<Long> serviceDefinitionIds) {
-		logger.debug("createBulkAuthorizationIntraCloudWithOneProviderAndMoreServiceDefinition started...");
+	private List<AuthorizationIntraCloud> createBulkAuthorizationIntraCloudWithOneProviderAndMoreServiceDefinitionAndOneInterface(final System consumer, final Long providerId,
+																												   final Set<Long> serviceDefinitionIds, final Long interfaceId) {
+		logger.debug("createBulkAuthorizationIntraCloudWithOneProviderAndMoreServiceDefinitionAndOneInterface started...");
 		
-		final Optional<System> providerOpt = systemRepository.findById(providerId);
+		final Optional<ServiceInterface> interfaceOpt = serviceInterfaceRepository.findById(interfaceId);
+		if (interfaceOpt.isEmpty()) {
+			throw new InvalidParameterException("ServiceInterface with id of " + interfaceId + " not exists");
+		}
+		final ServiceInterface serviceInterface = interfaceOpt.get();
+		
+		final Optional<System> providerOpt = systemRepository.findById(providerId);		
 		if (providerOpt.isPresent()) {
 			final System provider = providerOpt.get();
 
@@ -488,23 +520,43 @@ public class AuthorizationDBService {
 				}
 			}
 			
-			final List<AuthorizationIntraCloud> savedEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
+			final List<AuthorizationIntraCloud> authIntraEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
+			for (final AuthorizationIntraCloud authIntraEntry : authIntraEntries) {
+				final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry, serviceInterface));
+				authIntraEntry.getInterfaceConnections().add(connection);
+			}
+			authorizationIntraCloudInterfaceConnectionRepository.flush();
+
+			final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
 			authorizationIntraCloudRepository.flush();
+			return savedAuthIntraEntries;
 			
-			return savedEntries;
 		} else {
 			throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<AuthorizationIntraCloud> createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProvider(final System consumer, final Set<Long> providerIds, final Long serviceId) {
-		logger.debug("createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProvider started...");
+	private List<AuthorizationIntraCloud> createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProviderAndMoreInterface(final System consumer, final Set<Long> providerIds, final Long serviceId, final Set<Long> interfaceIds) {
+		logger.debug("createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProviderAndMoreInterface started...");
 		
 		final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findById(serviceId);
 		if (serviceOpt.isPresent()) {
 			final ServiceDefinition service = serviceOpt.get();
 			
+			final List<ServiceInterface> interfaces = new ArrayList<>(interfaceIds.size());
+			for (final Long id : interfaceIds) {
+				final Optional<ServiceInterface> interfaceOpt = serviceInterfaceRepository.findById(id);
+				if (interfaceOpt.isPresent()) {
+					interfaces.add(interfaceOpt.get());
+				} else {
+					logger.debug("ServiceInterface with id of '{}' not exsists", id);
+				}
+			}
+			if (interfaces.isEmpty()) {
+				throw new InvalidParameterException("interfaceId list doesn't contain any existing ServiceInterface");
+			}
+
 			final List<AuthorizationIntraCloud> toBeSaved = new ArrayList<>(providerIds.size());
 			for (final Long providerId : providerIds) {
 				final Optional<System> providerOpt = systemRepository.findById(providerId);
@@ -522,10 +574,19 @@ public class AuthorizationDBService {
 				}
 			}
 			
-			final List<AuthorizationIntraCloud> savedEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
-			authorizationIntraCloudRepository.flush();
+			final List<AuthorizationIntraCloud> authIntraEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
+			for (final AuthorizationIntraCloud authIntraEntry : authIntraEntries) {
+				for (final ServiceInterface serviceInterface : interfaces) {
+					final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry, serviceInterface));
+					authIntraEntry.getInterfaceConnections().add(connection);
+				}
+			}
+			authorizationIntraCloudInterfaceConnectionRepository.flush();
 			
-			return savedEntries;
+			final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
+			authorizationIntraCloudRepository.flush();
+			return savedAuthIntraEntries;
+			
 		} else {
 			throw new InvalidParameterException("ServiceDefinition with id of " + serviceId + " not exists");
 		}

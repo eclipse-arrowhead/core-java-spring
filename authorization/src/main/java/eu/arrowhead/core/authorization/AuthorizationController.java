@@ -223,11 +223,13 @@ public class AuthorizationController {
 		final boolean isConsumerIdInvalid = request.getConsumerId() == null || request.getConsumerId() < 1;
 		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
 		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds() == null || request.getServiceDefinitionIds().isEmpty();
-		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty) {
+		final boolean isInterfaceListEmpty = request.getInterfaceIds() == null || request.getInterfaceIds().isEmpty();
+		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty || isInterfaceListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
 			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
 			exceptionMsg = isServiceDefinitionListEmpty ? exceptionMsg + " serviceDefinitionList is empty," : exceptionMsg;
+			exceptionMsg = isInterfaceListEmpty ? exceptionMsg + " interfaceList is empty," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
@@ -236,6 +238,11 @@ public class AuthorizationController {
 		if (request.getProviderIds().size() > 1 && request.getServiceDefinitionIds().size() > 1) {
 			throw new BadPayloadException("providerIds list or serviceDefinitionIds list should contain only one element, but both contain more", HttpStatus.SC_BAD_REQUEST,
 										  CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
+		}
+		
+		if (request.getServiceDefinitionIds().size() > 1 && request.getInterfaceIds().size() > 1) {
+			throw new BadPayloadException("serviceDefinitionIds list or interfaceIds list should contain only one element, but both contain more", HttpStatus.SC_BAD_REQUEST,
+					  					  CommonConstants.AUTHORIZATION_URI + INTRA_CLOUD_AUTHORIZATION_MGMT_URI);
 		}
 		
 		final Set<Long> providerIdSet = new HashSet<>();
@@ -256,7 +263,16 @@ public class AuthorizationController {
 			}
 		}
 		
-		final AuthorizationIntraCloudListResponseDTO response = authorizationDBService.createBulkAuthorizationIntraCloudResponse(request.getConsumerId(), providerIdSet, serviceIdSet);
+		final Set<Long> interfaceIdSet = new HashSet<>();
+		for (final Long id : request.getInterfaceIds()) {
+			if (id != null && id > 0) {
+				interfaceIdSet.add(id);
+			} else {
+				logger.debug("Invalid ServiceInterface id: {}", id);
+			}
+		}
+		
+		final AuthorizationIntraCloudListResponseDTO response = authorizationDBService.createBulkAuthorizationIntraCloudResponse(request.getConsumerId(), providerIdSet, serviceIdSet, interfaceIdSet);
 		logger.debug("registerAuthorizationIntraCloud has been finished");
 		
 		return response;

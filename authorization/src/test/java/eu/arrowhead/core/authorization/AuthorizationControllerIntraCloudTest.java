@@ -201,7 +201,7 @@ public class AuthorizationControllerIntraCloudTest {
 	public void testRegisterAuthorizationIntraCloudWithInvalidConsumerId() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(0L, createIdList(1, 1), createIdList(1, 2))))
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(0L, createIdList(1, 1), createIdList(1, 2), createIdList(1, 1))))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -212,7 +212,7 @@ public class AuthorizationControllerIntraCloudTest {
 	public void testRegisterAuthorizationIntraCloudWithEmptyProviderIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, new ArrayList<>(), createIdList(1, 2))))
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, new ArrayList<>(), createIdList(1, 2), createIdList(1, 1))))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -223,7 +223,7 @@ public class AuthorizationControllerIntraCloudTest {
 	public void testRegisterAuthorizationIntraCloudWithEmptyServiceDefinitionIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), null)))
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), null, createIdList(1, 1))))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -234,7 +234,7 @@ public class AuthorizationControllerIntraCloudTest {
 	public void testRegisterAuthorizationIntraCloudWithMultipleElementsInBothList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), createIdList(1, 2))))
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), createIdList(1, 2), createIdList(1, 1))))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -243,12 +243,12 @@ public class AuthorizationControllerIntraCloudTest {
 	@Test
 	public void testRegisterAuthorizationIntraCloudDBCall() throws Exception {
 		final Page<AuthorizationIntraCloud> entries = createPageForMockingAuthorizationDBService(1);
-		when(authorizationDBService.createBulkAuthorizationIntraCloudResponse(anyLong(), any(), any())).thenReturn(
+		when(authorizationDBService.createBulkAuthorizationIntraCloudResponse(anyLong(), any(), any(), any())).thenReturn(
 																									DTOConverter.convertAuthorizationIntraCloudListToAuthorizationIntraCloudListResponseDTO(entries));
 		
 		final MvcResult response = this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 											   .contentType(MediaType.APPLICATION_JSON)
-											   .content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO((long) 1, createIdList(1, 1), createIdList(1, 1))))
+											   .content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO((long) 1, createIdList(1, 1), createIdList(1, 1), createIdList(1, 1))))
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isCreated())
 											   .andReturn();
