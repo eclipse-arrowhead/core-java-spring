@@ -318,6 +318,24 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
+	public void createOrchestratorStoreEntityByIdWithInvalidServiceInterfaceIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntityById(getOrchestratorStoreRequestByIdDTOWithInvalidServiceInterfaceIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createOrchestratorStoreEntityByIdWithNullServiceInterfaceIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntityById(getOrchestratorStoreRequestByIdDTOWithNullServiceInterfaceIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void createOrchestratorStoreEntityByIdWithNullServiceDefinitionIdTest() {
 		
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
@@ -666,6 +684,27 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestByIdDTO getOrchestratorStoreRequestByIdDTOWithInvalidServiceInterfaceIdForTest() {
+		
+		final Long serviceDefinitionId = 1L;
+		final Long consumerSystemId = 1L;
+		final Long providerSystemId = 1L;
+		final Long cloudId = 1L;
+		final Long serviceInterfaceId = -1L;
+		final Integer priority = 1;
+		final Map<String,String> attribute = null;
+		
+		return new OrchestratorStoreRequestByIdDTO(
+				serviceDefinitionId,
+				consumerSystemId,
+				providerSystemId,
+				cloudId,
+				serviceInterfaceId,
+				priority,
+				attribute);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreRequestByIdDTO getOrchestratorStoreRequestByIdDTOWithInvalidPriorityForTest() {
 		
 		final Long serviceDefinitionId = 1L;
@@ -757,6 +796,27 @@ public class OrchestratorStoreDBServiceTest {
 		final Long providerSystemId = 1L;
 		final Long cloudId = null;
 		final Long serviceInterfaceId = 1L;
+		final Integer priority = 1;
+		final Map<String,String> attribute = null;
+		
+		return new OrchestratorStoreRequestByIdDTO(
+				serviceDefinitionId,
+				consumerSystemId,
+				providerSystemId,
+				cloudId,
+				serviceInterfaceId,
+				priority,
+				attribute);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestByIdDTO getOrchestratorStoreRequestByIdDTOWithNullServiceInterfaceIdForTest() {
+		
+		final Long serviceDefinitionId = 1L;
+		final Long consumerSystemId = 1L;
+		final Long providerSystemId = 1L;
+		final Long cloudId = 1L;
+		final Long serviceInterfaceId = null;
 		final Integer priority = 1;
 		final Map<String,String> attribute = null;
 		

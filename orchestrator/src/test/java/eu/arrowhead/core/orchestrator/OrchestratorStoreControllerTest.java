@@ -384,6 +384,23 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void addOrchestratorStoreEntriesNullServiceIntrfaceTest() throws Exception {
+		
+		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		when(orchestratorStoreDBService.createOrchestratorStoresByIdResponse(any())).thenReturn(dto);
+		
+		final List<OrchestratorStoreRequestByIdDTO> request =  getOrchestratorStoreRequestByIdDTOListForNullServiceInterfaceIdTest(3);
+	
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void addOrchestratorStoreEntriesListElementsNullTest() throws Exception {
 		
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
@@ -516,6 +533,21 @@ public class OrchestratorStoreControllerTest {
 			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = getOrchestratorStoreRequestByIdDTOForTest();
 			orchestratorStoreRequestByIdDTO.setProviderSystemId(i + 1L);
 			orchestratorStoreRequestByIdDTO.setPriority(null);
+			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
+		}
+		return orchestratorStoreRequestByIdDTOList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForNullServiceInterfaceIdTest(final int listSize) {
+		
+		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		
+		for (int i = 0; i < listSize; i++) {
+			
+			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = getOrchestratorStoreRequestByIdDTOForTest();
+			orchestratorStoreRequestByIdDTO.setProviderSystemId(i + 1L);
+			orchestratorStoreRequestByIdDTO.setServiceInterfaceId(null);
 			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
 		}
 		return orchestratorStoreRequestByIdDTOList;
