@@ -362,6 +362,9 @@ public class OrchestratorStoreController {
 				throw new BadPayloadException("OrchestratorStoreRequestByIdDTO.ProviderSystemId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
+			if (orchestratorStoreRequestByIdDTO.getServiceInterfaceId() == null) {
+				throw new BadPayloadException("OrchestratorStoreRequestByIdDTO.ServiceInterfaceId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
 			
 			if (orchestratorStoreRequestByIdDTO.getPriority() == null) {
 				throw new BadPayloadException("OrchestratorStoreRequestByIdDTO.Priority "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);

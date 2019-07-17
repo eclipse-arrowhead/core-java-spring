@@ -439,11 +439,11 @@ public class OrchestratorStoreDBService {
 		logger.debug("validateServiceInterfaceId started...");
 		
 		if (serviceInterfaceId == null) {
-			return null;
+			throw new InvalidParameterException("ServiceInterfaceId " + NULL_ERROR_MESAGE);
 		}
 		
 		if( serviceInterfaceId < 1) {
-			throw new InvalidParameterException("CloudId " + LESS_THEN_ONE_ERROR_MESAGE );
+			throw new InvalidParameterException("ServiceInterfaceId " + LESS_THEN_ONE_ERROR_MESAGE );
 		}	
 
 		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findById(serviceInterfaceId);
