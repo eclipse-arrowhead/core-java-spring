@@ -281,7 +281,7 @@ public class TokenGenerationService {
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_INTERFACE_ID, intf);
-		
+
 		return claims;
 	}
 	
