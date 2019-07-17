@@ -30,10 +30,11 @@ import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -159,16 +160,16 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreListResponseDTO getOrchestratorStoresByConsumerResponse(final int page,
 			final int size, final Direction direction, final String sortField, final long consumerSystemId,
-			final long serviceDefinitionId) {
+			final String serviceDefinitionName) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
 				
-		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getOrchestratorStoresByConsumer(page, size, direction, sortField, consumerSystemId, serviceDefinitionId));
+		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getOrchestratorStoresByConsumer(page, size, direction, sortField, consumerSystemId, serviceDefinitionName));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public Page<OrchestratorStore> getOrchestratorStoresByConsumer(final int page,
 			final int size, final Direction direction, final String sortField, final long consumerSystemId,
-			final long serviceDefinitionId) {
+			final String serviceDefinitionName) {
 		logger.debug("getOrchestratorStoresByConsumer started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -189,13 +190,13 @@ public class OrchestratorStoreDBService {
 				throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESAGE);
 			}
 				
-		if ( serviceDefinitionId < 1) {
-			throw new InvalidParameterException("ServiceDefinitionId " + LESS_THEN_ONE_ERROR_MESAGE);
+		if ( Utilities.isEmpty(serviceDefinitionName)) {
+			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESAGE);
 		}
 		
-		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findById(serviceDefinitionId);
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
 		if ( serviceDefinitionOption.isEmpty() ) {
-			throw new InvalidParameterException("ServiceDefinitionId " + NOT_IN_DB_ERROR_MESAGE);
+			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESAGE);
 		}
 		
 		try {		
@@ -209,12 +210,12 @@ public class OrchestratorStoreDBService {
 	}
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public OrchestratorStoreListResponseDTO createOrchestratorStoresByIdResponse(
-			final List<OrchestratorStoreRequestByIdDTO> request) {
+	public OrchestratorStoreListResponseDTO createOrchestratorStoresResponse(
+			final List<OrchestratorStoreRequestDTO> request) {
 		logger.debug("createOrchestratorStoresResponse started...");
 		
 		try {			
-			final List<OrchestratorStore> savedOrchestratorStoreEntries = createOrchestratorStoresById(request);
+			final List<OrchestratorStore> savedOrchestratorStoreEntries = createOrchestratorStores(request);
 			
 			return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(savedOrchestratorStoreEntries);
 			
@@ -230,7 +231,7 @@ public class OrchestratorStoreDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public List<OrchestratorStore> createOrchestratorStoresById(final List<OrchestratorStoreRequestByIdDTO> request) {
+	public List<OrchestratorStore> createOrchestratorStores(final List<OrchestratorStoreRequestDTO> request) {
 		logger.debug("createOrchestratorStoresById started...");
 		
 		if (request == null || request.isEmpty()) {
@@ -241,10 +242,10 @@ public class OrchestratorStoreDBService {
 			
 			final List<OrchestratorStore> savedOrchestratorStoreEntries = new ArrayList<>();
 
-			for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
+			for (final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO : request) {
 				
 				try {					
-					savedOrchestratorStoreEntries.add(createOrchestratorStoreEntityById(orchestratorStoreRequestByIdDTO));
+					savedOrchestratorStoreEntries.add(createOrchestratorStoreEntity(orchestratorStoreRequestDTO));
 				
 				} catch (final Exception e) {
 					logger.debug( ORCHESTRATOR_STORE_REQUEST_BY_ID_DTO_VALIDATION_EXCEPTION_MESSAGE + e.getMessage() + e);
@@ -262,10 +263,13 @@ public class OrchestratorStoreDBService {
 
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public OrchestratorStore createOrchestratorStoreEntityById(final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO) {
-		logger.debug("createOrchestratorStoreEntityById started...");
+	public OrchestratorStore createOrchestratorStoreEntity(final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+		logger.debug("createOrchestratorStoreEntity started...");
 		
-			final OrchestratorStore orchestratorStore = validateOrchestratorStoreRequestById(orchestratorStoreRequestByIdDTO);						
+		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestDTO.getConsumerSystemId()); 
+		
+		
+			final OrchestratorStore orchestratorStore = validateOrchestratorStoreRequestById(orchestratorStoreRequestDTO);						
 			
 			return saveWithPriorityCheck(orchestratorStore);
 	
@@ -339,16 +343,16 @@ public class OrchestratorStoreDBService {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private OrchestratorStore validateOrchestratorStoreRequestById(
-			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO) {
-		logger.debug("validateOrchestratorStoreRequestById started...");
+	private OrchestratorStore validateOrchestratorStoreRequestDTO(
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+		logger.debug("validateOrchestratorStoreRequestDTO started...");
 		
-		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestByIdDTO.getConsumerSystemId()); 
-		final System validProviderSystem = validateSystemId(orchestratorStoreRequestByIdDTO.getProviderSystemId());		
-		final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(orchestratorStoreRequestByIdDTO.getServiceDefinitionId());	
-		final int validPriority = validatePriority(orchestratorStoreRequestByIdDTO.getPriority());
-		final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestByIdDTO.getCloudId());	
-		final ServiceInterface validInterface = validateServiceInterface(orchestratorStoreRequestByIdDTO.getServiceInterfaceId());
+		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestDTO.getConsumerSystemId()); 
+		final System validProviderSystem = validateSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO());		
+		final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(orchestratorStoreRequestDTO.getServiceDefinitionId());	
+		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
+		final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestDTO.getCloudId());	
+		final ServiceInterface validInterface = validateServiceInterface(orchestratorStoreRequestDTO.getServiceInterfaceId());
 		
 		checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem, validServiceDefinition, validProviderSystem, validInterface);
 	
@@ -359,7 +363,7 @@ public class OrchestratorStoreDBService {
 				validProviderCloud,
 				validInterface,
 				validPriority,
-				Utilities.map2Text(orchestratorStoreRequestByIdDTO.getAttribute()),
+				Utilities.map2Text(orchestratorStoreRequestDTO.getAttribute()),
 				null,
 				null);	
 	}
@@ -427,6 +431,22 @@ public class OrchestratorStoreDBService {
 		}	
 
 		final Optional<Cloud> cloudOptional = cloudRepository.findById(cloudId);
+		if (cloudOptional.isEmpty()) {
+			throw new InvalidParameterException("Cloud by id :" + cloudId + NOT_IN_DB_ERROR_MESAGE );
+		}
+		
+		return cloudOptional.get();
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private Cloud validateProviderCloud(final CloudRequestDTO cloudRequestDTO) {
+		logger.debug("validateProviderCloud started...");
+		
+		if (cloudRequestDTO == null) {
+			throw new InvalidParameterException("CloudRequestDTO " + NULL_ERROR_MESAGE );
+		}
+
+		final Optional<Cloud> cloudOptional = cloudRepository..findById(cloud);
 		if (cloudOptional.isEmpty()) {
 			throw new InvalidParameterException("Cloud by id :" + cloudId + NOT_IN_DB_ERROR_MESAGE );
 		}
