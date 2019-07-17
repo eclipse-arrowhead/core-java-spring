@@ -1,7 +1,9 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,10 +13,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerSystemId", "providerSystemId", "serviceId"}))
@@ -46,6 +52,10 @@ public class AuthorizationIntraCloud {
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
+	
+	@OneToMany (mappedBy = "authorizationIntraCloudEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
@@ -80,6 +90,7 @@ public class AuthorizationIntraCloud {
 	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public Set<AuthorizationIntraCloudInterfaceConnection> getInterfaceConnections() { return interfaceConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -88,6 +99,7 @@ public class AuthorizationIntraCloud {
 	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setInterfaceConnections (final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; };
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

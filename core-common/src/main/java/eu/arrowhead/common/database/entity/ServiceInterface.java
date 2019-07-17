@@ -42,6 +42,14 @@ public class ServiceInterface {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistryInterfaceConnection> serviceConnections = new HashSet<>();
 	
+	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<AuthorizationIntraCloudInterfaceConnection> authorizationIntraCloudConnections = new HashSet<>();
+	
+	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<AuthorizationInterCloudInterfaceConnection> authorizationInterCloudConnections = new HashSet<>();
+	
 	//=================================================================================================
 	// methods
 	
@@ -72,6 +80,8 @@ public class ServiceInterface {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<ServiceRegistryInterfaceConnection> getServiceConnections() { return serviceConnections; }
+	public Set<AuthorizationIntraCloudInterfaceConnection> getAuthorizationIntraCloudConnections() { return authorizationIntraCloudConnections; }
+	public Set<AuthorizationInterCloudInterfaceConnection> getAuthorizationInterCloudConnections() { return authorizationInterCloudConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -79,6 +89,8 @@ public class ServiceInterface {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setServiceConnections(final Set<ServiceRegistryInterfaceConnection> serviceConnections) { this.serviceConnections = serviceConnections; }
+	public void setAuthorizationIntraCloudConnections(final Set<AuthorizationIntraCloudInterfaceConnection> authorizationIntraCloudConnections) { this.authorizationIntraCloudConnections = authorizationIntraCloudConnections; }
+	public void setAuthorizationInterCloudConnections(final Set<AuthorizationInterCloudInterfaceConnection> authorizationInterCloudConnections) { this.authorizationInterCloudConnections = authorizationInterCloudConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
