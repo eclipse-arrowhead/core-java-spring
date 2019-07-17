@@ -18,7 +18,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerCloudId", "serviceId"}))
-public class InterCloudAuthorization {
+public class AuthorizationInterCloud {
 	
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 
@@ -47,10 +47,10 @@ public class InterCloudAuthorization {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public InterCloudAuthorization() {}
+	public AuthorizationInterCloud() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public InterCloudAuthorization(final Cloud cloud, final ServiceDefinition serviceDefinition) {
+	public AuthorizationInterCloud(final Cloud cloud, final ServiceDefinition serviceDefinition) {
 		this.cloud = cloud;
 		this.serviceDefinition = serviceDefinition;
 	}
@@ -85,6 +85,6 @@ public class InterCloudAuthorization {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "InterCloudAuthorization [id = " + id + ", cloud = " + cloud + ", serviceDefinition = " + serviceDefinition + "]";
+		return "AuthorizationInterCloud [id = " + id + ", cloud = " + cloud + ", serviceDefinition = " + serviceDefinition + "]";
 	}
 }

@@ -3,7 +3,7 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class InterCloudAuthorizationRequestDTO implements Serializable {
+public class AuthorizationInterCloudRequestDTO implements Serializable {
 
 	//=================================================================================================
 	// members
@@ -17,10 +17,10 @@ public class InterCloudAuthorizationRequestDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public InterCloudAuthorizationRequestDTO() {}
+	public AuthorizationInterCloudRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public InterCloudAuthorizationRequestDTO(final Long cloudId,
+	public AuthorizationInterCloudRequestDTO(final Long cloudId,
 			final List<Long> serviceDefinitionIdList) {
 
 		this.cloudId = cloudId;
