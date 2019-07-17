@@ -49,7 +49,7 @@ public class OrchestratorStore {
 	private Cloud providerCloud;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "serviceInterfaceId", referencedColumnName = "id", nullable = true)
+	@JoinColumn (name = "serviceInterfaceId", referencedColumnName = "id", nullable = false)
 	private ServiceInterface serviceInterface;
 	
 	@Column (nullable = false)
