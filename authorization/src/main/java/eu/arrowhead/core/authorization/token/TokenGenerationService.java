@@ -174,7 +174,7 @@ public class TokenGenerationService {
 		
 		for (final String intf : provider.getServiceInterfaces()) {
 			if (!interfaceNameVerifier.isValid(intf)) {
-				throw new BadPayloadException("Specified interface name is not valid: " + intf + ".");
+				throw new InvalidParameterException("Specified interface name is not valid: " + intf + ".");
 			}
 		}
 	}
