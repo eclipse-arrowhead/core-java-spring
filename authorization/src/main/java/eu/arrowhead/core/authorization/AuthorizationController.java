@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -43,10 +44,13 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.TokenDataDTO;
+import eu.arrowhead.common.dto.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 import eu.arrowhead.core.authorization.token.TokenGenerationService;
 import io.swagger.annotations.ApiOperation;
@@ -104,6 +108,9 @@ public class AuthorizationController {
 
 	@Autowired
 	private TokenGenerationService tokenGenerationService;
+	
+	@Autowired
+	private ServiceInterfaceNameVerifier interfaceNameVerifier;  
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -463,7 +470,7 @@ public class AuthorizationController {
 		}
 
 		final TokenGenerationResponseDTO response = tokenGenerationService.generateTokensResponse(request);
-		logger.debug("{} token(s) are generated for {}", response.getTokenData().size(), request.getConsumer().getSystemName());
+		logger.debug("{} token(s) are generated for {}", calculateNumberOfTokens(response.getTokenData()), request.getConsumer().getSystemName());
 		
 		return response;
 	}
@@ -506,12 +513,33 @@ public class AuthorizationController {
 			throw new BadPayloadException("Provider list is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		for (final SystemRequestDTO provider : request.getProviders()) {
-			checkSystemRequest(provider, origin, true);
+		for (final TokenGenerationProviderDTO provider : request.getProviders()) {
+			checkTokenGenerationProviderDTO(provider, origin, true);
 		}
 		
 		if (Utilities.isEmpty(request.getService())) {
 			throw new BadPayloadException("Service is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkTokenGenerationProviderDTO(final TokenGenerationProviderDTO provider, final String origin, final boolean mandatoryAuthInfo) {
+		logger.debug("checkTokenGenerationProviderDTO started...");
+		
+		if (provider.getProvider() == null) {
+			throw new BadPayloadException("Provider is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		checkSystemRequest(provider.getProvider(), origin, mandatoryAuthInfo);
+		
+		if (provider.getServiceInterfaces() == null || provider.getServiceInterfaces().isEmpty()) {
+			throw new BadPayloadException("Service interface list is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		for (final String intf : provider.getServiceInterfaces()) {
+			if (!interfaceNameVerifier.isValid(intf)) {
+				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 	}
 
@@ -567,5 +595,10 @@ public class AuthorizationController {
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 		
 		return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private int calculateNumberOfTokens(final List<TokenDataDTO> tokenData) {
+		return tokenData.stream().map(td -> td.getTokens().size()).collect(Collectors.summingInt(Integer::intValue));
 	}
 }

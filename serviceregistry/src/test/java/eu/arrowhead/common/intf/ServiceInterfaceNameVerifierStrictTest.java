@@ -23,7 +23,6 @@ public class ServiceInterfaceNameVerifierStrictTest {
 	
 	@Autowired
 	private ServiceInterfaceNameVerifier verifier;
-
 	
 	//=================================================================================================
 	// methods
