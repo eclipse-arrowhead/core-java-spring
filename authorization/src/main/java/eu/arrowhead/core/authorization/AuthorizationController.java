@@ -514,7 +514,7 @@ public class AuthorizationController {
 		}
 		
 		for (final TokenGenerationProviderDTO provider : request.getProviders()) {
-			checkTokenGenerationProviderDTO(provider, origin, true);
+			checkTokenGenerationProviderDTO(provider, origin);
 		}
 		
 		if (Utilities.isEmpty(request.getService())) {
@@ -523,14 +523,10 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkTokenGenerationProviderDTO(final TokenGenerationProviderDTO provider, final String origin, final boolean mandatoryAuthInfo) {
+	private void checkTokenGenerationProviderDTO(final TokenGenerationProviderDTO provider, final String origin) {
 		logger.debug("checkTokenGenerationProviderDTO started...");
 		
-		if (provider.getProvider() == null) {
-			throw new BadPayloadException("Provider is null", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		checkSystemRequest(provider.getProvider(), origin, mandatoryAuthInfo);
+		checkSystemRequest(provider.getProvider(), origin, true);
 		
 		if (provider.getServiceInterfaces() == null || provider.getServiceInterfaces().isEmpty()) {
 			throw new BadPayloadException("Service interface list is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
