@@ -312,9 +312,9 @@ public class AuthorizationDBService {
 	//-------------------------------------------------------------------------------------------------
 	public AuthorizationInterCloudResponseDTO getAuthorizationInterCloudEntryByIdResponse(final long id) {
 		logger.debug("getAuthorizationInterCloudEntryByIdResponse started...");		
-		final AuthorizationInterCloud AuthorizationInterCloudEntry = getAuthorizationInterCloudEntryById(id);
+		final AuthorizationInterCloud authorizationInterCloudEntry = getAuthorizationInterCloudEntryById(id);
 		
-		return DTOConverter.convertAuthorizationInterCloudToAuthorizationInterCloudResponseDTO(AuthorizationInterCloudEntry);
+		return DTOConverter.convertAuthorizationInterCloudToAuthorizationInterCloudResponseDTO(authorizationInterCloudEntry);
 	}
 	
 	
