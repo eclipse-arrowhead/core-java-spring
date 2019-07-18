@@ -13,6 +13,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -281,14 +282,18 @@ public class DTOConverter {
 		
 		Assert.notNull(entity, "AuthorizationInterCloud is null" );
 		Assert.notNull(entity.getCloud(), "AuthorizationInterCloud.Cloud is null" );
+		Assert.notNull(entity.getProvider(), "AuthorizationInterCloud.Provider is null");
 		Assert.notNull(entity.getServiceDefinition(), "AuthorizationInterCloud.ServiceDefinition is null" );
+		Assert.notNull(entity.getInterfaceConnections(), "AuthorizationInterCloud.InterfaceConnections is null");
 		Assert.notNull(entity.getCreatedAt(), "AuthorizationInterCloud.CreatedAt is null" );
 		Assert.notNull(entity.getUpdatedAt(), "AuthorizationInterCloud.UpdatedAt is null" );
 		
 		return new AuthorizationInterCloudResponseDTO(
 				entity.getId(),
 				convertCloudToCloudResponseDTO(entity.getCloud()),
+				convertSystemToSystemResponseDTO(entity.getProvider()),
 				convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
+				collectInterfacesFromAuthorizationInterCloud(entity.getInterfaceConnections()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 		
@@ -329,6 +334,18 @@ public class DTOConverter {
 	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromAuthorizationIntraCloud(final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) {
 		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
 		for (final AuthorizationIntraCloudInterfaceConnection conn : interfaceConnections) {
+			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
+		}
+		
+		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromAuthorizationInterCloud(final Set<AuthorizationInterCloudInterfaceConnection> interfaceConnections) {
+		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
+		for (final AuthorizationInterCloudInterfaceConnection conn : interfaceConnections) {
 			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
 		}
 		

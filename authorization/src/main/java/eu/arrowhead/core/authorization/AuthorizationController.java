@@ -3,7 +3,6 @@ package eu.arrowhead.core.authorization;
 import java.security.PublicKey;
 import java.util.Base64;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -350,22 +349,63 @@ public class AuthorizationController {
 	})
 	@PostMapping(path = AUTHORIZATION_INTER_CLOUD_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@ResponseBody public AuthorizationInterCloudListResponseDTO addAuthorizationInterCloud(@RequestBody final AuthorizationInterCloudRequestDTO request) {
+	@ResponseBody public AuthorizationInterCloudListResponseDTO registerAuthorizationInterCloud(@RequestBody final AuthorizationInterCloudRequestDTO request) {
 		logger.debug("New AuthorizationInterCloud registration request recieved");
 		
 		final boolean isCloudIdNotValid = request.getCloudId() == null || request.getCloudId() < 1;
-		final boolean isServiceDefinitionNotValid = request.getServiceDefinitionIdList() == null || request.getServiceDefinitionIdList().isEmpty() ;
-		if (isCloudIdNotValid || isServiceDefinitionNotValid) {
+		final boolean isProviderListNotValid = request.getProviderIdList() == null || request.getProviderIdList().isEmpty();
+		final boolean isServiceDefinitionListNotValid = request.getServiceDefinitionIdList() == null || request.getServiceDefinitionIdList().isEmpty() ;
+		final boolean isInterfaceListNotValid = request.getInterfaceIdList() == null || request.getInterfaceIdList().isEmpty();
+		if (isCloudIdNotValid || isProviderListNotValid || isServiceDefinitionListNotValid || isInterfaceListNotValid) {
 			String exceptionMsg = isCloudIdNotValid ? "Cloud Id is not valid," : "";
-			exceptionMsg = isServiceDefinitionNotValid ? exceptionMsg + " ServiceDefinition is null or blank," :  exceptionMsg ;
+			exceptionMsg = isProviderListNotValid ? exceptionMsg + " ProviderList is null or blank," : exceptionMsg; 
+			exceptionMsg = isServiceDefinitionListNotValid ? exceptionMsg + " ServiceDefinitionList is null or blank," :  exceptionMsg;
+			exceptionMsg = isInterfaceListNotValid ? exceptionMsg + " InterfaceList is null or blank," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1).trim();
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTER_CLOUD_MGMT_URI);
 		}
 		
+		if (request.getProviderIdList().size() > 1 && request.getServiceDefinitionIdList().size() > 1) {
+			throw new BadPayloadException("providerId list or serviceDefinitionId list should contain only one element, but both contain more", HttpStatus.SC_BAD_REQUEST,
+										  CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTER_CLOUD_MGMT_URI);
+		}
+		
+		if (request.getServiceDefinitionIdList().size() > 1 && request.getInterfaceIdList().size() > 1) {
+			throw new BadPayloadException("serviceDefinitionId list or interfaceId list should contain only one element, but both contain more", HttpStatus.SC_BAD_REQUEST,
+										  CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTER_CLOUD_MGMT_URI);
+		}
+		
 		final long validatedCloudId = request.getCloudId();
-		final Set<Long> serviceDefinitionIdSet = convertServiceDefinitionIdListToSet(request.getServiceDefinitionIdList(), AUTHORIZATION_INTER_CLOUD_MGMT_URI);
-		final AuthorizationInterCloudListResponseDTO response = authorizationDBService.createAuthorizationInterCloudResponse(validatedCloudId, serviceDefinitionIdSet);
+		
+		final Set<Long> providerIdSet = new HashSet<>();
+		for (final Long id : request.getProviderIdList()) {
+			if (id != null && id > 0) {
+				providerIdSet.add(id);
+			} else {
+				logger.debug("Invalid provider system id: {}", id);
+			}
+		}
+		
+		final Set<Long> serviceIdSet = new HashSet<>();
+		for (final Long id : request.getServiceDefinitionIdList()) {
+			if (id != null && id > 0) {
+				serviceIdSet.add(id);
+			} else {
+				logger.debug("Invalid service id: {}", id);
+			}
+		}
+		
+		final Set<Long> interfaceIdSet = new HashSet<>();
+		for (final Long id : request.getInterfaceIdList()) {
+			if (id != null && id > 0) {
+				interfaceIdSet.add(id);
+			} else {
+				logger.debug("Invalid interace id: {}", id);
+			}
+		}
+		
+		final AuthorizationInterCloudListResponseDTO response = authorizationDBService.createBulkAuthorizationInterCloudResponse(validatedCloudId, providerIdSet, serviceIdSet, interfaceIdSet);
 		logger.debug("registerAuthorizationInterCloud has been finished");
 		
 		return response;
@@ -574,15 +614,6 @@ public class AuthorizationController {
 			throw new BadPayloadException("System authentication info is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private Set<Long> convertServiceDefinitionIdListToSet(final List<Long> serviceDefinitionIdList, final String origin) {
-		if (serviceDefinitionIdList == null) {
-			throw new BadPayloadException("ServiceDefinition Id list element is null", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		return Set.copyOf(serviceDefinitionIdList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
