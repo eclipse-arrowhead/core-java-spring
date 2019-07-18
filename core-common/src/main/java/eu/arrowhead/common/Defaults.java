@@ -27,7 +27,7 @@ public class Defaults {
 	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILISECONDS = 5000;
 	public static final boolean DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES = 13;
-	public static final boolean DEFAULT_SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
+	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
 	
 	// HTTP client defaults
 	public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;
