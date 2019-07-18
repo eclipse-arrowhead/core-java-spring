@@ -19,7 +19,7 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table (uniqueConstraints = {
 		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority", "serviceInterfaceId"}),
-		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "foreign", "providerSystemId", "serviceInterfaceId"})
+		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "foreign_", "providerSystemId", "serviceInterfaceId"})
 		})
 public class OrchestratorStore {
 
@@ -40,7 +40,7 @@ public class OrchestratorStore {
 	@JoinColumn (name = "consumerSystemId", referencedColumnName = "id", nullable = false)
 	private System consumerSystem;
 	
-	@Column (nullable = false)
+	@Column (name= "foreign_", nullable = false)
 	private boolean foreign;
 	
 	@Column (nullable = false)
