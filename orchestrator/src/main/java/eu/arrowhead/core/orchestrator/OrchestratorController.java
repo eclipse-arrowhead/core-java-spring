@@ -68,7 +68,7 @@ public class OrchestratorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Start Orchestration prosess.", response = OrchestratorFormResponseDTO.class)
+	@ApiOperation(value = "Start Orchestration process.", response = OrchestratorFormResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_HTTP_400_MESSAGE),
