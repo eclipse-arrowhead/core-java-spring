@@ -220,7 +220,29 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699")
 	@Test
+	public void testRegisterAuthorizationIntraCloudWithNullProviderIdList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, null, createIdList(1, 2), createIdList(1, 1))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
 	public void testRegisterAuthorizationIntraCloudWithEmptyServiceDefinitionIdList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), new ArrayList<>(), createIdList(1, 1))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testRegisterAuthorizationIntraCloudWithNullServiceDefinitionIdList() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), null, createIdList(1, 1))))
@@ -231,10 +253,43 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699")
 	@Test
-	public void testRegisterAuthorizationIntraCloudWithMultipleElementsInBothList() throws Exception {
+	public void testRegisterAuthorizationIntraCloudWithEmptyInterfaceIdList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), createIdList(1, 1), new ArrayList<>())))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testRegisterAuthorizationIntraCloudWithNullInterfaceIdList() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), createIdList(1, 1), null)))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testRegisterAuthorizationIntraCloudWithMultipleElementsInProviderIdAndServiceDefinitionIdLists() throws Exception {
 		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 2), createIdList(1, 2), createIdList(1, 1))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testRegisterAuthorizationIntraCloudWithMultipleElementsInServiceDefinitionIdAndInterfaceIdLists() throws Exception {
+		this.mockMvc.perform(post(INTRA_CLOUD_AUTHORIZATION_MGMT_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudRequestDTO(1L, createIdList(1, 1), createIdList(1, 2), createIdList(1, 2))))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
