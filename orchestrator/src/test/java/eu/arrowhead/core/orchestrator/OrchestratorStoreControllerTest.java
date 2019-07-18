@@ -34,12 +34,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
@@ -217,11 +220,11 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerOkTest() throws Exception {
 		
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
 		
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getOrchestratorStoreRequestByIdDTOForTest()))
+				.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -232,7 +235,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerInvalidDirectionParamTest() throws Exception {
 		
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
 		
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
@@ -269,7 +272,7 @@ public class OrchestratorStoreControllerTest {
 		
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getOrchestratorStoreRequestByIdDTOForTest()))
+				.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -282,7 +285,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
 		
-		final OrchestratorStoreRequestByIdDTO request = null;
+		final OrchestratorStoreRequestDTO request = null;
 	
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -299,7 +302,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
 		
-		final OrchestratorStoreRequestByIdDTO request = getOrchestratorStoreRequestByIdDTOForTest();
+		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
 		request.setConsumerSystemId(null);
 	
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
@@ -317,7 +320,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
 		
-		final OrchestratorStoreRequestByIdDTO request = getOrchestratorStoreRequestByIdDTOForTest();
+		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
 		request.setServiceDefinitionId(null);
 	
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
@@ -338,7 +341,7 @@ public class OrchestratorStoreControllerTest {
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresByIdResponse(any())).thenReturn(dto);
 		
-		final List<OrchestratorStoreRequestByIdDTO> request =  getOrchestratorStoreRequestByIdDTOListForTest(3);
+		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForTest(3);
 	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -355,7 +358,7 @@ public class OrchestratorStoreControllerTest {
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresByIdResponse(any())).thenReturn(dto);
 		
-		final List<OrchestratorStoreRequestByIdDTO> request =  null;
+		final List<OrchestratorStoreRequestDTO> request =  null;
 	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -372,7 +375,7 @@ public class OrchestratorStoreControllerTest {
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresByIdResponse(any())).thenReturn(dto);
 		
-		final List<OrchestratorStoreRequestByIdDTO> request =  getOrchestratorStoreRequestByIdDTOListForNullPriorityTest(3);
+		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForNullPriorityTest(3);
 	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -389,7 +392,7 @@ public class OrchestratorStoreControllerTest {
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresByIdResponse(any())).thenReturn(dto);
 		
-		final List<OrchestratorStoreRequestByIdDTO> request =  getOrchestratorStoreRequestByIdDTOListForNullServiceInterfaceIdTest(3);
+		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForNullServiceInterfaceIdTest(3);
 	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -406,7 +409,7 @@ public class OrchestratorStoreControllerTest {
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresByIdResponse(any())).thenReturn(dto);
 		
-		final List<OrchestratorStoreRequestByIdDTO> request =  getOrchestratorStoreRequestByIdDTOListForListElementsNullTest(3);
+		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForListElementsNullTest(3);
 	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -488,83 +491,165 @@ public class OrchestratorStoreControllerTest {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private OrchestratorStoreRequestByIdDTO getOrchestratorStoreRequestByIdDTOForTest() {
+	private OrchestratorStoreRequestDTO getLocalOrchestratorStoreRequestDTOForTest() {
 		
-		final Long serviceDefinitionId = 1L;
+		final String serviceDefinitionName = "serviceDefinitionNameForTest";
 		final Long consumerSystemId = 1L;
-		final Long providerSystemId = 1L;
-		final Long cloudId = 1L;
-		final Long serviceInterfaceId = 1L;
-		final Integer priority = 1;
-		final Map<String,String> attribute = null;
+		final SystemRequestDTO providerSystemDTO = getProviderSystemRequestDTOForTest();
+		final CloudRequestDTO cloudDTO = getLocalProviderCloudRequestDTOForTest();
+		final String serviceInterfaceName = "serviceIntrfaceNameForTest";
+		final Integer priority = 1;	
+		final Map<String,String> attribute = new HashMap<String, String>();
 		
-		return new OrchestratorStoreRequestByIdDTO(
-				serviceDefinitionId,
-				consumerSystemId,
-				providerSystemId,
-				cloudId,
-				serviceInterfaceId,
-				priority,
+		return new OrchestratorStoreRequestDTO(
+				serviceDefinitionName, 
+				consumerSystemId, 
+				providerSystemDTO, 
+				cloudDTO, 
+				serviceInterfaceName, 
+				priority, 
 				attribute);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForTest(final int listSize) {
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOForTest() {
 		
-		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		final String serviceDefinitionName = "serviceDefinitionNameForTest";
+		final Long consumerSystemId = 1L;
+		final SystemRequestDTO providerSystemDTO = getProviderSystemRequestDTOForTest();
+		final CloudRequestDTO cloudDTO = getForeignProviderCloudRequestDTOForTest();
+		final String serviceInterfaceName = "serviceIntrfaceNameForTest";
+		final Integer priority = 1;	
+		final Map<String,String> attribute = new HashMap<String, String>();
 		
-		for (int i = 0; i < listSize; i++) {
-			
-			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = getOrchestratorStoreRequestByIdDTOForTest();
-			orchestratorStoreRequestByIdDTO.setProviderSystemId(i + 1L);
-			orchestratorStoreRequestByIdDTO.setPriority(i + 1);
-			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
-		}
-		return orchestratorStoreRequestByIdDTOList;
+		return new OrchestratorStoreRequestDTO(
+				serviceDefinitionName, 
+				consumerSystemId, 
+				providerSystemDTO, 
+				cloudDTO, 
+				serviceInterfaceName, 
+				priority, 
+				attribute);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForNullPriorityTest(final int listSize) {
+	private CloudRequestDTO getLocalProviderCloudRequestDTOForTest() {
 		
-		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		final String operator = "operatorForTest";
+		final String name = "cloudName";
+		final String address = "localhost";
+		final Integer port = 12345;
+		final Boolean ownCloud = true;	
 		
-		for (int i = 0; i < listSize; i++) {
-			
-			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = getOrchestratorStoreRequestByIdDTOForTest();
-			orchestratorStoreRequestByIdDTO.setProviderSystemId(i + 1L);
-			orchestratorStoreRequestByIdDTO.setPriority(null);
-			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
-		}
-		return orchestratorStoreRequestByIdDTOList;
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		
+		cloudRequestDTO.setOperator(operator);
+		cloudRequestDTO.setName(name);
+		cloudRequestDTO.setAddress(address);
+		cloudRequestDTO.setPort(port);
+		cloudRequestDTO.setOwnCloud(ownCloud);
+		
+		return cloudRequestDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForNullServiceInterfaceIdTest(final int listSize) {
+	private CloudRequestDTO getForeignProviderCloudRequestDTOForTest() {
 		
-		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		final String operator = "operatorForTest";
+		final String name = "cloudName";
+		final String address = "localhost";
+		final Integer port = 12345;
+		final Boolean ownCloud = false;	
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		
+		cloudRequestDTO.setOperator(operator);
+		cloudRequestDTO.setName(name);
+		cloudRequestDTO.setAddress(address);
+		cloudRequestDTO.setPort(port);
+		cloudRequestDTO.setOwnCloud(ownCloud);
+		
+		return cloudRequestDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private SystemRequestDTO getProviderSystemRequestDTOForTest() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreRequestDTO> getLocalOrchestratorStoreRequestDTOListForTest(final int listSize) {
+		
+		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
 		
 		for (int i = 0; i < listSize; i++) {
 			
-			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = getOrchestratorStoreRequestByIdDTOForTest();
-			orchestratorStoreRequestByIdDTO.setProviderSystemId(i + 1L);
-			orchestratorStoreRequestByIdDTO.setServiceInterfaceId(null);
-			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getLocalOrchestratorStoreRequestDTOForTest();
+			orchestratorStoreRequestDTO.setProviderSystemDTO(getProviderSystemRequestDTOForTest());
+			orchestratorStoreRequestDTO.setPriority(i + 1);
+			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
 		}
-		return orchestratorStoreRequestByIdDTOList;
+		return orchestratorStoreRequestDTOList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForListElementsNullTest(final int listSize) {
+	private List<OrchestratorStoreRequestDTO> getForeignOrchestratorStoreRequestDTOListForTest(final int listSize) {
 		
-		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
 		
 		for (int i = 0; i < listSize; i++) {
 			
-			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = null;
-			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
+			orchestratorStoreRequestDTO.setProviderSystemDTO(getProviderSystemRequestDTOForTest());
+			orchestratorStoreRequestDTO.setPriority(i + 1);
+			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
+		}
+		return orchestratorStoreRequestDTOList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreRequestDTO> getLocalOrchestratorStoreRequestDTOListForNullPriorityTest(final int listSize) {
+		
+		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
+		
+		for (int i = 0; i < listSize; i++) {
+			
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getLocalOrchestratorStoreRequestDTOForTest();
+			
+			orchestratorStoreRequestDTO.setPriority(null);
+			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
+		}
+		return orchestratorStoreRequestDTOList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreRequestDTO> getOrchestratorStoreRequestDTOListForNullServiceInterfaceIdTest(final int listSize) {
+		
+		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
+		
+		for (int i = 0; i < listSize; i++) {
+			
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getLocalOrchestratorStoreRequestDTOForTest();
+			
+			orchestratorStoreRequestDTO.setServiceInterfaceName(null);
+			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
+		}
+		return orchestratorStoreRequestDTOList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreRequestDTO> getOrchestratorStoreRequestDTOListForListElementsNullTest(final int listSize) {
+		
+		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
+		
+		for (int i = 0; i < listSize; i++) {
+			
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = null;
+			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
 		}
 		
-		return orchestratorStoreRequestByIdDTOList;
+		return orchestratorStoreRequestDTOList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -574,14 +659,31 @@ public class OrchestratorStoreControllerTest {
 				getIdForTest(),
 				getServiceDefinitionResponseDTOForTest(),
 				getConsumerSystemResponseDTOForTest(),
-				getProviderSystemResponseDTOForTest(),
-				getProviderCloudResponseDTOForTest(),
+				getForeignForTest(),
+				getIdForTest(),
+				getServiceInterfaceResponseDTO(),
 				getPriorityForTest(),
 				getAttributeForTest(),
 				getCreatedAtForTest(),
 				getUpdatedAtForTest());
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	private ServiceInterfaceResponseDTO getServiceInterfaceResponseDTO() {
+		
+		return new ServiceInterfaceResponseDTO(
+				getIdForTest(),
+				"interfaceNameForTest",
+				getCreatedAtForTest(),
+				getUpdatedAtForTest());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean getForeignForTest() {
+		
+		return false;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreResponseDTO> getOrchestratorStoreResponseDTOListForTest(final int size) {
 		
@@ -590,7 +692,7 @@ public class OrchestratorStoreControllerTest {
 		for (int i = 0; i < size; i++) {
 			final OrchestratorStoreResponseDTO orchestratorStoreResponseDTO = getOrchestratorStoreResponseDTOForTest();
 			orchestratorStoreResponseDTO.setId(i + 1L);
-			orchestratorStoreResponseDTO.getProviderSystem().setId(i + 1L);
+			orchestratorStoreResponseDTO.setProviderSystemId(i + 1L);
 			orchestratorStoreResponseDTO.setPriority(i + 1);
 			
 			orchestratorStoreResponseDTOList.add(orchestratorStoreResponseDTO);
