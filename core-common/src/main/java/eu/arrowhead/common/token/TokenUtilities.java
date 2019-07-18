@@ -163,5 +163,11 @@ public class TokenUtilities {
 		public String getInterfaceName() { return interfaceName; }
 		public Long getEndOfValidity() { return endOfValidity; }
 		public boolean hasEndOfValidity() { return endOfValidity != null && endOfValidity.longValue() > 0; }
+		
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public String toString() {
+			return "TokenInfo [consumerName=" + consumerName + ", service=" + service + ", interfaceName=" + interfaceName + ", endOfValidity=" + endOfValidity + "]";
+		}
 	}
 }

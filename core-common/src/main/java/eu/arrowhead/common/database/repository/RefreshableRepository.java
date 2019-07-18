@@ -13,5 +13,5 @@ public interface RefreshableRepository<T,ID extends Serializable> extends JpaRep
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	void refresh(final T t);
+	public void refresh(final T t);
 }
