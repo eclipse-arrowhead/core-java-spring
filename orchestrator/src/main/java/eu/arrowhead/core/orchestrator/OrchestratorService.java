@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import eu.arrowhead.common.dto.OrchestratorFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
@@ -23,7 +23,7 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------
 	public ServiceRegistryListResponseDTO externalServiceRequest(
-			final OrchestratorFormRequestDTO orchestratorFormRequestDTO) {
+			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("externalServiceRequest started ...");
 		
 		//TODO implement method logic here
@@ -32,7 +32,7 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------	
 	public ServiceRegistryListResponseDTO triggerInterCloud(
-			final OrchestratorFormRequestDTO orchestratorFormRequestDTO) {
+			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("triggerInterCloud started ...");
 		
 		//TODO implement method logic here
@@ -41,7 +41,7 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------	
 	public ServiceRegistryListResponseDTO orchestrationFromStore(
-			final OrchestratorFormRequestDTO orchestratorFormRequestDTO) {
+			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("orchestrationFromStore started ...");
 		
 
@@ -51,7 +51,7 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------	
 	public ServiceRegistryListResponseDTO dynamicOrchestration(
-			final OrchestratorFormRequestDTO orchestratorFormRequestDTO) {
+			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("dynamicOrchestration started ...");
 		
 		//TODO implement method logic here

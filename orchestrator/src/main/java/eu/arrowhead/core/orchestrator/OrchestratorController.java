@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.OrchestratorFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorFormResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -75,10 +75,10 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_ORCH_PROCESS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceRegistryListResponseDTO orchestrationProcess(@RequestBody final OrchestratorFormRequestDTO request) {
+	@ResponseBody public ServiceRegistryListResponseDTO orchestrationProcess(@RequestBody final OrchestrationFormRequestDTO request) {
 		logger.debug("orchestrationProcess started ...");
 		
-		final OrchestratorFormRequestDTO validatedOrchestratorFormRequestDTO = validateOrchestratorFormRequestDTO(request, CommonConstants.ORCHESTRATOR_URI);
+		final OrchestrationFormRequestDTO validatedOrchestratorFormRequestDTO = validateOrchestratorFormRequestDTO(request, CommonConstants.ORCHESTRATOR_URI);
 		
 	    if (validatedOrchestratorFormRequestDTO.getOrchestrationFlags().getOrDefault("externalServiceRequest", false)) {
 	      
@@ -111,7 +111,7 @@ public class OrchestratorController {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
-	private OrchestratorFormRequestDTO validateOrchestratorFormRequestDTO(final OrchestratorFormRequestDTO request, final String origin) {
+	private OrchestrationFormRequestDTO validateOrchestratorFormRequestDTO(final OrchestrationFormRequestDTO request, final String origin) {
 		
 		if (request == null) {
 			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -121,7 +121,7 @@ public class OrchestratorController {
 			throw new BadPayloadException("RequesterSystem "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final OrchestratorFormRequestDTO validOrchestratorFormRequestDTO = new OrchestratorFormRequestDTO();
+		final OrchestrationFormRequestDTO validOrchestratorFormRequestDTO = new OrchestrationFormRequestDTO();
 		
 		validOrchestratorFormRequestDTO.setRequesterSystem(request.getRequesterSystem());
 		

@@ -187,7 +187,7 @@ CREATE TABLE `orchestrator_store` (
   `name` varchar (255) NOT NULL,
   `consumer_system_id` bigint(20) NOT NULL,
   `provider_system_id` bigint(20) NOT NULL,
-  `foreign` int(1) NOT NULL DEFAULT 0,
+  `foreign_` int(1) NOT NULL DEFAULT 0,
   `service_id` bigint(20) NOT NULL,
   `service_interface_id` bigint(20) NOT NULL,
   `priority` int(11) NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE `orchestrator_store` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `priority_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`priority`),
-  UNIQUE KEY `duplication_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`provider_system_id`, `foreign`),
+  UNIQUE KEY `duplication_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`provider_system_id`, `foreign_`),
   CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
   CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
   CONSTRAINT `service_intf_orch` FOREIGN KEY (`service_interface_id`) REFERENCES `service_interface` (`id`) ON DELETE CASCADE

@@ -1,5 +1,7 @@
 package eu.arrowhead.common;
 
+import java.util.List;
+
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -159,6 +161,16 @@ public class CommonConstants {
 	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + Defaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT+ "}";
+	
+	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";
+	public static final String ORCHESTRATON_FLAG_METADATA_SEARCH = "metadataSearch";
+	public static final String ORCHESTRATON_FLAG_ONLY_PREFERRED = "onlyPreferred";
+	public static final String ORCHESTRATON_FLAG_PING_PROVIDERS = "pingProviders";
+	public static final String ORCHESTRATON_FLAG_OVERRIDE_STORE = "overrideStore";
+	public static final String ORCHESTRATON_FLAG_TRIGGER_INTER_CLOUD = "triggerInterCloud";
+	public static final String ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
+	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
+	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
 	
 	public static final int TOP_PRIORITY = 1;
 

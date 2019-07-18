@@ -28,13 +28,16 @@ public class PreferredProviderDataDTO implements Serializable {
 		return providerSystem != null && providerCloud == null;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public boolean isGlobal() {
 		return providerCloud != null;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public boolean isValid() {
 		return isLocal() || isGlobal();
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
