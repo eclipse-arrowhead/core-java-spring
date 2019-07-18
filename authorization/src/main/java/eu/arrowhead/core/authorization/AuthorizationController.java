@@ -42,6 +42,7 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
@@ -404,7 +405,7 @@ public class AuthorizationController {
 		
 		final boolean isConsumerIdInvalid = request.getConsumerId() == null || request.getConsumerId() < 1;
 		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
-		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
+		final boolean isProviderListEmpty = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().isEmpty();
 		if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
 			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
@@ -413,18 +414,34 @@ public class AuthorizationController {
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTRA_CHECK_URI);
-		}
+		}		
 		
-		final Set<Long> providerIdSet = new HashSet<>();
-		for (final Long id : request.getProviderIds()) {
-			if (id != null && id > 0) {
-				providerIdSet.add(id);
+		final Set<IdIdListDTO> providerIdsWithInterfaceIdsSet = new HashSet<>();
+		
+		final Set<Long> providerIdCheck = new HashSet<>();
+		for (final IdIdListDTO providerWithInterfaces : request.getProviderIdsWithInterfaceIds()) {
+			if (providerWithInterfaces.getId() != null && providerWithInterfaces.getId() > 0 && !providerIdCheck.contains(providerWithInterfaces.getId())) {
+				providerIdCheck.add(providerWithInterfaces.getId());
+				
+				final Set<Long> interfaceIdCheck = new HashSet<>();
+				for (final Long interfaceId : providerWithInterfaces.getIdList()) {
+					if (interfaceId != null && interfaceId > 0 && !interfaceIdCheck.contains(interfaceId)) {
+						interfaceIdCheck.add(interfaceId);
+					} else {
+						logger.debug("Invalid or duplicated interface id: {} with provider id: {}", interfaceId, providerWithInterfaces.getId()); 
+					}
+				}
+				providerWithInterfaces.getIdList().clear();
+				providerWithInterfaces.getIdList().addAll(interfaceIdCheck);
+				
+				providerIdsWithInterfaceIdsSet.add(providerWithInterfaces);
+				
 			} else {
-				logger.debug("Invalid provider system id: {}", id);
+				logger.debug("Invalid or duplicated provider system id: {}", providerWithInterfaces.getId());
 			}
 		}
 		
-		final AuthorizationIntraCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationIntraCloudRequest(request.getConsumerId(), request.getServiceDefinitionId(), providerIdSet);
+		final AuthorizationIntraCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationIntraCloudRequest(request.getConsumerId(), request.getServiceDefinitionId(), providerIdsWithInterfaceIdsSet);
 		logger.debug("checkAuthorizationIntraCloudRequest has been finished");
 		
 		return response;

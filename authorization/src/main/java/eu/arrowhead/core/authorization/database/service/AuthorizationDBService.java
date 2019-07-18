@@ -1,9 +1,7 @@
 package eu.arrowhead.core.authorization.database.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -40,6 +38,7 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -391,14 +390,13 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationIntraCloudCheckResponseDTO checkAuthorizationIntraCloudRequest(final long consumerId, final long serviceDefinitionId, final Set<Long> providerIds) {
+	public AuthorizationIntraCloudCheckResponseDTO checkAuthorizationIntraCloudRequest(final long consumerId, final long serviceDefinitionId, final Set<IdIdListDTO> providerIdsWithInterfaceIds) {
 		logger.debug("checkAuthorizationIntraCloudRequest started...");
 				
-		final Map<Long, Boolean> providerIdAuthorizationState = new HashMap<>();
 		try {
 			final boolean isConsumerIdInvalid = consumerId < 1 || !systemRepository.existsById(consumerId);
 			final boolean isServiceDefinitionIdInvalid = serviceDefinitionId < 1 || !serviceDefinitionRepository.existsById(serviceDefinitionId);
-			final boolean isProviderListEmpty = providerIds == null || providerIds.isEmpty();
+			final boolean isProviderListEmpty = providerIdsWithInterfaceIds == null || providerIdsWithInterfaceIds.isEmpty();
 			if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
 				String exceptionMsg = "Following parameters are invalid:";
 				exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " consumer id," : exceptionMsg;
@@ -409,21 +407,36 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException(exceptionMsg);
 			}
 			
-			for (final Long providerId : providerIds) {
+			final List<IdIdListDTO> authorizedProvidersWithInterfaces = new ArrayList<>();
+			for (final IdIdListDTO providerWithInterfaces : providerIdsWithInterfaceIds) {
+				final Long providerId = providerWithInterfaces.getId();
 				if (providerId == null || providerId < 1 || !systemRepository.existsById(providerId)) {
 					logger.debug("Invalid provider id: {}", providerId);
 				} else {
-					final Optional<AuthorizationIntraCloud> optional = authorizationIntraCloudRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId,
+					final Optional<AuthorizationIntraCloud> authIntraOpt = authorizationIntraCloudRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId,
 																																							 serviceDefinitionId);
-					providerIdAuthorizationState.put(providerId, optional.isPresent());			
+					if (authIntraOpt.isPresent()) {
+						final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections = authIntraOpt.get().getInterfaceConnections();
+						final List<Long> authorizedInterfaces = new ArrayList<>();
+						for (final Long interfaceId : providerWithInterfaces.getIdList()) {
+							for (final AuthorizationIntraCloudInterfaceConnection connection : interfaceConnections) {
+								if (connection.getServiceInterface().getId() == interfaceId) {
+									authorizedInterfaces.add(interfaceId);
+								}
+							}
+						}
+						if (!authorizedInterfaces.isEmpty()) {
+							authorizedProvidersWithInterfaces.add(new IdIdListDTO(providerId, authorizedInterfaces));
+						}
+					}
 				}
 			}
 			
-			if (providerIdAuthorizationState.isEmpty()) {
-				throw new InvalidParameterException("Have no valid id in providerId list");
+			if (authorizedProvidersWithInterfaces.isEmpty()) {
+				logger.debug("Have no any authorization intra cloud rule");
 			}			
 			
-			return new AuthorizationIntraCloudCheckResponseDTO(consumerId, serviceDefinitionId, providerIdAuthorizationState);
+			return new AuthorizationIntraCloudCheckResponseDTO(consumerId, serviceDefinitionId, authorizedProvidersWithInterfaces);
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
