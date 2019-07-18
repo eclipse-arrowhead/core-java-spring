@@ -296,12 +296,10 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity) {
 		
-		Assert.notNull(entity, "OrchestratorStore is null");
-		Assert.notNull(entity.getId(), "OrchestratorStore.id is null");                
+		Assert.notNull(entity, "OrchestratorStore is null");            
 		Assert.notNull(entity.getServiceDefinition(),"OrchestratorStore.ServiceDefinition is null"); 
 		Assert.notNull(entity.getConsumerSystem(),"OrchestratorStore.ConsumerSystem is null");    
 		Assert.notNull(entity.getProviderSystem(), "OrchestratorStore.ProviderSystem is null");
-		Assert.notNull(entity.getPriority(), "OrchestratorStore.Priority is null");
         Assert.notNull(entity.getCreatedAt(), "OrchestratorStore.CreatedAt is null");        
         Assert.notNull(entity.getUpdatedAt(),  "OrchestratorStore.UpdatedAt is null");          
 	
@@ -312,9 +310,9 @@ public class DTOConverter {
 			convertSystemToSystemResponseDTO(entity.getProviderSystem()),
 			entity.getProviderCloud() != null ? convertCloudToCloudResponseDTO(entity.getProviderCloud()) : null,
 			entity.getPriority(),
-			entity.getAttribute(),
-			entity.getCreatedAt(),
-			entity.getUpdatedAt());
+			Utilities.text2Map(entity.getAttribute()),
+			Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
+			Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 		
 	}
 

@@ -161,7 +161,7 @@ public class OrchestratorStoreControllerTest {
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
@@ -173,7 +173,7 @@ public class OrchestratorStoreControllerTest {
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -183,7 +183,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullPageParamTest() throws Exception {
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 				.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -193,7 +193,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamTest() throws Exception {
 
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 				.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
@@ -203,7 +203,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamAndNullPageParamTest() throws Exception {
 
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
@@ -384,6 +384,23 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void addOrchestratorStoreEntriesNullServiceIntrfaceTest() throws Exception {
+		
+		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		when(orchestratorStoreDBService.createOrchestratorStoresByIdResponse(any())).thenReturn(dto);
+		
+		final List<OrchestratorStoreRequestByIdDTO> request =  getOrchestratorStoreRequestByIdDTOListForNullServiceInterfaceIdTest(3);
+	
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void addOrchestratorStoreEntriesListElementsNullTest() throws Exception {
 		
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
@@ -431,7 +448,7 @@ public class OrchestratorStoreControllerTest {
 		
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTO(3);
 	
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify")
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes(request))
 				.accept(MediaType.APPLICATION_JSON))
@@ -445,7 +462,7 @@ public class OrchestratorStoreControllerTest {
 		
 		final OrchestratorStoreModifyPriorityRequestDTO request = null;
 	
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify")
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes(request))
 				.accept(MediaType.APPLICATION_JSON))
@@ -459,7 +476,7 @@ public class OrchestratorStoreControllerTest {
 		
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTOWithEmptyMap();
 	
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify")
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes(request))
 				.accept(MediaType.APPLICATION_JSON))
@@ -477,14 +494,16 @@ public class OrchestratorStoreControllerTest {
 		final Long consumerSystemId = 1L;
 		final Long providerSystemId = 1L;
 		final Long cloudId = 1L;
+		final Long serviceInterfaceId = 1L;
 		final Integer priority = 1;
-		final String attribute = null;
+		final Map<String,String> attribute = null;
 		
 		return new OrchestratorStoreRequestByIdDTO(
 				serviceDefinitionId,
 				consumerSystemId,
 				providerSystemId,
 				cloudId,
+				serviceInterfaceId,
 				priority,
 				attribute);
 	}
@@ -514,6 +533,21 @@ public class OrchestratorStoreControllerTest {
 			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = getOrchestratorStoreRequestByIdDTOForTest();
 			orchestratorStoreRequestByIdDTO.setProviderSystemId(i + 1L);
 			orchestratorStoreRequestByIdDTO.setPriority(null);
+			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
+		}
+		return orchestratorStoreRequestByIdDTOList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreRequestByIdDTO> getOrchestratorStoreRequestByIdDTOListForNullServiceInterfaceIdTest(final int listSize) {
+		
+		final List<OrchestratorStoreRequestByIdDTO> orchestratorStoreRequestByIdDTOList = new ArrayList<OrchestratorStoreRequestByIdDTO>(listSize);
+		
+		for (int i = 0; i < listSize; i++) {
+			
+			final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO = getOrchestratorStoreRequestByIdDTOForTest();
+			orchestratorStoreRequestByIdDTO.setProviderSystemId(i + 1L);
+			orchestratorStoreRequestByIdDTO.setServiceInterfaceId(null);
 			orchestratorStoreRequestByIdDTOList.add(orchestratorStoreRequestByIdDTO);
 		}
 		return orchestratorStoreRequestByIdDTOList;
@@ -551,7 +585,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreResponseDTO> getOrchestratorStoreResponseDTOListForTest(final int size) {
 		
-		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList(size);
+		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList<>(size);
 		
 		for (int i = 0; i < size; i++) {
 			final OrchestratorStoreResponseDTO orchestratorStoreResponseDTO = getOrchestratorStoreResponseDTOForTest();
@@ -599,21 +633,21 @@ public class OrchestratorStoreControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ZonedDateTime getUpdatedAtForTest() {
+	private String getUpdatedAtForTest() {
 			
-		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04 14:43:19");
+		return "2019-07-04 14:43:19";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ZonedDateTime getCreatedAtForTest() {
+	private String getCreatedAtForTest() {
 			
-		return Utilities.parseUTCStringToLocalZonedDateTime("2019-07-04 14:43:19");
+		return "2019-07-04 14:43:19";
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String getAttributeForTest() {
+	private Map<String,String> getAttributeForTest() {
 			
-		return null;
+		return new HashMap<String, String>();
 	}
 	
 	//-------------------------------------------------------------------------------------------------

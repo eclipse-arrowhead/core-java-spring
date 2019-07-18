@@ -18,8 +18,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table (uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority"}),
-		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "providerSystemId"})
+		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority", "serviceInterfaceId"}),
+		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "foreign", "providerSystemId", "serviceInterfaceId"})
 		})
 public class OrchestratorStore {
 
@@ -40,16 +40,18 @@ public class OrchestratorStore {
 	@JoinColumn (name = "consumerSystemId", referencedColumnName = "id", nullable = false)
 	private System consumerSystem;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "providerSystemId", referencedColumnName = "id", nullable = false)
-	private System providerSystem; 
-	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "providerCloudId", referencedColumnName = "id", nullable = true)
-	private Cloud providerCloud;
+	@Column (nullable = false)
+	private boolean foreign;
 	
 	@Column (nullable = false)
-	private Integer priority;
+	private long providerSystemId;
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "serviceInterfaceId", referencedColumnName = "id", nullable = false)
+	private ServiceInterface serviceInterface;
+	
+	@Column (nullable = false)
+	private int priority;
 	
 	@Column (nullable = true, columnDefinition = "TEXT")
 	private String attribute;
@@ -67,13 +69,13 @@ public class OrchestratorStore {
 	public OrchestratorStore() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStore(ServiceDefinition serviceDefinition, System consumerSystem, System providerSystem,
-			Cloud providerCloud, Integer priority, String attribute, ZonedDateTime createdAt, ZonedDateTime updatedAt) {
+	public OrchestratorStore(final ServiceDefinition serviceDefinition, final System consumerSystem, final boolean foreign, final long providerSystemId, final ServiceInterface serviceInterface, final Integer priority, final String attribute, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
 		super();
 		this.serviceDefinition = serviceDefinition;
 		this.consumerSystem = consumerSystem;
-		this.providerSystem = providerSystem;
-		this.providerCloud = providerCloud;
+		this.foreign = foreign;
+		this.providerSystemId = providerSystemId;
+		this.serviceInterface = serviceInterface;
 		this.priority = priority;
 		this.attribute = attribute;
 		this.createdAt = createdAt;
@@ -97,30 +99,32 @@ public class OrchestratorStore {
 	public long getId() { return id; }
 	public ServiceDefinition getServiceDefinition() { return serviceDefinition;	}
 	public System getConsumerSystem() {	return consumerSystem; }
-	public System getProviderSystem() {	return providerSystem; }
-	public Cloud getProviderCloud() { return providerCloud; }
-	public Integer getPriority() { return priority; }
+	public boolean isForeign() {return foreign; }
+	public long getProviderSystemId() {	return providerSystemId; }
+	public ServiceInterface serviceInterface() { return serviceInterface;}
+	public int getPriority() { return priority; }
 	public String getAttribute() { return attribute; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId(long id) { this.id = id; }
-	public void setServiceDefinition(ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setConsumerSystem(System consumerSystem) { this.consumerSystem = consumerSystem; }
-	public void setProviderSystem(System providerSystem) { this.providerSystem = providerSystem; }
-	public void setProviderCloud(Cloud providerCloud) { this.providerCloud = providerCloud; }
-	public void setPriority(Integer priority) { this.priority = priority; }
-	public void setAttribute(String attribute) { this.attribute = attribute; }
-	public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setId(final long id) { this.id = id; }
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setConsumerSystem(final System consumerSystem) { this.consumerSystem = consumerSystem; }
+	public void setForeign(final boolean foreign) {this.foreign = foreign; }
+	public void setProviderSystemId(final long providerSystemId) { this.providerSystemId = providerSystemId; }
+	public void setServiceInterface(final ServiceInterface serviceInterface) { this.serviceInterface = serviceInterface ;}
+	public void setPriority(final int priority) { this.priority = priority; }
+	public void setAttribute(final String attribute) { this.attribute = attribute; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------	
 	@Override
 	public String toString() {
 		return "OrchestratorStore [id=" + id + ", serviceDefinition=" + serviceDefinition + ", consumerSystem="
-				+ consumerSystem + ", providerSystem=" + providerSystem + ", providerCloud=" + providerCloud
-				+ ", priority=" + priority + ", attribute=" + attribute + ", createdAt=" + createdAt + ", updatedAt="
+				+ consumerSystem + ", foreign=" + foreign + ", providerSystemid=" + providerSystemId
+				+ ", serviceInterface=" + serviceInterface + ", priority=" + priority + ", attribute=" + attribute + ", createdAt=" + createdAt + ", updatedAt="
 				+ updatedAt + "]";
 	}
 }

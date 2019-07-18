@@ -1,19 +1,19 @@
 package eu.arrowhead.common.database.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.ForeignSystem;
 
 @Repository
-public interface CloudRepository extends RefreshableRepository<Cloud,Long> {
-
+public interface  ForeignSystemRepository  extends RefreshableRepository<ForeignSystem,Long> {
+	
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
-	public List<Cloud> findByOwnCloudAndSecure(final boolean ownCloud, final boolean secure);
-	public Optional<Cloud> findByOperatorAndName(final String operator, final String name);
+	public Optional<ForeignSystem> findBySystemNameAndAddressAndPortAndProviderCloud(final String systemName, final String address, final int port, final Cloud providerCloud);
+	
 }

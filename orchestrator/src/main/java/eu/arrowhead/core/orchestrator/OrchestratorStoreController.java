@@ -3,6 +3,7 @@ package eu.arrowhead.core.orchestrator;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -26,9 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestByIdDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
@@ -50,8 +52,8 @@ public class OrchestratorStoreController {
 	
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String ORCHESTRATOR_STORE_MGMT_BY_ID_URI = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_topPriority";
-	private static final String ORCHESTRATOR_STORE_MGMT_MODIFY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify";
+	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority";
+	private static final String ORCHESTRATOR_STORE_MGMT_MODIFY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE = "OrchestratorStore by requested id returned";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE = "No Such OrchestratorStore by requested id";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters returned";
@@ -207,7 +209,7 @@ public class OrchestratorStoreController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
-			@RequestBody final OrchestratorStoreRequestByIdDTO request) {
+			@RequestBody final OrchestratorStoreRequestDTO request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
 		int validatedPage;
@@ -226,7 +228,7 @@ public class OrchestratorStoreController {
 		
 		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
-		checkOrchestratorStoreRequestDTOForByConsumerIdAndServiceDefinitionId(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
+		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(
 				validatedPage, 
@@ -234,9 +236,9 @@ public class OrchestratorStoreController {
 				validatedDirection, 
 				sortField,
 				request.getConsumerSystemId(),
-				request.getServiceDefinitionId());
+				request.getServiceDefinitionName());
 		
-		logger.debug("OrchestratorStores  with ConsumerSystemId : {} and ServiceDefinitionId : {} and  page: {} and item_per page: {} retrieved successfully", request.getConsumerSystemId(), request.getServiceDefinitionId(), page, size);
+		logger.debug("OrchestratorStores  with ConsumerSystemId : {} and ServiceDefinitionName : {} and  page: {} and item_per page: {} retrieved successfully", request.getConsumerSystemId(), request.getServiceDefinitionName(), page, size);
 		return orchestratorStoreResponse;
 	}
 	
@@ -249,12 +251,12 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public OrchestratorStoreListResponseDTO addOrchestratorStoreEntries( @RequestBody final List<OrchestratorStoreRequestByIdDTO> request) {
+	@ResponseBody public OrchestratorStoreListResponseDTO addOrchestratorStoreEntries( @RequestBody final List<OrchestratorStoreRequestDTO> request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
-		checkOrchestratorStoreRequestByIdDTOList(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
+		checkOrchestratorStoreRequestDTOList(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		
-		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresByIdResponse(
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresResponse(
 				request);
 		
 		logger.debug(orchestratorStoreResponse.getCount() + " out of " + request.size() + " OrchestratorStore entries created successfully");
@@ -282,7 +284,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Modify prioities of OrchestratorStore entries.")
+	@ApiOperation(value = "Modify priorities of OrchestratorStore entries.")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_400_MESSAGE),
@@ -304,7 +306,7 @@ public class OrchestratorStoreController {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
-	private void checkOrchestratorStoreRequestDTOForByConsumerIdAndServiceDefinitionId(final OrchestratorStoreRequestByIdDTO request, final String origin) {
+	private void checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(final OrchestratorStoreRequestDTO request, final String origin) {
 		logger.debug("checkOrchestratorStoreRequestDTOForByConsumerRequest started ...");
 		
 		
@@ -315,24 +317,24 @@ public class OrchestratorStoreController {
 		
 		if (request.getConsumerSystemId() == null) {
 			throw new BadPayloadException(""+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}else {
-			if (request.getConsumerSystemId() < 1) {
-				throw new BadPayloadException("ConsumerSystemId : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-			}
 		}
 		
-		if (request.getServiceDefinitionId() == null) {
-			throw new BadPayloadException("ServiceDefinitionId " + NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}else {
-			if (request.getConsumerSystemId() < 1) {
-				throw new BadPayloadException("ServiceDefinitionId : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-			}
+		if (request.getConsumerSystemId() < 1) {
+			throw new BadPayloadException("ConsumerSystemId : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (request.getServiceDefinitionName() == null) {
+			throw new BadPayloadException("ServiceDefinitionName " + NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(request.getServiceDefinitionName())) {
+			throw new BadPayloadException("ServiceDefinitionName : " + EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void checkOrchestratorStoreRequestByIdDTOList(final List<OrchestratorStoreRequestByIdDTO> request, final String origin) {
+	private void checkOrchestratorStoreRequestDTOList(final List<OrchestratorStoreRequestDTO> request, final String origin) {
 		logger.debug("checkOrchestratorStoreRequestDTOList started ...");
 		
 		if (request == null) {
@@ -343,13 +345,58 @@ public class OrchestratorStoreController {
 			throw new BadPayloadException("Request "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		for (final OrchestratorStoreRequestByIdDTO orchestratorStoreRequestByIdDTO : request) {
-			if (orchestratorStoreRequestByIdDTO == null) {
-				throw new BadPayloadException("OrchestratorStoreRequestByIdDTO "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		for (final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO : request) {
+			if (orchestratorStoreRequestDTO == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestByIdDTO.getPriority() == null) {
-				throw new BadPayloadException("OrchestratorStoreRequestByIdDTO.Priority "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			if (orchestratorStoreRequestDTO.getConsumerSystemId() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ConsumerSystemId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (orchestratorStoreRequestDTO.getServiceDefinitionName() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ServiceDefinitionId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			
+			if (orchestratorStoreRequestDTO.getProviderSystemDTO() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getAddress() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Address "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystemDTO().getAddress())) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Address "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getSystemName() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.SystemName "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystemDTO().getSystemName())) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.SystemName "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Port "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (orchestratorStoreRequestDTO.getServiceInterfaceName() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ServiceInterfaceId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getServiceInterfaceName())) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.ServiceInterfaceName "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (orchestratorStoreRequestDTO.getPriority() == null) {
+				throw new BadPayloadException("orchestratorStoreRequestDTO.Priority "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
 
@@ -383,18 +430,24 @@ public class OrchestratorStoreController {
 			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
+		if (request.getPriorityMap() == null) {
+			throw new BadPayloadException("PriorityMap "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		if ( request.getPriorityMap().isEmpty()) {
 			throw new BadPayloadException("PriorityMap "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		final Map<Long, Integer> priorityMap = request.getPriorityMap();
 		
-		for (final Long consumerSystemId : priorityMap.keySet()) {
-			if (consumerSystemId == null) {
-				throw new BadPayloadException("PriorityMap.ConsumerSystemId "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-			}
-			if (priorityMap.get(consumerSystemId) == null) {
+		for (final Entry<Long, Integer> entry : priorityMap.entrySet()) {
+
+			if (entry.getValue() == null) {
 				throw new BadPayloadException("PriorityMap.PriorityValue "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (entry.getValue() < 1) {
+				throw new BadPayloadException("PriorityMap.PriorityValue "+  ID_NOT_VALID_ERROR_MESSAGE,HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
 		

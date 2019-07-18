@@ -21,7 +21,6 @@ public class OrchestratorStoreModifyPriorityRequestDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreModifyPriorityRequestDTO(final Map<Long, Integer> priorityMap) {
-		super();
 		this.priorityMap = priorityMap;
 	}
 	

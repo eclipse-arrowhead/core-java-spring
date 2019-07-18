@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class OrchestratorStoreRequestDTO implements Serializable{
 
@@ -9,12 +10,13 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 
 	private static final long serialVersionUID = 6496923524186210327L;
 	
-	private ServiceDefinitionRequestDTO serviceDefinitionDTO;
-	private SystemRequestDTO consumerSystemDTO;
+	private String serviceDefinitionName;
+	private Long consumerSystemId;
 	private SystemRequestDTO providerSystemDTO;
 	private CloudRequestDTO cloudDTO;
+	private String serviceInterfaceName;
 	private Integer priority;	
-	private String attribute;
+	private Map<String,String> attribute;
 	
 	//=================================================================================================
 	// methods
@@ -23,30 +25,32 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	public OrchestratorStoreRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreRequestDTO(final ServiceDefinitionRequestDTO serviceDefinitionDTO, final SystemRequestDTO consumerSystemDTO,
-			final SystemRequestDTO providerSystemDTO, final CloudRequestDTO cloudDTO, final Integer priority, final String attribute) {
-		super();
-		this.serviceDefinitionDTO = serviceDefinitionDTO;
-		this.consumerSystemDTO = consumerSystemDTO;
+	public OrchestratorStoreRequestDTO(final String serviceDefinitionName, final Long consumerSystemId,
+			final SystemRequestDTO providerSystemDTO, final CloudRequestDTO cloudDTO, final String serviceInterfaceName, final Integer priority, final Map<String,String> attribute) {
+		this.serviceDefinitionName = serviceDefinitionName;
+		this.consumerSystemId = consumerSystemId;
 		this.providerSystemDTO = providerSystemDTO;
 		this.cloudDTO = cloudDTO;
+		this.serviceInterfaceName = serviceInterfaceName;
 		this.priority = priority;
 		this.attribute = attribute;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceDefinitionRequestDTO getServiceDefinition() {return serviceDefinitionDTO;}
-	public SystemRequestDTO getConsumerSystemDTO() {return consumerSystemDTO;}
+	public String getServiceDefinitionName() {return serviceDefinitionName;}
+	public Long getConsumerSystemId() {return consumerSystemId;}
 	public SystemRequestDTO getProviderSystemDTO() {return providerSystemDTO;}
 	public CloudRequestDTO getCloudDTO() {return cloudDTO;}
+	public String getServiceInterfaceName() {return serviceInterfaceName;} 
 	public Integer getPriority() {return priority;}
-	public String getAttribute() {return attribute;}	
+	public Map<String,String> getAttribute() {return attribute;}	
 
 	//-------------------------------------------------------------------------------------------------
-	public void setServiceDefinitionId(final ServiceDefinitionRequestDTO serviceDefinitionDTO) {this.serviceDefinitionDTO = serviceDefinitionDTO;}
-	public void setConsumerSystemId(final SystemRequestDTO consumerSystemDTO) {this.consumerSystemDTO = consumerSystemDTO;}
+	public void setServiceDefinitionName(final String serviceDefinitionName) {this.serviceDefinitionName = serviceDefinitionName;}
+	public void setConsumerSystemId(final long consumerSystemId) {this.consumerSystemId = consumerSystemId;}
 	public void setProviderSystemId(final SystemRequestDTO providerSystemDTO) {this.providerSystemDTO = providerSystemDTO;}
 	public void setCloudId(final CloudRequestDTO cloudDTO) {this.cloudDTO = cloudDTO;}
+	public void setServiceInterfaceName(final String serviceInterfaceName) {this.serviceInterfaceName = serviceInterfaceName; }
 	public void setPriority(final Integer priority) {this.priority = priority;}
-	public void setAttribute(final String attribute) {this.attribute = attribute;}
+	public void setAttribute(final Map<String,String> attribute) {this.attribute = attribute;}
 }
