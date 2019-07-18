@@ -45,7 +45,7 @@ public class OrchestratorController {
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorController.class);
 	
-	@Value(CommonConstants.$IS_GATEKEEPER_PRESENT_WD)
+	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
 	
 	@Autowired
