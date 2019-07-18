@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -38,18 +39,6 @@ public class Cloud {
 	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String name;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
-	private String address;
-	
-	@Column (nullable = false)
-	private int port;
-	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
-	private String gatekeeperServiceUri;
-	
-	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
-	private String authenticationInfo;
-	
 	@Column (nullable = false)
 	private boolean secure = false;
 	
@@ -65,9 +54,13 @@ public class Cloud {
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
+	@OneToOne(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true, optional = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private CloudGatekeeper gatekeeper;
+	
 	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<InterCloudAuthorization> interCloudAuthorizations = new HashSet<>();
+	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
 	
 	@OneToMany (mappedBy = "providerCloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
@@ -80,14 +73,9 @@ public class Cloud {
 	public Cloud() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public Cloud(final String operator, final String name, final String address, final int port, final String gatekeeperServiceUri,	final String authenticationInfo, 
-				 final boolean secure, final boolean neighbor, final boolean ownCloud) {
+	public Cloud(final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud) {
 		this.operator = operator;
 		this.name = name;
-		this.address = address;
-		this.port = port;
-		this.gatekeeperServiceUri = gatekeeperServiceUri;
-		this.authenticationInfo = authenticationInfo;
 		this.secure = secure;
 		this.neighbor = neighbor;
 		this.ownCloud = ownCloud;
@@ -110,37 +98,31 @@ public class Cloud {
 	public long getId() { return id; }
 	public String getOperator() { return operator; }
 	public String getName() { return name; }
-	public String getAddress() { return address; }
-	public int getPort() { return port; }
-	public String getGatekeeperServiceUri() { return gatekeeperServiceUri; }
-	public String getAuthenticationInfo() { return authenticationInfo; }
 	public boolean getSecure() { return secure; }
 	public boolean getNeighbor() { return neighbor; }
 	public boolean getOwnCloud() { return ownCloud; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public Set<InterCloudAuthorization> getInterCloudAuthorizations() { return interCloudAuthorizations; }
+	public CloudGatekeeper getGatekeeper() { return gatekeeper; }
+	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
 	public Set<OrchestratorStore> getOrchestratorStores() { return orchestratorStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setOperator(final String operator) { this.operator = operator; }
 	public void setName(final String name) { this.name = name; }
-	public void setAddress(final String address) { this.address = address; }
-	public void setPort(final int port) { this.port = port; }
-	public void setGatekeeperServiceUri(final String gatekeeperServiceUri) { this.gatekeeperServiceUri = gatekeeperServiceUri; }
-	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setNeighbor(final boolean neighbor) { this.neighbor = neighbor; }
 	public void setOwnCloud(final boolean ownCloud) { this.ownCloud = ownCloud; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setInterCloudAuthorizations(final Set<InterCloudAuthorization> interCloudAuthorizations) { this.interCloudAuthorizations = interCloudAuthorizations; }
-	public void setorchestratorStores(final Set<OrchestratorStore> orchestratorStores) { this.orchestratorStores = orchestratorStores; }
+	public void setGatekeeper(final CloudGatekeeper gatekeeper) { this.gatekeeper = gatekeeper; }
+	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
+	public void setOrchestratorStores(final Set<OrchestratorStore> orchestratorStores) { this.orchestratorStores = orchestratorStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "Cloud [id = " + id + ", operator = " + operator + ", name = " + name + ", address = " + address + ", port = " + port + "]";
+		return "Cloud [id = " + id + ", operator = " + operator + ", name = " + name + "]";
 	}
 }

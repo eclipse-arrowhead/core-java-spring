@@ -2,7 +2,7 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
-public class InterCloudAuthorizationCheckRequestDTO implements Serializable {
+public class AuthorizationInterCloudCheckRequestDTO implements Serializable {
 
 	//=================================================================================================
 	// members
@@ -15,9 +15,9 @@ public class InterCloudAuthorizationCheckRequestDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public InterCloudAuthorizationCheckRequestDTO() {}
+	public AuthorizationInterCloudCheckRequestDTO() {}
 	
-	public InterCloudAuthorizationCheckRequestDTO(final Long cloudId, final Long serviceDefinitionId) {
+	public AuthorizationInterCloudCheckRequestDTO(final Long cloudId, final Long serviceDefinitionId) {
 		this.cloudId = cloudId;
 		this.serviceDefinitionId = serviceDefinitionId;
 	}

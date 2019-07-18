@@ -37,6 +37,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
@@ -78,7 +79,6 @@ public class AuthorizationControllerTokenTest {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
-		//TODO: when AuthAccessControlFilter is implemented we may need appropriate certificates to test these endpoints 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderNameNull() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setSystemName(null);
+		request.getProviders().get(0).getProvider().setSystemName(null);
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -278,7 +278,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderNameEmpty() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setSystemName(" ");
+		request.getProviders().get(0).getProvider().setSystemName(" ");
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -291,7 +291,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderAddressNull() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setAddress(null);
+		request.getProviders().get(0).getProvider().setAddress(null);
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -304,7 +304,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderAddressEmpty() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setAddress("\n");
+		request.getProviders().get(0).getProvider().setAddress("\n");
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -317,7 +317,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderPortNull() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setPort(null);
+		request.getProviders().get(0).getProvider().setPort(null);
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -330,7 +330,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderPortTooLow() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setPort(-1);
+		request.getProviders().get(0).getProvider().setPort(-1);
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -343,7 +343,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderPortTooHigh() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setPort(123456);
+		request.getProviders().get(0).getProvider().setPort(123456);
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -356,7 +356,7 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderAuthInfoNull() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setAuthenticationInfo(null);
+		request.getProviders().get(0).getProvider().setAuthenticationInfo(null);
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -369,13 +369,52 @@ public class AuthorizationControllerTokenTest {
 	@Test
 	public void testGenerateTokensProviderAuthInfoEmpty() throws Exception {
 		final TokenGenerationRequestDTO request = getRequest();
-		request.getProviders().get(0).setAuthenticationInfo("\t  ");
+		request.getProviders().get(0).getProvider().setAuthenticationInfo("\t  ");
 		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
 		Assert.assertEquals("System authentication info is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateTokensServiceInterfacesNull() throws Exception {
+		final TokenGenerationRequestDTO request = getRequest();
+		request.getProviders().get(0).setServiceInterfaces(null);
+		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
+		Assert.assertEquals("Service interface list is null or empty", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateTokensServiceInterfacesEmpty() throws Exception {
+		final TokenGenerationRequestDTO request = getRequest();
+		request.getProviders().get(0).setServiceInterfaces(List.of());
+		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
+		Assert.assertEquals("Service interface list is null or empty", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateTokensServiceInterfaceInvalid() throws Exception {
+		final TokenGenerationRequestDTO request = getRequest();
+		request.getProviders().get(0).setServiceInterfaces(List.of("INVALID"));
+		final MvcResult result = postGenerateTokens(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
+		Assert.assertEquals("Specified interface name is not valid: INVALID", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -490,6 +529,8 @@ public class AuthorizationControllerTokenTest {
 		provider.setPort(18765);
 		provider.setAuthenticationInfo("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1aaeuv1I4bF5dxMIvUvLMxjRn309kdJewIIH08DfL17/LSssD70ZaLz0yxNfbPPQpFK8LMK+HQHDiGZH5yp4qJDuEgfmUrqWibnBIBc/K3Ob45lQy0zdFVtFsVJYBFVymQwgxJT6th0hI3RGLbCJMzbmpDzT7g0IDsN+64tMyi08ZCPrqk99uzYgioSSWNb9bhG2Z9646b3oiY5utQWRhP/2z/t6vVJHtRYeyaXPl6Z2M/5KnjpSvpSeZQhNrw+Is1DEE5DHiEjfQFWrLwDOqPKDrvmFyIlJ7P7OCMax6dIlSB7GEQSSP+j4eIxDWgjm+Pv/c02UVDc0x3xX/UGtNwIDAQAB");
 		
-		return new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(provider), "aservice", null);
+		final TokenGenerationProviderDTO providerDTO = new TokenGenerationProviderDTO(provider, List.of("HTTP-SECURE-JSON"));
+		
+		return new TokenGenerationRequestDTO(consumer, consumerCloud, List.of(providerDTO), "aservice", null);
 	}
 }

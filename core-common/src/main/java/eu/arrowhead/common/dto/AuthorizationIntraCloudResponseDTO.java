@@ -2,7 +2,7 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
-public class IntraCloudAuthorizationResponseDTO implements Serializable {
+public class AuthorizationIntraCloudResponseDTO implements Serializable {
 
 	private static final long serialVersionUID = 8834973165624838555L;
 
@@ -20,10 +20,10 @@ public class IntraCloudAuthorizationResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public IntraCloudAuthorizationResponseDTO() {}
+	public AuthorizationIntraCloudResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorizationResponseDTO(final long id, final SystemResponseDTO consumerSystem, final SystemResponseDTO providerSystem,
+	public AuthorizationIntraCloudResponseDTO(final long id, final SystemResponseDTO consumerSystem, final SystemResponseDTO providerSystem,
 			final ServiceDefinitionResponseDTO serviceDefinition, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.consumerSystem = consumerSystem;

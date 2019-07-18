@@ -3,36 +3,36 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class IntraCloudAuthorizationRequestDTO implements Serializable {
+public class AuthorizationIntraCloudCheckRequestDTO implements Serializable {
 
-	private static final long serialVersionUID = 1322804880331971340L;
+	private static final long serialVersionUID = 6704709511013220348L;
 	
 	//=================================================================================================
 	// members
 	
 	private Long consumerId;
+	private Long serviceDefinitionId;
 	private List<Long> providerIds;
-	private List<Long> serviceDefinitionIds;
 	
 	//=================================================================================================
 	// methods
-		
+	
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorizationRequestDTO() {}
+	public AuthorizationIntraCloudCheckRequestDTO() {}
 	
-	public IntraCloudAuthorizationRequestDTO(final Long consumerId, final List<Long> providerIds, final List<Long> serviceDefinitionIds) {
+	public AuthorizationIntraCloudCheckRequestDTO(final Long consumerId, final Long serviceDefinitionId, final List<Long> providerIds) {
 		this.consumerId = consumerId;
+		this.serviceDefinitionId = serviceDefinitionId;
 		this.providerIds = providerIds;
-		this.serviceDefinitionIds = serviceDefinitionIds;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public Long getConsumerId() {return consumerId;}
+	public Long getServiceDefinitionId() {return serviceDefinitionId;}
 	public List<Long> getProviderIds() {return providerIds;}
-	public List<Long> getServiceDefinitionIds() {return serviceDefinitionIds;}
 
 	//-------------------------------------------------------------------------------------------------
 	public void setConsumerId(final Long consumerId) {this.consumerId = consumerId;}
-	public void setProviderIds(final List<Long> providerIds) {this.providerIds = providerIds;}
-	public void setServiceDefinitionIds(final List<Long> serviceDefinitionIds) {this.serviceDefinitionIds = serviceDefinitionIds;}	
+	public void setServiceDefinitionId(final Long serviceDefinitionId) {this.serviceDefinitionId = serviceDefinitionId;}
+	public void setProviderIds(final List<Long> providerIds) {this.providerIds = providerIds;}		
 }

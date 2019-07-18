@@ -3,33 +3,33 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class IntraCloudAuthorizationListResponseDTO implements Serializable {
-
-	private static final long serialVersionUID = -3996357127599109268L;
+public class AuthorizationInterCloudListResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members
 	
-	private List<IntraCloudAuthorizationResponseDTO> data;
+	private static final long serialVersionUID = 893654899355518416L;
+	
+	private List<AuthorizationInterCloudResponseDTO> data;
 	private long count;
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorizationListResponseDTO() {}
+	public AuthorizationInterCloudListResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorizationListResponseDTO(final List<IntraCloudAuthorizationResponseDTO> data, final long count) {
+	public AuthorizationInterCloudListResponseDTO(final List<AuthorizationInterCloudResponseDTO> data, final long count) {
 		this.data = data;
 		this.count = count;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<IntraCloudAuthorizationResponseDTO> getData() {return data;}
+	public List<AuthorizationInterCloudResponseDTO> getData() {return data;}
 	public long getCount() {return count;}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<IntraCloudAuthorizationResponseDTO> data) {this.data = data;}
+	public void setData(final List<AuthorizationInterCloudResponseDTO> data) {this.data = data;}
 	public void setCount(final long count) {this.count = count;}	
 }

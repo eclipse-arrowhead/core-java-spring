@@ -75,13 +75,15 @@ public abstract class TokenSecurityFilter extends ArrowheadFilter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	protected void checkToken(final String clientCN, final String token, final String requestTarget) {
+	protected TokenInfo checkToken(final String clientCN, final String token, final String requestTarget) {
 		final String clientName = clientCN.split("\\.")[0];
 		final TokenInfo tokenInfo = TokenUtilities.validateTokenAndExtractTokenInfo(token, authorizationPublicKey, myPrivateKey); // expiration (if set) is already checked in this method
 		if (!clientName.equalsIgnoreCase(tokenInfo.getConsumerName())) {
 			log.error("Client CN ({}) and token information ({}) is mismatched at: {}", clientCN, tokenInfo.getConsumerName(), requestTarget);
 			throw new AuthException("Unauthorized accesss: " + requestTarget + ", invalid token.");
 		}
+		
+		return tokenInfo;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -95,5 +97,4 @@ public abstract class TokenSecurityFilter extends ArrowheadFilter {
 		
 		return null;
 	}
-
 }

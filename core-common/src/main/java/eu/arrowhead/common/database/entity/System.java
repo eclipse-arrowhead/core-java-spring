@@ -68,11 +68,11 @@ public class System {
 	
 	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> authorizationsAsConsumer = new HashSet<>();
+	private Set<AuthorizationIntraCloud> authorizationsAsConsumer = new HashSet<>();
 	
 	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<>();
+	private Set<AuthorizationIntraCloud> authorizationsAsProvider = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
@@ -110,8 +110,8 @@ public class System {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
-	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() { return authorizationsAsConsumer; }
-	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() { return authorizationsAsProvider; }
+	public Set<AuthorizationIntraCloud> getAuthorizationsAsConsumer() { return authorizationsAsConsumer; }
+	public Set<AuthorizationIntraCloud> getAuthorizationsAsProvider() { return authorizationsAsProvider; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -122,9 +122,9 @@ public class System {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
-	public void setAuthorizationsAsConsumer(final Set<IntraCloudAuthorization> authorizationsAsConsumer) { this.authorizationsAsConsumer = authorizationsAsConsumer; }
-	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) { this.authorizationsAsProvider = authorizationsAsProvider; }	
-	
+	public void setAuthorizationsAsConsumer(final Set<AuthorizationIntraCloud> authorizationsAsConsumer) { this.authorizationsAsConsumer = authorizationsAsConsumer; }
+	public void setAuthorizationsAsProvider(final Set<AuthorizationIntraCloud> authorizationsAsProvider) { this.authorizationsAsProvider = authorizationsAsProvider; }
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {

@@ -18,7 +18,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerSystemId", "providerSystemId", "serviceId"}))
-public class IntraCloudAuthorization {
+public class AuthorizationIntraCloud {
 	
 	//=================================================================================================
 	// members
@@ -51,10 +51,10 @@ public class IntraCloudAuthorization {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorization() {}
+	public AuthorizationIntraCloud() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public IntraCloudAuthorization(final System consumerSystem, final System providerSystem, final ServiceDefinition serviceDefinition) {
+	public AuthorizationIntraCloud(final System consumerSystem, final System providerSystem, final ServiceDefinition serviceDefinition) {
 		this.consumerSystem = consumerSystem;
 		this.providerSystem = providerSystem;
 		this.serviceDefinition = serviceDefinition;
@@ -92,6 +92,6 @@ public class IntraCloudAuthorization {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "IntraCloudAuthorization [id = " + id + ", consumerSystem = " + consumerSystem + ", providerSystem = " + providerSystem + ", serviceDefinition = " + serviceDefinition + "]";
+		return "AuthorizationIntraCloud [id = " + id + ", consumerSystem = " + consumerSystem + ", providerSystem = " + providerSystem + ", serviceDefinition = " + serviceDefinition + "]";
 	}
 }

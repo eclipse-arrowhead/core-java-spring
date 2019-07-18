@@ -19,11 +19,6 @@ allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACC
 public class GatewayController {
 	
 	//=================================================================================================
-	// members
-
-	private static final String ECHO_URI = "/echo";
-	
-	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -33,7 +28,7 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = ECHO_URI)
+	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
 	}
