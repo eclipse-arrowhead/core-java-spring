@@ -1,27 +1,27 @@
 package eu.arrowhead.common.dto;
 
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.System;
+import java.io.Serializable;
 
-public class PreferredProviderDataDTO {
-
+public class PreferredProviderDataDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
 	
-	private System providerSystem;
-	private Cloud providerCloud;
+	private static final long serialVersionUID = -6954138371746479685L;
+	
+	private SystemRequestDTO providerSystem;
+	private CloudRequestDTO providerCloud;
 	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public System getProviderSystem() { return providerSystem; }
-	public Cloud getProviderCloud() { return providerCloud; }
+	public SystemRequestDTO getProviderSystem() { return providerSystem; }
+	public CloudRequestDTO getProviderCloud() { return providerCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setProviderSystem(System providerSystem) { this.providerSystem = providerSystem; }
-	public void setProviderCloud(Cloud providerCloud) { this.providerCloud = providerCloud; }
+	public void setProviderSystem(SystemRequestDTO providerSystem) { this.providerSystem = providerSystem; }
+	public void setProviderCloud(CloudRequestDTO providerCloud) { this.providerCloud = providerCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public boolean isLocal() {

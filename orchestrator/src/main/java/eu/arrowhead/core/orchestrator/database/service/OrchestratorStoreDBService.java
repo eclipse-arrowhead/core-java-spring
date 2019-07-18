@@ -431,7 +431,7 @@ public class OrchestratorStoreDBService {
 		if (Utilities.isEmpty(providerSystemRequestDTO.getSystemName())) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.SystemName " + EMPTY_OR_NULL_ERROR_MESAGE);
 		}
-		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();;
+		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();
 		
 		if (providerSystemRequestDTO.getPort() == null) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NULL_ERROR_MESAGE);
@@ -878,7 +878,7 @@ public class OrchestratorStoreDBService {
 		if (Utilities.isEmpty(providerSystemRequestDTO.getSystemName())) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.SystemName " + EMPTY_OR_NULL_ERROR_MESAGE);
 		}
-		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();;
+		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();
 		
 		if (providerSystemRequestDTO.getPort() == null) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NULL_ERROR_MESAGE);

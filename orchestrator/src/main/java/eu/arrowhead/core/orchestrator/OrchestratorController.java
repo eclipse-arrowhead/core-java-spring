@@ -53,7 +53,6 @@ public class OrchestratorController {
 	
 	//=================================================================================================
 	// methods
-
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
@@ -75,8 +74,8 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceRegistryListResponseDTO orchestrationProcess( @RequestBody final OrchestratorFormRequestDTO request) {
+	@PostMapping(path = CommonConstants.OP_ORCH_PROCESS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ServiceRegistryListResponseDTO orchestrationProcess(@RequestBody final OrchestratorFormRequestDTO request) {
 		logger.debug("orchestrationProcess started ...");
 		
 		final OrchestratorFormRequestDTO validatedOrchestratorFormRequestDTO = validateOrchestratorFormRequestDTO(request, CommonConstants.ORCHESTRATOR_URI);

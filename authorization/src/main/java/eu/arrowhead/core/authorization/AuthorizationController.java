@@ -365,7 +365,7 @@ public class AuthorizationController {
 	@ApiOperation(value = "Remove the requested AuthorizationInterCloud entry")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_INTER_CLOUD_AUTHORIZATION_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -389,7 +389,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_AUTH_INTRA_CHECK_URI)
+	@PostMapping(path = CommonConstants.OP_AUTH_INTRA_CHECK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public AuthorizationIntraCloudCheckResponseDTO checkAuthorizationIntraCloudRequest(@RequestBody final AuthorizationIntraCloudCheckRequestDTO request) {
 		logger.debug("New AuthorizationIntraCloud check request recieved");
 		
@@ -429,7 +429,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_AUTH_INTER_CHECK_URI)
+	@PostMapping(path = CommonConstants.OP_AUTH_INTER_CHECK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudRequest(@RequestBody final AuthorizationInterCloudCheckRequestDTO request) {
 		logger.debug("New AuthorizationInterCloud check request recieved");
 		
@@ -460,7 +460,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_AUTH_TOKEN_URI)
+	@PostMapping(path = CommonConstants.OP_AUTH_TOKEN_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public TokenGenerationResponseDTO generateTokens(@RequestBody final TokenGenerationRequestDTO request) {
 		logger.debug("New token generation request received");
 		checkTokenGenerationRequest(request);
