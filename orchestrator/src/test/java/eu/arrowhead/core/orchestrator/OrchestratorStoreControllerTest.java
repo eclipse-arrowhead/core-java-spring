@@ -268,7 +268,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerNullItemPerPageParamAndNullPageParamTest() throws Exception {
 
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
 		
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -283,7 +283,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerNullIRequestTest() throws Exception {
 
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = null;
 	
@@ -300,10 +300,11 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerNullConsumerSystemIdTest() throws Exception {
 
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), anyLong())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
-		request.setConsumerSystemId(null);
+		final Long id = null;
+		request.setConsumerSystemId(id);
 	
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
