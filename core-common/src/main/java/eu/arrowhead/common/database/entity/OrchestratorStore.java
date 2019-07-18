@@ -101,7 +101,7 @@ public class OrchestratorStore {
 	public System getConsumerSystem() {	return consumerSystem; }
 	public boolean isForeign() {return foreign; }
 	public long getProviderSystemId() {	return providerSystemId; }
-	public ServiceInterface serviceInterface() { return serviceInterface;}
+	public ServiceInterface getServiceInterface() { return serviceInterface;}
 	public int getPriority() { return priority; }
 	public String getAttribute() { return attribute; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }

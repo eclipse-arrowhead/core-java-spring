@@ -48,8 +48,8 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinitionName(final String serviceDefinitionName) {this.serviceDefinitionName = serviceDefinitionName;}
 	public void setConsumerSystemId(final long consumerSystemId) {this.consumerSystemId = consumerSystemId;}
-	public void setProviderSystemId(final SystemRequestDTO providerSystemDTO) {this.providerSystemDTO = providerSystemDTO;}
-	public void setCloudId(final CloudRequestDTO cloudDTO) {this.cloudDTO = cloudDTO;}
+	public void setProviderSystemDTO(final SystemRequestDTO providerSystemDTO) {this.providerSystemDTO = providerSystemDTO;}
+	public void setCloudDTO(final CloudRequestDTO cloudDTO) {this.cloudDTO = cloudDTO;}
 	public void setServiceInterfaceName(final String serviceInterfaceName) {this.serviceInterfaceName = serviceInterfaceName; }
 	public void setPriority(final Integer priority) {this.priority = priority;}
 	public void setAttribute(final Map<String,String> attribute) {this.attribute = attribute;}
