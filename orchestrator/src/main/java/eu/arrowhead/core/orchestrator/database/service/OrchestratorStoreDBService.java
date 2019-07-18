@@ -21,11 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.CloudRepository;
+import eu.arrowhead.common.database.repository.ForeignSystemRepository;
 import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
@@ -36,6 +38,7 @@ import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -52,6 +55,9 @@ public class OrchestratorStoreDBService {
 	
 	@Autowired
 	private SystemRepository systemRepository;
+	
+	@Autowired
+	private ForeignSystemRepository foreignSystemRepository;
 	
 	@Autowired
 	private CloudRepository cloudRepository;
@@ -200,7 +206,7 @@ public class OrchestratorStoreDBService {
 		}
 		
 		try {		
-			Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(), PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+			final Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(), PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 			
 			return orchestratorStorePage;
 		} catch (final Exception ex) {
@@ -266,15 +272,18 @@ public class OrchestratorStoreDBService {
 	public OrchestratorStore createOrchestratorStoreEntity(final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
 		logger.debug("createOrchestratorStoreEntity started...");
 		
-		checkSystemIdValidity(orchestratorStoreRequestDTO.getConsumerSystemId()); 
+		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestDTO.getConsumerSystemId()); 
 		
 		final Cloud validCloud = validateProviderCloud(orchestratorStoreRequestDTO.getCloudDTO());	
 		final boolean isLocalCloud = localCloudConditionCheck(validCloud);
 		
 		if (isLocalCloud) {
-			return createLocalOrchestratorStoreEntry(orchestratorStoreRequestDTO);
+			
+			return createLocalOrchestratorStoreEntry(orchestratorStoreRequestDTO, validConsumerSystem, validCloud);
+		
 		}else {
-			return createForeignOrchestratorStoreEntry(orchestratorStoreRequestDTO);
+			
+			return createForeignOrchestratorStoreEntry(orchestratorStoreRequestDTO, validConsumerSystem, validCloud);
 		}		
 	
 	}
@@ -347,31 +356,96 @@ public class OrchestratorStoreDBService {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private OrchestratorStore validateOrchestratorStoreRequestDTO(
-			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+	private OrchestratorStore validateLocalOrchestratorStoreRequestDTO(
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System validConsumerSystem, final Cloud validProviderCloud) {
 		logger.debug("validateOrchestratorStoreRequestDTO started...");
 		
-		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestDTO.getConsumerSystemId()); 
-		final System validProviderSystem = validateSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO());		
-		final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(orchestratorStoreRequestDTO.getServiceDefinitionId());	
-		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
-		final Cloud validProviderCloud = validateProviderCloudId(orchestratorStoreRequestDTO.getCloudId());	
-		final ServiceInterface validInterface = validateServiceInterface(orchestratorStoreRequestDTO.getServiceInterfaceId());
+		final boolean foreign = false;
 		
-		checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(validConsumerSystem, validServiceDefinition, validProviderSystem, validInterface);
+		final long validProviderSystemId = validateProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO());		
+		final ServiceDefinition validServiceDefinition = validateServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
+		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
+		final ServiceInterface validInterface = validateServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
+		
+		checkUniqueConstraintByConsumerSystemAndServiceAndProviderSystemIdAndInterfaceAndForeign(validConsumerSystem, validServiceDefinition, validProviderSystemId, validInterface, foreign);
 	
 		return new OrchestratorStore(
 				validServiceDefinition,
 				validConsumerSystem,
-				validProviderSystem,
-				validProviderCloud,
+				foreign,
+				validProviderSystemId,
 				validInterface,
 				validPriority,
 				Utilities.map2Text(orchestratorStoreRequestDTO.getAttribute()),
 				null,
 				null);	
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ServiceInterface validateServiceInterfaceName(final String serviceInterfaceName) {
+		logger.debug("validateServiceInterfaceName started...");
+		
+		if (Utilities.isEmpty(serviceInterfaceName)) {
+			throw new InvalidParameterException("validateServiceInterfaceName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String validServiceInterfaceName = serviceInterfaceName.trim().toLowerCase();
+		
+		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
+		if (serviceInterfaceOptional.isEmpty()) {
+			throw new InvalidParameterException("ServiceInterface by serviceDefinitionName " + validServiceInterfaceName + NOT_IN_DB_ERROR_MESAGE );
+		}
+		
+		return serviceInterfaceOptional.get();
+	}
 
+	//-------------------------------------------------------------------------------------------------
+	private ServiceDefinition validateServiceDefinitionName(final String serviceDefinitionName) {
+		logger.debug("validateServiceDefinition started...");
+		
+		if (Utilities.isEmpty(serviceDefinitionName)) {
+			throw new InvalidParameterException("ServiceDefinitionName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String validServiceDefinitionName = serviceDefinitionName.trim().toLowerCase();
+		
+		final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findByServiceDefinition(validServiceDefinitionName);
+		if (serviceDefinitionOptional.isEmpty()) {
+			throw new InvalidParameterException("ServiceDefinition by serviceDefinitionName " + validServiceDefinitionName + NOT_IN_DB_ERROR_MESAGE );
+		}
+		
+		return serviceDefinitionOptional.get();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private long validateProviderSystemRequestDTO(final SystemRequestDTO providerSystemRequestDTO) {
+		logger.debug("validateProviderSystemRequestDTO started...");
+		
+		if (providerSystemRequestDTO == null) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO " + NULL_ERROR_MESAGE);
+		}
+		
+		if (Utilities.isEmpty(providerSystemRequestDTO.getAddress())) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.Address " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String address = providerSystemRequestDTO.getAddress().trim().toLowerCase();
+		
+		if (Utilities.isEmpty(providerSystemRequestDTO.getSystemName())) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.SystemName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();;
+		
+		if (providerSystemRequestDTO.getPort() == null) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NULL_ERROR_MESAGE);
+		}
+		final int port = providerSystemRequestDTO.getPort();
+		
+		final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
+		if (systemOptional.isEmpty()) {
+			throw new InvalidParameterException("System by systemName: " + systemName + ", address: " + address + ", port: " + port + NOT_IN_DB_ERROR_MESAGE );
+		}
+		
+		return systemOptional.get().getId();
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	private System validateSystemId(final Long systemId) {
 		logger.debug("validateSystemId started...");
@@ -431,10 +505,10 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId(final System consumerSystem, final ServiceDefinition serviceDefinition, final System providerSystem, final ServiceInterface serviceInterface) {
+	private void checkUniqueConstraintByConsumerSystemAndServiceAndProviderSystemIdAndInterfaceAndForeign(final System consumerSystem, final ServiceDefinition serviceDefinition, final long providerSystemId, final ServiceInterface serviceInterface, final boolean foreign) {
 		logger.debug("checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId started...");
 		
-		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemAndServiceInterface( consumerSystem, serviceDefinition, providerSystem, serviceInterface);
+		final Optional<OrchestratorStore> orchestratorStoreOptional = orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign( consumerSystem, serviceDefinition, providerSystemId, serviceInterface, foreign);
 		if (orchestratorStoreOptional.isPresent()) {
 			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId " + VIOLATES_UNIQUE_CONSTRAINT );
 		}
@@ -667,7 +741,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void updateInvolvedPriorities(System consumerSystem, ServiceDefinition serviceDefinition, int priority) {
+	private void updateInvolvedPriorities(final System consumerSystem, final ServiceDefinition serviceDefinition, final int priority) {
 		logger.debug("updateInvolvedPriorities started...");
 		
 		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
@@ -678,9 +752,9 @@ public class OrchestratorStoreDBService {
 		}
 
 		final List<OrchestratorStore> updatedOrchestratorStoreEntryList = new ArrayList<>();
-		for (OrchestratorStore orchestratorStoreInList : orchestratorStoreList) {
+		for (final OrchestratorStore orchestratorStoreInList : orchestratorStoreList) {
 			
-			int actualPriority = orchestratorStoreInList.getPriority();
+			final int actualPriority = orchestratorStoreInList.getPriority();
 			if(actualPriority > priority) {
 				orchestratorStoreInList.setPriority( actualPriority - 1 );
 				updatedOrchestratorStoreEntryList.add(orchestratorStoreInList);
@@ -696,7 +770,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private boolean localCloudConditionCheck(Cloud cloud) {
+	private boolean localCloudConditionCheck(final Cloud cloud) {
 		
 		if (cloud == null || cloud.getOwnCloud()) {
 			return true;
@@ -707,20 +781,116 @@ public class OrchestratorStoreDBService {
 
 	//-------------------------------------------------------------------------------------------------	
 	private OrchestratorStore createLocalOrchestratorStoreEntry(
-			OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System  validConsumerSystem, final Cloud validProviderCloud) {
 		logger.debug("createLocalOrchestratorStoreEntry started...");
 		
-		// TODO Implement method logic here
-		return null;
+		final OrchestratorStore orchestratorStore = validateLocalOrchestratorStoreRequestDTO(orchestratorStoreRequestDTO, validConsumerSystem, validProviderCloud);
+		
+		return saveWithPriorityCheck(orchestratorStore);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStore createForeignOrchestratorStoreEntry(
-			OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System  validConsumerSystem, final Cloud validProviderCloud) {
 		logger.debug("createForeignOrchestratorStoreEntry started...");
 		
-		// TODO Implement method logic here
-		return null;
+		final OrchestratorStore orchestratorStore = validateForeignOrchestratorStoreRequestDTO(orchestratorStoreRequestDTO, validConsumerSystem, validProviderCloud);
+		
+		return saveWithPriorityCheck(orchestratorStore);
+	}
+
+	//-------------------------------------------------------------------------------------------------	
+	private OrchestratorStore validateForeignOrchestratorStoreRequestDTO(
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System validConsumerSystem,
+			final Cloud validProviderCloud) {
+		logger.debug("validateForeignOrchestratorStoreRequestDTO started...");
+		
+		final boolean foreign = true;
+		
+		final long validProviderSystemId = validateForeinProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO(), validProviderCloud);		
+		final ServiceDefinition validServiceDefinition = validateForeinServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
+		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
+		final ServiceInterface validInterface = validateForeinServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
+		
+		checkUniqueConstraintByConsumerSystemAndServiceAndProviderSystemIdAndInterfaceAndForeign(validConsumerSystem, validServiceDefinition, validProviderSystemId, validInterface, foreign);
+	
+		return new OrchestratorStore(
+				validServiceDefinition,
+				validConsumerSystem,
+				foreign,
+				validProviderSystemId,
+				validInterface,
+				validPriority,
+				Utilities.map2Text(orchestratorStoreRequestDTO.getAttribute()),
+				null,
+				null);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ServiceInterface validateForeinServiceInterfaceName(final String serviceInterfaceName) {
+		logger.debug("validateForeinServiceInterfaceName started...");
+		
+		if (Utilities.isEmpty(serviceInterfaceName)) {
+			throw new InvalidParameterException("validateServiceInterfaceName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String validServiceInterfaceName = serviceInterfaceName.trim().toLowerCase();
+		
+		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
+		if (serviceInterfaceOptional.isEmpty()) {
+			
+			return serviceInterfaceRepository.saveAndFlush(new ServiceInterface(validServiceInterfaceName));
+		}
+		
+		return serviceInterfaceOptional.get();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ServiceDefinition validateForeinServiceDefinitionName(final String serviceDefinitionName) {
+		logger.debug("validateForeinServiceDefinitionName started...");
+		
+		if (Utilities.isEmpty(serviceDefinitionName)) {
+			throw new InvalidParameterException("ServiceDefinitionName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String validServiceDefinitionName = serviceDefinitionName.trim().toLowerCase();
+		
+		final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findByServiceDefinition(validServiceDefinitionName);
+		if (serviceDefinitionOptional.isEmpty()) {
+			
+			return serviceDefinitionRepository.saveAndFlush(new ServiceDefinition(validServiceDefinitionName));
+		}
+		
+		return serviceDefinitionOptional.get();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private long validateForeinProviderSystemRequestDTO(final SystemRequestDTO providerSystemRequestDTO, final Cloud providerCloud) {
+		logger.debug("validateForeinProviderSystemRequestDTO started...");
+		
+		if (providerSystemRequestDTO == null) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO " + NULL_ERROR_MESAGE);
+		}
+		
+		if (Utilities.isEmpty(providerSystemRequestDTO.getAddress())) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.Address " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String address = providerSystemRequestDTO.getAddress().trim().toLowerCase();
+		
+		if (Utilities.isEmpty(providerSystemRequestDTO.getSystemName())) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.SystemName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		}
+		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();;
+		
+		if (providerSystemRequestDTO.getPort() == null) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NULL_ERROR_MESAGE);
+		}
+		final int port = providerSystemRequestDTO.getPort();
+		
+		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(systemName, address, port, providerCloud);
+		if (foreignSystemOptional.isEmpty()) {
+			foreignSystemRepository.saveAndFlush(new ForeignSystem(providerCloud, systemName, address, port, providerSystemRequestDTO.getAuthenticationInfo()));
+		}
+		
+		return foreignSystemOptional.get().getId();
 	}
 	
 }
