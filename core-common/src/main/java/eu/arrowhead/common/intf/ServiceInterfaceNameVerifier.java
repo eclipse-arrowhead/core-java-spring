@@ -1,4 +1,4 @@
-package eu.arrowhead.core.serviceregistry.intf;
+package eu.arrowhead.common.intf;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,7 +31,6 @@ public class ServiceInterfaceNameVerifier {
 	}
 	
 	private final Logger logger = LogManager.getLogger(ServiceInterfaceNameVerifier.class);
-
 	
 	@Value(CommonConstants.$SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD)
 	private boolean strictMode;

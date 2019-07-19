@@ -229,11 +229,11 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static TokenGenerationResponseDTO convertTokenMapToTokenGenerationResponseDTO(final Map<SystemRequestDTO,String> tokenMap) {
+	public static TokenGenerationResponseDTO convertTokenMapToTokenGenerationResponseDTO(final Map<SystemRequestDTO,Map<String,String>> tokenMap) {
 		Assert.notNull(tokenMap, "Token map is null.");
 		
 		final TokenGenerationResponseDTO result = new TokenGenerationResponseDTO();
-		for (final Entry<SystemRequestDTO,String> entry : tokenMap.entrySet()) {
+		for (final Entry<SystemRequestDTO,Map<String,String>> entry : tokenMap.entrySet()) {
 			result.getTokenData().add(new TokenDataDTO(entry.getKey(), entry.getValue()));
 		}
 		

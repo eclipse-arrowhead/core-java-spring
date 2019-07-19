@@ -5,7 +5,6 @@ import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
@@ -27,12 +26,14 @@ import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 
 // works only in secure mode
 @Service
@@ -54,6 +55,9 @@ public class TokenGenerationService {
 	@Autowired
 	private CommonDBService commonDBService;
 	
+	@Autowired
+	private ServiceInterfaceNameVerifier interfaceNameVerifier;
+	
 	private String ownCloudName;
 	private String ownCloudOperator;
 
@@ -61,7 +65,7 @@ public class TokenGenerationService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Map<SystemRequestDTO,String> generateTokens(final TokenGenerationRequestDTO request) {
+	public Map<SystemRequestDTO,Map<String,String>> generateTokens(final TokenGenerationRequestDTO request) {
 		logger.debug("generateTokens started...");
 		
 		if (!sslEnabled) {
@@ -72,25 +76,39 @@ public class TokenGenerationService {
 		checkTokenGenerationRequest(request);
 		
 		final Map<SystemRequestDTO,PublicKey> publicKeys = getProviderPublicKeys(request.getProviders());
-		final Map<SystemRequestDTO,String> result = new HashMap<>(publicKeys.size());
+		final Map<SystemRequestDTO,Map<String,String>> result = new HashMap<>(publicKeys.size());
 		final String consumerInfo = generateConsumerInfo(request.getConsumer(), request.getConsumerCloud());
+		final Map<String,String> signedJWTs = new HashMap<>();
 		
-		String signedJWT;
-		try {
-			signedJWT = generateSignedJWT(consumerInfo, request.getService(), request.getDuration());
-		} catch (final JoseException ex) {
-			logger.error("Problem occured when trying to sign JWT token", ex);
-			throw new ArrowheadException("Token generation failed");
-		}
-		
-		for (final Entry<SystemRequestDTO,PublicKey> providerEntry : publicKeys.entrySet()) {
-			try {
-				final String encryptedJWT = encryptSignedJWT(signedJWT, providerEntry.getValue());
-				result.put(providerEntry.getKey(), encryptedJWT);
-			} catch (final JoseException ex) {
-				logger.error("Problem occured when trying to encrypt signed JWT token", ex);
+		for (final TokenGenerationProviderDTO provider : request.getProviders()) {
+			final SystemRequestDTO providerSystem = provider.getProvider();
+			if (publicKeys.containsKey(providerSystem)) {
+				for (final String intf : provider.getServiceInterfaces()) {
+					String signedJWT = signedJWTs.get(intf);
+					if (signedJWT == null) {
+						try {
+							signedJWT = generateSignedJWT(consumerInfo, request.getService(), intf, request.getDuration());
+							signedJWTs.put(intf, signedJWT);
+						} catch (final JoseException ex) {
+							logger.error("Problem occured when trying to sign JWT token", ex);
+							throw new ArrowheadException("Token generation failed"); // if there is a problem here, all calling cause the same problem 
+						}
+					}
+					
+					try {
+						final String encryptedJWT = encryptSignedJWT(signedJWT, publicKeys.get(providerSystem));
+						
+						Map<String,String> tokens = result.get(providerSystem);
+						if (tokens == null) {
+							tokens = new HashMap<>();
+							result.put(providerSystem, tokens);
+						}
+						tokens.put(intf, encryptedJWT);
+					} catch (final JoseException ex) {
+						logger.error("Problem occured when trying to encrypt signed JWT token", ex);
+					}
+				}
 			}
-			
 		}
 		
 		if (result.isEmpty()) {
@@ -103,7 +121,7 @@ public class TokenGenerationService {
 	//-------------------------------------------------------------------------------------------------
 	public TokenGenerationResponseDTO generateTokensResponse(final TokenGenerationRequestDTO request) {
 		logger.debug("generateTokensResponse started...");
-		final Map<SystemRequestDTO,String> tokenMap = generateTokens(request);
+		final Map<SystemRequestDTO,Map<String,String>> tokenMap = generateTokens(request);
 		return DTOConverter.convertTokenMapToTokenGenerationResponseDTO(tokenMap);
 	}
 
@@ -131,12 +149,33 @@ public class TokenGenerationService {
 			throw new InvalidParameterException("Provider list is null or empty.");
 		}
 		
-		for (final SystemRequestDTO provider : request.getProviders()) {
-			checkSystemDTO(provider);
+		for (final TokenGenerationProviderDTO provider : request.getProviders()) {
+			checkTokenGeneratorionProviderDTO(provider);
 		}
 		
 		if (Utilities.isEmpty(request.getService())) {
 			throw new InvalidParameterException("Service is null or blank.");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkTokenGeneratorionProviderDTO(final TokenGenerationProviderDTO provider) {
+		logger.debug("checkTokenGenerationProviderDTO started...");
+		
+		if (provider.getProvider() == null) {
+			throw new InvalidParameterException("Provider is null");
+		}
+		
+		checkSystemDTO(provider.getProvider());
+		
+		if (provider.getServiceInterfaces() == null || provider.getServiceInterfaces().isEmpty()) {
+			throw new InvalidParameterException("Service interface list is null or empty.");
+		}
+		
+		for (final String intf : provider.getServiceInterfaces()) {
+			if (!interfaceNameVerifier.isValid(intf)) {
+				throw new InvalidParameterException("Specified interface name is not valid: " + intf + ".");
+			}
 		}
 	}
 
@@ -190,16 +229,17 @@ public class TokenGenerationService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<SystemRequestDTO,PublicKey> getProviderPublicKeys(final List<SystemRequestDTO> providers) {
+	private Map<SystemRequestDTO,PublicKey> getProviderPublicKeys(final List<TokenGenerationProviderDTO> providers) {
 		logger.debug("getProviderPublicKeys started...");
 		final Map<SystemRequestDTO,PublicKey> result = new HashMap<>();
 		
-		for (final SystemRequestDTO provider : providers) {
+		for (final TokenGenerationProviderDTO provider : providers) {
 			try {
-				final PublicKey publicKey = Utilities.getPublicKeyFromBase64EncodedString(provider.getAuthenticationInfo());
-				result.put(provider, publicKey);
+				final String authInfo = provider.getProvider().getAuthenticationInfo();
+				final PublicKey publicKey = Utilities.getPublicKeyFromBase64EncodedString(authInfo);
+				result.put(provider.getProvider(), publicKey);
 			} catch (final IllegalArgumentException | AuthException ex) {
-				logger.error("The stored auth info for the system (" + provider.getSystemName() + ") is not a proper RSA public key spec, or it is incorrectly encoded, or missing. " +
+				logger.error("The stored auth info for the system (" + provider.getProvider().getSystemName() + ") is not a proper RSA public key spec, or it is incorrectly encoded, or missing. " +
 							 "The public key can not be decoded from it.");
 			}
 		}
@@ -212,8 +252,8 @@ public class TokenGenerationService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String generateSignedJWT(final String consumerInfo, final String service, final Integer duration) throws JoseException {
-		final JwtClaims claims = generateTokenPayload(consumerInfo, service, duration);
+	private String generateSignedJWT(final String consumerInfo, final String service, final String intf, final Integer duration) throws JoseException {
+		final JwtClaims claims = generateTokenPayload(consumerInfo, service, intf, duration);
 		final JsonWebSignature jws = new JsonWebSignature();
 		jws.setPayload(claims.toJson());
 		
@@ -229,7 +269,7 @@ public class TokenGenerationService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private JwtClaims generateTokenPayload(final String consumerInfo, final String service, final Integer duration) {
+	private JwtClaims generateTokenPayload(final String consumerInfo, final String service, final String intf, final Integer duration) {
 		final JwtClaims claims = new JwtClaims();
 		claims.setGeneratedJwtId();
 		claims.setIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION);
@@ -240,7 +280,8 @@ public class TokenGenerationService {
 		}
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());
-		
+		claims.setStringClaim(CommonConstants.JWT_CLAIM_INTERFACE_ID, intf);
+
 		return claims;
 	}
 	
