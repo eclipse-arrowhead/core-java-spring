@@ -13,11 +13,11 @@ public class TokenGenerationRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -5685109711278175717L;
+	private static final long serialVersionUID = 1323986110293510298L;
 	
 	private SystemRequestDTO consumer;
 	private CloudRequestDTO consumerCloud;
-	private List<SystemRequestDTO> providers = new ArrayList<>();
+	private List<TokenGenerationProviderDTO> providers = new ArrayList<>();
 	private String service;
 	private Integer duration; // in minutes
 	
@@ -28,7 +28,8 @@ public class TokenGenerationRequestDTO implements Serializable {
 	public TokenGenerationRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public TokenGenerationRequestDTO(final SystemRequestDTO consumer, final CloudRequestDTO consumerCloud, final List<SystemRequestDTO> providers, final String service, final Integer duration) {
+	public TokenGenerationRequestDTO(final SystemRequestDTO consumer, final CloudRequestDTO consumerCloud, final List<TokenGenerationProviderDTO> providers, final String service,
+									 final Integer duration) {
 		Assert.notNull(consumer, "Consumer is null.");
 		Assert.isTrue(providers != null && !providers.isEmpty(), "Provider list is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(service), "Service is null or blank.");
@@ -43,14 +44,14 @@ public class TokenGenerationRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public SystemRequestDTO getConsumer() { return consumer; }
 	public CloudRequestDTO getConsumerCloud() { return consumerCloud; }
-	public List<SystemRequestDTO> getProviders() { return providers; }
+	public List<TokenGenerationProviderDTO> getProviders() { return providers; }
 	public String getService() { return service; }
 	public Integer getDuration() { return duration; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setConsumer(final SystemRequestDTO consumer) { this.consumer = consumer; }
 	public void setConsumerCloud(final CloudRequestDTO consumerCloud) { this.consumerCloud = consumerCloud; }
-	public void setProviders(final List<SystemRequestDTO> providers) { this.providers = providers; }
+	public void setProviders(final List<TokenGenerationProviderDTO> providers) { this.providers = providers; }
 	public void setService(final String service) { this.service = service; }
 	public void setDuration(final Integer duration) { this.duration = duration; }
 }

@@ -38,6 +38,9 @@ public class Defaults {
 	public static final long CORS_MAX_AGE = 600;
 	public static final String CORS_ALLOW_CREDENTIALS = "true";
 	
+	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
+	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
+	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CommonConstants.SORT_ORDER_ASCENDING;
 	
 	//=================================================================================================

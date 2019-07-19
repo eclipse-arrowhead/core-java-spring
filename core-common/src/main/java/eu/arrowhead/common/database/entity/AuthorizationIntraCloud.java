@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -10,27 +11,41 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import eu.arrowhead.common.Defaults;
-
 @Entity
-public class ServiceInterface {
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerSystemId", "providerSystemId", "serviceId"}))
+public class AuthorizationIntraCloud {
 	
 	//=================================================================================================
 	// members
 	
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
+
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column (nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
-	private String interfaceName;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "consumerSystemId", referencedColumnName = "id", nullable = false)
+	private System consumerSystem;
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "providerSystemId", referencedColumnName = "id", nullable = false)
+	private System providerSystem; 
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
+	private ServiceDefinition serviceDefinition;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
@@ -38,27 +53,21 @@ public class ServiceInterface {
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany (mappedBy = "authorizationIntraCloudEntry", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ServiceRegistryInterfaceConnection> serviceConnections = new HashSet<>();
-	
-	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<AuthorizationIntraCloudInterfaceConnection> authorizationIntraCloudConnections = new HashSet<>();
-	
-	@OneToMany (mappedBy = "serviceInterface", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<AuthorizationInterCloudInterfaceConnection> authorizationInterCloudConnections = new HashSet<>();
+	private Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public ServiceInterface() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceInterface(final String interfaceName) {
-		this.interfaceName = interfaceName;
+	public AuthorizationIntraCloud() {}
+
+	//-------------------------------------------------------------------------------------------------
+	public AuthorizationIntraCloud(final System consumerSystem, final System providerSystem, final ServiceDefinition serviceDefinition) {
+		this.consumerSystem = consumerSystem;
+		this.providerSystem = providerSystem;
+		this.serviceDefinition = serviceDefinition;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -76,25 +85,25 @@ public class ServiceInterface {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public String getInterfaceName() { return interfaceName; }
+	public System getConsumerSystem() { return consumerSystem; }
+	public System getProviderSystem() { return providerSystem; }
+	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public Set<ServiceRegistryInterfaceConnection> getServiceConnections() { return serviceConnections; }
-	public Set<AuthorizationIntraCloudInterfaceConnection> getAuthorizationIntraCloudConnections() { return authorizationIntraCloudConnections; }
-	public Set<AuthorizationInterCloudInterfaceConnection> getAuthorizationInterCloudConnections() { return authorizationInterCloudConnections; }
+	public Set<AuthorizationIntraCloudInterfaceConnection> getInterfaceConnections() { return interfaceConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setInterfaceName(final String interfaceName) { this.interfaceName = interfaceName; }
+	public void setConsumerSystem(final System consumerSystem) { this.consumerSystem = consumerSystem; }
+	public void setProviderSystem(final System providerSystem) { this.providerSystem = providerSystem; }
+	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setServiceConnections(final Set<ServiceRegistryInterfaceConnection> serviceConnections) { this.serviceConnections = serviceConnections; }
-	public void setAuthorizationIntraCloudConnections(final Set<AuthorizationIntraCloudInterfaceConnection> authorizationIntraCloudConnections) { this.authorizationIntraCloudConnections = authorizationIntraCloudConnections; }
-	public void setAuthorizationInterCloudConnections(final Set<AuthorizationInterCloudInterfaceConnection> authorizationInterCloudConnections) { this.authorizationInterCloudConnections = authorizationInterCloudConnections; }
+	public void setInterfaceConnections (final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; };
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ServiceInterface [id = " + id + ", interfaceName = " + interfaceName + "]";
+		return "AuthorizationIntraCloud [id = " + id + ", consumerSystem = " + consumerSystem + ", providerSystem = " + providerSystem + ", serviceDefinition = " + serviceDefinition + "]";
 	}
 }

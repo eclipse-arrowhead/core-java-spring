@@ -1,4 +1,4 @@
-package eu.arrowhead.core.serviceregistry.intf;
+package eu.arrowhead.common.intf;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,8 +10,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
+import eu.arrowhead.core.serviceregistry.ServiceRegistryMain;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = ServiceRegistryMain.class)
 @ContextConfiguration
 public class ServiceInterfaceNameVerifierStrictTest {
 
@@ -20,7 +23,6 @@ public class ServiceInterfaceNameVerifierStrictTest {
 	
 	@Autowired
 	private ServiceInterfaceNameVerifier verifier;
-
 	
 	//=================================================================================================
 	// methods
