@@ -221,7 +221,7 @@ public class AuthorizationDBServiceInterCloudTest {
 		when(serviceInterfaceRepository.findById(anyLong())).thenReturn(Optional.of(new ServiceInterface()));
 		
 		final List<AuthorizationInterCloud> entry = authorizationDBService.createBulkAuthorizationInterCloud(1L, Set.of(1L), Set.of(1L), Set.of(1L));
-		assertEquals(getValidTestCloud().getPort(), entry.get(0).getCloud().getPort());
+		assertEquals(getValidTestCloud().getName(), entry.get(0).getCloud().getName());
 	}
 	
 	//=================================================================================================

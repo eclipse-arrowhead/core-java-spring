@@ -3,6 +3,7 @@ package eu.arrowhead.core.authorization;
 import java.security.PublicKey;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
