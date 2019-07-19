@@ -501,18 +501,18 @@ public class AuthorizationController {
 		
 		final boolean isCloudIdInvalid = request.getCloudId() == null || request.getCloudId() < 1;
 		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
-		if (isCloudIdInvalid || isServiceDefinitionIdInvalid ) {
+		final boolean isProvidersWithInterfacesListInvalid = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().size() < 1;
+		if (isCloudIdInvalid || isServiceDefinitionIdInvalid || isProvidersWithInterfacesListInvalid ) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
 			exceptionMsg = isCloudIdInvalid ? exceptionMsg + " 'invalid cloud id' ," : exceptionMsg;
 			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'invalid serviceDefinition id' ," : exceptionMsg;
+			exceptionMsg = isProvidersWithInterfacesListInvalid ? exceptionMsg + " invalid providerIdsWithInterfaceIds list," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTER_CHECK_URI);
 		}
 		
-		final long validCloudId = request.getCloudId();
-		final long validServiceDefinitionId = request.getServiceDefinitionId(); 
-		final AuthorizationInterCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationInterCloudResponse(validCloudId, validServiceDefinitionId);
+		final AuthorizationInterCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationInterCloudResponse(request.getCloudId(), request.getServiceDefinitionId(), request.getProviderIdsWithInterfaceIds());
 		logger.debug("checkAuthorizationInterCloudRequest has been finished");
 		
 		return response;

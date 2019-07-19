@@ -448,7 +448,7 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException(exceptionMsg);
 			}
 			
-			final List<IdIdListDTO> authorizedProvidersWithInterfaces = new ArrayList<>();
+			final List<IdIdListDTO> authorizedProvidersWithInterfaces = new ArrayList<>(providerIdsWithInterfaceIds.size());
 			for (final IdIdListDTO providerWithInterfaces : providerIdsWithInterfaceIds) {
 				final Long providerId = providerWithInterfaces.getId();
 				if (providerId == null || providerId < 1 || !systemRepository.existsById(providerId)) {
@@ -507,19 +507,54 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudResponse(final long cloudId,	final long serviceDefinitionId) {	
+	//TODO
+	public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudResponse(final long cloudId,	final long serviceDefinitionId, final List<IdIdListDTO> providerIdsWithInterfaceIds) {	
 		logger.debug("checkAuthorizationInterCloudResponse started...");
 		
 		try {
-			final Cloud validCloud = validateCloudId(cloudId);		
-			final ServiceDefinition validServiceDefinition = validateServiceDefinitionId(serviceDefinitionId);
+			final boolean isCloudIdInvalid = cloudId < 1 || !cloudRepository.existsById(cloudId);
+			final boolean isServiceDefinitionIdInvalid = serviceDefinitionId < 1 || !serviceDefinitionRepository.existsById(serviceDefinitionId);
+			final boolean isProviderIdsWithInterfaceIdsListInvalid = providerIdsWithInterfaceIds == null ||  providerIdsWithInterfaceIds.isEmpty();
+			if (isCloudIdInvalid || isServiceDefinitionIdInvalid || isProviderIdsWithInterfaceIdsListInvalid) {
+				String exceptionMsg = "Following parameters are invalid:";
+				exceptionMsg = isCloudIdInvalid ? exceptionMsg + " cloudId," : exceptionMsg;
+				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " serviceDefinitionId," : exceptionMsg;
+				exceptionMsg = isProviderIdsWithInterfaceIdsListInvalid ? exceptionMsg + " providerIdsWithInterfaceIds," : exceptionMsg;
+				exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
+				
+				throw new InvalidParameterException(exceptionMsg);
+			}
 			
-			final Optional<AuthorizationInterCloud> optional = authorizationInterCloudRepository.findByCloudAndServiceDefinition(validCloud, validServiceDefinition);
-			if (optional.isEmpty()) {
-				return new AuthorizationInterCloudCheckResponseDTO(cloudId, serviceDefinitionId, false);
-			} else {
-				return new AuthorizationInterCloudCheckResponseDTO(cloudId, serviceDefinitionId, true);
-			}		
+			final List<IdIdListDTO> authorizedProvidersWithInterfaces = new ArrayList<>(providerIdsWithInterfaceIds.size());
+			for (final IdIdListDTO providerWithInterfaces : providerIdsWithInterfaceIds) {
+				final Long providerId = providerWithInterfaces.getId();
+				if (providerId == null || providerId < 1 || !systemRepository.existsById(providerId)) {
+					logger.debug("Invalid provider id: {}", providerId);
+				} else {
+					final Optional<AuthorizationInterCloud> authInterOpt = authorizationInterCloudRepository.findByCloudIdAndProviderIdAndServiceDefinitionId(cloudId, providerId, serviceDefinitionId);
+					
+					if (authInterOpt.isPresent()) {
+						final Set<AuthorizationInterCloudInterfaceConnection> interfaceConnections = authInterOpt.get().getInterfaceConnections();
+						final List<Long> authorizedInterfaces = new ArrayList<>();
+						for (final Long interfaceId : providerWithInterfaces.getIdList()) {
+							for (final AuthorizationInterCloudInterfaceConnection connection : interfaceConnections) {
+								if (connection.getServiceInterface().getId() == interfaceId) {
+									authorizedInterfaces.add(interfaceId);
+								}
+							}
+						}
+						if (!authorizedInterfaces.isEmpty()) {
+							authorizedProvidersWithInterfaces.add(new IdIdListDTO(providerId, authorizedInterfaces));
+						}						
+					}
+				}
+			}
+			
+			if (authorizedProvidersWithInterfaces.isEmpty()) {
+				logger.debug("Have no any authorization inter cloud rule");
+			}
+			
+			return new AuthorizationInterCloudCheckResponseDTO(cloudId, serviceDefinitionId, authorizedProvidersWithInterfaces);
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -763,37 +798,4 @@ public class AuthorizationDBService {
 		
 	}	
 	
-	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("squid:S3655")
-	private Cloud validateCloudId(final long cloudId) {		
-		logger.debug("validateCloudId started...");
-		
-		if (cloudId < 1) {
-			throw new InvalidParameterException("Not valid Cloud id: " + cloudId);
-		}	
-		
-		final Optional<Cloud> optionalCloud = cloudRepository.findById(cloudId);
-		if (optionalCloud.isEmpty()) {
-			throw new InvalidParameterException("No Cloud in database by id: " + cloudId);
-		}
-		
-		return optionalCloud.get();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("squid:S3655")
-	private ServiceDefinition validateServiceDefinitionId(final long serviceDefinitionId) {		
-		logger.debug("validateServiceDefinitionId started...");
-		
-		if (serviceDefinitionId < 1) {
-			throw new InvalidParameterException("Not valid ServiceDefinitionId id: " + serviceDefinitionId);
-		}
-		
-		final Optional<ServiceDefinition> optionalServiceDefinition = serviceDefinitionRepository.findById(serviceDefinitionId);
-		if (optionalServiceDefinition.isEmpty()) {
-			throw new InvalidParameterException("No ServiceDefinition in database by id: " + serviceDefinitionId);
-		}
-		
-		return optionalServiceDefinition.get();
-	}
 }
