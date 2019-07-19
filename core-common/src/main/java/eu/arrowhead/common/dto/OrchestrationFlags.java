@@ -46,6 +46,11 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public boolean getOrDefault(final Flag flag, final boolean defaultValue) {
+		return super.getOrDefault(flag.getFlag(), defaultValue);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public boolean containsKey(final Flag flag) {
 		return super.containsKey(flag.getFlag());
 	}

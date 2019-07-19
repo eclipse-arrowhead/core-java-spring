@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorFormResponseDTO;
-import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -39,8 +42,9 @@ public class OrchestratorController {
 	private static final String POST_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not modify OrchestratorStore by requested parameters";
 	
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
-	private static final String NULL_PARAMETERS_ERROR_MESSAGE = " is null.";
-	private static final String EMPTY_PARAMETERS_ERROR_MESSAGE = " is empty.";
+	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
+	private static final String EMPTY_PARAMETER_ERROR_MESSAGE = " is empty.";
+	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE = " can not be served. Orchestrator runs in NO GATEKEEPER mode.";
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorController.class);
@@ -67,7 +71,7 @@ public class OrchestratorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Start Orchestration process.", response = OrchestratorFormResponseDTO.class)
+	@ApiOperation(value = "Start Orchestration process.", response = OrchestrationResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_HTTP_400_MESSAGE),
@@ -75,34 +79,35 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_ORCH_PROCESS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceRegistryListResponseDTO orchestrationProcess(@RequestBody final OrchestrationFormRequestDTO request) {
+	@ResponseBody public OrchestrationResponseDTO orchestrationProcess(@RequestBody final OrchestrationFormRequestDTO request) {
 		logger.debug("orchestrationProcess started ...");
 		
-		final OrchestrationFormRequestDTO validatedOrchestratorFormRequestDTO = validateOrchestratorFormRequestDTO(request, CommonConstants.ORCHESTRATOR_URI);
+		checkOrchestratorFormRequestDTO(request, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS);
+		//TODO: cont
 		
-	    if (validatedOrchestratorFormRequestDTO.getOrchestrationFlags().getOrDefault("externalServiceRequest", false)) {
+	    if (request.getOrchestrationFlags().getOrDefault("externalServiceRequest", false)) {
 	      
 	    	if (!gateKeeperIsPresent) {
 	    		throw new BadPayloadException("ExternalServiceRequest " + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_URI);
 			}
 	    	
-	    	return orchestratorService.externalServiceRequest(validatedOrchestratorFormRequestDTO);
+	    	return orchestratorService.externalServiceRequest(request);
 	    
-	    } else if (validatedOrchestratorFormRequestDTO.getOrchestrationFlags().getOrDefault("triggerInterCloud", false)) {
+	    } else if (request.getOrchestrationFlags().getOrDefault("triggerInterCloud", false)) {
 	      
 	    	if (!gateKeeperIsPresent) {
 	    		throw new BadPayloadException("TriggerInterCloud " + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_URI);
 			}
 	    	
-	    	return orchestratorService.triggerInterCloud(validatedOrchestratorFormRequestDTO);
+	    	return orchestratorService.triggerInterCloud(request);
 	    
-	    } else if (!validatedOrchestratorFormRequestDTO.getOrchestrationFlags().getOrDefault("overrideStore", false)) { //overrideStore == false
+	    } else if (!request.getOrchestrationFlags().getOrDefault("overrideStore", false)) { //overrideStore == false
 	      
-	    	return orchestratorService.orchestrationFromStore(validatedOrchestratorFormRequestDTO);
+	    	return orchestratorService.orchestrationFromStore(request);
 	    
 	    } else {
 	      
-	    	return orchestratorService.dynamicOrchestration(validatedOrchestratorFormRequestDTO);
+	    	return orchestratorService.dynamicOrchestration(request);
 	    }
 		
 	}
@@ -111,23 +116,78 @@ public class OrchestratorController {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
-	private OrchestrationFormRequestDTO validateOrchestratorFormRequestDTO(final OrchestrationFormRequestDTO request, final String origin) {
-		
+	private void checkOrchestratorFormRequestDTO(final OrchestrationFormRequestDTO request, final String origin) {
 		if (request == null) {
-			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Request" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (request.getRequesterSystem() == null) {
-			throw new BadPayloadException("RequesterSystem "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		request.validateCrossParameterConstraints();
+
+		// Requester system
+		checkSystemRequestDTO(request.getRequesterSystem(), origin);
+
+		// Requester cloud
+		if (request.getRequesterCloud() != null) {
+			checkCloudRequestDTO(request.getRequesterCloud(), origin);
 		}
 		
-		final OrchestrationFormRequestDTO validOrchestratorFormRequestDTO = new OrchestrationFormRequestDTO();
+		// Requested service
+		if (request.getRequestedService() != null && Utilities.isEmpty(request.getRequestedService().getServiceDefinitionRequirement())) {
+			throw new BadPayloadException("Requested service definition requirement" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, origin);
+		}
 		
-		validOrchestratorFormRequestDTO.setRequesterSystem(request.getRequesterSystem());
+		// Preferred Providers
+		if (request.getPreferredProviders() != null) {
+			for (final PreferredProviderDataDTO provider : request.getPreferredProviders()) {
+				checkSystemRequestDTO(provider.getProviderSystem(), origin);
+				if (provider.getProviderCloud() != null) {
+					checkCloudRequestDTO(provider.getProviderCloud(), origin);
+				}
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkSystemRequestDTO(final SystemRequestDTO system, final String origin) {
+		logger.debug("checkSystemRequestDTO started...");
 		
-		//TODO Implement additional validation here
+		if (system == null) {
+			throw new BadPayloadException("System" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
 		
+		if (Utilities.isEmpty(system.getSystemName())) {
+			throw new BadPayloadException("System name" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
 		
-		return validOrchestratorFormRequestDTO;
+		if (Utilities.isEmpty(system.getAddress())) {
+			throw new BadPayloadException("System address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (system.getPort() == null) {
+			throw new BadPayloadException("System port" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final int validatedPort = system.getPort().intValue();
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".",
+										  HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkCloudRequestDTO(final CloudRequestDTO cloud, final String origin) {
+		logger.debug("checkCloudRequestDTO started...");
+		
+		if (cloud == null) {
+			throw new BadPayloadException("Cloud" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(cloud.getOperator())) {
+			throw new BadPayloadException("Cloud operator" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(cloud.getName())) {
+			throw new BadPayloadException("Cloud name" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
 	}
 }

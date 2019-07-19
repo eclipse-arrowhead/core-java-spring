@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
@@ -22,7 +23,7 @@ public class OrchestratorService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryListResponseDTO externalServiceRequest(
+	public OrchestrationResponseDTO externalServiceRequest(
 			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("externalServiceRequest started ...");
 		
@@ -31,7 +32,7 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public ServiceRegistryListResponseDTO triggerInterCloud(
+	public OrchestrationResponseDTO triggerInterCloud(
 			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("triggerInterCloud started ...");
 		
@@ -40,7 +41,7 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public ServiceRegistryListResponseDTO orchestrationFromStore(
+	public OrchestrationResponseDTO orchestrationFromStore(
 			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("orchestrationFromStore started ...");
 		
@@ -50,7 +51,7 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public ServiceRegistryListResponseDTO dynamicOrchestration(
+	public OrchestrationResponseDTO dynamicOrchestration(
 			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
 		logger.debug("dynamicOrchestration started ...");
 		

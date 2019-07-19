@@ -564,7 +564,6 @@ public class AuthorizationController {
 		if (mandatoryAuthInfo && Utilities.isEmpty(system.getAuthenticationInfo())) {
 			throw new BadPayloadException("System authentication info is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
-
 	}
 	
 	//-------------------------------------------------------------------------------------------------
