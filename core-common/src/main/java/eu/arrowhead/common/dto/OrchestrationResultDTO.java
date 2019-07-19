@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 public class OrchestrationResultDTO implements Serializable {
 
 	//=================================================================================================
@@ -26,6 +28,34 @@ public class OrchestrationResultDTO implements Serializable {
 	//=================================================================================================
 	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResultDTO() {}
+	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResultDTO(final SystemResponseDTO provider, final ServiceDefinitionResponseDTO service, final String serviceUri, final ServiceSecurityType secure, 
+								  final Map<String,String> metadata, final List<ServiceInterfaceResponseDTO> interfaces, final Integer version, final String authorizationToken,
+								  final List<OrchestratorWarnings> warnings) {
+		Assert.notNull(provider, "provider is null.");
+		Assert.notNull(service, "service is null.");
+		Assert.isTrue(interfaces != null && !interfaces.isEmpty(), "interfaces is null or empty.");
+		
+		this.provider = provider;
+		this.service = service;
+		this.serviceUri = serviceUri;
+		this.secure = secure;
+		this.metadata = metadata;
+		this.interfaces = interfaces;
+		this.version = version;
+		this.authorizationToken = authorizationToken;
+		this.warnings = warnings;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResultDTO(final SystemResponseDTO provider, final ServiceDefinitionResponseDTO service, final String serviceUri, final ServiceSecurityType secure, 
+								  final Map<String,String> metadata, final List<ServiceInterfaceResponseDTO> interfaces, final Integer version) {
+		this(provider, service, serviceUri, secure, metadata, interfaces, version, null, null);
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	public SystemResponseDTO getProvider() { return provider; }
 	public ServiceDefinitionResponseDTO getService() { return service; }

@@ -25,6 +25,7 @@ import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.orchestrator.service.OrchestratorService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;

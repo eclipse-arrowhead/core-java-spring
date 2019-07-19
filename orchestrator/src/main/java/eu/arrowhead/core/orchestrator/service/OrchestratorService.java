@@ -1,4 +1,4 @@
-package eu.arrowhead.core.orchestrator;
+package eu.arrowhead.core.orchestrator.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
-import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
 @Service
 public class OrchestratorService {
@@ -15,16 +13,18 @@ public class OrchestratorService {
 	//=================================================================================================
 	// members
 	
-	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
-	
-	private static final Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
+	private static final Logger logger = LogManager.getLogger(OrchestratorService.class);
 	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationResponseDTO externalServiceRequest(
-			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
+	/**
+	 * This method represents the orchestration process where the requester System is NOT in the local Cloud. This means that the Gatekeeper made sure
+	 * that this request from the remote Orchestrator can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
+	 * Systems.)
+	 */
+	public OrchestrationResponseDTO externalServiceRequest(final OrchestrationFormRequestDTO request) {
 		logger.debug("externalServiceRequest started ...");
 		
 		//TODO implement method logic here

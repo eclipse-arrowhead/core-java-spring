@@ -43,6 +43,7 @@ public class CommonConstants {
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
+	public static final String SR_QUERY_URI = "service.registry.query.uri";
 	
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
