@@ -182,7 +182,7 @@ public class TokenGenerationService {
 			
 			final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
 			final String[] serverFields = serverCN.split("\\.");
-			// when the gatekeeper initializes it will write own cloud in the database using its own common name to identify the cloudname and operator
+			// when the Service Registry initializes it will write own cloud in the database using its own common name to identify the cloud's name and operator
 			// the corresponding part of the CN is the same in the Authorization's CN too, so we can use that 
 			ownCloudName = serverFields[1]; 
 			ownCloudOperator = serverFields[2];
