@@ -279,7 +279,7 @@ public class OrchestratorStoreDBService {
 		
 		if (isLocalCloud) {
 			
-			return createLocalOrchestratorStoreEntry(orchestratorStoreRequestDTO, validConsumerSystem, validCloud);
+			return createLocalOrchestratorStoreEntry(orchestratorStoreRequestDTO, validConsumerSystem);
 		
 		}else {
 			
@@ -357,7 +357,7 @@ public class OrchestratorStoreDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStore validateLocalOrchestratorStoreRequestDTO(
-			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System validConsumerSystem, final Cloud validProviderCloud) {
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System validConsumerSystem) {
 		logger.debug("validateOrchestratorStoreRequestDTO started...");
 		
 		final boolean foreign = false;
@@ -715,10 +715,10 @@ public class OrchestratorStoreDBService {
 
 	//-------------------------------------------------------------------------------------------------	
 	private OrchestratorStore createLocalOrchestratorStoreEntry(
-			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System  validConsumerSystem, final Cloud validProviderCloud) {
+			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System  validConsumerSystem) {
 		logger.debug("createLocalOrchestratorStoreEntry started...");
 		
-		final OrchestratorStore orchestratorStore = validateLocalOrchestratorStoreRequestDTO(orchestratorStoreRequestDTO, validConsumerSystem, validProviderCloud);
+		final OrchestratorStore orchestratorStore = validateLocalOrchestratorStoreRequestDTO(orchestratorStoreRequestDTO, validConsumerSystem);
 		
 		return saveWithPriorityCheck(orchestratorStore);
 	}
