@@ -23,7 +23,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerCloudId", "serviceId"}))
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerCloudId", "providerSystemId", "serviceId"}))
 public class AuthorizationInterCloud {
 	
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
@@ -38,6 +38,10 @@ public class AuthorizationInterCloud {
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "consumerCloudId", referencedColumnName = "id", nullable = false)
 	private Cloud cloud;
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "providerSystemId", referencedColumnName = "id", nullable = false)
+	private System provider;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
@@ -60,8 +64,9 @@ public class AuthorizationInterCloud {
 	public AuthorizationInterCloud() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloud(final Cloud cloud, final ServiceDefinition serviceDefinition) {
+	public AuthorizationInterCloud(final Cloud cloud, final System provider, final ServiceDefinition serviceDefinition) {
 		this.cloud = cloud;
+		this.provider = provider;
 		this.serviceDefinition = serviceDefinition;
 	}
 	
@@ -81,6 +86,7 @@ public class AuthorizationInterCloud {
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public Cloud getCloud() { return cloud; }
+	public System getProvider() { return provider; }
 	public ServiceDefinition getServiceDefinition() { return serviceDefinition; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
@@ -89,6 +95,7 @@ public class AuthorizationInterCloud {
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setCloud(final Cloud cloud) { this.cloud = cloud; }
+	public void setProvider(final System provider) { this.provider = provider; }
 	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
@@ -97,6 +104,6 @@ public class AuthorizationInterCloud {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "AuthorizationInterCloud [id = " + id + ", cloud = " + cloud + ", serviceDefinition = " + serviceDefinition + "]";
+		return "AuthorizationInterCloud [id = " + id + ", cloud = " + cloud + ", provider = " + provider + ", serviceDefinition = " + serviceDefinition + "]";
 	}
 }

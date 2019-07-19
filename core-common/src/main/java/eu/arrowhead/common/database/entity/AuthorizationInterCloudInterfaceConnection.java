@@ -47,13 +47,10 @@ public class AuthorizationInterCloudInterfaceConnection {
 	public AuthorizationInterCloudInterfaceConnection() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloudInterfaceConnection(final long id, final AuthorizationInterCloud authorizationInterCloudEntry,
-			final ServiceInterface serviceInterface, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
-		this.id = id;
+	public AuthorizationInterCloudInterfaceConnection(final AuthorizationInterCloud authorizationInterCloudEntry,
+			final ServiceInterface serviceInterface) {
 		this.authorizationInterCloudEntry = authorizationInterCloudEntry;
 		this.serviceInterface = serviceInterface;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
