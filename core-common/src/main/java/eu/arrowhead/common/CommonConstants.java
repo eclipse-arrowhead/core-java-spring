@@ -22,6 +22,7 @@ public class CommonConstants {
 	public static final String DATABASE_OPERATION_EXCEPTION_MSG = "Database operation exception";
 	
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
+	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";

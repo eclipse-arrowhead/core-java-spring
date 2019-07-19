@@ -20,6 +20,7 @@ public class Defaults {
 	public static final int DEFAULT_GATEKEEPER_PORT = 8449;
 	public static final int DEFAULT_GATEWAY_PORT = 8453;
 	public static final int DEFAULT_EVENT_HANDLER_PORT = 8455;
+	public static final int DEFAULT_CHOREOGRAPHER_PORT = 8457;
 	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8459;
 
 	public static final boolean DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED = false;

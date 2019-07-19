@@ -20,7 +20,8 @@ public enum CoreSystem {
 	GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of()), // TODO: add services
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of()), // TODO: add services,
 	EVENT_HANDLER(Defaults.DEFAULT_EVENT_HANDLER_PORT, List.of()), // TODO: add services
-	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of()); // TODO: add services		
+	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of()), // TODO: add services
+	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of()); // TODO: add services
 	
 	//=================================================================================================
 	// members

@@ -31,6 +31,7 @@
 	    <module>eventhandler</module>
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
+	    <module>choreographer</module>
   	</modules>
   	
 	<properties>
