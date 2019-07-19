@@ -467,44 +467,6 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkSystemIdValidity(final Long systemId) {
-		logger.debug("checkSystemIdValidity started...");
-		
-		if (systemId == null) {
-			throw new InvalidParameterException("SystemId " + NULL_ERROR_MESAGE);
-		}
-		
-		if (systemId < 1) {
-			throw new InvalidParameterException("SystemId " + LESS_THEN_ONE_ERROR_MESAGE);
-		}
-		
-		if (systemRepository.existsById(systemId)) {
-			throw new InvalidParameterException("System by id" + systemId + NOT_IN_DB_ERROR_MESAGE );
-		}
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private ServiceDefinition validateServiceDefinitionId(final Long serviceDefinitionId) {
-		logger.debug("validateServiceDefinitionId started...");
-		
-		if (serviceDefinitionId == null) {
-			throw new InvalidParameterException("ServiceDefinitionId " + NULL_ERROR_MESAGE);
-		}
-		
-		if (serviceDefinitionId < 1) {
-			throw new InvalidParameterException("ServiceDefinition " + LESS_THEN_ONE_ERROR_MESAGE);
-		}
-		
-		final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findById(serviceDefinitionId);
-		if (serviceDefinitionOptional.isEmpty()) {
-			throw new InvalidParameterException("ServiceDefinition by id: " + serviceDefinitionId + NOT_IN_DB_ERROR_MESAGE );
-		}
-		
-		return serviceDefinitionOptional.get();
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	private void checkUniqueConstraintByConsumerSystemAndServiceAndProviderSystemIdAndInterfaceAndForeign(final System consumerSystem, final ServiceDefinition serviceDefinition, final long providerSystemId, final ServiceInterface serviceInterface, final boolean foreign) {
 		logger.debug("checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId started...");
 		
@@ -512,26 +474,6 @@ public class OrchestratorStoreDBService {
 		if (orchestratorStoreOptional.isPresent()) {
 			throw new InvalidParameterException("OrchestratorStore checkUniqueConstraintByConsumerSystemIdAndServiceIdAndProviderSystemId " + VIOLATES_UNIQUE_CONSTRAINT );
 		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private Cloud validateProviderCloudId(final Long cloudId) {
-		logger.debug("validateProviderCloudId started...");
-		
-		if (cloudId == null) {
-			return null;
-		}
-		
-		if( cloudId < 1) {
-			throw new InvalidParameterException("CloudId " + LESS_THEN_ONE_ERROR_MESAGE );
-		}	
-
-		final Optional<Cloud> cloudOptional = cloudRepository.findById(cloudId);
-		if (cloudOptional.isEmpty()) {
-			throw new InvalidParameterException("Cloud by id :" + cloudId + NOT_IN_DB_ERROR_MESAGE );
-		}
-		
-		return cloudOptional.get();
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -560,25 +502,6 @@ public class OrchestratorStoreDBService {
 		return cloudOptional.get();
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
-	private ServiceInterface validateServiceInterface(final Long serviceInterfaceId) {
-		logger.debug("validateServiceInterfaceId started...");
-		
-		if (serviceInterfaceId == null) {
-			throw new InvalidParameterException("ServiceInterfaceId " + NULL_ERROR_MESAGE);
-		}
-		
-		if( serviceInterfaceId < 1) {
-			throw new InvalidParameterException("ServiceInterfaceId " + LESS_THEN_ONE_ERROR_MESAGE );
-		}	
-
-		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findById(serviceInterfaceId);
-		if (serviceInterfaceOptional.isEmpty()) {
-			throw new InvalidParameterException("ServiceInterface by id :" + serviceInterfaceId + NOT_IN_DB_ERROR_MESAGE );
-		}
-		
-		return serviceInterfaceOptional.get();
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	private int validatePriority(final Integer priority) {
