@@ -19,6 +19,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
@@ -41,9 +42,7 @@ public class OrchestratorController {
 	private static final String POST_ORCHESTRATOR_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters modified";
 	private static final String POST_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not modify OrchestratorStore by requested parameters";
 	
-	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
-	private static final String EMPTY_PARAMETER_ERROR_MESSAGE = " is empty.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE = " can not be served. Orchestrator runs in NO GATEKEEPER mode.";
 	
@@ -82,34 +81,26 @@ public class OrchestratorController {
 	@ResponseBody public OrchestrationResponseDTO orchestrationProcess(@RequestBody final OrchestrationFormRequestDTO request) {
 		logger.debug("orchestrationProcess started ...");
 		
-		checkOrchestratorFormRequestDTO(request, CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS);
-		//TODO: cont
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS;
+		checkOrchestratorFormRequestDTO(request, origin);
 		
-	    if (request.getOrchestrationFlags().getOrDefault("externalServiceRequest", false)) {
-	      
+	    if (request.getOrchestrationFlags().getOrDefault(Flag.EXTERNAL_SERVICE_REQUEST, false)) {
 	    	if (!gateKeeperIsPresent) {
-	    		throw new BadPayloadException("ExternalServiceRequest " + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_URI);
+	    		throw new BadPayloadException("External service request" + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 	    	
 	    	return orchestratorService.externalServiceRequest(request);
-	    
-	    } else if (request.getOrchestrationFlags().getOrDefault("triggerInterCloud", false)) {
-	      
+	    } else if (request.getOrchestrationFlags().getOrDefault(Flag.TRIGGER_INTER_CLOUD, false)) {
 	    	if (!gateKeeperIsPresent) {
-	    		throw new BadPayloadException("TriggerInterCloud " + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_URI);
+	    		throw new BadPayloadException("Forced inter cloud service request" + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 	    	
 	    	return orchestratorService.triggerInterCloud(request);
-	    
-	    } else if (!request.getOrchestrationFlags().getOrDefault("overrideStore", false)) { //overrideStore == false
-	      
+	    } else if (!request.getOrchestrationFlags().getOrDefault(Flag.OVERRIDE_STORE, false)) { // overrideStore == false
 	    	return orchestratorService.orchestrationFromStore(request);
-	    
 	    } else {
-	      
 	    	return orchestratorService.dynamicOrchestration(request);
 	    }
-		
 	}
 
 	//=================================================================================================
