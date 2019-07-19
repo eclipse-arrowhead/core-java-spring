@@ -52,7 +52,11 @@ public class OrchestrationFormRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public OrchestrationFormRequestDTO validateCrossParameterConstraints() {
         if (requestedService == null && orchestrationFlags.get(Flag.OVERRIDE_STORE)) {
-            throw new BadPayloadException("Requested service can not be null when \"overrideStore\" is TRUE");
+            throw new BadPayloadException("Requested service can not be null when \"" + Flag.OVERRIDE_STORE + "\" is TRUE");
+        }
+        
+        if (requestedService == null && orchestrationFlags.get(Flag.TRIGGER_INTER_CLOUD)) {
+            throw new BadPayloadException("Requested service can not be null when \"" + Flag.TRIGGER_INTER_CLOUD + "\" is TRUE");
         }
 
         if (orchestrationFlags.get(Flag.ONLY_PREFERRED)) {
@@ -64,7 +68,7 @@ public class OrchestrationFormRequestDTO implements Serializable {
 			}
         	
             if (preferredProviders.isEmpty()) {
-                throw new BadPayloadException("There is no valid preferred provider, but \"onlyPreferred\" is set to true");
+                throw new BadPayloadException("There is no valid preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true");
             }
         }
 
