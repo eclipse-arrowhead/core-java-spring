@@ -24,11 +24,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.CloudRepository;
+import eu.arrowhead.common.database.repository.ForeignSystemRepository;
 import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
@@ -62,6 +64,9 @@ public class OrchestratorStoreDBServiceTest {
 	
 	@Mock
 	ServiceInterfaceRepository serviceInterfaceRepository;
+	
+	@Mock
+	ForeignSystemRepository foreignSystemRepository;
 	
 	//=================================================================================================
 	// methods
@@ -283,170 +288,6 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithInvalidProviderSystemTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
-		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
-		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
-		
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidProviderSystemForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithInvalidServiceDefinitionIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
-		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
-		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
-		
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidServiceDefinitionIdForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithInvalidPriorityTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
-		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
-		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
-		
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidPriorityForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithInvalidCloudIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
-		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
-		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
-		
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidCloudForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithInvalidServiceInterfaceIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
-		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
-		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidServiceInterfaceNameForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithNullServiceInterfaceIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullServiceInterfaceIdForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithNullServiceDefinitionIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
-		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
-		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullServiceDefinitionIdForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithNullConsumerSystemIdTest() {
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullConsumerSystemIdForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithNullProviderSystemIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullProviderSystemForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithNullPriorityTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullPriorityForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void createOrchestratorStoreEntityWithNullCloudIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
-		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
-		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
-		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
-		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullCloudIdForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithNotInDBServiceDefinitionIdTest() {
-		
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
-		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-
-		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
 	public void createOrchestratorStoreEntityWithNotInDBConsumerSystemIdTest() {
 		
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
@@ -475,8 +316,204 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	// Test createOrchestratorStoreEntity - localProvider
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void createOrchestratorStoreEntityWithUniqueConstraintTest() {
+	public void createLocalOrchestratorStoreEntityWithInvalidProviderSystemTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidProviderSystemForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithInvalidServiceDefinitionIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidServiceDefinitionIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithInvalidPriorityTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidPriorityForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithInvalidCloudIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidCloudForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithInvalidServiceInterfaceIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidServiceInterfaceNameForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNullServiceInterfaceIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullServiceInterfaceForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNullServiceDefinitionIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullServiceDefinitionIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNullConsumerSystemIdTest() {
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullConsumerSystemIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNullProviderSystemIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullProviderSystemForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNullPriorityTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullPriorityForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void createLocalOrchestratorStoreEntityWithNullCloudIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullCloudIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNotInDBServiceDefinitionIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNotInDBConsumerSystemIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNotInDBProviderSystemIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithNotInDBCloudIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createLocalOrchestratorStoreEntityWithUniqueConstraintTest() {
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
 		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
@@ -492,7 +529,7 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createOrchestratorStoreEntityWithPriorityCombinationNotPresentInDBTest() {
+	public void createLocalOrchestratorStoreEntityWithPriorityCombinationNotPresentInDBTest() {
 		
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
@@ -510,7 +547,7 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createOrchestratorStoreEntityWithPriorityNotPresentInDBEntitiesTest() {
+	public void createLocalOrchestratorStoreEntityWithPriorityNotPresentInDBEntitiesTest() {
 		
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
@@ -528,7 +565,7 @@ public class OrchestratorStoreDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void createOrchestratorStoreEntityWithPriorityPresentInDBEntitiesTest() {
+	public void createLocalOrchestratorStoreEntityWithPriorityPresentInDBEntitiesTest() {
 		
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
@@ -541,6 +578,296 @@ public class OrchestratorStoreDBServiceTest {
 		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
 		
 		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// Test createOrchestratorStoreEntity - foreignProvider
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithInvalidProviderSystemTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithInvalidProviderSystemForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithInvalidServiceDefinitionIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithInvalidServiceDefinitionIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithInvalidPriorityTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.ofNullable(null));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithInvalidPriorityForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithInvalidCloudTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithInvalidCloudForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithInvalidServiceInterfaceIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithInvalidServiceInterfaceNameForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithNullServiceInterfaceTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithNullServiceInterfaceForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithNullServiceDefinitionTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithNullServiceDefinitionForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithNullProviderSystemIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithNullProviderSystemForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithNullPriorityTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullPriorityForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void createForeignOrchestratorStoreEntityWithNullCloudIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOWithNullCloudIdForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithNotInDBServiceDefinitionIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithNotInDBConsumerSystemIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void createForeignOrchestratorStoreEntityWithNotInDBProviderSystemTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.ofNullable(null));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithNotInDBCloudIdTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.ofNullable(null));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void createForeignOrchestratorStoreEntityWithUniqueConstraintTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.of(getOrchestratorStore()));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOForTest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void createForeignOrchestratorStoreEntityWithPriorityCombinationNotPresentInDBTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOForTest());
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void createForeignOrchestratorStoreEntityWithPriorityNotPresentInDBEntitiesTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getForeignProviderCloudForTest()));
+		when(foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(any(), any(), anyInt(), any())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(foreignSystemRepository.saveAndFlush(any())).thenReturn(getForeignSystemForTest());
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceDefinitionRepository.saveAndFlush(any())).thenReturn(getServiceDefinitionForTest());
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(serviceInterfaceRepository.saveAndFlush(any())).thenReturn(getInterfaceForTest());
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithPriorityNotPresentInDBForTest());
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void createForeignOrchestratorStoreEntityWithPriorityPresentInDBEntitiesTest() {
+		
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
+		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.of(getServiceDefinitionForTest()));
+		when(serviceInterfaceRepository.findByInterfaceName(any())).thenReturn(Optional.of(getInterfaceForTest()));
+		when(orchestratorStoreRepository.findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(any(), any(), anyLong(), any(), anyBoolean())).thenReturn(Optional.ofNullable(null));		
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(any(), any())).thenReturn(getOrchestratorStoreListForTest(3));
+		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
+		
+		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOForTest());
 		
 	}
 	
@@ -670,6 +997,27 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOForTest() {
+		
+		final String serviceDefinitionName = "serviceDefinitionNameForTest";
+		final Long consumerSystemId = 1L;
+		final SystemRequestDTO providerSystemDTO = getProviderSystemRequestDTOForTest();
+		final CloudRequestDTO cloudDTO = getForeignProviderCloudRequestDTOForTest();
+		final String serviceInterfaceName = "serviceIntrfaceNameForTest";
+		final Integer priority = 1;	
+		final Map<String,String> attribute = new HashMap<String, String>();
+		
+		return new OrchestratorStoreRequestDTO(
+				serviceDefinitionName, 
+				consumerSystemId, 
+				providerSystemDTO, 
+				cloudDTO, 
+				serviceInterfaceName, 
+				priority, 
+				attribute);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private CloudRequestDTO getLocalProviderCloudRequestDTOForTest() {
 		
 		final String operator = "operatorForTest";
@@ -677,6 +1025,26 @@ public class OrchestratorStoreDBServiceTest {
 		final String address = "localhost";
 		final Integer port = 12345;
 		final Boolean ownCloud = true;	
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		
+		cloudRequestDTO.setOperator(operator);
+		cloudRequestDTO.setName(name);
+		cloudRequestDTO.setAddress(address);
+		cloudRequestDTO.setPort(port);
+		cloudRequestDTO.setOwnCloud(ownCloud);
+		
+		return cloudRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getForeignProviderCloudRequestDTOForTest() {
+		
+		final String operator = "operatorForTest";
+		final String name = "cloudName";
+		final String address = "localhost";
+		final Integer port = 12345;
+		final Boolean ownCloud = false;	
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		
@@ -712,6 +1080,17 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithInvalidServiceDefinitionIdForTest() {
+		
+		final String serviceDefinitionName = " ";
+
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setServiceDefinitionName(serviceDefinitionName);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithInvalidConsumerSystemIdForTest() {
 		
 		final Long consumerSystemId = -1L;
@@ -735,12 +1114,36 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithInvalidProviderSystemForTest() {
+		
+		final SystemRequestDTO providerSystemRequestDTO = getProviderSystemRequestDTOForTest();
+		providerSystemRequestDTO.setAddress("");
+		
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setProviderSystemDTO(providerSystemRequestDTO);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithInvalidCloudForTest() {
 		
 		final CloudRequestDTO providerCloudRequestDTO = getLocalProviderCloudRequestDTOForTest();
 		providerCloudRequestDTO.setName(" ");
 		
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setCloudDTO(providerCloudRequestDTO);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithInvalidCloudForTest() {
+		
+		final CloudRequestDTO providerCloudRequestDTO = getForeignProviderCloudRequestDTOForTest();
+		providerCloudRequestDTO.setName(" ");
+		
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
 		orchestratorStoreRequestDTO.setCloudDTO(providerCloudRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
@@ -769,11 +1172,33 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithInvalidPriorityForTest() {
+
+		final Integer priority = -1;
+
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setPriority(priority);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithNullServiceDefinitionIdForTest() {
 		
 		final String serviceDefinitionName = null;
 
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setServiceDefinitionName(serviceDefinitionName);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithNullServiceDefinitionForTest() {
+		
+		final String serviceDefinitionName = null;
+
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
 		orchestratorStoreRequestDTO.setServiceDefinitionName(serviceDefinitionName);
 		
 		return orchestratorStoreRequestDTO;
@@ -793,10 +1218,21 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithNullProviderSystemForTest() {
 		
-		final CloudRequestDTO providerCloudRequestDTO = null;
+		final SystemRequestDTO providerSystemRequestDTO = null;
 		
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setCloudDTO(providerCloudRequestDTO);
+		orchestratorStoreRequestDTO.setProviderSystemDTO(providerSystemRequestDTO);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithNullProviderSystemForTest() {
+		
+		final SystemRequestDTO providerSystemRequestDTO = null;
+		
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setProviderSystemDTO(providerSystemRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 	}
@@ -814,11 +1250,22 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithNullServiceInterfaceIdForTest() {
+	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithNullServiceInterfaceForTest() {
 		
 		final String serviceInterfaceName = null;
 
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setServiceInterfaceName(serviceInterfaceName);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithNullServiceInterfaceForTest() {
+		
+		final String serviceInterfaceName = null;
+
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
 		orchestratorStoreRequestDTO.setServiceInterfaceName(serviceInterfaceName);
 		
 		return orchestratorStoreRequestDTO;
@@ -841,6 +1288,17 @@ public class OrchestratorStoreDBServiceTest {
 		final Integer priority = 1;
 
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
+		orchestratorStoreRequestDTO.setPriority(priority);
+		
+		return orchestratorStoreRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithPriorityNotPresentInDBForTest() {
+		
+		final Integer priority = 1;
+
+		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
 		orchestratorStoreRequestDTO.setPriority(priority);
 		
 		return orchestratorStoreRequestDTO;
@@ -1019,6 +1477,27 @@ public class OrchestratorStoreDBServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private Cloud getForeignProviderCloudForTest() {
+			
+		final Cloud cloud =  new Cloud(
+					"operator",
+					"name", 
+					"address", 
+					1234, 
+					"gatekeeperServiceUri", 
+					"authenticationInfo", 
+					true, 
+					true, 
+					false);
+		cloud.setId(getIdForTest());
+		cloud.setCreatedAt(getCreatedAtForTest());
+		cloud.setUpdatedAt(getUpdatedAtForTest());
+		cloud.setOwnCloud(false);
+		
+		return cloud;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private ServiceInterface getServiceIntefaceForTest() {
 		
 		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-XML");
@@ -1030,6 +1509,23 @@ public class OrchestratorStoreDBServiceTest {
 	private System getSystemForTest() {
 			
 		final System system = new System(
+				"systemName",
+				"address", 
+				1234, 
+				null);
+		
+		system.setId(getIdForTest());
+		system.setCreatedAt(getCreatedAtForTest());
+		system.setUpdatedAt(getUpdatedAtForTest());
+		
+		return system;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ForeignSystem getForeignSystemForTest() {
+			
+		final ForeignSystem system = new ForeignSystem(
+				getProviderCloudForTest(),
 				"systemName",
 				"address", 
 				1234, 
