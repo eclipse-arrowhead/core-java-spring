@@ -366,6 +366,7 @@ public class OrchestratorStoreDBService {
 		final ServiceDefinition validServiceDefinition = validateServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
+		final String validAttribute = validateAttribute(orchestratorStoreRequestDTO.getAttribute());
 		
 		checkUniqueConstraintByConsumerSystemAndServiceAndProviderSystemIdAndInterfaceAndForeign(validConsumerSystem, validServiceDefinition, validProviderSystemId, validInterface, foreign);
 	
@@ -376,11 +377,21 @@ public class OrchestratorStoreDBService {
 				validProviderSystemId,
 				validInterface,
 				validPriority,
-				Utilities.map2Text(orchestratorStoreRequestDTO.getAttribute()),
+				validAttribute,
 				null,
 				null);	
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private String validateAttribute(Map<String, String> attribute) {
+
+		if (attribute == null) {
+			return null;
+		}
+		
+		return Utilities.map2Text(attribute);
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private ServiceInterface validateServiceInterfaceName(final String serviceInterfaceName) {
 		logger.debug("validateServiceInterfaceName started...");
