@@ -2,6 +2,7 @@ package eu.arrowhead.core.authorization.database.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
@@ -225,73 +227,65 @@ public class AuthorizationDBServiceInterCloudTest {
 	//=================================================================================================
 	//Tests of checkAuthorizationInterCloudResponse
 	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test(expected = InvalidParameterException.class)
-//	public void testCheckAuthorizationInterCloudResponseWithInvalidCloudId() {
-//		when(cloudRepository.existsById(anyLong())).thenReturn(true);
-//		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-//		authorizationDBService.checkAuthorizationInterCloudResponse(0, 1);
-//	}
-//	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test(expected = InvalidParameterException.class)
-//	public void testCheckAuthorizationInterCloudResponseWithNotExistingCloud() {
-//		when(cloudRepository.existsById(anyLong())).thenReturn(false);
-//		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-//		authorizationDBService.checkAuthorizationInterCloudResponse(1, 1);
-//	}
-//	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test(expected = InvalidParameterException.class)
-//	public void testCheckAuthorizationInterCloudResponseWithInvalidServiceDefintitionId() {
-//		when(cloudRepository.existsById(anyLong())).thenReturn(true);
-//		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-//		authorizationDBService.checkAuthorizationInterCloudResponse(1, 0);
-//	}
-//	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test(expected = InvalidParameterException.class)
-//	public void testCheckAuthorizationInterCloudResponseWithNotExistingServiceDefintition() {
-//		when(cloudRepository.existsById(anyLong())).thenReturn(true);
-//		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
-//		authorizationDBService.checkAuthorizationInterCloudResponse(1, 1);
-//	}
-//	
-//
-//	//-------------------------------------------------------------------------------------------------
-//	@Test
-//	public void testCheckAuthorizationInterCloudResponseNotAuthorizedDBCall() {
-//		final Cloud cloud = getValidTestCloud();
-//		cloud.setId(8);
-//		final ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
-//		serviceDefinition.setId(3);
-//		when(cloudRepository.existsById(anyLong())).thenReturn(true);
-//		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-//		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(new Cloud()));
-//		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of( new ServiceDefinition()));
-//		when(authorizationInterCloudRepository.findByCloudAndServiceDefinition(any(Cloud.class), any(ServiceDefinition.class))).thenReturn(Optional.ofNullable(null));
-//		
-//		final AuthorizationInterCloudCheckResponseDTO dto = authorizationDBService.checkAuthorizationInterCloudResponse(1, 1);
-//		assertFalse(dto.getCloudIdAuthorizationState());
-//	}
-//	
-//	//-------------------------------------------------------------------------------------------------
-//	@Test
-//	public void testCheckAuthorizationInterCloudResponseAuthorizedDBCall() {
-//		final Cloud cloud = getValidTestCloud();
-//		cloud.setId(8);
-//		final ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
-//		serviceDefinition.setId(3);
-//		when(cloudRepository.existsById(anyLong())).thenReturn(true);
-//		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-//		when(cloudRepository.findById(anyLong())).thenReturn(Optional.of(new Cloud()));
-//		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of( new ServiceDefinition()));
-//		when(authorizationInterCloudRepository.findByCloudAndServiceDefinition(any(Cloud.class), any(ServiceDefinition.class))).thenReturn(Optional.of(new AuthorizationInterCloud(cloud,
-//																																												   serviceDefinition)));
-//		
-//		final AuthorizationInterCloudCheckResponseDTO dto = authorizationDBService.checkAuthorizationInterCloudResponse(1, 1);
-//		assertTrue(dto.getCloudIdAuthorizationState());
-//	}
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationInterCloudResponseWithInvalidCloudId() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationInterCloudResponse(0, 1, createListOfIdIdLists(1, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationInterCloudResponseWithNotExistingCloud() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(false);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationInterCloudResponse(1, 1, createListOfIdIdLists(1, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationInterCloudResponseWithInvalidServiceDefintitionId() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationInterCloudResponse(1, 0, createListOfIdIdLists(1, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationInterCloudResponseWithNotExistingServiceDefintition() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
+		authorizationDBService.checkAuthorizationInterCloudResponse(1, 1, createListOfIdIdLists(1, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationInterCloudResponseWithEmptyProviderInterfacesList() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
+		authorizationDBService.checkAuthorizationInterCloudResponse(1, 1, createListOfIdIdLists(1, 0));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationInterCloudResponseWithNullProviderInterfacesList() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
+		authorizationDBService.checkAuthorizationInterCloudResponse(1, 1, null);
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCheckAuthorizationInterCloudResponseDBCall() {
+		when(cloudRepository.existsById(anyLong())).thenReturn(true);
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		when(authorizationInterCloudRepository.findByCloudIdAndProviderIdAndServiceDefinitionId(anyLong(), anyLong(), anyLong())).thenReturn(Optional.ofNullable(null));
+		
+		final AuthorizationInterCloudCheckResponseDTO dto = authorizationDBService.checkAuthorizationInterCloudResponse(1, 1, createListOfIdIdLists(1, 2));
+		assertTrue(dto.getAuthorizedProviderIdsWithInterfaceIds().isEmpty());
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -328,4 +322,17 @@ public class AuthorizationDBServiceInterCloudTest {
 
 		return cloud;
 	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<IdIdListDTO> createListOfIdIdLists(final int numberOfIds, final int sizeOfIdLists) {
+		final List<IdIdListDTO> ret = new ArrayList<>();
+		for (long id = 1; id <= numberOfIds; ++id) {
+			final List<Long> idList = new ArrayList<>();
+			for (long j = 1; j <= sizeOfIdLists; ++j) {
+				idList.add(j);
+			}
+			ret.add(new IdIdListDTO(id, idList));
+		}
+		return ret;
+	}
 }

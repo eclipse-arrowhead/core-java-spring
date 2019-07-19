@@ -507,7 +507,6 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO
 	public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudResponse(final long cloudId,	final long serviceDefinitionId, final List<IdIdListDTO> providerIdsWithInterfaceIds) {	
 		logger.debug("checkAuthorizationInterCloudResponse started...");
 		
