@@ -33,12 +33,14 @@ import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -81,7 +83,25 @@ public class OrchestratorStoreDBService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreResponseDTO getOrchestratorStoreById(final long orchestratorStoreId) {		
+	public OrchestratorStoreResponseDTO getOrchestratorStoreByIdResponse(final long orchestratorStoreId) {		
+		logger.debug("getOrchestratorStoreById started...");
+		
+		final OrchestratorStore orchestratorStore = getOrchestratorStoreById(orchestratorStoreId);
+		
+		if (orchestratorStore.isForeign()) {
+			
+			return getForeignResponseDTO(orchestratorStore);
+		
+		}else {
+			
+			return getLocalResponseDTO(orchestratorStore);
+		}
+
+		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public OrchestratorStore getOrchestratorStoreById(final long orchestratorStoreId) {		
 		logger.debug("getOrchestratorStoreById started...");
 		
 		try {
@@ -93,8 +113,9 @@ public class OrchestratorStoreDBService {
 			final Optional<OrchestratorStore> orchestratorStoreOption = orchestratorStoreRepository.findById(orchestratorStoreId);
 			if (orchestratorStoreOption.isEmpty()){
 				throw new InvalidParameterException("OrchestratorStore with id " + orchestratorStoreId + " not found.");		
-			}		
-			return DTOConverter.convertOrchestratorStoreToOrchestratorStoreResponseDTO(orchestratorStoreOption.get());
+			}
+	
+			return orchestratorStoreOption.get();
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -108,7 +129,10 @@ public class OrchestratorStoreDBService {
 			final Direction direction, final String sortField) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
 		
-		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getOrchestratorStoreEntries(page, size, direction, sortField));
+		final Page<OrchestratorStore> orchestratorStorePage = getOrchestratorStoreEntries(page, size, direction, sortField);
+		final long totalElements = orchestratorStorePage.getTotalElements();
+		
+		return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(getOrchestratorDTOListFromPage(orchestratorStorePage) , totalElements);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -138,7 +162,9 @@ public class OrchestratorStoreDBService {
 			final Direction direction, final String sortField) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
 		
-		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getAllTopPriorityOrchestratorStoreEntries(page, size, direction, sortField));		
+		final Page<OrchestratorStore> orchestratorStorePage = getAllTopPriorityOrchestratorStoreEntries(page, size, direction, sortField);
+		final long totalElements = orchestratorStorePage.getTotalElements();
+		return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(getOrchestratorDTOListFromPage(orchestratorStorePage) , totalElements);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -169,7 +195,9 @@ public class OrchestratorStoreDBService {
 			final String serviceDefinitionName) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
 				
-		return DTOConverter.convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(getOrchestratorStoresByConsumer(page, size, direction, sortField, consumerSystemId, serviceDefinitionName));
+		final Page<OrchestratorStore> orchestratorStorePage = getOrchestratorStoresByConsumer(page, size, direction, sortField, consumerSystemId, serviceDefinitionName);
+		final long totalElements = orchestratorStorePage.getTotalElements();
+		return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(getOrchestratorDTOListFromPage(orchestratorStorePage) , totalElements);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -223,7 +251,7 @@ public class OrchestratorStoreDBService {
 		try {			
 			final List<OrchestratorStore> savedOrchestratorStoreEntries = createOrchestratorStores(request);
 			
-			return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(savedOrchestratorStoreEntries);
+			return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(getOrchestratorDTOListFromPage(savedOrchestratorStoreEntries), savedOrchestratorStoreEntries.size());
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -828,4 +856,77 @@ public class OrchestratorStoreDBService {
 		return foreignSystemOptional.get().getId();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreResponseDTO getLocalResponseDTO(OrchestratorStore orchestratorStore) {
+		Optional<System> systemOptional = systemRepository.findById(orchestratorStore.getProviderSystemId());
+		if(systemOptional.isEmpty()) {
+			throw new InvalidParameterException("SystemOptional by id: " + orchestratorStore.getProviderSystemId() + NOT_IN_DB_ERROR_MESAGE );
+		}
+		final System system = systemOptional.get();
+		
+		final SystemResponseDTO providerSystem = DTOConverter.convertSystemToSystemResponseDTO(system);		
+		final CloudResponseDTO providerCloud = null;
+		
+		return DTOConverter.convertOrchestratorStoreToOrchestratorStoreResponseDTO(orchestratorStore, providerSystem, providerCloud);
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private OrchestratorStoreResponseDTO getForeignResponseDTO(OrchestratorStore orchestratorStore) {
+		Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findById(orchestratorStore.getProviderSystemId());
+		if(foreignSystemOptional.isEmpty()) {
+			throw new InvalidParameterException("ForeignSystemOptional by id: " + orchestratorStore.getProviderSystemId() + NOT_IN_DB_ERROR_MESAGE );
+		}
+		final ForeignSystem foreignSystem = foreignSystemOptional.get();
+		
+		final SystemResponseDTO providerSystem = DTOConverter.convertForeignSystemToSystemResponseDTO(foreignSystem);		
+		final CloudResponseDTO providerCloud = DTOConverter.convertCloudToCloudResponseDTO(foreignSystem.getProviderCloud());
+		
+		return DTOConverter.convertOrchestratorStoreToOrchestratorStoreResponseDTO(orchestratorStore, providerSystem, providerCloud);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreResponseDTO> getOrchestratorDTOListFromPage(Page<OrchestratorStore> orchestratorStorePage) {
+		
+		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList<>(orchestratorStorePage.getNumberOfElements());
+		
+		for (OrchestratorStore orchestratorStore : orchestratorStorePage.getContent()) {
+			
+			if (orchestratorStore.isForeign()) {
+				
+				orchestratorStoreResponseDTOList.add(getForeignResponseDTO(orchestratorStore));
+			
+			}else {
+				
+				orchestratorStoreResponseDTOList.add(getLocalResponseDTO(orchestratorStore));
+				
+			}
+			
+		}
+		
+		return orchestratorStoreResponseDTOList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStoreResponseDTO> getOrchestratorDTOListFromPage(List<OrchestratorStore> orchestratorStoreList) {
+		
+		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList<>(orchestratorStoreList.size());
+		
+		for (OrchestratorStore orchestratorStore : orchestratorStoreList) {
+			
+			if (orchestratorStore.isForeign()) {
+				
+				orchestratorStoreResponseDTOList.add(getForeignResponseDTO(orchestratorStore));
+			
+			}else {
+				
+				orchestratorStoreResponseDTOList.add(getLocalResponseDTO(orchestratorStore));
+				
+			}
+			
+		}
+		
+		return orchestratorStoreResponseDTOList;
+	}
+
 }

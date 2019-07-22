@@ -17,6 +17,7 @@ import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConne
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -297,20 +298,24 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity) {
+	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity, final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud) {
 		
 		Assert.notNull(entity, "OrchestratorStore is null");            
 		Assert.notNull(entity.getServiceDefinition(),"OrchestratorStore.ServiceDefinition is null"); 
 		Assert.notNull(entity.getConsumerSystem(),"OrchestratorStore.ConsumerSystem is null");
+		Assert.notNull(providerSystem, "OrchestratorStore.ProviderSystem is null");
         Assert.notNull(entity.getCreatedAt(), "OrchestratorStore.CreatedAt is null");        
-        Assert.notNull(entity.getUpdatedAt(),  "OrchestratorStore.UpdatedAt is null");          
+        Assert.notNull(entity.getUpdatedAt(),  "OrchestratorStore.UpdatedAt is null"); 
+        
+        
 	
 		return new OrchestratorStoreResponseDTO(
 			entity.getId(),
 			convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
 			convertSystemToSystemResponseDTO(entity.getConsumerSystem()),
 			entity.isForeign(),
-			entity.getProviderSystemId(),
+			providerSystem,
+			providerCloud,
 			convertServiceInterfaceToServiceInterfaceResponseDTO(entity.getServiceInterface()),
 			entity.getPriority(),
 			Utilities.text2Map(entity.getAttribute()),
@@ -319,30 +324,46 @@ public class DTOConverter {
 		
 	}
 
+//	//-------------------------------------------------------------------------------------------------
+//	public static OrchestratorStoreListResponseDTO convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(
+//			final Page<OrchestratorStore> entries) {
+//		Assert.notNull(entries, "OrchestratorStoreList is null");
+//		
+//		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.getNumberOfElements());
+//		for (final OrchestratorStore entry : entries) {
+//			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
+//		}
+//
+//		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.getTotalElements());
+//	}
+	
+//	//-------------------------------------------------------------------------------------------------
+//	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
+//			final List<OrchestratorStore> entries) {
+//		Assert.notNull(entries, "OrchestratorStoreList is null");
+//		
+//		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.size());
+//		for (final OrchestratorStore entry : entries) {
+//			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
+//		}
+//
+//		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.size());
+//	}
+//	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreListResponseDTO convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(
-			final Page<OrchestratorStore> entries) {
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
+			final List<OrchestratorStoreResponseDTO> entries) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
-		
-		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.getNumberOfElements());
-		for (final OrchestratorStore entry : entries) {
-			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
-		}
 
-		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.getTotalElements());
+		return new OrchestratorStoreListResponseDTO(entries, entries.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
-			final List<OrchestratorStore> entries) {
+			final List<OrchestratorStoreResponseDTO> entries, long totalElements) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
-		
-		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.size());
-		for (final OrchestratorStore entry : entries) {
-			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
-		}
 
-		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.size());
+		return new OrchestratorStoreListResponseDTO(entries, totalElements);
 	}
 	
 	//=================================================================================================
@@ -398,5 +419,13 @@ public class DTOConverter {
 		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
 		
 		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(ForeignSystem foreignSystem) {
+		Assert.notNull(foreignSystem, "ForeignSystem is null");
+		
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
 	}
 }
