@@ -1459,16 +1459,14 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private Cloud getProviderCloudForTest() {
 			
+		final boolean secure = true, neighbor = true, ownCloud = true;
 		final Cloud cloud =  new Cloud(
 					"operator",
-					"name", 
-					"address", 
-					1234, 
-					"gatekeeperServiceUri", 
-					"authenticationInfo", 
-					true, 
-					true, 
-					true);
+					"name",
+					secure, 
+					neighbor, 
+					ownCloud);
+		
 		cloud.setId(getIdForTest());
 		cloud.setCreatedAt(getCreatedAtForTest());
 		cloud.setUpdatedAt(getUpdatedAtForTest());
@@ -1479,16 +1477,13 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	private Cloud getForeignProviderCloudForTest() {
 			
+		final boolean secure = true, neighbor = true, ownCloud = true;
 		final Cloud cloud =  new Cloud(
 					"operator",
-					"name", 
-					"address", 
-					1234, 
-					"gatekeeperServiceUri", 
-					"authenticationInfo", 
-					true, 
-					true, 
-					false);
+					"name",
+					secure, 
+					neighbor, 
+					ownCloud);
 		cloud.setId(getIdForTest());
 		cloud.setCreatedAt(getCreatedAtForTest());
 		cloud.setUpdatedAt(getUpdatedAtForTest());
