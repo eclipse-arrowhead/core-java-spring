@@ -20,7 +20,6 @@ import eu.arrowhead.common.Defaults;
 
 @Entity
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
-
 public class ForeignSystem {
 	
 	//=================================================================================================

@@ -101,6 +101,7 @@ public class Cloud {
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public CloudGatekeeper getGatekeeper() { return gatekeeper; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
+	public Set<OrchestratorStore> getOrchestratorStores() { return orchestratorStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }

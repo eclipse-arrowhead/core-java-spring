@@ -40,7 +40,7 @@ public class OrchestratorStore {
 	@JoinColumn (name = "consumerSystemId", referencedColumnName = "id", nullable = false)
 	private System consumerSystem;
 	
-	@Column (name= "foreign_", nullable = false)
+	@Column(name="foreign_", nullable = false)
 	private boolean foreign;
 	
 	@Column (nullable = false)

@@ -48,8 +48,6 @@ public class OrchestratorStoreController {
 	//=================================================================================================
 	// members
 	
-	private static final String ECHO_URI = "/echo";
-	
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String ORCHESTRATOR_STORE_MGMT_BY_ID_URI = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority";
@@ -76,7 +74,7 @@ public class OrchestratorStoreController {
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorStoreController.class);
 	
-	@Value(CommonConstants.$IS_GATEKEEPER_PRESENT_WD)
+	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
 	
 	@Value(CommonConstants.$SERVICE_REGISTRY_ADDRESS_WD)
@@ -98,7 +96,7 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + ECHO_URI)
+	@GetMapping(path = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
 	}
@@ -111,7 +109,7 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(ORCHESTRATOR_STORE_MGMT_BY_ID_URI)
+	@GetMapping(path = ORCHESTRATOR_STORE_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public OrchestratorStoreResponseDTO getOrchestratorStoreById(@PathVariable(value = PATH_VARIABLE_ID) final long orchestratorStoreId) {		
 		logger.debug("getOrchestratorStoreById started ...");
 		
@@ -291,7 +289,7 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = ORCHESTRATOR_STORE_MGMT_MODIFY, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = ORCHESTRATOR_STORE_MGMT_MODIFY, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void modifyPriorities( @RequestBody final OrchestratorStoreModifyPriorityRequestDTO request) {
 		logger.debug("modifyPriorities started ...");
 		
