@@ -111,6 +111,8 @@ public class OrchestratorStoreDBServiceTest {
 	public void getOrchestratorStoreEntriesResponseOKTest() {
 		
 		when(orchestratorStoreRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
+		when(foreignSystemRepository.findById(anyLong())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		
 		orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(0, 10, Direction.ASC, "id");
 	}
@@ -132,7 +134,8 @@ public class OrchestratorStoreDBServiceTest {
 	public void getAllTopPriorityOrchestratorStoreEntriesResponseOKTest() {
 		
 		when(orchestratorStoreRepository.findAllByPriority(anyInt(), any(PageRequest.class))).thenReturn(getPageOfOrchestratorStoreList());
-		
+		when(foreignSystemRepository.findById(anyLong())).thenReturn(Optional.of(getForeignSystemForTest()));
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(0, 10, Direction.ASC, "id");
 	}
 	

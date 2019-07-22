@@ -80,7 +80,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoreByIdOkTest() throws Exception {
 		
 		OrchestratorStoreResponseDTO dto = getOrchestratorStoreResponseDTOForTest();
-		when(orchestratorStoreDBService.getOrchestratorStoreById(anyLong())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoreByIdResponse(anyLong())).thenReturn(dto);
 		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
 				.accept(MediaType.APPLICATION_JSON))
@@ -664,7 +664,8 @@ public class OrchestratorStoreControllerTest {
 				getServiceDefinitionResponseDTOForTest(),
 				getConsumerSystemResponseDTOForTest(),
 				getForeignForTest(),
-				getIdForTest(),
+				getSystemResponseDTOForTest(),
+				getCloudResponseDTOForTest(),
 				getServiceInterfaceResponseDTO(),
 				getPriorityForTest(),
 				getAttributeForTest(),
@@ -696,7 +697,7 @@ public class OrchestratorStoreControllerTest {
 		for (int i = 0; i < size; i++) {
 			final OrchestratorStoreResponseDTO orchestratorStoreResponseDTO = getOrchestratorStoreResponseDTOForTest();
 			orchestratorStoreResponseDTO.setId(i + 1L);
-			orchestratorStoreResponseDTO.setProviderSystemId(i + 1L);
+			orchestratorStoreResponseDTO.getProviderSystem();
 			orchestratorStoreResponseDTO.setPriority(i + 1);
 			
 			orchestratorStoreResponseDTOList.add(orchestratorStoreResponseDTO);
