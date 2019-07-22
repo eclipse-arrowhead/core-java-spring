@@ -447,7 +447,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_AUTH_INTRA_CHECK_URI)
+	@PostMapping(path = CommonConstants.OP_AUTH_INTRA_CHECK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public AuthorizationIntraCloudCheckResponseDTO checkAuthorizationIntraCloudRequest(@RequestBody final AuthorizationIntraCloudCheckRequestDTO request) {
 		logger.debug("New AuthorizationIntraCloud check request recieved");
 		
@@ -503,7 +503,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_AUTH_INTER_CHECK_URI)
+	@PostMapping(path = CommonConstants.OP_AUTH_INTER_CHECK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudRequest(@RequestBody final AuthorizationInterCloudCheckRequestDTO request) {
 		logger.debug("New AuthorizationInterCloud check request recieved");
 		
@@ -534,7 +534,7 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_AUTH_TOKEN_URI)
+	@PostMapping(path = CommonConstants.OP_AUTH_TOKEN_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public TokenGenerationResponseDTO generateTokens(@RequestBody final TokenGenerationRequestDTO request) {
 		logger.debug("New token generation request received");
 		checkTokenGenerationRequest(request);
@@ -638,7 +638,6 @@ public class AuthorizationController {
 		if (mandatoryAuthInfo && Utilities.isEmpty(system.getAuthenticationInfo())) {
 			throw new BadPayloadException("System authentication info is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
-
 	}
 	
 	//-------------------------------------------------------------------------------------------------

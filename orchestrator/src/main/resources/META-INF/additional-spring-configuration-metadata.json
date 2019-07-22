@@ -23,5 +23,10 @@
     "name": "core_system_name",
     "type": "java.lang.String",
     "description": "A description for 'core_system_name'"
+  },
+  {
+    "name": "gatekeeper_is_present",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'gatekeeper_is_present'"
   }
 ]}

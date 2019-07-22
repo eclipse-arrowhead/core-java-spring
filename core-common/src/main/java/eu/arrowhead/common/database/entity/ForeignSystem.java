@@ -1,9 +1,7 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,29 +9,18 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedEntityGraphs;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@Table (name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
-@NamedEntityGraphs({
-	@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
-			attributeNodes = {
-					@NamedAttributeNode (value = "serviceRegistryEntries")
-	})
-})
-public class System {
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
+public class ForeignSystem {
 	
 	//=================================================================================================
 	// members
@@ -43,6 +30,10 @@ public class System {
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "providerCloudId", referencedColumnName = "id", nullable = false)
+	private Cloud providerCloud;
 	
 	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String systemName;
@@ -62,30 +53,15 @@ public class System {
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<>();
-	
-	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<AuthorizationIntraCloud> authorizationsIntraCloudAsConsumer = new HashSet<>();
-	
-	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<AuthorizationIntraCloud> authorizationsIntraCloudAsProvider = new HashSet<>();
-	
-	@OneToMany (mappedBy = "provider", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<AuthorizationInterCloud> authorizationsInterCloudAsProvider = new HashSet<>();
-	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public System() {}
+	public ForeignSystem() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public System(final String systemName, final String address, final int port, final String authenticationInfo) {
+	public ForeignSystem(final Cloud providerCloud, final String systemName, final String address, final int port, final String authenticationInfo) {
+		this.providerCloud = providerCloud;
 		this.systemName = systemName;
 		this.address = address;
 		this.port = port;
@@ -107,30 +83,24 @@ public class System {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
+	public Cloud getProviderCloud() {return providerCloud ;}
 	public String getSystemName() { return systemName; }
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
 	public String getAuthenticationInfo() { return authenticationInfo; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
-	public Set<AuthorizationIntraCloud> getAuthorizationsIntraCloudAsConsumer() { return authorizationsIntraCloudAsConsumer; }
-	public Set<AuthorizationIntraCloud> getAuthorizationsIntraCloudAsProvider() { return authorizationsIntraCloudAsProvider; }
-	public Set<AuthorizationInterCloud> getAuthorizationsInterCloudAsProvider() { return authorizationsInterCloudAsProvider; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
+	public void setProviderCloud(final Cloud providerCloud) {this.providerCloud = providerCloud; }
 	public void setSystemName(final String systemName) { this.systemName = systemName; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
-	public void setAuthorizationsIntraCloudAsConsumer(final Set<AuthorizationIntraCloud> authorizationsIntraCloudAsConsumer) { this.authorizationsIntraCloudAsConsumer = authorizationsIntraCloudAsConsumer; }
-	public void setAuthorizationsIntraCloudAsProvider(final Set<AuthorizationIntraCloud> authorizationsIntraCloudAsProvider) { this.authorizationsIntraCloudAsProvider = authorizationsIntraCloudAsProvider; }
-	public void setAuthorizationsInterCloudAsProvider(final Set<AuthorizationInterCloud> authorizationsInterCloudAsProvider) { this.authorizationsInterCloudAsProvider = authorizationsInterCloudAsProvider; }
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {

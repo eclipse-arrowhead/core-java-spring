@@ -62,6 +62,10 @@ public class Cloud {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
 	
+	@OneToMany (mappedBy = "providerCloud", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<OrchestratorStore> orchestratorStores = new HashSet<>();
+	
 	//=================================================================================================
 	// methods
 
@@ -101,6 +105,7 @@ public class Cloud {
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public CloudGatekeeper getGatekeeper() { return gatekeeper; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
+	public Set<OrchestratorStore> getOrchestratorStores() { return orchestratorStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -113,6 +118,7 @@ public class Cloud {
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setGatekeeper(final CloudGatekeeper gatekeeper) { this.gatekeeper = gatekeeper; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
+	public void setOrchestratorStores(final Set<OrchestratorStore> orchestratorStores) { this.orchestratorStores = orchestratorStores; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
