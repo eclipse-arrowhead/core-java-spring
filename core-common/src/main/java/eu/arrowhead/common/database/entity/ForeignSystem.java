@@ -104,6 +104,16 @@ public class ForeignSystem {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "System [id = " + id + ", systemName = " + systemName + ", address = " + address + ", port = " + port + "]";
+		return "ForeignSystem [id = " + id + ", "
+				+ "providerCloud[providerCloud.id= " + providerCloud.getId() + 
+				", providerCloud.name = " + providerCloud.getName() + 
+				", providerCloud.neighbor = " + providerCloud.getNeighbor() +
+				", providerCloud.secure = " + providerCloud.getSecure() +
+				", providerCloud.operator = " + providerCloud.getOperator() +
+				", providerCloud.ownCloud = " + providerCloud.getOwnCloud() +
+				" ]" + 
+				", systemName = " + systemName + 
+				", address = " + address + 
+				", port = " + port + "]";
 	}
 }

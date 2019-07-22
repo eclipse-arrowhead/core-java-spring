@@ -363,6 +363,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'loca
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'localhost';
 
 DROP USER IF EXISTS 'orchestrator'@'%';
 CREATE USER IF NOT EXISTS 'orchestrator'@'%' IDENTIFIED BY 'KbgD2mTr8DQ4vtc';
@@ -374,6 +375,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'%';
 
 -- Event Handler
 DROP USER IF EXISTS 'event_handler'@'localhost';
