@@ -21,9 +21,6 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem,
 			final ServiceDefinition serviceDefinition);
 	
-	public Optional<OrchestratorStore> findByConsumerSystemAndServiceDefinitionAndPriority(final System consumerSystem,
-			final ServiceDefinition serviceDefinition,final int priority);
-	
 	public Optional<OrchestratorStore> findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(final System consumerSystem,
 			final ServiceDefinition serviceDefinition, final long providerSystemId, final ServiceInterface serviceInterface, final boolean foreign);
 
