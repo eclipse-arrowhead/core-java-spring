@@ -301,8 +301,6 @@ public class DTOConverter {
 	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity, final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud) {
 		
 		Assert.notNull(entity, "OrchestratorStore is null");            
-		Assert.notNull(entity.getServiceDefinition(),"OrchestratorStore.ServiceDefinition is null"); 
-		Assert.notNull(entity.getConsumerSystem(),"OrchestratorStore.ConsumerSystem is null");
 		Assert.notNull(providerSystem, "OrchestratorStore.ProviderSystem is null");
         Assert.notNull(entity.getCreatedAt(), "OrchestratorStore.CreatedAt is null");        
         Assert.notNull(entity.getUpdatedAt(),  "OrchestratorStore.UpdatedAt is null"); 
@@ -323,33 +321,7 @@ public class DTOConverter {
 			Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 		
 	}
-
-//	//-------------------------------------------------------------------------------------------------
-//	public static OrchestratorStoreListResponseDTO convertOrchestratorStorePageEntryListToOrchestratorStoreListResponseDTO(
-//			final Page<OrchestratorStore> entries) {
-//		Assert.notNull(entries, "OrchestratorStoreList is null");
-//		
-//		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.getNumberOfElements());
-//		for (final OrchestratorStore entry : entries) {
-//			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
-//		}
-//
-//		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.getTotalElements());
-//	}
 	
-//	//-------------------------------------------------------------------------------------------------
-//	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
-//			final List<OrchestratorStore> entries) {
-//		Assert.notNull(entries, "OrchestratorStoreList is null");
-//		
-//		final List<OrchestratorStoreResponseDTO> orchestratorStoreEntries = new ArrayList<>(entries.size());
-//		for (final OrchestratorStore entry : entries) {
-//			orchestratorStoreEntries.add(convertOrchestratorStoreToOrchestratorStoreResponseDTO(entry));
-//		}
-//
-//		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.size());
-//	}
-//	
 	//-------------------------------------------------------------------------------------------------
 	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
 			final List<OrchestratorStoreResponseDTO> entries) {
