@@ -27,7 +27,7 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem,
 			final ServiceDefinition serviceDefinition,final Sort sortByField);
 
-	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(System consumerSystem,
-			ServiceDefinition serviceDefinition, Pageable regRequest);
+	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem,
+			final ServiceDefinition serviceDefinition, final Pageable regRequest);
 		
 }
