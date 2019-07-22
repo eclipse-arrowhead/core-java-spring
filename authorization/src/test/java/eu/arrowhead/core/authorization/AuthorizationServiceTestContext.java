@@ -15,7 +15,7 @@ public class AuthorizationServiceTestContext {
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-	@Primary //This bean is primary only in test context
+	@Primary // This bean is primary only in test context
 	public TokenGenerationService mockTokenGenerationService() {
 		return Mockito.mock(TokenGenerationService.class);
 	}

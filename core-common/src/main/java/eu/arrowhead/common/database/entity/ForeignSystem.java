@@ -108,8 +108,8 @@ public class ForeignSystem {
 		return "ForeignSystem [id = " + id + ", "
 				+ "providerCloud[providerCloud.id= " + providerCloud.getId() + 
 				", providerCloud.name = " + providerCloud.getName() + 
-				", providerCloud.address = " + providerCloud.getAddress() +
-				", providerCloud.port = " + providerCloud.getPort() +
+				", providerCloud.neighbor = " + providerCloud.getNeighbor() +
+				", providerCloud.secure = " + providerCloud.getSecure() +
 				", providerCloud.operator = " + providerCloud.getOperator() +
 				", providerCloud.ownCloud = " + providerCloud.getOwnCloud() +
 				" ]" + 

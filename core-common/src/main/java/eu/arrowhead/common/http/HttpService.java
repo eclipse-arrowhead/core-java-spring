@@ -53,6 +53,7 @@ public class HttpService {
 	// members
 
 	private static final String ERROR_MESSAGE_PART_PKIX_PATH = "PKIX path";
+	private static final String ERROR_MESSAGE_PART_SUBJECT_ALTERNATIVE_NAMES = "doesn't match any of the subject alternative names";
 	
 	private static final List<HttpMethod> NOT_SUPPORTED_METHODS = List.of(HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.TRACE); 
  
@@ -137,6 +138,9 @@ public class HttpService {
 			if (ex.getMessage().contains(ERROR_MESSAGE_PART_PKIX_PATH)) {
 				logger.error("The system at {} is not part of the same certificate chain of trust!", uri.toUriString());
 		        throw new AuthException("The system at " + uri.toUriString() + " is not part of the same certificate chain of trust!", HttpStatus.SC_UNAUTHORIZED, ex);
+			} else if (ex.getMessage().contains(ERROR_MESSAGE_PART_SUBJECT_ALTERNATIVE_NAMES)) {
+				logger.error("The certificate of the system at {} does not contain the specified IP address or DNS name as a Subject Alternative Name.", uri.toString());
+				throw new AuthException("The certificate of the system at " + uri.toString() + " does not contain the specified IP address or DNS name as a Subject Alternative Name."); 
 			} else {
 		        logger.error("UnavailableServerException occurred at {}", uri.toUriString());
 		        logger.debug("Exception", ex);

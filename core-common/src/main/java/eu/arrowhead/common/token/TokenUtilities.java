@@ -60,9 +60,10 @@ public class TokenUtilities {
 			final JwtClaims claims = jwtConsumer.processToClaims(token);
 			final String consumerName = extractConsumerName(claims);
 			final String service = extractService(claims);
+			final String interfaceName = extractInterfaceName(claims);
 			final Long expirationTime = extractExpirationTime(claims);
 			
-			return new TokenInfo(consumerName, service, expirationTime);
+			return new TokenInfo(consumerName, service, interfaceName, expirationTime);
 		} catch (final InvalidJwtException ex) {
 			logger.debug("Token processing is failed: {}", ex.getMessage());
 			logger.debug(ex);
@@ -107,6 +108,19 @@ public class TokenUtilities {
 			throw new InvalidJwtException("Invalid service information.", null, ex, null);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static String extractInterfaceName(final JwtClaims claims) throws InvalidJwtException {
+		if (!claims.hasClaim(CommonConstants.JWT_CLAIM_INTERFACE_ID)) {
+			throw new InvalidJwtException("Missing interface information.", null, null, null);
+		}
+		
+		try {
+			return claims.getStringClaimValue(CommonConstants.JWT_CLAIM_INTERFACE_ID);
+		} catch (final MalformedClaimException ex) {
+			throw new InvalidJwtException("Invalid interface information.", null, ex, null);
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private static Long extractExpirationTime(final JwtClaims claims) throws InvalidJwtException {
@@ -129,22 +143,31 @@ public class TokenUtilities {
 		
 		private final String consumerName;
 		private final String service;
+		private final String interfaceName;
 		private final Long endOfValidity;
 		
 		//=================================================================================================
 		// methods
 		
 		//-------------------------------------------------------------------------------------------------
-		public TokenInfo(final String consumerName, final String service, final Long endOfValidity) {
+		public TokenInfo(final String consumerName, final String service, final String interfaceName, final Long endOfValidity) {
 			this.consumerName = consumerName;
 			this.service = service;
+			this.interfaceName = interfaceName;
 			this.endOfValidity = endOfValidity;
 		}
 
 		//-------------------------------------------------------------------------------------------------
 		public String getConsumerName() { return consumerName; }
-		public String getService() { return service; 	}
+		public String getService() { return service; }
+		public String getInterfaceName() { return interfaceName; }
 		public Long getEndOfValidity() { return endOfValidity; }
 		public boolean hasEndOfValidity() { return endOfValidity != null && endOfValidity.longValue() > 0; }
+		
+		//-------------------------------------------------------------------------------------------------
+		@Override
+		public String toString() {
+			return "TokenInfo [consumerName=" + consumerName + ", service=" + service + ", interfaceName=" + interfaceName + ", endOfValidity=" + endOfValidity + "]";
+		}
 	}
 }
