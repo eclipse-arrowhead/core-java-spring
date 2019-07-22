@@ -383,7 +383,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String validateAttribute(Map<String, String> attribute) {
+	private String validateAttribute(final Map<String, String> attribute) {
 
 		if (attribute == null) {
 			return null;
