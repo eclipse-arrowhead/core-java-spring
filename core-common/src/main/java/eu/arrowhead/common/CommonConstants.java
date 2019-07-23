@@ -76,6 +76,8 @@ public class CommonConstants {
 	public static final String OP_AUTH_KEY_URI = "/publickey";
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
+	
+	public static final String GATEKEEPER_URI = "/gatekeeper";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
