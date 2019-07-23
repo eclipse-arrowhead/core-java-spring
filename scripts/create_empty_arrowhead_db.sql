@@ -185,7 +185,6 @@ CREATE TABLE `relay` (
 DROP TABLE IF EXISTS `orchestrator_store`;
 CREATE TABLE `orchestrator_store` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar (255) NOT NULL,
   `consumer_system_id` bigint(20) NOT NULL,
   `provider_system_id` bigint(20) NOT NULL,
   `foreign_` int(1) NOT NULL DEFAULT 0,
