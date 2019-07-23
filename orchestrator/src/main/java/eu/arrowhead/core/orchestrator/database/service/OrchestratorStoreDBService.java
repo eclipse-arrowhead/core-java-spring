@@ -376,13 +376,14 @@ public class OrchestratorStoreDBService {
 			
 			final System consumerSystem = orchestratorStore.getConsumerSystem();
 			final ServiceDefinition serviceDefinition = orchestratorStore.getServiceDefinition();
+			final ServiceInterface serviceInterface = orchestratorStore.getServiceInterface();
 			
 			final int priority = orchestratorStore.getPriority();
 			
 			orchestratorStoreRepository.deleteById(id);
 			orchestratorStoreRepository.flush();
 			
-			updateInvolvedPriorities(consumerSystem, serviceDefinition, priority);			
+			updateInvolvedPriorities(consumerSystem, serviceDefinition, serviceInterface, priority);			
 	
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -407,8 +408,12 @@ public class OrchestratorStoreDBService {
 			final List<OrchestratorStore> orchestratorStoreList = getInvolvedOrchestratorStoreListByPriorityMap(modifiedPriorityMap);	
 			
 			final System consumerSystemForPriorityMapValidation = orchestratorStoreList.get(0).getConsumerSystem();
-			final ServiceDefinition serviceDefinitionForPriorityMapValidation = orchestratorStoreList.get(0).getServiceDefinition();			
-			validatemodifiedPriorityMapSize(consumerSystemForPriorityMapValidation, serviceDefinitionForPriorityMapValidation, modifiedPriorityMap.size());	
+			final ServiceDefinition serviceDefinitionForPriorityMapValidation = orchestratorStoreList.get(0).getServiceDefinition();	
+			final ServiceInterface serviceInterfaceForPriorityMapValidation = orchestratorStoreList.get(0).getServiceInterface();
+			validatemodifiedPriorityMapSize(consumerSystemForPriorityMapValidation,
+					serviceDefinitionForPriorityMapValidation, 
+					serviceInterfaceForPriorityMapValidation, 
+					modifiedPriorityMap.size());	
 			
 			refreshOrchestratorStoreListBymodifiedPriorityMap(orchestratorStoreList, modifiedPriorityMap);
 			
@@ -465,10 +470,10 @@ public class OrchestratorStoreDBService {
 	private ServiceInterface validateServiceInterfaceName(final String serviceInterfaceName) {
 		logger.debug("validateServiceInterfaceName started...");
 		
-		if (Utilities.isEmpty(serviceInterfaceName)) {
-			throw new InvalidParameterException("validateServiceInterfaceName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		if (!interfaceNameVerifier.isValid(serviceInterfaceName)) {
+			throw new InvalidParameterException("ServiceInterfaceName " + NOT_VALID_ERROR_MESSAGE);
 		}
-		final String validServiceInterfaceName = serviceInterfaceName.trim().toLowerCase();
+		final String validServiceInterfaceName = serviceInterfaceName;
 		
 		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
 		if (serviceInterfaceOptional.isEmpty()) {
@@ -676,10 +681,13 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void validatemodifiedPriorityMapSize(final System anyConsumerSystemForValidation, final ServiceDefinition anyServiceDefinition, final int modifiedPriorityMapSize) {
+	private void validatemodifiedPriorityMapSize(final System anyConsumerSystemForValidation, 
+			final ServiceDefinition anyServiceDefinition, 
+			final ServiceInterface anyServiceInterface,
+			final int modifiedPriorityMapSize) {
 		logger.debug("validatemodifiedPriorityMapSize started...");
 		
-		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(anyConsumerSystemForValidation, anyServiceDefinition);
+		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(anyConsumerSystemForValidation, anyServiceDefinition, anyServiceInterface);
 		if (orchestratorStoreList.isEmpty()) {
 			throw new InvalidParameterException("Priorities for consumerSystemId : " + anyConsumerSystemForValidation.getId() + ", and serviceDefinitionId : " + anyServiceDefinition.getId() + ", " + NOT_IN_DB_ERROR_MESAGE );
 		}
@@ -695,9 +703,11 @@ public class OrchestratorStoreDBService {
 
 		final System consumerSystem = orchestratorStore.getConsumerSystem();
 		final ServiceDefinition serviceDefinition = orchestratorStore.getServiceDefinition();
+		final ServiceInterface serviceInterface = orchestratorStore.getServiceInterface();
+		
 		final int priority = orchestratorStore.getPriority();
 		
-		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerSystem, serviceDefinition);
+		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(consumerSystem, serviceDefinition, serviceInterface);
 		if (orchestratorStoreList.isEmpty()) {
 			orchestratorStore.setPriority(CommonConstants.TOP_PRIORITY);
 			
@@ -744,11 +754,11 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void updateInvolvedPriorities(final System consumerSystem, final ServiceDefinition serviceDefinition, final int priority) {
+	private void updateInvolvedPriorities(final System consumerSystem, final ServiceDefinition serviceDefinition, final ServiceInterface serviceInterface, final int priority) {
 		logger.debug("updateInvolvedPriorities started...");
 		
-		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
-				consumerSystem, serviceDefinition, Sort.by(Direction.ASC, "priority"));
+		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+				consumerSystem, serviceDefinition, serviceInterface, Sort.by(Direction.ASC, "priority"));
 		
 		if (orchestratorStoreList.isEmpty()) {
 			return;
@@ -834,10 +844,10 @@ public class OrchestratorStoreDBService {
 	private ServiceInterface validateForeinServiceInterfaceName(final String serviceInterfaceName) {
 		logger.debug("validateForeinServiceInterfaceName started...");
 		
-		if (Utilities.isEmpty(serviceInterfaceName)) {
-			throw new InvalidParameterException("validateServiceInterfaceName " + EMPTY_OR_NULL_ERROR_MESAGE);
+		if (!interfaceNameVerifier.isValid(serviceInterfaceName)) {
+			throw new InvalidParameterException("ServiceInterfaceName " + NOT_VALID_ERROR_MESSAGE);
 		}
-		final String validServiceInterfaceName = serviceInterfaceName.trim().toLowerCase();
+		final String validServiceInterfaceName = serviceInterfaceName;
 		
 		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
 		if (serviceInterfaceOptional.isEmpty()) {
