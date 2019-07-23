@@ -440,7 +440,7 @@ public class OrchestratorStoreDBService {
 		final ServiceDefinition validServiceDefinition = validateServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
-		final String validAttribute = validateAttribute(orchestratorStoreRequestDTO.getAttribute());
+		final String validAttribute = Utilities.map2Text(orchestratorStoreRequestDTO.getAttribute());
 		
 		checkUniqueConstraintByConsumerSystemAndServiceAndProviderSystemIdAndInterfaceAndForeign(validConsumerSystem, validServiceDefinition, validProviderSystemId, validInterface, foreign);
 	
@@ -454,16 +454,6 @@ public class OrchestratorStoreDBService {
 				validAttribute,
 				null,
 				null);	
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private String validateAttribute(final Map<String, String> attribute) {
-
-		if (attribute == null) {
-			return null;
-		}
-		
-		return Utilities.map2Text(attribute);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -824,7 +814,7 @@ public class OrchestratorStoreDBService {
 		final ServiceDefinition validServiceDefinition = validateForeinServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateForeinServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
-		final String validAttribute = validateAttribute(orchestratorStoreRequestDTO.getAttribute());
+		final String validAttribute = Utilities.map2Text(orchestratorStoreRequestDTO.getAttribute());
 		
 		checkUniqueConstraintByConsumerSystemAndServiceAndProviderSystemIdAndInterfaceAndForeign(validConsumerSystem, validServiceDefinition, validProviderSystemId, validInterface, foreign);
 	
@@ -835,9 +825,10 @@ public class OrchestratorStoreDBService {
 				validProviderSystemId,
 				validInterface,
 				validPriority,
-				validAttribute,
-				null,
+				validAttribute, 
+				null, 
 				null);
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
