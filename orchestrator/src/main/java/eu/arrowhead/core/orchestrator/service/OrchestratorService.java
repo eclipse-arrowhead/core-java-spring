@@ -101,6 +101,13 @@ public class OrchestratorService {
 		return null;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResponseDTO storeOchestrationProcessResponse(long systemId) {
+		
+		//TODO implement method logic here
+		return null;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -261,4 +268,5 @@ public class OrchestratorService {
 		
 		return result;
 	}
+
 }
