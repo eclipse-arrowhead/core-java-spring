@@ -632,27 +632,6 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static Comparator<OrchestratorStore> getOrchestratorStorePriorityComparator() {
-		logger.debug("getOrchestratorStorePriorityComparato started...");
-		
-		return new Comparator<OrchestratorStore>() {
-		    @Override
-		    public int compare(final OrchestratorStore o1, final OrchestratorStore o2) {
-		        if(o1.getPriority() < o2.getPriority()) {
-		        	return -1;
-		        }
-		        if(o1.getPriority() > o2.getPriority()) {
-		        	return 1;
-		        }
-		        
-		        return 0;
-
-		    }
-		};
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStore> getInvolvedOrchestratorStoreListByPriorityMap(final Map<Long, Integer> modifiedPriorityMap) {
 		logger.debug("getOrchestratorStoreList started...");
 
@@ -725,7 +704,7 @@ public class OrchestratorStoreDBService {
 			final OrchestratorStore orchestratorStoreToInsert, final int priority) {
 		logger.debug("insertOrchestratorStoreWithPriority started...");
 
-		Collections.sort(orchestratorStoreList, getOrchestratorStorePriorityComparator());
+		orchestratorStoreList.sort((final OrchestratorStore o1, final OrchestratorStore o2) -> o1.getPriority() - o2.getPriority());
 		Collections.reverse(orchestratorStoreList);
 		
 		for (int i = 0; i < orchestratorStoreList.size(); i++) {
