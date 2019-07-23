@@ -859,11 +859,14 @@ public class OrchestratorStoreDBService {
 		if (providerSystemRequestDTO.getPort() == null) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NULL_ERROR_MESSAGE);
 		}
-		final int port = providerSystemRequestDTO.getPort();
+		final int validPort = providerSystemRequestDTO.getPort();
+		if (validPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NOT_VALID_ERROR_MESSAGE);
+		}		
 		
-		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(systemName, address, port, providerCloud);
+		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(systemName, address, validPort, providerCloud);
 		if (foreignSystemOptional.isEmpty()) {
-			return foreignSystemRepository.saveAndFlush(new ForeignSystem(providerCloud, systemName, address, port, providerSystemRequestDTO.getAuthenticationInfo())).getId();
+			return foreignSystemRepository.saveAndFlush(new ForeignSystem(providerCloud, systemName, address, validPort, providerSystemRequestDTO.getAuthenticationInfo())).getId();
 		}
 		
 		return foreignSystemOptional.get().getId();
