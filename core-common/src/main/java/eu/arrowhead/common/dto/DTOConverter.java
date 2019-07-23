@@ -339,6 +339,19 @@ public class DTOConverter {
 		return new OrchestratorStoreListResponseDTO(orchestratorStoreEntries, entries.size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static SystemRequestDTO convertSystemResponseDTOToSystemRequestDTO(final SystemResponseDTO response) {
+		Assert.notNull(response, "response is null");
+		
+		final SystemRequestDTO result = new SystemRequestDTO();
+		result.setSystemName(response.getSystemName());
+		result.setAddress(response.getAddress());
+		result.setPort(response.getPort());
+		result.setAuthenticationInfo(response.getAuthenticationInfo());
+		
+		return result;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
