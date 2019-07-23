@@ -80,7 +80,6 @@ public class CommonConstants {
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
-	public static final String ORCHESTRATOR_STORE_URI = "/store";
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
 

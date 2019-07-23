@@ -30,8 +30,6 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 		if (requestTarget.contains(CommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else if (requestTarget.contains(CommonConstants.ORCHESTRATOR_STORE_URI) ) {
-			//Everybody in the local cloud can use these methods => no further check is necessary
 		} else if (Utilities.isEmpty(requestJSON)) {
 			//If request body is empty (example: GET..../orchestrator/{systemId}), than everybody in the local cloud can use these methods => no further check is necessary
 		} else {
