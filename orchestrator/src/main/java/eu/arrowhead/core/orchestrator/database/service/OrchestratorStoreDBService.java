@@ -104,11 +104,11 @@ public class OrchestratorStoreDBService {
 	public OrchestratorStore getOrchestratorStoreById(final long orchestratorStoreId) {		
 		logger.debug("getOrchestratorStoreById started...");
 		
+		if (orchestratorStoreId < 1) {
+			throw new InvalidParameterException("OrchestratorStoreId " + LESS_THEN_ONE_ERROR_MESAGE );
+		}
+		
 		try {
-			
-			if (orchestratorStoreId < 1) {
-				throw new InvalidParameterException("OrchestratorStoreId " + LESS_THEN_ONE_ERROR_MESAGE );
-			}
 		
 			final Optional<OrchestratorStore> orchestratorStoreOption = orchestratorStoreRepository.findById(orchestratorStoreId);
 			if (orchestratorStoreOption.isEmpty()){
