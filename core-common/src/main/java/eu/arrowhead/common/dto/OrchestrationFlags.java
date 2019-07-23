@@ -35,7 +35,7 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public boolean put(final Flag flag, final Boolean value) {
+	public Boolean put(final Flag flag, final Boolean value) {
 		final boolean validValue = (value == null ? false : value); 
 		return super.put(flag.getFlag(), validValue);
 	}
