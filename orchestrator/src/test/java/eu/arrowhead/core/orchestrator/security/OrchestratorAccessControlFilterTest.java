@@ -4,6 +4,7 @@ import static org.junit.Assume.assumeTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.HashMap;
@@ -27,7 +28,6 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 
@@ -44,7 +44,9 @@ public class OrchestratorAccessControlFilterTest {
 	//=================================================================================================
 	// members
 	
-	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI +CommonConstants.ECHO_URI;
+	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
+	private static final String ORCH_MGMT_STORE_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
+	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -78,6 +80,16 @@ public class OrchestratorAccessControlFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testEchoCertificateSameCloud() throws Exception {
+		this.mockMvc.perform(get(ORCH_ECHO)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.accept(MediaType.TEXT_PLAIN))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testEchoCertificateOtherCloud() throws Exception {
 		this.mockMvc.perform(get(ORCH_ECHO)
 				    .secure(true)
@@ -88,30 +100,96 @@ public class OrchestratorAccessControlFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testEchoCertificateSameCloud() throws Exception {
-//		OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("client-demo-provider");
-		
-		this.mockMvc.perform(get(ORCH_ECHO)
+	public void testMgmtEchoCertificateSysop() throws Exception {
+		this.mockMvc.perform(get(ORCH_MGMT_STORE_ECHO)
 				    .secure(true)
-					.with(x509("certificates/provider.pem"))
-//					.contentType(MediaType.APPLICATION_JSON)
-//					.content(objectMapper.writeValueAsBytes(requestDTO))
+					.with(x509("certificates/valid.pem"))
 					.accept(MediaType.TEXT_PLAIN))
 					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testMgmtEchoCertificateNoSysop() throws Exception {
+		this.mockMvc.perform(get(ORCH_MGMT_STORE_ECHO)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.accept(MediaType.TEXT_PLAIN))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExternalOrchestrationWithGatekeeper() throws Exception {
+		final Map<String, Boolean> flags = new HashMap<>();
+		flags.put(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, true);
+		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("", flags);
+		
+		this.mockMvc.perform(post(ORCH_ORCHESTRATION)
+				    .secure(true)
+					.with(x509("certificates/gatekeeper.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(requestDTO))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExternalOrchestrationWithoutGatekeeper() throws Exception {
+		final Map<String, Boolean> flags = new HashMap<>();
+		flags.put(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, true);
+		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("", flags);
+		
+		this.mockMvc.perform(post(ORCH_ORCHESTRATION)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(requestDTO))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInternalOrchestrationWithCertificatedSystemName() throws Exception {
+		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("client-demo-provider", new HashMap<>());
+		
+		this.mockMvc.perform(post(ORCH_ORCHESTRATION)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(requestDTO))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInternalOrchestrationWithNotCertificatedSystemName() throws Exception {
+		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("not-certificated-provider", new HashMap<>());
+		
+		this.mockMvc.perform(post(ORCH_ORCHESTRATION)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(requestDTO))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
 	}
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationFormRequestDTO createOrchestrationFromRequestDTO(String requesterSystemName) {
-		OrchestrationFormRequestDTO dto = new OrchestrationFormRequestDTO();
+	public OrchestrationFormRequestDTO createOrchestrationFromRequestDTO(final String requesterSystemName, final Map<String, Boolean> flags) {
+		final OrchestrationFormRequestDTO dto = new OrchestrationFormRequestDTO();
 		
-		SystemRequestDTO requesterSystem = new SystemRequestDTO();
-		requesterSystem.setSystemName(requesterSystemName);
-		
+		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
+		requesterSystem.setSystemName(requesterSystemName);		
 		
 		dto.setRequesterSystem(requesterSystem);
+		dto.getOrchestrationFlags().putAll(flags);
 		
 		return dto;
 	}
