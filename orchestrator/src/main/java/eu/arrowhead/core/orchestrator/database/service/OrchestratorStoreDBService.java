@@ -752,11 +752,7 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------	
 	private boolean localCloudConditionCheck(final Cloud cloud) {
 		
-		if (cloud == null || cloud.getOwnCloud()) {
-			return true;
-		}
-	
-		return false;
+		return cloud == null || cloud.getOwnCloud() ? true : false;
 	}
 
 	//-------------------------------------------------------------------------------------------------	
