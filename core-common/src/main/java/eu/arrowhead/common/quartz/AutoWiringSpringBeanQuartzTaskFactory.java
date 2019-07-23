@@ -1,4 +1,4 @@
-package eu.arrowhead.core.serviceregistry.quartz;
+package eu.arrowhead.common.quartz;
 
 import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;

@@ -1,10 +1,15 @@
-package eu.arrowhead.core.serviceregistry.quartz.task;
+package eu.arrowhead.common.quartz.uricrawler;
+
+
+
+import java.util.Map;
+
+import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SimpleTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,56 +21,54 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
-public class ProvidersReachabilityTaskConfig {
-	
+public class UriCrawlerTaskConfig {
+
 	//=================================================================================================
 	// members
-
-	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.class);
+	
+	private Logger logger = LogManager.getLogger(UriCrawlerTaskConfig.class);
 	
 	@Autowired
-    private ApplicationContext applicationContext; //NOSONAR
+	private ApplicationContext applicationContext;
 	
-	@Value(CommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
-	private boolean pingScheduled;
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
 	
-	@Value(CommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
-	private int pingInterval;
+	private static final int SCHEDULER_DELAY = 16;
+	private static final int SCHEDULER_INTERVAL = 30; // TODO: make property from this one
 	
-	private static final int SCHEDULER_DELAY = 10;
-	
-	private static final String NAME_OF_TRIGGER = "Providers_Reachability_Task_Trigger";
-	private static final String NAME_OF_TASK = "Providers_Reachability_Task_Detail";
+	static final String NAME_OF_TRIGGER = "URI_Crawler_Task_Trigger";
+	private static final String NAME_OF_TASK = "URI_Crawler_Task";
 	
 	//=================================================================================================
 	// methods
-
+	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public SchedulerFactoryBean providersReachabilityTaskScheduler() {
+    public SchedulerFactoryBean uriCrawlerTaskScheduler() {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
+		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
-		
-		if (pingScheduled) {			
-	        schedulerFactory.setJobFactory(jobFactory);
-	        schedulerFactory.setJobDetails(providersReachabilityTaskDetail().getObject());
-	        schedulerFactory.setTriggers(providersReachabilityTaskTrigger().getObject());
-	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-	        logger.info("Providers reachabilitiy task adjusted with ping interval: {} minutes", pingInterval);
+		if (!arrowheadContext.containsKey(CommonConstants.SERVER_STANDALONE_MODE)) {
+			schedulerFactory.setJobFactory(jobFactory);
+			schedulerFactory.setJobDetails(uriCrawlerTaskDetail().getObject());
+			schedulerFactory.setTriggers(uriCrawlerTaskTrigger().getObject());
+			schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+			logger.info("URI Crawler task scheduled.");
 		} else {
-			logger.info("Providers reachabilitiy task is not adjusted");
+			logger.info("URI Crawler task is not scheduled in standalone mode.");
 		}
-		
+        
 		return schedulerFactory;        
     }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public SimpleTriggerFactoryBean providersReachabilityTaskTrigger() {
+    public SimpleTriggerFactoryBean uriCrawlerTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-		trigger.setJobDetail(providersReachabilityTaskDetail().getObject());
-        trigger.setRepeatInterval(pingInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
+		trigger.setJobDetail(uriCrawlerTaskDetail().getObject());
+        trigger.setRepeatInterval(SCHEDULER_INTERVAL * CommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
         
@@ -74,9 +77,9 @@ public class ProvidersReachabilityTaskConfig {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public JobDetailFactoryBean providersReachabilityTaskDetail() {
+    public JobDetailFactoryBean uriCrawlerTaskDetail() {
         final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-        jobDetailFactory.setJobClass(ProvidersReachabilityTask.class);
+        jobDetailFactory.setJobClass(UriCrawlerTask.class);
         jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
         

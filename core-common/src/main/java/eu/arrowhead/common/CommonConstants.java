@@ -1,7 +1,5 @@
 package eu.arrowhead.common;
 
-import java.util.List;
-
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -44,6 +42,8 @@ public class CommonConstants {
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
+	public static final String REQUIRED_URI_LIST = "required.uri.list";
+	public static final String URI_SUFFIX = "-uri";
 	
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
