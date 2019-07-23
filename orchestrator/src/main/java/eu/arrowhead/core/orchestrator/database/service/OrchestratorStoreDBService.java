@@ -362,11 +362,11 @@ public class OrchestratorStoreDBService {
 	public void removeOrchestratorStoreById(final long id) {
 		logger.debug("removeOrchestratorStoreById started...");
 		
+		if (id < 1) {
+			throw new InvalidParameterException("OrchestratorStore" + LESS_THEN_ONE_ERROR_MESAGE );
+		}
+		
 		try {
-			
-			if (id < 1) {
-				throw new InvalidParameterException("OrchestratorStore" + LESS_THEN_ONE_ERROR_MESAGE );
-			}
 			
 			final Optional<OrchestratorStore> orchestratorStoreOption = orchestratorStoreRepository.findById(id);
 			if (orchestratorStoreOption.isEmpty()) {
