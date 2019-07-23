@@ -415,7 +415,7 @@ public class OrchestratorStoreDBService {
 					serviceInterfaceForPriorityMapValidation, 
 					modifiedPriorityMap.size());	
 			
-			refreshOrchestratorStoreListBymodifiedPriorityMap(orchestratorStoreList, modifiedPriorityMap);
+			refreshOrchestratorStoreListByModifiedPriorityMap(orchestratorStoreList, modifiedPriorityMap);
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -607,8 +607,8 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void refreshOrchestratorStoreListBymodifiedPriorityMap(final List<OrchestratorStore> orchestratorStoreList, final Map<Long, Integer> priorityMap ) {
-		logger.debug("updateOrchestratorStoreListBymodifiedPriorityMap started...");
+	private void refreshOrchestratorStoreListByModifiedPriorityMap(final List<OrchestratorStore> orchestratorStoreList, final Map<Long, Integer> priorityMap ) {
+		logger.debug("updateOrchestratorStoreListByModifiedPriorityMap started...");
 		
 		if (orchestratorStoreList.size() != priorityMap.size()) {
 			throw new InvalidParameterException(MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE);
