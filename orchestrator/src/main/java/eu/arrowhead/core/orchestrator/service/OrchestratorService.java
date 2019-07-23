@@ -3,6 +3,7 @@ package eu.arrowhead.core.orchestrator.service;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
@@ -37,11 +41,16 @@ public class OrchestratorService {
 	private static final Logger logger = LogManager.getLogger(OrchestratorService.class);
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
+	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
+	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	
 	private static final int EXPIRING_TIME_IN_MINUTES = 2;
 	
 	@Autowired
 	private OrchestratorDriver orchestratorDriver;
+	
+	@Autowired
+	private SystemRepository systemRepository;
 	
 	//=================================================================================================
 	// methods
@@ -103,9 +112,16 @@ public class OrchestratorService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestrationResponseDTO storeOchestrationProcessResponse(long systemId) {
+		logger.debug("storeOchestrationProcessResponse started ...");
 		
-		//TODO implement method logic here
-		return null;
+		final System validConsumerSystem =  validateSystemId(systemId);
+		final SystemRequestDTO consumerSystemRequestDTO = DTOConverter.convertSystemToSystemRequestDTO(validConsumerSystem);
+		
+	    final OrchestrationFormRequestDTO orchestrationFormRequestDTO = new OrchestrationFormRequestDTO.Builder(consumerSystemRequestDTO).build();
+	    orchestrationFormRequestDTO.validateCrossParameterConstraints();
+
+	    return orchestrationFromStore(orchestrationFormRequestDTO);
+
 	}
 	
 	//=================================================================================================
@@ -267,6 +283,22 @@ public class OrchestratorService {
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private System validateSystemId(final long systemId) {
+		logger.debug("validateSystemId started...");
+		
+		if (systemId < 1) {
+			throw new InvalidParameterException("SystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		
+		final Optional<System> systemOptional = systemRepository.findById(systemId);
+		if (systemOptional.isEmpty()) {
+			throw new InvalidParameterException("System by id" + systemId + NOT_IN_DB_ERROR_MESSAGE );
+		}
+		
+		return systemOptional.get();
 	}
 
 }

@@ -394,10 +394,23 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(ForeignSystem foreignSystem) {
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
 		Assert.notNull(foreignSystem, "ForeignSystem is null");
 		
 		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
 										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
+		Assert.notNull(system, "System is null");
+		
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
+		systemRequestDTO.setAddress(system.getAddress());
+		systemRequestDTO.setSystemName(system.getSystemName());
+		systemRequestDTO.setPort(system.getPort());
+		systemRequestDTO.setAuthenticationInfo(systemRequestDTO.getAuthenticationInfo());
+		
+		return systemRequestDTO;
 	}
 }
