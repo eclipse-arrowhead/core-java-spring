@@ -2,14 +2,11 @@ package eu.arrowhead.common.quartz.uricrawler;
 
 
 
-import java.util.Map;
-
-import javax.annotation.Resource;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.SimpleTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,12 +27,11 @@ public class UriCrawlerTaskConfig {
 	
 	@Autowired
 	private ApplicationContext applicationContext;
-	
-	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	private Map<String,Object> arrowheadContext;
+
+	@Value(CommonConstants.$URI_CRAWLER_INTERVAL_WD)
+	private int schedulerInterval;
 	
 	private static final int SCHEDULER_DELAY = 16;
-	private static final int SCHEDULER_INTERVAL = 30; // TODO: make property from this one
 	
 	static final String NAME_OF_TRIGGER = "URI_Crawler_Task_Trigger";
 	private static final String NAME_OF_TASK = "URI_Crawler_Task";
@@ -50,15 +46,11 @@ public class UriCrawlerTaskConfig {
 		jobFactory.setApplicationContext(applicationContext);
 		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
-		if (!arrowheadContext.containsKey(CommonConstants.SERVER_STANDALONE_MODE)) {
-			schedulerFactory.setJobFactory(jobFactory);
-			schedulerFactory.setJobDetails(uriCrawlerTaskDetail().getObject());
-			schedulerFactory.setTriggers(uriCrawlerTaskTrigger().getObject());
-			schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-			logger.info("URI Crawler task scheduled.");
-		} else {
-			logger.info("URI Crawler task is not scheduled in standalone mode.");
-		}
+		schedulerFactory.setJobFactory(jobFactory);
+		schedulerFactory.setJobDetails(uriCrawlerTaskDetail().getObject());
+		schedulerFactory.setTriggers(uriCrawlerTaskTrigger().getObject());
+		schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+		logger.info("URI Crawler task scheduled.");
         
 		return schedulerFactory;        
     }
@@ -68,7 +60,7 @@ public class UriCrawlerTaskConfig {
     public SimpleTriggerFactoryBean uriCrawlerTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(uriCrawlerTaskDetail().getObject());
-        trigger.setRepeatInterval(SCHEDULER_INTERVAL * CommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
+        trigger.setRepeatInterval(schedulerInterval * CommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
         

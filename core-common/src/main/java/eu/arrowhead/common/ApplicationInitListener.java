@@ -307,7 +307,7 @@ public abstract class ApplicationInitListener {
 	private void initRequiredCoreSystemServiceUris(final ApplicationContext appContext) {
 		logger.debug("initRequiredCoreSystemServiceUris started...");
 		
-		if (skipSROperations(coreSystemRegistrationProperties.getCoreSystem())) {
+		if (standaloneMode) {
 			return;
 		}
 		

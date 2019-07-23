@@ -55,12 +55,22 @@ public class UriCrawlerTask implements Job {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public void execute(final JobExecutionContext context) throws JobExecutionException { //TODO: set info to debug 
-		logger.info("STARTED: URI crawler task");
+	public void execute(final JobExecutionContext context) throws JobExecutionException {  
+		logger.debug("STARTED: URI crawler task");
+		
+		if (arrowheadContext.containsKey(CommonConstants.SERVER_STANDALONE_MODE)) {
+			cancelJob();
+			return;
+		}
+		
+		final List<CoreSystemService> requiredServices = getRequiredServices();
+		if (requiredServices.isEmpty()) {
+			cancelJob();
+			return;
+		}
 		
 		final UriComponents queryUri = getQueryUri();
 		checkServiceRegistryConnection(queryUri);
-		final List<CoreSystemService> requiredServices = getRequiredServices();
 		int count = 0;
 		for (final CoreSystemService coreSystemService : requiredServices) {
 			if (findCoreSystemServiceUri(coreSystemService, queryUri)) {
@@ -68,7 +78,7 @@ public class UriCrawlerTask implements Job {
 			}
 		}
 		
-		logger.info("FINISHED: URI crawler task. Number of acquired URI: {}/{}", count, requiredServices.size());
+		logger.debug("FINISHED: URI crawler task. Number of acquired URI: {}/{}", count, requiredServices.size());
 		
 		if (count == requiredServices.size()) {
 			cancelJob();
@@ -80,9 +90,11 @@ public class UriCrawlerTask implements Job {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void cancelJob() {
+		logger.debug("cancelJob started...");
+		
 		try {
 			uriCrawlerTaskScheduler.unscheduleJob(new TriggerKey(UriCrawlerTaskConfig.NAME_OF_TRIGGER));
-			logger.info("STOPPED: URI crawler task.");
+			logger.debug("STOPPED: URI crawler task.");
 		} catch (final SchedulerException ex) {
 			logger.error(ex.getMessage());
 			logger.debug(ex);

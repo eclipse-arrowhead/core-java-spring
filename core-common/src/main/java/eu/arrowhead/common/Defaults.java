@@ -13,6 +13,7 @@ public class Defaults {
 	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
+	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
 	
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
