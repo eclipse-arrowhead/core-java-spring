@@ -234,7 +234,8 @@ public class OrchestratorStoreController {
 				validatedDirection, 
 				sortField,
 				request.getConsumerSystemId(),
-				request.getServiceDefinitionName());
+				request.getServiceDefinitionName(),
+				request.getServiceInterfaceName());
 		
 		logger.debug("OrchestratorStores  with ConsumerSystemId : {} and ServiceDefinitionName : {} and  page: {} and item_per page: {} retrieved successfully", request.getConsumerSystemId(), request.getServiceDefinitionName(), page, size);
 		return orchestratorStoreResponse;

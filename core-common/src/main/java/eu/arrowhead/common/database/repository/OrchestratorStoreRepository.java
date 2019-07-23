@@ -30,5 +30,9 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 																																final boolean foreign);
 	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem, final ServiceDefinition serviceDefinition, final Sort sortByField);
 	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem, final ServiceDefinition serviceDefinition, final Pageable regRequest);
+	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(final System system,
+			final ServiceDefinition serviceDefinition, 
+			final ServiceInterface validServiceInterface, 
+			final Pageable regRequest);
 		
 }

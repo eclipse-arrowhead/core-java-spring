@@ -218,7 +218,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerOkTest() throws Exception {
 		
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -233,7 +233,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerInvalidDirectionParamTest() throws Exception {
 		
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
@@ -266,7 +266,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerNullItemPerPageParamAndNullPageParamTest() throws Exception {
 
 		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -281,7 +281,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerNullIRequestTest() throws Exception {
 
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = null;
 	
@@ -298,7 +298,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerNullConsumerSystemIdTest() throws Exception {
 
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
 		final Long id = null;
@@ -317,7 +317,7 @@ public class OrchestratorStoreControllerTest {
 	public void getOrchestratorStoresByConsumerNullerviceDefinitionIdTest() throws Exception {
 
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any())).thenReturn(dto);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
 		request.setServiceDefinitionName(null);

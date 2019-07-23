@@ -43,6 +43,7 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 
 @Service
 public class OrchestratorStoreDBService {
@@ -69,6 +70,9 @@ public class OrchestratorStoreDBService {
 	
 	@Autowired
 	private ServiceDefinitionRepository serviceDefinitionRepository;
+	
+	@Autowired
+	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 
 	private static final String LESS_THEN_ONE_ERROR_MESAGE= " must be greater than zero.";
 	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESAGE = "The following sortable field  is not available : ";
@@ -78,6 +82,7 @@ public class OrchestratorStoreDBService {
 	private static final String ORCHESTRATOR_STORE_REQUEST_BY_ID_DTO_VALIDATION_EXCEPTION_MESSAGE = "Exception in OrchestratorStoreRequestByIdDTO validation, entry not going to be added to save list." ;
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "The given PriorityMap has different size than the size of consumer-serviceDeffinition pars in DB";
+	private static final String NOT_VALID_ERROR_MESSAGE = " is not valid.";
 
 	//=================================================================================================
 	// methods
@@ -192,10 +197,17 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	public OrchestratorStoreListResponseDTO getOrchestratorStoresByConsumerResponse(final int page,
 			final int size, final Direction direction, final String sortField, final long consumerSystemId,
-			final String serviceDefinitionName) {
+			final String serviceDefinitionName, final String serviceInterfaceName) {
 		logger.debug("getOrchestratorStoreEntriesResponse started...");
 				
-		final Page<OrchestratorStore> orchestratorStorePage = getOrchestratorStoresByConsumer(page, size, direction, sortField, consumerSystemId, serviceDefinitionName);
+		final Page<OrchestratorStore> orchestratorStorePage = getOrchestratorStoresByConsumer(
+				page, 
+				size, 
+				direction, 
+				sortField, 
+				consumerSystemId, 
+				serviceDefinitionName, 
+				serviceInterfaceName);
 		final long totalElements = orchestratorStorePage.getTotalElements();
 		return DTOConverter.convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(getOrchestratorDTOListFromPage(orchestratorStorePage) , totalElements);
 	}
@@ -203,7 +215,7 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	public Page<OrchestratorStore> getOrchestratorStoresByConsumer(final int page,
 			final int size, final Direction direction, final String sortField, final long consumerSystemId,
-			final String serviceDefinitionName) {
+			final String serviceDefinitionName, final String serviceInterfaceName) {
 		logger.debug("getOrchestratorStoresByConsumer started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -233,10 +245,39 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESAGE);
 		}
 		
+		final ServiceInterface validServiceInterface; 
+		if (serviceInterfaceName != null) {
+			if (interfaceNameVerifier.isValid(serviceInterfaceName)) {
+				Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName);
+				if ( serviceInterfaceOptional.isEmpty() ) {
+					throw new InvalidParameterException("ServiceInterfaceName " + NOT_IN_DB_ERROR_MESAGE);
+				}
+				validServiceInterface = serviceInterfaceOptional.get();
+				
+			}else {
+				throw new InvalidParameterException("ServiceInterfaceName " + NOT_VALID_ERROR_MESSAGE);
+			}
+		}else {
+			validServiceInterface = null;
+		}
+		
+		
 		try {		
-			final Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(), PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 			
-			return orchestratorStorePage;
+			if (validServiceInterface != null) {
+				
+				final Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(consumerOption.get(), serviceDefinitionOption.get(), validServiceInterface, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+				
+				return orchestratorStorePage;
+				
+			}else {
+				
+				final Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(), PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+				
+				return orchestratorStorePage;
+				
+			}
+			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
