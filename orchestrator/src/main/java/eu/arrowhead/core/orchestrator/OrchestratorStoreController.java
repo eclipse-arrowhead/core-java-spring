@@ -74,15 +74,6 @@ public class OrchestratorStoreController {
 	
 	private final Logger logger = LogManager.getLogger(OrchestratorStoreController.class);
 	
-	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
-	private boolean gateKeeperIsPresent;
-	
-	@Value(CommonConstants.$SERVICE_REGISTRY_ADDRESS_WD)
-	private String serviceRegistryAddress;
-	
-	@Value(CommonConstants.$SERVICE_REGISTRY_PORT_WD)
-	private Integer serviceRegistryPort;
-	
 	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
 	
