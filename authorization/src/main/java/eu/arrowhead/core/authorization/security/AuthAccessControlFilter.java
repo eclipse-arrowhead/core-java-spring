@@ -18,7 +18,6 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER };
 
-
 	//=================================================================================================
 	// assistant methods
 

@@ -83,6 +83,7 @@ public abstract class ApplicationInitListener {
 		}
 		
 		registerCoreSystemServicesToServiceRegistry(event.getApplicationContext());
+		initRequiredCoreSystemServiceUris(event.getApplicationContext());
 		customInit(event);
 		
 		logger.debug("Initialization in onApplicationEvent() is done.");
@@ -126,6 +127,11 @@ public abstract class ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	protected void customInit(final ContextRefreshedEvent event) {}
+	
+	//-------------------------------------------------------------------------------------------------
+	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		return List.of();
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	protected String getModeString() {
@@ -295,5 +301,31 @@ public abstract class ApplicationInitListener {
 		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(coreSystemService.getServiceDefinition()));
 		
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), queryMap, unregisterUriStr);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void initRequiredCoreSystemServiceUris(final ApplicationContext appContext) {
+		logger.debug("initRequiredCoreSystemServiceUris started...");
+		
+		if (standaloneMode) {
+			return;
+		}
+		
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		
+		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+		final UriComponents queryUri = createQueryUri(scheme);
+		context.put(CommonConstants.SR_QUERY_URI, queryUri);
+		
+		context.put(CommonConstants.REQUIRED_URI_LIST, getRequiredCoreSystemServiceUris());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createQueryUri(final String scheme) {
+		logger.debug("createQueryUri started...");
+				
+		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
+		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registerUriStr);
 	}
 }
