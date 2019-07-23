@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
@@ -43,6 +44,10 @@ public class OrchestratorService {
 	@Autowired
 	private OrchestratorDriver orchestratorDriver;
 	
+	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gateKeeperIsPresent;
+
+	
 	//=================================================================================================
 	// methods
 
@@ -54,7 +59,7 @@ public class OrchestratorService {
 	 */
 	public OrchestrationResponseDTO externalServiceRequest(final OrchestrationFormRequestDTO request) {
 		logger.debug("externalServiceRequest started ...");
-		checkExternalServiceRequestForm(request);
+		checkServiceRequestForm(request, false);
 		
 		// Querying the Service Registry to get the list of Provider Systems
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
@@ -93,11 +98,35 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO dynamicOrchestration(
-			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
+	/**
+	 * Represents the regular orchestration process where the requester sytem is in the local Cloud. In this process the
+     * <i>Orchestrator Store</i> is ignored, and the Orchestrator first tries to find a provider for the requested service in the local Cloud.
+     * If that fails but the <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
+	 */
+	public OrchestrationResponseDTO dynamicOrchestration(final OrchestrationFormRequestDTO request) {
 		logger.debug("dynamicOrchestration started ...");
+
+		// necessary because we want to use a flag value when we call the check method
+		if (request == null) {
+			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
 		
-		//TODO implement method logic here
+		final OrchestrationFlags flags = request.getOrchestrationFlags();
+		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
+		
+		// Querying the Service Registry to get the list of Provider Systems
+		final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(request.getRequestedService(), flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+		final List<ServiceRegistryResponseDTO> queryData = queryResult.getServiceQueryData();
+		if (queryData.isEmpty() && isInterCloudOrchestrationPossible(flags)) {
+			// no result in the local Service Registry => we try with other clouds
+			logger.debug("dynamicOrchestration: moving to Inter-Cloud orchestration.");
+			return triggerInterCloud(request);
+		}
+		
+	    // Cross-checking the SR response with the Authorization
+		
+		
+		//TODO: continue
 		return null;
 	}
 	
@@ -105,7 +134,12 @@ public class OrchestratorService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkExternalServiceRequestForm(final OrchestrationFormRequestDTO request) {
+	private boolean isInterCloudOrchestrationPossible(final OrchestrationFlags flags) {
+		return gateKeeperIsPresent && flags.get(Flag.ENABLE_INTER_CLOUD);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRequestForm(final OrchestrationFormRequestDTO request, final boolean cloudCheckInProviders) {
 		logger.debug("checkExternalServiceRequestForm started ...");
 		
 		if (request == null) {
@@ -118,7 +152,7 @@ public class OrchestratorService {
 		checkRequestedServiceForm(request.getRequestedService());
 		
 		// Preferred Providers
-		checkPreferredProviders(request.getPreferredProviders(), false);
+		checkPreferredProviders(request.getPreferredProviders(), cloudCheckInProviders);
 	}
 
 	//-------------------------------------------------------------------------------------------------
