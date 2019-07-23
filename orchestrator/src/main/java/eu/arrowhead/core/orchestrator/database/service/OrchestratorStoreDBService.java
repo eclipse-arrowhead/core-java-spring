@@ -451,9 +451,7 @@ public class OrchestratorStoreDBService {
 				validProviderSystemId,
 				validInterface,
 				validPriority,
-				validAttribute,
-				null,
-				null);	
+				validAttribute);	
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -804,9 +802,7 @@ public class OrchestratorStoreDBService {
 				validProviderSystemId,
 				validInterface,
 				validPriority,
-				validAttribute, 
-				null, 
-				null);
+				validAttribute);
 
 	}
 

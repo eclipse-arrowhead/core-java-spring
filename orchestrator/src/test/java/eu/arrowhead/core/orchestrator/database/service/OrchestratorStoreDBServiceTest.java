@@ -1369,11 +1369,11 @@ public class OrchestratorStoreDBServiceTest {
 				1L,
 				getServiceIntefaceForTest(),
 				getPriorityForTest(),
-				getAttributeStringForTest(),
-				getCreatedAtForTest(),
-				getUpdatedAtForTest()
+				getAttributeStringForTest()
 				);
 	
+		orchestratorStore.setCreatedAt(getCreatedAtForTest());
+		orchestratorStore.setUpdatedAt(getUpdatedAtForTest());
 		orchestratorStore.setId(getIdForTest());
 		
 		return orchestratorStore;

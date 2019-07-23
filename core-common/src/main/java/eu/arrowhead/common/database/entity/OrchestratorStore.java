@@ -69,7 +69,13 @@ public class OrchestratorStore {
 	public OrchestratorStore() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStore(final ServiceDefinition serviceDefinition, final System consumerSystem, final boolean foreign, final long providerSystemId, final ServiceInterface serviceInterface, final Integer priority, final String attribute, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
+	public OrchestratorStore(final ServiceDefinition serviceDefinition, 
+			final System consumerSystem, 
+			final boolean foreign, 
+			final long providerSystemId, 
+			final ServiceInterface serviceInterface, 
+			final Integer priority, final String attribute) {
+		
 		this.serviceDefinition = serviceDefinition;
 		this.consumerSystem = consumerSystem;
 		this.foreign = foreign;
