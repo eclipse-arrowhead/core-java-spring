@@ -562,12 +562,12 @@ public class OrchestratorStoreDBService {
 		if(Utilities.isEmpty(cloudRequestDTO.getOperator())) {
 			throw new InvalidParameterException("Cloud.Operator " + EMPTY_OR_NULL_ERROR_MESAGE );
 		}
-		final String operator = cloudRequestDTO.getOperator();
+		final String operator = cloudRequestDTO.getOperator().trim().toLowerCase();
 		
 		if(Utilities.isEmpty(cloudRequestDTO.getName())) {
 			throw new InvalidParameterException("Cloud.Name " + EMPTY_OR_NULL_ERROR_MESAGE );
 		}
-		final String cloudName = cloudRequestDTO.getName();
+		final String cloudName = cloudRequestDTO.getName().trim().toLowerCase();
 		
 		final Optional<Cloud> cloudOptional = cloudRepository.findByOperatorAndName(operator, cloudName);
 		if (cloudOptional.isEmpty()) {
