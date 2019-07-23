@@ -784,7 +784,7 @@ public class OrchestratorStoreDBService {
 		final boolean foreign = true;
 		
 		final long validProviderSystemId = validateForeinProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO(), validProviderCloud);		
-		final ServiceDefinition validServiceDefinition = validateForeinServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
+		final ServiceDefinition validServiceDefinition = validateForeignServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateForeignServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
 		final String validAttribute = Utilities.map2Text(orchestratorStoreRequestDTO.getAttribute());
@@ -821,7 +821,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private ServiceDefinition validateForeinServiceDefinitionName(final String serviceDefinitionName) {
+	private ServiceDefinition validateForeignServiceDefinitionName(final String serviceDefinitionName) {
 		logger.debug("validateForeinServiceDefinitionName started...");
 		
 		if (Utilities.isEmpty(serviceDefinitionName)) {
