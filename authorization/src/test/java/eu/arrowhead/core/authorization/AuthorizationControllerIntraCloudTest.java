@@ -360,7 +360,8 @@ public class AuthorizationControllerIntraCloudTest {
 		
 		final MvcResult response = this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
 											   .contentType(MediaType.APPLICATION_JSON)
-											   .content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumerId, serviceDefinitionId, authorizedProviderIdsWithInterfaceLitsts)))
+											   .content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumerId, serviceDefinitionId, 
+													   																			  authorizedProviderIdsWithInterfaceLitsts)))
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();

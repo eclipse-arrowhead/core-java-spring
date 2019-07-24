@@ -158,7 +158,7 @@ public class AuthorizationController {
 		} else {
 			if (page == null || size == null) {
 				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI +
-						AUTHORIZATION_INTRA_CLOUD_MGMT_URI);
+											  AUTHORIZATION_INTRA_CLOUD_MGMT_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
@@ -310,7 +310,7 @@ public class AuthorizationController {
 		} else {
 			if (page == null || size == null) {
 				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI +
-						AUTHORIZATION_INTER_CLOUD_MGMT_URI);
+											  AUTHORIZATION_INTER_CLOUD_MGMT_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
@@ -489,7 +489,8 @@ public class AuthorizationController {
 			}
 		}
 		
-		final AuthorizationIntraCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationIntraCloudRequest(request.getConsumerId(), request.getServiceDefinitionId(), providerIdsWithInterfaceIdsSet);
+		final AuthorizationIntraCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationIntraCloudRequest(request.getConsumerId(), request.getServiceDefinitionId(),
+																															providerIdsWithInterfaceIdsSet);
 		logger.debug("checkAuthorizationIntraCloudRequest has been finished");
 		
 		return response;
