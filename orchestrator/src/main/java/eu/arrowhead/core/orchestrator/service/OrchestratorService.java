@@ -114,7 +114,19 @@ public class OrchestratorService {
 		}else {
 			
 			entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());
-			// TODO filter entryList for requested interfaces
+			
+			// TODO filter entryList for requested interfaces	
+			final List<OrchestratorStore> validEntryList;
+			final List<String> requiredInterfaceList = orchestrationFormRequestDTO.getRequestedService().getInterfaceRequirements();
+			if (requiredInterfaceList != null && !requiredInterfaceList.isEmpty()) {
+				
+				validEntryList = null;//validateEntryList(entryList, requiredInterfaceList);
+				
+			}else {
+				
+				validEntryList = entryList;
+				
+			}
 		
 		}
 		
@@ -124,6 +136,7 @@ public class OrchestratorService {
 		//TODO implement additional method logic here
 		return null;
 	}
+
 	//-------------------------------------------------------------------------------------------------	
 	public OrchestrationResponseDTO dynamicOrchestration(
 			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
@@ -364,6 +377,14 @@ public class OrchestratorService {
 		}
 		
 		return retrievedList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStore> validateEntryList(List<OrchestratorStore> entryList,
+			List<String> requiredInterfaceList) {
+		
+		// TODO implement method logic here
+		return null;
 	}
 
 }
