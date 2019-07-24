@@ -56,9 +56,14 @@ public class GatekeeperDBService {
 	public CloudGatekeeper registerGatekeeper(final Cloud cloud, final String address, final int port, final String serviceUri, final String authenticationInfo) {
 		logger.debug("registerGatekeeper started...");
 		
-		Assert.isTrue(cloud != null, "Cloud is null.");
-		Assert.isTrue(!Utilities.isEmpty(address), "Address is null or empty.");
-		Assert.isTrue(!Utilities.isEmpty(serviceUri), "ServiceUri is null or empty.");
+		try {
+			Assert.isTrue(cloud != null, "Cloud is null.");
+			Assert.isTrue(!Utilities.isEmpty(address), "Address is null or empty.");
+			Assert.isTrue(!Utilities.isEmpty(serviceUri), "ServiceUri is null or empty.");			
+		} catch (IllegalArgumentException ex) {
+			throw new InvalidParameterException(ex.getMessage());
+		}
+		
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
@@ -74,8 +79,14 @@ public class GatekeeperDBService {
 	public CloudGatekeeper updateGatekeeper(final CloudGatekeeper gatekeeper, final String address, final int port, final String serviceUri, final String authenticationInfo) {
 		logger.debug("registerGatekeeper started...");
 		
-		Assert.isTrue(!Utilities.isEmpty(address), "Address is null or empty.");
-		Assert.isTrue(!Utilities.isEmpty(serviceUri), "ServiceUri is null or empty.");
+		try {
+			Assert.isTrue(gatekeeper != null, "Gatekeeper is null.");
+			Assert.isTrue(!Utilities.isEmpty(address), "Address is null or empty.");
+			Assert.isTrue(!Utilities.isEmpty(serviceUri), "ServiceUri is null or empty.");					
+		} catch (IllegalArgumentException ex) {
+			throw new InvalidParameterException(ex.getMessage());
+		}
+		
 		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
