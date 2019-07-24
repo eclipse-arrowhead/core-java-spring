@@ -397,22 +397,24 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationIntraCloudCheckResponseDTO checkAuthorizationIntraCloudRequest(final long consumerId, final long serviceDefinitionId, final Set<IdIdListDTO> providerIdsWithInterfaceIds) {
+	public AuthorizationIntraCloudCheckResponseDTO checkAuthorizationIntraCloudRequest(final String consumerName, final String consumerAddress, final int consumerPort, final long serviceDefinitionId,
+																					   final Set<IdIdListDTO> providerIdsWithInterfaceIds) {
 		logger.debug("checkAuthorizationIntraCloudRequest started...");
 				
 		try {
-			final boolean isConsumerIdInvalid = consumerId < 1 || !systemRepository.existsById(consumerId);
 			final boolean isServiceDefinitionIdInvalid = serviceDefinitionId < 1 || !serviceDefinitionRepository.existsById(serviceDefinitionId);
 			final boolean isProviderListEmpty = providerIdsWithInterfaceIds == null || providerIdsWithInterfaceIds.isEmpty();
-			if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
+			if (isServiceDefinitionIdInvalid || isProviderListEmpty) {
 				String exceptionMsg = "Following parameters are invalid:";
-				exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " consumer id," : exceptionMsg;
 				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " serviceDefinition id," : exceptionMsg;
 				exceptionMsg = isProviderListEmpty ? exceptionMsg + " empty providerId list," : exceptionMsg;
 				exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 				
 				throw new InvalidParameterException(exceptionMsg);
 			}
+			
+			final System consumer = checkAndGetConsumer(consumerName, consumerAddress, consumerPort);
+			final long consumerId = consumer.getId();
 			
 			final List<IdIdListDTO> authorizedProvidersWithInterfaces = new ArrayList<>(providerIdsWithInterfaceIds.size());
 			for (final IdIdListDTO providerWithInterfaces : providerIdsWithInterfaceIds) {
@@ -761,5 +763,32 @@ public class AuthorizationDBService {
 		}
 		
 		return interfaces;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private System checkAndGetConsumer(final String name, final String address, final int port) {
+		logger.debug("checkSystemRequest started...");
+		
+		if (Utilities.isEmpty(name)) {
+			throw new InvalidParameterException("Consumer name is null or blank");
+		}
+		
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("Consumer address is null or blank");
+		}
+		
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("Consumer port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		}
+		
+		final String validatedName = name.toLowerCase().trim();
+		final String validatedAddress = address.toLowerCase().trim();
+		
+		final Optional<System> optConsumer = systemRepository.findBySystemNameAndAddressAndPort(validatedName, validatedAddress, port);
+		if (optConsumer.isPresent()) {
+			return optConsumer.get();
+		} else {
+			throw new InvalidParameterException("Consumer with name: " + name + ", address: " + address + " and port: " + port + " is not exist in the database.");
+		}
 	}
 }

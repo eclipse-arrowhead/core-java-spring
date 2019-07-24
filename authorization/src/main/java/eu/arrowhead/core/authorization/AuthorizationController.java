@@ -451,17 +451,23 @@ public class AuthorizationController {
 	@ResponseBody public AuthorizationIntraCloudCheckResponseDTO checkAuthorizationIntraCloudRequest(@RequestBody final AuthorizationIntraCloudCheckRequestDTO request) {
 		logger.debug("New AuthorizationIntraCloud check request recieved");
 		
-		final boolean isConsumerIdInvalid = request.getConsumerId() == null || request.getConsumerId() < 1;
+		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTRA_CHECK_URI;
+		final SystemRequestDTO consumer = request.getConsumer();
+		if (consumer == null) {
+			throw new BadPayloadException("Consumer is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		checkSystemRequest(consumer, origin, false);
+		
 		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
 		final boolean isProviderListEmpty = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().isEmpty();
-		if (isConsumerIdInvalid || isServiceDefinitionIdInvalid || isProviderListEmpty) {
+		if (isServiceDefinitionIdInvalid || isProviderListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
-			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
 			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " invalid serviceDefinition id," : exceptionMsg;
 			exceptionMsg = isProviderListEmpty ? exceptionMsg + " providerId list is empty," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
-			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTRA_CHECK_URI);
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, origin);
 		}		
 		
 		final Set<IdIdListDTO> providerIdsWithInterfaceIdsSet = new HashSet<>();
@@ -489,8 +495,8 @@ public class AuthorizationController {
 			}
 		}
 		
-		final AuthorizationIntraCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationIntraCloudRequest(request.getConsumerId(), request.getServiceDefinitionId(),
-																															providerIdsWithInterfaceIdsSet);
+		final AuthorizationIntraCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationIntraCloudRequest(consumer.getSystemName(), consumer.getAddress(), consumer.getPort(),
+																															request.getServiceDefinitionId(), providerIdsWithInterfaceIdsSet);
 		logger.debug("checkAuthorizationIntraCloudRequest has been finished");
 		
 		return response;
