@@ -72,15 +72,18 @@ public class CommonConstants {
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String ECHO_URI = "/echo";
 	public static final String MGMT_URI = "/mgmt";
+	
 	public static final String SERVICE_REGISTRY_URI = "/serviceregistry";
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
+	
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
 	public static final String OP_AUTH_KEY_URI = "/publickey";
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
+	
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
