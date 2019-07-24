@@ -117,7 +117,7 @@ public class OrchestratorStoreController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, ORCHESTRATOR_STORE_MGMT_BY_ID_URI);
 		}
 		
-		return orchestratorStoreDBService.getOrchestratorStoreById(orchestratorStoreId);			
+		return orchestratorStoreDBService.getOrchestratorStoreByIdResponse(orchestratorStoreId);			
 	}
 	
 	//-------------------------------------------------------------------------------------------------

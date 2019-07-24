@@ -1,7 +1,6 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,56 +15,42 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import eu.arrowhead.common.Defaults;
-
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
-public class ForeignSystem {
-	
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"authorizationInterCloudId", "interfaceId"}))
+public class AuthorizationInterCloudInterfaceConnection {
+
 	//=================================================================================================
 	// members
-	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "systemName", "address", "port"); //NOSONAR
 	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
 	
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "providerCloudId", referencedColumnName = "id", nullable = false)
-	private Cloud providerCloud;
+	@JoinColumn (name = "authorizationInterCloudId", referencedColumnName = "id", nullable = false)
+	private AuthorizationInterCloud authorizationInterCloudEntry; 
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
-	private String systemName;
-	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
-	private String address;
-	
-	@Column (nullable = false)
-	private int port;
-	
-	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
-	private String authenticationInfo;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "interfaceId", referencedColumnName = "id", nullable = false)
+	private ServiceInterface serviceInterface;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
-	
+
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public AuthorizationInterCloudInterfaceConnection() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public ForeignSystem() {}
-
-	//-------------------------------------------------------------------------------------------------
-	public ForeignSystem(final Cloud providerCloud, final String systemName, final String address, final int port, final String authenticationInfo) {
-		this.providerCloud = providerCloud;
-		this.systemName = systemName;
-		this.address = address;
-		this.port = port;
-		this.authenticationInfo = authenticationInfo;
+	public AuthorizationInterCloudInterfaceConnection(final AuthorizationInterCloud authorizationInterCloudEntry,
+			final ServiceInterface serviceInterface) {
+		this.authorizationInterCloudEntry = authorizationInterCloudEntry;
+		this.serviceInterface = serviceInterface;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -82,38 +67,22 @@ public class ForeignSystem {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public long getId() { return id; }
-	public Cloud getProviderCloud() {return providerCloud ;}
-	public String getSystemName() { return systemName; }
-	public String getAddress() { return address; }
-	public int getPort() { return port; }
-	public String getAuthenticationInfo() { return authenticationInfo; }
+	public long getId() {return id;}
+	public AuthorizationInterCloud getAuthorizationInterCloudEntry() { return authorizationInterCloudEntry; }
+	public ServiceInterface getServiceInterface() { return serviceInterface; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setProviderCloud(final Cloud providerCloud) {this.providerCloud = providerCloud; }
-	public void setSystemName(final String systemName) { this.systemName = systemName; }
-	public void setAddress(final String address) { this.address = address; }
-	public void setPort(final int port) { this.port = port; }
-	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setAuthorizationInterCloudEntry(final AuthorizationInterCloud authorizationInterCloudEntry) { this.authorizationInterCloudEntry = authorizationInterCloudEntry; }
+	public void setServiceInterface(final ServiceInterface serviceInterface) { this.serviceInterface = serviceInterface; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ForeignSystem [id = " + id + ", "
-				+ "providerCloud[providerCloud.id= " + providerCloud.getId() + 
-				", providerCloud.name = " + providerCloud.getName() + 
-				", providerCloud.neighbor = " + providerCloud.getNeighbor() +
-				", providerCloud.secure = " + providerCloud.getSecure() +
-				", providerCloud.operator = " + providerCloud.getOperator() +
-				", providerCloud.ownCloud = " + providerCloud.getOwnCloud() +
-				" ]" + 
-				", systemName = " + systemName + 
-				", address = " + address + 
-				", port = " + port + "]";
-	}
+		return "AuthorizationInterCloudInterfaceConnection [id = " + id + ", authorizationInterCloudEntry = " + authorizationInterCloudEntry + ", serviceInterface = " + serviceInterface + "]";
+	}	
 }

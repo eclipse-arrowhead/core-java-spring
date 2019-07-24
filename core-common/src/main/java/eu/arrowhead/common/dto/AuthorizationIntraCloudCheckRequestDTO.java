@@ -12,7 +12,7 @@ public class AuthorizationIntraCloudCheckRequestDTO implements Serializable {
 	
 	private Long consumerId;
 	private Long serviceDefinitionId;
-	private List<Long> providerIds;
+	private List<IdIdListDTO> providerIdsWithInterfaceIds;
 	
 	//=================================================================================================
 	// methods
@@ -20,19 +20,19 @@ public class AuthorizationIntraCloudCheckRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public AuthorizationIntraCloudCheckRequestDTO() {}
 	
-	public AuthorizationIntraCloudCheckRequestDTO(final Long consumerId, final Long serviceDefinitionId, final List<Long> providerIds) {
+	public AuthorizationIntraCloudCheckRequestDTO(final Long consumerId, final Long serviceDefinitionId, final List<IdIdListDTO> providerIdsWithInterfaceIds) {
 		this.consumerId = consumerId;
 		this.serviceDefinitionId = serviceDefinitionId;
-		this.providerIds = providerIds;
+		this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public Long getConsumerId() {return consumerId;}
 	public Long getServiceDefinitionId() {return serviceDefinitionId;}
-	public List<Long> getProviderIds() {return providerIds;}
+	public List<IdIdListDTO> getProviderIdsWithInterfaceIds() {return providerIdsWithInterfaceIds;}
 
 	//-------------------------------------------------------------------------------------------------
 	public void setConsumerId(final Long consumerId) {this.consumerId = consumerId;}
 	public void setServiceDefinitionId(final Long serviceDefinitionId) {this.serviceDefinitionId = serviceDefinitionId;}
-	public void setProviderIds(final List<Long> providerIds) {this.providerIds = providerIds;}		
+	public void setProviderIdsWithInterfaceIds(final List<IdIdListDTO> providerIdsWithInterfaceIds) {this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds;}
 }
