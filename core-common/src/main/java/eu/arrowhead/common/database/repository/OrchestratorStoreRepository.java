@@ -21,14 +21,29 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 
 	//-------------------------------------------------------------------------------------------------
 	public Page<OrchestratorStore> findAllByPriority(final int priority, final Pageable regRequest);
-	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem,	final ServiceDefinition serviceDefinition);
+	//public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem,	final ServiceDefinition serviceDefinition);
 	public Optional<OrchestratorStore> findByConsumerSystemAndServiceDefinitionAndPriority(final System consumerSystem,	final ServiceDefinition serviceDefinition,final int priority);
 	public Optional<OrchestratorStore> findByConsumerSystemAndServiceDefinitionAndProviderSystemIdAndServiceInterfaceAndForeign(final System consumerSystem, 
 																																final ServiceDefinition serviceDefinition,
 																																final long providerSystemId,
 																																final ServiceInterface serviceInterface,
 																																final boolean foreign);
-	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem, final ServiceDefinition serviceDefinition, final Sort sortByField);
-	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(final System consumerSystem, final ServiceDefinition serviceDefinition, final Pageable regRequest);
+	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(
+			final System consumerSystem, 
+			final ServiceDefinition serviceDefinition, final Pageable regRequest);
+	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+			final System system,
+			final ServiceDefinition serviceDefinition, 
+			final ServiceInterface validServiceInterface, 
+			final Pageable regRequest);
+	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+			final System system,
+			final ServiceDefinition serviceDefinition, 
+			final ServiceInterface validServiceInterface, 
+			final Sort sortField);
+	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+			final System anyConsumerSystemForValidation, 
+			final ServiceDefinition anyServiceDefinition,
+			final ServiceInterface anyServiceInterface);
 		
 }
