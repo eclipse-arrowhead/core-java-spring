@@ -119,7 +119,7 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = OP_ORCH_PROCESS_BY_ID , consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = OP_ORCH_PROCESS_BY_ID , produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public OrchestrationResponseDTO storeOrchestrationProcess(@PathVariable(value = PATH_VARIABLE_ID) final long systemId) {
 		logger.debug("storeOrchestrationProcess started ...");
 		

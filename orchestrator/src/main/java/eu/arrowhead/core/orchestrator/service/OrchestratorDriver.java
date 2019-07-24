@@ -1,5 +1,6 @@
 package eu.arrowhead.core.orchestrator.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -62,11 +63,12 @@ public class OrchestratorDriver {
 	//-------------------------------------------------------------------------------------------------
 	public SystemResponseDTO queryServiceRegistryByIdSystemId(final long consumerSystemId) {
 		logger.debug("queryByIdServiceRegistry started...");
-		Assert.isTrue(consumerSystemId < 1, "ConsumerSystemId is less then 1.");
+		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less then 1.");
 		
-		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri();
-		queryBySystemIdUri.expand(Map.of(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId));
-		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemIdUri, HttpMethod.POST, SystemResponseDTO.class);
+		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri().expand(
+				Collections.singletonMap(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId + ""));
+		
+		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemIdUri, HttpMethod.GET, SystemResponseDTO.class);
 		
 		return response.getBody();
 	}
