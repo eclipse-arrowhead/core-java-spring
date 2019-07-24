@@ -45,7 +45,7 @@ CREATE TABLE `system_` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pair` (`system_name`,`address`,`port`)
+  UNIQUE KEY `triple` (`system_name`,`address`,`port`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `service_definition`;
@@ -185,23 +185,36 @@ CREATE TABLE `relay` (
 DROP TABLE IF EXISTS `orchestrator_store`;
 CREATE TABLE `orchestrator_store` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar (255) NOT NULL,
   `consumer_system_id` bigint(20) NOT NULL,
-  `provider_cloud_id` bigint(20) DEFAULT NULL,
   `provider_system_id` bigint(20) NOT NULL,
+  `foreign_` int(1) NOT NULL DEFAULT 0,
   `service_id` bigint(20) NOT NULL,
   `service_interface_id` bigint(20) NOT NULL,
-  `priority` int(11) DEFAULT NULL,
+  `priority` int(11) NOT NULL,
   `attribute` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `priority_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`priority`),
-  UNIQUE KEY `duplication_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`provider_system_id`),
-  CONSTRAINT `provider_orch` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`),
-  CONSTRAINT `cloud_orch` FOREIGN KEY (`provider_cloud_id`) REFERENCES `cloud` (`id`),
-  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`),
-  CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`)
+  UNIQUE KEY `duplication_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`provider_system_id`, `foreign_`),
+  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `service_intf_orch` FOREIGN KEY (`service_interface_id`) REFERENCES `service_interface` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `foreign_system`;
+CREATE TABLE `foreign_system` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `provider_cloud_id` bigint(20) NOT NULL,
+  `system_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `port` int(11) NOT NULL,
+  `authentication_info` varchar(2047) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `triple` (`system_name`,`address`,`port`),
+  CONSTRAINT `foreign_cloud` FOREIGN KEY (`provider_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Logs
@@ -347,7 +360,9 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'orchestrator'@'loca
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'localhost';
 
 DROP USER IF EXISTS 'orchestrator'@'%';
 CREATE USER IF NOT EXISTS 'orchestrator'@'%' IDENTIFIED BY 'KbgD2mTr8DQ4vtc';
@@ -357,7 +372,9 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'%';
 
 -- Event Handler
 DROP USER IF EXISTS 'event_handler'@'localhost';
