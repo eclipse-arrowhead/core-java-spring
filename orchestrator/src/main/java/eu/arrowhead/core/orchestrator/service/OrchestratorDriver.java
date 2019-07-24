@@ -164,11 +164,12 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S1612")
 	private List<String> convertServiceInterfaceListToServiceInterfaceNameList(final List<ServiceInterfaceResponseDTO> intfs) {
 		logger.debug("convertServiceInterfaceListToServiceInterfaceNameList started...");
 		
 		if (intfs == null) {
-			return null;
+			return List.of();
 		}
 		
 		return intfs.stream().map(dto -> dto.getInterfaceName()).collect(Collectors.toList());

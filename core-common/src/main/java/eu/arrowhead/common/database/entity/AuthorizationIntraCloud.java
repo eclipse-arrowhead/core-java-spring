@@ -99,7 +99,7 @@ public class AuthorizationIntraCloud {
 	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setInterfaceConnections (final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; };
+	public void setInterfaceConnections (final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

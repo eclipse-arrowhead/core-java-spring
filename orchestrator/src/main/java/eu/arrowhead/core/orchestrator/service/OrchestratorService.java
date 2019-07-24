@@ -57,6 +57,7 @@ public class OrchestratorService {
 	 * that this request from the remote Orchestrator can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
 	 * Systems.)
 	 */
+	@SuppressWarnings("squid:S1612")
 	public OrchestrationResponseDTO externalServiceRequest(final OrchestrationFormRequestDTO request) {
 		logger.debug("externalServiceRequest started ...");
 		checkServiceRequestForm(request, false);

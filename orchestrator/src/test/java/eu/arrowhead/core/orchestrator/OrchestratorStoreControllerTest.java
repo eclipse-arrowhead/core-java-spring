@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -51,6 +50,8 @@ public class OrchestratorStoreControllerTest {
 
 	//=================================================================================================
 	// members
+
+	private static final String ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_by_consumer";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -208,7 +209,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
@@ -222,7 +223,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -231,7 +232,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullPageParamTest() throws Exception {
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -240,7 +241,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullItemPerPageParamTest() throws Exception {
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -252,7 +253,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
@@ -266,7 +267,7 @@ public class OrchestratorStoreControllerTest {
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = null;
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes(request))
 				.accept(MediaType.APPLICATION_JSON))
@@ -282,7 +283,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
 		request.setConsumerSystemId(null);
 	
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -298,7 +299,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
 		request.setServiceDefinitionName(null);
 	
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))

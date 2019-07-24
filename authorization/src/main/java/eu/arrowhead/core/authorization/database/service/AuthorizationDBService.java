@@ -298,7 +298,7 @@ public class AuthorizationDBService {
 		
 		try {						
 			final List<AuthorizationInterCloud> savedEntries = createBulkAuthorizationInterCloud(cloudId, providerIdSet, serviceDefinitionIdSet, interfaceIdSet);
-			final Page<AuthorizationInterCloud> savedEntriesPage = new PageImpl<AuthorizationInterCloud>(savedEntries);
+			final Page<AuthorizationInterCloud> savedEntriesPage = new PageImpl<>(savedEntries);
 			
 			return DTOConverter.convertAuthorizationInterCloudListToAuthorizationInterCloudListResponseDTO(savedEntriesPage);
 		} catch (final InvalidParameterException ex) {
@@ -596,58 +596,40 @@ public class AuthorizationDBService {
 	private List<AuthorizationIntraCloud> createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProviderAndMoreInterface(final System consumer, final Set<Long> providerIds,
 																																   final Long serviceId, final Set<Long> interfaceIds) {
 		logger.debug("createBulkAuthorizationIntraCloudWithOneServiceDefinitionAndMoreProviderAndMoreInterface started...");
-		
-		final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findById(serviceId);
-		if (serviceOpt.isPresent()) {
-			final ServiceDefinition service = serviceOpt.get();
-			
-			final List<ServiceInterface> interfaces = new ArrayList<>(interfaceIds.size());
-			for (final Long id : interfaceIds) {
-				final Optional<ServiceInterface> interfaceOpt = serviceInterfaceRepository.findById(id);
-				if (interfaceOpt.isPresent()) {
-					interfaces.add(interfaceOpt.get());
-				} else {
-					logger.debug("ServiceInterface with id of '{}' not exsists", id);
-				}
-			}
-			
-			if (interfaces.isEmpty()) {
-				throw new InvalidParameterException("interfaceId list doesn't contain any existing ServiceInterface");
-			}
 
-			final List<AuthorizationIntraCloud> toBeSaved = new ArrayList<>(providerIds.size());
-			for (final Long providerId : providerIds) {
-				final Optional<System> providerOpt = systemRepository.findById(providerId);
-				if (providerOpt.isPresent()) {
-					final System provider = providerOpt.get();
-					try {
-						checkConstraintsOfAuthorizationIntraCloudTable(consumer, provider, service);
-						toBeSaved.add(new AuthorizationIntraCloud(consumer, provider, service));
-					} catch (final InvalidParameterException ex) {
-						//not throwing towards as in this bulk operation case should be only a warning
-						logger.debug(ex.getMessage());
-					}
-				} else {
-					throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
+		final ServiceDefinition service = getServiceDefinitionById(serviceId);
+		final List<ServiceInterface> interfaces = getServiceInterfacesById(interfaceIds);
+
+		final List<AuthorizationIntraCloud> toBeSaved = new ArrayList<>(providerIds.size());
+		for (final Long providerId : providerIds) {
+			final Optional<System> providerOpt = systemRepository.findById(providerId);
+			if (providerOpt.isPresent()) {
+				final System provider = providerOpt.get();
+				try {
+					checkConstraintsOfAuthorizationIntraCloudTable(consumer, provider, service);
+					toBeSaved.add(new AuthorizationIntraCloud(consumer, provider, service));
+				} catch (final InvalidParameterException ex) {
+					// not throwing towards as in this bulk operation case should be only a warning
+					logger.debug(ex.getMessage());
 				}
+			} else {
+				throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
 			}
-			
-			final List<AuthorizationIntraCloud> authIntraEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
-			for (final AuthorizationIntraCloud authIntraEntry : authIntraEntries) {
-				for (final ServiceInterface serviceInterface : interfaces) {
-					final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry, serviceInterface));
-					authIntraEntry.getInterfaceConnections().add(connection);
-				}
-			}
-			authorizationIntraCloudInterfaceConnectionRepository.flush();
-			
-			final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
-			authorizationIntraCloudRepository.flush();
-			
-			return savedAuthIntraEntries;
-		} else {
-			throw new InvalidParameterException("ServiceDefinition with id of " + serviceId + " not exists");
 		}
+		
+		final List<AuthorizationIntraCloud> authIntraEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
+		for (final AuthorizationIntraCloud authIntraEntry : authIntraEntries) {
+			for (final ServiceInterface serviceInterface : interfaces) {
+				final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry, serviceInterface));
+				authIntraEntry.getInterfaceConnections().add(connection);
+			}
+		}
+		authorizationIntraCloudInterfaceConnectionRepository.flush();
+		
+		final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
+		authorizationIntraCloudRepository.flush();
+		
+		return savedAuthIntraEntries;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -715,57 +697,69 @@ public class AuthorizationDBService {
 																																   final Long serviceId, final Set<Long> interfaceIds) {
 		logger.debug("createBulkAuthorizationInterCloudWithOneServiceDefinitionAndMoreProviderAndMoreInterface started...");
 		
+		final ServiceDefinition service = getServiceDefinitionById(serviceId);
+		final List<ServiceInterface> interfaces = getServiceInterfacesById(interfaceIds);
+		
+		final List<AuthorizationInterCloud> toBeSaved = new ArrayList<>(providerIds.size());
+		for (final Long providerId : providerIds) {
+			final Optional<System> providerOpt = systemRepository.findById(providerId);
+			if (providerOpt.isPresent()) {
+				final System provider = providerOpt.get();
+				try {
+					checkConstraintsOfAuthorizationInterCloudTable(cloud, provider, service);
+					toBeSaved.add(new AuthorizationInterCloud(cloud, provider, service));
+				} catch (final InvalidParameterException ex) {
+					//not throwing towards as in this bulk operation case should be only a warning
+					logger.debug(ex.getMessage());
+				}
+			} else {
+				throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
+			}
+		}
+		
+		final List<AuthorizationInterCloud> authInterEntries = authorizationInterCloudRepository.saveAll(toBeSaved);
+		for (final AuthorizationInterCloud authInterEntry : authInterEntries) {
+			for (final ServiceInterface serviceInterface : interfaces) {
+				final AuthorizationInterCloudInterfaceConnection connection = authorizationInterCloudInterfaceConnectionRepository.save(
+																												new AuthorizationInterCloudInterfaceConnection(authInterEntry, serviceInterface));
+				authInterEntry.getInterfaceConnections().add(connection);
+			}
+		}
+		authorizationInterCloudInterfaceConnectionRepository.flush();
+		
+		final List<AuthorizationInterCloud> savedAuthInterEntries = authorizationInterCloudRepository.saveAll(authInterEntries);
+		authorizationInterCloudRepository.flush();
+		
+		return savedAuthInterEntries;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
+	private ServiceDefinition getServiceDefinitionById(final long serviceId) {
 		final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findById(serviceId);
-		if (serviceOpt.isPresent()) {
-			final ServiceDefinition service = serviceOpt.get();
-			
-			final List<ServiceInterface> interfaces = new ArrayList<>(interfaceIds.size());
-			for (final Long id : interfaceIds) {
-				final Optional<ServiceInterface> interfaceOpt = serviceInterfaceRepository.findById(id);
-				if (interfaceOpt.isPresent()) {
-					interfaces.add(interfaceOpt.get());
-				} else {
-					logger.debug("ServiceInterface with id of '{}' not exsists", id);
-				}				
-			}
-			
-			if (interfaces.isEmpty()) {
-				throw new InvalidParameterException("interfaceId list doesn't contain any existing ServiceInterface");
-			}
-			
-			final List<AuthorizationInterCloud> toBeSaved = new ArrayList<>(providerIds.size());
-			for (final Long providerId : providerIds) {
-				final Optional<System> providerOpt = systemRepository.findById(providerId);
-				if (providerOpt.isPresent()) {
-					final System provider = providerOpt.get();
-					try {
-						checkConstraintsOfAuthorizationInterCloudTable(cloud, provider, service);
-						toBeSaved.add(new AuthorizationInterCloud(cloud, provider, service));
-					} catch (final InvalidParameterException ex) {
-						//not throwing towards as in this bulk operation case should be only a warning
-						logger.debug(ex.getMessage());
-					}
-				} else {
-					throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
-				}
-			}
-			
-			final List<AuthorizationInterCloud> authInterEntries = authorizationInterCloudRepository.saveAll(toBeSaved);
-			for (final AuthorizationInterCloud authInterEntry : authInterEntries) {
-				for (final ServiceInterface serviceInterface : interfaces) {
-					final AuthorizationInterCloudInterfaceConnection connection = authorizationInterCloudInterfaceConnectionRepository.save(
-																													new AuthorizationInterCloudInterfaceConnection(authInterEntry, serviceInterface));
-					authInterEntry.getInterfaceConnections().add(connection);
-				}
-			}
-			authorizationInterCloudInterfaceConnectionRepository.flush();
-			
-			final List<AuthorizationInterCloud> savedAuthInterEntries = authorizationInterCloudRepository.saveAll(authInterEntries);
-			authorizationInterCloudRepository.flush();
-			
-			return savedAuthInterEntries;
-		} else {
+		if (serviceOpt.isEmpty()) {
 			throw new InvalidParameterException("ServiceDefinition with id of " + serviceId + " not exists");
 		}
-	}	
+		
+		return serviceOpt.get();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<ServiceInterface> getServiceInterfacesById(final Set<Long> interfaceIds) {
+		final List<ServiceInterface> interfaces = new ArrayList<>(interfaceIds.size());
+		for (final Long id : interfaceIds) {
+			final Optional<ServiceInterface> interfaceOpt = serviceInterfaceRepository.findById(id);
+			if (interfaceOpt.isPresent()) {
+				interfaces.add(interfaceOpt.get());
+			} else {
+				logger.debug("ServiceInterface with id of '{}' not exists", id);
+			}				
+		}
+		
+		if (interfaces.isEmpty()) {
+			throw new InvalidParameterException("interfaceId list doesn't contain any existing ServiceInterface");
+		}
+		
+		return interfaces;
+	}
 }

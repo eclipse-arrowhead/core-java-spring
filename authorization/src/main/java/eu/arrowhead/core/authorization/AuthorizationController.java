@@ -510,7 +510,7 @@ public class AuthorizationController {
 		
 		final boolean isCloudIdInvalid = request.getCloudId() == null || request.getCloudId() < 1;
 		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
-		final boolean isProvidersWithInterfacesListInvalid = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().size() < 1;
+		final boolean isProvidersWithInterfacesListInvalid = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().isEmpty();
 		if (isCloudIdInvalid || isServiceDefinitionIdInvalid || isProvidersWithInterfacesListInvalid ) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
 			exceptionMsg = isCloudIdInvalid ? exceptionMsg + " 'invalid cloud id' ," : exceptionMsg;

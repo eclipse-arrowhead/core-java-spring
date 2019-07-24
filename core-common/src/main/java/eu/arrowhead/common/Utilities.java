@@ -156,6 +156,28 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static ValidatedPageParams validatePageParameters(final Integer page, final Integer size, final String direction, final String origin) {
+		int validatedPage;
+		int validatedSize;
+
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", org.apache.http.HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+
+		final Direction validatedDirection = calculateDirection(direction, origin);
+		
+		return new ValidatedPageParams(validatedPage, validatedSize, validatedDirection);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String toPrettyJson(final String jsonString) {
 		try {
@@ -425,5 +447,34 @@ public class Utilities {
 		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
 		      throw new AuthException("Public key decoding failed due wrong input key", ex);
 		}
+	}
+	
+	//=================================================================================================
+	// nested classed
+	
+	//-------------------------------------------------------------------------------------------------
+	public static class ValidatedPageParams {
+		
+		//=================================================================================================
+		// members
+		
+		private final int validatedPage;
+		private final int validatedSize;
+		private final Direction validatedDirecion;
+		
+		//=================================================================================================
+		// methods
+		
+		//-------------------------------------------------------------------------------------------------
+		public ValidatedPageParams(final int validatedPage, final int validatedSize, final Direction validatedDirection) {
+			this.validatedPage = validatedPage;
+			this.validatedSize = validatedSize;
+			this.validatedDirecion = validatedDirection;
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		public int getValidatedPage() { return validatedPage; }
+		public int getValidatedSize() { return validatedSize; }
+		public Direction getValidatedDirecion() { return validatedDirecion; } 
 	}
 }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,6 +101,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public OrchestratorStore getOrchestratorStoreById(final long orchestratorStoreId) {		
 		logger.debug("getOrchestratorStoreById started...");
 		
@@ -196,6 +198,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public Page<OrchestratorStore> getOrchestratorStoresByConsumer(final int page, final int size, final Direction direction, final String sortField, final long consumerSystemId,
 																   final String serviceDefinitionName, final String serviceInterfaceName) {
 		logger.debug("getOrchestratorStoresByConsumer started...");
@@ -246,17 +249,10 @@ public class OrchestratorStoreDBService {
 		try {		
 			final PageRequest pageRequest = PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField);
 			if (validServiceInterface != null) {
-				final Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(consumerOption.get(),
-																																								 serviceDefinitionOption.get(),
-																																								 validServiceInterface,
-																																								 pageRequest);
-				
-				return orchestratorStorePage;
+				return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(consumerOption.get(), serviceDefinitionOption.get(), validServiceInterface,
+																												  pageRequest);
 			} else {
-				final Page<OrchestratorStore> orchestratorStorePage = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(),
-																																			  pageRequest);
-				
-				return orchestratorStorePage;
+				return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(), pageRequest);
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -293,10 +289,9 @@ public class OrchestratorStoreDBService {
 		try {
 			final List<OrchestratorStore> savedOrchestratorStoreEntries = new ArrayList<>();
 			for (final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO : request) {
-				try {					
-					savedOrchestratorStoreEntries.add(createOrchestratorStoreEntity(orchestratorStoreRequestDTO));
-				} catch (final Exception ex) {
-					logger.debug(ORCHESTRATOR_STORE_REQUEST_BY_ID_DTO_VALIDATION_EXCEPTION_MESSAGE + ex.getMessage(), ex);
+				final OrchestratorStore orchStore = saveOrchestratorStoreEntry(orchestratorStoreRequestDTO);
+				if (orchStore != null) {
+					savedOrchestratorStoreEntries.add(orchStore);
 				}
 			}
 			
@@ -324,6 +319,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeOrchestratorStoreById(final long id) {
 		logger.debug("removeOrchestratorStoreById started...");
@@ -401,6 +397,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private ServiceInterface validateServiceInterfaceName(final String serviceInterfaceName) {
 		logger.debug("validateServiceInterfaceName started...");
 		
@@ -418,6 +415,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private ServiceDefinition validateServiceDefinitionName(final String serviceDefinitionName) {
 		logger.debug("validateServiceDefinition started...");
 		
@@ -433,10 +431,10 @@ public class OrchestratorStoreDBService {
 		
 		return serviceDefinitionOptional.get();
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
-	private long validateProviderSystemRequestDTO(final SystemRequestDTO providerSystemRequestDTO) {
-		logger.debug("validateProviderSystemRequestDTO started...");
+	private void validateOnlyProviderSystemRequestDTO(final SystemRequestDTO providerSystemRequestDTO) {
+		logger.debug("validateOnlyProviderSystemRequestDTO started...");
 		
 		if (providerSystemRequestDTO == null) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO " + NULL_ERROR_MESSAGE);
@@ -446,18 +444,29 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.Address " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
-		final String address = providerSystemRequestDTO.getAddress().trim().toLowerCase();
-		
 		if (Utilities.isEmpty(providerSystemRequestDTO.getSystemName())) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.SystemName " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
-		
-		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();
-		
+
 		if (providerSystemRequestDTO.getPort() == null) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NULL_ERROR_MESSAGE);
 		}
+
+		final int validPort = providerSystemRequestDTO.getPort();
+		if (validPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NOT_VALID_ERROR_MESSAGE);
+		}		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
+	private long validateProviderSystemRequestDTO(final SystemRequestDTO providerSystemRequestDTO) {
+		logger.debug("validateProviderSystemRequestDTO started...");
 		
+		validateOnlyProviderSystemRequestDTO(providerSystemRequestDTO);
+
+		final String address = providerSystemRequestDTO.getAddress().trim().toLowerCase();
+		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();
 		final int port = providerSystemRequestDTO.getPort();
 		
 		final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
@@ -469,6 +478,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private System validateSystemId(final Long systemId) {
 		logger.debug("validateSystemId started...");
 		
@@ -501,6 +511,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	@SuppressWarnings("squid:S3655")
 	private Cloud validateProviderCloud(final CloudRequestDTO cloudRequestDTO) {
 		logger.debug("validateProviderCloud started...");
 		
@@ -584,6 +595,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private List<OrchestratorStore> getInvolvedOrchestratorStoreListByPriorityMap(final Map<Long,Integer> modifiedPriorityMap) {
 		logger.debug("getOrchestratorStoreList started...");
 
@@ -735,6 +747,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private ServiceInterface validateForeignServiceInterfaceName(final String serviceInterfaceName) {
 		logger.debug("validateForeinServiceInterfaceName started...");
 		
@@ -752,6 +765,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private ServiceDefinition validateForeignServiceDefinitionName(final String serviceDefinitionName) {
 		logger.debug("validateForeinServiceDefinitionName started...");
 		
@@ -767,36 +781,17 @@ public class OrchestratorStoreDBService {
 		
 		return serviceDefinitionOptional.get();
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private long validateForeignProviderSystemRequestDTO(final SystemRequestDTO providerSystemRequestDTO, final Cloud providerCloud) {
 		logger.debug("validateForeignProviderSystemRequestDTO started...");
 		
-		if (providerSystemRequestDTO == null) {
-			throw new InvalidParameterException("ProviderSystemRequestDTO " + NULL_ERROR_MESSAGE);
-		}
-		
-		if (Utilities.isEmpty(providerSystemRequestDTO.getAddress())) {
-			throw new InvalidParameterException("ProviderSystemRequestDTO.Address " + EMPTY_OR_NULL_ERROR_MESSAGE);
-		}
+		validateOnlyProviderSystemRequestDTO(providerSystemRequestDTO);
 		
 		final String address = providerSystemRequestDTO.getAddress().trim().toLowerCase();
-		
-		if (Utilities.isEmpty(providerSystemRequestDTO.getSystemName())) {
-			throw new InvalidParameterException("ProviderSystemRequestDTO.SystemName " + EMPTY_OR_NULL_ERROR_MESSAGE);
-		}
-		
 		final String systemName = providerSystemRequestDTO.getSystemName().trim().toLowerCase();
-		
-		if (providerSystemRequestDTO.getPort() == null) {
-			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NULL_ERROR_MESSAGE);
-		}
-		
 		final int validPort = providerSystemRequestDTO.getPort();
-		
-		if (validPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NOT_VALID_ERROR_MESSAGE);
-		}		
 		
 		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findBySystemNameAndAddressAndPortAndProviderCloud(systemName, address, validPort, providerCloud);
 		if (foreignSystemOptional.isEmpty()) {
@@ -807,6 +802,7 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private OrchestratorStoreResponseDTO getLocalResponseDTO(final OrchestratorStore orchestratorStore) {
 		final Optional<System> systemOptional = systemRepository.findById(orchestratorStore.getProviderSystemId());
 		if (systemOptional.isEmpty()) {
@@ -820,6 +816,7 @@ public class OrchestratorStoreDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	private OrchestratorStoreResponseDTO getForeignResponseDTO(final OrchestratorStore orchestratorStore) {
 		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findById(orchestratorStore.getProviderSystemId());
 		if (foreignSystemOptional.isEmpty()) {
@@ -860,4 +857,16 @@ public class OrchestratorStoreDBService {
 		
 		return orchestratorStoreResponseDTOList;
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Nullable
+	private OrchestratorStore saveOrchestratorStoreEntry(final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO) {
+		try {					
+			return createOrchestratorStoreEntity(orchestratorStoreRequestDTO);
+		} catch (final Exception ex) {
+			logger.debug(ORCHESTRATOR_STORE_REQUEST_BY_ID_DTO_VALIDATION_EXCEPTION_MESSAGE + ex.getMessage(), ex);
+			return null;
+		}
+	}
+
 }

@@ -9,7 +9,6 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.Utilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
@@ -50,6 +49,7 @@ public class OrchestratorStoreController {
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String ORCHESTRATOR_STORE_MGMT_BY_ID_URI = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority";
+	private static final String ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_by_consumer";
 	private static final String ORCHESTRATOR_STORE_MGMT_MODIFY = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE = "OrchestratorStore by requested id returned";
 	private static final String GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE = "No Such OrchestratorStore by requested id";
@@ -127,24 +127,9 @@ public class OrchestratorStoreController {
 		logger.debug("getOrchestratorStores started ...");
 		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
 		
-		int validatedPage;
-		int validatedSize;
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}
-		}
-		
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
-		
-		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection,
-																																			  sortField);
+		final ValidatedPageParams vpp = Utilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(), 
+																																			  vpp.getValidatedDirecion(), sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
 		
 		return orchestratorStoreListResponse;
@@ -167,24 +152,9 @@ public class OrchestratorStoreController {
 		logger.debug("getAllTopPriorityOrchestratorStores started ...");
 		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
 		
-		int validatedPage;
-		int validatedSize;
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}
-		}
-		
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
-		
-		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(validatedPage, validatedSize,
-																																					    validatedDirection, sortField);
+		final ValidatedPageParams vpp = Utilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY);
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
+																																					    vpp.getValidatedDirecion(), sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
 		
 		return orchestratorStoreResponse;
@@ -198,7 +168,7 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(path = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public OrchestratorStoreListResponseDTO getOrchestratorStoresByConsumer(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
@@ -207,26 +177,11 @@ public class OrchestratorStoreController {
 			@RequestBody final OrchestratorStoreRequestDTO request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
-		int validatedPage;
-		int validatedSize;
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}
-		}
-		
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
-		
-		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
-		
-		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(validatedPage, validatedSize,	validatedDirection, 
-																																			  sortField, request.getConsumerSystemId(),
+		final ValidatedPageParams vpp = Utilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
+		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
+																																			  vpp.getValidatedDirecion(), sortField,
+																																			  request.getConsumerSystemId(),
 																																			  request.getServiceDefinitionName(),
 																																			  request.getServiceInterfaceName());
 		

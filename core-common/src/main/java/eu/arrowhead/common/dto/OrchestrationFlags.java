@@ -78,7 +78,7 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	// nested classes
 	
 	//-------------------------------------------------------------------------------------------------
-	public static enum Flag {
+	public enum Flag {
 		
 		//=================================================================================================
 		// elements
