@@ -99,14 +99,14 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------	
 	/**
-	 * Represents the regular orchestration process where the requester sytem is in the local Cloud. In this process the
+	 * Represents the regular orchestration process where the requester system is in the local Cloud. In this process the
      * <i>Orchestrator Store</i> is ignored, and the Orchestrator first tries to find a provider for the requested service in the local Cloud.
      * If that fails but the <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
 	 */
 	public OrchestrationResponseDTO dynamicOrchestration(final OrchestrationFormRequestDTO request) {
 		logger.debug("dynamicOrchestration started ...");
 
-		// necessary because we want to use a flag value when we call the check method
+		// necessary, because we want to use a flag value when we call the check method
 		if (request == null) {
 			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
