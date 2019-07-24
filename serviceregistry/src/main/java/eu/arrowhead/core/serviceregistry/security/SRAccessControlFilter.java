@@ -47,6 +47,9 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		}else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemId, requestTarget);
+		}else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI)) {
+			// Only dedicated core systems can use this service
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemId, requestTarget);
 		}
 	}
 

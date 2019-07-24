@@ -74,7 +74,7 @@ public class OrchestratorStoreDBService {
 	@Autowired
 	private ServiceInterfaceNameVerifier interfaceNameVerifier;
 
-	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
+	private static final String LESS_THAN_ONE_ERROR_MESSAGE = " must be greater than zero.";
 	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = "The following sortable field  is not available : ";
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
@@ -419,6 +419,23 @@ public class OrchestratorStoreDBService {
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStore> getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(
+			final long consumerSystemId) {
+		
+		if (consumerSystemId < 1) {
+			throw new InvalidParameterException( "ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		
+		try {
+			return orchestratorStoreRepository.findAllByPriorityAndSystemId(CommonConstants.TOP_PRIORITY, consumerSystemId);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

@@ -61,7 +61,7 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO queryServiceRegistryByIdSystemId(final long consumerSystemId) {
+	public SystemResponseDTO queryServiceRegistryBySystemId(final long consumerSystemId) {
 		logger.debug("queryByIdServiceRegistry started...");
 		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less then 1.");
 		
@@ -73,6 +73,17 @@ public class OrchestratorDriver {
 		return response.getBody();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public SystemResponseDTO queryServiceRegistryBySystemRequestDTO(SystemRequestDTO consumerSystemRequestDTO) {
+		logger.debug("queryServiceRegistryBySystemRequestDTO started...");
+		Assert.notNull(consumerSystemRequestDTO, "ConsumerSystemRequestDTO is null.");
+		
+
+		final UriComponents queryBySystemDTOUri = getQueryBySystemDTOUri();
+		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemDTOUri, HttpMethod.POST, SystemResponseDTO.class, consumerSystemRequestDTO);
+		
+		return response.getBody();
+	}
 	//-------------------------------------------------------------------------------------------------
 	public List<OrchestrationResultDTO> generateAuthTokens(final OrchestrationFormRequestDTO request, final List<OrchestrationResultDTO> orList) {
 		logger.debug("generateAuthTokens started...");
@@ -114,4 +125,20 @@ public class OrchestratorDriver {
 		
 		throw new ArrowheadException("Orchestrator can't find Service Registry Query By Id URI.");
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQueryBySystemDTOUri() {
+		logger.debug("getQueryBySystemDTOUri started...");
+		
+		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find Service Registry Query By DTO URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find Service Registry Query By DTO URI.");
+	}
+
 }

@@ -3,7 +3,6 @@ package eu.arrowhead.core.orchestrator.service;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,8 +13,7 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestrationFlags;
@@ -31,6 +29,7 @@ import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
 @Service
 public class OrchestratorService {
@@ -42,7 +41,6 @@ public class OrchestratorService {
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
-	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	
 	private static final int EXPIRING_TIME_IN_MINUTES = 2;
 	
@@ -50,7 +48,8 @@ public class OrchestratorService {
 	private OrchestratorDriver orchestratorDriver;
 	
 	@Autowired
-	private SystemRepository systemRepository;
+	private OrchestratorStoreDBService orchestratorStoreDBService;
+	
 	
 	//=================================================================================================
 	// methods
@@ -93,14 +92,35 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------	
 	public OrchestrationResponseDTO orchestrationFromStore(
-			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
+			final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("orchestrationFromStore started ...");
 		
+		return orchestrationFromStoreWithSystemIdParameter(orchestrationFormRequestDTO, null);
+	}
 
+	//-------------------------------------------------------------------------------------------------	
+	public OrchestrationResponseDTO orchestrationFromStoreWithSystemIdParameter(
+			final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
+			final Long systemId) {
+		logger.debug("orchestrationFromStoreWithSystemParameter started ...");		
+		
+		orchestrationFormRequestDTO.validateCrossParameterConstraints();
+		
+		 final List<OrchestratorStore> entryList;
+		
+		if ( systemId == null) {
+			entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(systemId);
+		
+		}else {
+			
+			entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());
+		}
+	    int storeSize = entryList.size();
+	    
+	    
 		//TODO implement additional method logic here
 		return null;
 	}
-
 	//-------------------------------------------------------------------------------------------------	
 	public OrchestrationResponseDTO dynamicOrchestration(
 			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
@@ -120,7 +140,7 @@ public class OrchestratorService {
 	    final OrchestrationFormRequestDTO orchestrationFormRequestDTO = new OrchestrationFormRequestDTO.Builder(systemRequestDTO).build();
 	    orchestrationFormRequestDTO.validateCrossParameterConstraints();
 
-	    return orchestrationFromStore(orchestrationFormRequestDTO);
+	    return orchestrationFromStoreWithSystemIdParameter(orchestrationFormRequestDTO, systemId);
 
 	}
 	
@@ -293,10 +313,49 @@ public class OrchestratorService {
 			throw new InvalidParameterException("SystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryByIdSystemId(systemId);
+		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemId(systemId);
 		
 		
 		return systemResponseDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private long validateSystemRequestDTO(final SystemRequestDTO consumerSystemRequestDTO) {
+		logger.debug("validateSystemId started...");
+		
+		if (consumerSystemRequestDTO == null) {
+			throw new InvalidParameterException("SystemRequestDTO " + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemRequestDTO(consumerSystemRequestDTO);
+		
+		
+		return systemResponseDTO.getId();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStore> getOrchestrationStoreEntries(SystemRequestDTO requesterSystem,
+			ServiceQueryFormDTO requestedService) {
+		logger.debug("getOrchestrationStoreEntries started...");
+		
+		final List<OrchestratorStore> retrievedList ;
+		
+		if (requesterSystem == null) {
+			throw new InvalidParameterException("ConsumerSystem " + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if ( requestedService == null) {
+			
+			final long consumerSystemId = validateSystemRequestDTO(requesterSystem);
+			retrievedList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(consumerSystemId);
+			
+		}else {
+			
+			retrievedList = null;//orchestratorStoreDBService.getOrchestratorStoresByConsumerAndServiceDefinition(requesterSystem, requestedService );
+		}
+		
+		//TODO implement additional method logic here
+		return retrievedList;
 	}
 
 }

@@ -857,6 +857,7 @@ public class ServiceRegistryDBService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeBulkOfServiceRegistryEntries(final Iterable<ServiceRegistry> entities) {
 		logger.debug("removeBulkOfServiceRegistryEntries started...");
+		
 		try {
 			serviceRegistryRepository.deleteInBatch(entities);
 			serviceRegistryRepository.flush();
@@ -866,6 +867,28 @@ public class ServiceRegistryDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public SystemResponseDTO getSystemByNameAndAddressAndPort(String systemName, String address, int port) {
+		logger.debug("getSystemByNameAndAddressAndPort started...");
+		
+		final int validatedPort = validateSystemPort(port);
+		final String validatedSystemName = validateSystemParamString(systemName);
+		final String validatedAddress = validateSystemParamString(address);
+		
+		try {
+			final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
+			if (systemOptional.isEmpty()) {
+				throw new InvalidParameterException("No system with name: " + systemName + ", address: " +  address + " and port: " + port);
+			}
+			
+			return DTOConverter.convertSystemToSystemResponseDTO(systemOptional.get());
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 	//=================================================================================================
 	// assistant methods
 
@@ -1151,4 +1174,5 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+
 }

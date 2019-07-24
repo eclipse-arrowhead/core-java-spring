@@ -98,6 +98,9 @@ public class ServiceRegistryController {
 	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_DESCRIPTION = "Return Consumer system by requested id";
 	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_200_MESSAGE = "Consumer system data by id returned";
 	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_400_MESSAGE = "Could not query Service Registry by Consumer system id";
+	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION = "Return Consumer system by requested dto";
+	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE = "Consumer system data by requestDTO returned";
+	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE = "Could not query Service Registry by Consumer system requestDTO";
 	private static final String SERVICE_REGISTRY_UPDATE_DESCRIPTION = "Update a service";
 	private static final String SERVICE_REGISTRY_UPDATE_200_MESSAGE = "Service updated";
 	private static final String SERVICE_REGISTRY_UPDATE_400_MESSAGE = "Could not update service";
@@ -675,8 +678,8 @@ public class ServiceRegistryController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public SystemResponseDTO queryBySystemIdRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long consumerSystemId) {
-		logger.debug("Service query by id request received");
+	@ResponseBody public SystemResponseDTO queryRegistryBySystemId(@PathVariable(value = PATH_VARIABLE_ID) final long consumerSystemId) {
+		logger.debug("Service query by system id request received");
 		
 		if (consumerSystemId < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI +
@@ -685,6 +688,32 @@ public class ServiceRegistryController {
 		
 		final SystemResponseDTO result = serviceRegistryDBService.getSystemById(consumerSystemId);
 		logger.debug("Return consumer system by id: {}", consumerSystemId);
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION, response = SystemResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public SystemResponseDTO queryRegistryBySystemDTO(@RequestBody final SystemRequestDTO request) {
+		logger.debug("Service query by systemRequestDTO request received");
+		
+
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI +
+										  CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		
+		final String systemName = request.getSystemName();
+		final String address = request.getAddress();
+		final int port = request.getPort();
+		
+		final SystemResponseDTO result = serviceRegistryDBService.getSystemByNameAndAddressAndPort(systemName, address, port);
+		logger.debug("Return consumer system by name: {}, address: {}, port: {}", systemName, address, port);
 		
 		return result;
 	}
