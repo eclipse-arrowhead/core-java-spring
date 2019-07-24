@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
 
 @Repository
-public interface AuthorizationIntraCloudInterfaceConnectionRepository  extends RefreshableRepository<AuthorizationIntraCloudInterfaceConnection, Long> {
+public interface AuthorizationIntraCloudInterfaceConnectionRepository extends RefreshableRepository<AuthorizationIntraCloudInterfaceConnection,Long> {
 
 }

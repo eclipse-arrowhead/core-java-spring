@@ -26,11 +26,11 @@ import org.hibernate.annotations.OnDeleteAction;
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@Table (name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
+@Table(name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
 @NamedEntityGraphs({
-	@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
+	@NamedEntityGraph(name = "systemWithServiceRegistryEntries",
 			attributeNodes = {
-					@NamedAttributeNode (value = "serviceRegistryEntries")
+					@NamedAttributeNode(value = "serviceRegistryEntries")
 	})
 })
 public class System {
@@ -41,41 +41,41 @@ public class System {
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "systemName", "address", "port"); //NOSONAR
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String systemName;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String address;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private int port;
 	
-	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToMany (mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<>();
 	
-	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationIntraCloud> authorizationsIntraCloudAsConsumer = new HashSet<>();
 	
-	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationIntraCloud> authorizationsIntraCloudAsProvider = new HashSet<>();
 	
-	@OneToMany (mappedBy = "provider", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "provider", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationsInterCloudAsProvider = new HashSet<>();
 	
 	//=================================================================================================

@@ -15,29 +15,29 @@ import javax.persistence.UniqueConstraint;
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
 public class Relay {
 	
 	//=================================================================================================
 	// members
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String address;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private int port;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean secure = false;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 
 	//=================================================================================================

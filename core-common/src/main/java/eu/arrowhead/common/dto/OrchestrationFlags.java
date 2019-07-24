@@ -118,5 +118,4 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 			this.flag = flag;
 		}
 	}
-
 }

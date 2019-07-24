@@ -75,7 +75,7 @@ public class ServiceQueryFormDTO implements Serializable {
 		//=================================================================================================
 		// members
 
-		private String serviceDefinitionRequirement;
+		private final String serviceDefinitionRequirement;
 		private List<String> interfaceRequirements; 
 		private List<ServiceSecurityType> securityRequirements; 
 		private Map<String,String> metadataRequirements; 
