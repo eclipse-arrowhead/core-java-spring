@@ -125,16 +125,17 @@ CREATE TABLE `authorization_intra_cloud` (
 DROP TABLE IF EXISTS `authorization_inter_cloud`;
 CREATE TABLE `authorization_inter_cloud` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `consumer_cloud_id` bigint(20) NOT NULL,
   `provider_system_id` bigint(20) NOT NULL,
   `service_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `rule` (`consumer_cloud_id`,`service_id`),
+  UNIQUE KEY `rule` (`consumer_cloud_id`, `provider_system_id`, `service_id`),
   KEY `service_inter_auth` (`service_id`),
   CONSTRAINT `cloud` FOREIGN KEY (`consumer_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `service_inter_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE
+  CONSTRAINT `service_inter_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `provider_inter_auth` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `authorization_inter_cloud_interface_connection`;
@@ -361,6 +362,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'loca
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'localhost';
 
 DROP USER IF EXISTS 'orchestrator'@'%';
 CREATE USER IF NOT EXISTS 'orchestrator'@'%' IDENTIFIED BY 'KbgD2mTr8DQ4vtc';
@@ -372,6 +374,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'orchestrator'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`foreign_system` TO 'orchestrator'@'%';
 
 -- Event Handler
 DROP USER IF EXISTS 'event_handler'@'localhost';
