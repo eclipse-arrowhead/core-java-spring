@@ -76,7 +76,7 @@ public class OrchestratorAccessControlFilterTest {
 									  .addFilters(orchFilter)
 									  .build();
 			
-		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -179,10 +179,10 @@ public class OrchestratorAccessControlFilterTest {
 	}
 	
 	//=================================================================================================
-	// methods
+	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationFormRequestDTO createOrchestrationFromRequestDTO(final String requesterSystemName, final Map<String, Boolean> flags) {
+	private OrchestrationFormRequestDTO createOrchestrationFromRequestDTO(final String requesterSystemName, final Map<String,Boolean> flags) {
 		final OrchestrationFormRequestDTO dto = new OrchestrationFormRequestDTO();
 		
 		final SystemRequestDTO requesterSystem = new SystemRequestDTO();
@@ -193,5 +193,4 @@ public class OrchestratorAccessControlFilterTest {
 		
 		return dto;
 	}
-	
 }

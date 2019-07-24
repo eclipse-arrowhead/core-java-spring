@@ -9,7 +9,6 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -39,7 +38,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
-allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.ORCHESTRATOR_URI)
@@ -141,10 +140,13 @@ public class OrchestratorStoreController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
-		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		
+		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection,
+																																			  sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
+		
 		return orchestratorStoreListResponse;
 	}
 	
@@ -178,10 +180,13 @@ public class OrchestratorStoreController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
-		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
+		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(validatedPage, validatedSize,
+																																					    validatedDirection, sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
+		
 		return orchestratorStoreResponse;
 	}
 	
@@ -194,7 +199,8 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(path = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public OrchestratorStoreListResponseDTO getOrchestratorStoresByConsumer( @RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+	@ResponseBody public OrchestratorStoreListResponseDTO getOrchestratorStoresByConsumer(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
@@ -215,20 +221,18 @@ public class OrchestratorStoreController {
 			}
 		}
 		
-		final Direction validatedDirection = calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		
 		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		
-		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(
-				validatedPage, 
-				validatedSize, 
-				validatedDirection, 
-				sortField,
-				request.getConsumerSystemId(),
-				request.getServiceDefinitionName(),
-				request.getServiceInterfaceName());
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(validatedPage, validatedSize,	validatedDirection, 
+																																			  sortField, request.getConsumerSystemId(),
+																																			  request.getServiceDefinitionName(),
+																																			  request.getServiceInterfaceName());
 		
-		logger.debug("OrchestratorStores  with ConsumerSystemId : {} and ServiceDefinitionName : {} and  page: {} and item_per page: {} retrieved successfully", request.getConsumerSystemId(), request.getServiceDefinitionName(), page, size);
+		logger.debug("OrchestratorStores  with ConsumerSystemId : {} and ServiceDefinitionName : {} and  page: {} and item_per page: {} retrieved successfully", request.getConsumerSystemId(),
+					 request.getServiceDefinitionName(), page, size);
+		
 		return orchestratorStoreResponse;
 	}
 	
@@ -241,15 +245,15 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public OrchestratorStoreListResponseDTO addOrchestratorStoreEntries( @RequestBody final List<OrchestratorStoreRequestDTO> request) {
+	@ResponseBody public OrchestratorStoreListResponseDTO addOrchestratorStoreEntries(@RequestBody final List<OrchestratorStoreRequestDTO> request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
 		checkOrchestratorStoreRequestDTOList(request, CommonConstants.ORCHESTRATOR_STORE_MGMT_URI );
 		
-		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresResponse(
-				request);
+		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.createOrchestratorStoresResponse(request);
 		
 		logger.debug(orchestratorStoreResponse.getCount() + " out of " + request.size() + " OrchestratorStore entries created successfully");
+		
 		return orchestratorStoreResponse;
 	}
 	
@@ -282,7 +286,7 @@ public class OrchestratorStoreController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = ORCHESTRATOR_STORE_MGMT_MODIFY, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void modifyPriorities( @RequestBody final OrchestratorStoreModifyPriorityRequestDTO request) {
+	@ResponseBody public void modifyPriorities(@RequestBody final OrchestratorStoreModifyPriorityRequestDTO request) {
 		logger.debug("modifyPriorities started ...");
 		
 		checkOrchestratorStoreModifyPriorityRequestDTO(request, ORCHESTRATOR_STORE_MGMT_MODIFY );
@@ -298,8 +302,6 @@ public class OrchestratorStoreController {
 	//-------------------------------------------------------------------------------------------------	
 	private void checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(final OrchestratorStoreRequestDTO request, final String origin) {
 		logger.debug("checkOrchestratorStoreRequestDTOForByConsumerRequest started ...");
-		
-		
 		
 		if (request == null) {
 			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -320,7 +322,6 @@ public class OrchestratorStoreController {
 		if (Utilities.isEmpty(request.getServiceDefinitionName())) {
 			throw new BadPayloadException("ServiceDefinitionName : " + EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -373,8 +374,10 @@ public class OrchestratorStoreController {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Port "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || 
+				orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
+											  origin);
 			}
 			
 			if (orchestratorStoreRequestDTO.getServiceInterfaceName() == null) {
@@ -389,32 +392,10 @@ public class OrchestratorStoreController {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.Priority "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 		}
-
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private Direction calculateDirection(final String direction, final String origin) {
-		logger.debug("calculateDirection started ...");
-		
-		final String directionStr = direction != null ? direction.toUpperCase() : "";
-		Direction validatedDirection;
-		switch (directionStr) {
-			case CommonConstants.SORT_ORDER_ASCENDING:
-				validatedDirection = Direction.ASC;
-				break;
-			case CommonConstants.SORT_ORDER_DESCENDING:
-				validatedDirection = Direction.DESC;
-				break;
-			default:
-				throw new BadPayloadException("Invalid sort direction flag", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		return validatedDirection;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkOrchestratorStoreModifyPriorityRequestDTO(final OrchestratorStoreModifyPriorityRequestDTO request,
-			final String origin) {
+	private void checkOrchestratorStoreModifyPriorityRequestDTO(final OrchestratorStoreModifyPriorityRequestDTO request, final String origin) {
 		
 		if (request == null) {
 			throw new BadPayloadException("Request "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -424,14 +405,12 @@ public class OrchestratorStoreController {
 			throw new BadPayloadException("PriorityMap "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if ( request.getPriorityMap().isEmpty()) {
+		if (request.getPriorityMap().isEmpty()) {
 			throw new BadPayloadException("PriorityMap "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		final Map<Long, Integer> priorityMap = request.getPriorityMap();
-		
 		for (final Entry<Long, Integer> entry : priorityMap.entrySet()) {
-
 			if (entry.getValue() == null) {
 				throw new BadPayloadException("PriorityMap.PriorityValue "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
@@ -446,7 +425,5 @@ public class OrchestratorStoreController {
 		if (mapSize != valuesSet.size()) {
 			throw new BadPayloadException(MODIFY_PRIORITY_MAP_PRIORITY_DUPLICATION_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-
 	}
-
 }

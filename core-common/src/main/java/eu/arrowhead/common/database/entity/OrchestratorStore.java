@@ -27,6 +27,7 @@ public class OrchestratorStore {
 	// members
 
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "priority"); //NOSONAR
+	public static final String FIELD_NAME_PRIORITY = "priority";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
