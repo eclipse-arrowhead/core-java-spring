@@ -108,13 +108,16 @@ public class OrchestratorService {
 		
 		 final List<OrchestratorStore> entryList;
 		
-		if ( systemId == null) {
+		if ( systemId != null) {
 			entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(systemId);
 		
 		}else {
 			
 			entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());
+			// TODO filter entryList for requested interfaces
+		
 		}
+		
 	    int storeSize = entryList.size();
 	    
 	    
@@ -360,7 +363,6 @@ public class OrchestratorService {
 			retrievedList = orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinition(consumerSystemId, serviceDefinitionName );
 		}
 		
-		//TODO implement additional method logic here
 		return retrievedList;
 	}
 

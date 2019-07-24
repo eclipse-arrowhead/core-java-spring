@@ -54,7 +54,8 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE priority = ?1 AND consumerSystem.id = ?2 ")
 	public List<OrchestratorStore> findAllByPriorityAndSystemId(int topPriority, long consumerSystemId);
 	
-	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(
 			final System consumerSystem,
-			final ServiceDefinition serviceDefinition);
+			final ServiceDefinition serviceDefinition,
+			final Sort sortField);
 }

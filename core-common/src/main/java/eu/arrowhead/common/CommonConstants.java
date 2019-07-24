@@ -145,6 +145,8 @@ public class CommonConstants {
 
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
+	
+	public static final String SORT_FIELD_PRIORITY = "priority";
 
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";

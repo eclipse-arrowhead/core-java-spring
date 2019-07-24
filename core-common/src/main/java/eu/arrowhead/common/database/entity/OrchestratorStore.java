@@ -16,6 +16,8 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import eu.arrowhead.common.CommonConstants;
+
 @Entity
 @Table (uniqueConstraints = {
 		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority", "serviceInterfaceId"}),
@@ -26,7 +28,7 @@ public class OrchestratorStore {
 	//=================================================================================================
 	// members
 
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "priority"); //NOSONAR
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", CommonConstants.SORT_FIELD_PRIORITY); //NOSONAR
 	
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)

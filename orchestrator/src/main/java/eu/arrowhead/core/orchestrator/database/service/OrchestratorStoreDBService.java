@@ -307,9 +307,11 @@ public class OrchestratorStoreDBService {
 		
 		try {		
 			
-			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
 					consumerOption.get(), 
-					serviceDefinitionOption.get());			
+					serviceDefinitionOption.get(),
+					Sort.by(CommonConstants.SORT_FIELD_PRIORITY)
+					);			
 			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
