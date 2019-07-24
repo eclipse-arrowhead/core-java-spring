@@ -42,6 +42,7 @@ public class CommonConstants {
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
+	public static final String SR_QUERY_BY_ID_URI = "service.registry.query.by.id.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
 	
@@ -74,6 +75,7 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_SERVICE_REGISTRY_QUERY_BY_ID_URI = "/querybyid/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
 	public static final String OP_AUTH_KEY_URI = "/publickey";

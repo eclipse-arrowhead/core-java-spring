@@ -58,6 +58,18 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultDTO queryByIdServiceRegistry(final long consumerSystemId) {
+		logger.debug("queryByIdServiceRegistry started...");
+		Assert.isTrue(consumerSystemId < 1, "ConsumerSystemId is less then 1.");
+		
+		final UriComponents queryByIdUri = getQueryByIdUri();
+		queryByIdUri.expand(Map.of(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId));
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryByIdUri, HttpMethod.POST, ServiceQueryResultDTO.class);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public List<OrchestrationResultDTO> generateAuthTokens(final OrchestrationFormRequestDTO request, final List<OrchestrationResultDTO> orList) {
 		logger.debug("generateAuthTokens started...");
 		
@@ -82,5 +94,20 @@ public class OrchestratorDriver {
 		}
 		
 		throw new ArrowheadException("Orchestrator can't find Service Registry Query URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQueryByIdUri() {
+		logger.debug("getQueryByIdUri started...");
+		
+		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_BY_ID_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_BY_ID_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find Service Registry Query By Id URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find Service Registry Query By Id URI.");
 	}
 }
