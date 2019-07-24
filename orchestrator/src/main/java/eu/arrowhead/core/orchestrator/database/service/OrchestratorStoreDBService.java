@@ -2,7 +2,6 @@ package eu.arrowhead.core.orchestrator.database.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -283,6 +282,41 @@ public class OrchestratorStoreDBService {
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStore> getOrchestratorStoresByConsumerIdAndServiceDefinition(final long consumerSystemId,
+			final String serviceDefinitionName) {
+		logger.debug("getOrchestratorStoresByConsumerIdAndServiceDefinition started...");
+		
+		if ( consumerSystemId < 1) {
+			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
+			if ( consumerOption.isEmpty() ) {
+				throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
+			}
+				
+		if ( Utilities.isEmpty(serviceDefinitionName)) {
+			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
+		if ( serviceDefinitionOption.isEmpty() ) {
+			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		try {		
+			
+			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+					consumerOption.get(), 
+					serviceDefinitionOption.get());			
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public OrchestratorStoreListResponseDTO createOrchestratorStoresResponse(

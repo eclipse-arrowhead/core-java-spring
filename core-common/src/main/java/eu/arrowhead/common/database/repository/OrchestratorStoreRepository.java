@@ -31,7 +31,8 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	
 	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(
 			final System consumerSystem, 
-			final ServiceDefinition serviceDefinition, final Pageable regRequest);
+			final ServiceDefinition serviceDefinition, 
+			final Pageable regRequest);
 	
 	public Page<OrchestratorStore> findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
 			final System system,
@@ -52,5 +53,8 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 	
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE priority = ?1 AND consumerSystem.id = ?2 ")
 	public List<OrchestratorStore> findAllByPriorityAndSystemId(int topPriority, long consumerSystemId);
-		
+	
+	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+			final System consumerSystem,
+			final ServiceDefinition serviceDefinition);
 }

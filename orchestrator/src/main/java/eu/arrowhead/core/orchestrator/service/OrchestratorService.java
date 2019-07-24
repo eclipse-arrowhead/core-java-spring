@@ -343,15 +343,21 @@ public class OrchestratorService {
 		if (requesterSystem == null) {
 			throw new InvalidParameterException("ConsumerSystem " + NULL_PARAMETER_ERROR_MESSAGE);
 		}
+		final long consumerSystemId = validateSystemRequestDTO(requesterSystem);
 		
 		if ( requestedService == null) {
 			
-			final long consumerSystemId = validateSystemRequestDTO(requesterSystem);
 			retrievedList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(consumerSystemId);
 			
 		}else {
 			
-			retrievedList = null;//orchestratorStoreDBService.getOrchestratorStoresByConsumerAndServiceDefinition(requesterSystem, requestedService );
+			if (Utilities.isEmpty(requestedService.getServiceDefinitionRequirement() )) {
+				throw new InvalidParameterException("ServiceDefinitionRequirement " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+			}
+			
+			final String serviceDefinitionName = requestedService.getServiceDefinitionRequirement().trim().toLowerCase();
+			
+			retrievedList = orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinition(consumerSystemId, serviceDefinitionName );
 		}
 		
 		//TODO implement additional method logic here
