@@ -41,7 +41,7 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		
 		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 		final UriComponents queryUri = createQueryByIdUri(scheme);
-		context.put(CommonConstants.SR_QUERY_BY_ID_URI, queryUri);
+		context.put(CommonConstants.SR_QUERY_BY_SYSTEM_ID_URI, queryUri);
 		
 		context.put(CommonConstants.REQUIRED_URI_LIST, getRequiredCoreSystemServiceUris());
 		
@@ -51,7 +51,7 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	private UriComponents createQueryByIdUri(final String scheme) {
 		logger.debug("createQueryUri started...");
 				
-		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_ID_URI;
+		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI;
 		return Utilities.createURI(
 				scheme, 
 				coreSystemRegistrationProperties.getServiceRegistryAddress(), 

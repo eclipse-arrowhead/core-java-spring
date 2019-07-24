@@ -19,6 +19,8 @@ import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -58,13 +60,13 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryResultDTO queryByIdServiceRegistry(final long consumerSystemId) {
+	public SystemResponseDTO queryServiceRegistryByIdSystemId(final long consumerSystemId) {
 		logger.debug("queryByIdServiceRegistry started...");
 		Assert.isTrue(consumerSystemId < 1, "ConsumerSystemId is less then 1.");
 		
-		final UriComponents queryByIdUri = getQueryByIdUri();
-		queryByIdUri.expand(Map.of(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId));
-		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryByIdUri, HttpMethod.POST, ServiceQueryResultDTO.class);
+		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri();
+		queryBySystemIdUri.expand(Map.of(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId));
+		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemIdUri, HttpMethod.POST, SystemResponseDTO.class);
 		
 		return response.getBody();
 	}
@@ -97,12 +99,12 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents getQueryByIdUri() {
+	private UriComponents getQueryBySystemIdUri() {
 		logger.debug("getQueryByIdUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_BY_ID_URI)) {
+		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_BY_SYSTEM_ID_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_BY_ID_URI);
+				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_BY_SYSTEM_ID_URI);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find Service Registry Query By Id URI.");
 			}

@@ -338,6 +338,41 @@ public class DTOConverter {
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
+		Assert.notNull(foreignSystem, "ForeignSystem is null");
+		
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
+		Assert.notNull(system, "System is null");
+		
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
+		systemRequestDTO.setAddress(system.getAddress());
+		systemRequestDTO.setSystemName(system.getSystemName());
+		systemRequestDTO.setPort(system.getPort());
+		systemRequestDTO.setAuthenticationInfo(systemRequestDTO.getAuthenticationInfo());
+		
+		return systemRequestDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemRequestDTO convertSystemResponseDTOToSystemRequestDTO(
+			SystemResponseDTO validConsumerSystemResponseDTO) {
+		Assert.notNull(validConsumerSystemResponseDTO, "ConsumerSystemResponseDTO is null");
+		
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
+		systemRequestDTO.setAddress(validConsumerSystemResponseDTO.getAddress());
+		systemRequestDTO.setSystemName(validConsumerSystemResponseDTO.getSystemName());
+		systemRequestDTO.setPort(validConsumerSystemResponseDTO.getPort());
+		systemRequestDTO.setAuthenticationInfo(validConsumerSystemResponseDTO.getAuthenticationInfo());
+		
+		return systemRequestDTO;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -393,24 +428,4 @@ public class DTOConverter {
 		return result;
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
-		Assert.notNull(foreignSystem, "ForeignSystem is null");
-		
-		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
-										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
-		Assert.notNull(system, "System is null");
-		
-		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
-		systemRequestDTO.setAddress(system.getAddress());
-		systemRequestDTO.setSystemName(system.getSystemName());
-		systemRequestDTO.setPort(system.getPort());
-		systemRequestDTO.setAuthenticationInfo(systemRequestDTO.getAuthenticationInfo());
-		
-		return systemRequestDTO;
-	}
 }

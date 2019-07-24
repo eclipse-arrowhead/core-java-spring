@@ -114,10 +114,10 @@ public class OrchestratorService {
 	public OrchestrationResponseDTO storeOchestrationProcessResponse(long systemId) {
 		logger.debug("storeOchestrationProcessResponse started ...");
 		
-		final System validConsumerSystem =  validateSystemId(systemId);
-		final SystemRequestDTO consumerSystemRequestDTO = DTOConverter.convertSystemToSystemRequestDTO(validConsumerSystem);
+		final SystemResponseDTO validConsumerSystemResponseDTO  =  validateSystemId(systemId);
+		final SystemRequestDTO systemRequestDTO = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(validConsumerSystemResponseDTO);
 		
-	    final OrchestrationFormRequestDTO orchestrationFormRequestDTO = new OrchestrationFormRequestDTO.Builder(consumerSystemRequestDTO).build();
+	    final OrchestrationFormRequestDTO orchestrationFormRequestDTO = new OrchestrationFormRequestDTO.Builder(systemRequestDTO).build();
 	    orchestrationFormRequestDTO.validateCrossParameterConstraints();
 
 	    return orchestrationFromStore(orchestrationFormRequestDTO);
@@ -286,19 +286,17 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private System validateSystemId(final long systemId) {
+	private SystemResponseDTO validateSystemId(final long systemId) {
 		logger.debug("validateSystemId started...");
 		
 		if (systemId < 1) {
 			throw new InvalidParameterException("SystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		final Optional<System> systemOptional = systemRepository.findById(systemId);
-		if (systemOptional.isEmpty()) {
-			throw new InvalidParameterException("System by id" + systemId + NOT_IN_DB_ERROR_MESSAGE );
-		}
+		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryByIdSystemId(systemId);
 		
-		return systemOptional.get();
+		
+		return systemResponseDTO;
 	}
 
 }
