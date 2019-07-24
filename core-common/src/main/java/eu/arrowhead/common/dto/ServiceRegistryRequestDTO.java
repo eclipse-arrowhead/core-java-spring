@@ -42,4 +42,4 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	public void setMetadata(Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final Integer version) { this.version = version; }
 	public void setInterfaces(final List<String> interfaces) { this.interfaces = interfaces; }
-}
+} 
