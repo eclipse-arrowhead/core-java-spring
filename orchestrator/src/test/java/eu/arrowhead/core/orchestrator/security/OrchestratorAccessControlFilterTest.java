@@ -131,7 +131,7 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest());
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ public class OrchestratorAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest());
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
