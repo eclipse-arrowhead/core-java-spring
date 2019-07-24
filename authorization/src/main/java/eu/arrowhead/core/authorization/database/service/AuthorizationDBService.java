@@ -446,7 +446,7 @@ public class AuthorizationDBService {
 				logger.debug("Have no any authorization intra cloud rule");
 			}			
 			
-			return new AuthorizationIntraCloudCheckResponseDTO(consumerId, serviceDefinitionId, authorizedProvidersWithInterfaces);
+			return new AuthorizationIntraCloudCheckResponseDTO(DTOConverter.convertSystemToSystemResponseDTO(consumer), serviceDefinitionId, authorizedProvidersWithInterfaces);
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {

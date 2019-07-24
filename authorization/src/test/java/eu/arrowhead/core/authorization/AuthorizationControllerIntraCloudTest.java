@@ -42,6 +42,8 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 
 @RunWith(SpringRunner.class)
@@ -317,10 +319,112 @@ public class AuthorizationControllerIntraCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699")
 	@Test
-	public void testCheckAuthorizationIntraCloudRequestWithInvalidConsumerId() throws Exception {
+	public void testCheckAuthorizationIntraCloudRequestWithNullConsumer() throws Exception {
 		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(0L, 1L, createListOfIdIdLists(2, 2))))
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(null, 1L, createListOfIdIdLists(2, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testCheckAuthorizationIntraCloudRequestWithNullConsumerName() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 1L, createListOfIdIdLists(2, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testCheckAuthorizationIntraCloudRequestWithEmptyConsumerName() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName(" ");
+		
+		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 1L, createListOfIdIdLists(2, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testCheckAuthorizationIntraCloudRequestWithNullConsumerAddress() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		
+		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 1L, createListOfIdIdLists(2, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testCheckAuthorizationIntraCloudRequestWithEmptyConsumerAddress() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress(" ");
+		
+		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 1L, createListOfIdIdLists(2, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testCheckAuthorizationIntraCloudRequestWithNullConsumerPort() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("127.0.0.1");
+		
+		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 1L, createListOfIdIdLists(2, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testCheckAuthorizationIntraCloudRequestWithTooLowConsumerPort() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("127.0.0.1");
+		consumer.setPort(-1);
+		
+		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 1L, createListOfIdIdLists(2, 2))))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testCheckAuthorizationIntraCloudRequestWithTooHighConsumerPort() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("127.0.0.1");
+		consumer.setPort(420000);
+		
+		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 1L, createListOfIdIdLists(2, 2))))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -329,9 +433,14 @@ public class AuthorizationControllerIntraCloudTest {
 	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckAuthorizationIntraCloudRequestWithInvalidServiceDefinitionId() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("127.0.0.1");
+		consumer.setPort(4200);
+		
 		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(1L, null, createListOfIdIdLists(2, 2))))
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, null, createListOfIdIdLists(2, 2))))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -340,27 +449,35 @@ public class AuthorizationControllerIntraCloudTest {
 	@SuppressWarnings("squid:S2699")
 	@Test
 	public void testCheckAuthorizationIntraCloudRequestWithEmptyProviderIdList() throws Exception {
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("127.0.0.1");
+		consumer.setPort(4200);
+		
 		this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(1L, 2L, new ArrayList<>())))
+					.content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, 2L, new ArrayList<>())))
 					.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckAuthorizationIntraCloudRequestDBCall() throws Exception {
-		final Long consumerId = 1L;
-		final Long serviceDefinitionId = 3L;
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("127.0.0.1");
+		consumer.setPort(4200);
+		final long serviceDefinitionId = 3L;
 		final int numberOfProviders = 2;
 		final int numberOfInterfaces = 4;
-		final List<IdIdListDTO> authorizedProviderIdsWithInterfaceLitsts =createListOfIdIdLists(numberOfProviders, numberOfInterfaces);
-		when(authorizationDBService.checkAuthorizationIntraCloudRequest(anyLong(), anyLong(), any())).thenReturn(new AuthorizationIntraCloudCheckResponseDTO(consumerId, serviceDefinitionId,
-																																							 authorizedProviderIdsWithInterfaceLitsts));
+		final List<IdIdListDTO> authorizedProviderIdsWithInterfaceLitsts = createListOfIdIdLists(numberOfProviders, numberOfInterfaces);
+		when(authorizationDBService.checkAuthorizationIntraCloudRequest(any(String.class), any(String.class), anyInt(), anyLong(), any())).
+														thenReturn(new AuthorizationIntraCloudCheckResponseDTO(new SystemResponseDTO(), serviceDefinitionId, authorizedProviderIdsWithInterfaceLitsts));
 		
 		final MvcResult response = this.mockMvc.perform(post(AUTHORIZATION_INTRA_CLOUD_CHECK_URI)
 											   .contentType(MediaType.APPLICATION_JSON)
-											   .content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumerId, serviceDefinitionId, 
+											   .content(objectMapper.writeValueAsBytes(new AuthorizationIntraCloudCheckRequestDTO(consumer, serviceDefinitionId, 
 													   																			  authorizedProviderIdsWithInterfaceLitsts)))
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
