@@ -35,18 +35,19 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		logger.debug("customInit started...");
 		
 		final Cloud ownCloud = commonDBservicre.getOwnCloud(sslProperties.isSslEnabled());
+		final String authorizationInfo = sslProperties.isSslEnabled() ? Base64.getEncoder().encodeToString(publicKey.getEncoded()) : null;
 		final CloudGatekeeper gatekeeper = checkIfGatekeeperRegistered(ownCloud);
 		if (gatekeeper == null) {
 			gatekeeperDBService.registerGatekeeper(ownCloud, coreSystemRegistrationProperties.getCoreSystemAddress()
 														   , coreSystemRegistrationProperties.getCoreSystemPort()
 														   , CommonConstants.GATEKEEPER_URI
-														   , Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+														   , authorizationInfo);
 			logger.info("Gatekeeper of own cloud has been registered.");
 		} else if (!checkIfRegisteredGatekeeperHasSameProperties(gatekeeper)) {
 			gatekeeperDBService.updateGatekeeper(gatekeeper, coreSystemRegistrationProperties.getCoreSystemAddress()
 														   , coreSystemRegistrationProperties.getCoreSystemPort()
 														   , CommonConstants.GATEKEEPER_URI
-														   , Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+														   , authorizationInfo);
 			logger.info("Gatekeeper of own cloud has been updated.");
 		} else {
 			logger.info("Gatekeeper of own cloud was already registered.");
@@ -63,10 +64,27 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean checkIfRegisteredGatekeeperHasSameProperties(CloudGatekeeper gatekeeper) {
-		return (gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
-				&& gatekeeper.getPort() == coreSystemRegistrationProperties.getCoreSystemPort()
-				&& gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
-				&& gatekeeper.getAuthenticationInfo().equals(Base64.getEncoder().encodeToString(publicKey.getEncoded())));
+	private boolean checkIfRegisteredGatekeeperHasSameProperties(final CloudGatekeeper gatekeeper) {
+		if (publicKey == null) {
+			
+			return (gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
+					&& gatekeeper.getPort() == coreSystemRegistrationProperties.getCoreSystemPort()
+					&& gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
+					&& gatekeeper.getAuthenticationInfo() == null);
+			
+		} else if (gatekeeper.getAuthenticationInfo() == null) {
+			
+			return (gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
+					&& gatekeeper.getPort() == coreSystemRegistrationProperties.getCoreSystemPort()
+					&& gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
+					&& publicKey == null);
+			
+		} else {
+			
+			return (gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
+					&& gatekeeper.getPort() == coreSystemRegistrationProperties.getCoreSystemPort()
+					&& gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
+					&& gatekeeper.getAuthenticationInfo().equals(Base64.getEncoder().encodeToString(publicKey.getEncoded())));
+		}
 	}
 }
