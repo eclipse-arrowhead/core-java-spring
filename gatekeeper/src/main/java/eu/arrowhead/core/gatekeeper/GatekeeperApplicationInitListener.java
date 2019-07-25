@@ -36,7 +36,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 
 		final Cloud ownCloud = commonDBservicre.getOwnCloud(sslProperties.isSslEnabled());
 			
-		Cloud anotherOwnCloud = commonDBservicre.getOwnCloud(!sslProperties.isSslEnabled());
+		final Cloud anotherOwnCloud = commonDBservicre.getOwnCloud(!sslProperties.isSslEnabled());
 		if (anotherOwnCloud.getGatekeeper() != null) {
 			gatekeeperDBService.removeGatekeeper(anotherOwnCloud.getGatekeeper().getId());				
 		}
