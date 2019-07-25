@@ -14,7 +14,6 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeper;
 import eu.arrowhead.common.database.repository.CloudGatekeeperRepository;
-import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -57,24 +56,36 @@ public class GatekeeperDBService {
 		logger.debug("registerGatekeeper started...");
 		
 		try {
+			
 			Assert.isTrue(cloud != null, "Cloud is null.");
 			Assert.isTrue(!Utilities.isEmpty(address), "Address is null or empty.");
-			Assert.isTrue(!Utilities.isEmpty(serviceUri), "ServiceUri is null or empty.");			
-		} catch (IllegalArgumentException ex) {
+			Assert.isTrue(!Utilities.isEmpty(serviceUri), "ServiceUri is null or empty.");
+						
+			if (isPortOutOfValidRange(port)) {
+				throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+			}
+			
+			if (cloud.getSecure() && Utilities.isEmpty(authenticationInfo)) {
+				throw new InvalidParameterException("Gatekeeper without or with blank authenticationInfo cannot be registered for a secured cloud. Cloud: " + cloud);
+			}
+			
+			final String validatedAddress = address.toLowerCase().trim();
+			final String validatedServiceUri = serviceUri.trim();
+			
+			checkUniqueConstraintOfCloudGatekeeperTable(cloud, validatedAddress, port, validatedServiceUri);
+			
+			final CloudGatekeeper gatekeeper = new CloudGatekeeper(cloud, validatedAddress, port, validatedServiceUri, authenticationInfo);
+			return cloudGatekeeperRepository.saveAndFlush(gatekeeper);			
+			
+		} catch (final IllegalArgumentException ex) {
 			throw new InvalidParameterException(ex.getMessage());
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
-		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
-		}
-		
-		String validatedAddress = address.toLowerCase().trim();
-		String validatedServiceUri = serviceUri.trim();
-		
-		checkUniqueConstraintOfCloudGatekeeperTable(cloud, validatedAddress, port, validatedServiceUri);
-		
-		final CloudGatekeeper gatekeeper = new CloudGatekeeper(cloud, validatedAddress, port, validatedServiceUri, authenticationInfo);
-		return cloudGatekeeperRepository.saveAndFlush(gatekeeper);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -83,30 +94,41 @@ public class GatekeeperDBService {
 		logger.debug("registerGatekeeper started...");
 		
 		try {
+			
 			Assert.isTrue(gatekeeper != null, "Gatekeeper is null.");
 			Assert.isTrue(!Utilities.isEmpty(address), "Address is null or empty.");
 			Assert.isTrue(!Utilities.isEmpty(serviceUri), "ServiceUri is null or empty.");					
-		} catch (IllegalArgumentException ex) {
+			
+			if (isPortOutOfValidRange(port)) {
+				throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+			}
+						
+			if (gatekeeper.getCloud().getSecure() && Utilities.isEmpty(authenticationInfo)) {
+				throw new InvalidParameterException("Gatekeeper without or with blank authenticationInfo cannot be registered for a secured cloud. Cloud: " + gatekeeper.getCloud());
+			}
+								
+			final String validatedAddress = address.toLowerCase().trim();
+			final String validatedServiceUri = serviceUri.trim();
+			
+				if(!gatekeeper.getAddress().equals(validatedAddress) || gatekeeper.getPort() != port || !gatekeeper.getServiceUri().equals(validatedServiceUri)) {
+				checkUniqueConstraintOfCloudGatekeeperTable(null, validatedAddress, port, validatedServiceUri);			
+			}
+			
+			gatekeeper.setAddress(validatedAddress);
+			gatekeeper.setPort(port);
+			gatekeeper.setServiceUri(validatedServiceUri);
+			gatekeeper.setAuthenticationInfo(authenticationInfo);
+			
+			return cloudGatekeeperRepository.saveAndFlush(gatekeeper);
+			
+		} catch (final IllegalArgumentException ex) {
 			throw new InvalidParameterException(ex.getMessage());
-		}
-		
-		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
-		}
-		
-		String validatedAddress = address.toLowerCase().trim();
-		String validatedServiceUri = serviceUri.trim();
-		
-		if(!gatekeeper.getAddress().equals(validatedAddress) || gatekeeper.getPort() != port || !gatekeeper.getServiceUri().equals(validatedServiceUri)) {
-			checkUniqueConstraintOfCloudGatekeeperTable(null, validatedAddress, port, validatedServiceUri);			
-		}
-		
-		gatekeeper.setAddress(validatedAddress);
-		gatekeeper.setPort(port);
-		gatekeeper.setServiceUri(validatedServiceUri);
-		gatekeeper.setAuthenticationInfo(authenticationInfo);
-		
-		return cloudGatekeeperRepository.saveAndFlush(gatekeeper);
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
 	}
 	
 	//=================================================================================================
@@ -137,5 +159,11 @@ public class GatekeeperDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isPortOutOfValidRange(final int port) {
+		logger.debug("isPortOutOfValidRange started...");
+		return port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX;
 	}
 }
