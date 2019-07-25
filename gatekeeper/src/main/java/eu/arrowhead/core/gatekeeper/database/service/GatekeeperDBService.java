@@ -68,9 +68,12 @@ public class GatekeeperDBService {
 			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 		
-		checkUniqueConstraintOfCloudGatekeeperTable(cloud, address, port, serviceUri);
+		String validatedAddress = address.toLowerCase().trim();
+		String validatedServiceUri = serviceUri.trim();
 		
-		final CloudGatekeeper gatekeeper = new CloudGatekeeper(cloud, address, port, serviceUri, authenticationInfo);
+		checkUniqueConstraintOfCloudGatekeeperTable(cloud, validatedAddress, port, validatedServiceUri);
+		
+		final CloudGatekeeper gatekeeper = new CloudGatekeeper(cloud, validatedAddress, port, validatedServiceUri, authenticationInfo);
 		return cloudGatekeeperRepository.saveAndFlush(gatekeeper);
 	}
 	
@@ -91,11 +94,16 @@ public class GatekeeperDBService {
 			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 		
-		checkUniqueConstraintOfCloudGatekeeperTable(null, address, port, serviceUri);
+		String validatedAddress = address.toLowerCase().trim();
+		String validatedServiceUri = serviceUri.trim();
 		
-		gatekeeper.setAddress(address);
+		if(!gatekeeper.getAddress().equals(validatedAddress) || gatekeeper.getPort() != port || !gatekeeper.getServiceUri().equals(validatedServiceUri)) {
+			checkUniqueConstraintOfCloudGatekeeperTable(null, validatedAddress, port, validatedServiceUri);			
+		}
+		
+		gatekeeper.setAddress(validatedAddress);
 		gatekeeper.setPort(port);
-		gatekeeper.setServiceUri(serviceUri);
+		gatekeeper.setServiceUri(validatedServiceUri);
 		gatekeeper.setAuthenticationInfo(authenticationInfo);
 		
 		return cloudGatekeeperRepository.saveAndFlush(gatekeeper);

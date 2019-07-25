@@ -64,12 +64,9 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	private boolean checkIfRegisteredGatekeeperHasSameProperties(CloudGatekeeper gatekeeper) {
-		if (!gatekeeper.getAddress().equals(coreSystemRegistrationProperties.getCoreSystemAddress()) 
+		return (!gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
 				|| gatekeeper.getPort() != coreSystemRegistrationProperties.getCoreSystemPort()
-				|| !gatekeeper.getServiceUri().equals(CommonConstants.GATEKEEPER_URI)
-				|| !gatekeeper.getAuthenticationInfo().equals(Base64.getEncoder().encodeToString(publicKey.getEncoded()))) {
-			return false;
-		}
-		return true;
+				|| !gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
+				|| !gatekeeper.getAuthenticationInfo().equals(Base64.getEncoder().encodeToString(publicKey.getEncoded())));
 	}
 }

@@ -102,7 +102,7 @@ public class GatekeeperDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testRegisterGatekeeperWithAlreadyExistingCloud() {
+	public void testRegisterGatekeeperWithCloudAlreadyHavingGatekeeper() {
 		final Cloud cloud = new Cloud();
 		final CloudGatekeeper cloudGatekeeper = new CloudGatekeeper(cloud, "0.0.0.0", 1000, "", null);
 		when(cloudGatekeeperRepository.findByCloud(any())).thenReturn(Optional.of(cloudGatekeeper));
@@ -185,6 +185,6 @@ public class GatekeeperDBServiceTest {
 		when(cloudGatekeeperRepository.findByCloud(any())).thenReturn(Optional.ofNullable(null));
 		when(cloudGatekeeperRepository.findByAddressAndPortAndServiceUri(any(), anyInt(), any())).thenReturn(Optional.of(existingGatekeeper));
 		
-		gatekeeperDBService.updateGatekeeper(new CloudGatekeeper(), address, port, uri, null);
+		gatekeeperDBService.updateGatekeeper(existingGatekeeper, "another address", port, uri, null);
 	}
 }
