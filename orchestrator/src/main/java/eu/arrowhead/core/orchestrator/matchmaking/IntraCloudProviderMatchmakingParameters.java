@@ -13,7 +13,7 @@ public class IntraCloudProviderMatchmakingParameters {
 	// members
 	
 	protected List<PreferredProviderDataDTO> preferredLocalProviders = new ArrayList<>();
-	protected long randomSeed;
+	protected long randomSeed = System.currentTimeMillis();
 	
 	// additional parameter can be add here to provide information to the various matchmaking algorithms
 	
