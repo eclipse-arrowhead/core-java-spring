@@ -2,6 +2,7 @@ package eu.arrowhead.core.orchestrator.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,13 +21,18 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.dto.TokenDataDTO;
 import eu.arrowhead.common.dto.TokenGenerationProviderDTO;
@@ -42,6 +48,7 @@ public class OrchestratorDriver {
 	// members
 	
 	private static final String AUTH_TOKEN_GENERATION_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 
 	private static final Logger logger = LogManager.getLogger(OrchestratorDriver.class);
 	
@@ -96,6 +103,23 @@ public class OrchestratorDriver {
 		
 		return orList;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<ServiceRegistryResponseDTO> queryAuthorization(final SystemRequestDTO consumer, final List<ServiceRegistryResponseDTO> providers) {
+		logger.debug("queryAuthorization started...");
+		
+		if (!providers.isEmpty()) {
+			final UriComponents checkUri = getAuthIntraCheckUri();
+			final long serviceDefinitionId = providers.get(0).getServiceDefinition().getId();
+			final List<IdIdListDTO> providerIdsWithInterfaceIds = convertSRResultsToProviderIdListWithInterfaceIds(providers);
+			final AuthorizationIntraCloudCheckRequestDTO payload = new AuthorizationIntraCloudCheckRequestDTO(consumer, serviceDefinitionId, providerIdsWithInterfaceIds);
+			final ResponseEntity<AuthorizationIntraCloudCheckResponseDTO> response = httpService.sendRequest(checkUri, HttpMethod.POST, AuthorizationIntraCloudCheckResponseDTO.class, payload);
+			
+			filterProviderListUsingAuthorizationResult(providers, response.getBody());
+		}
+		
+		return providers;
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -128,6 +152,21 @@ public class OrchestratorDriver {
 		}
 		
 		throw new ArrowheadException("Orchestrator can't find token generation URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getAuthIntraCheckUri() {
+		logger.debug("getAuthTokenGenerationUri started...");
+		
+		if (arrowheadContext.containsKey(AUTH_INTRA_CHECK_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(AUTH_INTRA_CHECK_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find authorization check URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find authorization check URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -177,6 +216,8 @@ public class OrchestratorDriver {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void updateOrchestrationResultsWithTokenData(final List<OrchestrationResultDTO> orList, final String serviceDefinition, final List<TokenDataDTO> tokenDataList) {
+		logger.debug("updateOrchestrationResultsWithTokenData started...");
+		
 		for (final OrchestrationResultDTO result : orList) {
 			if (result.getService().getServiceDefinition().equals(serviceDefinition)) {
 				for (final TokenDataDTO tokenData : tokenDataList) {
@@ -193,6 +234,61 @@ public class OrchestratorDriver {
 		return system.getSystemName().equals(systemName) &&
 			   system.getAddress().equals(systemAddress) &&
 			   system.getPort() == systemPort;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<IdIdListDTO> convertSRResultsToProviderIdListWithInterfaceIds(final List<ServiceRegistryResponseDTO> providers) {
+		logger.debug("convertSRResultsToProviderIdListWithInterfaceIds started...");
+		
+		final List<IdIdListDTO> result = new ArrayList<IdIdListDTO>(providers.size());
+		for (final ServiceRegistryResponseDTO srEntry : providers) {
+			final IdIdListDTO dto = new IdIdListDTO(srEntry.getProvider().getId(), convertServiceInterfaceListToServiceInterfaceIdList(srEntry.getInterfaces()));
+			result.add(dto);
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S1612")
+	private List<Long> convertServiceInterfaceListToServiceInterfaceIdList(final List<ServiceInterfaceResponseDTO> intfs) {
+		logger.debug("convertServiceInterfaceListToServiceInterfaceIdList started...");
+		
+		if (intfs == null) {
+			return List.of();
+		}
+		
+		return intfs.stream().map(dto -> dto.getId()).collect(Collectors.toList());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// method may change providers list
+	private void filterProviderListUsingAuthorizationResult(final List<ServiceRegistryResponseDTO> providers, final AuthorizationIntraCloudCheckResponseDTO authResult) {
+		logger.debug("filterProviderListUsingAuthorizationResult started...");
+		
+		if (authResult.getAuthorizedProviderIdsWithInterfaceIds().isEmpty()) {
+			// consumer has no access to any of the specified providers
+			providers.clear();
+		} else {
+			final Map<Long,List<Long>> authMap = convertAuthorizationResultsToMap(authResult.getAuthorizedProviderIdsWithInterfaceIds());
+			for (final Iterator<ServiceRegistryResponseDTO> it = providers.iterator(); it.hasNext();) {
+				final ServiceRegistryResponseDTO srEntry = it.next();
+				if (authMap.containsKey(srEntry.getProvider().getId())) {
+					final List<Long> authorizedInterfaceIds = authMap.get(srEntry.getProvider().getId());
+					srEntry.getInterfaces().removeIf(e -> !authorizedInterfaceIds.contains(e.getId()));
+				} else {
+					it.remove();
+				}
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Map<Long,List<Long>> convertAuthorizationResultsToMap(List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
+		logger.debug("convertAuthorizationResultsToMap started...");
+
+		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
+																					   e -> e.getIdList()));
 	}
 	
 	//=================================================================================================
