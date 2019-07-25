@@ -177,6 +177,8 @@ public class CommonConstants {
 	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
 	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
 	
+	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
+	
 	public static final int TOP_PRIORITY = 1;
 
 	//=================================================================================================
