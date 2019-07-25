@@ -123,18 +123,26 @@ public class OrchestratorService {
 		// Querying the Service Registry to get the list of Provider Systems
 		final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(request.getRequestedService(), flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
 		List<ServiceRegistryResponseDTO> queryData = queryResult.getServiceQueryData();
-		if (queryData.isEmpty() && isInterCloudOrchestrationPossible(flags)) {
-			// no result in the local Service Registry => we try with other clouds
-			logger.debug("dynamicOrchestration: no result in Service Registry => moving to Inter-Cloud orchestration.");
-			return triggerInterCloud(request);
+		if (queryData.isEmpty()) {
+			if (isInterCloudOrchestrationPossible(flags)) {
+				// no result in the local Service Registry => we try with other clouds
+				logger.debug("dynamicOrchestration: no result in Service Registry => moving to Inter-Cloud orchestration.");
+				return triggerInterCloud(request);
+			} else {
+				return new OrchestrationResponseDTO(); // empty response
+			}
 		}
 		
 	    // Cross-checking the SR response with the Authorization
 		queryData = orchestratorDriver.queryAuthorization(request.getRequesterSystem(), queryData);
-		if (queryData.isEmpty() && isInterCloudOrchestrationPossible(flags)) {
-			// no result after authorization => we try with other clouds
-			logger.debug("dynamicOrchestration: no provider give access to requester system => moving to Inter-Cloud orchestration.");
-			return triggerInterCloud(request);
+		if (queryData.isEmpty()) {
+			if (isInterCloudOrchestrationPossible(flags)) {
+				// no result after authorization => we try with other clouds
+				logger.debug("dynamicOrchestration: no provider give access to requester system => moving to Inter-Cloud orchestration.");
+				return triggerInterCloud(request);
+			} else {
+				return new OrchestrationResponseDTO(); // empty response
+			}
 		}
 		
 		final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
@@ -142,10 +150,14 @@ public class OrchestratorService {
 		// If necessary, removing the non-preferred providers from the SR response. 
 		if (flags.get(Flag.ONLY_PREFERRED)) {
 			queryData = removeNonPreferred(queryData, localProviders);
-			if (queryData.isEmpty() && isInterCloudOrchestrationPossible(flags)) {
-				// no result that contains any of the preferred providers => we try with other clouds
-				logger.debug("dynamicOrchestration: no preferred provider give access to requester system => moving to Inter-Cloud orchestration.");
-				return triggerInterCloud(request);
+			if (queryData.isEmpty()) {
+				if (isInterCloudOrchestrationPossible(flags)) {
+					// no result that contains any of the preferred providers => we try with other clouds
+					logger.debug("dynamicOrchestration: no preferred provider give access to requester system => moving to Inter-Cloud orchestration.");
+					return triggerInterCloud(request);
+				} else {
+					return new OrchestrationResponseDTO(); // empty response
+				}
 			}
 		}
 
