@@ -33,8 +33,14 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Override
 	protected void customInit(final ContextRefreshedEvent event) {
 		logger.debug("customInit started...");
-		
+
 		final Cloud ownCloud = commonDBservicre.getOwnCloud(sslProperties.isSslEnabled());
+			
+		Cloud anotherOwnCloud = commonDBservicre.getOwnCloud(!sslProperties.isSslEnabled());
+		if (anotherOwnCloud.getGatekeeper() != null) {
+			gatekeeperDBService.removeGatekeeper(anotherOwnCloud.getGatekeeper().getId());				
+		}
+		
 		final String authorizationInfo = sslProperties.isSslEnabled() ? Base64.getEncoder().encodeToString(publicKey.getEncoded()) : null;
 		final CloudGatekeeper gatekeeper = checkIfGatekeeperRegistered(ownCloud);
 		if (gatekeeper == null) {
