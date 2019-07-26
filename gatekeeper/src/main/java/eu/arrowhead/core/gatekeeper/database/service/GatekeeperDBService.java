@@ -14,7 +14,6 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeper;
 import eu.arrowhead.common.database.repository.CloudGatekeeperRepository;
-import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -135,8 +134,15 @@ public class GatekeeperDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeGatekeeper(final long id) {
-		if(cloudGatekeeperRepository.existsById(id)) {
-			cloudGatekeeperRepository.deleteById(id);
+		try {
+
+			if(cloudGatekeeperRepository.existsById(id)) {
+				cloudGatekeeperRepository.deleteById(id);
+			}
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
