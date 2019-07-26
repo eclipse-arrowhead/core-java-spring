@@ -86,6 +86,9 @@ public class OrchestratorDriver {
 	public List<OrchestrationResultDTO> generateAuthTokens(final OrchestrationFormRequestDTO request, final List<OrchestrationResultDTO> orList) {
 		logger.debug("generateAuthTokens started...");
 		
+		Assert.notNull(request, "Request is null.");
+		Assert.notNull(orList, "Orchestration result list is null.");
+		
 		final List<TokenGenHelper> tokenGenHelperList = convertOrchestrationResultListToTokenGenHelperList(orList);
 		if (tokenGenHelperList.isEmpty()) {
 			return orList;

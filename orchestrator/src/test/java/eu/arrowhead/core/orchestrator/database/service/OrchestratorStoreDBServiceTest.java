@@ -43,7 +43,7 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 
-@RunWith (SpringRunner.class)
+@RunWith(SpringRunner.class)
 public class OrchestratorStoreDBServiceTest {
 
 	//=================================================================================================
