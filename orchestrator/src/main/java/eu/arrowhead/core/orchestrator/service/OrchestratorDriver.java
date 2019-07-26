@@ -111,6 +111,9 @@ public class OrchestratorDriver {
 	public List<ServiceRegistryResponseDTO> queryAuthorization(final SystemRequestDTO consumer, final List<ServiceRegistryResponseDTO> providers) {
 		logger.debug("queryAuthorization started...");
 		
+		Assert.notNull(consumer, "consumer is null.");
+		Assert.notNull(providers, "providers list is null.");
+		
 		if (!providers.isEmpty()) {
 			final UriComponents checkUri = getAuthIntraCheckUri();
 			final long serviceDefinitionId = providers.get(0).getServiceDefinition().getId();
