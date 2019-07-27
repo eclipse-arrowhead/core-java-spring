@@ -90,4 +90,15 @@ public class Action {
     public void setUpdatedAt(ZonedDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = ZonedDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = ZonedDateTime.now();
+    }
 }
