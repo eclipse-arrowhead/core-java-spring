@@ -207,42 +207,50 @@ CREATE TABLE `event_subscriber` (
   CONSTRAINT `event_consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `plan`;
-CREATE TABLE `plan` (
+DROP TABLE IF EXISTS `action_plan`;
+CREATE TABLE `action_plan` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-
-DROP TABLE IF EXISTS `plan_step`;
-CREATE TABLE `plan_step` (
+DROP TABLE IF EXISTS `action`;
+CREATE TABLE `action` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `plan_id` bigint(20) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `action_plan_id` bigint(20) NOT NULL,
+  `next_action_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  CONSTRAINT `FKaxgcwgyga50fsi9tyupu19xp` FOREIGN KEY (`plan_id`) REFERENCES `plan` (`id`) ON DELETE CASCADE
+  CONSTRAINT `action_plan` FOREIGN KEY (`action_plan_id`) REFERENCES `action_plan`(`id`),
+  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `action` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-
-DROP TABLE IF EXISTS `plan_step_service`;
-CREATE TABLE `plan_step_service` (
+DROP TABLE IF EXISTS `action_step`;
+CREATE TABLE `action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `plan_step_id` bigint(20) NOT NULL,
-  `service_id` bigint(20) NOT NULL,
-  KEY `FK62jllkni532a5e757u1x7jjnw` (`service_id`),
-  CONSTRAINT `FK62jllkni532a5e757u1x7jjnw` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FKfvq70kdu6sibc1i3acutbnqp2` FOREIGN KEY (`plan_step_id`) REFERENCES `plan_step` (`id`) ON DELETE CASCADE
+  `name` varchar(255) NOT NULL,
+  `action_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT NOW(),
+  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+  CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `action`(`id`)  ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `action_step_service_definition_connection`;
+CREATE TABLE `action_step_service_definition_connection` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `action_step_id` bigint(20) NOT NULL,
+  `service_definition_id` bigint(20) NOT NULL,
+  CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `next_step`;
-CREATE TABLE `next_steps` (
+DROP TABLE IF EXISTS `next_action_step`;
+CREATE TABLE `next_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `plan_step_id` bigint(20) NOT NULL,
-  `next_step_id` bigint(20) NOT NULL,
-  KEY `FKkc9vycv0onpa957jdey7f7rdm` (`next_step_id`),
-  CONSTRAINT `FK5x0k6luexx1mmtci9iqmangig` FOREIGN KEY (`plan_step_id`) REFERENCES `plan_step` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FKkc9vycv0onpa957jdey7f7rdm` FOREIGN KEY (`next_step_id`) REFERENCES `plan_step` (`id`) ON DELETE CASCADE
+  `action_step_id` bigint(20) NOT NULL,
+  `next_action_step_id` bigint(20) NOT NULL,
+  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `next_action` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
