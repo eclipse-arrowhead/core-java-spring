@@ -251,6 +251,6 @@ CREATE TABLE `next_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_step_id` bigint(20) NOT NULL,
   `next_action_step_id` bigint(20) NOT NULL,
-  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `next_action` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE
+  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
