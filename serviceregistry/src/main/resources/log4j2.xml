@@ -26,16 +26,15 @@
          	<Column name="log_level" pattern="%level" />
          	<Column name="message" pattern="%m" />
          	<Column name="exception" pattern="%throwable " />
-      </JDBC>
+		</JDBC>
     </Appenders>
     <Loggers>
-    	<AsyncLogger name="eu.arrowhead" level="info" additivity="true">
-            <AppenderRef ref="MySQLDatabase" />
-    	</AsyncLogger>
-    
-        <Root level="info">
+    	<Root level="info">
             <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
             <AppenderRef ref="FileAppender" />
         </Root>
+		<AsyncLogger name="eu.arrowhead" level="info" additivity="true">
+            <AppenderRef ref="MySQLDatabase" />
+    	</AsyncLogger>
     </Loggers>
 </Configuration>

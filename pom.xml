@@ -34,7 +34,7 @@
   	</modules>
   	
 	<properties>
-		<base.version>5</base.version>
+		<base.version>4.1.3</base.version>
 		<revision>${base.version}</revision>
 		<java.version>11</java.version>
 		<mvn.compiler.version>3.8.1</mvn.compiler.version>
@@ -44,7 +44,10 @@
 	    <mvn.resources.version>3.1.0</mvn.resources.version>
 		<mariadb.jdbc.driver>2.3.0</mariadb.jdbc.driver>
 		<mysql.jdbc.driver>8.0.16</mysql.jdbc.driver>
-		<swagger.version>2.0.5</swagger.version>
+		<swagger.version>2.9.2</swagger.version>
+		<disruptor.version>3.3.6</disruptor.version>
+		<http.client.version>4.5.8</http.client.version>
+  		<jose4j.version>0.6.5</jose4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -95,14 +98,28 @@
 		<dependency>
 		    <groupId>com.lmax</groupId>
     		<artifactId>disruptor</artifactId>
-    		<version>3.3.6</version>
+    		<version>${disruptor.version}</version>
 		</dependency>
-		
 		<dependency>
-        	<groupId>io.swagger.core.v3</groupId>
-        	<artifactId>swagger-jaxrs2</artifactId>
-        	<version>${swagger.version}</version>
-      	</dependency>
+           <groupId>org.apache.httpcomponents</groupId>
+           <artifactId>httpclient</artifactId>
+           <version>${http.client.version}</version>
+        </dependency>
+        <dependency>
+	    	<groupId>org.bitbucket.b_c</groupId>
+	    	<artifactId>jose4j</artifactId>
+	    	<version>${jose4j.version}</version>
+	    </dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${swagger.version}</version>
+		</dependency>
+		<dependency>
+    		<groupId>io.springfox</groupId>
+    		<artifactId>springfox-swagger-ui</artifactId>
+    		<version>${swagger.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
