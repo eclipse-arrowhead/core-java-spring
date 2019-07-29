@@ -1,17 +1,22 @@
 package eu.arrowhead.common.database.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 @Service
 public class CommonDBService {
@@ -45,5 +50,30 @@ public class CommonDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public Cloud insertOwnCloudWithoutGatekeeper(final String operator, final String name, final boolean secure) {
+		logger.debug("insertOwnCloudWithoutGatekeeper started...");
+		Assert.isTrue(!Utilities.isEmpty(operator), "Operator is null or empty.");
+		Assert.isTrue(!Utilities.isEmpty(name), "Name is null or empty.");
+		
+		final String validOperator = operator.toLowerCase().trim();
+		final String validName = name.toLowerCase().trim();
+		try {
+			final Optional<Cloud> optCloud = cloudRepository.findByOperatorAndName(validOperator, validName);
+			if (optCloud.isPresent()) {
+				throw new InvalidParameterException("Cloud with operator " + validOperator + " and name " + validName + " is already exists.");
+			}
+			
+			final Cloud cloud = new Cloud(validOperator, validName, secure, false, true);
+			return cloudRepository.saveAndFlush(cloud);
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	}
 }

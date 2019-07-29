@@ -12,6 +12,7 @@ public class Defaults {
 	public static final boolean DEFAULT_SSL_SERVER_ENABLED = true;
 	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
+	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
 	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
 	
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
@@ -28,7 +29,6 @@ public class Defaults {
 	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILISECONDS = 5000;
 	public static final boolean DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES = 13;
-	public static final boolean DEFAULT_SERVICE_REGISTRY_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
 	
 	// HTTP client defaults
 	public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;
@@ -39,7 +39,12 @@ public class Defaults {
 	public static final long CORS_MAX_AGE = 600;
 	public static final String CORS_ALLOW_CREDENTIALS = "true";
 	
+	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
+	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
+	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CommonConstants.SORT_ORDER_ASCENDING;
+	
+	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
 	
 	//=================================================================================================
 	// assistant methods

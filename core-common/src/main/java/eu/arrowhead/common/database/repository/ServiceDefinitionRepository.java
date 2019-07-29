@@ -13,5 +13,5 @@ public interface ServiceDefinitionRepository extends RefreshableRepository<Servi
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	Optional<ServiceDefinition> findByServiceDefinition(final String serviceDefinition);	
+	public Optional<ServiceDefinition> findByServiceDefinition(final String serviceDefinition);	
 }

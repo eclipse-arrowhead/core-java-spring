@@ -12,9 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.InterCloudAuthorization;
-import eu.arrowhead.common.database.entity.IntraCloudAuthorization;
+import eu.arrowhead.common.database.entity.ForeignSystem;
+import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -86,7 +90,7 @@ public class DTOConverter {
 		dto.setSecure(entry.getSecure());
 		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
 		dto.setVersion(entry.getVersion());
-		dto.setInterfaces(collectInterfaces(entry.getInterfaceConnections()));
+		dto.setInterfaces(collectInterfacesFromServiceSergistry(entry.getInterfaceConnections()));
 		dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()));
 		dto.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 		
@@ -191,7 +195,7 @@ public class DTOConverter {
 		final ServiceQueryResultDTO result = new ServiceQueryResultDTO();
 		
 		if (entries != null) {
-			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits:" + unfilteredHits);
+			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits: " + unfilteredHits);
 			result.setUnfilteredHits(unfilteredHits);
 			for (final ServiceRegistry srEntry : entries) {
 				result.getServiceQueryData().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
@@ -202,35 +206,36 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static IntraCloudAuthorizationResponseDTO convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(final IntraCloudAuthorization entry) {
-		Assert.notNull(entry, "IntraCloudAuthorization is null");
+	public static AuthorizationIntraCloudResponseDTO convertAuthorizationIntraCloudToAuthorizationIntraCloudResponseDTO(final AuthorizationIntraCloud entry) {
+		Assert.notNull(entry, "AuthorizationIntraCloud is null");
 		Assert.notNull(entry.getConsumerSystem(), "Consumer is null");
 		Assert.notNull(entry.getProviderSystem(), "Provider is null");
 		Assert.notNull(entry.getServiceDefinition(), "ServiceDefintion is null");
+		Assert.notNull(entry.getInterfaceConnections(), "InterfaceConnections is null");
 		
-		return new IntraCloudAuthorizationResponseDTO(entry.getId(), convertSystemToSystemResponseDTO(entry.getConsumerSystem()), convertSystemToSystemResponseDTO(entry.getProviderSystem()), 
-				convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition()), 
+		return new AuthorizationIntraCloudResponseDTO(entry.getId(), convertSystemToSystemResponseDTO(entry.getConsumerSystem()), convertSystemToSystemResponseDTO(entry.getProviderSystem()), 
+				convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition()), collectInterfacesFromAuthorizationIntraCloud(entry.getInterfaceConnections()),
 				Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static IntraCloudAuthorizationListResponseDTO convertIntraCloudAuthorizationListToIntraCloudAuthorizationListResponseDTO(final Page<IntraCloudAuthorization> entries) {
-		Assert.notNull(entries, "IntraCloudAuthorizationList is null");
+	public static AuthorizationIntraCloudListResponseDTO convertAuthorizationIntraCloudListToAuthorizationIntraCloudListResponseDTO(final Page<AuthorizationIntraCloud> entries) {
+		Assert.notNull(entries, "AuthorizationIntraCloudList is null");
 		
-		final List<IntraCloudAuthorizationResponseDTO> intraCloudAuthorizationEntries = new ArrayList<>(entries.getNumberOfElements());
-		for (final IntraCloudAuthorization entry : entries) {
-			intraCloudAuthorizationEntries.add(convertIntraCloudAuthorizationToIntraCloudAuthorizationResponseDTO(entry));
+		final List<AuthorizationIntraCloudResponseDTO> authorizationIntraCloudEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final AuthorizationIntraCloud entry : entries) {
+			authorizationIntraCloudEntries.add(convertAuthorizationIntraCloudToAuthorizationIntraCloudResponseDTO(entry));
 		}
 		
-		return new IntraCloudAuthorizationListResponseDTO(intraCloudAuthorizationEntries, entries.getTotalElements());
+		return new AuthorizationIntraCloudListResponseDTO(authorizationIntraCloudEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static TokenGenerationResponseDTO convertTokenMapToTokenGenerationResponseDTO(final Map<SystemRequestDTO,String> tokenMap) {
+	public static TokenGenerationResponseDTO convertTokenMapToTokenGenerationResponseDTO(final Map<SystemRequestDTO,Map<String,String>> tokenMap) {
 		Assert.notNull(tokenMap, "Token map is null.");
 		
 		final TokenGenerationResponseDTO result = new TokenGenerationResponseDTO();
-		for (final Entry<SystemRequestDTO,String> entry : tokenMap.entrySet()) {
+		for (final Entry<SystemRequestDTO,Map<String,String>> entry : tokenMap.entrySet()) {
 			result.getTokenData().add(new TokenDataDTO(entry.getKey(), entry.getValue()));
 		}
 		
@@ -238,23 +243,20 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public static CloudResponseDTO convertCloudToCloudResponseDTO(Cloud entity) {
-		
+	public static CloudResponseDTO convertCloudToCloudResponseDTO(final Cloud entity) {
 		Assert.notNull(entity, "Cloud is null" );
-		Assert.notNull(entity.getOperator(), "Cloud.Operator is null" );
-		Assert.notNull(entity.getName(), "Cloud.Name is null" );
-		Assert.notNull(entity.getAddress(), "Cloud.Address is null" );
-		Assert.notNull(entity.getGatekeeperServiceUri(), "Cloud.GateKeeperServiceUri is null" );
-		Assert.notNull(entity.getCreatedAt(), "Cloud.CreatedAt is null" );
-		Assert.notNull(entity.getUpdatedAt(), "Cloud.UpdatedAt is null" );
+		Assert.notNull(entity.getOperator(), "Cloud.operator is null" );
+		Assert.notNull(entity.getName(), "Cloud.name is null" );
+		Assert.notNull(entity.getCreatedAt(), "Cloud.createdAt is null" );
+		Assert.notNull(entity.getUpdatedAt(), "Cloud.cpdatedAt is null" );
 		
 		return new CloudResponseDTO(
 				entity.getId(),
 				entity.getOperator(),
 				entity.getName(),
-				entity.getAddress(),
-				entity.getPort(),
-				entity.getGatekeeperServiceUri(),
+				entity.getGatekeeper() != null ? entity.getGatekeeper().getAddress() : null,
+				entity.getGatekeeper() != null ? entity.getGatekeeper().getPort() : null,
+				entity.getGatekeeper() != null ? entity.getGatekeeper().getServiceUri() : null,
 				entity.getSecure(),
 				entity.getNeighbor(),
 				entity.getOwnCloud(),
@@ -263,33 +265,77 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static InterCloudAuthorizationListResponseDTO convertInterCloudAuthorizationListToInterCloudAuthorizationListResponseDTO(final Page<InterCloudAuthorization> entries) {
-		Assert.notNull(entries, "InterCloudAuthorizationList is null");
+	public static AuthorizationInterCloudListResponseDTO convertAuthorizationInterCloudListToAuthorizationInterCloudListResponseDTO(final Page<AuthorizationInterCloud> entries) {
+		Assert.notNull(entries, "AuthorizationInterCloudList is null");
 		
-		final List<InterCloudAuthorizationResponseDTO> interCloudAuthorizationEntries = new ArrayList<>(entries.getNumberOfElements());
-		for (final InterCloudAuthorization entry : entries) {
-			interCloudAuthorizationEntries.add(convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(entry));
+		final List<AuthorizationInterCloudResponseDTO> authorizationInterCloudEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final AuthorizationInterCloud entry : entries) {
+			authorizationInterCloudEntries.add(convertAuthorizationInterCloudToAuthorizationInterCloudResponseDTO(entry));
 		}
 		
-		return new InterCloudAuthorizationListResponseDTO(interCloudAuthorizationEntries, entries.getTotalElements());
+		return new AuthorizationInterCloudListResponseDTO(authorizationInterCloudEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static InterCloudAuthorizationResponseDTO convertInterCloudAuthorizationToInterCloudAuthorizationResponseDTO(InterCloudAuthorization entity) {
+	public static AuthorizationInterCloudResponseDTO convertAuthorizationInterCloudToAuthorizationInterCloudResponseDTO(final AuthorizationInterCloud entity) {
+		Assert.notNull(entity, "AuthorizationInterCloud is null" );
+		Assert.notNull(entity.getCloud(), "AuthorizationInterCloud.Cloud is null" );
+		Assert.notNull(entity.getProvider(), "AuthorizationInterCloud.Provider is null");
+		Assert.notNull(entity.getServiceDefinition(), "AuthorizationInterCloud.ServiceDefinition is null" );
+		Assert.notNull(entity.getInterfaceConnections(), "AuthorizationInterCloud.InterfaceConnections is null");
+		Assert.notNull(entity.getCreatedAt(), "AuthorizationInterCloud.CreatedAt is null" );
+		Assert.notNull(entity.getUpdatedAt(), "AuthorizationInterCloud.UpdatedAt is null" );
 		
-		Assert.notNull(entity, "InterCloudAuthorization is null" );
-		Assert.notNull(entity.getCloud(), "InterCloudAuthorization.Cloud is null" );
-		Assert.notNull(entity.getServiceDefinition(), "InterCloudAuthorization.ServiceDefinition is null" );
-		Assert.notNull(entity.getCreatedAt(), "InterCloudAuthorization.CreatedAt is null" );
-		Assert.notNull(entity.getUpdatedAt(), "InterCloudAuthorization.UpdatedAt is null" );
-		
-		return new InterCloudAuthorizationResponseDTO(
+		return new AuthorizationInterCloudResponseDTO(
 				entity.getId(),
 				convertCloudToCloudResponseDTO(entity.getCloud()),
+				convertSystemToSystemResponseDTO(entity.getProvider()),
 				convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
+				collectInterfacesFromAuthorizationInterCloud(entity.getInterfaceConnections()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity, final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud) {
+		
+		Assert.notNull(entity, "OrchestratorStore is null");            
+		Assert.notNull(providerSystem, "OrchestratorStore.ProviderSystem is null");
+        Assert.notNull(entity.getCreatedAt(), "OrchestratorStore.CreatedAt is null");        
+        Assert.notNull(entity.getUpdatedAt(),  "OrchestratorStore.UpdatedAt is null"); 
+        
+        
+	
+		return new OrchestratorStoreResponseDTO(
+			entity.getId(),
+			convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
+			convertSystemToSystemResponseDTO(entity.getConsumerSystem()),
+			entity.isForeign(),
+			providerSystem,
+			providerCloud,
+			convertServiceInterfaceToServiceInterfaceResponseDTO(entity.getServiceInterface()),
+			entity.getPriority(),
+			Utilities.text2Map(entity.getAttribute()),
+			Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
+			Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
+			final List<OrchestratorStoreResponseDTO> entries) {
+		Assert.notNull(entries, "OrchestratorStoreList is null");
+
+		return new OrchestratorStoreListResponseDTO(entries, entries.size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
+			final List<OrchestratorStoreResponseDTO> entries, long totalElements) {
+		Assert.notNull(entries, "OrchestratorStoreList is null");
+
+		return new OrchestratorStoreListResponseDTO(entries, totalElements);
 	}
 	
 	//=================================================================================================
@@ -312,7 +358,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<ServiceInterfaceResponseDTO> collectInterfaces(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
+	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromServiceSergistry(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
 		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
 			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
@@ -321,5 +367,37 @@ public class DTOConverter {
 		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromAuthorizationIntraCloud(final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) {
+		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
+		for (final AuthorizationIntraCloudInterfaceConnection conn : interfaceConnections) {
+			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
+		}
+		
+		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromAuthorizationInterCloud(final Set<AuthorizationInterCloudInterfaceConnection> interfaceConnections) {
+		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
+		for (final AuthorizationInterCloudInterfaceConnection conn : interfaceConnections) {
+			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
+		}
+		
+		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
+		
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(ForeignSystem foreignSystem) {
+		Assert.notNull(foreignSystem, "ForeignSystem is null");
+		
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
 	}
 }

@@ -3,6 +3,7 @@ package eu.arrowhead.common.database.service;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,7 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
 public class CommonDBServiceTest {
@@ -42,5 +44,12 @@ public class CommonDBServiceTest {
 	public void testGetOwnCloudTooMuchResult() {
 		when(cloudRepository.findByOwnCloudAndSecure(true, true)).thenReturn(List.of(new Cloud(), new Cloud()));
 		commonDBService.getOwnCloud(true);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInsertOwnCloudWithoutGatekeeperCloudAlreadyExists() {
+		when(cloudRepository.findByOperatorAndName("operator", "name")).thenReturn(Optional.of(new Cloud()));
+		commonDBService.insertOwnCloudWithoutGatekeeper("operator", "name", false);
 	}
 }

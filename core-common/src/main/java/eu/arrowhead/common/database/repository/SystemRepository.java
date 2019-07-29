@@ -13,5 +13,6 @@ public interface SystemRepository extends RefreshableRepository<System,Long> {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	Optional<System> findBySystemNameAndAddressAndPort(final String systemName, final String address, final int port);
+	public Optional<System> findBySystemNameAndAddressAndPort(final String systemName, final String address, final int port);
+	
 }

@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -26,10 +27,12 @@ import eu.arrowhead.common.Defaults;
 
 @Entity
 @Table (name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
-@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
-	attributeNodes = {
-		@NamedAttributeNode (value = "serviceRegistryEntries")
+@NamedEntityGraphs({
+	@NamedEntityGraph (name = "systemWithServiceRegistryEntries",
+			attributeNodes = {
+					@NamedAttributeNode (value = "serviceRegistryEntries")
 	})
+})
 public class System {
 	
 	//=================================================================================================
@@ -65,11 +68,15 @@ public class System {
 	
 	@OneToMany (mappedBy = "consumerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> authorizationsAsConsumer = new HashSet<>();
+	private Set<AuthorizationIntraCloud> authorizationsIntraCloudAsConsumer = new HashSet<>();
 	
 	@OneToMany (mappedBy = "providerSystem", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<IntraCloudAuthorization> authorizationsAsProvider = new HashSet<>();
+	private Set<AuthorizationIntraCloud> authorizationsIntraCloudAsProvider = new HashSet<>();
+	
+	@OneToMany (mappedBy = "provider", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<AuthorizationInterCloud> authorizationsInterCloudAsProvider = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
@@ -107,8 +114,9 @@ public class System {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
-	public Set<IntraCloudAuthorization> getAuthorizationsAsConsumer() { return authorizationsAsConsumer; }
-	public Set<IntraCloudAuthorization> getAuthorizationsAsProvider() { return authorizationsAsProvider; }
+	public Set<AuthorizationIntraCloud> getAuthorizationsIntraCloudAsConsumer() { return authorizationsIntraCloudAsConsumer; }
+	public Set<AuthorizationIntraCloud> getAuthorizationsIntraCloudAsProvider() { return authorizationsIntraCloudAsProvider; }
+	public Set<AuthorizationInterCloud> getAuthorizationsInterCloudAsProvider() { return authorizationsInterCloudAsProvider; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -119,8 +127,9 @@ public class System {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
-	public void setAuthorizationsAsConsumer(final Set<IntraCloudAuthorization> authorizationsAsConsumer) { this.authorizationsAsConsumer = authorizationsAsConsumer; }
-	public void setAuthorizationsAsProvider(final Set<IntraCloudAuthorization> authorizationsAsProvider) { this.authorizationsAsProvider = authorizationsAsProvider; }
+	public void setAuthorizationsIntraCloudAsConsumer(final Set<AuthorizationIntraCloud> authorizationsIntraCloudAsConsumer) { this.authorizationsIntraCloudAsConsumer = authorizationsIntraCloudAsConsumer; }
+	public void setAuthorizationsIntraCloudAsProvider(final Set<AuthorizationIntraCloud> authorizationsIntraCloudAsProvider) { this.authorizationsIntraCloudAsProvider = authorizationsIntraCloudAsProvider; }
+	public void setAuthorizationsInterCloudAsProvider(final Set<AuthorizationInterCloud> authorizationsInterCloudAsProvider) { this.authorizationsInterCloudAsProvider = authorizationsInterCloudAsProvider; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
