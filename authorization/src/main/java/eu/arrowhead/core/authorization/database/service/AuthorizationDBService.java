@@ -465,9 +465,9 @@ public class AuthorizationDBService {
 									authorizedInterfaces.add(interfaceId);
 								}
 							}
-						}
 						if (!authorizedInterfaces.isEmpty()) {
 							authorizedProvidersWithInterfaces.add(new IdIdListDTO(providerId, authorizedInterfaces));
+						}
 						}
 					}
 				}

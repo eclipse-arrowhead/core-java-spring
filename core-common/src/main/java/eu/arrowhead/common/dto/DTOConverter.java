@@ -373,6 +373,21 @@ public class DTOConverter {
 		return systemRequestDTO;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static List<Long> convertServiceInterfaceResponseDTOListToServiceInterfaceIdList(
+			List<ServiceInterfaceResponseDTO> serviceInterfaceResponseDTOList) {
+		Assert.notNull(serviceInterfaceResponseDTOList, "ServiceInterfaceResponseDTOList is null");
+		
+		final List<Long> serviceInterfaceIdList = new ArrayList<>(serviceInterfaceResponseDTOList.size());
+		
+		for (ServiceInterfaceResponseDTO dto : serviceInterfaceResponseDTOList) {
+			
+			serviceInterfaceIdList.add(dto.getId());
+		}
+		
+		return serviceInterfaceIdList;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	

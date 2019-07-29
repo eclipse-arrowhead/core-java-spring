@@ -2,7 +2,9 @@ package eu.arrowhead.core.orchestrator.service;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,12 +12,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
@@ -106,25 +112,27 @@ public class OrchestratorService {
 		
 		orchestrationFormRequestDTO.validateCrossParameterConstraints();
 		
-		 final List<OrchestratorStore> entryList;
+		final List<OrchestratorStore> entryList;
+		final List<OrchestratorStore> filteredEntryList;
+		final List<OrchestratorStore> crossCheckedEntryList;
 		
 		if ( systemId != null) {
 			entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(systemId);
+			crossCheckedEntryList = crossCheckTopPriorityEntries(entryList, orchestrationFormRequestDTO);
 		
 		}else {
 			
-			entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());
-			
-			// TODO filter entryList for requested interfaces	
-			final List<OrchestratorStore> validEntryList;
+			entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());	
+
 			final List<String> requiredInterfaceList = orchestrationFormRequestDTO.getRequestedService().getInterfaceRequirements();
+			
 			if (requiredInterfaceList != null && !requiredInterfaceList.isEmpty()) {
 				
-				validEntryList = null;//validateEntryList(entryList, requiredInterfaceList);
+				filteredEntryList = filterEntryListByInterfaces(entryList, requiredInterfaceList);
 				
 			}else {
 				
-				validEntryList = entryList;
+				filteredEntryList = entryList;
 				
 			}
 		
@@ -380,10 +388,68 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> validateEntryList(List<OrchestratorStore> entryList,
-			List<String> requiredInterfaceList) {
+	private List<OrchestratorStore> filterEntryListByInterfaces(final List<OrchestratorStore> entryList,
+			final List<String> requiredInterfaceList) {
+		logger.debug("filterEntryListByInterfaces started...");
 		
-		// TODO implement method logic here
+		final List<OrchestratorStore> filteredEntryList = new ArrayList<>();
+		for (OrchestratorStore orchestratorStore : entryList) {
+			
+			Assert.notNull(orchestratorStore.getServiceInterface(), "ServiceInterface is null.");
+			
+			if (requiredInterfaceList.contains(orchestratorStore.getServiceInterface().getInterfaceName())) {
+				filteredEntryList.add(orchestratorStore);
+			}
+		}
+		
+		return filteredEntryList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<OrchestratorStore> crossCheckTopPriorityEntries(final List<OrchestratorStore> entryList, final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+		logger.debug("crossCheckTopPriorityEntries started...");
+		
+		final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();	   
+	    
+	    List<ServiceRegistryResponseDTO> serviceQueryResultDTOList ;
+	    
+	    for (OrchestratorStore entry : entryList) {
+	    	
+	    	//TODO ... handle foreign system exception ...
+			
+	    	final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+	    	serviceQueryFormDTO.setServiceDefinitionRequirement(entry.getServiceDefinition().getServiceDefinition());
+	    	final List<String> interfaceRequirements = List.of(entry.getServiceInterface().getInterfaceName());
+	    	serviceQueryFormDTO.setInterfaceRequirements(interfaceRequirements);
+	    	
+	    	final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(orchestrationFormRequestDTO.getRequestedService(), flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+
+	    	serviceQueryResultDTOList = queryResult.getServiceQueryData();
+	    	
+	    	for (ServiceRegistryResponseDTO serviceRegistryResponseDTO : serviceQueryResultDTOList) {
+				
+	    		final IdIdListDTO idIdListDTO = new IdIdListDTO();
+	    		idIdListDTO.setId(serviceRegistryResponseDTO.getProvider().getId());
+	    		idIdListDTO.setIdList(DTOConverter.convertServiceInterfaceResponseDTOListToServiceInterfaceIdList(serviceRegistryResponseDTO.getInterfaces()));
+	    		
+	    		final AuthorizationIntraCloudCheckRequestDTO authorizationIntraCloudCheckRequestDTO = new AuthorizationIntraCloudCheckRequestDTO();
+	    		authorizationIntraCloudCheckRequestDTO.setConsumerId(entry.getConsumerSystem().getId());
+	    		authorizationIntraCloudCheckRequestDTO.setServiceDefinitionId(entry.getServiceDefinition().getId());
+	    		authorizationIntraCloudCheckRequestDTO.setProviderIdsWithInterfaceIds(List.of(idIdListDTO));
+	    		
+	    		
+	    		
+	    		
+	    		
+			}
+	    	
+	    	
+	    	
+	    	
+	    	
+		}
+		
+		// TODO implement additional method logic here 
 		return null;
 	}
 
