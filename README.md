@@ -35,9 +35,9 @@ Execute ```mvn install``` command. Wait until the build succeeds.
 This command builds all available projects.
 After succeeding enter:
 - serviceregistry/target directory.
-```cd serviceregistry/target``` <br />and execute: ```java -jar arrowhead-serviceregistry-4.1.2.jar```
-- authorization/target directory. ```cd authorization/target``` <br />and execute: ```java -jar arrowhead-authorization-4.1.2.jar``` 
-- orchestrator/target directory. ```orchestrator/target``` <br />and execute: ```java -jar arrowhead-orchestrator-4.1.2.jar```
+```cd serviceregistry/target``` <br />and execute: ```java -jar arrowhead-serviceregistry-4.1.3.jar```
+- authorization/target directory. ```cd authorization/target``` <br />and execute: ```java -jar arrowhead-authorization-4.1.3.jar``` 
+- orchestrator/target directory. ```orchestrator/target``` <br />and execute: ```java -jar arrowhead-orchestrator-4.1.3.jar```
 
 
 Wait until servers start...
