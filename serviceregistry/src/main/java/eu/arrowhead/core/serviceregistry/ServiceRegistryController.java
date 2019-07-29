@@ -155,7 +155,7 @@ public class ServiceRegistryController {
 		if (systemId < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
-		
+
 		return serviceRegistryDBService.getSystemById(systemId);			
 	}
 	

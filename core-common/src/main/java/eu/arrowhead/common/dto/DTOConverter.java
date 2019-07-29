@@ -8,22 +8,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.arrowhead.common.database.entity.*;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
+import jdk.jshell.execution.Util;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.ForeignSystem;
-import eu.arrowhead.common.database.entity.OrchestratorStore;
-import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.entity.ServiceInterface;
-import eu.arrowhead.common.database.entity.ServiceRegistry;
-import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
-import eu.arrowhead.common.database.entity.System;
 
 public class DTOConverter {
 	
@@ -399,5 +392,16 @@ public class DTOConverter {
 		
 		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
 										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
+	}
+
+    /* public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(final ChoreographerActionPlan choreographerActionPlan) {
+		Assert.notNull(choreographerActionPlan, "choreographerActionPlan is null");
+
+		return new ChoreographerActionPlanResponseDTO(choreographerActionPlan.getId(), choreographerActionPlan.getActionPlanName(),
+				Utilities.convertZonedDateTimeToUTCString(choreographerActionPlan.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(choreographerActionPlan.getUpdatedAt()));
+	} */
+
+    public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep choreographerActionStep) {
+
 	}
 }

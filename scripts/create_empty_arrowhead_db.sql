@@ -271,7 +271,6 @@ DROP TABLE IF EXISTS `choreographer_action`;
 CREATE TABLE `choreographer_action` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `action_plan_id` bigint(20) NOT NULL,
   `next_action_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
@@ -283,7 +282,7 @@ DROP TABLE IF EXISTS `choreographer_action_step`;
 CREATE TABLE `choreographer_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `action_id` bigint(20) NOT NULL,
+  -- `action_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
   -- CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `action`(`id`)

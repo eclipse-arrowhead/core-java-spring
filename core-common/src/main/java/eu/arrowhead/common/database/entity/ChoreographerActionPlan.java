@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class ActionPlan {
+public class ChoreographerActionPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +25,9 @@ public class ActionPlan {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @OneToMany (mappedBy = "actionPlan", fetch = FetchType.LAZY, orphanRemoval = true)
+    @ManyToMany(mappedBy = "actionPlans")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<Action> actionEntries = new HashSet<>();
+    private Set<ChoreographerAction> actions = new HashSet<>();
 
     public long getId() {
         return id;
@@ -61,12 +61,12 @@ public class ActionPlan {
         this.updatedAt = updatedAt;
     }
 
-    public Set<Action> getActionEntries() {
-        return actionEntries;
+    public Set<ChoreographerAction> getActions() {
+        return actions;
     }
 
-    public void setActionEntries(Set<Action> actionEntries) {
-        this.actionEntries = actionEntries;
+    public void setActions(Set<ChoreographerAction> actions) {
+        this.actions = actions;
     }
 
     @PrePersist

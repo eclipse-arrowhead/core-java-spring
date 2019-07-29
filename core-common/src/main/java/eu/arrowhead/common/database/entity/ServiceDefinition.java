@@ -5,17 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.*;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -58,7 +48,11 @@ public class ServiceDefinition {
 	@OneToMany (mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
-	
+
+	@ManyToMany(mappedBy = "usedServices")
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Set<ChoreographerActionStep> actionSteps = new HashSet<>();
+
 	//=================================================================================================
 	// methods
 
@@ -91,6 +85,7 @@ public class ServiceDefinition {
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
 	public Set<AuthorizationIntraCloud> getAuthorizationIntraClouds() { return authorizationIntraClouds; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
+	public Set<ChoreographerActionStep> getActionSteps() { return actionSteps; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -100,6 +95,7 @@ public class ServiceDefinition {
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
 	public void setAuthorizationIntraClouds(final Set<AuthorizationIntraCloud> authorizationIntraClouds) { this.authorizationIntraClouds = authorizationIntraClouds; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
+	public void setActionSteps(Set<ChoreographerActionStep> actionSteps) { this.actionSteps = actionSteps; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

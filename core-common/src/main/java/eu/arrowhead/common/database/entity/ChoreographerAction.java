@@ -1,6 +1,8 @@
 package eu.arrowhead.common.database.entity;
 
 import eu.arrowhead.common.Defaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -9,7 +11,7 @@ import java.util.Set;
 
 // Formerly known as "Plan(s)"
 @Entity
-public class Action {
+public class ChoreographerAction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,20 +22,26 @@ public class Action {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "nextActionId", referencedColumnName = "id", nullable = true)
-    private Action nextAction;
+    private ChoreographerAction nextAction;
 
-    @ManyToOne (fetch = FetchType.EAGER)
-    @JoinColumn (name = "actionPlanId", referencedColumnName = "id", nullable = false)
-    private ActionPlan actionPlan;
-
-    @OneToMany(mappedBy = "action", fetch = FetchType.EAGER)
-    private Set<ActionStep> actionSteps = new HashSet<>();
-
-    @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
 
-    @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
+
+    @ManyToMany(mappedBy = "actions")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ChoreographerActionStep> actionSteps = new HashSet<>();
+
+    @ManyToMany (cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "ChoreographerActionPlanActionConnection",
+            joinColumns = @JoinColumn(name = "actionId"),
+            inverseJoinColumns = @JoinColumn(name = "actionPlanId")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ChoreographerActionPlan> actionPlans = new HashSet<>();
 
     public long getId() {
         return id;
@@ -51,28 +59,12 @@ public class Action {
         this.actionName = actionName;
     }
 
-    public Action getNextAction() {
+    public ChoreographerAction getNextAction() {
         return nextAction;
     }
 
-    public void setNextAction(Action nextAction) {
+    public void setNextAction(ChoreographerAction nextAction) {
         this.nextAction = nextAction;
-    }
-
-    public ActionPlan getActionPlan() {
-        return actionPlan;
-    }
-
-    public void setActionPlan(ActionPlan actionPlan) {
-        this.actionPlan = actionPlan;
-    }
-
-    public Set<ActionStep> getActionSteps() {
-        return actionSteps;
-    }
-
-    public void setActionSteps(Set<ActionStep> actionSteps) {
-        this.actionSteps = actionSteps;
     }
 
     public ZonedDateTime getCreatedAt() {
@@ -89,6 +81,22 @@ public class Action {
 
     public void setUpdatedAt(ZonedDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Set<ChoreographerActionStep> getActionSteps() {
+        return actionSteps;
+    }
+
+    public void setActionSteps(Set<ChoreographerActionStep> actionSteps) {
+        this.actionSteps = actionSteps;
+    }
+
+    public Set<ChoreographerActionPlan> getActionPlans() {
+        return actionPlans;
+    }
+
+    public void setActionPlans(Set<ChoreographerActionPlan> actionPlans) {
+        this.actionPlans = actionPlans;
     }
 
     @PrePersist
