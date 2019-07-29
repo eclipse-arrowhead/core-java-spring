@@ -259,15 +259,15 @@ CREATE TABLE `event_handler_event_subscriber` (
 
 -- Choreographer
 
-DROP TABLE IF EXISTS `choreographer_plan`;
-CREATE TABLE `choreographer_plan` (
+DROP TABLE IF EXISTS `choreographer_action_plan`;
+CREATE TABLE `action_plan` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `created_at` timestamp NOT NULL DEFAULT NOW(),
+  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `action`;
+DROP TABLE IF EXISTS `choreographer_action`;
 CREATE TABLE `action` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -279,7 +279,7 @@ CREATE TABLE `action` (
   CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `action` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `action_step`;
+DROP TABLE IF EXISTS `choreographer_action_step`;
 CREATE TABLE `action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -289,7 +289,7 @@ CREATE TABLE `action_step` (
   CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `action`(`id`)  ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `action_step_service_definition_connection`;
+DROP TABLE IF EXISTS `choreographer_action_step_service_definition_connection`;
 CREATE TABLE `action_step_service_definition_connection` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_step_id` bigint(20) NOT NULL,
@@ -298,7 +298,7 @@ CREATE TABLE `action_step_service_definition_connection` (
   CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `next_action_step`;
+DROP TABLE IF EXISTS `choreographer_next_action_step`;
 CREATE TABLE `next_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_step_id` bigint(20) NOT NULL,
