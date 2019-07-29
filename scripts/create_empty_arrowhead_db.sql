@@ -260,7 +260,7 @@ CREATE TABLE `event_handler_event_subscriber` (
 -- Choreographer
 
 DROP TABLE IF EXISTS `choreographer_action_plan`;
-CREATE TABLE `action_plan` (
+CREATE TABLE `choreographer_action_plan` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
@@ -268,7 +268,7 @@ CREATE TABLE `action_plan` (
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_action`;
-CREATE TABLE `action` (
+CREATE TABLE `choreographer_action` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `action_plan_id` bigint(20) NOT NULL,
@@ -280,17 +280,17 @@ CREATE TABLE `action` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_action_step`;
-CREATE TABLE `action_step` (
+CREATE TABLE `choreographer_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `action_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
-  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
   -- CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `action`(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `choreographer_action_plan_action_connection`
-CREATE TABLE `choreographer_action_plan_action_connection`
+DROP TABLE IF EXISTS `choreographer_action_plan_action_connection`;
+CREATE TABLE `choreographer_action_plan_action_connection` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_plan_id` bigint(20) NOT NULL,
   `action_id` bigint(20) NOT NULL,
@@ -298,8 +298,8 @@ CREATE TABLE `choreographer_action_plan_action_connection`
   CONSTRAINT `action_fk1` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `choreographer_action_action_step_connection`
-CREATE TABLE `choreographer_action_action_step_connection`
+DROP TABLE IF EXISTS `choreographer_action_action_step_connection`;
+CREATE TABLE `choreographer_action_action_step_connection` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_id` bigint(20) NOT NULL,
   `action_step_id` bigint(20) NOT NULL,
@@ -308,21 +308,21 @@ CREATE TABLE `choreographer_action_action_step_connection`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_action_step_service_definition_connection`;
-CREATE TABLE `action_step_service_definition_connection` (
+CREATE TABLE `choreographer_action_step_service_definition_connection` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_step_id` bigint(20) NOT NULL,
   `service_definition_id` bigint(20) NOT NULL,
   CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`),
-  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`)
+  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_next_action_step`;
-CREATE TABLE `next_action_step` (
+CREATE TABLE `choreographer_next_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_step_id` bigint(20) NOT NULL,
   `next_action_step_id` bigint(20) NOT NULL,
-  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`),
-  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`)
+  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`),
+  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Set up privileges
