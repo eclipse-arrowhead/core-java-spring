@@ -19,15 +19,10 @@ dependency to use them)
 
 Verify that you have Java (```java -version```), Maven (```mvn -version```), MySQL installed properly!
 
-In MySQL create a database called `arrowhead` and create a user `arrowhead` with password `arrowhead`. Example SQL statement, that does this for you: 
-```
-CREATE DATABASE arrowhead;
-CREATE USER 'arrowhead'@'%';
-GRANT ALL PRIVILEGES ON arrowhead.* To 'arrowhead'@'%' IDENTIFIED BY 'arrowhead';
-```
 Pull this code and enter the directory. 
 ```git pull https://github.com/arrowhead-f/core-java-spring.git```
 
+Run the MySQL script which is in the ```scripts``` folder. If you won't run this script first, the project won't build. 
 
 ```cd core-java-spring```
 
