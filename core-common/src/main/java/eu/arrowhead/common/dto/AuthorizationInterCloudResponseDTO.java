@@ -25,8 +25,8 @@ public class AuthorizationInterCloudResponseDTO implements Serializable {
 	public AuthorizationInterCloudResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public AuthorizationInterCloudResponseDTO(final long id, final CloudResponseDTO cloud, final SystemResponseDTO provider,
-			final ServiceDefinitionResponseDTO serviceDefinition, final List<ServiceInterfaceResponseDTO> interfaces, final String createdAt, final String updatedAt) {
+	public AuthorizationInterCloudResponseDTO(final long id, final CloudResponseDTO cloud, final SystemResponseDTO provider, final ServiceDefinitionResponseDTO serviceDefinition,
+											  final List<ServiceInterfaceResponseDTO> interfaces, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.cloud = cloud;
 		this.provider = provider;
@@ -53,5 +53,4 @@ public class AuthorizationInterCloudResponseDTO implements Serializable {
 	public void setInterfaces(final List<ServiceInterfaceResponseDTO> interfaces) { this.interfaces = interfaces; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }	
-
 }

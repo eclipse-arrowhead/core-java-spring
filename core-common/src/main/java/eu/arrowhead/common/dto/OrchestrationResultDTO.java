@@ -12,7 +12,7 @@ public class OrchestrationResultDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -6425527229383724551L;
+	private static final long serialVersionUID = -8155568751654674141L;
 	
 	private SystemResponseDTO provider;
 	private ServiceDefinitionResponseDTO service;
@@ -22,7 +22,7 @@ public class OrchestrationResultDTO implements Serializable {
 	private List<ServiceInterfaceResponseDTO> interfaces;
 	private Integer version;
 	
-	private String authorizationToken;
+	private Map<String,String> authorizationTokens;
 	private List<OrchestratorWarnings> warnings = new ArrayList<>();
 	
 	//=================================================================================================
@@ -33,7 +33,7 @@ public class OrchestrationResultDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestrationResultDTO(final SystemResponseDTO provider, final ServiceDefinitionResponseDTO service, final String serviceUri, final ServiceSecurityType secure, 
-								  final Map<String,String> metadata, final List<ServiceInterfaceResponseDTO> interfaces, final Integer version, final String authorizationToken,
+								  final Map<String,String> metadata, final List<ServiceInterfaceResponseDTO> interfaces, final Integer version, final Map<String,String> authorizationTokens,
 								  final List<OrchestratorWarnings> warnings) {
 		Assert.notNull(provider, "provider is null.");
 		Assert.notNull(service, "service is null.");
@@ -46,7 +46,7 @@ public class OrchestrationResultDTO implements Serializable {
 		this.metadata = metadata;
 		this.interfaces = interfaces;
 		this.version = version;
-		this.authorizationToken = authorizationToken;
+		this.authorizationTokens = authorizationTokens;
 		this.warnings = warnings;
 	}
 	
@@ -64,7 +64,7 @@ public class OrchestrationResultDTO implements Serializable {
 	public Map<String,String> getMetadata() { return metadata; }
 	public List<ServiceInterfaceResponseDTO> getInterfaces() { return interfaces; }
 	public Integer getVersion() { return version; }
-	public String getAuthorizationToken() { return authorizationToken; }
+	public Map<String,String> getAuthorizationTokens() { return authorizationTokens; }
 	public List<OrchestratorWarnings> getWarnings() { return warnings; }
 	
 	//-------------------------------------------------------------------------------------------------
@@ -75,6 +75,6 @@ public class OrchestrationResultDTO implements Serializable {
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setInterfaces(final List<ServiceInterfaceResponseDTO> interfaces) { this.interfaces = interfaces; }
 	public void setVersion(final Integer version) { this.version = version; }
-	public void setAuthorizationToken(final String authorizationToken) { this.authorizationToken = authorizationToken; }
+	public void setAuthorizationTokens(final Map<String,String> authorizationTokens) { this.authorizationTokens = authorizationTokens; }
 	public void setWarnings(final List<OrchestratorWarnings> warnings) { this.warnings = warnings; }
 }

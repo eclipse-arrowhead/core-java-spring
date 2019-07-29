@@ -23,42 +23,42 @@ import org.hibernate.annotations.OnDeleteAction;
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"operator", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"operator", "name"}))
 public class Cloud {
 	
 	//=================================================================================================
 	// members
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String operator;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String name;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean secure = false;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean neighbor = false;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean ownCloud = false;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
 	@OneToOne(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true, optional = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private CloudGatekeeper gatekeeper;
 	
-	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
 	

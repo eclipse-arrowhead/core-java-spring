@@ -19,6 +19,7 @@ public class IdIdListDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public IdIdListDTO() {}
 	
+	//-------------------------------------------------------------------------------------------------
 	public IdIdListDTO(final Long id, final List<Long> idList) {
 		this.id = id;
 		this.idList = idList;

@@ -24,29 +24,29 @@ public class CloudGatekeeper {
 	// members
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
 	@OneToOne(optional = false)
 	@JoinColumn(name = "cloudId", referencedColumnName = "id", unique = true, nullable = false)
 	private Cloud cloud;
 
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String address;
 
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private int port;
 
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String serviceUri;
 	
-	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
 	//=================================================================================================

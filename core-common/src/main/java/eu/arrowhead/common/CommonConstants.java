@@ -129,6 +129,8 @@ public class CommonConstants {
 	public static final String $USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" + Defaults.DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
 	public static final String URI_CRAWLER_INTERVAL = "uri_crawler_interval"; // in seconds
 	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + Defaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
+	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
+	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + Defaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
 
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
@@ -180,6 +182,8 @@ public class CommonConstants {
 	public static final String ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
 	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
 	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
+	
+	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
 

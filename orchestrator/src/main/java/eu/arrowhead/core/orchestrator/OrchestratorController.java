@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
-allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.ORCHESTRATOR_URI)
@@ -44,10 +44,11 @@ public class OrchestratorController {
 	private static final String PATH_VARIABLE_ID = "id";
 	private static final String OP_ORCH_PROCESS_BY_ID = CommonConstants.OP_ORCH_PROCESS + "/{" + PATH_VARIABLE_ID + "}";
 	
-	private static final String POST_ORCHESTRATOR_HTTP_200_MESSAGE = "OrchestratorStores by requested parameters modified";
-	private static final String POST_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not modify OrchestratorStore by requested parameters";
 	private static final String GET_ORCHESTRATOR_HTTP_200_MESSAGE = "Orchestration by consumer system id returned";
 	private static final String GET_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not orchestrate by requested consumer system id";
+	private static final String POST_ORCHESTRATIOR_DESCRIPTION = "Start Orchestration process.";
+	private static final String POST_ORCHESTRATOR_HTTP_200_MESSAGE = "Returns possible providers of the specified service.";
+	private static final String POST_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not run the orchestration process";
 	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
@@ -78,7 +79,7 @@ public class OrchestratorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Start Orchestration process.", response = OrchestrationResponseDTO.class)
+	@ApiOperation(value = POST_ORCHESTRATIOR_DESCRIPTION, response = OrchestrationResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_HTTP_400_MESSAGE),

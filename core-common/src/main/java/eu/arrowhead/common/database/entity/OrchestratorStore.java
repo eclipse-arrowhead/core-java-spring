@@ -19,9 +19,9 @@ import javax.persistence.UniqueConstraint;
 import eu.arrowhead.common.CommonConstants;
 
 @Entity
-@Table (uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority", "serviceInterfaceId"}),
-		@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "foreign_", "providerSystemId", "serviceInterfaceId"})
+@Table(uniqueConstraints = {
+			@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "priority", "serviceInterfaceId"}),
+			@UniqueConstraint(columnNames = {"serviceId", "consumerSystemId", "foreign_", "providerSystemId", "serviceInterfaceId"})
 		})
 public class OrchestratorStore {
 
@@ -29,39 +29,40 @@ public class OrchestratorStore {
 	// members
 
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", CommonConstants.SORT_FIELD_PRIORITY); //NOSONAR
+	public static final String FIELD_NAME_PRIORITY = "priority";
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "serviceId", referencedColumnName = "id", nullable = false)
 	private ServiceDefinition serviceDefinition;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "consumerSystemId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "consumerSystemId", referencedColumnName = "id", nullable = false)
 	private System consumerSystem;
 	
-	@Column(name="foreign_", nullable = false)
+	@Column(name = "foreign_", nullable = false)
 	private boolean foreign;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private long providerSystemId;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "serviceInterfaceId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "serviceInterfaceId", referencedColumnName = "id", nullable = false)
 	private ServiceInterface serviceInterface;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private int priority;
 	
-	@Column (nullable = true, columnDefinition = "TEXT")
+	@Column(nullable = true, columnDefinition = "TEXT")
 	private String attribute;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
 	//=================================================================================================
@@ -71,12 +72,8 @@ public class OrchestratorStore {
 	public OrchestratorStore() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStore(final ServiceDefinition serviceDefinition, 
-			final System consumerSystem, 
-			final boolean foreign, 
-			final long providerSystemId, 
-			final ServiceInterface serviceInterface, 
-			final Integer priority, final String attribute) {
+	public OrchestratorStore(final ServiceDefinition serviceDefinition,	final System consumerSystem, final boolean foreign, final long providerSystemId, final ServiceInterface serviceInterface, 
+							 final int priority, final String attribute) {
 		
 		this.serviceDefinition = serviceDefinition;
 		this.consumerSystem = consumerSystem;
@@ -127,9 +124,8 @@ public class OrchestratorStore {
 	//-------------------------------------------------------------------------------------------------	
 	@Override
 	public String toString() {
-		return "OrchestratorStore [id=" + id + ", serviceDefinition=" + serviceDefinition + ", consumerSystem="
-				+ consumerSystem + ", foreign=" + foreign + ", providerSystemid=" + providerSystemId
-				+ ", serviceInterface=" + serviceInterface + ", priority=" + priority + ", attribute=" + attribute + ", createdAt=" + createdAt + ", updatedAt="
-				+ updatedAt + "]";
+		return "OrchestratorStore [id = " + id + ", serviceDefinition = " + serviceDefinition + ", consumerSystem = " + consumerSystem + ", foreign = " + foreign + ", providerSystemid = " +
+			   providerSystemId + ", serviceInterface = " + serviceInterface + ", priority = " + priority + ", attribute = " + attribute + ", createdAt = " + createdAt + ", updatedAt = " +
+			   updatedAt + "]";
 	}
 }

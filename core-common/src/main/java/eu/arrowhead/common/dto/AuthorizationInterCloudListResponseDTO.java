@@ -26,10 +26,10 @@ public class AuthorizationInterCloudListResponseDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<AuthorizationInterCloudResponseDTO> getData() {return data;}
-	public long getCount() {return count;}
+	public List<AuthorizationInterCloudResponseDTO> getData() { return data; }
+	public long getCount() { return count; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<AuthorizationInterCloudResponseDTO> data) {this.data = data;}
-	public void setCount(final long count) {this.count = count;}	
+	public void setData(final List<AuthorizationInterCloudResponseDTO> data) { this.data = data; }
+	public void setCount(final long count) { this.count = count; }	
 }

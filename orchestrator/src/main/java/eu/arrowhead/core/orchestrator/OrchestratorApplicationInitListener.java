@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
@@ -12,9 +13,20 @@ import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
+import eu.arrowhead.core.orchestrator.matchmaking.RandomIntraCloudProviderMatchmaker;
 
 @Component
 public class OrchestratorApplicationInitListener extends ApplicationInitListener {
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CommonConstants.INTRA_CLOUD_PROVIDER_MATCHMAKER)
+	public IntraCloudProviderMatchmakingAlgorithm getIntraCloudProviderMatchmaker() {
+		return new RandomIntraCloudProviderMatchmaker();
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -22,7 +34,7 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		return List.of(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE); // TODO: add all necessary services
+		return List.of(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, CoreSystemService.AUTH_CONTROL_INTRA_SERVICE); // TODO: add all necessary services
 	}
 	
 	//-------------------------------------------------------------------------------------------------

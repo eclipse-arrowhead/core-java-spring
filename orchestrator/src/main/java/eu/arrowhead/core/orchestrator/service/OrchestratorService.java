@@ -8,9 +8,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -22,6 +25,7 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
@@ -36,6 +40,8 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
+import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
+import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingParameters;
 
 @Service
 public class OrchestratorService {
@@ -56,6 +62,11 @@ public class OrchestratorService {
 	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
 	
+	@Resource(name = CommonConstants.INTRA_CLOUD_PROVIDER_MATCHMAKER)
+	private IntraCloudProviderMatchmakingAlgorithm intraCloudProviderMatchmaker;
+	
+	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gateKeeperIsPresent;
 	
 	//=================================================================================================
 	// methods
@@ -66,9 +77,10 @@ public class OrchestratorService {
 	 * that this request from the remote Orchestrator can be satisfied in this Cloud. (Gatekeeper polled the Service Registry and Authorization
 	 * Systems.)
 	 */
+	@SuppressWarnings("squid:S1612")
 	public OrchestrationResponseDTO externalServiceRequest(final OrchestrationFormRequestDTO request) {
 		logger.debug("externalServiceRequest started ...");
-		checkExternalServiceRequestForm(request);
+		checkServiceRequestForm(request, false);
 		
 		// Querying the Service Registry to get the list of Provider Systems
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
@@ -78,7 +90,7 @@ public class OrchestratorService {
 	    // If necessary, removing the non-preferred providers from the SR response. (If necessary, matchmaking is done after this at the request sender Cloud.)
 		if (flags.get(Flag.ONLY_PREFERRED)) {  
 			// This request contains only local preferred systems, since this request came from another cloud, but the de-boxing is necessary
-			final Set<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toSet());
+			final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
 			queryData = removeNonPreferred(queryData, localProviders);
 		}
 
@@ -146,12 +158,76 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO dynamicOrchestration(
-			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
+	/**
+	 * Represents the regular orchestration process where the requester system is in the local Cloud. In this process the
+     * <i>Orchestrator Store</i> is ignored, and the Orchestrator first tries to find a provider for the requested service in the local Cloud.
+     * If that fails but the <i>enableInterCloud</i> flag is set to true, the Orchestrator tries to find a provider in other Clouds.
+	 */
+	public OrchestrationResponseDTO dynamicOrchestration(final OrchestrationFormRequestDTO request) {
 		logger.debug("dynamicOrchestration started ...");
+
+		// necessary, because we want to use a flag value when we call the check method
+		if (request == null) {
+			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
 		
-		//TODO implement method logic here
-		return null;
+		final OrchestrationFlags flags = request.getOrchestrationFlags();
+		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
+		
+		// Querying the Service Registry to get the list of Provider Systems
+		final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(request.getRequestedService(), flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+		List<ServiceRegistryResponseDTO> queryData = queryResult.getServiceQueryData();
+		if (queryData.isEmpty()) {
+			if (isInterCloudOrchestrationPossible(flags)) {
+				// no result in the local Service Registry => we try with other clouds
+				logger.debug("dynamicOrchestration: no result in Service Registry => moving to Inter-Cloud orchestration.");
+				return triggerInterCloud(request);
+			} else {
+				return new OrchestrationResponseDTO(); // empty response
+			}
+		}
+		
+	    // Cross-checking the SR response with the Authorization
+		queryData = orchestratorDriver.queryAuthorization(request.getRequesterSystem(), queryData);
+		if (queryData.isEmpty()) {
+			if (isInterCloudOrchestrationPossible(flags)) {
+				// no result after authorization => we try with other clouds
+				logger.debug("dynamicOrchestration: no provider give access to requester system => moving to Inter-Cloud orchestration.");
+				return triggerInterCloud(request);
+			} else {
+				return new OrchestrationResponseDTO(); // empty response
+			}
+		}
+		
+		final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
+
+		// If necessary, removing the non-preferred providers from the SR response. 
+		if (flags.get(Flag.ONLY_PREFERRED)) {
+			queryData = removeNonPreferred(queryData, localProviders);
+			if (queryData.isEmpty()) {
+				if (isInterCloudOrchestrationPossible(flags)) {
+					// no result that contains any of the preferred providers => we try with other clouds
+					logger.debug("dynamicOrchestration: no preferred provider give access to requester system => moving to Inter-Cloud orchestration.");
+					return triggerInterCloud(request);
+				} else {
+					return new OrchestrationResponseDTO(); // empty response
+				}
+			}
+		}
+
+		// If matchmaking is requested, we pick out 1 ServiceRegistryEntry entity from the list.
+		if (flags.get(Flag.MATCHMAKING)) {
+			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
+			// set additional parameters here if you use a different matchmaking algorithm
+			final ServiceRegistryResponseDTO selected = intraCloudProviderMatchmaker.doMatchmaking(queryData, params);
+			queryData.clear();
+			queryData.add(selected);
+		}
+
+		// all the filtering is done
+		logger.debug("dynamicOrchestration finished with {} service providers.", queryData.size());
+		
+		return compileOrchestrationResponse(queryData, request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -172,7 +248,12 @@ public class OrchestratorService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkExternalServiceRequestForm(final OrchestrationFormRequestDTO request) {
+	private boolean isInterCloudOrchestrationPossible(final OrchestrationFlags flags) {
+		return gateKeeperIsPresent && flags.get(Flag.ENABLE_INTER_CLOUD);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRequestForm(final OrchestrationFormRequestDTO request, final boolean cloudCheckInProviders) {
 		logger.debug("checkExternalServiceRequestForm started ...");
 		
 		if (request == null) {
@@ -185,7 +266,7 @@ public class OrchestratorService {
 		checkRequestedServiceForm(request.getRequestedService());
 		
 		// Preferred Providers
-		checkPreferredProviders(request.getPreferredProviders(), false);
+		checkPreferredProviders(request.getPreferredProviders(), cloudCheckInProviders);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -257,13 +338,13 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<ServiceRegistryResponseDTO> removeNonPreferred(final List<ServiceRegistryResponseDTO> srList, final Set<PreferredProviderDataDTO> preferredProviders) {
+	private List<ServiceRegistryResponseDTO> removeNonPreferred(final List<ServiceRegistryResponseDTO> srList, final List<PreferredProviderDataDTO> preferredProviders) {
 		logger.debug("removeNonPreferred started...");
 		
 		final List<ServiceRegistryResponseDTO> result = new ArrayList<>();
 		for (final ServiceRegistryResponseDTO srResult : srList) {
 			for (final PreferredProviderDataDTO preferredProvider : preferredProviders) {
-				if (equalsSystemInResponseAndRequest(srResult.getProvider(), preferredProvider.getProviderSystem())) {
+				if (DTOUtilities.equalsSystemInResponseAndRequest(srResult.getProvider(), preferredProvider.getProviderSystem())) {
 					result.add(srResult);
 				}
 			}
@@ -274,14 +355,6 @@ public class OrchestratorService {
 		return result;
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	private boolean equalsSystemInResponseAndRequest(final SystemResponseDTO response, final SystemRequestDTO request) {
-		logger.debug("equalsSystemInResponseAndRequest started...");
-		
-		return response.getSystemName().equalsIgnoreCase(request.getSystemName()) &&
-			   response.getAddress().equalsIgnoreCase(request.getAddress()) &&
-			   response.getPort() == request.getPort().intValue();
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestrationResponseDTO compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
@@ -433,7 +506,7 @@ public class OrchestratorService {
 	    		idIdListDTO.setIdList(DTOConverter.convertServiceInterfaceResponseDTOListToServiceInterfaceIdList(serviceRegistryResponseDTO.getInterfaces()));
 	    		
 	    		final AuthorizationIntraCloudCheckRequestDTO authorizationIntraCloudCheckRequestDTO = new AuthorizationIntraCloudCheckRequestDTO();
-	    		authorizationIntraCloudCheckRequestDTO.setConsumerId(entry.getConsumerSystem().getId());
+	    		authorizationIntraCloudCheckRequestDTO.setConsumer(DTOConverter.convertSystemToSystemRequestDTO(entry.getConsumerSystem()));
 	    		authorizationIntraCloudCheckRequestDTO.setServiceDefinitionId(entry.getServiceDefinition().getId());
 	    		authorizationIntraCloudCheckRequestDTO.setProviderIdsWithInterfaceIds(List.of(idIdListDTO));
 	    		
