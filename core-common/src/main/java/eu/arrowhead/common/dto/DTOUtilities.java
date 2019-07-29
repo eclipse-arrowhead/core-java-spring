@@ -17,9 +17,11 @@ public class DTOUtilities {
 		
 		final SystemRequestDTO converted = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(response);
 		normalizeSystemRequestDTO(converted);
-		normalizeSystemRequestDTO(request);
 		
-		return converted.equals(request);
+		final SystemRequestDTO requestCopy = copySystemRequestDTO(request);
+		normalizeSystemRequestDTO(requestCopy);
+		
+		return converted.equals(requestCopy);
 	}
 	
 	//=================================================================================================
@@ -28,6 +30,21 @@ public class DTOUtilities {
 	//-------------------------------------------------------------------------------------------------
 	private DTOUtilities() {
 		throw new UnsupportedOperationException();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static SystemRequestDTO copySystemRequestDTO(final SystemRequestDTO orig) {
+		if (orig == null) {
+			return null;
+		}
+		
+		final SystemRequestDTO result = new SystemRequestDTO();
+		result.setSystemName(orig.getSystemName());
+		result.setAddress(orig.getAddress());
+		result.setPort(orig.getPort());
+		result.setAuthenticationInfo(orig.getAuthenticationInfo());
+		
+		return result;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

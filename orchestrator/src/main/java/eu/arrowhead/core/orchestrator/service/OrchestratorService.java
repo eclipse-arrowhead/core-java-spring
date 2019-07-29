@@ -74,7 +74,7 @@ public class OrchestratorService {
 		List<ServiceRegistryResponseDTO> queryData = queryResult.getServiceQueryData();
 	    // If necessary, removing the non-preferred providers from the SR response. (If necessary, matchmaking is done after this at the request sender Cloud.)
 		if (flags.get(Flag.ONLY_PREFERRED)) {  
-			// This request contains only local preferred systems, since this request came from another cloud, but the de-boxing is necessary
+			// This request contains only local preferred systems, since this request came from another cloud, but the unboxing is necessary
 			final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
 			queryData = removeNonPreferred(queryData, localProviders);
 		}
