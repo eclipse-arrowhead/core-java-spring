@@ -41,4 +41,6 @@ Service Registry will be available on ```localhost:8443``` <br />
 Authorization will be available on ```localhost:8445``` <br />
 Ochestrator will be available on ```localhost:8441``` <br />
 
+Swagger with API documentation is available in the root route.
+
 Enjoy! ;)
