@@ -273,10 +273,10 @@ CREATE TABLE `action` (
   `name` varchar(255) NOT NULL,
   `action_plan_id` bigint(20) NOT NULL,
   `next_action_id` bigint(20) NOT NULL,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `FKaxgcwgyga50fsi9tyupu19xp` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE
-  CONSTRAINT `action_plan` FOREIGN KEY (`action_plan_id`) REFERENCES `action_plan`(`id`),
-  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `action` (`id`)
+  `created_at` timestamp NOT NULL DEFAULT NOW(),
+  `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+  -- CONSTRAINT `action_plan` FOREIGN KEY (`action_plan_id`) REFERENCES `action_plan`(`id`),
+  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_action_step`;
@@ -286,16 +286,34 @@ CREATE TABLE `action_step` (
   `action_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT NOW(),
   `updated_at` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `action`(`id`)  ON DELETE CASCADE
+  -- CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `action`(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `choreographer_action_plan_action_connection`
+CREATE TABLE `choreographer_action_plan_action_connection`
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `action_plan_id` bigint(20) NOT NULL,
+  `action_id` bigint(20) NOT NULL,
+  CONSTRAINT `action_plan_fk1` FOREIGN KEY (`action_plan_id`) REFERENCES `choreographer_action_plan` (`id`),
+  CONSTRAINT `action_fk1` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `choreographer_action_action_step_connection`
+CREATE TABLE `choreographer_action_action_step_connection`
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `action_id` bigint(20) NOT NULL,
+  `action_step_id` bigint(20) NOT NULL,
+  CONSTRAINT `action_fk2` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`),
+  CONSTRAINT `action_step_fk1` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_action_step_service_definition_connection`;
 CREATE TABLE `action_step_service_definition_connection` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_step_id` bigint(20) NOT NULL,
   `service_definition_id` bigint(20) NOT NULL,
-  CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE
+  CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`),
+  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_next_action_step`;
@@ -303,8 +321,8 @@ CREATE TABLE `next_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_step_id` bigint(20) NOT NULL,
   `next_action_step_id` bigint(20) NOT NULL,
-  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`) ON DELETE CASCADE
+  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`),
+  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `action_step` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Set up privileges
@@ -402,19 +420,25 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'%';
 -- Choreographer
 DROP USER IF EXISTS 'choreographer'@'localhost';
 CREATE USER IF NOT EXISTS 'choreographer'@'localhost' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_steps` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step_service` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan_action_connection` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'localhost';
 
 DROP USER IF EXISTS 'choreographer'@'%';
 CREATE USER IF NOT EXISTS 'choreographer'@'%' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_steps` TO 'choreographer'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan` TO 'choreographer'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step` TO 'choreographer'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step_service` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan_action_connection` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'%';
 
