@@ -6,7 +6,7 @@
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
  
 ### How to contribute?
-Check out ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```developlent```. When accepted, your contribution will be in the next release. :)
+Check out ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. When accepted, your contribution will be in the next release. :)
  
  
 ### Requirements
@@ -46,6 +46,4 @@ Service Registry will be available on ```localhost:8443``` <br />
 Authorization will be available on ```localhost:8445``` <br />
 Ochestrator will be available on ```localhost:8441``` <br />
 
-
-
-
+Enjoy! ;)
