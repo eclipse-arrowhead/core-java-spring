@@ -40,11 +40,14 @@ public class ChoreographerDBService {
     @Autowired
     private ChoreographerActionStepServiceDefinitionConnectionRepository choreographerActionStepServiceDefinitionConnectionRepository;
 
+    @Autowired
+    private ChoreographerNextActionStepRepository choreographerNextActionStepRepository;
+
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
 
     @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerActionStep createChoreographerActionStepWithServiceDefinition(final String stepName, final Set<String> usedServiceNames) {
-        logger.debug("createChoreographerActionStepWithServiceDefinition started");
+        logger.debug("createChoreographerActionStepWithServiceDefinition started...");
 
         List<ServiceDefinition> usedServices = new ArrayList<>(usedServiceNames.size());
         for (String name : usedServiceNames) {
@@ -80,6 +83,39 @@ public class ChoreographerDBService {
 
         return DTOConverter.convertChoreographerActionStepToChoreographerActionStepResponseDTO(createChoreographerActionStepWithServiceDefinition(stepName, usedServiceNames));
     }
+
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerActionStep updateChoreographerActionStepWithNextSteps(final long id, final Set<Long> nextActionStepIds) {
+        logger.debug("updateChoreographerActionStepWithNextSteps started...");
+
+        List<ChoreographerActionStep> nextActionSteps = new ArrayList<>(nextActionStepIds.size());
+        for (Long nextActionStepId : nextActionStepIds) {
+            Optional<ChoreographerActionStep> actionStepOpt = choreographerActionStepRepository.findById(nextActionStepId);
+            if (actionStepOpt.isPresent()) {
+                nextActionSteps.add(actionStepOpt.get());
+            } else {
+                logger.debug("ChoreographerPlanStep with the id of " + nextActionStepId + " doesn't exist!");
+            }
+        }
+
+        if (nextActionSteps.size() != nextActionStepIds.size()) {
+            throw new InvalidParameterException("One or more of the given next action step doesn't exist! Create ALL action steps before linking them together.");
+        }
+
+        ChoreographerActionStep stepEntry = getChoreographerActionStepEntryById(id);
+        for (ChoreographerActionStep choreographerActionStep : nextActionSteps) {
+            ChoreographerNextActionStep nextActionStep =
+                    choreographerNextActionStepRepository.save(new ChoreographerNextActionStep(stepEntry, choreographerActionStep));
+            stepEntry.getNextActionSteps().add(nextActionStep);
+        }
+        choreographerNextActionStepRepository.flush();
+
+        ChoreographerActionStep savedStepEntry = choreographerActionStepRepository.save(stepEntry);
+        choreographerActionStepRepository.flush();
+        return savedStepEntry;
+    }
+
+    public 
 
     public ChoreographerActionStep getChoreographerActionStepEntryById(final long id) {
         logger.debug("getChoreographerActionStepEntryById started...");

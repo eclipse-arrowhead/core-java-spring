@@ -9,7 +9,7 @@ public class ChoreographerActionStepResponseDTO implements Serializable {
 
     private long id;
     private List<ServiceDefinitionResponseDTO> serviceDefinitions;
-    private List<NextActionStepResponseDTO> nextActionSteps;
+    private List<ChoreographerNextActionStepResponseDTO> nextActionSteps;
     private String createdAt;
     private String updatedAt;
 

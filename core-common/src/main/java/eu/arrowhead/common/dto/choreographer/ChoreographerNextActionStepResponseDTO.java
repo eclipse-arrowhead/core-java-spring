@@ -1,14 +1,14 @@
 package eu.arrowhead.common.dto.choreographer;
 
-public class NextActionStepResponseDTO {
+public class ChoreographerNextActionStepResponseDTO {
 
     private long id;
     private String actionStepName;
 
-    public NextActionStepResponseDTO() {
+    public ChoreographerNextActionStepResponseDTO() {
     }
 
-    public NextActionStepResponseDTO(long id, String actionStepName) {
+    public ChoreographerNextActionStepResponseDTO(long id, String actionStepName) {
         this.id = id;
         this.actionStepName = actionStepName;
     }
