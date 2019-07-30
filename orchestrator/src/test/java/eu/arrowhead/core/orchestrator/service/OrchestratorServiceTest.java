@@ -25,7 +25,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 
 @RunWith(SpringRunner.class)
-public class OrchastratorServiceTest {
+public class OrchestratorServiceTest {
 
 	//=================================================================================================
 	// members
