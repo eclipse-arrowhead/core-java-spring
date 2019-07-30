@@ -1064,8 +1064,6 @@ public class OrchestratorStoreDBServiceTest {
 		
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
@@ -1084,8 +1082,6 @@ public class OrchestratorStoreDBServiceTest {
 		
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;

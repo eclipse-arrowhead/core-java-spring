@@ -257,6 +257,7 @@ public class DTOConverter {
 				entity.getSecure(),
 				entity.getNeighbor(),
 				entity.getOwnCloud(),
+				entity.getAuthenticationInfo(),
 				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 	}

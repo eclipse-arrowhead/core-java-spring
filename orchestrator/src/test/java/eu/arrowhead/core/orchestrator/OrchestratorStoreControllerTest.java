@@ -544,8 +544,6 @@ public class OrchestratorStoreControllerTest {
 		
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
@@ -564,8 +562,6 @@ public class OrchestratorStoreControllerTest {
 		
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
@@ -770,12 +766,10 @@ public class OrchestratorStoreControllerTest {
 				getIdForTest(), 
 				"operator", 
 				"name", 
-				"address", 
-				12345, 
-				"gateKeeperServiceUri", 
 				true, 
 				true, 
-				true, 
+				true,
+				null,
 				"2019-07-04 14:43:19", 
 				"2019-07-04 14:43:19");
 	}
