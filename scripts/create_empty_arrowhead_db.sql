@@ -174,6 +174,8 @@ CREATE TABLE `relay` (
   `address` varchar(255) NOT NULL,
   `port` int(11) NOT NULL,
   `secure` int(1) NOT NULL DEFAULT 0,
+  `private_relation` int(1) NOT NULL DEFAULT 0,
+  `type` varchar(255) NOT NULL DEFAULT 'GENERAL_RELAY',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
