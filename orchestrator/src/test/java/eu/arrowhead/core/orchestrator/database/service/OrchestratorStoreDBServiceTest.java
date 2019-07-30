@@ -1064,8 +1064,6 @@ public class OrchestratorStoreDBServiceTest {
 		
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
@@ -1084,8 +1082,6 @@ public class OrchestratorStoreDBServiceTest {
 		
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
@@ -1499,7 +1495,8 @@ public class OrchestratorStoreDBServiceTest {
 					"name",
 					secure, 
 					neighbor, 
-					ownCloud);
+					ownCloud,
+					"jlvhdaswfcb");
 		
 		cloud.setId(getIdForTest());
 		cloud.setCreatedAt(getCreatedAtForTest());
@@ -1517,7 +1514,8 @@ public class OrchestratorStoreDBServiceTest {
 					"name",
 					secure, 
 					neighbor, 
-					ownCloud);
+					ownCloud,
+					"dsoklfndhaskjf");
 		cloud.setId(getIdForTest());
 		cloud.setCreatedAt(getCreatedAtForTest());
 		cloud.setUpdatedAt(getUpdatedAtForTest());

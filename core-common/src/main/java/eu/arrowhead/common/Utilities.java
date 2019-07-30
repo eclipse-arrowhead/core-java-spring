@@ -162,10 +162,10 @@ public class Utilities {
 			if (jsonString != null) {
 				final String jsonString_ = jsonString.trim();
 				if (jsonString_.startsWith("{")) {
-					Object tempObj = mapper.readValue(jsonString_, Object.class);
+					final Object tempObj = mapper.readValue(jsonString_, Object.class);
 					return mapper.writeValueAsString(tempObj);
 				} else {
-					Object[] tempObj = mapper.readValue(jsonString_, Object[].class);
+					final Object[] tempObj = mapper.readValue(jsonString_, Object[].class);
 					return mapper.writeValueAsString(tempObj);
 				}
 			}
@@ -299,7 +299,7 @@ public class Utilities {
 		
 	    try {
 	    	// Subject is in LDAP format, we can use the LdapName object for parsing
-	    	LdapName ldapname = new LdapName(subjectName);
+	    	final LdapName ldapname = new LdapName(subjectName);
 	    	for (final Rdn rdn : ldapname.getRdns()) {
 	    		// Find the data after the CN field
 	    		if (CommonConstants.COMMON_NAME_FIELD_NAME.equalsIgnoreCase(rdn.getType())) {

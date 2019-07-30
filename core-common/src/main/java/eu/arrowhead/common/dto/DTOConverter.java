@@ -254,12 +254,10 @@ public class DTOConverter {
 				entity.getId(),
 				entity.getOperator(),
 				entity.getName(),
-				entity.getGatekeeper() != null ? entity.getGatekeeper().getAddress() : null,
-				entity.getGatekeeper() != null ? entity.getGatekeeper().getPort() : null,
-				entity.getGatekeeper() != null ? entity.getGatekeeper().getServiceUri() : null,
 				entity.getSecure(),
 				entity.getNeighbor(),
 				entity.getOwnCloud(),
+				entity.getAuthenticationInfo(),
 				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 	}
@@ -332,7 +330,7 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
-			final List<OrchestratorStoreResponseDTO> entries, long totalElements) {
+			final List<OrchestratorStoreResponseDTO> entries, final long totalElements) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
 
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
@@ -394,7 +392,7 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(ForeignSystem foreignSystem) {
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
 		Assert.notNull(foreignSystem, "ForeignSystem is null");
 		
 		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),

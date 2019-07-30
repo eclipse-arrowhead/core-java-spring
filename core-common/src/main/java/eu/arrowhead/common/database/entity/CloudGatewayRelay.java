@@ -4,45 +4,40 @@ import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import eu.arrowhead.common.Defaults;
-
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "address", "port", "serviceUri" }))
-public class CloudGatekeeper {
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"cloudAId", "cloudBId", "relayId"}))
+public class CloudGatewayRelay {
 
 	//=================================================================================================
 	// members
-	
+
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@OneToOne(optional = false)
-	@JoinColumn(name = "cloudId", referencedColumnName = "id", unique = true, nullable = false)
-	private Cloud cloud;
-
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
-	private String address;
-
-	@Column (nullable = false)
-	private int port;
-
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
-	private String serviceUri;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "cloudAId", referencedColumnName = "id", nullable = false)
+	private Cloud cloudA;
 	
-	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
-	private String authenticationInfo;
-
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "cloudBId", referencedColumnName = "id", nullable = false)
+	private Cloud cloudB;
+	
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "relayId", referencedColumnName = "id", nullable = false)
+	private Relay relay;
+	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
@@ -53,15 +48,13 @@ public class CloudGatekeeper {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudGatekeeper() {}
+	public CloudGatewayRelay() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudGatekeeper(final Cloud cloud, final String address, final int port, final String serviceUri, final String authenticationInfo) {
-		this.cloud = cloud;
-		this.address = address;
-		this.port = port;
-		this.serviceUri = serviceUri;
-		this.authenticationInfo = authenticationInfo;
+	public CloudGatewayRelay(final Cloud cloudA, final Cloud cloudB, final Relay relay) {
+		this.cloudA = cloudA;
+		this.cloudB = cloudB;
+		this.relay = relay;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -79,27 +72,23 @@ public class CloudGatekeeper {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public Cloud getCloud() { return cloud; }
-	public String getAddress() { return address; }
-	public int getPort() { return port; }
-	public String getServiceUri() { return serviceUri; }
-	public String getAuthenticationInfo() { return authenticationInfo; }
+	public Cloud getCloudA() { return cloudA; }
+	public Cloud getCloudB() { return cloudB; }
+	public Relay getRelay() { return relay; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setCloud(final Cloud cloud) { this.cloud = cloud; }
-	public void setAddress(final String address) { this.address = address; }
-	public void setPort(final int port) { this.port = port; }
-	public void setServiceUri(final String serviceUri) { this.serviceUri = serviceUri; }
-	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setCloudA(final Cloud cloudA) { this.cloudA = cloudA; }
+	public void setCloudB(final Cloud cloudB) { this.cloudB = cloudB; }
+	public void setRelay(final Relay relay) { this.relay = relay; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "CloudGatekeeper [id=" + id + ", operator=" + cloud.getOperator() + ", name=" + cloud.getName() + ", address=" + address + ", port=" + port	+ ", serviceUri=" + serviceUri + "]";
+		return "CloudGatewayRelay [id = " + id + ", cloudA = " + cloudA + ", cloudB = " + cloudB + ", relay = " + relay + "]";
 	}
 }
