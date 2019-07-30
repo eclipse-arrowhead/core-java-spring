@@ -124,7 +124,7 @@ public class OrchestratorService {
 		
 		final List<OrchestratorStore> entryList;
 		final List<OrchestratorStore> filteredEntryList;
-		final List<OrchestratorStore> crossCheckedEntryList;
+		final List<ServiceRegistryResponseDTO> crossCheckedEntryList;
 		
 		if ( systemId != null) {
 			
@@ -132,6 +132,8 @@ public class OrchestratorService {
 			
 			entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(systemId);
 			crossCheckedEntryList = crossCheckTopPriorityEntries(entryList, orchestrationFormRequestDTO, consumerSystemRequestDTO);
+			
+			return compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
 		
 		}else {
 			
@@ -149,7 +151,7 @@ public class OrchestratorService {
 				
 			}
 			
-			crossCheckedEntryList = crossCheckStoreEntries(entryList, orchestrationFormRequestDTO);
+			// TODO iterate over filteredEntryList and handle foreign entries differently ... crossCheckedEntryList = crossCheckStoreEntries(entryList, orchestrationFormRequestDTO);
 			
 		
 		}
@@ -483,7 +485,7 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> crossCheckTopPriorityEntries(
+	private List<ServiceRegistryResponseDTO> crossCheckTopPriorityEntries(
 			final List<OrchestratorStore> entryList, 
 			final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
 			final SystemRequestDTO consumerSystem) {
@@ -497,7 +499,7 @@ public class OrchestratorService {
 	    
 	    if (onlyLocalEntryList.isEmpty()) {
 			
-	    	return onlyLocalEntryList;
+	    	return new ArrayList<>(0);
 		}
 	    
 	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
@@ -519,7 +521,7 @@ public class OrchestratorService {
 		    filteredServiceQueryResultDTOList.addAll(filteredQueryResultByAuthorization);
 	    }
 	    
-		return filterEntryListByFilteredQueryResult(filteredServiceQueryResultDTOList,  onlyLocalEntryList);
+		return filteredServiceQueryResultDTOList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -538,47 +540,75 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> crossCheckStoreEntries(List<OrchestratorStore> entryList,
+	private List<ServiceRegistryResponseDTO> crossCheckStoreEntries(List<OrchestratorStore> entryList,
 			OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("crossCheckStoreEntries started...");
 		
-		orchestrationFormRequestDTO.getRequestedService();
 		final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();
+		
+	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);	   
+	    
+	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapIntrefacesToProviders( onlyLocalEntryList);
 		
     	final ServiceQueryFormDTO serviceQueryFormDTO = orchestrationFormRequestDTO.getRequestedService();		
 		final ServiceQueryResultDTO serviceQueryResultDTO = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO,  flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS)); 
-	    final List<ServiceRegistryResponseDTO> authorizedServiceQueryResultDTO = orchestratorDriver.queryAuthorization(orchestrationFormRequestDTO.getRequesterSystem(), serviceQueryResultDTO.getServiceQueryData());
-
-	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);
+		final List<ServiceRegistryResponseDTO> filteredQueryResultByInterfaces = filterQueryResultByInterfaces(providerIdInterfaceIdsMap, serviceQueryResultDTO);	
+		final List<ServiceRegistryResponseDTO> authorizedServiceQueryResultDTO = orchestratorDriver.queryAuthorization(orchestrationFormRequestDTO.getRequesterSystem(), filteredQueryResultByInterfaces);
 	    
-	    if (onlyLocalEntryList.size() == entryList.size()) {
-	    	
-	    	return filterEntryListByFilteredQueryResult(authorizedServiceQueryResultDTO,  onlyLocalEntryList);
+
+		final List<ServiceRegistryResponseDTO> foreignStoreEntryInServiceRegistryResponseDTOFormat = getForeignStoreEntriesInServiceRegistryResponseDTOFormat(entryList);
 		
-	    }else {
-	    	return filterEntryListByFilteredQueryResultWithForeignCheck(authorizedServiceQueryResultDTO,  onlyLocalEntryList);
-		}
+		foreignStoreEntryInServiceRegistryResponseDTOFormat.addAll(authorizedServiceQueryResultDTO);
+		
+		return foreignStoreEntryInServiceRegistryResponseDTOFormat;
 	    
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> filterEntryListByFilteredQueryResult(
-			final List<ServiceRegistryResponseDTO> filteredServiceQueryResultDTOList, final List<OrchestratorStore> entryList) {
-		logger.debug("filterEntryListByFilteredQueryResult started...");
+	private List<ServiceRegistryResponseDTO> getForeignStoreEntriesInServiceRegistryResponseDTOFormat(
+			List<OrchestratorStore> entryList) {
+		logger.debug("getForeignStoreEntriesInServiceREgistryResponseDTOFormat started...");
 		
-		final List<OrchestratorStore> filteredEntryList = new ArrayList<>();
+		final List<ServiceRegistryResponseDTO> serviceRegistryResponseDTOList = new ArrayList<>();
 		
 		for (final OrchestratorStore orchestratorStore : entryList) {
 			
-			final long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
-			final long providerSystemId = orchestratorStore.getProviderSystemId();
-			final long serviceInterfaceId = orchestratorStore.getServiceInterface().getId();
-			
-			if (findOrchestratorStoreInFilteredResponse(serviceDefinitionId, providerSystemId, serviceInterfaceId, filteredServiceQueryResultDTOList)) {
+			if (orchestratorStore.isForeign()) {
 				
-				filteredEntryList.add(orchestratorStore);
+				final ServiceRegistryResponseDTO serviceRegistryResponseDTO = new ServiceRegistryResponseDTO();
+				//serviceRegistryResponseDTO.set
+				//serviceRegistryResponseDTOList.add();
+				
 			}
 		}
+		
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private List<ServiceRegistryResponseDTO> filterEntryListByFilteredQueryResult(
+			final List<ServiceRegistryResponseDTO> filteredServiceQueryResultDTOList, final List<OrchestratorStore> entryList) {
+		logger.debug("filterEntryListByFilteredQueryResult started...");
+		
+		final List<ServiceRegistryResponseDTO> filteredEntryList = new ArrayList<>();
+		
+		for (ServiceRegistryResponseDTO serviceRegistryResponseDTO : filteredServiceQueryResultDTOList) {
+			
+			//serviceRegistryResponseDTO.get
+			
+		}
+		
+		//for (final OrchestratorStore orchestratorStore : entryList) {
+		//	
+		//	final long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
+		//	final long providerSystemId = orchestratorStore.getProviderSystemId();
+		//	final long serviceInterfaceId = orchestratorStore.getServiceInterface().getId();
+		//	
+		//	if (findOrchestratorStoreInFilteredResponse(serviceDefinitionId, providerSystemId, serviceInterfaceId, filteredServiceQueryResultDTOList)) {
+		//		
+		//		filteredEntryList.add(orchestratorStore);
+		//	}
+		//}
 		
 		return filteredEntryList;
 	}
