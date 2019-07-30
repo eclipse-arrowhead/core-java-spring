@@ -45,7 +45,7 @@ public class Relay {
 	private boolean secure = false;
 	
 	@Column (nullable = false)
-	private boolean privateRelation = false;
+	private boolean exclusive = false;
 	
 	@Column (nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'GENERAL_RELAY'")
 	@Enumerated(EnumType.STRING)
@@ -72,11 +72,11 @@ public class Relay {
 	public Relay() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public Relay(final String address, final int port, final boolean secure, final boolean privateRelation, final RelayType type) {
+	public Relay(final String address, final int port, final boolean secure, final boolean exclusive, final RelayType type) {
 		this.address = address;
 		this.port = port;
 		this.secure = secure;
-		this.privateRelation = privateRelation;
+		this.exclusive = exclusive;
 		this.type = type;
 	}
 	
@@ -98,7 +98,7 @@ public class Relay {
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
 	public boolean getSecure() { return secure; }
-	public boolean getPrivateRelation() { return privateRelation; }
+	public boolean getExclusive() { return exclusive; }
 	public RelayType getType() { return type; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
@@ -110,7 +110,7 @@ public class Relay {
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
 	public void setSecure(final boolean secure) { this.secure = secure; }
-	public void setPrivateRelation (final boolean privateRelation) { this.privateRelation = privateRelation; }
+	public void setExclusive (final boolean exclusive) { this.exclusive = exclusive; }
 	public void setType(final RelayType type) { this.type = type; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }

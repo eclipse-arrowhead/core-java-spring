@@ -1,6 +1,5 @@
 package eu.arrowhead.core.serviceregistry;
 
-import java.util.Base64;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +53,6 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 		if (!standaloneMode) {
 			String name = Defaults.DEFAULT_OWN_CLOUD_NAME;
 			String operator = Defaults.DEFAULT_OWN_CLOUD_OPERATOR;
-			String authorizationInfo = null;
 			
 			if (sslProperties.isSslEnabled()) {
 				@SuppressWarnings("unchecked")
@@ -63,10 +61,9 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 				final String[] serverFields = serverCN.split("\\.");
 				name = serverFields[1];
 				operator = serverFields[2];
-				authorizationInfo = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 			}
 			
-			commonDBService.insertOwnCloudWithoutGatekeeper(operator, name, sslProperties.isSslEnabled(), authorizationInfo);
+			commonDBService.insertOwnCloud(operator, name, sslProperties.isSslEnabled(), null);
 			logger.info("{}.{} own cloud is registered in {} mode.", name, operator, getModeString());
 		}
 	}

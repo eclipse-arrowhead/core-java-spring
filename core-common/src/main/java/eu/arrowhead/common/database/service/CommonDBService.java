@@ -54,7 +54,7 @@ public class CommonDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Cloud insertOwnCloudWithoutGatekeeper(final String operator, final String name, final boolean secure, final String authenticationInfo) {
+	public Cloud insertOwnCloud(final String operator, final String name, final boolean secure, final String authenticationInfo) {
 		logger.debug("insertOwnCloudWithoutGatekeeper started...");
 		Assert.isTrue(!Utilities.isEmpty(operator), "Operator is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(name), "Name is null or empty.");
