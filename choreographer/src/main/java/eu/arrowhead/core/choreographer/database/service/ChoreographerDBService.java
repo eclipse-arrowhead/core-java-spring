@@ -36,36 +36,7 @@ public class ChoreographerDBService {
 
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
 
-    public ChoreographerActionStep getChoreographerActionStepById(final long id) {
-        logger.debug("getChoreographerActionStepById started...");
 
-        try {
-            final Optional<ChoreographerActionStep> actionStep = choreographerActionStepRepository.findById(id);
-            if(actionStep.isPresent()) {
-                return actionStep.get();
-            } else {
-                throw new InvalidParameterException("Action step with id of '\" + id + \"' does not exist!");
-            }
-        } catch (final InvalidParameterException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
-
-    public Set<ServiceDefinition> getAllUsedServicesByActionStepId(final long id) {
-
-        final Optional<ChoreographerActionStep> actionStep = choreographerActionStepRepository.findById(id);
-        return actionStep.get().getUsedServices();
-    }
-
-    public ChoreographerActionStepResponseDTO getChoreographerActionStepByIdResponse(final long id) {
-        logger.debug("getChoreographerActionPlanByIdResponse started...");
-
-        final ChoreographerActionStep choreographerActionPlan = getChoreographerActionStepById(id);
-        return DTOConverter.convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep);
-    }
 
     /* public ChoreographerActionPlan getChoreographerActionPlanById(final long id) {
         logger.debug("getChoreographerActionPlanById started...");

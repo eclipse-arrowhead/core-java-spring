@@ -24,24 +24,26 @@ public class ChoreographerAction {
     @JoinColumn(name = "nextActionId", referencedColumnName = "id", nullable = true)
     private ChoreographerAction nextAction;
 
+    @OneToMany (mappedBy = "actionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete (action = OnDeleteAction.CASCADE)
+    private Set<ChoreographerActionPlanActionConnection> actionPlanActionConnections = new HashSet<>();
+
+    @OneToMany (mappedBy = "actionEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OnDelete (action = OnDeleteAction.CASCADE)
+    private Set<ChoreographerActionActionStepConnection> actionActionStepConnections = new HashSet<>();
+
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "actions")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerActionStep> actionSteps = new HashSet<>();
+    public ChoreographerAction() {}
 
-    @ManyToMany (cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "ChoreographerActionPlanActionConnection",
-            joinColumns = @JoinColumn(name = "actionId"),
-            inverseJoinColumns = @JoinColumn(name = "actionPlanId")
-    )
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerActionPlan> actionPlans = new HashSet<>();
+    public ChoreographerAction(String actionName, ChoreographerAction nextAction) {
+        this.actionName = actionName;
+        this.nextAction = nextAction;
+    }
 
     public long getId() {
         return id;
@@ -83,20 +85,20 @@ public class ChoreographerAction {
         this.updatedAt = updatedAt;
     }
 
-    public Set<ChoreographerActionStep> getActionSteps() {
-        return actionSteps;
+    public Set<ChoreographerActionPlanActionConnection> getActionPlanActionConnections() {
+        return actionPlanActionConnections;
     }
 
-    public void setActionSteps(Set<ChoreographerActionStep> actionSteps) {
-        this.actionSteps = actionSteps;
+    public void setActionPlanActionConnections(Set<ChoreographerActionPlanActionConnection> actionPlanActionConnections) {
+        this.actionPlanActionConnections = actionPlanActionConnections;
     }
 
-    public Set<ChoreographerActionPlan> getActionPlans() {
-        return actionPlans;
+    public Set<ChoreographerActionActionStepConnection> getActionActionStepConnections() {
+        return actionActionStepConnections;
     }
 
-    public void setActionPlans(Set<ChoreographerActionPlan> actionPlans) {
-        this.actionPlans = actionPlans;
+    public void setActionActionStepConnections(Set<ChoreographerActionActionStepConnection> actionActionStepConnections) {
+        this.actionActionStepConnections = actionActionStepConnections;
     }
 
     @PrePersist

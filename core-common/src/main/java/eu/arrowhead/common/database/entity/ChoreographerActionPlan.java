@@ -25,9 +25,15 @@ public class ChoreographerActionPlan {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "actionPlans")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerAction> actions = new HashSet<>();
+    @OneToMany (mappedBy = "actionPlanEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OnDelete (action = OnDeleteAction.CASCADE)
+    private Set<ChoreographerActionPlanActionConnection> actionPlanActionConnections = new HashSet<>();
+
+    public ChoreographerActionPlan() {}
+
+    public ChoreographerActionPlan(String actionPlanName) {
+        this.actionPlanName = actionPlanName;
+    }
 
     public long getId() {
         return id;
@@ -61,12 +67,12 @@ public class ChoreographerActionPlan {
         this.updatedAt = updatedAt;
     }
 
-    public Set<ChoreographerAction> getActions() {
-        return actions;
+    public Set<ChoreographerActionPlanActionConnection> getActionPlanActionConnections() {
+        return actionPlanActionConnections;
     }
 
-    public void setActions(Set<ChoreographerAction> actions) {
-        this.actions = actions;
+    public void setActionPlanActionConnections(Set<ChoreographerActionPlanActionConnection> actionPlanActionConnections) {
+        this.actionPlanActionConnections = actionPlanActionConnections;
     }
 
     @PrePersist

@@ -49,9 +49,9 @@ public class ServiceDefinition {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
 
-	@ManyToMany(mappedBy = "usedServices")
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Set<ChoreographerActionStep> actionSteps = new HashSet<>();
+	@OneToMany (mappedBy = "serviceDefinitionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<ChoreographerActionStepServiceDefinitionConnection> actionStepServiceDefinitionConnections = new HashSet<>();
 
 	//=================================================================================================
 	// methods
@@ -85,7 +85,6 @@ public class ServiceDefinition {
 	public Set<ServiceRegistry> getServiceRegistryEntries() { return serviceRegistryEntries; }
 	public Set<AuthorizationIntraCloud> getAuthorizationIntraClouds() { return authorizationIntraClouds; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
-	public Set<ChoreographerActionStep> getActionSteps() { return actionSteps; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -95,7 +94,6 @@ public class ServiceDefinition {
 	public void setServiceRegistryEntries(final Set<ServiceRegistry> serviceRegistryEntries) { this.serviceRegistryEntries = serviceRegistryEntries; }
 	public void setAuthorizationIntraClouds(final Set<AuthorizationIntraCloud> authorizationIntraClouds) { this.authorizationIntraClouds = authorizationIntraClouds; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
-	public void setActionSteps(Set<ChoreographerActionStep> actionSteps) { this.actionSteps = actionSteps; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
