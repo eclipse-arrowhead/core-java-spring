@@ -307,7 +307,7 @@ public class OrchestratorService {
 	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 	    orList = orchestratorDriver.generateAuthTokens(request, orList);
 		
-	    logger.debug("compileOrchestrationResponse creates {} orchestration form", orList.size());
+	    logger.debug("compileOrchestrationResponse creates {} orchestration forms", orList.size());
 
 		return new OrchestrationResponseDTO(orList);
 	}
