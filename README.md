@@ -1,11 +1,13 @@
-# DO NOT USE THIS VERSION UNTIL THE FIRST RELEASE
+### Service Registry, Authorization, Orchestration Core Systems are available for now. Orchestrator will be fully released on 08.08, until it's partially usable.
 
-### Only Service Registry is available for now.
-
-# Arrowhead Framework 4.1.2
+# Arrowhead Framework 4.1.3
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
+ 
+### How to contribute?
+Check out ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. When accepted, your contribution will be in the next release. :)
+ 
  
 ### Requirements
 
@@ -17,26 +19,28 @@ dependency to use them)
 
 Verify that you have Java (```java -version```), Maven (```mvn -version```), MySQL installed properly!
 
-In MySQL create a database called `arrowhead` and create a user `arrowhead` with password `arrowhead`. Example SQL statement, that does this for you: 
-```
-CREATE DATABASE arrowhead;
-CREATE USER 'arrowhead'@'%';
-GRANT ALL PRIVILEGES ON arrowhead.* To 'arrowhead'@'%' IDENTIFIED BY 'arrowhead';
-```
 Pull this code and enter the directory. 
 ```git pull https://github.com/arrowhead-f/core-java-spring.git```
 
+Run the MySQL script which is in the ```scripts``` folder. If you won't run this script first, the project won't build. 
 
 ```cd core-java-spring```
 
 Execute ```mvn install``` command. Wait until the build succeeds. 
-After succeeding enter the serviceregistry/target directory.
-```cd serviceregistry/target```
-and execute: ```java -jar arrowhead-serviceregistry-4.1.2.jar```
-
-Wait until server starts...
-
-Go to ```localhost:8443```, enjoy ;)
-
+This command builds all available projects.
+After succeeding enter:
+- serviceregistry/target directory.
+```cd serviceregistry/target``` <br />and execute: ```java -jar arrowhead-serviceregistry-4.1.3.jar```
+- authorization/target directory. ```cd authorization/target``` <br />and execute: ```java -jar arrowhead-authorization-4.1.3.jar``` 
+- orchestrator/target directory. ```orchestrator/target``` <br />and execute: ```java -jar arrowhead-orchestrator-4.1.3.jar```
 
 
+Wait until servers start...
+
+Service Registry will be available on ```localhost:8443``` <br />
+Authorization will be available on ```localhost:8445``` <br />
+Ochestrator will be available on ```localhost:8441``` <br />
+
+Swagger with API documentation is available in the root route.
+
+Enjoy! ;)

@@ -461,13 +461,29 @@ public class OrchestratorStoreControllerTest {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getForeignProviderCloudRequestDTOForTest() {
+		
+		final String operator = "operatorForTest";
+		final String name = "cloudName";
+		final String address = "localhost";
+		final Integer port = 12345;
+		final Boolean ownCloud = false;	
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		
+		cloudRequestDTO.setOperator(operator);
+		cloudRequestDTO.setName(name);
+		cloudRequestDTO.setOwnCloud(ownCloud);
+		
+		return cloudRequestDTO;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getProviderSystemRequestDTOForTest() {
 		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
@@ -598,7 +614,8 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private CloudResponseDTO getCloudResponseDTOForTest() {
-		return new CloudResponseDTO(getIdForTest(), "operator", "name", "address", 12345, "gateKeeperServiceUri", true,	true, false, "2019-07-04 14:43:19", "2019-07-04 14:43:19");
+		return new CloudResponseDTO(getIdForTest(), "operator", "name", "address", 12345, "gateKeeperServiceUri", true,	true, false, null, "2019-07-04 14:43:19", "2019-07-04 14:43:19");
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------

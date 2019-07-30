@@ -54,7 +54,7 @@ public class CommonDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Cloud insertOwnCloudWithoutGatekeeper(final String operator, final String name, final boolean secure) {
+	public Cloud insertOwnCloud(final String operator, final String name, final boolean secure, final String authenticationInfo) {
 		logger.debug("insertOwnCloudWithoutGatekeeper started...");
 		Assert.isTrue(!Utilities.isEmpty(operator), "Operator is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(name), "Name is null or empty.");
@@ -67,7 +67,7 @@ public class CommonDBService {
 				throw new InvalidParameterException("Cloud with operator " + validOperator + " and name " + validName + " is already exists.");
 			}
 			
-			final Cloud cloud = new Cloud(validOperator, validName, secure, false, true);
+			final Cloud cloud = new Cloud(validOperator, validName, secure, false, true, authenticationInfo);
 			return cloudRepository.saveAndFlush(cloud);
 		} catch (final InvalidParameterException ex) {
 			throw ex;

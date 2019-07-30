@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -48,19 +47,30 @@ public class Cloud {
 	@Column(nullable = false)
 	private boolean ownCloud = false;
 	
+	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	private String authenticationInfo;
+	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToOne(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true, optional = true)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private CloudGatekeeper gatekeeper;
-	
 	@OneToMany(mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
+	
+	@OneToMany (mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<CloudGatekeeperRelay> gatekeeperRelays = new HashSet<>();
+	
+	@OneToMany (mappedBy = "cloudA", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<CloudGatewayRelay> cloudGatewayRelaysA = new HashSet<>();
+	
+	@OneToMany (mappedBy = "cloudB", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<CloudGatewayRelay> cloudGatewayRelaysB = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
@@ -69,12 +79,13 @@ public class Cloud {
 	public Cloud() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public Cloud(final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud) {
+	public Cloud(final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud, final String authenticationInfo) {
 		this.operator = operator;
 		this.name = name;
 		this.secure = secure;
 		this.neighbor = neighbor;
 		this.ownCloud = ownCloud;
+		this.authenticationInfo = authenticationInfo;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -97,10 +108,13 @@ public class Cloud {
 	public boolean getSecure() { return secure; }
 	public boolean getNeighbor() { return neighbor; }
 	public boolean getOwnCloud() { return ownCloud; }
+	public String getAuthenticationInfo() { return authenticationInfo; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public CloudGatekeeper getGatekeeper() { return gatekeeper; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
+	public Set<CloudGatekeeperRelay> getGatekeeperRelays() { return gatekeeperRelays; }
+	public Set<CloudGatewayRelay> getCloudGatewayRelaysA() { return cloudGatewayRelaysA; }
+	public Set<CloudGatewayRelay> getCloudGatewayRelaysB() { return cloudGatewayRelaysB; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -109,10 +123,13 @@ public class Cloud {
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setNeighbor(final boolean neighbor) { this.neighbor = neighbor; }
 	public void setOwnCloud(final boolean ownCloud) { this.ownCloud = ownCloud; }
+	public void setAuthenticationInfo (final String authenticationInfo) { this.authenticationInfo = authenticationInfo; } 
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setGatekeeper(final CloudGatekeeper gatekeeper) { this.gatekeeper = gatekeeper; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
+	public void setGatekeeperRelays(final Set<CloudGatekeeperRelay> gatekeeperRelays) { this.gatekeeperRelays = gatekeeperRelays; }
+	public void setCloudGatewayRelaysA(final Set<CloudGatewayRelay> cloudGatewayRelaysA) { this.cloudGatewayRelaysA = cloudGatewayRelaysA; }
+	public void setCloudGatewayRelaysB(final Set<CloudGatewayRelay> cloudGatewayRelaysB) { this.cloudGatewayRelaysB = cloudGatewayRelaysB; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
