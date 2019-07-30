@@ -492,6 +492,8 @@ public class OrchestratorService {
 			
 	    	final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 	    	serviceQueryFormDTO.setServiceDefinitionRequirement(entry.getServiceDefinition().getServiceDefinition());
+	    	//TODO get all interfaces for the given ServiceDefinition ... and query with all
+	    	
 	    	final List<String> interfaceRequirements = List.of(entry.getServiceInterface().getInterfaceName());
 	    	serviceQueryFormDTO.setInterfaceRequirements(interfaceRequirements);
 	    	
