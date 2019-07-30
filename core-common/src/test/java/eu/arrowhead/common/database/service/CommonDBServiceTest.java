@@ -50,6 +50,6 @@ public class CommonDBServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testInsertOwnCloudWithoutGatekeeperCloudAlreadyExists() {
 		when(cloudRepository.findByOperatorAndName("operator", "name")).thenReturn(Optional.of(new Cloud()));
-		commonDBService.insertOwnCloudWithoutGatekeeper("operator", "name", false);
+		commonDBService.insertOwnCloudWithoutGatekeeper("operator", "name", false, null);
 	}
 }

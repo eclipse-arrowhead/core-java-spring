@@ -1499,7 +1499,8 @@ public class OrchestratorStoreDBServiceTest {
 					"name",
 					secure, 
 					neighbor, 
-					ownCloud);
+					ownCloud,
+					"jlvhdaswfcb");
 		
 		cloud.setId(getIdForTest());
 		cloud.setCreatedAt(getCreatedAtForTest());
@@ -1517,7 +1518,8 @@ public class OrchestratorStoreDBServiceTest {
 					"name",
 					secure, 
 					neighbor, 
-					ownCloud);
+					ownCloud,
+					"dsoklfndhaskjf");
 		cloud.setId(getIdForTest());
 		cloud.setCreatedAt(getCreatedAtForTest());
 		cloud.setUpdatedAt(getUpdatedAtForTest());

@@ -314,7 +314,7 @@ public class AuthorizationDBServiceInterCloudTest {
 		final boolean neighbor = false;
 		final boolean ownCloud = true;
 		
-		final Cloud cloud = new Cloud("testOperator", "testCloudName", secure, neighbor, ownCloud);
+		final Cloud cloud = new Cloud("testOperator", "testCloudName", secure, neighbor, ownCloud, null);
 		cloud.setId(1);
 		cloud.setCreatedAt(zdTime);
 		cloud.setUpdatedAt(zdTime);

@@ -12,6 +12,7 @@ CREATE TABLE `cloud` (
   `secure` int(1) NOT NULL DEFAULT 0 COMMENT 'Is secure?',
   `neighbor` int(1) NOT NULL DEFAULT 0 COMMENT 'Is neighbor cloud?',
   `own_cloud` int(1) NOT NULL DEFAULT 0 COMMENT 'Is own cloud?',
+  `authentication_info` varchar(2047) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

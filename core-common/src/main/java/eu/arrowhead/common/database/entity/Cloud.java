@@ -48,6 +48,9 @@ public class Cloud {
 	@Column (nullable = false)
 	private boolean ownCloud = false;
 	
+	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	private String authenticationInfo;
+	
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
@@ -69,12 +72,13 @@ public class Cloud {
 	public Cloud() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public Cloud(final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud) {
+	public Cloud(final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud, final String authenticationInfo) {
 		this.operator = operator;
 		this.name = name;
 		this.secure = secure;
 		this.neighbor = neighbor;
 		this.ownCloud = ownCloud;
+		this.authenticationInfo = authenticationInfo;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -97,6 +101,7 @@ public class Cloud {
 	public boolean getSecure() { return secure; }
 	public boolean getNeighbor() { return neighbor; }
 	public boolean getOwnCloud() { return ownCloud; }
+	public String getAuthenticationInfo() { return authenticationInfo; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public CloudGatekeeper getGatekeeper() { return gatekeeper; }
@@ -109,6 +114,7 @@ public class Cloud {
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setNeighbor(final boolean neighbor) { this.neighbor = neighbor; }
 	public void setOwnCloud(final boolean ownCloud) { this.ownCloud = ownCloud; }
+	public void setAuthenticationInfo (final String authenticationInfo) { this.authenticationInfo = authenticationInfo; } 
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setGatekeeper(final CloudGatekeeper gatekeeper) { this.gatekeeper = gatekeeper; }
