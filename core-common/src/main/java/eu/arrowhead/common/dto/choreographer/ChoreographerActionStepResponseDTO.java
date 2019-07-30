@@ -1,33 +1,25 @@
 package eu.arrowhead.common.dto.choreographer;
 
-import eu.arrowhead.common.database.entity.ChoreographerActionStep;
-import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ChoreographerActionStepResponseDTO {
+public class ChoreographerActionStepResponseDTO implements Serializable {
 
     private long id;
-
-    private String name;
-
+    private List<ServiceDefinitionResponseDTO> serviceDefinitions;
+    private List<NextActionStepResponseDTO> nextActionSteps;
     private String createdAt;
-
     private String updatedAt;
-
-    private List<ServiceDefinition> usedServices;
-
-    private List<ChoreographerActionStep> nextActionSteps;
 
     public ChoreographerActionStepResponseDTO() {}
 
-    public ChoreographerActionStepResponseDTO(long id, String name, String createdAt, String updatedAt, List<ServiceDefinition> usedServices, List<ChoreographerActionStep> nextActionSteps) {
+    public ChoreographerActionStepResponseDTO(long id, List<ServiceDefinitionResponseDTO> serviceDefinitions, String createdAt, String updatedAt) {
         this.id = id;
-        this.name = name;
+        this.serviceDefinitions = serviceDefinitions;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.usedServices = usedServices;
-        this.nextActionSteps = nextActionSteps;
     }
 
     public long getId() {
@@ -38,12 +30,12 @@ public class ChoreographerActionStepResponseDTO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public List<ServiceDefinitionResponseDTO> getServiceDefinitions() {
+        return serviceDefinitions;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setServiceDefinitions(List<ServiceDefinitionResponseDTO> serviceDefinitions) {
+        this.serviceDefinitions = serviceDefinitions;
     }
 
     public String getCreatedAt() {
@@ -60,21 +52,5 @@ public class ChoreographerActionStepResponseDTO {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public List<ServiceDefinition> getUsedServices() {
-        return usedServices;
-    }
-
-    public void setUsedServices(List<ServiceDefinition> usedServices) {
-        this.usedServices = usedServices;
-    }
-
-    public List<ChoreographerActionStep> getNextActionSteps() {
-        return nextActionSteps;
-    }
-
-    public void setNextActionSteps(List<ChoreographerActionStep> nextActionSteps) {
-        this.nextActionSteps = nextActionSteps;
     }
 }

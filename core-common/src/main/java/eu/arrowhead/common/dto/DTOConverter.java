@@ -10,7 +10,6 @@ import java.util.Set;
 
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
 import jdk.jshell.execution.Util;
 import org.springframework.data.domain.Page;
@@ -394,14 +393,23 @@ public class DTOConverter {
 										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
 	}
 
-    /* public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(final ChoreographerActionPlan choreographerActionPlan) {
-		Assert.notNull(choreographerActionPlan, "choreographerActionPlan is null");
+	private static List<ServiceDefinitionResponseDTO> collectInterfacesFromChoreographerActionPlan(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
+		final List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
+		for (final ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
+			result.add(convertServiceDefinitionToServiceDefinitionResponseDTO(conn.getServiceDefinitionEntry()));
+		}
 
-		return new ChoreographerActionPlanResponseDTO(choreographerActionPlan.getId(), choreographerActionPlan.getActionPlanName(),
-				Utilities.convertZonedDateTimeToUTCString(choreographerActionPlan.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(choreographerActionPlan.getUpdatedAt()));
-	} */
+		// result.sort((dto1, dto2) -> dto1.getServiceDefinition().compareToIgnoreCase(dto2.getServiceDefinition()));
 
-    /* public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep choreographerActionStep) {
+		return result;
+	}
 
-	} */
+	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep actionStepEntry) {
+
+		return new ChoreographerActionStepResponseDTO(actionStepEntry.getId(),
+				collectInterfacesFromChoreographerActionPlan(actionStepEntry.getActionStepServiceDefinitionConnections()),
+				Utilities.convertZonedDateTimeToUTCString(actionStepEntry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(actionStepEntry.getUpdatedAt()));
+	}
+	
 }
