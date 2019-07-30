@@ -1,11 +1,10 @@
 package eu.arrowhead.core.choreographer;
 
-import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudRequestDTO;
+import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepListResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepRequestDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 
-import java.security.Provider;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,8 +29,14 @@ allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACC
 @RestController
 public class ChoreographerController {
 
-    private static final String ACTION_STEP_MGMT_URI = CommonConstants.MGMT_URI + "/actionstep";
+    private static final String PATH_VARIABLE_ID = "id";
+    private static final String ID_NOT_VALID_ERROR_MESSAGE = "ID must be greater than 0.";
 
+    private static final String ACTION_STEP_MGMT_URI = CommonConstants.MGMT_URI + "/actionstep";
+    private static final String CHOREOGRAPHER_ACTION_STEP_MGMT_BY_ID_URI = ACTION_STEP_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+
+    private static final String GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_200_MESSAGE = "ChoreographerActionStep returned.";
+    private static final String GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_400_MESSAGE = "Could not retrieve ChoreographerActionStep.";
     private static final String POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE = "ChoreographerActionStep created with given service definitions.";
     private static final String POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE = "Could not create ChoreographerActionStep.";
 
@@ -70,5 +74,26 @@ public class ChoreographerController {
 
         logger.debug("registerAuthorizationIntraCloud has been finished");
         return choreographerDBService.createChoreographerActionStepWithServiceDefinitionResponse(request.getName(), serviceNames);
+    }
+
+    @ApiOperation(value = "Return requested ChoreographerActionStep entry", response = ChoreographerActionStepResponseDTO.class)
+    @ApiResponses (value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @GetMapping(path = CHOREOGRAPHER_ACTION_STEP_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody public ChoreographerActionStepResponseDTO getAuthorizationIntraCloudById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("New AuthorizationIntraCloud get request recieved with id: {}", id);
+
+        if (id < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CHOREOGRAPHER_ACTION_STEP_MGMT_BY_ID_URI);
+        }
+
+        final ChoreographerActionStepResponseDTO choreographerActionStepEntryByIdResponse = choreographerDBService.getChoreographerActionStepEntryByIdResponse(id);
+        logger.debug("ChoreographerActionPlan entry with id of " + id + " successfully retrieved");
+
+        return choreographerActionStepEntryByIdResponse;
     }
 }

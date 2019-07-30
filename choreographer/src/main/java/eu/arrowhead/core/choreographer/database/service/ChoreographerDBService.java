@@ -1,14 +1,19 @@
 package eu.arrowhead.core.choreographer.database.service;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.repository.*;
+import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepListResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +52,7 @@ public class ChoreographerDBService {
             if (serviceOpt.isPresent()) {
                 usedServices.add(serviceOpt.get());
             } else {
-                logger.debug("Service Definition with name of" + name + "doesn't exist!");
+                logger.debug("Service Definition with name of " + name + " doesn't exist!");
             }
         }
 
@@ -69,21 +74,22 @@ public class ChoreographerDBService {
         return savedStepEntry;
     }
 
+    @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerActionStepResponseDTO createChoreographerActionStepWithServiceDefinitionResponse(final String stepName, final Set<String> usedServiceNames)  {
         logger.debug("createChoreographerActionStepWithServiceDefinitionResponse started...");
 
         return DTOConverter.convertChoreographerActionStepToChoreographerActionStepResponseDTO(createChoreographerActionStepWithServiceDefinition(stepName, usedServiceNames));
     }
 
-    /* public ChoreographerActionPlan getChoreographerActionPlanById(final long id) {
-        logger.debug("getChoreographerActionPlanById started...");
+    public ChoreographerActionStep getChoreographerActionStepEntryById(final long id) {
+        logger.debug("getChoreographerActionStepEntryById started...");
 
         try {
-            final Optional<ChoreographerActionPlan> actionPlan = choreographerActionPlanRepository.findById(id);
-            if (actionPlan.isPresent()) {
-                return actionPlan.get();
+            Optional<ChoreographerActionStep> actionStepOpt = choreographerActionStepRepository.findById(id);
+            if (actionStepOpt.isPresent()) {
+                return actionStepOpt.get();
             } else {
-                throw new InvalidParameterException("Action Plan with id of '" + id + "' does not exist!");
+                throw new InvalidParameterException("ChoreographerActionStep with ID of " + id + " doesn't exist!");
             }
         } catch (final InvalidParameterException ex) {
             throw ex;
@@ -93,11 +99,10 @@ public class ChoreographerDBService {
         }
     }
 
-    public ChoreographerActionPlanResponseDTO getChoreographerActionPlanByIdResponse(final long id) {
-        logger.debug("getChoreographerActionPlanByIdResponse started...");
+    public ChoreographerActionStepResponseDTO getChoreographerActionStepEntryByIdResponse(final long id) {
+        logger.debug("getChoreographerActionStepEntryByIdResponse started...");
 
-        final ChoreographerActionPlan choreographerActionPlan = getChoreographerActionPlanById(id);
-        return DTOConverter.convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(choreographerActionPlan);
-    } */
-
+        ChoreographerActionStep choreographerActionStepEntry = getChoreographerActionStepEntryById(id);
+        return DTOConverter.convertChoreographerActionStepToChoreographerActionStepResponseDTO(choreographerActionStepEntry);
+    }
 }
