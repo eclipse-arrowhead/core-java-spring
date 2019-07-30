@@ -476,6 +476,7 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudResponse(final String cloudOperator, final String cloudName, final String serviceDefinition, final List<IdIdListDTO> providerIdsWithInterfaceIds) {	
 		logger.debug("checkAuthorizationInterCloudResponse started...");
 		
@@ -483,7 +484,7 @@ public class AuthorizationDBService {
 			
 			final boolean isCloudOperatorInvalid = Utilities.isEmpty(cloudOperator);
 			final boolean isCloudNameInvalid = Utilities.isEmpty(cloudName);
-			final boolean isServiceDefinitionInvalid = Utilities.isEmpty(serviceDefinition);;
+			final boolean isServiceDefinitionInvalid = Utilities.isEmpty(serviceDefinition);
 			final boolean isProviderIdsWithInterfaceIdsListInvalid = providerIdsWithInterfaceIds == null ||  providerIdsWithInterfaceIds.isEmpty();
 			if (isCloudOperatorInvalid || isCloudNameInvalid || isServiceDefinitionInvalid || isProviderIdsWithInterfaceIdsListInvalid) {
 				String exceptionMsg = "Following parameters are invalid:";
