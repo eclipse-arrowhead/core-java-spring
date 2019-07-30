@@ -1,0 +1,4 @@
+package eu.arrowhead.common.database.repository;
+
+public interface ChoreographerActionStepServiceDefinitionConnectionRepository extends RefreshableRepository<ChoreographerActionStepServiceDefinitionConnectionRepository, Long> {
+}

@@ -401,7 +401,7 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(choreographerActionPlan.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(choreographerActionPlan.getUpdatedAt()));
 	} */
 
-    public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep choreographerActionStep) {
+    /* public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep choreographerActionStep) {
 
-	}
+	} */
 }

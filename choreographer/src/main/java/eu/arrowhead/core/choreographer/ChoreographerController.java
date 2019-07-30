@@ -24,27 +24,5 @@ allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACC
 )
 @RestController
 public class ChoreographerController {
-	
-	//=================================================================================================
-	// methods
 
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
-	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(path = CommonConstants.ECHO_URI)
-	public String echoService() {
-		return "Got it!";
-	}
-
-	@ApiOperation(value = "", response = String.class)
-	@GetMapping(path = "/test1")
-	public String test() {
-		List<String> usedServiceNames = new ArrayList<>();
-		final Set<ServiceDefinition> usedServices = ChoreographerDBService.getAllUsedServicesByActionStepId(1);
-		for(ServiceDefinition sd : getAllUsedServicesByActionStepId(1))
-	}
 }
