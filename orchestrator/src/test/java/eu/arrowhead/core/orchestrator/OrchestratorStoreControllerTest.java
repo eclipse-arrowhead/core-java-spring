@@ -43,9 +43,9 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
-@RunWith (SpringRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrchestratorMain.class)
-@ContextConfiguration (classes = { OrchestratorStoreDBServiceTestContext.class })
+@ContextConfiguration(classes = { OrchestratorServiceTestContext.class })
 public class OrchestratorStoreControllerTest {
 
 	//=================================================================================================
