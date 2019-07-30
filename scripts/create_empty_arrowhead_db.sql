@@ -19,6 +19,33 @@ CREATE TABLE `cloud` (
   UNIQUE KEY `cloud` (`operator`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `relay`;
+CREATE TABLE `relay` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `address` varchar(255) NOT NULL,
+  `port` int(11) NOT NULL,
+  `secure` int(1) NOT NULL DEFAULT 0,
+  `private_relation` int(1) NOT NULL DEFAULT 0,
+  `type` varchar(255) NOT NULL DEFAULT 'GENERAL_RELAY',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pair` (`address`, `port`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `cloud_gatekeeper_relay`;
+CREATE TABLE `cloud_gatekeeper_relay` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `cloud_id` bigint(20) NOT NULL,
+  `relay_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pair` (`cloud_id`,`relay_id`),
+  CONSTRAINT `cloud_constr` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `relay_constr` FOREIGN KEY (`relay_id`) REFERENCES `relay` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `system_`;
 CREATE TABLE `system_` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -148,22 +175,6 @@ CREATE TABLE `authorization_intra_cloud_interface_connection` (
   KEY `interface_intra` (`interface_id`),
   CONSTRAINT `auth_intra_interface` FOREIGN KEY (`interface_id`) REFERENCES `service_interface` (`id`) ON DELETE CASCADE,
   CONSTRAINT `auth_intra_cloud` FOREIGN KEY (`authorization_intra_cloud_id`) REFERENCES `authorization_intra_cloud` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- Relay
-
-DROP TABLE IF EXISTS `relay`;
-CREATE TABLE `relay` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `address` varchar(255) NOT NULL,
-  `port` int(11) NOT NULL,
-  `secure` int(1) NOT NULL DEFAULT 0,
-  `private_relation` int(1) NOT NULL DEFAULT 0,
-  `type` varchar(255) NOT NULL DEFAULT 'GENERAL_RELAY',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `pair` (`address`, `port`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Orchestrator
