@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
@@ -59,9 +60,10 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testExternalServiceRequestCrossParameterConstraint1Failed() {
-		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.OVERRIDE_STORE, true).
-																					build();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.OVERRIDE_STORE, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
 		
 		testingObject.externalServiceRequest(request);
 	}
@@ -69,9 +71,10 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testExternalServiceRequestCrossParameterConstraint2Failed() {
-		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.TRIGGER_INTER_CLOUD, true).
-																					build();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.TRIGGER_INTER_CLOUD, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
 		
 		testingObject.externalServiceRequest(request);
 	}
@@ -79,9 +82,10 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testExternalServiceRequestCrossParameterConstraint3Failed() {
-		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.ONLY_PREFERRED, true).
-																					build();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_PREFERRED, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
 		
 		testingObject.externalServiceRequest(request);
 	}
@@ -251,9 +255,10 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testDynamicOrchestrationCrossParameterConstraint1Failed() {
-		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.OVERRIDE_STORE, true).
-																					build();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.OVERRIDE_STORE, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
 		
 		testingObject.dynamicOrchestration(request);
 	}
@@ -261,9 +266,10 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testDynamicOrchestrationCrossParameterConstraint2Failed() {
-		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.TRIGGER_INTER_CLOUD, true).
-																					build();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.TRIGGER_INTER_CLOUD, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
 		
 		testingObject.dynamicOrchestration(request);
 	}
@@ -271,9 +277,10 @@ public class OrchestratorServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = BadPayloadException.class)
 	public void testDynamicOrchestrationCrossParameterConstraint3Failed() {
-		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.ONLY_PREFERRED, true).
-																					build();
+		final OrchestrationFlags flags = new OrchestrationFlags();
+		flags.put(Flag.ONLY_PREFERRED, true);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setOrchestrationFlags(flags);
 		
 		testingObject.dynamicOrchestration(request);
 	}
