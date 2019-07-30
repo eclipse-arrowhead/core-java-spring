@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -57,10 +56,6 @@ public class Cloud {
 	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToOne(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true, optional = true)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private CloudGatekeeper gatekeeper;
-	
 	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
@@ -104,7 +99,6 @@ public class Cloud {
 	public String getAuthenticationInfo() { return authenticationInfo; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public CloudGatekeeper getGatekeeper() { return gatekeeper; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
 
 	//-------------------------------------------------------------------------------------------------
@@ -117,7 +111,6 @@ public class Cloud {
 	public void setAuthenticationInfo (final String authenticationInfo) { this.authenticationInfo = authenticationInfo; } 
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setGatekeeper(final CloudGatekeeper gatekeeper) { this.gatekeeper = gatekeeper; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
 
 	//-------------------------------------------------------------------------------------------------

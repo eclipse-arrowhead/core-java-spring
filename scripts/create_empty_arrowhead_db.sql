@@ -19,23 +19,6 @@ CREATE TABLE `cloud` (
   UNIQUE KEY `cloud` (`operator`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `cloud_gatekeeper`;
-CREATE TABLE `cloud_gatekeeper` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `cloud_id` bigint(20) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  `port` int(11) NOT NULL,
-  `service_uri` varchar(255) NOT NULL,
-  `authentication_info` varchar(2047) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `cloud` (`cloud_id`),
-  UNIQUE KEY `address` (`address`, `port`, `service_uri`),
-  KEY `fk_cloud` (`cloud_id`),
-  CONSTRAINT `fk_cloud` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 DROP TABLE IF EXISTS `system_`;
 CREATE TABLE `system_` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
