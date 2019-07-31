@@ -1,10 +1,6 @@
 package eu.arrowhead.core.choreographer;
 
-import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepListResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepRequestDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -19,9 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
@@ -56,7 +49,21 @@ public class ChoreographerController {
         return "Got it!";
     }
 
-    @ApiOperation(value = "Create the requested ChoreographerActionStep entries", response = ChoreographerActionStepListResponseDTO.class)
+    @ApiOperation(value = "Create the requested ChoreographerActionStep entries")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = ACTION_STEP_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+    @ResponseBody
+    public void registerChoreographerActionStepWithServiceDefinition(@RequestBody final ChoreographerActionRequestDTO request) {
+        choreographerDBService.createChoreographerAction(request.getActionName(), request.getNextActionName(), request.getActions());
+    }
+
+    /* @ApiOperation(value = "Create the requested ChoreographerActionStep entries", response = ChoreographerActionStepListResponseDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
@@ -74,9 +81,9 @@ public class ChoreographerController {
 
         logger.debug("registerAuthorizationIntraCloud has been finished");
         return choreographerDBService.createChoreographerActionStepWithServiceDefinitionResponse(request.getName(), serviceNames);
-    }
+    } */
 
-    @ApiOperation(value = "Return requested ChoreographerActionStep entry", response = ChoreographerActionStepResponseDTO.class)
+    /* @ApiOperation(value = "Return requested ChoreographerActionStep entry", response = ChoreographerActionStepResponseDTO.class)
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_400_MESSAGE),
@@ -95,5 +102,5 @@ public class ChoreographerController {
         logger.debug("ChoreographerActionPlan entry with id of " + id + " successfully retrieved");
 
         return choreographerActionStepEntryByIdResponse;
-    }
+    } */
 }

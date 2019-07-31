@@ -5,30 +5,41 @@ import java.util.List;
 
 public class ChoreographerActionStepRequestDTO implements Serializable {
 
-    private String name;
+    private String actionStepName;
 
-    private List<String> usedServices;
+    private List<String> usedServiceNames;
+
+    private List<String> nextActionStepNames;
 
     public ChoreographerActionStepRequestDTO() {}
 
-    public ChoreographerActionStepRequestDTO(String name, List<String> usedServices) {
-        this.name = name;
-        this.usedServices = usedServices;
+    public ChoreographerActionStepRequestDTO(String actionStepName, List<String> usedServiceNames, List<String> nextActionStepNames) {
+        this.actionStepName = actionStepName;
+        this.usedServiceNames = usedServiceNames;
+        this.nextActionStepNames = nextActionStepNames;
     }
 
-    public String getName() {
-        return name;
+    public String getActionStepName() {
+        return actionStepName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setActionStepName(String actionStepName) {
+        this.actionStepName = actionStepName;
     }
 
-    public List<String> getUsedServices() {
-        return usedServices;
+    public List<String> getUsedServiceNames() {
+        return usedServiceNames;
     }
 
-    public void setUsedServices(List<String> usedServices) {
-        this.usedServices = usedServices;
+    public void setUsedServiceNames(List<String> usedServiceNames) {
+        this.usedServiceNames = usedServiceNames;
+    }
+
+    public List<String> getNextActionStepNames() {
+        return nextActionStepNames;
+    }
+
+    public void setNextActionStepNames(List<String> nextActionStepNames) {
+        this.nextActionStepNames = nextActionStepNames;
     }
 }

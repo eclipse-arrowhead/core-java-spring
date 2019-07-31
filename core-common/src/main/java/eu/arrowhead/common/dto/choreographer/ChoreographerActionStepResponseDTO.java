@@ -1,5 +1,6 @@
 package eu.arrowhead.common.dto.choreographer;
 
+import eu.arrowhead.common.database.entity.ChoreographerActionStep;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 
 import java.io.Serializable;
@@ -9,15 +10,16 @@ public class ChoreographerActionStepResponseDTO implements Serializable {
 
     private long id;
     private List<ServiceDefinitionResponseDTO> serviceDefinitions;
-    private List<ChoreographerNextActionStepResponseDTO> nextActionSteps;
+    private List<ChoreographerActionStep> nextActionSteps;
     private String createdAt;
     private String updatedAt;
 
     public ChoreographerActionStepResponseDTO() {}
 
-    public ChoreographerActionStepResponseDTO(long id, List<ServiceDefinitionResponseDTO> serviceDefinitions, String createdAt, String updatedAt) {
+    public ChoreographerActionStepResponseDTO(long id, List<ServiceDefinitionResponseDTO> serviceDefinitions, List<ChoreographerActionStep> nextActionSteps, String createdAt, String updatedAt) {
         this.id = id;
         this.serviceDefinitions = serviceDefinitions;
+        this.nextActionSteps = nextActionSteps;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -36,6 +38,14 @@ public class ChoreographerActionStepResponseDTO implements Serializable {
 
     public void setServiceDefinitions(List<ServiceDefinitionResponseDTO> serviceDefinitions) {
         this.serviceDefinitions = serviceDefinitions;
+    }
+
+    public List<ChoreographerActionStep> getNextActionSteps() {
+        return nextActionSteps;
+    }
+
+    public void setNextActionSteps(List<ChoreographerActionStep> nextActionSteps) {
+        this.nextActionSteps = nextActionSteps;
     }
 
     public String getCreatedAt() {
