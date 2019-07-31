@@ -913,7 +913,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult updateServiceRegistry(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long validServiceRegistryId = 1;
 		
-		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI+"/"+validServiceRegistryId)
+		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI + "/" + validServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -925,7 +925,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult updateServiceRegistryWithInValidId(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long inValidServiceRegistryId = -1;
 		
-		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI+"/"+inValidServiceRegistryId)
+		return this.mockMvc.perform(put(SERVICE_REGISTRY_MGMT_URI + "/" + inValidServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -937,7 +937,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult mergeServiceRegistryWithInValidId(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long inValidServiceRegistryId = -1;
 		
-		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI+"/"+inValidServiceRegistryId)
+		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI + "/" + inValidServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))
@@ -949,7 +949,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private MvcResult mergeServiceRegistry(final ServiceRegistryRequestDTO request, final ResultMatcher matcher) throws Exception {
 		final long validServiceRegistryId = 1;
 		
-		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI+"/"+validServiceRegistryId)
+		return this.mockMvc.perform(patch(SERVICE_REGISTRY_MGMT_URI + "/" + validServiceRegistryId)
 						   .contentType(MediaType.APPLICATION_JSON)
 						   .content(objectMapper.writeValueAsBytes(request))
 						   .accept(MediaType.APPLICATION_JSON))

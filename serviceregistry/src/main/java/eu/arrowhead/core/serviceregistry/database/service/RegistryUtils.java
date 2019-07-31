@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,10 +60,12 @@ public class RegistryUtils {
 		final List<ServiceRegistry> toBeRemoved = new ArrayList<>();
 		for (final ServiceRegistry srEntry : providedServices) {
 			boolean remove = true;
-			for (final ServiceRegistryInterfaceConnection conn : srEntry.getInterfaceConnections()) {
+			for (final Iterator<ServiceRegistryInterfaceConnection> it = srEntry.getInterfaceConnections().iterator(); it.hasNext();) {
+				final ServiceRegistryInterfaceConnection conn = it.next();
 				if (interfaceRequirements.contains(conn.getServiceInterface().getInterfaceName())) {
 					remove = false;
-					break;
+				} else {
+					it.remove();
 				}
 			}
 			

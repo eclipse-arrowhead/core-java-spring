@@ -97,10 +97,12 @@ public class RegistryUtilsTest {
 	public void testFilterOnInterfacesGood() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
 		Assert.assertEquals(3, providedServices.size());
+		Assert.assertEquals(2, providedServices.get(2).getInterfaceConnections().size());
 		RegistryUtils.filterOnInterfaces(providedServices, List.of("HTTP-SECURE-JSON"));
 		Assert.assertEquals(2, providedServices.size());
 		Assert.assertEquals(1, providedServices.get(0).getId());
 		Assert.assertEquals(3, providedServices.get(1).getId());
+		Assert.assertEquals(1, providedServices.get(1).getInterfaceConnections().size()); // one interface removed 
 	}
 	
 	//-------------------------------------------------------------------------------------------------

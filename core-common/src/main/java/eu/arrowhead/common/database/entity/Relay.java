@@ -25,44 +25,44 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.RelayType;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
 public class Relay {
 	
 	//=================================================================================================
 	// members
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String address;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private int port;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean secure = false;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean exclusive = false;
 	
-	@Column (nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'GENERAL_RELAY'")
+	@Column(nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'GENERAL_RELAY'")
 	@Enumerated(EnumType.STRING)
 	private RelayType type = RelayType.GENERAL_RELAY;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToMany (mappedBy = "relay", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "relay", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<CloudGatekeeperRelay> cloudGatekeepers = new HashSet<>();
 	
-	@OneToMany (mappedBy = "relay", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "relay", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<CloudGatekeeperRelay> cloudGateways = new HashSet<>();
 
 	//=================================================================================================

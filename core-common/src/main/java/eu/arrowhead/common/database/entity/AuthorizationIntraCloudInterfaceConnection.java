@@ -16,28 +16,28 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"authorizationIntraCloudId", "interfaceId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"authorizationIntraCloudId", "interfaceId"}))
 public class AuthorizationIntraCloudInterfaceConnection {
 
 	//=================================================================================================
 	// members
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "authorizationIntraCloudId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "authorizationIntraCloudId", referencedColumnName = "id", nullable = false)
 	private AuthorizationIntraCloud authorizationIntraCloudEntry; 
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "interfaceId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "interfaceId", referencedColumnName = "id", nullable = false)
 	private ServiceInterface serviceInterface;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
 	//=================================================================================================
@@ -64,8 +64,9 @@ public class AuthorizationIntraCloudInterfaceConnection {
 	public void onUpdate() {
 		this.updatedAt = ZonedDateTime.now();
 	}
+	
 	//-------------------------------------------------------------------------------------------------
-	public long getId() {return id;}
+	public long getId() { return id; }
 	public AuthorizationIntraCloud getAuthorizationIntraCloudEntry() { return authorizationIntraCloudEntry; }
 	public ServiceInterface getServiceInterface() { return serviceInterface; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }

@@ -23,7 +23,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"consumerSystemId", "providerSystemId", "serviceId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"consumerSystemId", "providerSystemId", "serviceId"}))
 public class AuthorizationIntraCloud {
 	
 	//=================================================================================================
@@ -32,29 +32,29 @@ public class AuthorizationIntraCloud {
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "consumerSystemId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "consumerSystemId", referencedColumnName = "id", nullable = false)
 	private System consumerSystem;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "providerSystemId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "providerSystemId", referencedColumnName = "id", nullable = false)
 	private System providerSystem; 
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "serviceId", referencedColumnName = "id", nullable = false)
 	private ServiceDefinition serviceDefinition;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToMany (mappedBy = "authorizationIntraCloudEntry", fetch = FetchType.EAGER, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "authorizationIntraCloudEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections = new HashSet<>();
 	
 	//=================================================================================================
@@ -99,7 +99,7 @@ public class AuthorizationIntraCloud {
 	public void setServiceDefinition(final ServiceDefinition serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setInterfaceConnections (final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; };
+	public void setInterfaceConnections (final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections) { this.interfaceConnections = interfaceConnections; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

@@ -3,6 +3,7 @@ package eu.arrowhead.core.authorization.database.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,7 @@ public class AuthorizationDBServiceIntraCloudTest {
 	
 	//=================================================================================================
 	// members
+	
 	@InjectMocks
 	private AuthorizationDBService authorizationDBService;
 	
@@ -97,68 +99,6 @@ public class AuthorizationDBServiceIntraCloudTest {
 	public void testRemoveAuthorizationIntraCloudEntryByIdWithNotExistingId() {
 		when(authorizationIntraCloudRepository.existsById(anyLong())).thenReturn(false);
 		authorizationDBService.removeAuthorizationIntraCloudEntryById(1);
-	}
-
-	//=================================================================================================
-	//Tests of createAuthorizationIntraCloud
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCreateAuthorizationIntraCloudWithInvalidConsumerId() {
-		authorizationDBService.createAuthorizationIntraCloud(0, 1, 1);		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCreateAuthorizationIntraCloudWithInvalidProviderId() {
-		authorizationDBService.createAuthorizationIntraCloud(1, 0, 1);		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCreateAuthorizationIntraCloudWithInvalidServiceDefinitionId() {
-		authorizationDBService.createAuthorizationIntraCloud(1, 1, 0);		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testreateAuthorizationIntraCloudWithNotExistingSystem() {
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(new ServiceDefinition()));
-		when(authorizationIntraCloudRepository.findByConsumerSystemAndProviderSystemAndServiceDefinition(any(), any(), any())).thenReturn(Optional.ofNullable(null));
-		
-		authorizationDBService.createAuthorizationIntraCloud(1, 1, 1);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCreateAuthorizationIntraCloudWithNotExistingServiceDefintition() {
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(new System()));
-		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-		when(authorizationIntraCloudRepository.findByConsumerSystemAndProviderSystemAndServiceDefinition(any(), any(), any())).thenReturn(Optional.ofNullable(null));
-		
-		authorizationDBService.createAuthorizationIntraCloud(1, 1, 1);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCreateAuthorizationIntraCloudWithDBConstraintViolation() {
-		when(authorizationIntraCloudRepository.findByConsumerSystemAndProviderSystemAndServiceDefinition(any(), any(), any())).thenReturn(Optional.of(new AuthorizationIntraCloud()));
-		authorizationDBService.createAuthorizationIntraCloud(1, 1, 1);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testCreateAuthorizationIntraCloudDBCall() {
-		final System system = new System("test", "0.0.0.0", 1000, null);
-		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
-		when(authorizationIntraCloudRepository.saveAndFlush(any())).thenReturn(new AuthorizationIntraCloud(system, system, serviceDefinition));
-		when(authorizationIntraCloudRepository.findByConsumerSystemAndProviderSystemAndServiceDefinition(any(), any(), any())).thenReturn(Optional.ofNullable(null));
-		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
-		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(serviceDefinition));
-		
-		final AuthorizationIntraCloud entry = authorizationDBService.createAuthorizationIntraCloud(1, 1, 1);
-		assertEquals(1000, entry.getConsumerSystem().getPort());
 	}
 	
 	//=================================================================================================
@@ -264,89 +204,107 @@ public class AuthorizationDBServiceIntraCloudTest {
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.of(serviceDefinition));
 		when(serviceInterfaceRepository.findById(anyLong())).thenReturn(Optional.of(serviceInterface));
 		
-		final List<AuthorizationIntraCloud> entries = authorizationDBService.createBulkAuthorizationIntraCloud(1, createIdSet(1, numOfEntriesToBeSaved), createIdSet(1, numOfEntriesToBeSaved), createIdSet(1, 1));
+		final List<AuthorizationIntraCloud> entries = authorizationDBService.createBulkAuthorizationIntraCloud(1, createIdSet(1, numOfEntriesToBeSaved), createIdSet(1, numOfEntriesToBeSaved),
+																											   createIdSet(1, 1));
 		assertEquals(numOfEntriesToBeSaved, entries.size());
 	}
 	
 	//=================================================================================================
-	//Tests of checkAuthorizationIntraCloudRequest
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCheckAuthorizationIntraCloudRequestWithInvalidConsumerId() {
-		when(systemRepository.existsById(anyLong())).thenReturn(true);
-		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-		authorizationDBService.checkAuthorizationIntraCloudRequest(0, 1, createSetOfIdIdLists(2, 2));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCheckAuthorizationIntraCloudRequestWithNotExistingConsumer() {
-		when(systemRepository.existsById(anyLong())).thenReturn(false);
-		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-		authorizationDBService.checkAuthorizationIntraCloudRequest(1, 1, createSetOfIdIdLists(2, 2));
-	}
+	// Tests of checkAuthorizationIntraCloudRequest
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testCheckAuthorizationIntraCloudRequestWithInvalidServiceDefintitionId() {
-		when(systemRepository.existsById(anyLong())).thenReturn(true);
-		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-		authorizationDBService.checkAuthorizationIntraCloudRequest(1, 0, createSetOfIdIdLists(2, 2));
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", 4200, 0, createSetOfIdIdLists(2, 2));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testCheckAuthorizationIntraCloudRequestWithNotExistingServiceDefintition() {
-		when(systemRepository.existsById(anyLong())).thenReturn(true);
 		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(false);
-		authorizationDBService.checkAuthorizationIntraCloudRequest(1, 1, createSetOfIdIdLists(2, 2));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testCheckAuthorizationIntraCloudRequestWithEmptyProviderIdList() {
-		when(systemRepository.existsById(anyLong())).thenReturn(true);
-		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-		authorizationDBService.checkAuthorizationIntraCloudRequest(1, 1, createSetOfIdIdLists(0, 0));
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", 4200, 0, createSetOfIdIdLists(2, 2));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testheckAuthorizationIntraCloudRequestWithNullProviderIdList() {
-		when(systemRepository.existsById(anyLong())).thenReturn(true);
 		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-		authorizationDBService.checkAuthorizationIntraCloudRequest(1, 1, null);
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", 4200, 1, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testCheckAuthorizationIntraCloudRequestWithNotExistingProvider() {
-		final long consumerId = 1;
-		final long providerId = 1;
-		when(systemRepository.existsById(consumerId)).thenReturn(true);
-		when(systemRepository.existsById(providerId)).thenReturn(false);
+	public void testCheckAuthorizationIntraCloudRequestWithEmptyProviderIdList() {
 		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
-		
-		authorizationDBService.checkAuthorizationIntraCloudRequest(consumerId, 1, createSetOfIdIdLists((int) providerId, 2));
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", 4200, 1, createSetOfIdIdLists(2, 2));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationIntraCloudRequestWithNullConsumerName() {
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationIntraCloudRequest(null, "127.0.0.1", 4200, 1, createSetOfIdIdLists(2, 2));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationIntraCloudRequestWithEmptyConsumerName() {
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationIntraCloudRequest(" ", "127.0.0.1", 4200, 1, createSetOfIdIdLists(2, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationIntraCloudRequestWithNullConsumerAddress() {
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", null, 4200, 1, createSetOfIdIdLists(2, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationIntraCloudRequestWithEmptyConsumerAddress() {
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "", 4200, 1, createSetOfIdIdLists(2, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationIntraCloudRequestWithTooLowConsumerPort() {
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", -4200, 1, createSetOfIdIdLists(2, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationIntraCloudRequestWithTooHighConsumerPort() {
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", 420000, 1, createSetOfIdIdLists(2, 2));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCheckAuthorizationIntraCloudRequestWithNotExistedConsumer() {
+		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.empty());
+		authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", 4200, 1, createSetOfIdIdLists(2, 2));
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckAuthorizationIntraCloudRequestDBCall() {
-		final System consumer = new System("testConsumer", "address", 1000, null);
-		final int consumerId = 8;
-		consumer.setId(consumerId);
 		final System provider = new System("testProvider", "address", 2000, null);
-		final int providerId = 6;
+		final long providerId = 6;
 		provider.setId(providerId);		
-		when(systemRepository.existsById(anyLong())).thenReturn(true);
 		when(serviceDefinitionRepository.existsById(anyLong())).thenReturn(true);
+		final long consumerId = 8;
+		final System consumer = new System("consumer", "127.0.0.1", 4200, null);
+		consumer.setId(consumerId);
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(consumer));
 		when(authorizationIntraCloudRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(anyLong(), anyLong(), anyLong())).
-			 thenReturn(Optional.of(new AuthorizationIntraCloud(consumer, provider, new ServiceDefinition())));
+			 																						thenReturn(Optional.of(new AuthorizationIntraCloud(consumer, provider, new ServiceDefinition())));
 		
-		final AuthorizationIntraCloudCheckResponseDTO dto = authorizationDBService.checkAuthorizationIntraCloudRequest(consumerId, 1, createSetOfIdIdLists(providerId, 2));
-		assertEquals(consumerId, (long) dto.getConsumerId()); 
+		final AuthorizationIntraCloudCheckResponseDTO dto = authorizationDBService.checkAuthorizationIntraCloudRequest("consumer", "127.0.0.1", 4200, 1, createSetOfIdIdLists(6, 2));
+		assertEquals(consumerId, (long) dto.getConsumer().getId()); 
 		assertEquals(0, dto.getAuthorizedProviderIdsWithInterfaceIds().size());
 	}
 	

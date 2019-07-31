@@ -1,7 +1,5 @@
 package eu.arrowhead.common;
 
-import java.util.List;
-
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -46,6 +44,8 @@ public class CommonConstants {
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
+	public static final String REQUIRED_URI_LIST = "required.uri.list";
+	public static final String URI_SUFFIX = "-uri";
 	
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
@@ -132,6 +132,10 @@ public class CommonConstants {
 	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + Defaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
 	public static final String USE_STRICT_SERVICE_INTF_NAME_VERIFIER = "use_strict_service_intf_name_verifier";
 	public static final String $USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" + Defaults.DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
+	public static final String URI_CRAWLER_INTERVAL = "uri_crawler_interval"; // in seconds
+	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + Defaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
+	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
+	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + Defaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
 
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
@@ -181,6 +185,8 @@ public class CommonConstants {
 	public static final String ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
 	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
 	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
+	
+	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
 
