@@ -167,7 +167,8 @@ public class DTOConverter {
 				if (servicesByServiceDefinitionAndInterface.containsKey(key)) {
 					servicesByServiceDefinitionAndInterface.get(key).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				} else {
-					final ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition, interfaceName,  new ArrayList<>());
+					final ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition,
+																																						interfaceName,  new ArrayList<>());
 					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 					servicesByServiceDefinitionAndInterface.put(key, dto);
 				}
@@ -215,8 +216,9 @@ public class DTOConverter {
 		Assert.notNull(entry.getInterfaceConnections(), "InterfaceConnections is null");
 		
 		return new AuthorizationIntraCloudResponseDTO(entry.getId(), convertSystemToSystemResponseDTO(entry.getConsumerSystem()), convertSystemToSystemResponseDTO(entry.getProviderSystem()), 
-				convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition()), collectInterfacesFromAuthorizationIntraCloud(entry.getInterfaceConnections()),
-				Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+													  convertServiceDefinitionToServiceDefinitionResponseDTO(entry.getServiceDefinition()),
+													  collectInterfacesFromAuthorizationIntraCloud(entry.getInterfaceConnections()),
+													  Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -263,16 +265,8 @@ public class DTOConverter {
 		Assert.notNull(entity.getCreatedAt(), "Cloud.createdAt is null" );
 		Assert.notNull(entity.getUpdatedAt(), "Cloud.cpdatedAt is null" );
 		
-		return new CloudResponseDTO(
-				entity.getId(),
-				entity.getOperator(),
-				entity.getName(),
-				entity.getSecure(),
-				entity.getNeighbor(),
-				entity.getOwnCloud(),
-				entity.getAuthenticationInfo(),
-				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+		return new CloudResponseDTO(entity.getId(), entity.getOperator(), entity.getName(), entity.getSecure(), entity.getNeighbor(), entity.getOwnCloud(), entity.getAuthenticationInfo(),
+								   Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -328,56 +322,52 @@ public class DTOConverter {
 		Assert.notNull(entity.getCreatedAt(), "AuthorizationInterCloud.CreatedAt is null" );
 		Assert.notNull(entity.getUpdatedAt(), "AuthorizationInterCloud.UpdatedAt is null" );
 		
-		return new AuthorizationInterCloudResponseDTO(
-				entity.getId(),
-				convertCloudToCloudResponseDTO(entity.getCloud()),
-				convertSystemToSystemResponseDTO(entity.getProvider()),
-				convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
-				collectInterfacesFromAuthorizationInterCloud(entity.getInterfaceConnections()),
-				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+		return new AuthorizationInterCloudResponseDTO(entity.getId(), convertCloudToCloudResponseDTO(entity.getCloud()), convertSystemToSystemResponseDTO(entity.getProvider()),
+													  convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
+													  collectInterfacesFromAuthorizationInterCloud(entity.getInterfaceConnections()),
+													  Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity, final SystemResponseDTO providerSystem, final CloudResponseDTO providerCloud) {
-		
+	public static OrchestratorStoreResponseDTO convertOrchestratorStoreToOrchestratorStoreResponseDTO(final OrchestratorStore entity, final SystemResponseDTO providerSystem,
+																									  final CloudResponseDTO providerCloud) {
 		Assert.notNull(entity, "OrchestratorStore is null");            
 		Assert.notNull(providerSystem, "OrchestratorStore.ProviderSystem is null");
         Assert.notNull(entity.getCreatedAt(), "OrchestratorStore.CreatedAt is null");        
         Assert.notNull(entity.getUpdatedAt(),  "OrchestratorStore.UpdatedAt is null"); 
-        
-        
 	
-		return new OrchestratorStoreResponseDTO(
-			entity.getId(),
-			convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
-			convertSystemToSystemResponseDTO(entity.getConsumerSystem()),
-			entity.isForeign(),
-			providerSystem,
-			providerCloud,
-			convertServiceInterfaceToServiceInterfaceResponseDTO(entity.getServiceInterface()),
-			entity.getPriority(),
-			Utilities.text2Map(entity.getAttribute()),
-			Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
-			Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
-		
+		return new OrchestratorStoreResponseDTO(entity.getId(),	convertServiceDefinitionToServiceDefinitionResponseDTO(entity.getServiceDefinition()),
+												convertSystemToSystemResponseDTO(entity.getConsumerSystem()), entity.isForeign(), providerSystem, providerCloud,
+												convertServiceInterfaceToServiceInterfaceResponseDTO(entity.getServiceInterface()), entity.getPriority(), Utilities.text2Map(entity.getAttribute()),
+												Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
-			final List<OrchestratorStoreResponseDTO> entries) {
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(final List<OrchestratorStoreResponseDTO> entries) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
 
 		return new OrchestratorStoreListResponseDTO(entries, entries.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(
-			final List<OrchestratorStoreResponseDTO> entries, final long totalElements) {
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(final List<OrchestratorStoreResponseDTO> entries, final long totalElements) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
 
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static SystemRequestDTO convertSystemResponseDTOToSystemRequestDTO(final SystemResponseDTO response) {
+		Assert.notNull(response, "response is null");
+		
+		final SystemRequestDTO result = new SystemRequestDTO();
+		result.setSystemName(response.getSystemName());
+		result.setAddress(response.getAddress());
+		result.setPort(response.getPort());
+		result.setAuthenticationInfo(response.getAuthenticationInfo());
+		
+		return result;
 	}
 	
 	//=================================================================================================
@@ -440,6 +430,6 @@ public class DTOConverter {
 		Assert.notNull(foreignSystem, "ForeignSystem is null");
 		
 		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
-										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
+									 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
 	}
 }

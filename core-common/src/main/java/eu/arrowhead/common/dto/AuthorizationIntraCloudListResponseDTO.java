@@ -5,10 +5,10 @@ import java.util.List;
 
 public class AuthorizationIntraCloudListResponseDTO implements Serializable {
 
-	private static final long serialVersionUID = -3996357127599109268L;
-
 	//=================================================================================================
 	// members
+	
+	private static final long serialVersionUID = -3996357127599109268L;
 	
 	private List<AuthorizationIntraCloudResponseDTO> data;
 	private long count;
@@ -26,10 +26,10 @@ public class AuthorizationIntraCloudListResponseDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<AuthorizationIntraCloudResponseDTO> getData() {return data;}
-	public long getCount() {return count;}
+	public List<AuthorizationIntraCloudResponseDTO> getData() { return data; }
+	public long getCount() { return count; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<AuthorizationIntraCloudResponseDTO> data) {this.data = data;}
-	public void setCount(final long count) {this.count = count;}	
+	public void setData(final List<AuthorizationIntraCloudResponseDTO> data) { this.data = data; }
+	public void setCount(final long count) { this.count = count; }	
 }

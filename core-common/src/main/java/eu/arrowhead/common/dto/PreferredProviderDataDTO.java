@@ -2,6 +2,8 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class PreferredProviderDataDTO implements Serializable {
 	
 	//=================================================================================================
@@ -24,16 +26,19 @@ public class PreferredProviderDataDTO implements Serializable {
 	public void setProviderCloud(CloudRequestDTO providerCloud) { this.providerCloud = providerCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
 	public boolean isLocal() {
 		return providerSystem != null && providerCloud == null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
 	public boolean isGlobal() {
 		return providerCloud != null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
 	public boolean isValid() {
 		return isLocal() || isGlobal();
 	}

@@ -15,22 +15,22 @@ public class Logs {
 	// members
 	
 	@Id
-	@Column (length = Defaults.VARCHAR_LOG)
+	@Column(length = Defaults.VARCHAR_LOG)
 	private String logId;
 	
-	@Column (nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime entryDate;
 	
-	@Column (nullable = true, length = Defaults.VARCHAR_LOG)
+	@Column(nullable = true, length = Defaults.VARCHAR_LOG)
 	private String logger;
 	
-	@Column (nullable = true, length = Defaults.VARCHAR_LOG)
+	@Column(nullable = true, length = Defaults.VARCHAR_LOG)
 	private String logLevel;
 	
-	@Column (nullable = true, columnDefinition = "TEXT")
+	@Column(nullable = true, columnDefinition = "TEXT")
 	private String message;
 	
-	@Column (nullable = true, columnDefinition = "TEXT")
+	@Column(nullable = true, columnDefinition = "TEXT")
 	private String exception;
 	
 	//=================================================================================================
