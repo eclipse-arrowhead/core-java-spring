@@ -1,1 +1,0 @@
-The trust store of the gatekeeper must contain the Arrowhead master certificate as well (besides the certificate of the local cloud). Otherwise the gatekeeper's services cannot be used by the an other gatekeeper.
