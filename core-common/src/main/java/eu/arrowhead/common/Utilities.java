@@ -50,6 +50,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -310,6 +311,22 @@ public class Utilities {
 	    }
 	    
 		return status;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayType convertStringToRelayType(final String str) {
+		if (isEmpty(str)) {
+			return RelayType.GENERAL_RELAY;
+		}
+		
+		switch (str.toUpperCase().trim()) {
+			case "GATEKEEPER_RELAY":
+				return RelayType.GATEKEEPER_RELAY;
+			case "GATEWAY_RELAY":
+				return RelayType.GATEKEEPER_RELAY;
+			default:
+				return null;
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
