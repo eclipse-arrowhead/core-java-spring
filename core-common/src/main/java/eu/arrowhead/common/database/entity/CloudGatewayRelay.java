@@ -16,7 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"cloudAId", "cloudBId", "relayId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"cloudId", "relayId"}))
 public class CloudGatewayRelay {
 
 	//=================================================================================================
@@ -27,15 +27,12 @@ public class CloudGatewayRelay {
 	private long id;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "cloudAId", referencedColumnName = "id", nullable = false)
-	private Cloud cloudA;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "cloudBId", referencedColumnName = "id", nullable = false)
-	private Cloud cloudB;
+	@JoinColumn(name = "cloudId", referencedColumnName = "id", nullable = false)
+	private Cloud cloud;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "relayId", referencedColumnName = "id", nullable = false)
+
 	private Relay relay;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -51,9 +48,8 @@ public class CloudGatewayRelay {
 	public CloudGatewayRelay() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudGatewayRelay(final Cloud cloudA, final Cloud cloudB, final Relay relay) {
-		this.cloudA = cloudA;
-		this.cloudB = cloudB;
+	public CloudGatewayRelay(final Cloud cloud, final Relay relay) {
+		this.cloud = cloud;
 		this.relay = relay;
 	}
 
@@ -72,16 +68,14 @@ public class CloudGatewayRelay {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public Cloud getCloudA() { return cloudA; }
-	public Cloud getCloudB() { return cloudB; }
+	public Cloud getCloud() { return cloud; }
 	public Relay getRelay() { return relay; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setCloudA(final Cloud cloudA) { this.cloudA = cloudA; }
-	public void setCloudB(final Cloud cloudB) { this.cloudB = cloudB; }
+	public void setCloud(final Cloud cloud) { this.cloud = cloud; }
 	public void setRelay(final Relay relay) { this.relay = relay; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
@@ -89,6 +83,6 @@ public class CloudGatewayRelay {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "CloudGatewayRelay [id = " + id + ", cloudA = " + cloudA + ", cloudB = " + cloudB + ", relay = " + relay + "]";
+		return "CloudGatewayRelay [id = " + id + ", cloud = " + cloud + ", relay = " + relay + "]";
 	}
 }

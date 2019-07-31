@@ -64,13 +64,9 @@ public class Cloud {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<CloudGatekeeperRelay> gatekeeperRelays = new HashSet<>();
 	
-	@OneToMany (mappedBy = "cloudA", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<CloudGatewayRelay> cloudGatewayRelaysA = new HashSet<>();
-	
-	@OneToMany (mappedBy = "cloudB", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<CloudGatewayRelay> cloudGatewayRelaysB = new HashSet<>();
+	private Set<CloudGatewayRelay> gatewayRelays = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
@@ -113,9 +109,8 @@ public class Cloud {
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
 	public Set<CloudGatekeeperRelay> getGatekeeperRelays() { return gatekeeperRelays; }
-	public Set<CloudGatewayRelay> getCloudGatewayRelaysA() { return cloudGatewayRelaysA; }
-	public Set<CloudGatewayRelay> getCloudGatewayRelaysB() { return cloudGatewayRelaysB; }
-
+	public Set<CloudGatewayRelay> getGatewayRelays() { return gatewayRelays; }
+	
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setOperator(final String operator) { this.operator = operator; }
@@ -128,9 +123,8 @@ public class Cloud {
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
 	public void setGatekeeperRelays(final Set<CloudGatekeeperRelay> gatekeeperRelays) { this.gatekeeperRelays = gatekeeperRelays; }
-	public void setCloudGatewayRelaysA(final Set<CloudGatewayRelay> cloudGatewayRelaysA) { this.cloudGatewayRelaysA = cloudGatewayRelaysA; }
-	public void setCloudGatewayRelaysB(final Set<CloudGatewayRelay> cloudGatewayRelaysB) { this.cloudGatewayRelaysB = cloudGatewayRelaysB; }
-
+	public void setGatewayRelays(final Set<CloudGatewayRelay> gatewayRelays) { this.gatewayRelays = gatewayRelays; }
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {

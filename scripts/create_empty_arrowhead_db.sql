@@ -42,22 +42,20 @@ CREATE TABLE `cloud_gatekeeper_relay` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pair` (`cloud_id`,`relay_id`),
-  CONSTRAINT `cloud_constr` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `gk_cloud_constr` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
   CONSTRAINT `gk_relay_constr` FOREIGN KEY (`relay_id`) REFERENCES `relay` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `cloud_gateway_relay`;
 CREATE TABLE `cloud_gateway_relay` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `cloud_a_id` bigint(20) NOT NULL,
-  `cloud_b_id` bigint(20) NOT NULL,
+  `cloud_id` bigint(20) NOT NULL,
   `relay_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `triple` (`cloud_a_id`, `cloud_b_id`,`relay_id`),
-  CONSTRAINT `cloud_a_constr` FOREIGN KEY (`cloud_a_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `cloud_b_constr` FOREIGN KEY (`cloud_b_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+  UNIQUE KEY `pair` (`cloud_id`,`relay_id`),
+  CONSTRAINT `gw_cloud_constr` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
   CONSTRAINT `gw_relay_constr` FOREIGN KEY (`relay_id`) REFERENCES `relay` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
