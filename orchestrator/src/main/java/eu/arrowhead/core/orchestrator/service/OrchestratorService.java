@@ -152,9 +152,15 @@ public class OrchestratorService {
 			queryData = removeNonPreferred(queryData, localProviders);
 			if (queryData.isEmpty()) {
 				if (isInterCloudOrchestrationPossible(flags)) {
-					// no result that contains any of the preferred providers => we try with other clouds
-					logger.debug("dynamicOrchestration: no preferred provider give access to requester system => moving to Inter-Cloud orchestration.");
-					return triggerInterCloud(request);
+					// no result that contains any of the local preferred providers => if there are preferred providers from other clouds we can try with those clouds
+					final List<PreferredProviderDataDTO> nonLocalProviders = request.getPreferredProviders().stream().filter(p -> p.isGlobal()).collect(Collectors.toList());
+					if (!nonLocalProviders.isEmpty()) {
+						logger.debug("dynamicOrchestration: no local preferred provider give access to requester system => moving to Inter-Cloud orchestration.");
+						return triggerInterCloud(request);
+					} else { // nothing we can do
+						logger.debug("dynamicOrchestration: no preferred provider give access to requester system => orchestration failed");
+						return new OrchestrationResponseDTO(); // empty response
+					}
 				} else {
 					return new OrchestrationResponseDTO(); // empty response
 				}
