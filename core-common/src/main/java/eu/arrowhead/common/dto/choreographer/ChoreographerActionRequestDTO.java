@@ -8,15 +8,15 @@ public class ChoreographerActionRequestDTO {
 
     private String nextActionName;
 
-    private List<ChoreographerActionStepRequestDTO> actions;
+    private List<ChoreographerActionStepRequestDTO> actionSteps;
 
     public ChoreographerActionRequestDTO() {
     }
 
-    public ChoreographerActionRequestDTO(String actionName, String nextActionName, List<ChoreographerActionStepRequestDTO> actions) {
+    public ChoreographerActionRequestDTO(String actionName, String nextActionName, List<ChoreographerActionStepRequestDTO> actionSteps) {
         this.actionName = actionName;
         this.nextActionName = nextActionName;
-        this.actions = actions;
+        this.actionSteps = actionSteps;
     }
 
     public String getActionName() {
@@ -35,11 +35,11 @@ public class ChoreographerActionRequestDTO {
         this.nextActionName = nextActionName;
     }
 
-    public List<ChoreographerActionStepRequestDTO> getActions() {
-        return actions;
+    public List<ChoreographerActionStepRequestDTO> getActionSteps() {
+        return actionSteps;
     }
 
-    public void setActions(List<ChoreographerActionStepRequestDTO> actions) {
-        this.actions = actions;
+    public void setActionSteps(List<ChoreographerActionStepRequestDTO> actionSteps) {
+        this.actionSteps = actionSteps;
     }
 }

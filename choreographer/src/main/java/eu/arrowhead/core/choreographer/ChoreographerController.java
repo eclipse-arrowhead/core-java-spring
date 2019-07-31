@@ -1,5 +1,7 @@
 package eu.arrowhead.core.choreographer;
 
+import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionRequestDTO;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.ApiOperation;
@@ -49,7 +51,7 @@ public class ChoreographerController {
         return "Got it!";
     }
 
-    @ApiOperation(value = "Create the requested ChoreographerActionStep entries")
+    @ApiOperation(value = "TEST")
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
@@ -59,48 +61,7 @@ public class ChoreographerController {
     @PostMapping(path = ACTION_STEP_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody
-    public void registerChoreographerActionStepWithServiceDefinition(@RequestBody final ChoreographerActionRequestDTO request) {
-        choreographerDBService.createChoreographerAction(request.getActionName(), request.getNextActionName(), request.getActions());
+    public void registerActionPlans(@RequestBody final ChoreographerActionPlanRequestDTO request) {
+        choreographerDBService.createChoreographerActionPlan(request.getActionPlanName(), request.getActions());
     }
-
-    /* @ApiOperation(value = "Create the requested ChoreographerActionStep entries", response = ChoreographerActionStepListResponseDTO.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_STEP_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = ACTION_STEP_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody
-    public ChoreographerActionStepResponseDTO registerChoreographerActionStepWithServiceDefinition(@RequestBody final ChoreographerActionStepRequestDTO request) {
-        Set<String> serviceNames = new HashSet<>();
-        for (String serviceName : request.getUsedServices()) {
-            serviceNames.add(serviceName);
-        }
-
-        logger.debug("registerAuthorizationIntraCloud has been finished");
-        return choreographerDBService.createChoreographerActionStepWithServiceDefinitionResponse(request.getName(), serviceNames);
-    } */
-
-    /* @ApiOperation(value = "Return requested ChoreographerActionStep entry", response = ChoreographerActionStepResponseDTO.class)
-    @ApiResponses (value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_STEP_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = CHOREOGRAPHER_ACTION_STEP_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public ChoreographerActionStepResponseDTO getAuthorizationIntraCloudById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New AuthorizationIntraCloud get request recieved with id: {}", id);
-
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CHOREOGRAPHER_ACTION_STEP_MGMT_BY_ID_URI);
-        }
-
-        final ChoreographerActionStepResponseDTO choreographerActionStepEntryByIdResponse = choreographerDBService.getChoreographerActionStepEntryByIdResponse(id);
-        logger.debug("ChoreographerActionPlan entry with id of " + id + " successfully retrieved");
-
-        return choreographerActionStepEntryByIdResponse;
-    } */
 }
