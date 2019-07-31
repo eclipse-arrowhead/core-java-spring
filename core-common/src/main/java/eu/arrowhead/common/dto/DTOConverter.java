@@ -19,6 +19,7 @@ import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConne
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -243,6 +244,18 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
+	public static CloudResponseListDTO convertCloudToCloudResponseDTO(final Page<Cloud> entries) {
+		Assert.notNull(entries, "Cloud list is null" );
+		
+		final List<CloudResponseDTO> cloudEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final Cloud entry : entries) {
+			cloudEntries.add(convertCloudToCloudResponseDTO(entry));
+		}
+		
+		return new CloudResponseListDTO(cloudEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public static CloudResponseDTO convertCloudToCloudResponseDTO(final Cloud entity) {
 		Assert.notNull(entity, "Cloud is null" );
 		Assert.notNull(entity.getOperator(), "Cloud.operator is null" );
@@ -260,6 +273,37 @@ public class DTOConverter {
 				entity.getAuthenticationInfo(),
 				Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayResponseListDTO convertRelayListToRelayResponseListDTO(final Page<Relay> entries) {
+		Assert.notNull(entries, "Relay list is null" );
+		
+		final List<RelayResponseDTO> relayEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final Relay entry : entries) {
+			relayEntries.add(convertRelayToRelayResponseDTO(entry));
+		}
+		
+		return new RelayResponseListDTO(relayEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayResponseDTO convertRelayToRelayResponseDTO(final Relay entry) {
+		Assert.notNull(entry, "Relay is null");
+		Assert.notNull(entry.getAddress(), "Relay.address is null");
+		Assert.notNull(entry.getType(), "Relay.type is null");
+		Assert.notNull(entry.getCreatedAt(), "Relay.createdAt is null");
+		Assert.notNull(entry.getCreatedAt(), "Relay.updatedAt is null");
+		
+		return new RelayResponseDTO(
+				entry.getId(),
+				entry.getAddress(),
+				entry.getPort(),
+				entry.getSecure(),
+				entry.getExclusive(),
+				entry.getType(),
+				Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

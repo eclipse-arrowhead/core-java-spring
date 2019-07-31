@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class CloudRequestDTO implements Serializable {
 
@@ -15,6 +16,7 @@ public class CloudRequestDTO implements Serializable {
 	private Boolean neighbor;
 	private Boolean ownCloud;
 	private String authenticationInfo;
+	private List<Long> relayId;
 	
 	//=================================================================================================
 	// methods
@@ -25,7 +27,8 @@ public class CloudRequestDTO implements Serializable {
 	public Boolean getSecure() { return secure; }
 	public Boolean getNeighbor() { return neighbor; }
 	public Boolean getOwnCloud() { return ownCloud; }	
-	public String getAuthenticationInfo() { return authenticationInfo; }
+	public String getAuthenticationInfo() { return authenticationInfo; }	
+	public List<Long> getRelayId() { return relayId; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setOperator(final String operator) { this.operator = operator; }
@@ -33,5 +36,6 @@ public class CloudRequestDTO implements Serializable {
 	public void setSecure(final Boolean secure) { this.secure = secure; }
 	public void setNeighbor(final Boolean neighbor) { this.neighbor = neighbor; }
 	public void setOwnCloud(final Boolean ownCloud) { this.ownCloud = ownCloud; }
-	public void setAuthenticationInfo(String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setRelayId(final List<Long> relayId) { this.relayId = relayId; }	
 }
