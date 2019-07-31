@@ -69,6 +69,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
 		final Connection connection = connectionFactory.createConnection();
 		connectionFactory.setClientID(null);
+		connection.start();
 		
 		return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
