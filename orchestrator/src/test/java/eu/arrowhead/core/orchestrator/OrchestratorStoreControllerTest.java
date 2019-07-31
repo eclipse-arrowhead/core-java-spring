@@ -43,9 +43,9 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
-@RunWith (SpringRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrchestratorMain.class)
-@ContextConfiguration (classes = { OrchestratorStoreDBServiceTestContext.class })
+@ContextConfiguration(classes = { OrchestratorServiceTestContext.class })
 public class OrchestratorStoreControllerTest {
 
 	//=================================================================================================
@@ -454,15 +454,11 @@ public class OrchestratorStoreControllerTest {
 	private CloudRequestDTO getLocalProviderCloudRequestDTOForTest() {
 		final String operator = "operatorForTest";
 		final String name = "cloudName";
-		final String address = "localhost";
-		final Integer port = 12345;
-		final Boolean ownCloud = true;	
+		final boolean ownCloud = true;	
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
 		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
@@ -598,7 +594,8 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private CloudResponseDTO getCloudResponseDTOForTest() {
-		return new CloudResponseDTO(getIdForTest(), "operator", "name", "address", 12345, "gateKeeperServiceUri", true,	true, false, "2019-07-04 14:43:19", "2019-07-04 14:43:19");
+		return new CloudResponseDTO(getIdForTest(), "operator", "name", true,	true, false, null, "2019-07-04 14:43:19", "2019-07-04 14:43:19");
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------

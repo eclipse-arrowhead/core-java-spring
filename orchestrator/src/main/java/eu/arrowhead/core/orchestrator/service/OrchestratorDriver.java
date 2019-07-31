@@ -300,7 +300,7 @@ public class OrchestratorDriver {
 	private List<IdIdListDTO> convertSRResultsToProviderIdListWithInterfaceIds(final List<ServiceRegistryResponseDTO> providers) {
 		logger.debug("convertSRResultsToProviderIdListWithInterfaceIds started...");
 		
-		final List<IdIdListDTO> result = new ArrayList<IdIdListDTO>(providers.size());
+		final List<IdIdListDTO> result = new ArrayList<>(providers.size());
 		for (final ServiceRegistryResponseDTO srEntry : providers) {
 			final IdIdListDTO dto = new IdIdListDTO(srEntry.getProvider().getId(), convertServiceInterfaceListToServiceInterfaceIdList(srEntry.getInterfaces()));
 			result.add(dto);

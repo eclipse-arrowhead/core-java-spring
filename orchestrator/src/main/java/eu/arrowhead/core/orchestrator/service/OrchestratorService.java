@@ -87,7 +87,7 @@ public class OrchestratorService {
 		List<ServiceRegistryResponseDTO> queryData = queryResult.getServiceQueryData();
 	    // If necessary, removing the non-preferred providers from the SR response. (If necessary, matchmaking is done after this at the request sender Cloud.)
 		if (flags.get(Flag.ONLY_PREFERRED)) {  
-			// This request contains only local preferred systems, since this request came from another cloud, but the de-boxing is necessary
+			// This request contains only local preferred systems, since this request came from another cloud, but the unboxing is necessary
 			final List<PreferredProviderDataDTO> localProviders = request.getPreferredProviders().stream().filter(p -> p.isLocal()).collect(Collectors.toList());
 			queryData = removeNonPreferred(queryData, localProviders);
 		}
@@ -212,9 +212,15 @@ public class OrchestratorService {
 			queryData = removeNonPreferred(queryData, localProviders);
 			if (queryData.isEmpty()) {
 				if (isInterCloudOrchestrationPossible(flags)) {
-					// no result that contains any of the preferred providers => we try with other clouds
-					logger.debug("dynamicOrchestration: no preferred provider give access to requester system => moving to Inter-Cloud orchestration.");
-					return triggerInterCloud(request);
+					// no result that contains any of the local preferred providers => if there are preferred providers from other clouds we can try with those clouds
+					final List<PreferredProviderDataDTO> nonLocalProviders = request.getPreferredProviders().stream().filter(p -> p.isGlobal()).collect(Collectors.toList());
+					if (!nonLocalProviders.isEmpty()) {
+						logger.debug("dynamicOrchestration: no local preferred provider give access to requester system => moving to Inter-Cloud orchestration.");
+						return triggerInterCloud(request);
+					} else { // nothing we can do
+						logger.debug("dynamicOrchestration: no preferred provider give access to requester system => orchestration failed");
+						return new OrchestrationResponseDTO(); // empty response
+					}
 				} else {
 					return new OrchestrationResponseDTO(); // empty response
 				}
@@ -381,7 +387,7 @@ public class OrchestratorService {
 	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 	    orList = orchestratorDriver.generateAuthTokens(request, orList);
 		
-	    logger.debug("compileOrchestrationResponse creates {} orchestration form", orList.size());
+	    logger.debug("compileOrchestrationResponse creates {} orchestration forms", orList.size());
 
 		return new OrchestrationResponseDTO(orList);
 	}

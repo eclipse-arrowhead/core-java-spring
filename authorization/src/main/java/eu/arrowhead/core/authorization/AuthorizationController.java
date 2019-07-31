@@ -514,20 +514,24 @@ public class AuthorizationController {
 	@ResponseBody public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudRequest(@RequestBody final AuthorizationInterCloudCheckRequestDTO request) {
 		logger.debug("New AuthorizationInterCloud check request recieved");
 		
-		final boolean isCloudIdInvalid = request.getCloudId() == null || request.getCloudId() < 1;
-		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
+		final boolean isCloudInvalid = request.getCloud() == null ;
+		final boolean isCloudOperatorInvalid = isCloudInvalid || Utilities.isEmpty(request.getCloud().getOperator());
+		final boolean isCloudNameInvalid = isCloudInvalid || Utilities.isEmpty(request.getCloud().getName());
+		final boolean isServiceDefinitionInvalid = Utilities.isEmpty(request.getServiceDefinition());
 		final boolean isProvidersWithInterfacesListInvalid = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().isEmpty();
-		if (isCloudIdInvalid || isServiceDefinitionIdInvalid || isProvidersWithInterfacesListInvalid ) {
+		if (isCloudOperatorInvalid || isCloudNameInvalid || isServiceDefinitionInvalid || isProvidersWithInterfacesListInvalid ) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
-			exceptionMsg = isCloudIdInvalid ? exceptionMsg + " 'invalid cloud id' ," : exceptionMsg;
-			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " 'invalid serviceDefinition id' ," : exceptionMsg;
+			exceptionMsg = isCloudOperatorInvalid ? exceptionMsg + " cloud operator is empty, " : exceptionMsg;
+			exceptionMsg = isCloudNameInvalid ? exceptionMsg + " cloud name is empty, " : exceptionMsg;
+			exceptionMsg = isServiceDefinitionInvalid ? exceptionMsg + " serviceDefinition is empty, " : exceptionMsg;
 			exceptionMsg = isProvidersWithInterfacesListInvalid ? exceptionMsg + " invalid providerIdsWithInterfaceIds list," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTER_CHECK_URI);
 		}
 		
-		final AuthorizationInterCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationInterCloudResponse(request.getCloudId(), request.getServiceDefinitionId(), request.getProviderIdsWithInterfaceIds());
+		final AuthorizationInterCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationInterCloudResponse(request.getCloud().getOperator(), request.getCloud().getName()
+				, request.getServiceDefinition(), request.getProviderIdsWithInterfaceIds());
 		logger.debug("checkAuthorizationInterCloudRequest has been finished");
 		
 		return response;

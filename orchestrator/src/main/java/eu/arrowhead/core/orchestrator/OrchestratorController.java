@@ -58,7 +58,7 @@ public class OrchestratorController {
 	private final Logger logger = LogManager.getLogger(OrchestratorController.class);
 	
 	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
-	private boolean gateKeeperIsPresent;
+	private boolean gatekeeperIsPresent;
 	
 	@Autowired
 	private OrchestratorService orchestratorService;
@@ -94,13 +94,13 @@ public class OrchestratorController {
 		checkOrchestratorFormRequestDTO(request, origin);
 		
 	    if (request.getOrchestrationFlags().getOrDefault(Flag.EXTERNAL_SERVICE_REQUEST, false)) {
-	    	if (!gateKeeperIsPresent) {
+	    	if (!gatekeeperIsPresent) {
 	    		throw new BadPayloadException("External service request" + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 	    	
 	    	return orchestratorService.externalServiceRequest(request);
 	    } else if (request.getOrchestrationFlags().getOrDefault(Flag.TRIGGER_INTER_CLOUD, false)) {
-	    	if (!gateKeeperIsPresent) {
+	    	if (!gatekeeperIsPresent) {
 	    		throw new BadPayloadException("Forced inter cloud service request" + GATEKEEPER_IS_NOT_PRESENT_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 	    	

@@ -252,10 +252,8 @@ public class DTOConverter {
 		Assert.notNull(entity.getCreatedAt(), "Cloud.createdAt is null" );
 		Assert.notNull(entity.getUpdatedAt(), "Cloud.cpdatedAt is null" );
 		
-		return new CloudResponseDTO(entity.getId(),	entity.getOperator(), entity.getName(), entity.getGatekeeper() != null ? entity.getGatekeeper().getAddress() : null,
-								    entity.getGatekeeper() != null ? entity.getGatekeeper().getPort() : null, entity.getGatekeeper() != null ? entity.getGatekeeper().getServiceUri() : null,
-								    entity.getSecure(),	entity.getNeighbor(), entity.getOwnCloud(), Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()),
-								    Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+		return new CloudResponseDTO(entity.getId(), entity.getOperator(), entity.getName(), entity.getSecure(), entity.getNeighbor(), entity.getOwnCloud(), entity.getAuthenticationInfo(),
+								   Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -309,7 +307,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(final List<OrchestratorStoreResponseDTO> entries, long totalElements) {
+	public static OrchestratorStoreListResponseDTO convertOrchestratorStoreEntryListToOrchestratorStoreListResponseDTO(final List<OrchestratorStoreResponseDTO> entries, final long totalElements) {
 		Assert.notNull(entries, "OrchestratorStoreList is null");
 
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
