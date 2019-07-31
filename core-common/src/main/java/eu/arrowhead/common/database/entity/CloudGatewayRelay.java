@@ -32,7 +32,6 @@ public class CloudGatewayRelay {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "relayId", referencedColumnName = "id", nullable = false)
-
 	private Relay relay;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
