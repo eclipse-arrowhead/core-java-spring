@@ -24,7 +24,9 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
@@ -150,6 +152,14 @@ public class OrchestratorDriver {
 		}
 		
 		return providers;
+	}
+	
+	public ICNResponseDTO doInterCloudNegotiations(OrchestrationFormRequestDTO orchestrationFormRequestDTO,
+			CloudRequestDTO providerCloud) {
+		logger.debug("doInterCloudNegotiations started...");
+		
+		// TODO Implement additional method logic here
+		return null;
 	}
 
 	//=================================================================================================
@@ -377,4 +387,5 @@ public class OrchestratorDriver {
 		
 		
 	}
+
 }
