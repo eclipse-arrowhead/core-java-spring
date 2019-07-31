@@ -2,7 +2,6 @@ package eu.arrowhead.core.orchestrator.service;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +18,8 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.repository.ForeignSystemRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
@@ -32,7 +29,6 @@ import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorWarnings;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
