@@ -101,8 +101,8 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public RelayResponseDTO getRelayByIdResponseResponse(final String address, final int port) {
-		logger.debug("getRelayByIdResponse started...");
+	public RelayResponseDTO getRelayByAddressAndPortResponse(final String address, final int port) {
+		logger.debug("getRelayByAddressAndPortResponse started...");
 		
 		final Relay entry = getRelayByAddressAndPort(address, port);
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
@@ -110,7 +110,7 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	public Relay getRelayByAddressAndPort(String address, final int port) {
-		logger.debug("updateRelayById started...");
+		logger.debug("getRelayByAddressAndPort started...");
 		
 		try {
 			
