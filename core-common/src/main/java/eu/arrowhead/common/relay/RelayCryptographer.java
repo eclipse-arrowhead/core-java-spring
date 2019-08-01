@@ -107,6 +107,13 @@ public class RelayCryptographer {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public String encodeBytes(final byte[] bytes, final String recipientPublicKey) {
+		logger.debug("encodeBytes started...");
+		
+		return encodeBytes(bytes, Utilities.getPublicKeyFromBase64EncodedString(recipientPublicKey));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public String encodeBytes(final byte[] bytes, final PublicKey recipientPublicKey) {
 		logger.debug("encodeBytes started...");
 		
