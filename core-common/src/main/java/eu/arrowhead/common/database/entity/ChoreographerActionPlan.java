@@ -25,7 +25,7 @@ public class ChoreographerActionPlan {
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
 
-    @OneToMany (mappedBy = "actionPlanEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany (mappedBy = "actionPlanEntry", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerActionPlanActionConnection> actionPlanActionConnections = new HashSet<>();
 

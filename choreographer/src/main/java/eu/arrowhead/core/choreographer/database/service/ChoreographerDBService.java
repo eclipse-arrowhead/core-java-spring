@@ -1,5 +1,6 @@
 package eu.arrowhead.core.choreographer.database.service;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.repository.*;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionRequestDTO;
@@ -142,8 +143,6 @@ public class ChoreographerDBService {
             throw new InvalidParameterException("Action with given Action Name of " + actionName + "doesn't exist!");
         }
 
-        logger.debug(choreographerAction.getActionName());
-
         ChoreographerAction nextAction = new ChoreographerAction();
         Optional<ChoreographerAction> nextActionOpt = choreographerActionRepository.findByActionName(nextActionName);
         if(nextActionOpt.isPresent()) {
@@ -152,7 +151,7 @@ public class ChoreographerDBService {
         } /*else {
             throw new InvalidParameterException("Action with given Action Name of " + nextActionName + "doesn't exist!");
         }*/
-        
+
         return choreographerActionRepository.saveAndFlush(choreographerAction);
     }
 
@@ -183,5 +182,23 @@ public class ChoreographerDBService {
         choreographerActionPlanActionConnectionRepository.flush();
 
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
+    }
+
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public void removeActionPlanEntryById(final long id) {
+        logger.debug("removeActionPlanEntryById started...");
+
+        try {
+            if(!choreographerActionPlanRepository.existsById(id)) {
+                throw new InvalidParameterException("ActionPlan with id of '" + id + "' doesn't exist!");
+            }
+            choreographerActionPlanRepository.deleteById(id);
+            choreographerActionPlanRepository.flush();
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
     }
 }

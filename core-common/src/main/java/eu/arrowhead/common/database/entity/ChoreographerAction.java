@@ -22,13 +22,14 @@ public class ChoreographerAction {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "nextActionId", referencedColumnName = "id", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private ChoreographerAction nextAction;
 
-    @OneToMany (mappedBy = "actionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany (mappedBy = "actionEntry", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerActionPlanActionConnection> actionPlanActionConnections = new HashSet<>();
 
-    @OneToMany (mappedBy = "actionEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany (mappedBy = "actionEntry", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerActionActionStepConnection> actionActionStepConnections = new HashSet<>();
 

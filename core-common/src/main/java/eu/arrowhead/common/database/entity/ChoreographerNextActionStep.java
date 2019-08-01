@@ -1,6 +1,9 @@
 package eu.arrowhead.common.database.entity;
 
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
@@ -12,12 +15,14 @@ public class ChoreographerNextActionStep {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn (name = "actionStepId", referencedColumnName = "id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private ChoreographerActionStep actionStepEntry;
 
-    @ManyToOne (fetch = FetchType.EAGER)
+    @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn (name = "nextActionStepId", referencedColumnName = "id", nullable = false)
+    @OnDelete (action = OnDeleteAction.CASCADE)
     private ChoreographerActionStep nextActionStepEntry;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
