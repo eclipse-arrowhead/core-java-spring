@@ -1,8 +1,12 @@
 package eu.arrowhead.core.gatekeeper.database.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,8 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
+import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
@@ -33,12 +42,84 @@ public class GatekeeperDBService {
 	// members
 	
 	@Autowired
+	private CloudRepository cloudRepository;
+	
+	@Autowired
 	private RelayRepository relayRepository;
+	
+	@Autowired
+	private CloudGatekeeperRelayRepository cloudGatekeeperRelayRepository;
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperDBService.class);
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------	
+	public List<Cloud> registerBulkCloudsWithGatekeeperRelays(final List<CloudRequestDTO> dtoList) {
+		logger.debug("registerBulkCloudsWithGatekeeperRelays started...");
+		
+		try {
+			
+			final Map<String, Cloud> cloudsToSave = new HashMap<>();
+			final Map<String, List<Relay>> relaysForClouds = new HashMap<>();
+			
+			if (dtoList == null || dtoList.isEmpty()) {
+				throw new InvalidParameterException("List of CloudRequestDTO is null or empty");
+			}
+			
+			for (final CloudRequestDTO dto : dtoList) {
+				
+				if (dto == null) {
+					throw new InvalidParameterException("List of CloudRequestDTO contains null element");
+				}				
+				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo(), dto.getRelayId());
+				if (cloudsToSave.containsKey(dto.getOperator() + dto.getName())) {
+					throw new InvalidParameterException("List of CloudRequestDTO contains uinque constraint violation: " + dto.getOperator() + " operator with " + dto.getName() + " name");
+				}
+				
+				cloudsToSave.put(dto.getOperator() + dto.getName(), new Cloud(dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo()));
+				
+				final List<Relay> relays = relayRepository.findAllById(dto.getRelayId());
+				for (final Relay relay : relays) {
+					if (relay.getExclusive()) {
+						throw new InvalidParameterException("Relay with gatekeeper purpose couldn't be exclusive");
+					}
+					if (relay.getType().compareTo(RelayType.GATEKEEPER_RELAY) != 0 && relay.getType().compareTo(RelayType.GENERAL_RELAY) != 0) {
+						throw new InvalidParameterException("Relay with gatekeeper purpose could be only " + RelayType.GATEKEEPER_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
+					}
+				}
+				
+				relaysForClouds.put(dto.getOperator() + dto.getName(), relays);
+				
+			}
+			
+			final List<Cloud> savedClouds = cloudRepository.saveAll(cloudsToSave.values());
+			cloudRepository.flush();
+			
+			final List<CloudGatekeeperRelay> cloudGatekeeperRelaysToSave = new ArrayList<>();
+			final Set<Long> savedCloudIds = new HashSet<>();
+			for (final Cloud cloud : savedClouds) {
+				final List<Relay> relays = relaysForClouds.get(cloud.getOperator() + cloud.getName());
+				
+				for (final Relay relay : relays) {
+					cloudGatekeeperRelaysToSave.add(new CloudGatekeeperRelay(cloud, relay));
+				}
+				
+				savedCloudIds.add(cloud.getId());
+			}			
+			cloudGatekeeperRelayRepository.saveAll(cloudGatekeeperRelaysToSave);
+			cloudGatekeeperRelayRepository.flush();
+			
+			return cloudRepository.findAllById(savedCloudIds);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	public RelayResponseListDTO getRelaysResponse(final int page, final int size, final Direction direction, final String sortField) {
@@ -149,7 +230,7 @@ public class GatekeeperDBService {
 		logger.debug("registerBulkRelays started...");
 		
 		try {
-			final List<Relay> relaysToSave = new ArrayList<>(dtoList.size());
+			final Map<String, Relay> relaysToSave = new HashMap<>();
 			
 			if (dtoList == null || dtoList.isEmpty()) {
 				throw new InvalidParameterException("List of RelayRequestDTO is null or empty");
@@ -161,11 +242,14 @@ public class GatekeeperDBService {
 					throw new InvalidParameterException("List of RelayRequestDTO contains null element");
 				}				
 				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), dto.getType());
+				if (relaysToSave.containsKey(dto.getAddress() + dto.getPort())) {
+					throw new InvalidParameterException("List of RelayRequestDTO contains uinque constraint violation: " + dto.getAddress() + " address with " + dto.getPort() + " port");
+				}
 				
-				relaysToSave.add(new Relay(dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType())));
+				relaysToSave.put(dto.getAddress() + dto.getPort(), new Relay(dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType())));
 			}
 			
-			final List<Relay> savedRelays = relayRepository.saveAll(relaysToSave);
+			final List<Relay> savedRelays = relayRepository.saveAll(relaysToSave.values());
 			relayRepository.flush();
 			return savedRelays;
 			
@@ -241,6 +325,52 @@ public class GatekeeperDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
+	private void validateCloudParameters(final boolean withUniqueConstarintCheck, String operator, String name, Boolean secure, Boolean neighbor, Boolean ownCloud, final String authenticationInfo, final List<Long> relayId) {
+		logger.debug("validateCloudParameters started...");
+		
+		if (Utilities.isEmpty(operator)) {
+			throw new InvalidParameterException("Operator is empty");
+		}
+		operator = operator.toLowerCase().trim();
+		
+		if (Utilities.isEmpty(name)) {
+			throw new InvalidParameterException("Name is empty");
+		}
+		name = name.toLowerCase().trim();
+		
+		secure = secure == null ? false : secure;
+		neighbor = neighbor == null ? false : neighbor;
+		ownCloud = ownCloud == null ? false : ownCloud;
+		
+		if (secure && Utilities.isEmpty(authenticationInfo)) {
+			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
+		}
+		
+		if (withUniqueConstarintCheck) {
+			checkUniqueConstarintOfCloudTable(operator, name);
+		}
+		
+		if (relayId == null || relayId.isEmpty()) {
+			throw new InvalidParameterException("RelayId list is empty");
+		} else {
+			for (final Long id : relayId) {
+				if (id == null || id < 1 || !relayRepository.existsById(id)) {
+					throw new InvalidParameterException("Relay with id '" + id  + "' not exists");
+				}
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private void checkUniqueConstarintOfCloudTable(final String operator, final String name) {
+		logger.debug("checkUniqueConstarintOfCloudTable started...");
+		
+		if (cloudRepository.existsByOperatorAndName(operator, name)) {
+			throw new InvalidParameterException("Cloud with the following operator and name already exists: " + operator + ", " + name);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	private void validateRelayParameters(final boolean withUniqueConstarintCheck, String address, final Integer port, Boolean secure, Boolean exclusive, final String type) {
 		logger.debug("validateRelayParameters started...");
 		
@@ -270,9 +400,11 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	private void checkUniqueConstarintOfRelayTable(final String address, final int port) {
-			if (relayRepository.existsByAddressAndPort(address, port)) {
-				throw new InvalidParameterException("Relay with the following address and port already exists: " + address + ", " + port);
-			}
+		logger.debug("checkUniqueConstarintOfRelayTable started...");
+		
+		if (relayRepository.existsByAddressAndPort(address, port)) {
+			throw new InvalidParameterException("Relay with the following address and port already exists: " + address + ", " + port);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------	

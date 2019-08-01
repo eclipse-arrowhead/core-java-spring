@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class CloudResponseDTO implements Serializable {
 
@@ -28,7 +29,8 @@ public class CloudResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public CloudResponseDTO(final long id, final String operator, final String name, final boolean secure,
-							final boolean neighbor, final boolean ownCloud, final String authenticationInfo, final String createdAt, final String updatedAt) {
+							final boolean neighbor, final boolean ownCloud, final String authenticationInfo,
+							final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.operator = operator;
 		this.name = name;
@@ -46,7 +48,7 @@ public class CloudResponseDTO implements Serializable {
 	public boolean getSecure() { return secure; }
 	public boolean getNeighbor() { return neighbor; }
 	public boolean getOwnCloud() { return ownCloud; }
-	public String getAuthenticationInfo() { return authenticationInfo; }
+	public String getAuthenticationInfo() { return authenticationInfo; }	
 	public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 	
@@ -57,7 +59,7 @@ public class CloudResponseDTO implements Serializable {
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setNeighbor(final boolean neighbor) { this.neighbor = neighbor; }
 	public void setOwnCloud(final boolean ownCloud) { this.ownCloud = ownCloud; }
-	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }	
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 }
