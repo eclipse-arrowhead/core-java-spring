@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 
 public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
@@ -38,7 +39,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final Logger logger = LogManager.getLogger(ActiveMQGatekeeperRelayClient.class);
 	
 	private PublicKey publicKey;
-	private PrivateKey privateKey;
+	private RelayCryptographer cryptographer;
 	
 	//=================================================================================================
 	// methods
@@ -47,13 +48,13 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	public ActiveMQGatekeeperRelayClient(final PublicKey publicKey, final PrivateKey privateKey) {
 		if (publicKey != null) {
 			Assert.notNull(privateKey, "Need both public and private keys.");
-		}
-		if (privateKey != null) {
-			Assert.notNull(publicKey, "Need both public and private keys.");
+			this.publicKey = publicKey;
 		}
 		
-		this.publicKey = publicKey;
-		this.privateKey = privateKey;
+		if (privateKey != null) {
+			Assert.notNull(publicKey, "Need both public and private keys.");
+			this.cryptographer = new RelayCryptographer(privateKey);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -130,7 +131,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		String sessionId = RandomStringUtils.randomAlphanumeric(SESSION_ID_LENGTH);
 		
 		if (publicKey != null) {
-			//TODO: encoding session id using JOSE
+			sessionId = cryptographer.encodeSessionId(sessionId, recipientPublicKey);
 		}
 		
 		return sessionId;
