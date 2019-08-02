@@ -185,6 +185,25 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		throw new JMSException("Invalid message type: " + reqMsg.getClass().getSimpleName());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void sendResponse(final Session session, final GatekeeperRelayRequest request, final Object responsePayload) throws JMSException {
+		logger.debug("sendResponse started...");
+		
+		Assert.notNull(session, "session is null.");
+		Assert.notNull(request, "request is null.");
+		Assert.notNull(request.getAnswerSender(), "Sender is null.");
+		Assert.notNull(request.getPeerPublicKey(), "Peer public key is null.");
+		Assert.isTrue(!Utilities.isEmpty(request.getSessionId()), "Session id is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getMessageType()), "Message type is null or blank.");
+		Assert.notNull(responsePayload, "Payload is null.");
+		
+		final String encryptedResponse = cryptographer.encodeRelayMessage(request.getMessageType(), request.getSessionId(), responsePayload, request.getPeerPublicKey());
+		final TextMessage respMsg = session.createTextMessage(encryptedResponse);
+		request.getAnswerSender().send(respMsg);
+		request.getAnswerSender().close();
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

@@ -19,11 +19,16 @@ public interface GatekeeperRelayClient {
 	//-------------------------------------------------------------------------------------------------
 	public MessageConsumer subscribeGeneralAdvertisementTopic(final Session session) throws JMSException;
 	
+	//-------------------------------------------------------------------------------------------------
 	// returns null if message is for someone else
 	public GeneralAdvertisementMessageDTO getGeneralAdvertisementMessage(final Message msg) throws JMSException; 
 	
+	//-------------------------------------------------------------------------------------------------
 	// returns null if no request arrived in time
 	public GatekeeperRelayRequest sendAcknowledgementAndReturnRequest(final Session session, final GeneralAdvertisementMessageDTO gaMsg) throws JMSException; 
+	
+	//-------------------------------------------------------------------------------------------------
+	public void sendResponse(final Session session, final GatekeeperRelayRequest request, final Object responsePayload) throws JMSException;
 	
 	//-------------------------------------------------------------------------------------------------
 	// returns null if no acknowledgement arrived in time
