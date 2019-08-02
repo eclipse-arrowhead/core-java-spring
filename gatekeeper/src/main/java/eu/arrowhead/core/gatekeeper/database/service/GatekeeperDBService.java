@@ -30,6 +30,7 @@ import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
@@ -127,7 +128,17 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public List<Cloud> assignRelaysToCloud(final long id, final List<Long> gatekeeperRelayIds, final List<Long> gatewayRelayIds) {
+	public CloudWithRelaysResponseDTO assignRelaysToCloudResponse(final long id, final List<Long> gatekeeperRelayIds, final List<Long> gatewayRelayIds) {
+		logger.debug("assignRelaysToCloud started...");
+		
+		Cloud entry = assignRelaysToCloud(id, gatekeeperRelayIds, gatewayRelayIds);
+		
+		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
+	}
+		
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public Cloud assignRelaysToCloud(final long id, final List<Long> gatekeeperRelayIds, final List<Long> gatewayRelayIds) {
 		logger.debug("assignRelaysToCloud started...");
 		
 		try {
@@ -158,7 +169,7 @@ public class GatekeeperDBService {
 			final List<Relay> gatewayRelays = collectAndValidateGatewayRelays(normalizedGatewayRelayIds);
 			
 			final Set<Long> savedCloudIds = saveCloudAndRelayConnections(cloud, gatekeeperRelays, gatewayRelays);
-			return cloudRepository.findAllById(savedCloudIds);
+			return cloudRepository.findById(savedCloudIds.iterator().next()).get();
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
