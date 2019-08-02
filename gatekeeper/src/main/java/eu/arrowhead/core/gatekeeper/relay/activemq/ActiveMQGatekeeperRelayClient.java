@@ -6,6 +6,7 @@ import java.util.Base64;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -22,6 +23,7 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.UnsecuredMessageDTO;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 
@@ -37,24 +39,23 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final int SESSION_ID_LENGTH = 48;
 
 	private static final Logger logger = LogManager.getLogger(ActiveMQGatekeeperRelayClient.class);
-	
-	private PublicKey publicKey;
-	private RelayCryptographer cryptographer;
+
+	private final String serverCommonName;
+	private final PublicKey publicKey;
+	private final RelayCryptographer cryptographer;
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ActiveMQGatekeeperRelayClient(final PublicKey publicKey, final PrivateKey privateKey) {
-		if (publicKey != null) {
-			Assert.notNull(privateKey, "Need both public and private keys.");
-			this.publicKey = publicKey;
-		}
+	public ActiveMQGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey) {
+		Assert.isTrue(!Utilities.isEmpty(serverCommonName), "Common name is null or blank.");
+		Assert.notNull(publicKey, "Public key is null.");
+		Assert.notNull(privateKey, "Private key is null.");
 		
-		if (privateKey != null) {
-			Assert.notNull(publicKey, "Need both public and private keys.");
-			this.cryptographer = new RelayCryptographer(privateKey);
-		}
+		this.serverCommonName = serverCommonName;
+		this.cryptographer = new RelayCryptographer(privateKey);
+		this.publicKey = publicKey;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -99,6 +100,26 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		final Topic topic = session.createTopic(GENERAL_TOPIC_NAME);
 		return session.createConsumer(topic);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public GeneralAdvertisementMessageDTO getGeneralAdvertisementMessage(final Message msg) throws JMSException {
+		logger.debug("getGeneralAdvertisementMessage started...");
+		
+		Assert.notNull(msg, "message is null.");
+		
+		if (msg instanceof TextMessage) {
+			final TextMessage tmsg = (TextMessage) msg;
+			final GeneralAdvertisementMessageDTO originalDTO = Utilities.fromJson(tmsg.getText(), GeneralAdvertisementMessageDTO.class);
+			if (isForMe(originalDTO.getRecipientCN())) {
+				return decryptGeneralAdvertisementMessage(originalDTO);
+			}
+			
+			return null; // message to someone else
+		}
+		
+		throw new JMSException("Invalid message type: " + msg.getClass().getSimpleName());
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -108,12 +129,10 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.notNull(session, "session is null.");
 		Assert.isTrue(!Utilities.isEmpty(senderCN), "senderCN is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(recipientCN), "recipientCN is null or blank.");
-		if (publicKey != null) {
-			Assert.isTrue(!Utilities.isEmpty(recipientPublicKey), "recipientPublicKey is null or blank.");
-		}
+		Assert.isTrue(!Utilities.isEmpty(recipientPublicKey), "recipientPublicKey is null or blank.");
 
 		final String sessionId = createSessionId(recipientPublicKey);
-		final String senderPublicKey = publicKey != null ?  Base64.getEncoder().encodeToString(publicKey.getEncoded()) : null;
+		final String senderPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(senderCN, senderPublicKey, recipientCN, sessionId);
 		final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
 
@@ -128,12 +147,24 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String createSessionId(final String recipientPublicKey) {
-		String sessionId = RandomStringUtils.randomAlphanumeric(SESSION_ID_LENGTH);
+		logger.debug("createSessionId started...");
 		
-		if (publicKey != null) {
-			sessionId = cryptographer.encodeSessionId(sessionId, recipientPublicKey);
-		}
+		final String sessionId = RandomStringUtils.randomAlphanumeric(SESSION_ID_LENGTH);
+		return cryptographer.encodeSessionId(sessionId, recipientPublicKey);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isForMe(final String recipientCN) {
+		return serverCommonName.equalsIgnoreCase(recipientCN);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private GeneralAdvertisementMessageDTO decryptGeneralAdvertisementMessage(final GeneralAdvertisementMessageDTO originalDTO) {
+		logger.debug("decryptGeneralAdvertisementMessage started...");
 		
-		return sessionId;
+		final UnsecuredMessageDTO decodedSessionId = cryptographer.decodeMessage(originalDTO.getSessionId(), originalDTO.getSenderPublicKey());
+		originalDTO.setSessionId(decodedSessionId.getSessionId());
+		
+		return originalDTO;
 	}
 }
