@@ -36,6 +36,7 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
+import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 
 public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	
@@ -162,8 +163,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		final Message reqMsg = messageConsumer.receive(timeout);
 		
 		if (reqMsg == null) { // timeout
-			messageProducer.close();
-			messageConsumer.close();
+			closeThese(messageProducer, messageConsumer);
 			
 			return null; // no request arrived
 		}
@@ -179,41 +179,73 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			return request;
 		}
 
-		messageProducer.close();
-		messageConsumer.close();
+		closeThese(messageProducer, messageConsumer);
+		
 		throw new JMSException("Invalid message type: " + reqMsg.getClass().getSimpleName());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	//TODO: rewrite
 	@Override
-	public void publishGeneralAdvertisement(final Session session, final String recipientCN, final String recipientPublicKey, final String senderCN) throws JMSException {
+	public GeneralAdvertisementResult publishGeneralAdvertisement(final Session session, final String recipientCN, final String recipientPublicKey, final String senderCN) throws JMSException {
 		logger.debug("publishGeneralAdvertisement started...");
 		
 		Assert.notNull(session, "session is null.");
 		Assert.isTrue(!Utilities.isEmpty(senderCN), "senderCN is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(recipientCN), "recipientCN is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(recipientPublicKey), "recipientPublicKey is null or blank.");
+		final PublicKey peerPublicKey = Utilities.getPublicKeyFromBase64EncodedString(recipientPublicKey);
 
-		final String sessionId = createSessionId(recipientPublicKey);
+		final String sessionId = createSessionId();
+		final String encryptedSessionId = encryptSessionId(sessionId, peerPublicKey);
 		final String senderPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
-		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(senderCN, senderPublicKey, recipientCN, sessionId);
+		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(senderCN, senderPublicKey, recipientCN, encryptedSessionId);
 		final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
 
 		final Topic topic = session.createTopic(GENERAL_TOPIC_NAME);
 		final MessageProducer producer = session.createProducer(topic);
+		
+		final Queue responseQueue = session.createQueue(RESPONSE_QUEUE_PREFIX + recipientCN + "-" + sessionId);
+		final MessageConsumer messageConsumer = session.createConsumer(responseQueue);
 
 		producer.send(textMessage);
+		
+		// waiting for acknowledgement
+		final Message ackMsg = messageConsumer.receive(timeout);
+		
+		if (ackMsg == null) {
+			closeThese(producer, messageConsumer);
+			
+			return null;
+		}
+		
+		if (ackMsg instanceof TextMessage) {
+			final TextMessage tmsg = (TextMessage) ackMsg;
+			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
+			validateAcknowledgement(sessionId, decryptedMessageDTO);
+			producer.close();
+			
+			return new GeneralAdvertisementResult(messageConsumer, peerPublicKey, sessionId);
+		}
+
+		closeThese(producer, messageConsumer);
+		
+		throw new JMSException("Invalid message type: " + ackMsg.getClass().getSimpleName());
+
 	}
 	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private String createSessionId(final String recipientPublicKey) {
-		logger.debug("createSessionId started...");
+	private String createSessionId() {
+		return RandomStringUtils.randomAlphanumeric(SESSION_ID_LENGTH);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String encryptSessionId(final String sessionId, final PublicKey recipientPublicKey) {
+		logger.debug("encryptSessionId started...");
 		
-		final String sessionId = RandomStringUtils.randomAlphanumeric(SESSION_ID_LENGTH);
 		return cryptographer.encodeSessionId(sessionId, recipientPublicKey);
 	}
 	
@@ -262,9 +294,36 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void validateSessionId(final String expectedSessionId, final String actualSessionId) {
+		logger.debug("validateSessionId started...");
+		
 		if (!Objects.equals(expectedSessionId, actualSessionId)) {
 			throw new AuthException("Unauthorized message on queue.");
 		}
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateAcknowledgement(final String sessionId, final DecryptedMessageDTO msg) {
+		logger.debug("validateAcknowledgement started...");
+		
+		if (!CommonConstants.RELAY_MESSAGE_TYPE_ACK.equals(msg.getMessageType())) {
+			throw new AuthException("Unauthorized message on queue.");
+		}
+		
+		validateSessionId(sessionId, msg.getSessionId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void closeThese(final AutoCloseable... closeables) {
+		logger.debug("closeThese started...");
+		
+		for (final AutoCloseable closeable : closeables) {
+			try {
+				closeable.close();
+			} catch (final Exception ex) {
+				logger.debug(ex.getMessage());
+				logger.trace(ex);
+			}
+		}
 	}
 }

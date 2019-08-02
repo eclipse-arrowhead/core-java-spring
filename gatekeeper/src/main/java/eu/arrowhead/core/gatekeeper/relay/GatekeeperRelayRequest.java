@@ -7,6 +7,9 @@ import javax.jms.MessageProducer;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.ICNProposalRequestDTO;
+import eu.arrowhead.common.exception.DataNotFoundException;
 
 public class GatekeeperRelayRequest {
 
@@ -45,5 +48,21 @@ public class GatekeeperRelayRequest {
 	public String getSessionId() { return sessionId; }
 	public String getMessageType() { return messageType; }
 
-	//TODO: special getter for payload
+	//-------------------------------------------------------------------------------------------------
+	public GSDPollRequestDTO getGSDPollRequest() {
+		if (payload instanceof GSDPollRequestDTO) {
+			return (GSDPollRequestDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The request is not a GSD poll.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ICNProposalRequestDTO getICNProposalRequest() {
+		if (payload instanceof ICNProposalRequestDTO) {
+			return (ICNProposalRequestDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The request is not an ICN proposal.");
+	}
 }
