@@ -9,16 +9,18 @@ import java.util.List;
 public class ChoreographerActionStepResponseDTO implements Serializable {
 
     private long id;
+    private String stepName;
     private List<ServiceDefinitionResponseDTO> serviceDefinitions;
-    private List<ChoreographerActionStep> nextActionSteps;
+    private List<ChoreographerNextActionStepResponseDTO> nextActionSteps;
     private String createdAt;
     private String updatedAt;
 
     public ChoreographerActionStepResponseDTO() {}
 
-    public ChoreographerActionStepResponseDTO(long id, List<ServiceDefinitionResponseDTO> serviceDefinitions, List<ChoreographerActionStep> nextActionSteps, String createdAt, String updatedAt) {
+    public ChoreographerActionStepResponseDTO(long id, String stepName, List<ServiceDefinitionResponseDTO> serviceDefinitions, List<ChoreographerNextActionStepResponseDTO> nextActionSteps, String createdAt, String updatedAt) {
         this.id = id;
         this.serviceDefinitions = serviceDefinitions;
+        this.stepName = stepName;
         this.nextActionSteps = nextActionSteps;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -32,6 +34,14 @@ public class ChoreographerActionStepResponseDTO implements Serializable {
         this.id = id;
     }
 
+    public String getStepName() {
+        return stepName;
+    }
+
+    public void setStepName(String stepName) {
+        this.stepName = stepName;
+    }
+
     public List<ServiceDefinitionResponseDTO> getServiceDefinitions() {
         return serviceDefinitions;
     }
@@ -40,11 +50,11 @@ public class ChoreographerActionStepResponseDTO implements Serializable {
         this.serviceDefinitions = serviceDefinitions;
     }
 
-    public List<ChoreographerActionStep> getNextActionSteps() {
+    public List<ChoreographerNextActionStepResponseDTO> getNextActionSteps() {
         return nextActionSteps;
     }
 
-    public void setNextActionSteps(List<ChoreographerActionStep> nextActionSteps) {
+    public void setNextActionSteps(List<ChoreographerNextActionStepResponseDTO> nextActionSteps) {
         this.nextActionSteps = nextActionSteps;
     }
 

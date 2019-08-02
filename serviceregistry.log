@@ -1709,3 +1709,374 @@ Using generated security password: d8f7291f-3ef0-4eec-a93e-5002873ad83c
 2019-07-29 16:11:38.496  INFO DESKTOP-HTUTBM5 --- [0.1-8443-exec-8] o.a.c.c.C.[.[.[/]                        : Initializing Spring DispatcherServlet 'dispatcherServlet'
 2019-07-29 16:11:38.497  INFO DESKTOP-HTUTBM5 --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Initializing Servlet 'dispatcherServlet'
 2019-07-29 16:11:38.505  INFO DESKTOP-HTUTBM5 --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Completed initialization in 8 ms
+2019-07-31 09:23:18.253  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Starting ServiceRegistryMain on DESKTOP-CB3KCFU with PID 5396 (E:\dev\core-java-spring\serviceregistry\target\classes started by Szabo in E:\dev\core-java-spring)
+2019-07-31 09:23:18.259  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : No active profile set, falling back to default profiles: default
+2019-07-31 09:23:18.276  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Starting...
+2019-07-31 09:23:18.653  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Start completed.
+2019-07-31 09:23:19.093  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2019-07-31 09:23:19.178  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 79ms. Found 21 repository interfaces.
+2019-07-31 09:23:19.551  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2019-07-31 09:23:19.559  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'taskScheduler' has been explicitly defined. Therefore, a default ThreadPoolTaskScheduler will be created.
+2019-07-31 09:23:19.564  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2019-07-31 09:23:19.657  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$1b2e261f] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 09:23:19.685  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.integration.config.IntegrationManagementConfiguration' of type [org.springframework.integration.config.IntegrationManagementConfiguration$$EnhancerBySpringCGLIB$$861fe14e] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 09:23:19.695  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'integrationDisposableAutoCreatedBeans' of type [org.springframework.integration.config.annotation.Disposables] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 09:23:19.939  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat initialized with port(s): 8443 (https)
+2019-07-31 09:23:19.952  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Initializing ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-07-31 09:23:19.961  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardService                  : Starting service [Tomcat]
+2019-07-31 09:23:19.961  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardEngine                   : Starting Servlet engine: [Apache Tomcat/9.0.19]
+2019-07-31 09:23:20.075  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.C.[.[.[/]                        : Initializing Spring embedded WebApplicationContext
+2019-07-31 09:23:20.076  INFO DESKTOP-CB3KCFU --- [           main] o.s.w.c.ContextLoader                    : Root WebApplicationContext: initialization completed in 1778 ms
+2019-07-31 09:23:20.094  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : SRAccessControlFilter is active
+2019-07-31 09:23:20.637  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Starting...
+2019-07-31 09:23:20.645  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Start completed.
+2019-07-31 09:23:20.676  INFO DESKTOP-CB3KCFU --- [           main] o.h.j.i.u.LogHelper                      : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2019-07-31 09:23:20.733  INFO DESKTOP-CB3KCFU --- [           main] o.h.Version                              : HHH000412: Hibernate Core {5.3.10.Final}
+2019-07-31 09:23:20.736  INFO DESKTOP-CB3KCFU --- [           main] o.h.c.Environment                        : HHH000206: hibernate.properties not found
+2019-07-31 09:23:20.865  INFO DESKTOP-CB3KCFU --- [           main] o.h.a.c.Version                          : HCANN000001: Hibernate Commons Annotations {5.0.4.Final}
+2019-07-31 09:23:20.975  INFO DESKTOP-CB3KCFU --- [           main] o.h.d.Dialect                            : HHH000400: Using dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+2019-07-31 09:23:21.676  INFO DESKTOP-CB3KCFU --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2019-07-31 09:23:22.242  WARN DESKTOP-CB3KCFU --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2019-07-31 09:23:22.362  INFO DESKTOP-CB3KCFU --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2019-07-31 09:23:22.553  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Providers reachabilitiy task is not adjusted
+2019-07-31 09:23:22.573  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-07-31 09:23:22.586  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-07-31 09:23:22.586  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-07-31 09:23:22.587  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-07-31 09:23:22.587  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'providersReachabilityTaskScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-07-31 09:23:22.588  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'providersReachabilityTaskScheduler' initialized from an externally provided properties instance.
+2019-07-31 09:23:22.588  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-07-31 09:23:22.588  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@49976824
+2019-07-31 09:23:22.598  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Services end of validity task is not adjusted
+2019-07-31 09:23:22.598  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-07-31 09:23:22.604  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-07-31 09:23:22.605  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-07-31 09:23:22.605  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-07-31 09:23:22.605  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'servicesEndOfValidityCheckSheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-07-31 09:23:22.605  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'servicesEndOfValidityCheckSheduler' initialized from an externally provided properties instance.
+2019-07-31 09:23:22.605  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-07-31 09:23:22.605  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@56d4481f
+2019-07-31 09:23:22.658  INFO DESKTOP-CB3KCFU --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 2456e014-0e9a-4cad-acf3-b877ec361672
+
+2019-07-31 09:23:22.699  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : PayloadSizeFilter is active
+2019-07-31 09:23:22.725  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.a.c.ChannelProcessingFilter      : Validated configuration attributes
+2019-07-31 09:23:22.726  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.DefaultSecurityFilterChain       : Creating filter chain: any request, [org.springframework.security.web.access.channel.ChannelProcessingFilter@652855c4, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@132f1d85, org.springframework.security.web.context.SecurityContextPersistenceFilter@31aec04a, org.springframework.security.web.header.HeaderWriterFilter@7c144349, org.springframework.security.web.authentication.logout.LogoutFilter@5abf9a76, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5e5f5ddf, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1d4ee936, eu.arrowhead.common.filter.PayloadSizeFilter@4a2c69a6, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@12581426, org.springframework.security.web.session.SessionManagementFilter@117bfeb8, org.springframework.security.web.access.ExceptionTranslationFilter@7cc966a9]
+2019-07-31 09:23:22.742  INFO DESKTOP-CB3KCFU --- [           main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [public org.springframework.http.ResponseEntity<springfox.documentation.spring.web.json.Json> springfox.documentation.swagger2.web.Swagger2Controller.getDocumentation(java.lang.String,javax.servlet.http.HttpServletRequest)]
+2019-07-31 09:23:22.877  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskExecutor           : Initializing ExecutorService 'applicationTaskExecutor'
+2019-07-31 09:23:23.160  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2019-07-31 09:23:23.246  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2019-07-31 09:23:23.246  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.c.PublishSubscribeChannel          : Channel 'application.errorChannel' has 1 subscriber(s).
+2019-07-31 09:23:23.246  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : started _org.springframework.integration.errorLogger
+2019-07-31 09:23:23.246  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Context refreshed
+2019-07-31 09:23:23.262  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Found 1 custom documentation plugin(s)
+2019-07-31 09:23:23.288  INFO DESKTOP-CB3KCFU --- [           main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2019-07-31 09:23:23.449  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-07-31 09:23:23.449  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler providersReachabilityTaskScheduler_$_NON_CLUSTERED started.
+2019-07-31 09:23:23.449  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-07-31 09:23:23.450  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler servicesEndOfValidityCheckSheduler_$_NON_CLUSTERED started.
+2019-07-31 09:23:23.450  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Core system name: SERVICE_REGISTRY
+2019-07-31 09:23:23.451  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Server mode: SECURED
+2019-07-31 09:23:23.736  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : testcloud2.aitia own cloud is registered in SECURED mode.
+2019-07-31 09:23:23.744  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Starting ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-07-31 09:23:24.236  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat started on port(s): 8443 (https) with context path ''
+2019-07-31 09:23:24.238  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Started ServiceRegistryMain in 6.317 seconds (JVM running for 8.886)
+2019-07-31 09:23:39.111  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-2] o.a.c.c.C.[.[.[/]                        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2019-07-31 09:23:39.111  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-2] o.s.w.s.DispatcherServlet                : Initializing Servlet 'dispatcherServlet'
+2019-07-31 09:23:39.118  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-2] o.s.w.s.DispatcherServlet                : Completed initialization in 7 ms
+2019-07-31 14:57:43.613  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Starting ServiceRegistryMain on DESKTOP-CB3KCFU with PID 2964 (E:\dev\core-java-spring\serviceregistry\target\classes started by Szabo in E:\dev\core-java-spring)
+2019-07-31 14:57:43.618  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : No active profile set, falling back to default profiles: default
+2019-07-31 14:57:43.633  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Starting...
+2019-07-31 14:57:43.959  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Start completed.
+2019-07-31 14:57:44.412  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2019-07-31 14:57:44.517  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 99ms. Found 21 repository interfaces.
+2019-07-31 14:57:44.881  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2019-07-31 14:57:44.886  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'taskScheduler' has been explicitly defined. Therefore, a default ThreadPoolTaskScheduler will be created.
+2019-07-31 14:57:44.889  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2019-07-31 14:57:44.971  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$b2738d7c] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 14:57:44.995  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.integration.config.IntegrationManagementConfiguration' of type [org.springframework.integration.config.IntegrationManagementConfiguration$$EnhancerBySpringCGLIB$$1d6548ab] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 14:57:45.004  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'integrationDisposableAutoCreatedBeans' of type [org.springframework.integration.config.annotation.Disposables] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 14:57:45.205  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat initialized with port(s): 8443 (https)
+2019-07-31 14:57:45.216  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Initializing ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-07-31 14:57:45.232  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardService                  : Starting service [Tomcat]
+2019-07-31 14:57:45.233  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardEngine                   : Starting Servlet engine: [Apache Tomcat/9.0.19]
+2019-07-31 14:57:45.490  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.C.[.[.[/]                        : Initializing Spring embedded WebApplicationContext
+2019-07-31 14:57:45.491  INFO DESKTOP-CB3KCFU --- [           main] o.s.w.c.ContextLoader                    : Root WebApplicationContext: initialization completed in 1833 ms
+2019-07-31 14:57:45.517  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : SRAccessControlFilter is active
+2019-07-31 14:57:46.286  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Starting...
+2019-07-31 14:57:46.303  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Start completed.
+2019-07-31 14:57:46.339  INFO DESKTOP-CB3KCFU --- [           main] o.h.j.i.u.LogHelper                      : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2019-07-31 14:57:46.403  INFO DESKTOP-CB3KCFU --- [           main] o.h.Version                              : HHH000412: Hibernate Core {5.3.10.Final}
+2019-07-31 14:57:46.405  INFO DESKTOP-CB3KCFU --- [           main] o.h.c.Environment                        : HHH000206: hibernate.properties not found
+2019-07-31 14:57:46.540  INFO DESKTOP-CB3KCFU --- [           main] o.h.a.c.Version                          : HCANN000001: Hibernate Commons Annotations {5.0.4.Final}
+2019-07-31 14:57:46.691  INFO DESKTOP-CB3KCFU --- [           main] o.h.d.Dialect                            : HHH000400: Using dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+2019-07-31 14:57:47.973  INFO DESKTOP-CB3KCFU --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2019-07-31 14:57:48.728  WARN DESKTOP-CB3KCFU --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2019-07-31 14:57:48.833  INFO DESKTOP-CB3KCFU --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2019-07-31 14:57:49.225  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Providers reachabilitiy task is not adjusted
+2019-07-31 14:57:49.244  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-07-31 14:57:49.258  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-07-31 14:57:49.258  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-07-31 14:57:49.258  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-07-31 14:57:49.259  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'providersReachabilityTaskScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-07-31 14:57:49.259  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'providersReachabilityTaskScheduler' initialized from an externally provided properties instance.
+2019-07-31 14:57:49.259  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-07-31 14:57:49.260  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@27b9d5b7
+2019-07-31 14:57:49.271  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Services end of validity task is not adjusted
+2019-07-31 14:57:49.276  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-07-31 14:57:49.283  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-07-31 14:57:49.283  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-07-31 14:57:49.283  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-07-31 14:57:49.284  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'servicesEndOfValidityCheckSheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-07-31 14:57:49.284  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'servicesEndOfValidityCheckSheduler' initialized from an externally provided properties instance.
+2019-07-31 14:57:49.284  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-07-31 14:57:49.284  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@608448e7
+2019-07-31 14:57:49.363  INFO DESKTOP-CB3KCFU --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 21d8044c-3226-4c7c-8976-0643403aed90
+
+2019-07-31 14:57:49.453  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : PayloadSizeFilter is active
+2019-07-31 14:57:49.504  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.a.c.ChannelProcessingFilter      : Validated configuration attributes
+2019-07-31 14:57:49.506  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.DefaultSecurityFilterChain       : Creating filter chain: any request, [org.springframework.security.web.access.channel.ChannelProcessingFilter@37a74cf4, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2cee1bcf, org.springframework.security.web.context.SecurityContextPersistenceFilter@218e28d9, org.springframework.security.web.header.HeaderWriterFilter@643947d1, org.springframework.security.web.authentication.logout.LogoutFilter@158f0af4, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@28ec92c9, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@b257072, eu.arrowhead.common.filter.PayloadSizeFilter@ae4a043, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@50c9b080, org.springframework.security.web.session.SessionManagementFilter@349504d5, org.springframework.security.web.access.ExceptionTranslationFilter@2778a7c3]
+2019-07-31 14:57:49.542  INFO DESKTOP-CB3KCFU --- [           main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [public org.springframework.http.ResponseEntity<springfox.documentation.spring.web.json.Json> springfox.documentation.swagger2.web.Swagger2Controller.getDocumentation(java.lang.String,javax.servlet.http.HttpServletRequest)]
+2019-07-31 14:57:49.940  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskExecutor           : Initializing ExecutorService 'applicationTaskExecutor'
+2019-07-31 14:57:50.702  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2019-07-31 14:57:50.807  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2019-07-31 14:57:50.807  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.c.PublishSubscribeChannel          : Channel 'application.errorChannel' has 1 subscriber(s).
+2019-07-31 14:57:50.807  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : started _org.springframework.integration.errorLogger
+2019-07-31 14:57:50.808  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Context refreshed
+2019-07-31 14:57:50.823  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Found 1 custom documentation plugin(s)
+2019-07-31 14:57:50.899  INFO DESKTOP-CB3KCFU --- [           main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2019-07-31 14:57:51.112  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-07-31 14:57:51.112  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler providersReachabilityTaskScheduler_$_NON_CLUSTERED started.
+2019-07-31 14:57:51.112  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-07-31 14:57:51.112  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler servicesEndOfValidityCheckSheduler_$_NON_CLUSTERED started.
+2019-07-31 14:57:51.113  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Core system name: SERVICE_REGISTRY
+2019-07-31 14:57:51.113  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Server mode: SECURED
+2019-07-31 14:57:51.393  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Starting ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-07-31 14:57:51.929  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat started on port(s): 8443 (https) with context path ''
+2019-07-31 14:57:51.931  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Started ServiceRegistryMain in 8.801 seconds (JVM running for 9.969)
+2019-07-31 14:57:55.477  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.a.c.c.C.[.[.[/]                        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2019-07-31 14:57:55.477  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Initializing Servlet 'dispatcherServlet'
+2019-07-31 14:57:55.484  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Completed initialization in 7 ms
+2019-07-31 20:03:44.858  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Starting ServiceRegistryMain on DESKTOP-CB3KCFU with PID 3248 (E:\dev\core-java-spring\serviceregistry\target\classes started by Szabo in E:\dev\core-java-spring)
+2019-07-31 20:03:44.865  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : No active profile set, falling back to default profiles: default
+2019-07-31 20:03:44.882  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Starting...
+2019-07-31 20:03:45.302  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Start completed.
+2019-07-31 20:03:46.309  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2019-07-31 20:03:46.459  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 143ms. Found 21 repository interfaces.
+2019-07-31 20:03:47.124  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2019-07-31 20:03:47.131  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'taskScheduler' has been explicitly defined. Therefore, a default ThreadPoolTaskScheduler will be created.
+2019-07-31 20:03:47.136  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2019-07-31 20:03:47.353  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$2e9fecf] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 20:03:47.432  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.integration.config.IntegrationManagementConfiguration' of type [org.springframework.integration.config.IntegrationManagementConfiguration$$EnhancerBySpringCGLIB$$6ddbb9fe] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 20:03:47.448  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'integrationDisposableAutoCreatedBeans' of type [org.springframework.integration.config.annotation.Disposables] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-07-31 20:03:47.845  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat initialized with port(s): 8443 (https)
+2019-07-31 20:03:47.860  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Initializing ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-07-31 20:03:47.874  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardService                  : Starting service [Tomcat]
+2019-07-31 20:03:47.876  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardEngine                   : Starting Servlet engine: [Apache Tomcat/9.0.19]
+2019-07-31 20:03:48.051  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.C.[.[.[/]                        : Initializing Spring embedded WebApplicationContext
+2019-07-31 20:03:48.052  INFO DESKTOP-CB3KCFU --- [           main] o.s.w.c.ContextLoader                    : Root WebApplicationContext: initialization completed in 3130 ms
+2019-07-31 20:03:48.078  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : SRAccessControlFilter is active
+2019-07-31 20:03:48.863  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Starting...
+2019-07-31 20:03:48.874  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Start completed.
+2019-07-31 20:03:48.911  INFO DESKTOP-CB3KCFU --- [           main] o.h.j.i.u.LogHelper                      : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2019-07-31 20:03:48.983  INFO DESKTOP-CB3KCFU --- [           main] o.h.Version                              : HHH000412: Hibernate Core {5.3.10.Final}
+2019-07-31 20:03:48.985  INFO DESKTOP-CB3KCFU --- [           main] o.h.c.Environment                        : HHH000206: hibernate.properties not found
+2019-07-31 20:03:49.188  INFO DESKTOP-CB3KCFU --- [           main] o.h.a.c.Version                          : HCANN000001: Hibernate Commons Annotations {5.0.4.Final}
+2019-07-31 20:03:49.608  INFO DESKTOP-CB3KCFU --- [           main] o.h.d.Dialect                            : HHH000400: Using dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+2019-07-31 20:03:50.935  INFO DESKTOP-CB3KCFU --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2019-07-31 20:03:51.716  WARN DESKTOP-CB3KCFU --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2019-07-31 20:03:51.879  INFO DESKTOP-CB3KCFU --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2019-07-31 20:03:52.078  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Providers reachabilitiy task is not adjusted
+2019-07-31 20:03:52.096  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-07-31 20:03:52.109  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-07-31 20:03:52.110  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-07-31 20:03:52.110  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-07-31 20:03:52.111  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'providersReachabilityTaskScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-07-31 20:03:52.111  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'providersReachabilityTaskScheduler' initialized from an externally provided properties instance.
+2019-07-31 20:03:52.111  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-07-31 20:03:52.112  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@772db1d8
+2019-07-31 20:03:52.124  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Services end of validity task is not adjusted
+2019-07-31 20:03:52.127  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-07-31 20:03:52.133  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-07-31 20:03:52.133  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-07-31 20:03:52.133  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-07-31 20:03:52.133  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'servicesEndOfValidityCheckSheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-07-31 20:03:52.133  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'servicesEndOfValidityCheckSheduler' initialized from an externally provided properties instance.
+2019-07-31 20:03:52.133  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-07-31 20:03:52.133  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@63019596
+2019-07-31 20:03:52.195  INFO DESKTOP-CB3KCFU --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 47f21167-bce6-4fac-8d37-33a6bbdb9609
+
+2019-07-31 20:03:52.243  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : PayloadSizeFilter is active
+2019-07-31 20:03:52.273  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.a.c.ChannelProcessingFilter      : Validated configuration attributes
+2019-07-31 20:03:52.274  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.DefaultSecurityFilterChain       : Creating filter chain: any request, [org.springframework.security.web.access.channel.ChannelProcessingFilter@138d85f8, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@738da6f2, org.springframework.security.web.context.SecurityContextPersistenceFilter@457547a1, org.springframework.security.web.header.HeaderWriterFilter@6dd8ac29, org.springframework.security.web.authentication.logout.LogoutFilter@c52c362, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@280cb0b4, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2e04dbc1, eu.arrowhead.common.filter.PayloadSizeFilter@1b513ce8, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@17596317, org.springframework.security.web.session.SessionManagementFilter@207e3ffd, org.springframework.security.web.access.ExceptionTranslationFilter@5e81b406]
+2019-07-31 20:03:52.303  INFO DESKTOP-CB3KCFU --- [           main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [public org.springframework.http.ResponseEntity<springfox.documentation.spring.web.json.Json> springfox.documentation.swagger2.web.Swagger2Controller.getDocumentation(java.lang.String,javax.servlet.http.HttpServletRequest)]
+2019-07-31 20:03:52.450  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskExecutor           : Initializing ExecutorService 'applicationTaskExecutor'
+2019-07-31 20:03:52.802  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2019-07-31 20:03:52.884  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2019-07-31 20:03:52.884  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.c.PublishSubscribeChannel          : Channel 'application.errorChannel' has 1 subscriber(s).
+2019-07-31 20:03:52.884  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : started _org.springframework.integration.errorLogger
+2019-07-31 20:03:52.885  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Context refreshed
+2019-07-31 20:03:52.899  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Found 1 custom documentation plugin(s)
+2019-07-31 20:03:52.928  INFO DESKTOP-CB3KCFU --- [           main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2019-07-31 20:03:53.113  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-07-31 20:03:53.114  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler providersReachabilityTaskScheduler_$_NON_CLUSTERED started.
+2019-07-31 20:03:53.114  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-07-31 20:03:53.114  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler servicesEndOfValidityCheckSheduler_$_NON_CLUSTERED started.
+2019-07-31 20:03:53.115  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Core system name: SERVICE_REGISTRY
+2019-07-31 20:03:53.115  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Server mode: SECURED
+2019-07-31 20:03:53.411  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : testcloud2.aitia own cloud is registered in SECURED mode.
+2019-07-31 20:03:53.420  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Starting ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-07-31 20:03:53.960  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat started on port(s): 8443 (https) with context path ''
+2019-07-31 20:03:53.963  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Started ServiceRegistryMain in 9.503 seconds (JVM running for 11.116)
+2019-07-31 20:04:57.042  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.a.c.c.C.[.[.[/]                        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2019-07-31 20:04:57.042  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Initializing Servlet 'dispatcherServlet'
+2019-07-31 20:04:57.051  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Completed initialization in 9 ms
+2019-08-01 10:17:18.096  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Starting ServiceRegistryMain on DESKTOP-CB3KCFU with PID 3324 (E:\dev\core-java-spring\serviceregistry\target\classes started by Szabo in E:\dev\core-java-spring)
+2019-08-01 10:17:18.101  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : No active profile set, falling back to default profiles: default
+2019-08-01 10:17:18.115  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Starting...
+2019-08-01 10:17:18.534  INFO DESKTOP-CB3KCFU --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Start completed.
+2019-08-01 10:17:19.960  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2019-08-01 10:17:20.126  INFO DESKTOP-CB3KCFU --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 157ms. Found 21 repository interfaces.
+2019-08-01 10:17:20.687  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2019-08-01 10:17:20.703  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'taskScheduler' has been explicitly defined. Therefore, a default ThreadPoolTaskScheduler will be created.
+2019-08-01 10:17:20.721  INFO DESKTOP-CB3KCFU --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2019-08-01 10:17:20.830  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$73cc3471] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-08-01 10:17:20.904  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.integration.config.IntegrationManagementConfiguration' of type [org.springframework.integration.config.IntegrationManagementConfiguration$$EnhancerBySpringCGLIB$$debdefa0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-08-01 10:17:20.919  INFO DESKTOP-CB3KCFU --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'integrationDisposableAutoCreatedBeans' of type [org.springframework.integration.config.annotation.Disposables] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-08-01 10:17:21.256  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat initialized with port(s): 8443 (https)
+2019-08-01 10:17:21.301  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Initializing ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-08-01 10:17:21.314  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardService                  : Starting service [Tomcat]
+2019-08-01 10:17:21.314  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.StandardEngine                   : Starting Servlet engine: [Apache Tomcat/9.0.19]
+2019-08-01 10:17:21.530  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.c.C.[.[.[/]                        : Initializing Spring embedded WebApplicationContext
+2019-08-01 10:17:21.531  INFO DESKTOP-CB3KCFU --- [           main] o.s.w.c.ContextLoader                    : Root WebApplicationContext: initialization completed in 3386 ms
+2019-08-01 10:17:21.569  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : SRAccessControlFilter is active
+2019-08-01 10:17:22.804  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Starting...
+2019-08-01 10:17:22.815  INFO DESKTOP-CB3KCFU --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Start completed.
+2019-08-01 10:17:22.849  INFO DESKTOP-CB3KCFU --- [           main] o.h.j.i.u.LogHelper                      : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2019-08-01 10:17:22.917  INFO DESKTOP-CB3KCFU --- [           main] o.h.Version                              : HHH000412: Hibernate Core {5.3.10.Final}
+2019-08-01 10:17:22.920  INFO DESKTOP-CB3KCFU --- [           main] o.h.c.Environment                        : HHH000206: hibernate.properties not found
+2019-08-01 10:17:23.114  INFO DESKTOP-CB3KCFU --- [           main] o.h.a.c.Version                          : HCANN000001: Hibernate Commons Annotations {5.0.4.Final}
+2019-08-01 10:17:23.258  INFO DESKTOP-CB3KCFU --- [           main] o.h.d.Dialect                            : HHH000400: Using dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+2019-08-01 10:17:24.719  INFO DESKTOP-CB3KCFU --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2019-08-01 10:17:27.438  WARN DESKTOP-CB3KCFU --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2019-08-01 10:17:27.605  INFO DESKTOP-CB3KCFU --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2019-08-01 10:17:27.987  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Providers reachabilitiy task is not adjusted
+2019-08-01 10:17:28.012  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-08-01 10:17:28.038  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-08-01 10:17:28.038  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-08-01 10:17:28.040  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-08-01 10:17:28.040  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'providersReachabilityTaskScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-08-01 10:17:28.041  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'providersReachabilityTaskScheduler' initialized from an externally provided properties instance.
+2019-08-01 10:17:28.041  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-08-01 10:17:28.042  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@4d7f3adf
+2019-08-01 10:17:28.056  INFO DESKTOP-CB3KCFU --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Services end of validity task is not adjusted
+2019-08-01 10:17:28.063  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-08-01 10:17:28.069  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-08-01 10:17:28.069  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-08-01 10:17:28.069  INFO DESKTOP-CB3KCFU --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-08-01 10:17:28.070  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'servicesEndOfValidityCheckSheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-08-01 10:17:28.070  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'servicesEndOfValidityCheckSheduler' initialized from an externally provided properties instance.
+2019-08-01 10:17:28.071  INFO DESKTOP-CB3KCFU --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-08-01 10:17:28.071  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@335cd031
+2019-08-01 10:17:28.152  INFO DESKTOP-CB3KCFU --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 7df55450-dcff-47a9-871e-7fd48364a30c
+
+2019-08-01 10:17:28.225  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.f.ArrowheadFilter                  : PayloadSizeFilter is active
+2019-08-01 10:17:28.262  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.a.c.ChannelProcessingFilter      : Validated configuration attributes
+2019-08-01 10:17:28.263  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.w.DefaultSecurityFilterChain       : Creating filter chain: any request, [org.springframework.security.web.access.channel.ChannelProcessingFilter@7e3c5ef1, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2898cd46, org.springframework.security.web.context.SecurityContextPersistenceFilter@17596317, org.springframework.security.web.header.HeaderWriterFilter@347770a9, org.springframework.security.web.authentication.logout.LogoutFilter@5b5f48d5, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@297bbd41, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@16576a6, eu.arrowhead.common.filter.PayloadSizeFilter@7ebf5bf, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5d8cbb32, org.springframework.security.web.session.SessionManagementFilter@738da6f2, org.springframework.security.web.access.ExceptionTranslationFilter@3de507af]
+2019-08-01 10:17:28.290  INFO DESKTOP-CB3KCFU --- [           main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [public org.springframework.http.ResponseEntity<springfox.documentation.spring.web.json.Json> springfox.documentation.swagger2.web.Swagger2Controller.getDocumentation(java.lang.String,javax.servlet.http.HttpServletRequest)]
+2019-08-01 10:17:28.440  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskExecutor           : Initializing ExecutorService 'applicationTaskExecutor'
+2019-08-01 10:17:28.750  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2019-08-01 10:17:28.827  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2019-08-01 10:17:28.827  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.c.PublishSubscribeChannel          : Channel 'application.errorChannel' has 1 subscriber(s).
+2019-08-01 10:17:28.827  INFO DESKTOP-CB3KCFU --- [           main] o.s.i.e.EventDrivenConsumer              : started _org.springframework.integration.errorLogger
+2019-08-01 10:17:28.828  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Context refreshed
+2019-08-01 10:17:28.842  INFO DESKTOP-CB3KCFU --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Found 1 custom documentation plugin(s)
+2019-08-01 10:17:28.872  INFO DESKTOP-CB3KCFU --- [           main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2019-08-01 10:17:29.045  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-08-01 10:17:29.046  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler providersReachabilityTaskScheduler_$_NON_CLUSTERED started.
+2019-08-01 10:17:29.046  INFO DESKTOP-CB3KCFU --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-08-01 10:17:29.046  INFO DESKTOP-CB3KCFU --- [           main] o.q.c.QuartzScheduler                    : Scheduler servicesEndOfValidityCheckSheduler_$_NON_CLUSTERED started.
+2019-08-01 10:17:29.047  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Core system name: SERVICE_REGISTRY
+2019-08-01 10:17:29.047  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : Server mode: SECURED
+2019-08-01 10:17:29.386  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.ApplicationInitListener            : testcloud2.aitia own cloud is registered in SECURED mode.
+2019-08-01 10:17:29.395  INFO DESKTOP-CB3KCFU --- [           main] o.a.c.h.Http11NioProtocol                : Starting ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-08-01 10:17:29.986  INFO DESKTOP-CB3KCFU --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat started on port(s): 8443 (https) with context path ''
+2019-08-01 10:17:29.988  INFO DESKTOP-CB3KCFU --- [           main] e.a.c.s.ServiceRegistryMain              : Started ServiceRegistryMain in 12.448 seconds (JVM running for 13.83)
+2019-08-01 10:17:32.720  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.a.c.c.C.[.[.[/]                        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2019-08-01 10:17:32.720  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Initializing Servlet 'dispatcherServlet'
+2019-08-01 10:17:32.729  INFO DESKTOP-CB3KCFU --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Completed initialization in 9 ms
+2019-08-01 13:01:48.632  WARN DESKTOP-CB3KCFU --- [l-1 housekeeper] c.z.h.p.HikariPool                       : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=6m26s137ms484µs439ns).
+2019-08-01 13:01:53.003  WARN DESKTOP-CB3KCFU --- [l-2 housekeeper] c.z.h.p.HikariPool                       : HikariPool-2 - Thread starvation or clock leap detected (housekeeper delta=6m26s137ms486µs250ns).
+2019-08-01 17:49:49.749  WARN DESKTOP-CB3KCFU --- [l-1 housekeeper] c.z.h.p.HikariPool                       : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h28m30s447ms546µs431ns).
+2019-08-01 17:49:53.957  WARN DESKTOP-CB3KCFU --- [l-2 housekeeper] c.z.h.p.HikariPool                       : HikariPool-2 - Thread starvation or clock leap detected (housekeeper delta=1h28m30s447ms527µs716ns).

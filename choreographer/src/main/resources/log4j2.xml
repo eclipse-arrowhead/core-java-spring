@@ -29,7 +29,7 @@
       </JDBC>
     </Appenders>
     <Loggers>
-    	<AsyncLogger name="eu.arrowhead" level="info" additivity="true">
+    	<AsyncLogger name="eu.arrowhead" level="debug" additivity="true">
             <AppenderRef ref="MySQLDatabase" />
     	</AsyncLogger>
     
