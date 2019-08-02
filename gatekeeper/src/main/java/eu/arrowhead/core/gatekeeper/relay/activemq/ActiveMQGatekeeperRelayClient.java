@@ -22,8 +22,8 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.DecryptedMessageDTO;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
-import eu.arrowhead.common.dto.UnsecuredMessageDTO;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 
@@ -162,7 +162,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private GeneralAdvertisementMessageDTO decryptGeneralAdvertisementMessage(final GeneralAdvertisementMessageDTO originalDTO) {
 		logger.debug("decryptGeneralAdvertisementMessage started...");
 		
-		final UnsecuredMessageDTO decodedSessionId = cryptographer.decodeMessage(originalDTO.getSessionId(), originalDTO.getSenderPublicKey());
+		final DecryptedMessageDTO decodedSessionId = cryptographer.decodeMessage(originalDTO.getSessionId(), originalDTO.getSenderPublicKey());
 		originalDTO.setSessionId(decodedSessionId.getSessionId());
 		
 		return originalDTO;

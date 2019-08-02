@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.UnsecuredMessageDTO;
+import eu.arrowhead.common.dto.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 
@@ -132,14 +132,14 @@ public class RelayCryptographer {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public UnsecuredMessageDTO decodeMessage(final String encryptedMessage, final String senderPublicKey) {
+	public DecryptedMessageDTO decodeMessage(final String encryptedMessage, final String senderPublicKey) {
 		logger.debug("decodeMessage started...");
 
 		return decodeMessage(encryptedMessage, Utilities.getPublicKeyFromBase64EncodedString(senderPublicKey));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public UnsecuredMessageDTO decodeMessage(final String encryptedMessage, final PublicKey senderPublicKey) {
+	public DecryptedMessageDTO decodeMessage(final String encryptedMessage, final PublicKey senderPublicKey) {
 		logger.debug("decodeMessage started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(encryptedMessage), "Encrypted message is null or blank.");
@@ -237,11 +237,11 @@ public class RelayCryptographer {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private UnsecuredMessageDTO convertToUnsecuredMessage(final JwtClaims claims) {
+	private DecryptedMessageDTO convertToUnsecuredMessage(final JwtClaims claims) {
 		logger.debug("convertToUnsecuredMessage started...");
 		
 		try {
-			final UnsecuredMessageDTO result = new UnsecuredMessageDTO();
+			final DecryptedMessageDTO result = new DecryptedMessageDTO();
 			
 			if (claims.hasClaim(CommonConstants.JWT_CLAIM_MESSAGE_TYPE)) {
 				result.setMessageType(claims.getStringClaimValue(CommonConstants.JWT_CLAIM_MESSAGE_TYPE));
