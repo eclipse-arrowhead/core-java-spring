@@ -11,8 +11,8 @@ public class RelayClientFactory {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey) {
-		return new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey);
+	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final long timeout) {
+		return new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout);
 	}
 
 	//=================================================================================================

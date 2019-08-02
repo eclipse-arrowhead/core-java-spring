@@ -58,6 +58,9 @@ public class CommonConstants {
 	public static final String JWS_SIGN_ALG = AlgorithmIdentifiers.RSA_USING_SHA512;
 	
 	public static final String RELAY_MESSAGE_TYPE_RAW = "raw";
+	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
+	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
+	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
 	
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
