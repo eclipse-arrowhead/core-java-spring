@@ -29,8 +29,10 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.DecryptedMessageDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.relay.RelayCryptographer;
@@ -185,7 +187,6 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	//TODO: rewrite
 	@Override
 	public GeneralAdvertisementResult publishGeneralAdvertisement(final Session session, final String recipientCN, final String recipientPublicKey, final String senderCN) throws JMSException {
 		logger.debug("publishGeneralAdvertisement started...");
@@ -268,7 +269,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private Object extractPayload(final DecryptedMessageDTO decryptedMessageDTO) {
 		logger.debug("extractPayload started...");
 		
-		final Class<?> clazz = getMessageDTOClass(decryptedMessageDTO.getMessageType());
+		final Class<?> clazz = getMessageDTOClass(decryptedMessageDTO.getMessageType(), true);
 		try {
 			return mapper.readValue(decryptedMessageDTO.getPayload(), clazz);
 		} catch (final IOException ex) {
@@ -279,14 +280,14 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Class<?> getMessageDTOClass(final String messageType) {
+	private Class<?> getMessageDTOClass(final String messageType, final boolean request) {
 		logger.debug("getMessageDTOClass started...");
 		
 		switch (messageType) {
 		case CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
-			return GSDPollRequestDTO.class;
+			return request ? GSDPollRequestDTO.class : GSDPollResponseDTO.class;
 		case CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
-			return ICNProposalRequestDTO.class;
+			return request ? ICNProposalRequestDTO.class : ICNProposalResponseDTO.class;
 		default:
 			throw new ArrowheadException("Invalid message type: " + messageType);
 		}
