@@ -309,7 +309,7 @@ public class DTOConverter {
 		final List<CloudWithRelaysResponseDTO> gatekeeperRelayListDTO = new ArrayList<>(entries.getNumberOfElements());
 		for (final Cloud cloud : entries) {
 			Assert.notNull(cloud.getGatekeeperRelays(), "CloudGatekeeperRelay set is null");
-			//Assert.notNull(gatewayRelays, "CloudGatewayRelay set is null"); //TODO
+			Assert.notNull(cloud.getGatewayRelays(), "CloudGatewayRelay set is null");
 			
 			final List<Relay> gatekeeperRelays = new ArrayList<>();
 			final List<Relay> gatewayRelays = new ArrayList<>();
@@ -318,9 +318,9 @@ public class DTOConverter {
 				gatekeeperRelays.add(cloudRelay.getRelay());
 			}
 			
-//			for (final CloudGatewayRelay cloudRelay : cloud.getGatewayRelays()) {
-//				gatewayRelays.add(cloudRelay.getRelay());
-//			}
+			for (final CloudGatewayRelay cloudRelay : cloud.getGatewayRelays()) {
+				gatewayRelays.add(cloudRelay.getRelay());
+			}
 			
 			gatekeeperRelayListDTO.add(convertCloudToCloudWithRelaysResponseDTO(cloud, gatekeeperRelays, gatewayRelays));
 		}
@@ -331,7 +331,7 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	public static CloudWithRelaysResponseDTO convertCloudToCloudWithRelaysResponseDTO(final Cloud cloud, final Iterable<Relay> gatekeeperRelays, final Iterable<Relay> gatewayRelays) {
 		Assert.notNull(gatekeeperRelays, "Gatekeeper relays set is null");
-		//Assert.notNull(gatewayRelays, "Gateway relays set is null"); //TODO
+		Assert.notNull(gatewayRelays, "Gateway relays set is null");
 		
 		final CloudResponseDTO cloudResponseDTO = convertCloudToCloudResponseDTO(cloud);
 		
@@ -341,9 +341,9 @@ public class DTOConverter {
 		}
 		
 		final List<RelayResponseDTO> gatewayRelayListDTO = new ArrayList<>();
-//		for (Relay gatewayRelay : gatewayRelays) {
-//			gatewayRelayListDTO.add(convertRelayToRelayResponseDTO(gatewayRelay));
-//		}
+		for (Relay gatewayRelay : gatewayRelays) {
+			gatewayRelayListDTO.add(convertRelayToRelayResponseDTO(gatewayRelay));
+		}
 		
 		return new CloudWithRelaysResponseDTO(cloudResponseDTO.getId(), cloudResponseDTO.getOperator(), cloudResponseDTO.getName(), cloudResponseDTO.getSecure(),
 											  cloudResponseDTO.getNeighbor(), cloudResponseDTO.getOwnCloud(), cloudResponseDTO.getAuthenticationInfo(),

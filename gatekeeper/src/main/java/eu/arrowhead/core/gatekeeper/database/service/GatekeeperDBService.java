@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.cloud.CloudServiceConnectorsAutoConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +30,7 @@ import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
@@ -61,6 +63,16 @@ public class GatekeeperDBService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public CloudWithRelaysListResponseDTO registerBulkCloudsWithRelaysResponse(final List<CloudRequestDTO> dtoList) {
+		logger.debug("registerBulkCloudsWithRelaysResponse started...");
+		
+		final List<Cloud> entries = registerBulkCloudsWithRelays(dtoList);
+		return DTOConverter.convertCloudToCloudWithRelaysListResponseDTO(new PageImpl<Cloud>(entries));
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public List<Cloud> registerBulkCloudsWithRelays(final List<CloudRequestDTO> dtoList) {
 		logger.debug("registerBulkCloudsWithRelays started...");
 		
