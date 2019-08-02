@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.UnsecuredMessageDTO;
+import eu.arrowhead.common.dto.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
 
@@ -103,7 +103,7 @@ public class RelayCryptographerDecodeTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void decodeMessage2EverythingOKWithDTO() throws JsonParseException, JsonMappingException, IOException {
-		final UnsecuredMessageDTO result = testingObject.decodeMessage(ENCRYPTED_MESSAGE, senderPublicKey);
+		final DecryptedMessageDTO result = testingObject.decodeMessage(ENCRYPTED_MESSAGE, senderPublicKey);
 		final ObjectMapper mapper = new ObjectMapper();
 		final ErrorMessageDTO payload = mapper.readValue(result.getPayload(), ErrorMessageDTO.class);
 		Assert.assertEquals("gsd_poll", result.getMessageType());
@@ -117,7 +117,7 @@ public class RelayCryptographerDecodeTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void decodeMessage2EverythingOKWithByteArray() throws JsonParseException, JsonMappingException, IOException {
-		final UnsecuredMessageDTO result = testingObject.decodeMessage(ENCRYPTED_MESSAGE_BYTES, senderPublicKey);
+		final DecryptedMessageDTO result = testingObject.decodeMessage(ENCRYPTED_MESSAGE_BYTES, senderPublicKey);
 		Assert.assertEquals(CommonConstants.RELAY_MESSAGE_TYPE_RAW, result.getMessageType());
 		Assert.assertEquals("AQIDBAU=", result.getPayload());
 	}

@@ -2,7 +2,7 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
-public class UnsecuredMessageDTO implements Serializable {
+public class DecryptedMessageDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
