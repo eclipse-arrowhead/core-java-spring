@@ -126,6 +126,49 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public List<Cloud> assignRelaysToCloud(final long id, final List<Long> gatekeeperRelayIds, final List<Long> gatewayRelayIds) {
+		logger.debug("assignRelaysToCloud started...");
+		
+		try {
+			
+			final Optional<Cloud> cloudOpt = cloudRepository.findById(id);
+			if(cloudOpt.isEmpty()) {
+				throw new InvalidParameterException("Cloud with id '" + id +"' not exists");
+			}
+			final Cloud cloud = cloudOpt.get();
+			final Set<Long> extantGatkeeperRelayIds = collectGatkeeperRelayIdsFromCloud(cloud);
+			final Set<Long> extantGatewayRelayIds = collectGatewayRelayIdsFromCloud(cloud);
+			
+			final Set<Long> normalizedGatekeeperRelayIds = new HashSet<>();
+			for (final Long relayId : gatekeeperRelayIds) {
+				if (relayId != null && relayId > 1 && !extantGatkeeperRelayIds.contains(relayId) ) {					
+					normalizedGatekeeperRelayIds.add(relayId);
+				}
+			}
+			
+			final Set<Long> normalizedGatewayRelayIds = new HashSet<>();
+			for (final Long relayId : gatewayRelayIds) {
+				if (relayId != null && relayId > 1 && !extantGatewayRelayIds.contains(relayId)) {
+					normalizedGatewayRelayIds.add(relayId);
+				}
+			}
+			
+			final List<Relay> gatekeeperRelays = collectAndValidateGatekeeperRelays(normalizedGatekeeperRelayIds);
+			final List<Relay> gatewayRelays = collectAndValidateGatewayRelays(normalizedGatewayRelayIds);
+			
+			final Set<Long> savedCloudIds = saveCloudAndRelayConnections(cloud, gatekeeperRelays, gatewayRelays);
+			return cloudRepository.findAllById(savedCloudIds);
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public RelayResponseListDTO getRelaysResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getRelaysResponse started...");
 		
@@ -443,11 +486,11 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<Relay> collectAndValidateGatekeeperRelays(final List<Long> gatekeeperRelayIds) {
+	private List<Relay> collectAndValidateGatekeeperRelays(final Iterable<Long> gatekeeperRelayIds) {
 		logger.debug("collectAndValidateGatekeeperRelays started...");
 		
 		List<Relay> gatekeeperRelays = new ArrayList<>();
-		if (gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {
+		if (gatekeeperRelayIds != null) {
 			gatekeeperRelays = relayRepository.findAllById(gatekeeperRelayIds);		
 			
 			for (final Relay relay : gatekeeperRelays) {
@@ -465,11 +508,11 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<Relay> collectAndValidateGatewayRelays(final List<Long> gatekewayRelayIds) {
+	private List<Relay> collectAndValidateGatewayRelays(final Iterable<Long> gatekewayRelayIds) {
 		logger.debug("collectAndValidateGatewayRelays started...");
 		
 		List<Relay> gatewayRelays = new ArrayList<>();
-		if (gatekewayRelayIds != null && !gatekewayRelayIds.isEmpty()) {
+		if (gatekewayRelayIds != null) {
 			gatewayRelays = relayRepository.findAllById(gatekewayRelayIds);
 			
 			for (final Relay relay : gatewayRelays) {
@@ -484,7 +527,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Set<Long> saveCloudAndRelayConnections(final List<Cloud> savedClouds, final Map<String, List<Relay>> gatekeeperRelaysForClouds, final Map<String, List<Relay>> gatewayRelaysForClouds) {
+	private Set<Long> saveCloudAndRelayConnections(final List<Cloud> savedClouds, final Map<String, List<Relay>> gatekeeperRelaysForClouds, final Map<String, List<Relay>> gatewayRelaysForClouds) {
 		logger.debug("saveCloudAndRelayConnections started...");
 
 		final List<CloudGatekeeperRelay> cloudGatekeeperRelaysToSave = new ArrayList<>();
@@ -518,5 +561,35 @@ public class GatekeeperDBService {
 		
 		return savedCloudIds;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Set<Long> saveCloudAndRelayConnections (final Cloud cloud, final List<Relay> gatekeeperRelaysForClouds, final List<Relay> gatewayRelaysForClouds) {
+		return saveCloudAndRelayConnections(List.of(cloud), 
+											Map.of(cloud.getOperator() + cloud.getName(), gatekeeperRelaysForClouds),
+											Map.of(cloud.getOperator() + cloud.getName(), gatewayRelaysForClouds));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Set<Long> collectGatkeeperRelayIdsFromCloud(final Cloud cloud) {
+		logger.debug("collectGatkeeperRelayIdsFromCloud started...");
 		
+		final Set<Long> idSet = new HashSet<>();
+		for (final CloudGatekeeperRelay conn : cloud.getGatekeeperRelays()) {
+			idSet.add(conn.getRelay().getId());
+		}
+		
+		return idSet;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Set<Long> collectGatewayRelayIdsFromCloud(final Cloud cloud) {
+		logger.debug("collectGatewayRelayIdsFromCloud started...");
+		
+		final Set<Long> idSet = new HashSet<>();
+		for (final CloudGatewayRelay conn : cloud.getGatewayRelays()) {
+			idSet.add(conn.getRelay().getId());
+		}
+		
+		return idSet;	
+	}
 }
