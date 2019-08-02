@@ -305,6 +305,10 @@ public class GatekeeperController {
 			throw new BadPayloadException("CloudRequestDTO is empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
+		if (dto.getOwnCloud() != null && dto.getOwnCloud()) {
+			throw new BadPayloadException("Register own cloud is not allowed as it is managed automatically by the " + CommonConstants.CORE_SYSTEM_SERVICE_REGISTRY + " core system", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		final boolean isOperatorInvalid = Utilities.isEmpty(dto.getOperator());
 		final boolean isNameInvalid = Utilities.isEmpty(dto.getName());
 		

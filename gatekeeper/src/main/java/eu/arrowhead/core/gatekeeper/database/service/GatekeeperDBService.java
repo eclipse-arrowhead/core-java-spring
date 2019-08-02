@@ -91,14 +91,19 @@ public class GatekeeperDBService {
 					throw new InvalidParameterException("List of CloudRequestDTO contains null element");
 				}				
 
-				final String cloudUniqueConstraint = dto.getOperator() + dto.getName();
-				
+
 				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+				
+				final String operator = dto.getOperator().toLowerCase().trim();
+				final String name = dto.getName().toLowerCase().trim();
+				
+				final String cloudUniqueConstraint = operator + name;
+				
 				if (cloudsToSave.containsKey(cloudUniqueConstraint)) {
 					throw new InvalidParameterException("List of CloudRequestDTO contains uinque constraint violation: " + dto.getOperator() + " operator with " + dto.getName() + " name");
 				}
 				
-				cloudsToSave.put(cloudUniqueConstraint, new Cloud(dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo()));
+				cloudsToSave.put(cloudUniqueConstraint, new Cloud(operator, name, dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo()));
 				
 				gatekeeperRelaysForClouds.put(cloudUniqueConstraint, collectAndValidateGatekeeperRelays(dto.getGatekeeperRelayIds()));
 				gatewayRelaysForClouds.put(cloudUniqueConstraint, collectAndValidateGatewayRelays(dto.getGatewayRelayIds()));				
@@ -241,11 +246,15 @@ public class GatekeeperDBService {
 					throw new InvalidParameterException("List of RelayRequestDTO contains null element");
 				}				
 				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), dto.getType());
-				if (relaysToSave.containsKey(dto.getAddress() + dto.getPort())) {
-					throw new InvalidParameterException("List of RelayRequestDTO contains uinque constraint violation: " + dto.getAddress() + " address with " + dto.getPort() + " port");
+				
+				final String address = dto.getAddress().toLowerCase().trim();
+				final String uniqueConstraint = address  + dto.getPort();
+				
+				if (relaysToSave.containsKey(uniqueConstraint)) {
+					throw new InvalidParameterException("List of RelayRequestDTO contains uinque constraint violation: " + address + " address with " + dto.getPort() + " port");
 				}
 				
-				relaysToSave.put(dto.getAddress() + dto.getPort(), new Relay(dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType())));
+				relaysToSave.put(uniqueConstraint, new Relay(address, dto.getPort(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType())));
 			}
 			
 			final List<Relay> savedRelays = relayRepository.saveAll(relaysToSave.values());
@@ -341,6 +350,10 @@ public class GatekeeperDBService {
 		secure = secure == null ? false : secure;
 		neighbor = neighbor == null ? false : neighbor;
 		ownCloud = ownCloud == null ? false : ownCloud;
+		
+		if (ownCloud) {
+			throw new InvalidParameterException("Register own cloud is not allowed as it is managed automatically by the " + CommonConstants.CORE_SYSTEM_SERVICE_REGISTRY + " core system");
+		}
 		
 		if (secure && Utilities.isEmpty(authenticationInfo)) {
 			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
