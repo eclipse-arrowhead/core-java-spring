@@ -22,8 +22,10 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
+import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
+import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
@@ -50,19 +52,23 @@ public class GatekeeperDBService {
 	@Autowired
 	private CloudGatekeeperRelayRepository cloudGatekeeperRelayRepository;
 	
+	@Autowired
+	private CloudGatewayRelayRepository cloudGatewayRelayRepository;
+	
 	private final Logger logger = LogManager.getLogger(GatekeeperDBService.class);
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public List<Cloud> registerBulkCloudsWithGatekeeperRelays(final List<CloudRequestDTO> dtoList) {
-		logger.debug("registerBulkCloudsWithGatekeeperRelays started...");
+	public List<Cloud> registerBulkCloudsWithRelays(final List<CloudRequestDTO> dtoList) {
+		logger.debug("registerBulkCloudsWithRelays started...");
 		
 		try {
 			
 			final Map<String, Cloud> cloudsToSave = new HashMap<>();
-			final Map<String, List<Relay>> relaysForClouds = new HashMap<>();
+			final Map<String, List<Relay>> gatekeeperRelaysForClouds = new HashMap<>();
+			final Map<String, List<Relay>> gatewayRelaysForClouds = new HashMap<>();
 			
 			if (dtoList == null || dtoList.isEmpty()) {
 				throw new InvalidParameterException("List of CloudRequestDTO is null or empty");
@@ -73,45 +79,26 @@ public class GatekeeperDBService {
 				if (dto == null) {
 					throw new InvalidParameterException("List of CloudRequestDTO contains null element");
 				}				
-				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo(), dto.getRelayId());
-				if (cloudsToSave.containsKey(dto.getOperator() + dto.getName())) {
+
+				final String cloudUniqueConstraint = dto.getOperator() + dto.getName();
+				
+				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+				if (cloudsToSave.containsKey(cloudUniqueConstraint)) {
 					throw new InvalidParameterException("List of CloudRequestDTO contains uinque constraint violation: " + dto.getOperator() + " operator with " + dto.getName() + " name");
 				}
 				
-				cloudsToSave.put(dto.getOperator() + dto.getName(), new Cloud(dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo()));
+				cloudsToSave.put(cloudUniqueConstraint, new Cloud(dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo()));
 				
-				final List<Relay> relays = relayRepository.findAllById(dto.getRelayId());
-				for (final Relay relay : relays) {
-					if (relay.getExclusive()) {
-						throw new InvalidParameterException("Relay with gatekeeper purpose couldn't be exclusive");
-					}
-					if (relay.getType().compareTo(RelayType.GATEKEEPER_RELAY) != 0 && relay.getType().compareTo(RelayType.GENERAL_RELAY) != 0) {
-						throw new InvalidParameterException("Relay with gatekeeper purpose could be only " + RelayType.GATEKEEPER_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
-					}
-				}
-				
-				relaysForClouds.put(dto.getOperator() + dto.getName(), relays);
-				
+				gatekeeperRelaysForClouds.put(cloudUniqueConstraint, collectAndValidateGatekeeperRelays(dto.getGatekeeperRelayIds()));
+				gatewayRelaysForClouds.put(cloudUniqueConstraint, collectAndValidateGatewayRelays(dto.getGatewayRelayIds()));				
 			}
 			
 			final List<Cloud> savedClouds = cloudRepository.saveAll(cloudsToSave.values());
 			cloudRepository.flush();
 			
-			final List<CloudGatekeeperRelay> cloudGatekeeperRelaysToSave = new ArrayList<>();
-			final Set<Long> savedCloudIds = new HashSet<>();
-			for (final Cloud cloud : savedClouds) {
-				final List<Relay> relays = relaysForClouds.get(cloud.getOperator() + cloud.getName());
-				
-				for (final Relay relay : relays) {
-					cloudGatekeeperRelaysToSave.add(new CloudGatekeeperRelay(cloud, relay));
-				}
-				
-				savedCloudIds.add(cloud.getId());
-			}			
-			cloudGatekeeperRelayRepository.saveAll(cloudGatekeeperRelaysToSave);
-			cloudGatekeeperRelayRepository.flush();
-			
-			return cloudRepository.findAllById(savedCloudIds);
+			final Set<Long> savedCloudIds = saveCloudAndRelayConnections(savedClouds, gatekeeperRelaysForClouds, gatewayRelaysForClouds);
+			//TODO: start to listen gatekeeper relay topics
+			return cloudRepository.findAllById(savedCloudIds);			
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -325,7 +312,8 @@ public class GatekeeperDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateCloudParameters(final boolean withUniqueConstarintCheck, String operator, String name, Boolean secure, Boolean neighbor, Boolean ownCloud, final String authenticationInfo, final List<Long> relayId) {
+	private void validateCloudParameters(final boolean withUniqueConstarintCheck, String operator, String name, Boolean secure, Boolean neighbor, Boolean ownCloud, final String authenticationInfo,
+										 final List<Long> gatekeeperRelayIds, final List<Long> gatewayRealyIds) {
 		logger.debug("validateCloudParameters started...");
 		
 		if (Utilities.isEmpty(operator)) {
@@ -350,12 +338,20 @@ public class GatekeeperDBService {
 			checkUniqueConstarintOfCloudTable(operator, name);
 		}
 		
-		if (relayId == null || relayId.isEmpty()) {
-			throw new InvalidParameterException("RelayId list is empty");
+		if (gatekeeperRelayIds == null || gatekeeperRelayIds.isEmpty()) {
+			throw new InvalidParameterException("GatekeeperRelayIds list is empty");
 		} else {
-			for (final Long id : relayId) {
+			for (final Long id : gatekeeperRelayIds) {
 				if (id == null || id < 1 || !relayRepository.existsById(id)) {
-					throw new InvalidParameterException("Relay with id '" + id  + "' not exists");
+					throw new InvalidParameterException("GatekeeperRelay with id '" + id  + "' not exists");
+				}
+			}
+		}
+		
+		if (gatewayRealyIds != null && !gatewayRealyIds.isEmpty()) {		
+			for (final Long id : gatewayRealyIds) {
+				if (id == null || id < 1 || !relayRepository.existsById(id)) {
+					throw new InvalidParameterException("GatekewayRelay with id '" + id  + "' not exists");
 				}
 			}
 		}
@@ -412,4 +408,76 @@ public class GatekeeperDBService {
 		logger.debug("isPortOutOfValidRange started...");
 		return port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<Relay> collectAndValidateGatekeeperRelays(final List<Long> gatekeeperRelayIds) {
+		logger.debug("collectAndValidateGatekeeperRelays started...");
+		
+		List<Relay> gatekeeperRelays = new ArrayList<>();
+		if (gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {
+			gatekeeperRelays = relayRepository.findAllById(gatekeeperRelayIds);		
+			
+			for (final Relay relay : gatekeeperRelays) {
+				if (relay.getExclusive()) {
+					throw new InvalidParameterException("Relay with gatekeeper purpose couldn't be exclusive");
+				}
+				if (relay.getType().compareTo(RelayType.GATEKEEPER_RELAY) != 0 && relay.getType().compareTo(RelayType.GENERAL_RELAY) != 0) {
+					throw new InvalidParameterException("Relay with gatekeeper purpose could be only " + RelayType.GATEKEEPER_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
+				}
+			}			
+		}
+		
+		return gatekeeperRelays;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<Relay> collectAndValidateGatewayRelays(final List<Long> gatekewayRelayIds) {
+		logger.debug("collectAndValidateGatewayRelays started...");
+		
+		List<Relay> gatewayRelays = new ArrayList<>();
+		if (gatekewayRelayIds != null && !gatekewayRelayIds.isEmpty()) {
+			gatewayRelays = relayRepository.findAllById(gatekewayRelayIds);
+			
+			for (final Relay relay : gatewayRelays) {
+				if (relay.getType().compareTo(RelayType.GATEWAY_RELAY) != 0 && relay.getType().compareTo(RelayType.GENERAL_RELAY) != 0) {
+					throw new InvalidParameterException("Relay with gateway purpose could be only " + RelayType.GATEWAY_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
+				}
+			}
+		}
+		
+		return gatewayRelays;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Set<Long> saveCloudAndRelayConnections(final List<Cloud> savedClouds, final Map<String, List<Relay>> gatekeeperRelaysForClouds, final Map<String, List<Relay>> gatewayRelaysForClouds) {
+		logger.debug("saveCloudAndRelayConnections started...");
+
+		final List<CloudGatekeeperRelay> cloudGatekeeperRelaysToSave = new ArrayList<>();
+		final List<CloudGatewayRelay> cloudGatewayRelaysToSave = new ArrayList<>();
+		final Set<Long> savedCloudIds = new HashSet<>();
+		
+		for (final Cloud cloud : savedClouds) {
+			final String cloudUniqueConstraint = cloud.getOperator() + cloud.getName();
+			
+			final List<Relay> gatekeeperRelays = gatekeeperRelaysForClouds.get(cloudUniqueConstraint);				
+			for (final Relay relay : gatekeeperRelays) {
+				cloudGatekeeperRelaysToSave.add(new CloudGatekeeperRelay(cloud, relay));
+			}
+			
+			final List<Relay> gatewayRelays = gatewayRelaysForClouds.get(cloudUniqueConstraint);
+			for (final Relay relay : gatewayRelays) {
+				cloudGatewayRelaysToSave.add(new CloudGatewayRelay(cloud, relay));
+			}
+			
+			savedCloudIds.add(cloud.getId());
+		}			
+		cloudGatekeeperRelayRepository.saveAll(cloudGatekeeperRelaysToSave);
+		cloudGatekeeperRelayRepository.flush();
+		
+		cloudGatewayRelayRepository.saveAll(cloudGatewayRelaysToSave);
+		cloudGatewayRelayRepository.flush();
+		
+		return savedCloudIds;
+	}
+		
 }
