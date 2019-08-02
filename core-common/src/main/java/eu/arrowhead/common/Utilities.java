@@ -323,9 +323,9 @@ public class Utilities {
 			case "GATEKEEPER_RELAY":
 				return RelayType.GATEKEEPER_RELAY;
 			case "GATEWAY_RELAY":
-				return RelayType.GATEKEEPER_RELAY;
+				return RelayType.GATEWAY_RELAY;
 			case "GENERAL_RELAY":
-				return RelayType.GATEKEEPER_RELAY;
+				return RelayType.GENERAL_RELAY;
 			default:
 				return null;
 		}

@@ -107,6 +107,7 @@ public class GatekeeperDBService {
 			final List<Cloud> savedClouds = cloudRepository.saveAll(cloudsToSave.values());
 			cloudRepository.flush();
 			
+			
 			final Set<Long> savedCloudIds = saveCloudAndRelayConnections(savedClouds, gatekeeperRelaysForClouds, gatewayRelaysForClouds);
 			//TODO: start to listen gatekeeper relay topics
 			return cloudRepository.findAllById(savedCloudIds);			
@@ -394,10 +395,18 @@ public class GatekeeperDBService {
 		
 		secure = secure == null ? false : secure;
 		
-		exclusive = exclusive == null ? false : secure;
+		exclusive = exclusive == null ? false : exclusive;
 		
 		if (Utilities.convertStringToRelayType(type) == null) {
 			throw new InvalidParameterException(type + " type is invalid");
+		}
+		
+		if (exclusive && type.equalsIgnoreCase(RelayType.GATEKEEPER_RELAY.toString())) {
+			throw new InvalidParameterException("GATEKEEPER_RELAY type cloudn't be exclusive");
+		}
+		
+		if (exclusive && type.equalsIgnoreCase(RelayType.GENERAL_RELAY.toString())) {
+			throw new InvalidParameterException("GENERAL_RELAY type cloudn't be exclusive");
 		}
 		
 		if (withUniqueConstarintCheck) {
@@ -432,7 +441,8 @@ public class GatekeeperDBService {
 				if (relay.getExclusive()) {
 					throw new InvalidParameterException("Relay with gatekeeper purpose couldn't be exclusive");
 				}
-				if (relay.getType().compareTo(RelayType.GATEKEEPER_RELAY) != 0 && relay.getType().compareTo(RelayType.GENERAL_RELAY) != 0) {
+				if (!relay.getType().toString().equalsIgnoreCase(RelayType.GATEKEEPER_RELAY.toString()) 
+						&& !relay.getType().toString().equalsIgnoreCase(RelayType.GENERAL_RELAY.toString())) {
 					throw new InvalidParameterException("Relay with gatekeeper purpose could be only " + RelayType.GATEKEEPER_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
 				}
 			}			
@@ -450,7 +460,8 @@ public class GatekeeperDBService {
 			gatewayRelays = relayRepository.findAllById(gatekewayRelayIds);
 			
 			for (final Relay relay : gatewayRelays) {
-				if (relay.getType().compareTo(RelayType.GATEWAY_RELAY) != 0 && relay.getType().compareTo(RelayType.GENERAL_RELAY) != 0) {
+				if (!relay.getType().toString().equalsIgnoreCase(RelayType.GATEWAY_RELAY.toString()) 
+						&& !relay.getType().toString().equalsIgnoreCase(RelayType.GENERAL_RELAY.toString())) {
 					throw new InvalidParameterException("Relay with gateway purpose could be only " + RelayType.GATEWAY_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
 				}
 			}
@@ -487,6 +498,10 @@ public class GatekeeperDBService {
 		
 		cloudGatewayRelayRepository.saveAll(cloudGatewayRelaysToSave);
 		cloudGatewayRelayRepository.flush();
+		
+		for (final Cloud cloud : savedClouds) {
+			cloudRepository.refresh(cloud);
+		}
 		
 		return savedCloudIds;
 	}

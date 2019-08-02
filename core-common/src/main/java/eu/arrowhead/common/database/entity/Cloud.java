@@ -64,7 +64,7 @@ public class Cloud {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<CloudGatekeeperRelay> gatekeeperRelays = new HashSet<>();
 	
-	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany (mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<CloudGatewayRelay> gatewayRelays = new HashSet<>();
 	

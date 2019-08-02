@@ -29,6 +29,7 @@ import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
 import eu.arrowhead.common.dto.RelayResponseListDTO;
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import io.swagger.annotations.ApiOperation;
@@ -280,11 +281,16 @@ public class GatekeeperController {
 		final boolean isAddressInvalid = Utilities.isEmpty(dto.getAddress());
 		final boolean isPortInvalid = dto.getPort() == null || isPortOutOfValidRange(dto.getPort());
 		final boolean isTypeInvalid = Utilities.convertStringToRelayType(dto.getType()) == null;
-		if (isAddressInvalid || isPortInvalid || isTypeInvalid) {
+		final boolean isGatekeeperRelayAndExclusive = dto.isExclusive() && dto.getType().equalsIgnoreCase(RelayType.GATEKEEPER_RELAY.toString());
+		final boolean isGeneralRelayAndExclusive = dto.isExclusive() && dto.getType().equalsIgnoreCase(RelayType.GENERAL_RELAY.toString());
+		
+		if (isAddressInvalid || isPortInvalid || isTypeInvalid || isGatekeeperRelayAndExclusive || isGeneralRelayAndExclusive) {
 			String exceptionMsg = "RelayRequestDTO is invalid due to the following reasons:";
 			exceptionMsg = isAddressInvalid ? exceptionMsg + " address is empty, " : exceptionMsg;
 			exceptionMsg = isPortInvalid ? exceptionMsg + " port is null or should be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX  + ",": exceptionMsg;
 			exceptionMsg = isTypeInvalid ? exceptionMsg + " type '" + dto.getType() + "' is not valid," : exceptionMsg;
+			exceptionMsg = isGatekeeperRelayAndExclusive ? exceptionMsg + " GATEKEEPER_REALY type couldn't be exclusive," : exceptionMsg;
+			exceptionMsg = isGeneralRelayAndExclusive ? exceptionMsg + " GENERAL_REALY type couldn't be exclusive," : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, origin);
