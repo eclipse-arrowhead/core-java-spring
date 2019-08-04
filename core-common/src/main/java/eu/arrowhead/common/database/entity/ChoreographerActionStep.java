@@ -1,7 +1,6 @@
 package eu.arrowhead.common.database.entity;
 
 import eu.arrowhead.common.Defaults;
-import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -32,11 +31,11 @@ public class ChoreographerActionStep {
 
     @OneToMany (mappedBy = "actionStepEntry", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerNextActionStep> actionSteps = new HashSet<>();
+    private Set<ChoreographerNextActionStep> nextActionSteps = new HashSet<>();
 
     @OneToMany (mappedBy = "nextActionStepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerNextActionStep> nextActionSteps = new HashSet<>();
+    private Set<ChoreographerNextActionStep> actionSteps = new HashSet<>();
 
     @OneToMany (mappedBy = "actionStepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
@@ -88,21 +87,21 @@ public class ChoreographerActionStep {
         this.actionActionStepConnections = actionActionStepConnections;
     }
 
-    public Set<ChoreographerNextActionStep> getActionSteps() {
-        return actionSteps;
-    }
-
-    public void setActionSteps(Set<ChoreographerNextActionStep> actionSteps) {
-        this.actionSteps = actionSteps;
-    }
-
     public Set<ChoreographerNextActionStep> getNextActionSteps() {
         return nextActionSteps;
     }
 
-
     public void setNextActionSteps(Set<ChoreographerNextActionStep> nextActionSteps) {
         this.nextActionSteps = nextActionSteps;
+    }
+
+    public Set<ChoreographerNextActionStep> getActionSteps() {
+        return actionSteps;
+    }
+
+
+    public void setActionSteps(Set<ChoreographerNextActionStep> actionSteps) {
+        this.actionSteps = actionSteps;
     }
 
     public Set<ChoreographerActionStepServiceDefinitionConnection> getActionStepServiceDefinitionConnections() {

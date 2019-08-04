@@ -11,12 +11,16 @@ import java.util.Set;
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 
 public class DTOConverter {
+	private static final Logger logger = LogManager.getLogger(DTOConverter.class);
 	
 	//=================================================================================================
 	// methods
@@ -36,7 +40,7 @@ public class DTOConverter {
 		final long count = systemEntryList.getTotalElements();		
 		final SystemListResponseDTO systemListResponseDTO = new SystemListResponseDTO();
 		systemListResponseDTO.setCount(count);
-		systemListResponseDTO.setData(systemEntryListToSystemResponeDTOList(systemEntryList.getContent()));
+		systemListResponseDTO.setData(systemEntryListToSystemResponseDTOList(systemEntryList.getContent()));
 		
 		return systemListResponseDTO;
 	}
@@ -81,7 +85,7 @@ public class DTOConverter {
 		dto.setSecure(entry.getSecure());
 		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
 		dto.setVersion(entry.getVersion());
-		dto.setInterfaces(collectInterfacesFromServiceSergistry(entry.getInterfaceConnections()));
+		dto.setInterfaces(collectInterfacesFromServiceRegistry(entry.getInterfaceConnections()));
 		dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()));
 		dto.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 		
@@ -338,7 +342,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<SystemResponseDTO> systemEntryListToSystemResponeDTOList(final List<System> systemList) {
+	private static List<SystemResponseDTO> systemEntryListToSystemResponseDTOList(final List<System> systemList) {
 		final List<SystemResponseDTO> systemResponseDTOs = new ArrayList<>(systemList.size());
 		
 		for (final System system : systemList) {
@@ -349,7 +353,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromServiceSergistry(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
+	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromServiceRegistry(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
 		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
 			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
@@ -392,21 +396,32 @@ public class DTOConverter {
 										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
 	}
 
-	/* private static List<ServiceDefinitionResponseDTO> collectServiceDefinitionsFromChoreographerActionPlan(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
+	private static List<ServiceDefinitionResponseDTO> collectServiceDefinitionsFromChoreographerActionStep(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
 		final List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
-		for (final ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
+		for (ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
 			result.add(convertServiceDefinitionToServiceDefinitionResponseDTO(conn.getServiceDefinitionEntry()));
 		}
-
 		return result;
 	}
 
-	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep actionStepEntry) {
-
-		return new ChoreographerActionStepResponseDTO(actionStepEntry.getId(),
-				collectServiceDefinitionsFromChoreographerActionPlan(actionStepEntry.getActionStepServiceDefinitionConnections()),
-				Utilities.convertZonedDateTimeToUTCString(actionStepEntry.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(actionStepEntry.getUpdatedAt()));
+	private static List<ChoreographerNextActionStepResponseDTO> collectChoreographerNextActionStepsFromChoreographerActionStep(final Set<ChoreographerNextActionStep> nextActionSteps) {
+		final List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
+		for (ChoreographerNextActionStep nextActionStep : nextActionSteps) {
+			result.add(convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(nextActionStep.getNextActionStepEntry()));
+		}
+		return result;
 	}
-*/
+
+	private static ChoreographerNextActionStepResponseDTO convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(ChoreographerActionStep nextActionStepEntry) {
+		return new ChoreographerNextActionStepResponseDTO(nextActionStepEntry.getId(), nextActionStepEntry.getName());
+	}
+
+	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep actionStep) {
+	    return new ChoreographerActionStepResponseDTO(actionStep.getId(),
+				actionStep.getName(),
+				collectServiceDefinitionsFromChoreographerActionStep(actionStep.getActionStepServiceDefinitionConnections()),
+				collectChoreographerNextActionStepsFromChoreographerActionStep(actionStep.getNextActionSteps()),
+				Utilities.convertZonedDateTimeToUTCString(actionStep.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(actionStep.getUpdatedAt()));
+	}
 }

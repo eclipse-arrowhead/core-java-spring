@@ -3,8 +3,10 @@ package eu.arrowhead.core.choreographer.database.service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.repository.*;
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepRequestDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
@@ -12,10 +14,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.tags.form.OptionsTag;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ChoreographerDBService {
@@ -100,7 +100,7 @@ public class ChoreographerDBService {
 
         for(ChoreographerActionStep actionStep : nextActionSteps) {
             ChoreographerNextActionStep nextActionStep = choreographerNextActionStepRepository.save(new ChoreographerNextActionStep(stepEntry, actionStep));
-            stepEntry.getNextActionSteps().add(nextActionStep);
+            stepEntry.getActionSteps().add(nextActionStep);
         }
         choreographerNextActionStepRepository.flush();
 
@@ -122,8 +122,12 @@ public class ChoreographerDBService {
             actionEntry.getActionActionStepConnections().add(connection);
         }
 
+
         for (ChoreographerActionStepRequestDTO actionStep : actionSteps) {
-            addNextStepToChoreographerActionStep(actionStep.getActionStepName(), new HashSet<>(actionStep.getNextActionStepNames()));
+            List<String> nextActionStepNames = actionStep.getNextActionStepNames();
+            if(nextActionStepNames != null && !nextActionStepNames.isEmpty()) {
+                addNextStepToChoreographerActionStep(actionStep.getActionStepName(), new HashSet<>(nextActionStepNames));
+            }
         }
 
         choreographerActionActionStepConnectionRepository.flush();
@@ -182,6 +186,29 @@ public class ChoreographerDBService {
         choreographerActionPlanActionConnectionRepository.flush();
 
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
+    }
+
+    public ChoreographerActionStep getChoreographerActionStepById(final long id) {
+        logger.debug("getChoreographerActionStepById started...");
+
+        try {
+            if (choreographerActionStepRepository.findById(id).isPresent()) {
+                return choreographerActionStepRepository.findById(id).get();
+            } else {
+                throw new InvalidParameterException("Choreographer Action Step with id of '" + id + "' doesn't exist!");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    public ChoreographerActionStepResponseDTO getChoreographerActionStepByIdResponse(final long id) {
+        logger.debug("getChoreographerActionStepByIdResponse started...");
+
+        return DTOConverter.convertChoreographerActionStepToChoreographerActionStepResponseDTO(getChoreographerActionStepById(id));
     }
 
     @Transactional(rollbackFor = ArrowheadException.class)
