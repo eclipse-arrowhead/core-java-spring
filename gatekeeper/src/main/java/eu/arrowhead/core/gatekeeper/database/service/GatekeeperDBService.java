@@ -29,6 +29,7 @@ import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
@@ -61,6 +62,35 @@ public class GatekeeperDBService {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------	
+	public CloudResponseDTO getCloudByIdResponse(final long id) {
+		logger.debug("getCloudByIdResponse started...");
+		
+		final Cloud entry = getCloudById(id);
+		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public Cloud getCloudById(final long id) {
+		logger.debug("getCloudById started...");
+		
+		try {
+				
+			final Optional<Cloud> cloudOpt = cloudRepository.findById(id);
+			if (cloudOpt.isEmpty()) {
+				throw new InvalidParameterException("Cloud with id '" + id + "' not exists");
+			}
+			
+			return cloudOpt.get();			
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
