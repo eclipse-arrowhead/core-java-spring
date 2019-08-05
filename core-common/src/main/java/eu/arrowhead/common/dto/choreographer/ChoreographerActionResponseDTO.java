@@ -1,5 +1,8 @@
 package eu.arrowhead.common.dto.choreographer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -9,6 +12,7 @@ public class ChoreographerActionResponseDTO implements Serializable {
 
     private String actionName;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String nextActionName;
 
     private List<ChoreographerActionStepResponseDTO> actionSteps;

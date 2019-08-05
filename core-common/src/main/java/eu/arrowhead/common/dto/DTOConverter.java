@@ -438,7 +438,7 @@ public class DTOConverter {
 		if (nextAction != null) {
 			return nextAction.getActionName();
 		}
-		return "";
+		return null;
 	}
 
     public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(ChoreographerAction actionEntry) {

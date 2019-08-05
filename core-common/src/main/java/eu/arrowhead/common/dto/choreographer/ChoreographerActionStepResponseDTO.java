@@ -1,5 +1,6 @@
 package eu.arrowhead.common.dto.choreographer;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import eu.arrowhead.common.database.entity.ChoreographerActionStep;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 
@@ -9,10 +10,17 @@ import java.util.List;
 public class ChoreographerActionStepResponseDTO implements Serializable {
 
     private long id;
+
     private String stepName;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ServiceDefinitionResponseDTO> serviceDefinitions;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<ChoreographerNextActionStepResponseDTO> nextActionSteps;
+
     private String createdAt;
+
     private String updatedAt;
 
     public ChoreographerActionStepResponseDTO() {}
