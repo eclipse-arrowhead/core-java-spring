@@ -1,6 +1,7 @@
 package eu.arrowhead.core.choreographer.database.service;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.repository.*;
 import eu.arrowhead.common.dto.DTOConverter;
@@ -10,8 +11,13 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.data.domain.Sort.Direction;
 
 import java.util.*;
 
@@ -47,6 +53,12 @@ public class ChoreographerDBService {
     @Transactional(rollbackFor = ArrowheadException.class)
     public ChoreographerActionStep createChoreographerActionStepWithUsedService(final String stepName, final Set<String> usedServiceNames) {
         logger.debug("createChoreographerActionStep started...");
+
+        Optional<ChoreographerActionStep> choreographerActionStepOpt = choreographerActionStepRepository.findByName(stepName);
+
+        choreographerActionStepOpt.ifPresent(choreographerActionStep -> {
+            throw new InvalidParameterException("One or more ActionSteps with the given names already exist! ActionStep NAMES must be UNIQUE!");
+        });
 
         List<ServiceDefinition> usedServices = new ArrayList<>(usedServiceNames.size());
         for (String name : usedServiceNames) {
@@ -91,9 +103,9 @@ public class ChoreographerDBService {
             Optional<ChoreographerActionStep> actionStepOpt = choreographerActionStepRepository.findByName(nextActionStepName);
             if (actionStepOpt.isPresent()) {
                 nextActionSteps.add(actionStepOpt.get());
-            } /*else {
+            } else {
                 throw new InvalidParameterException("Action Step with name of " + nextActionStepName + " doesn't exist!");
-            }*/
+            }
         }
 
         for(ChoreographerActionStep actionStep : nextActionSteps) {
@@ -108,6 +120,12 @@ public class ChoreographerDBService {
     @Transactional (rollbackFor = ArrowheadException.class)
     public ChoreographerAction createChoreographerAction(final String actionName, final List<ChoreographerActionStepRequestDTO> actionSteps) {
         logger.debug("createChoreographerAction started...");
+
+        Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByActionName(actionName);
+
+        choreographerActionOpt.ifPresent(choreographerAction -> {
+            throw new InvalidParameterException("One or more Actions with the given names already exist! Action NAMES must be UNIQUE!");
+        });
 
         ChoreographerAction action = new ChoreographerAction();
         action.setActionName(actionName);
@@ -186,29 +204,38 @@ public class ChoreographerDBService {
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
     }
 
-    /*public ChoreographerActionStep getChoreographerActionStepById(final long id) {
-        logger.debug("getChoreographerActionStepById started...");
+    public Page<ChoreographerActionPlan> getChoreographerActionPlanEntries(final int page, final int size, final Direction direction, final String sortField) {
+        logger.debug("getChoreographerActionPlanEntries started... ");
+
+        int validatedPage = page < 0 ? 0 : page;
+        int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
+        Direction validatedDirection = direction == null ? Direction.ASC : direction;
+        String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+
+        if(!ChoreographerActionPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+            throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+        }
 
         try {
-            Optional<ChoreographerActionStep> actionStepOpt = choreographerActionStepRepository.findById(id);
-            if (actionStepOpt.isPresent()) {
-                return actionStepOpt.get();
-            } else {
-                throw new InvalidParameterException("Choreographer Action Step with id of '" + id + "' doesn't exist!");
-            }
-        } catch (InvalidParameterException ex) {
-            throw ex;
+            return choreographerActionPlanRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
-    public ChoreographerActionStepResponseDTO getChoreographerActionStepByIdResponse(final long id) {
-        logger.debug("getChoreographerActionStepByIdResponse started...");
+    public List<ChoreographerActionPlanResponseDTO> getChoreographerActionPlanEntriesResponse (final int page, final int size, final Direction direction, final String sortField) {
+        logger.debug("getChoreographerActionPlanEntriesResponse started...");
 
-        return DTOConverter.convertChoreographerActionStepToChoreographerActionStepResponseDTO(getChoreographerActionStepById(id));
-    }*/
+        Page<ChoreographerActionPlan> choreographerActionPlanEntries = getChoreographerActionPlanEntries(page, size, direction, sortField);
+
+        List<ChoreographerActionPlanResponseDTO> actionPlanResponseDTOS = new ArrayList<>();
+        for(ChoreographerActionPlan actionPlan : choreographerActionPlanEntries) {
+            actionPlanResponseDTOS.add(DTOConverter.convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(actionPlan));
+        }
+
+        return actionPlanResponseDTOS;
+    }
 
     public ChoreographerActionPlan getChoreographerActionPlanById(final long id) {
         logger.debug("getChoreographerActionPlanById started...");
@@ -251,6 +278,4 @@ public class ChoreographerDBService {
             throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
-
-
 }

@@ -1,12 +1,7 @@
 package eu.arrowhead.common.dto;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
@@ -402,6 +397,8 @@ public class DTOConverter {
 		for (ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
 			result.add(convertServiceDefinitionToServiceDefinitionResponseDTO(conn.getServiceDefinitionEntry()));
 		}
+
+		result.sort(Comparator.comparing(ServiceDefinitionResponseDTO::getId));
 		return result;
 	}
 
@@ -410,6 +407,9 @@ public class DTOConverter {
 		for (ChoreographerNextActionStep nextActionStep : nextActionSteps) {
 			result.add(convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(nextActionStep.getNextActionStepEntry()));
 		}
+
+		result.sort(Comparator.comparing(ChoreographerNextActionStepResponseDTO::getId));
+
 		return result;
 	}
 
@@ -431,6 +431,9 @@ public class DTOConverter {
 		for(ChoreographerActionActionStepConnection conn : actionStepConnections) {
 			result.add(convertChoreographerActionStepToChoreographerActionStepResponseDTO(conn.getActionStepEntry()));
 		}
+
+		result.sort(Comparator.comparing(ChoreographerActionStepResponseDTO::getId));
+
 		return result;
 	}
 
@@ -455,6 +458,9 @@ public class DTOConverter {
 		for (ChoreographerActionPlanActionConnection conn : actionConnections) {
 			result.add(convertChoreographerActionToChoreographerActionResponseDTO(conn.getActionEntry()));
 		}
+
+		result.sort(Comparator.comparing(ChoreographerActionResponseDTO::getId));
+
 		return result;
 	}
 

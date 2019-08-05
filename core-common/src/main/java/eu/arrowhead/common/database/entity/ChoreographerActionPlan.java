@@ -7,10 +7,13 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 public class ChoreographerActionPlan {
+
+    public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

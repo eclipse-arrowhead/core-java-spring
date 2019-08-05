@@ -93,6 +93,8 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 
+	public static final String CHOREOGRAPHER_URI = "/choreographer";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
