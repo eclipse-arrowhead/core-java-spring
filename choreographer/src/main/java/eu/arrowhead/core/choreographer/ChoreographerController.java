@@ -4,6 +4,7 @@ import eu.arrowhead.common.database.entity.ChoreographerActionStep;
 import eu.arrowhead.common.dto.AuthorizationInterCloudListResponseDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
@@ -89,11 +90,11 @@ public class ChoreographerController {
         logger.debug("ChoreographerActionStep with id: " + id + " successfully deleted!");
     }
 
-    @ApiOperation(value = "tesztChoreographerActionStepGet")
+    @ApiOperation(value = "tesztChoreographerActionPlanGet")
     @GetMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ChoreographerActionStepResponseDTO getActionStepById(@PathVariable(value = PATH_VARIABLE_ID) final long actionStepId) {
-        logger.debug("New ChoreographerActionStep get request received with id: " + actionStepId + ".");
-        return choreographerDBService.getChoreographerActionStepByIdResponse(actionStepId);
+    public ChoreographerActionPlanResponseDTO getActionPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+        logger.debug("New ChoreographerActionStep get request received with id: " + id + ".");
+        return choreographerDBService.getChoreographerActionPlanByIdResponse(id);
     }
 }

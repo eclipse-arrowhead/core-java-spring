@@ -4,9 +4,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.repository.*;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionRequestDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepRequestDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.choreographer.*;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
@@ -188,12 +186,13 @@ public class ChoreographerDBService {
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
     }
 
-    public ChoreographerActionStep getChoreographerActionStepById(final long id) {
+    /*public ChoreographerActionStep getChoreographerActionStepById(final long id) {
         logger.debug("getChoreographerActionStepById started...");
 
         try {
-            if (choreographerActionStepRepository.findById(id).isPresent()) {
-                return choreographerActionStepRepository.findById(id).get();
+            Optional<ChoreographerActionStep> actionStepOpt = choreographerActionStepRepository.findById(id);
+            if (actionStepOpt.isPresent()) {
+                return actionStepOpt.get();
             } else {
                 throw new InvalidParameterException("Choreographer Action Step with id of '" + id + "' doesn't exist!");
             }
@@ -209,6 +208,30 @@ public class ChoreographerDBService {
         logger.debug("getChoreographerActionStepByIdResponse started...");
 
         return DTOConverter.convertChoreographerActionStepToChoreographerActionStepResponseDTO(getChoreographerActionStepById(id));
+    }*/
+
+    public ChoreographerActionPlan getChoreographerActionPlanById(final long id) {
+        logger.debug("getChoreographerActionPlanById started...");
+
+        try {
+            Optional<ChoreographerActionPlan> actionPlanOpt = choreographerActionPlanRepository.findById(id);
+            if (actionPlanOpt.isPresent()) {
+                return actionPlanOpt.get();
+            } else {
+                throw new InvalidParameterException("Choreographer Action Plan with id of '" + id + "' doesn't exist!");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    public ChoreographerActionPlanResponseDTO getChoreographerActionPlanByIdResponse (final long id) {
+        logger.debug("getChoreographerActionPlanByIdResponse started...");
+
+        return DTOConverter.convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(getChoreographerActionPlanById(id));
     }
 
     @Transactional(rollbackFor = ArrowheadException.class)

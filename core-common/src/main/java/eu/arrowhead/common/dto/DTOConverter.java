@@ -10,6 +10,8 @@ import java.util.Set;
 
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +22,6 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 
 public class DTOConverter {
-	private static final Logger logger = LogManager.getLogger(DTOConverter.class);
 	
 	//=================================================================================================
 	// methods
@@ -397,7 +398,7 @@ public class DTOConverter {
 	}
 
 	private static List<ServiceDefinitionResponseDTO> collectServiceDefinitionsFromChoreographerActionStep(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
-		final List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
+		List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
 		for (ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
 			result.add(convertServiceDefinitionToServiceDefinitionResponseDTO(conn.getServiceDefinitionEntry()));
 		}
@@ -405,7 +406,7 @@ public class DTOConverter {
 	}
 
 	private static List<ChoreographerNextActionStepResponseDTO> collectChoreographerNextActionStepsFromChoreographerActionStep(final Set<ChoreographerNextActionStep> nextActionSteps) {
-		final List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
+		List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
 		for (ChoreographerNextActionStep nextActionStep : nextActionSteps) {
 			result.add(convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(nextActionStep.getNextActionStepEntry()));
 		}
@@ -423,5 +424,45 @@ public class DTOConverter {
 				collectChoreographerNextActionStepsFromChoreographerActionStep(actionStep.getNextActionSteps()),
 				Utilities.convertZonedDateTimeToUTCString(actionStep.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(actionStep.getUpdatedAt()));
+	}
+
+	public static List<ChoreographerActionStepResponseDTO>collectChoreographerActionStepsFromChoreographerAction(final Set<ChoreographerActionActionStepConnection> actionStepConnections) {
+		List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
+		for(ChoreographerActionActionStepConnection conn : actionStepConnections) {
+			result.add(convertChoreographerActionStepToChoreographerActionStepResponseDTO(conn.getActionStepEntry()));
+		}
+		return result;
+	}
+
+	public static String collectChoreographerNextActionNameFromChoreographerAction(final ChoreographerAction nextAction) {
+		if (nextAction != null) {
+			return nextAction.getActionName();
+		}
+		return "";
+	}
+
+    public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(ChoreographerAction actionEntry) {
+		return new ChoreographerActionResponseDTO(actionEntry.getId(),
+				actionEntry.getActionName(),
+				collectChoreographerNextActionNameFromChoreographerAction(actionEntry.getNextAction()),
+				collectChoreographerActionStepsFromChoreographerAction(actionEntry.getActionActionStepConnections()),
+				Utilities.convertZonedDateTimeToUTCString(actionEntry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(actionEntry.getUpdatedAt()));
+	}
+
+	public static List<ChoreographerActionResponseDTO> collectChoreographerActionsFromChoreographerActionPlan(final Set<ChoreographerActionPlanActionConnection> actionConnections) {
+		List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
+		for (ChoreographerActionPlanActionConnection conn : actionConnections) {
+			result.add(convertChoreographerActionToChoreographerActionResponseDTO(conn.getActionEntry()));
+		}
+		return result;
+	}
+
+	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(ChoreographerActionPlan actionPlanEntry) {
+		return new ChoreographerActionPlanResponseDTO(actionPlanEntry.getId(),
+				actionPlanEntry.getActionPlanName(),
+				collectChoreographerActionsFromChoreographerActionPlan(actionPlanEntry.getActionPlanActionConnections()),
+				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
 }
