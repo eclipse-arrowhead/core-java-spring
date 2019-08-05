@@ -166,7 +166,7 @@ public class GatekeeperDBService {
 				final boolean secure = dto.getSecure() == null ? false : dto.getSecure();
 				final boolean neighbor = dto.getNeighbor() == null ? false : dto.getNeighbor();
 				
-				final String cloudUniqueConstraint = operator + name;
+				final String cloudUniqueConstraint = operator + "." + name;
 				
 				if (cloudsToSave.containsKey(cloudUniqueConstraint)) {
 					throw new InvalidParameterException("List of CloudRequestDTO contains uinque constraint violation: " + dto.getOperator() + " operator with " + dto.getName() + " name");
@@ -473,7 +473,7 @@ public class GatekeeperDBService {
 				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), dto.getType());
 				
 				final String address = dto.getAddress().toLowerCase().trim();
-				final String uniqueConstraint = address  + dto.getPort();
+				final String uniqueConstraint = address  + ":" + dto.getPort();
 				
 				if (relaysToSave.containsKey(uniqueConstraint)) {
 					throw new InvalidParameterException("List of RelayRequestDTO contains uinque constraint violation: " + address + " address with " + dto.getPort() + " port");
@@ -580,6 +580,10 @@ public class GatekeeperDBService {
 		}
 		name = name.toLowerCase().trim();
 		
+		if (operator.contains(".") || name.contains(".")) {
+			throw new InvalidParameterException("Cloud operator and name can't contains dot (.)");
+		}
+		
 		secure = secure == null ? false : secure;
 		neighbor = neighbor == null ? false : neighbor;
 		
@@ -638,7 +642,7 @@ public class GatekeeperDBService {
 		
 		exclusive = exclusive == null ? false : exclusive;
 		
-		RelayType typeEnum = Utilities.convertStringToRelayType(type);
+		final RelayType typeEnum = Utilities.convertStringToRelayType(type);
 		if (typeEnum == null) {
 			throw new InvalidParameterException(type + " type is invalid");
 		}
@@ -721,7 +725,7 @@ public class GatekeeperDBService {
 		final Set<Long> savedCloudIds = new HashSet<>();
 		
 		for (final Cloud cloud : savedClouds) {
-			final String cloudUniqueConstraint = cloud.getOperator() + cloud.getName();
+			final String cloudUniqueConstraint = cloud.getOperator() + "." + cloud.getName();
 			
 			final List<Relay> gatekeeperRelays = gatekeeperRelaysForClouds.get(cloudUniqueConstraint);				
 			for (final Relay relay : gatekeeperRelays) {
@@ -751,8 +755,8 @@ public class GatekeeperDBService {
 	//-------------------------------------------------------------------------------------------------
 	private Set<Long> saveCloudAndRelayConnections (final Cloud cloud, final List<Relay> gatekeeperRelaysForClouds, final List<Relay> gatewayRelaysForClouds) {
 		return saveCloudAndRelayConnections(List.of(cloud), 
-											Map.of(cloud.getOperator() + cloud.getName(), gatekeeperRelaysForClouds),
-											Map.of(cloud.getOperator() + cloud.getName(), gatewayRelaysForClouds));
+											Map.of(cloud.getOperator() + "." + cloud.getName(), gatekeeperRelaysForClouds),
+											Map.of(cloud.getOperator() + "." + cloud.getName(), gatewayRelaysForClouds));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
