@@ -58,7 +58,7 @@ public class ChoreographerController {
         return "Got it!";
     }
 
-    @ApiOperation(value = "Registers an Action Plan.")
+    @ApiOperation(value = "Register one ore more ActionPlans.")
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
@@ -68,8 +68,10 @@ public class ChoreographerController {
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody
-    public void registerActionPlans(@RequestBody final ChoreographerActionPlanRequestDTO request) {
-        choreographerDBService.createChoreographerActionPlan(request.getActionPlanName(), request.getActions());
+    public void registerActionPlans(@RequestBody final List<ChoreographerActionPlanRequestDTO> requests) {
+        for(ChoreographerActionPlanRequestDTO request : requests) {
+            choreographerDBService.createChoreographerActionPlan(request.getActionPlanName(), request.getActions());
+        }
     }
 
     @ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.")
