@@ -131,7 +131,7 @@ public class GatekeeperDBService {
 	public CloudWithRelaysResponseDTO assignRelaysToCloudResponse(final long id, final List<Long> gatekeeperRelayIds, final List<Long> gatewayRelayIds) {
 		logger.debug("assignRelaysToCloud started...");
 		
-		Cloud entry = assignRelaysToCloud(id, gatekeeperRelayIds, gatewayRelayIds);
+		final Cloud entry = assignRelaysToCloud(id, gatekeeperRelayIds, gatewayRelayIds);
 		
 		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
 	}
@@ -173,6 +173,23 @@ public class GatekeeperDBService {
 			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public void removeCloudById(final long id) {
+		logger.debug("removeCloudById started...");
+		
+		try {
+			
+			if (cloudRepository.existsById(id)) {
+				cloudRepository.deleteById(id);
+			}
+			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
