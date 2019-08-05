@@ -13,6 +13,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -27,6 +29,10 @@ import eu.arrowhead.common.dto.RelayType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
+@NamedEntityGraph(name = "relayWithCloudGatekeeperRelayEntries",
+attributeNodes = {
+		  @NamedAttributeNode(value = "cloudGatekeepers")
+})
 public class Relay {
 	
 	//=================================================================================================

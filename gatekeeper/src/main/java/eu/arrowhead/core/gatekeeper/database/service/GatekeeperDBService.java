@@ -231,15 +231,12 @@ public class GatekeeperDBService {
 			final boolean dtoNeighbor = dto.getNeighbor() == null ? false : dto.getNeighbor();
 			
 			if (!cloud.getOperator().equalsIgnoreCase(dtoOperator) || !cloud.getName().equalsIgnoreCase(dtoName)) {
-				checkUniqueConstarintOfCloudTable(dtoOperator, dtoName);
+				checkUniqueConstraintOfCloudTable(dtoOperator, dtoName);
 			}
 			
-			final Set<Long> gatekeeperRelayIdsToAdd = deleteUnnecessaryGatekeeperRelayConnectionsAndGetAdditionalRelayIds(cloud, dto.getGatekeeperRelayIds());
-			final Set<Long> gatewayRelayIdsToAdd = deleteUnnecessaryGatewayRelayConnectionsAndGetAdditionalRelayIds(cloud, dto.getGatewayRelayIds());
-			
-			final List<Relay> validatedGatekeeperRelaysToAdd = collectAndValidateGatekeeperRelays(gatekeeperRelayIdsToAdd);
-			final List<Relay> validatedGatewayRelaysToAdd = collectAndValidateGatewayRelays(gatewayRelayIdsToAdd);
-			
+			final List<Relay> validatedGatekeeperRelaysToAdd = deleteUnnecessaryGatekeeperRelayConnectionsAndGetValidatedAdditionalRelays(cloud, dto.getGatekeeperRelayIds());
+			final List<Relay> validatedGatewayRelaysToAdd = deleteUnnecessaryGatewayRelayConnectionsAndGetValidatedAdditionalRelays(cloud, dto.getGatewayRelayIds());
+						
 			saveCloudAndRelayConnections(cloud, validatedGatekeeperRelaysToAdd, validatedGatewayRelaysToAdd);			
 			cloud.setOperator(dtoOperator);
 			cloud.setName(dtoName);
@@ -284,14 +281,14 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException("Cloud with id '" + id +"' not exists");
 			}
 			final Cloud cloud = cloudOpt.get();
-			final Set<Long> extantGatkeeperRelayIds = collectGatkeeperRelayIdsFromCloud(cloud);
+			final Set<Long> extantGatekeeperRelayIds = collectGatkeeperRelayIdsFromCloud(cloud);
 			final Set<Long> extantGatewayRelayIds = collectGatewayRelayIdsFromCloud(cloud);
 			
 			final Set<Long> normalizedGatekeeperRelayIds = new HashSet<>();
 			if (gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {		
 				
 				for (final Long relayId : gatekeeperRelayIds) {
-					if (relayId != null && relayId > 1 && !extantGatkeeperRelayIds.contains(relayId) ) {					
+					if (relayId != null && relayId > 1 && !extantGatekeeperRelayIds.contains(relayId) ) {					
 						normalizedGatekeeperRelayIds.add(relayId);
 					} else {
 						throw new InvalidParameterException("Relay with id '" + relayId +"' not exists");
@@ -514,7 +511,7 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
 			
-			final Optional<Relay> relayOpt = relayRepository.findById(id);
+			final Optional<Relay> relayOpt = relayRepository.getByIdWithCloudGatekeepers(id);
 			if (relayOpt.isEmpty()) {
 				throw new InvalidParameterException("Relay with id '" + id + "' not exists");
 			}
@@ -522,7 +519,17 @@ public class GatekeeperDBService {
 			
 			validateRelayParameters(false, address, port, isSecure, isExclusive, type.toString());
 			if (!relay.getAddress().equalsIgnoreCase(address) || relay.getPort() != port) {
-				checkUniqueConstarintOfRelayTable(address, port);
+				checkUniqueConstraintOfRelayTable(address, port);
+			}
+			
+			if ((relay.getType() == RelayType.GATEKEEPER_RELAY || relay.getType() == RelayType.GENERAL_RELAY) 
+					&& type == RelayType.GATEWAY_RELAY) {
+				
+				for (final CloudGatekeeperRelay cloudConn : relay.getCloudGatekeepers()) {
+					if (cloudConn.getCloud().getGatekeeperRelays().size() == 1) {
+						throw new InvalidParameterException("Relay couldn't be changed to GATEWAY_RELAY type, because the following cloud woud stay without gatekeeper Relay: " + cloudConn.getCloud());	
+					}
+				}
 			}
 			
 			relay.setAddress(address);
@@ -546,16 +553,28 @@ public class GatekeeperDBService {
 	public void removeRelayById(final long id) {
 		logger.debug("removeRelayById started...");
 		
+		
 		try {
 
 			if (id < 1) {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
 			
-			if (relayRepository.existsById(id)) {
+			final Optional<Relay> relayOpt = relayRepository.getByIdWithCloudGatekeepers(id);
+			if (relayOpt.isPresent()) {
+				final Relay relay = relayOpt.get();
+				
+				for (final CloudGatekeeperRelay cloudConn : relay.getCloudGatekeepers()) {
+					if (cloudConn.getCloud().getGatekeeperRelays().size() == 1) {
+						throw new InvalidParameterException("Relay couldn't be removed, because the following cloud woud stay without gatekeeper Relay: " + cloudConn.getCloud());	
+					}
+				}
+				
 				relayRepository.deleteById(id);
-			}
-			
+			}			
+		
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -566,7 +585,7 @@ public class GatekeeperDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateCloudParameters(final boolean withUniqueConstarintCheck, String operator, String name, Boolean secure, Boolean neighbor, final String authenticationInfo,
+	private void validateCloudParameters(final boolean withUniqueConstraintCheck, String operator, String name, Boolean secure, Boolean neighbor, final String authenticationInfo,
 										 final List<Long> gatekeeperRelayIds, final List<Long> gatewayRealyIds) {
 		logger.debug("validateCloudParameters started...");
 		
@@ -591,8 +610,8 @@ public class GatekeeperDBService {
 			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
 		}
 		
-		if (withUniqueConstarintCheck) {
-			checkUniqueConstarintOfCloudTable(operator, name);
+		if (withUniqueConstraintCheck) {
+			checkUniqueConstraintOfCloudTable(operator, name);
 		}
 		
 		if (gatekeeperRelayIds == null || gatekeeperRelayIds.isEmpty()) {
@@ -615,8 +634,8 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void checkUniqueConstarintOfCloudTable(final String operator, final String name) {
-		logger.debug("checkUniqueConstarintOfCloudTable started...");
+	private void checkUniqueConstraintOfCloudTable(final String operator, final String name) {
+		logger.debug("checkUniqueConstraintOfCloudTable started...");
 		
 		if (cloudRepository.existsByOperatorAndName(operator, name)) {
 			throw new InvalidParameterException("Cloud with the following operator and name already exists: " + operator + ", " + name);
@@ -624,7 +643,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateRelayParameters(final boolean withUniqueConstarintCheck, String address, final Integer port, Boolean secure, Boolean exclusive, final String type) {
+	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, Boolean secure, Boolean exclusive, final String type) {
 		logger.debug("validateRelayParameters started...");
 		
 		if (Utilities.isEmpty(address)) {
@@ -655,14 +674,14 @@ public class GatekeeperDBService {
 			throw new InvalidParameterException("GENERAL_RELAY type cloudn't be exclusive");
 		}
 		
-		if (withUniqueConstarintCheck) {
-			checkUniqueConstarintOfRelayTable(address, port);
+		if (withUniqueConstraintCheck) {
+			checkUniqueConstraintOfRelayTable(address, port);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void checkUniqueConstarintOfRelayTable(final String address, final int port) {
-		logger.debug("checkUniqueConstarintOfRelayTable started...");
+	private void checkUniqueConstraintOfRelayTable(final String address, final int port) {
+		logger.debug("checkUniqueConstraintOfRelayTable started...");
 		
 		if (relayRepository.existsByAddressAndPort(address, port)) {
 			throw new InvalidParameterException("Relay with the following address and port already exists: " + address + ", " + port);
@@ -784,7 +803,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Set<Long> deleteUnnecessaryGatekeeperRelayConnectionsAndGetAdditionalRelayIds(final Cloud cloud, final List<Long> gatekeeperRealyIds) {
+	private List<Relay> deleteUnnecessaryGatekeeperRelayConnectionsAndGetValidatedAdditionalRelays(final Cloud cloud, final List<Long> gatekeeperRealyIds) {
 		logger.debug("deleteUnnecessaryGatekeeperRelayConnectionsAndGetAdditionallyRelayIds started...");
 		
 		final Set<Long> relaysConnToKeep = new HashSet<>();
@@ -792,46 +811,70 @@ public class GatekeeperDBService {
 		final Set<Long> relaysToAssign = new HashSet<>();
 		
 		for (final CloudGatekeeperRelay relayConn : cloud.getGatekeeperRelays()) {
+			
+			boolean relayConnToRemove = true;
 			for (final Long dtoRelayId : gatekeeperRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
+					
 					relaysConnToKeep.add(relayConn.getId());
-				} else {
-					relaysConnToDelete.add(relayConn.getId());
-					relaysToAssign.add(dtoRelayId);
-				}
+					relayConnToRemove = false;
+					break;
+				} 
 			}
+			
+			if (relayConnToRemove) {
+				relaysConnToDelete.add(relayConn.getId());
+			}
+			
 		}
+		
+		relaysToAssign.addAll(gatekeeperRealyIds);
 		relaysToAssign.removeAll(relaysConnToKeep);
+		
+		final List<Relay> validatedRelaysToAdd = collectAndValidateGatekeeperRelays(relaysToAssign);
+		
+		if (relaysConnToKeep.isEmpty() &&  validatedRelaysToAdd.isEmpty()) {
+			throw new InvalidParameterException("Cloud can't exist without gatekeeper Relay");
+		}
 		
 		final List<CloudGatekeeperRelay> entriesToDelete = cloudGatekeeperRelayRepository.findAllById(relaysConnToDelete);
 		cloudGatekeeperRelayRepository.deleteInBatch(entriesToDelete);
 		
-		return relaysToAssign;
+		return validatedRelaysToAdd;
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
-	private Set<Long> deleteUnnecessaryGatewayRelayConnectionsAndGetAdditionalRelayIds(final Cloud cloud, final List<Long> gatewayRealyIds) {
+	private List<Relay> deleteUnnecessaryGatewayRelayConnectionsAndGetValidatedAdditionalRelays(final Cloud cloud, final List<Long> gatewayRealyIds) {
 		logger.debug("deleteUnnecessaryGatewayRelayConnectionsAndGetAdditionallyRelayIds started...");
 		
 		final Set<Long> relaysConnToKeep = new HashSet<>();
 		final Set<Long> relaysConnToDelete = new HashSet<>();
 		final Set<Long> relaysToAssign = new HashSet<>();
 		
-		for (final CloudGatekeeperRelay relayConn : cloud.getGatekeeperRelays()) {
+		for (final CloudGatewayRelay relayConn : cloud.getGatewayRelays()) {
+			
+			boolean relayConnToRemove = true;
 			for (final Long dtoRelayId : gatewayRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
+					
 					relaysConnToKeep.add(relayConn.getId());
-			} else {
-				relaysConnToDelete.add(relayConn.getId());
-				relaysToAssign.add(dtoRelayId);
-				}
+					relayConnToRemove = false;
+					break;
+				} 
 			}
+			
+			if (relayConnToRemove) {
+				relaysConnToDelete.add(relayConn.getId());
+			}
+			
 		}
+		
+		relaysToAssign.addAll(gatewayRealyIds);
 		relaysToAssign.removeAll(relaysConnToKeep);
 		
 		final List<CloudGatewayRelay> entriesToDelete = cloudGatewayRelayRepository.findAllById(relaysConnToDelete);
 		cloudGatewayRelayRepository.deleteInBatch(entriesToDelete);
 		
-		return relaysToAssign;
+		return collectAndValidateGatekeeperRelays(relaysToAssign);
 	}
 }
