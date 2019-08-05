@@ -1,12 +1,8 @@
 package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.ChoreographerActionStep;
-import eu.arrowhead.common.dto.AuthorizationInterCloudListResponseDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.ApiOperation;
@@ -30,6 +26,7 @@ import java.util.List;
 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
+@RequestMapping(CommonConstants.CHOREOGRAPHER_URI)
 public class ChoreographerController {
 
     private static final String PATH_VARIABLE_ID = "id";
