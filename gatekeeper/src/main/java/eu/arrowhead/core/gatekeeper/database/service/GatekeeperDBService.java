@@ -29,7 +29,6 @@ import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
@@ -95,7 +94,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public CloudResponseDTO getCloudByIdResponse(final long id) {
+	public CloudWithRelaysResponseDTO getCloudByIdResponse(final long id) {
 		logger.debug("getCloudByIdResponse started...");
 		
 		final Cloud entry = getCloudById(id);
