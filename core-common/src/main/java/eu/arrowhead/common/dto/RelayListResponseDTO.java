@@ -3,33 +3,33 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class CloudResponseListDTO implements Serializable {
+public class RelayListResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -6172699974033391827L;
+	private static final long serialVersionUID = 4091489448271794951L;
 
-	private List<CloudResponseDTO> data;
+	private List<RelayResponseDTO> data;
 	private long count;
-		
+	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudResponseListDTO() {}
-	
+	public RelayListResponseDTO() {}
+
 	//-------------------------------------------------------------------------------------------------
-	public CloudResponseListDTO(final List<CloudResponseDTO> data, final long count) {
+	public RelayListResponseDTO(final List<RelayResponseDTO> data, final long count) {
 		this.data = data;
 		this.count = count;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<CloudResponseDTO> getData() { return data; }
+	public List<RelayResponseDTO> getData() { return data; }
 	public long getCount() { return count; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setData(final List<CloudResponseDTO> data) { this.data = data; }
+	public void setData(final List<RelayResponseDTO> data) { this.data = data; }
 	public void setCount(final long count) { this.count = count; }	
 }

@@ -34,7 +34,7 @@ import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
-import eu.arrowhead.common.dto.RelayResponseListDTO;
+import eu.arrowhead.common.dto.RelayListResponseDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -44,6 +44,8 @@ public class GatekeeperDBService {
 
 	//=================================================================================================
 	// members
+	
+	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0.";
 	
 	@Autowired
 	private CloudRepository cloudRepository;
@@ -106,7 +108,11 @@ public class GatekeeperDBService {
 		logger.debug("getCloudById started...");
 		
 		try {
-				
+
+			if (id < 1) {
+				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+			}
+						
 			final Optional<Cloud> cloudOpt = cloudRepository.findById(id);
 			if (cloudOpt.isEmpty()) {
 				throw new InvalidParameterException("Cloud with id '" + id + "' not exists");
@@ -153,13 +159,12 @@ public class GatekeeperDBService {
 				}				
 
 
-				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
 				
 				final String operator = dto.getOperator().toLowerCase().trim();
 				final String name = dto.getName().toLowerCase().trim();
 				final boolean secure = dto.getSecure() == null ? false : dto.getSecure();
 				final boolean neighbor = dto.getNeighbor() == null ? false : dto.getNeighbor();
-				final boolean ownCloud = dto.getOwnCloud() == null ? false : dto.getOwnCloud();
 				
 				final String cloudUniqueConstraint = operator + name;
 				
@@ -167,7 +172,7 @@ public class GatekeeperDBService {
 					throw new InvalidParameterException("List of CloudRequestDTO contains uinque constraint violation: " + dto.getOperator() + " operator with " + dto.getName() + " name");
 				}
 				
-				cloudsToSave.put(cloudUniqueConstraint, new Cloud(operator, name, secure, neighbor, ownCloud, dto.getAuthenticationInfo()));
+				cloudsToSave.put(cloudUniqueConstraint, new Cloud(operator, name, secure, neighbor, false, dto.getAuthenticationInfo()));
 				
 				gatekeeperRelaysForClouds.put(cloudUniqueConstraint, collectAndValidateGatekeeperRelays(dto.getGatekeeperRelayIds()));
 				gatewayRelaysForClouds.put(cloudUniqueConstraint, collectAndValidateGatewayRelays(dto.getGatewayRelayIds()));				
@@ -202,9 +207,13 @@ public class GatekeeperDBService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Cloud updateCloudByIdWithRelays (final long id, final CloudRequestDTO dto) {
 		logger.debug("updateCloudByIdWithRelays started...");
-		
+						
 		try {
-			
+
+			if (id < 1) {
+				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+			}
+						
 			if (dto == null) {
 				throw new InvalidParameterException("CloudRequestDTO is null");		
 			}
@@ -215,12 +224,11 @@ public class GatekeeperDBService {
 			}
 			final Cloud cloud = cloudOpt.get();
 			
-			validateCloudParameters(false, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getOwnCloud(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+			validateCloudParameters(false, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
 			final String dtoOperator = dto.getOperator().toLowerCase().trim();
 			final String dtoName = dto.getName().toLowerCase().trim();
 			final boolean dtoSecure = dto.getSecure() == null ? false : dto.getSecure();
 			final boolean dtoNeighbor = dto.getNeighbor() == null ? false : dto.getNeighbor();
-			final boolean dtoOwnCloud = dto.getOwnCloud() == null ? false : dto.getOwnCloud();
 			
 			if (!cloud.getOperator().equalsIgnoreCase(dtoOperator) || !cloud.getName().equalsIgnoreCase(dtoName)) {
 				checkUniqueConstarintOfCloudTable(dtoOperator, dtoName);
@@ -237,7 +245,6 @@ public class GatekeeperDBService {
 			cloud.setName(dtoName);
 			cloud.setSecure(dtoSecure);
 			cloud.setNeighbor(dtoNeighbor);
-			cloud.setOwnCloud(dtoOwnCloud);
 			cloud.setAuthenticationInfo(dto.getAuthenticationInfo());
 			
 			final Cloud savedCloud = cloudRepository.saveAndFlush(cloud);
@@ -267,6 +274,10 @@ public class GatekeeperDBService {
 		logger.debug("assignRelaysToCloud started...");
 		
 		try {
+
+			if (id < 1) {
+				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+			}
 			
 			final Optional<Cloud> cloudOpt = cloudRepository.findById(id);
 			if(cloudOpt.isEmpty()) {
@@ -277,7 +288,7 @@ public class GatekeeperDBService {
 			final Set<Long> extantGatewayRelayIds = collectGatewayRelayIdsFromCloud(cloud);
 			
 			final Set<Long> normalizedGatekeeperRelayIds = new HashSet<>();
-			if(gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {		
+			if (gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {		
 				
 				for (final Long relayId : gatekeeperRelayIds) {
 					if (relayId != null && relayId > 1 && !extantGatkeeperRelayIds.contains(relayId) ) {					
@@ -289,7 +300,7 @@ public class GatekeeperDBService {
 			}
 			
 			final Set<Long> normalizedGatewayRelayIds = new HashSet<>();
-			if(gatewayRelayIds != null && !gatewayRelayIds.isEmpty()) {		
+			if (gatewayRelayIds != null && !gatewayRelayIds.isEmpty()) {		
 				
 				for (final Long relayId : gatewayRelayIds) {
 					if (relayId != null && relayId > 1 && !extantGatewayRelayIds.contains(relayId)) {
@@ -321,6 +332,10 @@ public class GatekeeperDBService {
 		
 		try {
 			
+			if (id < 1) {
+				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+			}
+			
 			if (cloudRepository.existsById(id)) {
 				cloudRepository.deleteById(id);
 			}
@@ -332,7 +347,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public RelayResponseListDTO getRelaysResponse(final int page, final int size, final Direction direction, final String sortField) {
+	public RelayListResponseDTO getRelaysResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getRelaysResponse started...");
 		
 		final Page<Relay> entries = getRelays(page, size, direction, sortField);
@@ -340,7 +355,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public Page<Relay> getRelays (final int page, final int size, final Direction direction, final String sortField) {
+	public Page<Relay> getRelays(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getRelays started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -375,6 +390,10 @@ public class GatekeeperDBService {
 		logger.debug("updateRelayById started...");
 		
 		try {
+
+			if (id < 1) {
+				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+			}
 				
 			final Optional<Relay> relayOpt = relayRepository.findById(id);
 			if (relayOpt.isEmpty()) {
@@ -427,7 +446,7 @@ public class GatekeeperDBService {
  	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public RelayResponseListDTO registerBulkRelaysResponse(final List<RelayRequestDTO> dtoList) {
+	public RelayListResponseDTO registerBulkRelaysResponse(final List<RelayRequestDTO> dtoList) {
 		logger.debug("registerBulkRelaysResponse started...");
 		
 		final List<Relay> entries = registerBulkRelays(dtoList);
@@ -490,7 +509,11 @@ public class GatekeeperDBService {
 		logger.debug("updateRelayById started...");
 		
 		try {
-				
+
+			if (id < 1) {
+				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+			}
+			
 			final Optional<Relay> relayOpt = relayRepository.findById(id);
 			if (relayOpt.isEmpty()) {
 				throw new InvalidParameterException("Relay with id '" + id + "' not exists");
@@ -524,6 +547,10 @@ public class GatekeeperDBService {
 		logger.debug("removeRelayById started...");
 		
 		try {
+
+			if (id < 1) {
+				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+			}
 			
 			if (relayRepository.existsById(id)) {
 				relayRepository.deleteById(id);
@@ -539,7 +566,7 @@ public class GatekeeperDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateCloudParameters(final boolean withUniqueConstarintCheck, String operator, String name, Boolean secure, Boolean neighbor, Boolean ownCloud, final String authenticationInfo,
+	private void validateCloudParameters(final boolean withUniqueConstarintCheck, String operator, String name, Boolean secure, Boolean neighbor, final String authenticationInfo,
 										 final List<Long> gatekeeperRelayIds, final List<Long> gatewayRealyIds) {
 		logger.debug("validateCloudParameters started...");
 		
@@ -555,11 +582,6 @@ public class GatekeeperDBService {
 		
 		secure = secure == null ? false : secure;
 		neighbor = neighbor == null ? false : neighbor;
-		ownCloud = ownCloud == null ? false : ownCloud;
-		
-		if (ownCloud) {
-			throw new InvalidParameterException("Register own cloud is not allowed as it is managed automatically by the " + CommonConstants.CORE_SYSTEM_SERVICE_REGISTRY + " core system");
-		}
 		
 		if (secure && Utilities.isEmpty(authenticationInfo)) {
 			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
@@ -616,15 +638,16 @@ public class GatekeeperDBService {
 		
 		exclusive = exclusive == null ? false : exclusive;
 		
-		if (Utilities.convertStringToRelayType(type) == null) {
+		RelayType typeEnum = Utilities.convertStringToRelayType(type);
+		if (typeEnum == null) {
 			throw new InvalidParameterException(type + " type is invalid");
 		}
 		
-		if (exclusive && type.equalsIgnoreCase(RelayType.GATEKEEPER_RELAY.toString())) {
+		if (exclusive && typeEnum == RelayType.GATEKEEPER_RELAY) {
 			throw new InvalidParameterException("GATEKEEPER_RELAY type cloudn't be exclusive");
 		}
 		
-		if (exclusive && type.equalsIgnoreCase(RelayType.GENERAL_RELAY.toString())) {
+		if (exclusive && typeEnum == RelayType.GENERAL_RELAY) {
 			throw new InvalidParameterException("GENERAL_RELAY type cloudn't be exclusive");
 		}
 		
@@ -660,8 +683,8 @@ public class GatekeeperDBService {
 				if (relay.getExclusive()) {
 					throw new InvalidParameterException("Relay with gatekeeper purpose couldn't be exclusive");
 				}
-				if (!relay.getType().toString().equalsIgnoreCase(RelayType.GATEKEEPER_RELAY.toString()) 
-						&& !relay.getType().toString().equalsIgnoreCase(RelayType.GENERAL_RELAY.toString())) {
+				if (relay.getType() != RelayType.GATEKEEPER_RELAY 
+						&& relay.getType() != RelayType.GENERAL_RELAY) {
 					throw new InvalidParameterException("Relay with gatekeeper purpose could be only " + RelayType.GATEKEEPER_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
 				}
 			}			
@@ -679,8 +702,8 @@ public class GatekeeperDBService {
 			gatewayRelays = relayRepository.findAllById(gatekewayRelayIds);
 			
 			for (final Relay relay : gatewayRelays) {
-				if (!relay.getType().toString().equalsIgnoreCase(RelayType.GATEWAY_RELAY.toString()) 
-						&& !relay.getType().toString().equalsIgnoreCase(RelayType.GENERAL_RELAY.toString())) {
+				if (relay.getType() != RelayType.GATEWAY_RELAY 
+						&& relay.getType() != RelayType.GENERAL_RELAY) {
 					throw new InvalidParameterException("Relay with gateway purpose could be only " + RelayType.GATEWAY_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
 				}
 			}

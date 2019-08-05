@@ -28,9 +28,9 @@ import eu.arrowhead.common.dto.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.RelayListResponseDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
-import eu.arrowhead.common.dto.RelayResponseListDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
@@ -219,6 +219,27 @@ public class GatekeeperController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
+		if ((dto.getGatekeeperRelayIds() == null || dto.getGatekeeperRelayIds().isEmpty())
+				&& (dto.getGatewayRelayIds() == null || dto.getGatewayRelayIds().isEmpty())) {
+			throw new BadPayloadException("GatekeeperRelayIds and GatewayRelayIds list couldn't be null or empty at the same time", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (dto.getGatekeeperRelayIds() != null) {
+			for (final Long id : dto.getGatekeeperRelayIds()) {
+				if (id == null || id < 1) {
+					throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+				}
+			}
+		}
+		
+		if (dto.getGatewayRelayIds() != null) {
+			for (final Long id : dto.getGatewayRelayIds()) {
+				if (id == null || id < 1) {
+					throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+				}
+			}
+		}
+		
 		final CloudWithRelaysResponseDTO cloudResponse = gatekeeperDBService.assignRelaysToCloudResponse(dto.getCloudId(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
 		
 		logger.debug("assignRelaysToCloud post request successfully finished");
@@ -246,7 +267,7 @@ public class GatekeeperController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested Relay entries by the given parameters", response = RelayResponseListDTO.class)
+	@ApiOperation(value = "Return requested Relay entries by the given parameters", response = RelayListResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_RELAYS_MGMT_HTTP_400_MESSAGE),
@@ -254,7 +275,7 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = RELAYS_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public RelayResponseListDTO getRelays(
+	@ResponseBody public RelayListResponseDTO getRelays(
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
@@ -263,7 +284,7 @@ public class GatekeeperController {
 		
 		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI);
 		
-		final RelayResponseListDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirecion(), sortField);
+		final RelayListResponseDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirecion(), sortField);
 		
 		logger.debug("Relays  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return relaysResponse;
@@ -322,7 +343,7 @@ public class GatekeeperController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return created Relay entries", response = RelayResponseListDTO.class)
+	@ApiOperation(value = "Return created Relay entries", response = RelayListResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_RELAYS_MGMT_HTTP_400_MESSAGE),
@@ -331,7 +352,7 @@ public class GatekeeperController {
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = RELAYS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public RelayResponseListDTO registerRelays(@RequestBody final List<RelayRequestDTO> dtoList) {
+	@ResponseBody public RelayListResponseDTO registerRelays(@RequestBody final List<RelayRequestDTO> dtoList) {
 		logger.debug("New registerRelays post request recieved");
 		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI;
 		
@@ -342,7 +363,7 @@ public class GatekeeperController {
 			validateRelayRequestDTO(dto, origin);
 		}
 		
-		final RelayResponseListDTO relayResponseListDTO = gatekeeperDBService.registerBulkRelaysResponse(dtoList);
+		final RelayListResponseDTO relayResponseListDTO = gatekeeperDBService.registerBulkRelaysResponse(dtoList);
 		
 		logger.debug("registerRelays has been finished");
 		return relayResponseListDTO;
@@ -434,10 +455,6 @@ public class GatekeeperController {
 		
 		if (dto == null) {
 			throw new BadPayloadException("CloudRequestDTO is empty", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		if (dto.getOwnCloud() != null && dto.getOwnCloud()) {
-			throw new BadPayloadException("Register or update own cloud is not allowed as it is managed automatically by the " + CommonConstants.CORE_SYSTEM_SERVICE_REGISTRY + " core system", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		final boolean isOperatorInvalid = Utilities.isEmpty(dto.getOperator());

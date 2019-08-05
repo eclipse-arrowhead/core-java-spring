@@ -6,7 +6,7 @@ public class RelayResponseDTO implements Serializable {
 
 	private static final long serialVersionUID = -8159263313404856979L;
 
-	private Long id;
+	private long id;
 	private String address;
 	private int port;
 	private boolean secure = false;
@@ -22,7 +22,7 @@ public class RelayResponseDTO implements Serializable {
 	public RelayResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public RelayResponseDTO(final Long id, final String address, final int port, final boolean secure, final boolean exclusive, final RelayType type, final String createdAt, final String updatedAt) {
+	public RelayResponseDTO(final long id, final String address, final int port, final boolean secure, final boolean exclusive, final RelayType type, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.address = address;
 		this.port = port;
@@ -34,7 +34,7 @@ public class RelayResponseDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Long getId() { return id; }
+	public long getId() { return id; }
 	public String getAddress() { return address; }
 	public int getPort() { return port; }
 	public boolean isSecure() { return secure; }
@@ -44,7 +44,7 @@ public class RelayResponseDTO implements Serializable {
 	public String getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId(final Long id) { this.id = id; }
+	public void setId(final long id) { this.id = id; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setPort(final int port) { this.port = port; }
 	public void setSecure(final boolean secure) { this.secure = secure; }

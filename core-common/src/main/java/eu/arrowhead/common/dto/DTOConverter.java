@@ -248,7 +248,7 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public static CloudResponseListDTO convertCloudToCloudResponseDTO(final Page<Cloud> entries) {
+	public static CloudListResponseDTO convertCloudToCloudResponseDTO(final Page<Cloud> entries) {
 		Assert.notNull(entries, "Cloud list is null" );
 		
 		final List<CloudResponseDTO> cloudEntries = new ArrayList<>(entries.getNumberOfElements());
@@ -256,7 +256,7 @@ public class DTOConverter {
 			cloudEntries.add(convertCloudToCloudResponseDTO(entry));
 		}
 		
-		return new CloudResponseListDTO(cloudEntries, entries.getTotalElements());
+		return new CloudListResponseDTO(cloudEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -272,7 +272,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static RelayResponseListDTO convertRelayListToRelayResponseListDTO(final Page<Relay> entries) {
+	public static RelayListResponseDTO convertRelayListToRelayResponseListDTO(final Page<Relay> entries) {
 		Assert.notNull(entries, "Relay list is null" );
 		
 		final List<RelayResponseDTO> relayEntries = new ArrayList<>(entries.getNumberOfElements());
@@ -280,7 +280,7 @@ public class DTOConverter {
 			relayEntries.add(convertRelayToRelayResponseDTO(entry));
 		}
 		
-		return new RelayResponseListDTO(relayEntries, entries.getTotalElements());
+		return new RelayListResponseDTO(relayEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -319,27 +319,28 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static CloudWithRelaysResponseDTO convertCloudToCloudWithRelaysResponseDTO(final Cloud cloud) {
+		Assert.notNull(cloud, "Cloud is null");
 		Assert.notNull(cloud.getGatekeeperRelays(), "Gatekeeper relays set is null");
 		Assert.notNull(cloud.getGatewayRelays(), "Gateway relays set is null");
 		
 		final CloudResponseDTO cloudResponseDTO = convertCloudToCloudResponseDTO(cloud);
 		
-		final Set<Relay>gatekeeperRelays = new HashSet<>();
+		final Set<Relay> gatekeeperRelays = new HashSet<>();
 		for (final CloudGatekeeperRelay conn : cloud.getGatekeeperRelays()) {
 			gatekeeperRelays.add(conn.getRelay());
 		}		
 		
-		final Set<Relay>gatewayRelays = new HashSet<>();
+		final Set<Relay> gatewayRelays = new HashSet<>();
 		for (final CloudGatewayRelay conn : cloud.getGatewayRelays()) {
 			gatewayRelays.add(conn.getRelay());
 		}
 		
-		final List<RelayResponseDTO> gatekeeperRelayListDTO = new ArrayList<>();
+		final List<RelayResponseDTO> gatekeeperRelayListDTO = new ArrayList<>(gatekeeperRelays.size());
 		for (final Relay gatekeeperRelay : gatekeeperRelays) {
 			gatekeeperRelayListDTO.add(convertRelayToRelayResponseDTO(gatekeeperRelay));
 		}
 		
-		final List<RelayResponseDTO> gatewayRelayListDTO = new ArrayList<>();
+		final List<RelayResponseDTO> gatewayRelayListDTO = new ArrayList<>(gatewayRelays.size());
 		for (final Relay gatewayRelay : gatewayRelays) {
 			gatewayRelayListDTO.add(convertRelayToRelayResponseDTO(gatewayRelay));
 		}

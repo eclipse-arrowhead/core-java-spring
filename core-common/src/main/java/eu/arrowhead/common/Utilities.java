@@ -318,16 +318,11 @@ public class Utilities {
 		if (isEmpty(str)) {
 			return RelayType.GENERAL_RELAY;
 		}
-		
-		switch (str.toUpperCase().trim()) {
-			case "GATEKEEPER_RELAY":
-				return RelayType.GATEKEEPER_RELAY;
-			case "GATEWAY_RELAY":
-				return RelayType.GATEWAY_RELAY;
-			case "GENERAL_RELAY":
-				return RelayType.GENERAL_RELAY;
-			default:
-				return null;
+				
+		try {
+			return RelayType.valueOf(RelayType.class, str);			
+		} catch (IllegalArgumentException ex) {
+			return null;
 		}
 	}
 	

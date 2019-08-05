@@ -14,7 +14,6 @@ public class CloudRequestDTO implements Serializable {
 	private String name;
 	private Boolean secure;
 	private Boolean neighbor;
-	private Boolean ownCloud;
 	private String authenticationInfo;
 	private List<Long> gatekeeperRelayIds;
 	private List<Long> gatewayRelayIds;
@@ -27,7 +26,6 @@ public class CloudRequestDTO implements Serializable {
 	public String getName() { return name; }
 	public Boolean getSecure() { return secure; }
 	public Boolean getNeighbor() { return neighbor; }
-	public Boolean getOwnCloud() { return ownCloud; }	
 	public String getAuthenticationInfo() { return authenticationInfo; }	
 	public List<Long> getGatekeeperRelayIds() { return gatekeeperRelayIds; }	
 	public List<Long> getGatewayRelayIds() { return gatewayRelayIds; }
@@ -36,7 +34,6 @@ public class CloudRequestDTO implements Serializable {
 	public void setName(final String name) { this.name = name; }
 	public void setSecure(final Boolean secure) { this.secure = secure; }
 	public void setNeighbor(final Boolean neighbor) { this.neighbor = neighbor; }
-	public void setOwnCloud(final Boolean ownCloud) { this.ownCloud = ownCloud; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setGatewayRelayIds(final List<Long> gatewayRelayIds) { this.gatewayRelayIds = gatewayRelayIds; }
 	

@@ -21,7 +21,7 @@ public class CloudWithRelaysResponseDTO extends CloudResponseDTO {
 	//-------------------------------------------------------------------------------------------------
 	public CloudWithRelaysResponseDTO(final long id, final String operator, final String name, final boolean secure,
 									  final boolean neighbor, final boolean ownCloud, final String authenticationInfo,
-									  final String createdAt, final String updatedAt, List<RelayResponseDTO> gatekeeperRelays, List<RelayResponseDTO> gatewayRelays) {
+									  final String createdAt, final String updatedAt, final List<RelayResponseDTO> gatekeeperRelays, final List<RelayResponseDTO> gatewayRelays) {
 		super(id, operator, name, secure, neighbor, ownCloud, authenticationInfo, createdAt, updatedAt);
 		this.gatekeeperRelays = gatekeeperRelays;
 		this.gatewayRelays = gatewayRelays;
@@ -32,6 +32,6 @@ public class CloudWithRelaysResponseDTO extends CloudResponseDTO {
 	public List<RelayResponseDTO> getGatewayRelays() { return gatewayRelays; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setGatekeeperRelays(List<RelayResponseDTO> gatekeeperRelays) { this.gatekeeperRelays = gatekeeperRelays; }
-	public void setGatewayRelays(List<RelayResponseDTO> gatewayRelays) { this.gatewayRelays = gatewayRelays; }	
+	public void setGatekeeperRelays(final List<RelayResponseDTO> gatekeeperRelays) { this.gatekeeperRelays = gatekeeperRelays; }
+	public void setGatewayRelays(final List<RelayResponseDTO> gatewayRelays) { this.gatewayRelays = gatewayRelays; }	
 }
