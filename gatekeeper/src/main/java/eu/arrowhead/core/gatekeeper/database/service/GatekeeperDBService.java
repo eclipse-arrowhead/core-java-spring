@@ -64,6 +64,37 @@ public class GatekeeperDBService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
+	public CloudWithRelaysListResponseDTO getCloudsResponse (final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getClouds getCloudsResponse...");
+		
+		final Page<Cloud> entries = getClouds(page, size, direction, sortField);
+		return DTOConverter.convertCloudToCloudWithRelaysListResponseDTO(entries);
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public Page<Cloud> getClouds (final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getClouds started...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		
+		if (!Cloud.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+		}
+		
+		try {
+			
+			return cloudRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public CloudResponseDTO getCloudByIdResponse(final long id) {
 		logger.debug("getCloudByIdResponse started...");
 		
