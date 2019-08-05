@@ -238,6 +238,7 @@ public class GatekeeperDBService {
 			cloud.setSecure(dtoSecure);
 			cloud.setNeighbor(dtoNeighbor);
 			cloud.setOwnCloud(dtoOwnCloud);
+			cloud.setAuthenticationInfo(dto.getAuthenticationInfo());
 			
 			final Cloud savedCloud = cloudRepository.saveAndFlush(cloud);
 			cloudRepository.refresh(cloud);
@@ -276,18 +277,28 @@ public class GatekeeperDBService {
 			final Set<Long> extantGatewayRelayIds = collectGatewayRelayIdsFromCloud(cloud);
 			
 			final Set<Long> normalizedGatekeeperRelayIds = new HashSet<>();
-			for (final Long relayId : gatekeeperRelayIds) {
-				if (relayId != null && relayId > 1 && !extantGatkeeperRelayIds.contains(relayId) ) {					
-					normalizedGatekeeperRelayIds.add(relayId);
+			if(gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {		
+				
+				for (final Long relayId : gatekeeperRelayIds) {
+					if (relayId != null && relayId > 1 && !extantGatkeeperRelayIds.contains(relayId) ) {					
+						normalizedGatekeeperRelayIds.add(relayId);
+					} else {
+						throw new InvalidParameterException("Relay with id '" + relayId +"' not exists");
+					}
 				}
 			}
 			
 			final Set<Long> normalizedGatewayRelayIds = new HashSet<>();
-			for (final Long relayId : gatewayRelayIds) {
-				if (relayId != null && relayId > 1 && !extantGatewayRelayIds.contains(relayId)) {
-					normalizedGatewayRelayIds.add(relayId);
+			if(gatewayRelayIds != null && !gatewayRelayIds.isEmpty()) {		
+				
+				for (final Long relayId : gatewayRelayIds) {
+					if (relayId != null && relayId > 1 && !extantGatewayRelayIds.contains(relayId)) {
+						normalizedGatewayRelayIds.add(relayId);
+					} else {
+						throw new InvalidParameterException("Relay with id '" + relayId +"' not exists");
+					}
 				}
-			}
+			}			
 			
 			final List<Relay> gatekeeperRelays = collectAndValidateGatekeeperRelays(normalizedGatekeeperRelayIds);
 			final List<Relay> gatewayRelays = collectAndValidateGatewayRelays(normalizedGatewayRelayIds);

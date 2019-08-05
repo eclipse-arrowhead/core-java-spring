@@ -219,14 +219,6 @@ public class GatekeeperController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (dto.getGatekeeperRelayIds() == null || dto.getGatekeeperRelayIds().isEmpty()) {
-			throw new BadPayloadException("GatekeeperRelayIds list null or empty", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		if (dto.getGatekeeperRelayIds() == null || dto.getGatewayRelayIds().isEmpty()) {
-			throw new BadPayloadException("getGatewayRelayIds list null or empty", HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
 		final CloudWithRelaysResponseDTO cloudResponse = gatekeeperDBService.assignRelaysToCloudResponse(dto.getCloudId(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
 		
 		logger.debug("assignRelaysToCloud post request successfully finished");
@@ -254,7 +246,7 @@ public class GatekeeperController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested Broker entries by the given parameters", response = RelayResponseListDTO.class)
+	@ApiOperation(value = "Return requested Relay entries by the given parameters", response = RelayResponseListDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_RELAYS_MGMT_HTTP_400_MESSAGE),
@@ -273,12 +265,12 @@ public class GatekeeperController {
 		
 		final RelayResponseListDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirecion(), sortField);
 		
-		logger.debug("Brokers  with page: {} and item_per page: {} retrieved successfully", page, size);
+		logger.debug("Relays  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return relaysResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested Broker entry", response = RelayResponseDTO.class)
+	@ApiOperation(value = "Return requested Relay entry", response = RelayResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_RELAYS_MGMT_HTTP_400_MESSAGE),
@@ -324,13 +316,13 @@ public class GatekeeperController {
 		
 		final RelayResponseDTO relayResponse = gatekeeperDBService.getRelayByAddressAndPortResponse(address, port);
 		
-		logger.debug("Broker entry with address: '{}', and port: '{}' successfully retrieved", address, port);
+		logger.debug("Relay entry with address: '{}', and port: '{}' successfully retrieved", address, port);
 		return relayResponse;
 		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return created Broker entries", response = RelayResponseListDTO.class)
+	@ApiOperation(value = "Return created Relay entries", response = RelayResponseListDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_RELAYS_MGMT_HTTP_400_MESSAGE),
@@ -357,7 +349,7 @@ public class GatekeeperController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return updated Broker entry", response = RelayResponseDTO.class)
+	@ApiOperation(value = "Return updated Relay entry", response = RelayResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_RELAYS_MGMT_HTTP_400_MESSAGE),
@@ -376,12 +368,12 @@ public class GatekeeperController {
 		
 		final RelayResponseDTO relayResponse = gatekeeperDBService.updateRelayByIdResponse(id, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType()));
 		
-		logger.debug("Broker with id '{}' is successfully updated", id);
+		logger.debug("Relay with id '{}' is successfully updated", id);
 		return relayResponse;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove requested Broker entry")
+	@ApiOperation(value = "Remove requested Relay entry")
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_RELAYS_MGMT_HTTP_400_MESSAGE),
