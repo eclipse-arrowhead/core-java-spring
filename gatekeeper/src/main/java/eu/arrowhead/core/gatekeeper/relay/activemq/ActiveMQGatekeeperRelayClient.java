@@ -38,6 +38,7 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 
 public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
@@ -137,7 +138,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			return null; // message to someone else
 		}
 		
-		throw new JMSException("Invalid message type: " + msg.getClass().getSimpleName());
+		throw new JMSException("Invalid message class: " + msg.getClass().getSimpleName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -174,7 +175,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			final TextMessage tmsg = (TextMessage) reqMsg;
 			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
 			validateSessionId(gaMsg.getSessionId(), decryptedMessageDTO.getSessionId());
-			final Object payload = extractPayload(decryptedMessageDTO);
+			final Object payload = extractPayload(decryptedMessageDTO, true);
 			final GatekeeperRelayRequest request = new GatekeeperRelayRequest(messageProducer, peerPublicKey, gaMsg.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
 			messageConsumer.close();
 			
@@ -183,7 +184,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 
 		closeThese(messageProducer, messageConsumer);
 		
-		throw new JMSException("Invalid message type: " + reqMsg.getClass().getSimpleName());
+		throw new JMSException("Invalid message class: " + reqMsg.getClass().getSimpleName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -245,13 +246,58 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			validateAcknowledgement(sessionId, decryptedMessageDTO);
 			producer.close();
 			
-			return new GeneralAdvertisementResult(messageConsumer, peerPublicKey, sessionId);
+			return new GeneralAdvertisementResult(messageConsumer, recipientCN, peerPublicKey, sessionId);
 		}
 
 		closeThese(producer, messageConsumer);
 		
-		throw new JMSException("Invalid message type: " + ackMsg.getClass().getSimpleName());
+		throw new JMSException("Invalid message class: " + ackMsg.getClass().getSimpleName());
 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GatekeeperRelayResponse sendRequestAndReturnResponse(final Session session, final GeneralAdvertisementResult advResponse, final Object requestPayload) throws JMSException {
+		logger.debug("sendRequestAndReturnResponse started...");
+
+		Assert.notNull(session, "session is null.");
+		Assert.notNull(advResponse, "advResponse is null.");
+		Assert.notNull(advResponse.getAnswerReceiver(), "Receiver is null.");
+		Assert.notNull(advResponse.getPeerPublicKey(), "Peer public key is null.");
+		Assert.isTrue(!Utilities.isEmpty(advResponse.getSessionId()), "Session id is null or blank.");
+		Assert.notNull(requestPayload, "Payload is null.");
+
+		final Queue requestQueue = session.createQueue(REQUEST_QUEUE_PREFIX + advResponse.getPeerCN() + "-" + advResponse.getSessionId());
+		final MessageProducer messageProducer = session.createProducer(requestQueue);
+		
+		final String messageType = getMessageType(requestPayload);
+		final String encryptedRequest = cryptographer.encodeRelayMessage(messageType, advResponse.getSessionId(), requestPayload, advResponse.getPeerPublicKey());
+		final TextMessage message = session.createTextMessage(encryptedRequest);
+		messageProducer.send(message);
+		
+		// waiting for the response
+		final Message ansMsg = advResponse.getAnswerReceiver().receive(timeout);
+		
+		if (ansMsg == null) { // timeout
+			closeThese(messageProducer, advResponse.getAnswerReceiver());
+			
+			return null; // no response arrived in time
+		}
+		
+		if (ansMsg instanceof TextMessage) {
+			final TextMessage tmsg = (TextMessage) ansMsg;
+			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), advResponse.getPeerPublicKey());
+			validateResponse(advResponse.getSessionId(), messageType, decryptedMessageDTO);
+			final Object payload = extractPayload(decryptedMessageDTO, false);
+			final GatekeeperRelayResponse response = new GatekeeperRelayResponse(decryptedMessageDTO.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
+			
+			closeThese(messageProducer, advResponse.getAnswerReceiver());
+			
+			return response;
+		}
+
+		closeThese(messageProducer, advResponse.getAnswerReceiver());
+		
+		throw new JMSException("Invalid message class: " + ansMsg.getClass().getSimpleName());
 	}
 	
 	//=================================================================================================
@@ -285,10 +331,10 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Object extractPayload(final DecryptedMessageDTO decryptedMessageDTO) {
+	private Object extractPayload(final DecryptedMessageDTO decryptedMessageDTO, final boolean request) {
 		logger.debug("extractPayload started...");
 		
-		final Class<?> clazz = getMessageDTOClass(decryptedMessageDTO.getMessageType(), true);
+		final Class<?> clazz = getMessageDTOClass(decryptedMessageDTO.getMessageType(), request);
 		try {
 			return mapper.readValue(decryptedMessageDTO.getPayload(), clazz);
 		} catch (final IOException ex) {
@@ -313,6 +359,21 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private String getMessageType(final Object requestPayload) {
+		logger.debug("getMessageType started...");
+		
+		if (requestPayload instanceof GSDPollRequestDTO) {
+			return CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL;
+		}
+		
+		if (requestPayload instanceof ICNProposalRequestDTO) {
+			return CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL;
+		}
+		
+		throw new ArrowheadException("Invalid message DTO: " + requestPayload.getClass().getSimpleName());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private void validateSessionId(final String expectedSessionId, final String actualSessionId) {
 		logger.debug("validateSessionId started...");
 		
@@ -325,8 +386,15 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	//-------------------------------------------------------------------------------------------------
 	private void validateAcknowledgement(final String sessionId, final DecryptedMessageDTO msg) {
 		logger.debug("validateAcknowledgement started...");
-		
-		if (!CommonConstants.RELAY_MESSAGE_TYPE_ACK.equals(msg.getMessageType())) {
+
+		validateResponse(sessionId, CommonConstants.RELAY_MESSAGE_TYPE_ACK, msg);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateResponse(final String sessionId, final String messageType, final DecryptedMessageDTO msg) {
+		logger.debug("validateResponse started...");
+
+		if (!messageType.equals(msg.getMessageType())) {
 			throw new AuthException("Unauthorized message on queue.");
 		}
 		

@@ -33,4 +33,8 @@ public interface GatekeeperRelayClient {
 	//-------------------------------------------------------------------------------------------------
 	// returns null if no acknowledgement arrived in time
 	public GeneralAdvertisementResult publishGeneralAdvertisement(final Session session, final String recipientCN, final String recipientPublicKey, final String senderCN) throws JMSException;
+	
+	//-------------------------------------------------------------------------------------------------
+	// returns null if no response arrived in time
+	public GatekeeperRelayResponse sendRequestAndReturnResponse(final Session session, final GeneralAdvertisementResult advResponse, final Object requestPayload) throws JMSException;
 }
