@@ -85,6 +85,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2095")
 	@Override
 	public Session createConnection(final String host, final int port) throws JMSException {
 		logger.debug("createConnection started...");
@@ -148,6 +149,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2095")
 	@Override
 	public GatekeeperRelayRequest sendAcknowledgementAndReturnRequest(final Session session, final GeneralAdvertisementMessageDTO gaMsg) throws JMSException {
 		logger.debug("sendAcknowledgementAndReturnRequest started...");
@@ -201,23 +203,28 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.notNull(session, "session is null.");
 		Assert.notNull(request, "request is null.");
 		Assert.notNull(request.getAnswerSender(), "Sender is null.");
-		Assert.notNull(request.getPeerPublicKey(), "Peer public key is null.");
-		Assert.isTrue(!Utilities.isEmpty(request.getSessionId()), "Session id is null or blank.");
-		Assert.isTrue(!Utilities.isEmpty(request.getMessageType()), "Message type is null or blank.");
-		Assert.notNull(responsePayload, "Payload is null.");
 		
-		final Class<?> responseClass = getMessageDTOClass(request.getMessageType(), false);
-		if (!responseClass.isInstance(responsePayload) && !ErrorMessageDTO.class.isInstance(responsePayload)) {
-			throw new InvalidParameterException("The specified payload is not a valid response to the specified request.");
+		try {
+			Assert.notNull(request.getPeerPublicKey(), "Peer public key is null.");
+			Assert.isTrue(!Utilities.isEmpty(request.getSessionId()), "Session id is null or blank.");
+			Assert.isTrue(!Utilities.isEmpty(request.getMessageType()), "Message type is null or blank.");
+			Assert.notNull(responsePayload, "Payload is null.");
+			
+			final Class<?> responseClass = getMessageDTOClass(request.getMessageType(), false);
+			if (!responseClass.isInstance(responsePayload) && !ErrorMessageDTO.class.isInstance(responsePayload)) {
+				throw new InvalidParameterException("The specified payload is not a valid response to the specified request.");
+			}
+			
+			final String encryptedResponse = cryptographer.encodeRelayMessage(request.getMessageType(), request.getSessionId(), responsePayload, request.getPeerPublicKey());
+			final TextMessage respMsg = session.createTextMessage(encryptedResponse);
+			request.getAnswerSender().send(respMsg);
+		} finally {
+			request.getAnswerSender().close();
 		}
-		
-		final String encryptedResponse = cryptographer.encodeRelayMessage(request.getMessageType(), request.getSessionId(), responsePayload, request.getPeerPublicKey());
-		final TextMessage respMsg = session.createTextMessage(encryptedResponse);
-		request.getAnswerSender().send(respMsg);
-		request.getAnswerSender().close();
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2095")
 	@Override
 	public GeneralAdvertisementResult publishGeneralAdvertisement(final Session session, final String recipientCN, final String recipientPublicKey, final String senderCN) throws JMSException {
 		logger.debug("publishGeneralAdvertisement started...");
@@ -306,9 +313,8 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 					handleError(errorMessage);
 				} else {
 					final Object payload = extractPayload(decryptedMessageDTO, false);
-					final GatekeeperRelayResponse response = new GatekeeperRelayResponse(decryptedMessageDTO.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
 					
-					return response;
+					return new GatekeeperRelayResponse(decryptedMessageDTO.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
 				}
 			}
 
