@@ -502,7 +502,7 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Relay updateRelayById(final long id, final String address, final int port, final boolean isSecure, final boolean isExclusive, final RelayType type) {
+	public Relay updateRelayById(final long id, final String address, final int port, final boolean isSecure, final boolean isExclusive, RelayType type) {
 		logger.debug("updateRelayById started...");
 		
 		try {
@@ -511,25 +511,22 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
 			
-			final Optional<Relay> relayOpt = relayRepository.getByIdWithCloudGatekeepers(id);
+			final Optional<Relay> relayOpt = relayRepository.findById(id);
 			if (relayOpt.isEmpty()) {
 				throw new InvalidParameterException("Relay with id '" + id + "' not exists");
 			}
 			final Relay relay = relayOpt.get();
 			
+			if (type == null) {
+				type = relay.getType();
+			}			
+			if (relay.getType() != type) { 
+				throw new InvalidParameterException("Type of relay couldn't be updated");
+			}
+			
 			validateRelayParameters(false, address, port, isSecure, isExclusive, type.toString());
 			if (!relay.getAddress().equalsIgnoreCase(address) || relay.getPort() != port) {
 				checkUniqueConstraintOfRelayTable(address, port);
-			}
-			
-			if ((relay.getType() == RelayType.GATEKEEPER_RELAY || relay.getType() == RelayType.GENERAL_RELAY) 
-					&& type == RelayType.GATEWAY_RELAY) {
-				
-				for (final CloudGatekeeperRelay cloudConn : relay.getCloudGatekeepers()) {
-					if (cloudConn.getCloud().getGatekeeperRelays().size() == 1) {
-						throw new InvalidParameterException("Relay couldn't be changed to GATEWAY_RELAY type, because the following cloud woud stay without gatekeeper Relay: " + cloudConn.getCloud());	
-					}
-				}
 			}
 			
 			relay.setAddress(address);
@@ -552,7 +549,6 @@ public class GatekeeperDBService {
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeRelayById(final long id) {
 		logger.debug("removeRelayById started...");
-		
 		
 		try {
 
