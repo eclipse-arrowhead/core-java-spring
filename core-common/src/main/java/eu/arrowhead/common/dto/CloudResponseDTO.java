@@ -1,7 +1,6 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class CloudResponseDTO implements Serializable {
 
@@ -39,6 +38,7 @@ public class CloudResponseDTO implements Serializable {
 		this.ownCloud = ownCloud;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
+		this.authenticationInfo = authenticationInfo;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
