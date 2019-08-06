@@ -98,9 +98,15 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
 		final Connection connection = connectionFactory.createConnection();
 		connectionFactory.setClientID(null);
-		connection.start();
 		
-		return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		try {
+			connection.start();
+			
+			return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		} catch (final JMSException ex) {
+			connection.close();
+			throw ex;
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -160,39 +166,45 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.isTrue(!Utilities.isEmpty(gaMsg.getSessionId()), "Session id is null or blank.");
 		final PublicKey peerPublicKey = Utilities.getPublicKeyFromBase64EncodedString(gaMsg.getSenderPublicKey());
 		
-		final Queue requestQueue = session.createQueue(REQUEST_QUEUE_PREFIX + serverCommonName + "-" + gaMsg.getSessionId());
-		final MessageConsumer messageConsumer = session.createConsumer(requestQueue);
+		MessageConsumer messageConsumer = null;
+		MessageProducer messageProducer = null;
 		
-		final Queue responseQueue = session.createQueue(RESPONSE_QUEUE_PREFIX + serverCommonName + "-" + gaMsg.getSessionId());
-		final MessageProducer messageProducer = session.createProducer(responseQueue);
-		
-		final String encodedMessage = cryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_ACK, gaMsg.getSessionId(), null, peerPublicKey); // no payload
-		final TextMessage ackMsg = session.createTextMessage(encodedMessage);
-		messageProducer.send(ackMsg);
-		
-		// waiting for the request
-		final Message reqMsg = messageConsumer.receive(timeout);
-		
-		if (reqMsg == null) { // timeout
+		try {
+			final Queue requestQueue = session.createQueue(REQUEST_QUEUE_PREFIX + serverCommonName + "-" + gaMsg.getSessionId());
+			messageConsumer = session.createConsumer(requestQueue);
+			
+			final Queue responseQueue = session.createQueue(RESPONSE_QUEUE_PREFIX + serverCommonName + "-" + gaMsg.getSessionId());
+			messageProducer = session.createProducer(responseQueue);
+			
+			final String encodedMessage = cryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_ACK, gaMsg.getSessionId(), null, peerPublicKey); // no payload
+			final TextMessage ackMsg = session.createTextMessage(encodedMessage);
+			messageProducer.send(ackMsg);
+			
+			// waiting for the request
+			final Message reqMsg = messageConsumer.receive(timeout);
+			
+			if (reqMsg == null) { // timeout
+				closeThese(messageProducer, messageConsumer);
+				
+				return null; // no request arrived
+			}
+			
+			if (reqMsg instanceof TextMessage) {
+				final TextMessage tmsg = (TextMessage) reqMsg;
+				final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
+				validateRequest(gaMsg.getSessionId(), decryptedMessageDTO);
+				final Object payload = extractPayload(decryptedMessageDTO, true);
+				final GatekeeperRelayRequest request = new GatekeeperRelayRequest(messageProducer, peerPublicKey, gaMsg.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
+				messageConsumer.close();
+				
+				return request;
+			}
+			
+			throw new JMSException("Invalid message class: " + reqMsg.getClass().getSimpleName());
+		} catch (final JMSException | ArrowheadException ex) {
 			closeThese(messageProducer, messageConsumer);
-			
-			return null; // no request arrived
+			throw ex;
 		}
-		
-		if (reqMsg instanceof TextMessage) {
-			final TextMessage tmsg = (TextMessage) reqMsg;
-			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
-			validateRequest(gaMsg.getSessionId(), decryptedMessageDTO);
-			final Object payload = extractPayload(decryptedMessageDTO, true);
-			final GatekeeperRelayRequest request = new GatekeeperRelayRequest(messageProducer, peerPublicKey, gaMsg.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
-			messageConsumer.close();
-			
-			return request;
-		}
-
-		closeThese(messageProducer, messageConsumer);
-		
-		throw new JMSException("Invalid message class: " + reqMsg.getClass().getSimpleName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -241,36 +253,41 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(senderCN, senderPublicKey, recipientCN, encryptedSessionId);
 		final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
 
-		final Topic topic = session.createTopic(GENERAL_TOPIC_NAME);
-		final MessageProducer producer = session.createProducer(topic);
+		MessageProducer producer = null;
+		MessageConsumer messageConsumer = null;
 		
-		final Queue responseQueue = session.createQueue(RESPONSE_QUEUE_PREFIX + recipientCN + "-" + sessionId);
-		final MessageConsumer messageConsumer = session.createConsumer(responseQueue);
-
-		producer.send(textMessage);
-		
-		// waiting for acknowledgement
-		final Message ackMsg = messageConsumer.receive(timeout);
-		
-		if (ackMsg == null) {
+		try {
+			final Topic topic = session.createTopic(GENERAL_TOPIC_NAME);
+			producer = session.createProducer(topic);
+			
+			final Queue responseQueue = session.createQueue(RESPONSE_QUEUE_PREFIX + recipientCN + "-" + sessionId);
+			messageConsumer = session.createConsumer(responseQueue);
+			
+			producer.send(textMessage);
+			
+			// waiting for acknowledgement
+			final Message ackMsg = messageConsumer.receive(timeout);
+			
+			if (ackMsg == null) {
+				closeThese(producer, messageConsumer);
+				
+				return null;
+			}
+			
+			if (ackMsg instanceof TextMessage) {
+				final TextMessage tmsg = (TextMessage) ackMsg;
+				final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
+				validateAcknowledgement(sessionId, decryptedMessageDTO);
+				producer.close();
+				
+				return new GeneralAdvertisementResult(messageConsumer, recipientCN, peerPublicKey, sessionId);
+			}
+			
+			throw new JMSException("Invalid message class: " + ackMsg.getClass().getSimpleName());
+		} catch (final JMSException | ArrowheadException ex) {
 			closeThese(producer, messageConsumer);
-			
-			return null;
+			throw ex;
 		}
-		
-		if (ackMsg instanceof TextMessage) {
-			final TextMessage tmsg = (TextMessage) ackMsg;
-			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
-			validateAcknowledgement(sessionId, decryptedMessageDTO);
-			producer.close();
-			
-			return new GeneralAdvertisementResult(messageConsumer, recipientCN, peerPublicKey, sessionId);
-		}
-
-		closeThese(producer, messageConsumer);
-		
-		throw new JMSException("Invalid message class: " + ackMsg.getClass().getSimpleName());
-
 	}
 	
 	//-------------------------------------------------------------------------------------------------
