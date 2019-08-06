@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
@@ -35,6 +36,10 @@ import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
@@ -51,6 +56,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final String GENERAL_TOPIC_NAME = "General-" + GENERATED_TOPIC_SUFFIX;
 	private static final String REQUEST_QUEUE_PREFIX = "REQ-";
 	private static final String RESPONSE_QUEUE_PREFIX = "RESP-";
+	private static final String ERROR_CODE = "errorCode";
 	
 	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int SESSION_ID_LENGTH = 48;
@@ -200,6 +206,11 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.isTrue(!Utilities.isEmpty(request.getMessageType()), "Message type is null or blank.");
 		Assert.notNull(responsePayload, "Payload is null.");
 		
+		final Class<?> responseClass = getMessageDTOClass(request.getMessageType(), false);
+		if (!responsePayload.getClass().isInstance(responseClass) && !responsePayload.getClass().isInstance(ErrorMessageDTO.class)) {
+			throw new InvalidParameterException("The specified payload is not a valid response to the specified request.");
+		}
+		
 		final String encryptedResponse = cryptographer.encodeRelayMessage(request.getMessageType(), request.getSessionId(), responsePayload, request.getPeerPublicKey());
 		final TextMessage respMsg = session.createTextMessage(encryptedResponse);
 		request.getAnswerSender().send(respMsg);
@@ -287,12 +298,18 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			final TextMessage tmsg = (TextMessage) ansMsg;
 			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), advResponse.getPeerPublicKey());
 			validateResponse(advResponse.getSessionId(), messageType, decryptedMessageDTO);
-			final Object payload = extractPayload(decryptedMessageDTO, false);
-			final GatekeeperRelayResponse response = new GatekeeperRelayResponse(decryptedMessageDTO.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
 			
-			closeThese(messageProducer, advResponse.getAnswerReceiver());
-			
-			return response;
+			if (isErrorResponse(decryptedMessageDTO)) {
+				final ErrorMessageDTO errorMessage = extractErrorPayload(decryptedMessageDTO);
+				handleError(errorMessage);
+			} else {
+				final Object payload = extractPayload(decryptedMessageDTO, false);
+				final GatekeeperRelayResponse response = new GatekeeperRelayResponse(decryptedMessageDTO.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
+				
+				closeThese(messageProducer, advResponse.getAnswerReceiver());
+				
+				return response;
+			}
 		}
 
 		closeThese(messageProducer, advResponse.getAnswerReceiver());
@@ -410,6 +427,53 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		}
 		
 		validateSessionId(sessionId, msg.getSessionId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isErrorResponse(final DecryptedMessageDTO msg) {
+		return msg.getPayload().contains(ERROR_CODE);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ErrorMessageDTO extractErrorPayload(final DecryptedMessageDTO decryptedMessageDTO) {
+		logger.debug("extractErrorPayload started...");
+		
+		try {
+			return mapper.readValue(decryptedMessageDTO.getPayload(), ErrorMessageDTO.class);
+		} catch (final IOException ex) {
+			logger.error("Can't convert payload with type {}", ErrorMessageDTO.class.getSimpleName());
+			logger.debug(ex);
+			throw new ArrowheadException("Can't convert payload with type " + ErrorMessageDTO.class.getSimpleName());
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void handleError(final ErrorMessageDTO dto) {
+		if (dto.getExceptionType() == null) {
+			logger.error("Request failed, error message: {}", dto.getErrorMessage());
+		    throw new ArrowheadException("Unknown error occurred at " + ActiveMQGatekeeperRelayClient.class.getSimpleName() + ". Check log for possibly more information.");
+		}
+		
+		logger.error("Request returned with {}: {}", dto.getExceptionType(), dto.getErrorMessage());
+		switch (dto.getExceptionType()) {
+	    case ARROWHEAD:
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case AUTH:
+	        throw new AuthException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case BAD_PAYLOAD:
+	        throw new BadPayloadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case INVALID_PARAMETER:
+	    	throw new InvalidParameterException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case DATA_NOT_FOUND:
+            throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case GENERIC:
+            throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case UNAVAILABLE:
+	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    default:
+	    	logger.error("Unknown exception type: {}", dto.getExceptionType());
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        }
 	}
 	
 	//-------------------------------------------------------------------------------------------------
