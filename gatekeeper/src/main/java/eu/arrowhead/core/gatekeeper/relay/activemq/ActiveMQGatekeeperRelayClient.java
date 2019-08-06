@@ -223,9 +223,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		logger.debug("publishGeneralAdvertisement started...");
 		
 		Assert.notNull(session, "session is null.");
-		Assert.isTrue(!Utilities.isEmpty(senderCN), "senderCN is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(recipientCN), "recipientCN is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(recipientPublicKey), "recipientPublicKey is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(senderCN), "senderCN is null or blank.");
 		final PublicKey peerPublicKey = Utilities.getPublicKeyFromBase64EncodedString(recipientPublicKey);
 
 		final String sessionId = createSessionId();
@@ -273,48 +273,48 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.notNull(session, "session is null.");
 		Assert.notNull(advResponse, "advResponse is null.");
 		Assert.notNull(advResponse.getAnswerReceiver(), "Receiver is null.");
-		Assert.notNull(advResponse.getPeerPublicKey(), "Peer public key is null.");
-		Assert.isTrue(!Utilities.isEmpty(advResponse.getSessionId()), "Session id is null or blank.");
-		Assert.notNull(requestPayload, "Payload is null.");
+		
+		MessageProducer messageProducer = null;
+		try {
+			Assert.notNull(advResponse.getPeerPublicKey(), "Peer public key is null.");
+			Assert.isTrue(!Utilities.isEmpty(advResponse.getSessionId()), "Session id is null or blank.");
+			Assert.notNull(requestPayload, "Payload is null.");
 
-		final Queue requestQueue = session.createQueue(REQUEST_QUEUE_PREFIX + advResponse.getPeerCN() + "-" + advResponse.getSessionId());
-		final MessageProducer messageProducer = session.createProducer(requestQueue);
-		
-		final String messageType = getMessageType(requestPayload);
-		final String encryptedRequest = cryptographer.encodeRelayMessage(messageType, advResponse.getSessionId(), requestPayload, advResponse.getPeerPublicKey());
-		final TextMessage message = session.createTextMessage(encryptedRequest);
-		messageProducer.send(message);
-		
-		// waiting for the response
-		final Message ansMsg = advResponse.getAnswerReceiver().receive(timeout);
-		
-		if (ansMsg == null) { // timeout
-			closeThese(messageProducer, advResponse.getAnswerReceiver());
+			final Queue requestQueue = session.createQueue(REQUEST_QUEUE_PREFIX + advResponse.getPeerCN() + "-" + advResponse.getSessionId());
+			messageProducer = session.createProducer(requestQueue);
 			
-			return null; // no response arrived in time
-		}
-		
-		if (ansMsg instanceof TextMessage) {
-			final TextMessage tmsg = (TextMessage) ansMsg;
-			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), advResponse.getPeerPublicKey());
-			validateResponse(advResponse.getSessionId(), messageType, decryptedMessageDTO);
+			final String messageType = getMessageType(requestPayload);
+			final String encryptedRequest = cryptographer.encodeRelayMessage(messageType, advResponse.getSessionId(), requestPayload, advResponse.getPeerPublicKey());
+			final TextMessage message = session.createTextMessage(encryptedRequest);
+			messageProducer.send(message);
 			
-			if (isErrorResponse(decryptedMessageDTO)) {
-				final ErrorMessageDTO errorMessage = extractErrorPayload(decryptedMessageDTO);
-				handleError(errorMessage);
-			} else {
-				final Object payload = extractPayload(decryptedMessageDTO, false);
-				final GatekeeperRelayResponse response = new GatekeeperRelayResponse(decryptedMessageDTO.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
-				
-				closeThese(messageProducer, advResponse.getAnswerReceiver());
-				
-				return response;
+			// waiting for the response
+			final Message ansMsg = advResponse.getAnswerReceiver().receive(timeout);
+			
+			if (ansMsg == null) { // timeout
+				return null; // no response arrived in time
 			}
-		}
+			
+			if (ansMsg instanceof TextMessage) {
+				final TextMessage tmsg = (TextMessage) ansMsg;
+				final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), advResponse.getPeerPublicKey());
+				validateResponse(advResponse.getSessionId(), messageType, decryptedMessageDTO);
+				
+				if (isErrorResponse(decryptedMessageDTO)) {
+					final ErrorMessageDTO errorMessage = extractErrorPayload(decryptedMessageDTO);
+					handleError(errorMessage);
+				} else {
+					final Object payload = extractPayload(decryptedMessageDTO, false);
+					final GatekeeperRelayResponse response = new GatekeeperRelayResponse(decryptedMessageDTO.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
+					
+					return response;
+				}
+			}
 
-		closeThese(messageProducer, advResponse.getAnswerReceiver());
-		
-		throw new JMSException("Invalid message class: " + ansMsg.getClass().getSimpleName());
+			throw new JMSException("Invalid message class: " + ansMsg.getClass().getSimpleName());
+		} finally {
+			closeThese(messageProducer, advResponse.getAnswerReceiver());
+		}
 	}
 	
 	//=================================================================================================
@@ -482,7 +482,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		for (final AutoCloseable closeable : closeables) {
 			try {
-				closeable.close();
+				if (closeable != null) {
+					closeable.close();
+				}
 			} catch (final Exception ex) {
 				logger.debug(ex.getMessage());
 				logger.trace(ex);
