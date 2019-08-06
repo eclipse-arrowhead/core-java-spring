@@ -320,8 +320,8 @@ public class Utilities {
 		}
 				
 		try {
-			return RelayType.valueOf(RelayType.class, str);			
-		} catch (IllegalArgumentException ex) {
+			return RelayType.valueOf(str.toUpperCase().trim());			
+		} catch (final IllegalArgumentException ex) {
 			return null;
 		}
 	}

@@ -162,7 +162,7 @@ public class UtilitiesTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testFromJSONConvertSuccess() {
-		ErrorMessageDTO result = Utilities.fromJson("{ \"exceptionType\": \"AUTH\" }", ErrorMessageDTO.class);
+		final ErrorMessageDTO result = Utilities.fromJson("{ \"exceptionType\": \"AUTH\" }", ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.AUTH, result.getExceptionType());
 	}
 	
@@ -257,42 +257,49 @@ public class UtilitiesTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConvertStringToRelayTypeWithNullString() {
-		RelayType convertedType = Utilities.convertStringToRelayType(null);
+		final RelayType convertedType = Utilities.convertStringToRelayType(null);
 		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConvertStringToRelayTypeWithBlankString() {
-		RelayType convertedType = Utilities.convertStringToRelayType("");
+		final RelayType convertedType = Utilities.convertStringToRelayType("");
 		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConvertStringToRelayTypeWithInvalidString() {
-		RelayType convertedType = Utilities.convertStringToRelayType("InvalidString");
+		final RelayType convertedType = Utilities.convertStringToRelayType("InvalidString");
 		Assert.assertEquals(null, convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConvertStringToRelayTypeWithValidGatekeeperTypeString() {
-		RelayType convertedType = Utilities.convertStringToRelayType("GATEKEEPER_RELAY");
+		final RelayType convertedType = Utilities.convertStringToRelayType("GATEKEEPER_RELAY");
 		Assert.assertEquals(RelayType.GATEKEEPER_RELAY, convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConvertStringToRelayTypeWithValidGatewayTypeString() {
-		RelayType convertedType = Utilities.convertStringToRelayType("GATEWAY_RELAY");
+		final RelayType convertedType = Utilities.convertStringToRelayType("GATEWAY_RELAY");
 		Assert.assertEquals(RelayType.GATEWAY_RELAY, convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConvertStringToRelayTypeWithValidGeneralTypeString() {
-		RelayType convertedType = Utilities.convertStringToRelayType("GENERAL_RELAY");
+		final RelayType convertedType = Utilities.convertStringToRelayType("GENERAL_RELAY");
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidButLowercaseStringWithWhiteSpaces() {
+		final RelayType convertedType = Utilities.convertStringToRelayType(" general_relay ");
 		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
 	}
 	
