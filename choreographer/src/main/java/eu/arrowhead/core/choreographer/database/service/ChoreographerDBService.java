@@ -216,16 +216,22 @@ public class ChoreographerDBService {
 
         List<ChoreographerAction> choreographerActions = new ArrayList<>(actions.size());
         for(ChoreographerExistingActionRequestDTO action : actions) {
-            Optional<ChoreographerAction> nextActionOptional = choreographerActionRepository.findByActionName(action.getNextActionName());
-            if(nextActionOptional.isPresent()) {
-                Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionNameAndNextAction(action.getActionName(), nextActionOptional.get());
-                if(actionOptional.isPresent()) {
-                    choreographerActions.add(actionOptional.get());
+            String nextActionName = action.getNextActionName();
+            if(nextActionName != null) {
+                Optional<ChoreographerAction> nextActionOptional = choreographerActionRepository.findByActionName(nextActionName);
+                if(nextActionOptional.isPresent()) {
+                    Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionNameAndNextAction(action.getActionName(), nextActionOptional.get());
+                    if(actionOptional.isPresent()) {
+                        choreographerActions.add(actionOptional.get());
+                    } else {
+                        throw new InvalidParameterException("One or more given Actions are not present in the database! Please create them first!");
+                    }
                 } else {
-                    throw new InvalidParameterException("One or more given Actions are not present in the database! Please create them first!");
+                    throw new InvalidParameterException("The NextAction you defined for an Action doesn't match with the Action's initial NextAction!");
                 }
             } else {
-                throw new InvalidParameterException("The NextAction you defined for an Action doesn't match with the Action's initial NextAction!");
+                Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionName(action.getActionName());
+                actionOptional.ifPresent(choreographerActions::add);
             }
         }
 

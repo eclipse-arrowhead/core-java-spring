@@ -2,7 +2,9 @@ package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestWithExistingActionDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerExistingActionRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.ApiOperation;
@@ -34,11 +36,12 @@ public class ChoreographerController {
 
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_URI = CommonConstants.MGMT_URI + "/actionplan";
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+    private static final String CHOREOGRAPHER_ACTION_PLAN_WITH_ACTIONS_MGMT_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/withactions";
 
     private static final String GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE = "ChoreographerActionStep returned.";
     private static final String GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve ChoreographerActionStep.";
-    private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE = "ChoreographerActionStep created with given service definitions.";
-    private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE = "Could not create ChoreographerActionStep.";
+    private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE = "ChoreographerActionPlan created with given service definitions.";
+    private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE = "Could not create ChoreographerActionPlan.";
     private static final String DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_200_MESSAGE = "ChoreographerActionPlan successfully removed.";
     private static final String DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_400_MESSAGE = "Could not remove ChoreographerActionPlan.";
 
@@ -69,10 +72,24 @@ public class ChoreographerController {
     })
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody
-    public void registerActionPlans(@RequestBody final List<ChoreographerActionPlanRequestDTO> requests) {
+    @ResponseBody public void registerActionPlans(@RequestBody final List<ChoreographerActionPlanRequestDTO> requests) {
         for(ChoreographerActionPlanRequestDTO request : requests) {
             choreographerDBService.createChoreographerActionPlan(request.getActionPlanName(), request.getActions());
+        }
+    }
+
+    @ApiOperation(value = "Register one ore more ActionPlans using already existing Action chains only.")
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_WITH_ACTIONS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+    @ResponseBody public void registerActionPlansWithExistingActions(@RequestBody final List<ChoreographerActionPlanRequestWithExistingActionDTO> requests) {
+        for (ChoreographerActionPlanRequestWithExistingActionDTO request : requests) {
+            choreographerDBService.createChoreographerActionPlanWithExistingActions(request.getActionPlanName(), request.getActions());
         }
     }
 
