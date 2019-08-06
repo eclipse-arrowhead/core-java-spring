@@ -35,6 +35,7 @@ public class CloudRequestDTO implements Serializable {
 	public void setSecure(final Boolean secure) { this.secure = secure; }
 	public void setNeighbor(final Boolean neighbor) { this.neighbor = neighbor; }
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setGatekeeperRelayIds(final List<Long> gatekeeperRelayIds) { this.gatekeeperRelayIds = gatekeeperRelayIds; }
 	public void setGatewayRelayIds(final List<Long> gatewayRelayIds) { this.gatewayRelayIds = gatewayRelayIds; }
 	
 }

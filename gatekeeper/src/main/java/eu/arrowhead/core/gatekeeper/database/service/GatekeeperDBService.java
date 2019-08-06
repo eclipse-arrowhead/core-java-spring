@@ -288,10 +288,10 @@ public class GatekeeperDBService {
 			if (gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {		
 				
 				for (final Long relayId : gatekeeperRelayIds) {
-					if (relayId != null && relayId > 1 && !extantGatekeeperRelayIds.contains(relayId) ) {					
+					if (relayId != null && relayId >= 1 && !extantGatekeeperRelayIds.contains(relayId) ) {					
 						normalizedGatekeeperRelayIds.add(relayId);
 					} else {
-						throw new InvalidParameterException("Relay with id '" + relayId +"' not exists");
+						throw new InvalidParameterException("Invalid relay id: " + relayId);
 					}
 				}
 			}
@@ -300,10 +300,10 @@ public class GatekeeperDBService {
 			if (gatewayRelayIds != null && !gatewayRelayIds.isEmpty()) {		
 				
 				for (final Long relayId : gatewayRelayIds) {
-					if (relayId != null && relayId > 1 && !extantGatewayRelayIds.contains(relayId)) {
+					if (relayId != null && relayId >= 1 && !extantGatewayRelayIds.contains(relayId)) {
 						normalizedGatewayRelayIds.add(relayId);
 					} else {
-						throw new InvalidParameterException("Relay with id '" + relayId +"' not exists");
+						throw new InvalidParameterException("Invalid relay id: " + relayId);
 					}
 				}
 			}			
@@ -327,11 +327,12 @@ public class GatekeeperDBService {
 	public void removeCloudById(final long id) {
 		logger.debug("removeCloudById started...");
 		
+		if (id < 1) {
+			throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
+		}
+
 		try {
 			
-			if (id < 1) {
-				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
-			}
 			
 			if (cloudRepository.existsById(id)) {
 				cloudRepository.deleteById(id);
