@@ -207,7 +207,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		Assert.notNull(responsePayload, "Payload is null.");
 		
 		final Class<?> responseClass = getMessageDTOClass(request.getMessageType(), false);
-		if (!responsePayload.getClass().isInstance(responseClass) && !responsePayload.getClass().isInstance(ErrorMessageDTO.class)) {
+		if (!responseClass.isInstance(responsePayload) && !ErrorMessageDTO.class.isInstance(responsePayload)) {
 			throw new InvalidParameterException("The specified payload is not a valid response to the specified request.");
 		}
 		
