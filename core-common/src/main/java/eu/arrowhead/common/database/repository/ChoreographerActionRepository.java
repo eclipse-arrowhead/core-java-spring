@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface ChoreographerActionRepository extends RefreshableRepository<ChoreographerAction, Long> {
 
     public Optional<ChoreographerAction> findByActionName(final String actionName);
+    public Optional<ChoreographerAction> findByActionNameAndNextAction(final String actionName, final ChoreographerAction nextAction);
 
 }

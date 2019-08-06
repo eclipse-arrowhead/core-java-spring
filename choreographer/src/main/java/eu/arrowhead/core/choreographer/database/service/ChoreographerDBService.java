@@ -138,7 +138,6 @@ public class ChoreographerDBService {
             actionEntry.getActionActionStepConnections().add(connection);
         }
 
-
         for (ChoreographerActionStepRequestDTO actionStep : actionSteps) {
             List<String> nextActionStepNames = actionStep.getNextActionStepNames();
             if(nextActionStepNames != null && !nextActionStepNames.isEmpty()) {
@@ -163,14 +162,12 @@ public class ChoreographerDBService {
             throw new InvalidParameterException("Action with given Action Name of " + actionName + "doesn't exist!");
         }
 
-        ChoreographerAction nextAction = new ChoreographerAction();
         Optional<ChoreographerAction> nextActionOpt = choreographerActionRepository.findByActionName(nextActionName);
         if(nextActionOpt.isPresent()) {
-            nextAction = nextActionOpt.get();
-            choreographerAction.setNextAction(nextAction);
-        } /*else {
+            choreographerAction.setNextAction(nextActionOpt.get());
+        } else {
             throw new InvalidParameterException("Action with given Action Name of " + nextActionName + "doesn't exist!");
-        }*/
+        }
 
         return choreographerActionRepository.saveAndFlush(choreographerAction);
     }
@@ -190,9 +187,9 @@ public class ChoreographerDBService {
         ChoreographerActionPlan actionPlanEntry = choreographerActionPlanRepository.save(actionPlan);
 
         for(ChoreographerActionRequestDTO action : actions) {
-            ChoreographerActionPlanActionConnection connection = choreographerActionPlanActionConnectionRepository
-                    .save(new ChoreographerActionPlanActionConnection(actionPlanEntry, createChoreographerAction(action.getActionName(), action.getActionSteps())));
-            actionPlanEntry.getActionPlanActionConnections().add(connection);
+                ChoreographerActionPlanActionConnection connection = choreographerActionPlanActionConnectionRepository
+                        .save(new ChoreographerActionPlanActionConnection(actionPlanEntry, createChoreographerAction(action.getActionName(), action.getActionSteps())));
+                actionPlanEntry.getActionPlanActionConnections().add(connection);
         }
 
         for (ChoreographerActionRequestDTO action : actions) {
@@ -200,6 +197,43 @@ public class ChoreographerDBService {
         }
 
         choreographerActionPlanActionConnectionRepository.flush();
+
+        return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
+    }
+
+    public ChoreographerActionPlan createChoreographerActionPlanWithExistingActions(final String actionPlanName, List<ChoreographerExistingActionRequestDTO> actions) {
+        logger.debug("createChoreographerActionPlanWithExistingActions started...");
+
+        Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
+
+        choreographerActionPlanOpt.ifPresent(choreographerActionPlan -> {
+            throw new InvalidParameterException("ActionPlan with given name already exists! ActionPlan NAMES must be UNIQUE!");
+        });
+
+        ChoreographerActionPlan actionPlan = new ChoreographerActionPlan(actionPlanName);
+
+        ChoreographerActionPlan actionPlanEntry = choreographerActionPlanRepository.save(actionPlan);
+
+        List<ChoreographerAction> choreographerActions = new ArrayList<>(actions.size());
+        for(ChoreographerExistingActionRequestDTO action : actions) {
+            Optional<ChoreographerAction> nextActionOptional = choreographerActionRepository.findByActionName(action.getNextActionName());
+            if(nextActionOptional.isPresent()) {
+                Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionNameAndNextAction(action.getActionName(), nextActionOptional.get());
+                if(actionOptional.isPresent()) {
+                    choreographerActions.add(actionOptional.get());
+                } else {
+                    throw new InvalidParameterException("One or more given Actions are not present in the database! Please create them first!");
+                }
+            } else {
+                throw new InvalidParameterException("The NextAction you defined for an Action doesn't match with the Action's initial NextAction!");
+            }
+        }
+
+        for (ChoreographerAction action : choreographerActions) {
+            ChoreographerActionPlanActionConnection connection = choreographerActionPlanActionConnectionRepository
+                    .save(new ChoreographerActionPlanActionConnection(actionPlanEntry, action));
+            actionPlanEntry.getActionPlanActionConnections().add(connection);
+        }
 
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
     }

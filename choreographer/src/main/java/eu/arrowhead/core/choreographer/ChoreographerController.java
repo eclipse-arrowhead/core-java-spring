@@ -58,7 +58,9 @@ public class ChoreographerController {
         return "Got it!";
     }
 
-    @ApiOperation(value = "Register one ore more ActionPlans.")
+    @ApiOperation(value = "Register one ore more ActionPlans.",
+            notes = "Please note that creating ActionPlans this way means that Actions included in the ActionPlan(s) can't be already existing Actions." +
+                    "If you want to create an ActionPlan with already existing Actions please use the corresponding endpoint!")
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
