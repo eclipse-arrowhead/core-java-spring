@@ -539,7 +539,7 @@ public class OrchestratorService {
 		    final List<String> interfaceRequirements = serviceDefinitionIdInterfaceIdsMap.get(entry.getKey());
 		    serviceQueryFormDTO.setInterfaceRequirements(interfaceRequirements);
 		    
-		    final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(orchestrationFormRequestDTO.getRequestedService(), flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+		    final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
 		    final List<ServiceRegistryResponseDTO> filteredQueryResultByInterfaces = filterQueryResultByInterfaces(providerIdInterfaceIdsMap, queryResult);	
 		    final List<ServiceRegistryResponseDTO> filteredQueryResultByAuthorization = orchestratorDriver.queryAuthorization(consumerSystem, filteredQueryResultByInterfaces);	
 		    
