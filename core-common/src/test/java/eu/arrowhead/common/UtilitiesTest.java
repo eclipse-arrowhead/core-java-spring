@@ -27,6 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.Utilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -251,6 +252,48 @@ public class UtilitiesTest {
 		final ArrowheadException ex = new ArrowheadException("Does not matter.");
 		final HttpStatus result = Utilities.calculateHttpStatusFromArrowheadException(ex);
 		Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithNullString() {
+		RelayType convertedType = Utilities.convertStringToRelayType(null);
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithBlankString() {
+		RelayType convertedType = Utilities.convertStringToRelayType("");
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithInvalidString() {
+		RelayType convertedType = Utilities.convertStringToRelayType("InvalidString");
+		Assert.assertEquals(null, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidGatekeeperTypeString() {
+		RelayType convertedType = Utilities.convertStringToRelayType("GATEKEEPER_RELAY");
+		Assert.assertEquals(RelayType.GATEKEEPER_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidGatewayTypeString() {
+		RelayType convertedType = Utilities.convertStringToRelayType("GATEWAY_RELAY");
+		Assert.assertEquals(RelayType.GATEWAY_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidGeneralTypeString() {
+		RelayType convertedType = Utilities.convertStringToRelayType("GENERAL_RELAY");
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
