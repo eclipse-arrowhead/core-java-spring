@@ -52,6 +52,7 @@ import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
+import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
 
 @RunWith(SpringRunner.class)
@@ -369,6 +370,92 @@ public class ActiveMQGatekeeperRelayClientTest {
 		final ErrorMessageDTO errorPayload = new ErrorMessageDTO("error", 401, ExceptionType.ARROWHEAD, "out there");
 		testObject.sendResponse(getTestSession(), getTestGatekeeperRelayRequest("sessionId", CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, new String("does not matter")), errorPayload);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementSessionNull() throws JMSException {
+		testObject.publishGeneralAdvertisement(null, null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientCNNull() throws JMSException {
+		testObject.publishGeneralAdvertisement(getTestSession(), null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientCNEmpty() throws JMSException {
+		testObject.publishGeneralAdvertisement(getTestSession(), " ", null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientPublicKeyNull() throws JMSException {
+		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementRecipientPublicKeyEmpty() throws JMSException {
+		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", " ", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementSenderCNNull() throws JMSException {
+		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", Base64.getEncoder().encodeToString(otherPublicKey.getEncoded()), null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testPublishGeneralAdvertisementSenderCNEmpty() throws JMSException {
+		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", Base64.getEncoder().encodeToString(otherPublicKey.getEncoded()), "");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPublishGeneralAdvertisementNoAcknowledgement() throws JMSException {
+		final String recipientPublicKey = Base64.getEncoder().encodeToString(otherPublicKey.getEncoded());
+		final GeneralAdvertisementResult result = testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey,
+											  											 "gatekeeper.testcloud2.aitia.arrowhead.eu");
+		Assert.assertNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testPublishGeneralAdvertisementInvalidAcknowledgementClass() throws JMSException {
+		final String recipientPublicKey = Base64.getEncoder().encodeToString(otherPublicKey.getEncoded());
+		final TestSession testSession = getTestSession();
+		testSession.setConsumerWithMessage(new ActiveMQObjectMessage());
+		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey, "gatekeeper.testcloud2.aitia.arrowhead.eu");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testPublishGeneralAdvertisementInvalidAcknowledgementMessageType() throws JMSException {
+		final String recipientPublicKey = Base64.getEncoder().encodeToString(otherPublicKey.getEncoded());
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final String encodedMessage = recipientCryptographer.encodeRelayMessage("invalid", "sessionId", null, clientPublicKey); 
+		final TextMessage ackMsg = new ActiveMQTextMessage();
+		ackMsg.setText(encodedMessage);
+		final TestSession testSession = getTestSession();
+		testSession.setConsumerWithMessage(ackMsg);
+		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey, "gatekeeper.testcloud2.aitia.arrowhead.eu");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testPublishGeneralAdvertisementInvalidAcknowledgementSessionId() throws JMSException {
+		final String recipientPublicKey = Base64.getEncoder().encodeToString(otherPublicKey.getEncoded());
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final String encodedMessage = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_ACK, "sessionId", null, clientPublicKey); 
+		final TextMessage ackMsg = new ActiveMQTextMessage();
+		ackMsg.setText(encodedMessage);
+		final TestSession testSession = getTestSession();
+		testSession.setConsumerWithMessage(ackMsg);
+		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey, "gatekeeper.testcloud2.aitia.arrowhead.eu");
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -439,6 +526,16 @@ public class ActiveMQGatekeeperRelayClientTest {
 		
 		//-------------------------------------------------------------------------------------------------
 		@Override
+		public Topic createTopic(final String topicName) throws JMSException { 
+			return new Topic() {
+				public String getTopicName() throws JMSException {
+					return topicName;
+				}
+			};
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		@Override
 		public MessageConsumer createConsumer(final Destination destination) throws JMSException {
 			return consumer;
 		}
@@ -481,7 +578,6 @@ public class ActiveMQGatekeeperRelayClientTest {
 		public MessageConsumer createConsumer(final Destination destination, final String messageSelector, final boolean noLocal) throws JMSException { return null; }
 		public MessageConsumer createSharedConsumer(final Topic topic, final String sharedSubscriptionName) throws JMSException { return null; }
 		public MessageConsumer createSharedConsumer(final Topic topic, final String sharedSubscriptionName, final String messageSelector) throws JMSException { return null; }
-		public Topic createTopic(final String topicName) throws JMSException { return null; }
 		public TopicSubscriber createDurableSubscriber(final Topic topic, final String name) throws JMSException { return null; }
 		public TopicSubscriber createDurableSubscriber(final Topic topic, final String name, final String messageSelector, final boolean noLocal) throws JMSException { return null; }
 		public MessageConsumer createDurableConsumer(final Topic topic, final String name) throws JMSException { return null; }
@@ -501,7 +597,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 		//=================================================================================================
 		// members
 		
-		private Message msg;
+		private final Message msg;
 		
 		//=================================================================================================
 		// methods
@@ -544,31 +640,31 @@ public class ActiveMQGatekeeperRelayClientTest {
 		
 		//-------------------------------------------------------------------------------------------------
 		@Override
-		public void send(Message message) throws JMSException {}
+		public void send(final Message message) throws JMSException {}
 		
 		//=================================================================================================
 		// not used methods
 
 		//-------------------------------------------------------------------------------------------------
-		public void setDisableMessageID(boolean value) throws JMSException {}
+		public void setDisableMessageID(final boolean value) throws JMSException {}
 		public boolean getDisableMessageID() throws JMSException { return false; }
-		public void setDisableMessageTimestamp(boolean value) throws JMSException {}
+		public void setDisableMessageTimestamp(final boolean value) throws JMSException {}
 		public boolean getDisableMessageTimestamp() throws JMSException { return false; }
-		public void setDeliveryMode(int deliveryMode) throws JMSException {}
+		public void setDeliveryMode(final int deliveryMode) throws JMSException {}
 		public int getDeliveryMode() throws JMSException { return 0; }
-		public void setPriority(int defaultPriority) throws JMSException {}
+		public void setPriority(final int defaultPriority) throws JMSException {}
 		public int getPriority() throws JMSException { return 0; }
-		public void setTimeToLive(long timeToLive) throws JMSException {}
+		public void setTimeToLive(final long timeToLive) throws JMSException {}
 		public long getTimeToLive() throws JMSException { return 0; }
-		public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
+		public void setDeliveryDelay(final long deliveryDelay) throws JMSException {}
 		public long getDeliveryDelay() throws JMSException { return 0; }
 		public Destination getDestination() throws JMSException { return null; }
-		public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-		public void send(Destination destination, Message message) throws JMSException {}
-		public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
-		public void send(Message message, CompletionListener completionListener) throws JMSException {}
-		public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
-		public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
-		public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+		public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+		public void send(final Destination destination, final Message message) throws JMSException {}
+		public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive) throws JMSException {}
+		public void send(final Message message, final CompletionListener completionListener) throws JMSException {}
+		public void send(final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
+		public void send(final Destination destination, final Message message, final CompletionListener completionListener) throws JMSException {}
+		public void send(final Destination destination, final Message message, final int deliveryMode, final int priority, final long timeToLive, final CompletionListener completionListener) throws JMSException {}
 	}
 }
