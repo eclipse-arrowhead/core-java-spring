@@ -41,11 +41,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
@@ -318,6 +322,53 @@ public class ActiveMQGatekeeperRelayClientTest {
 		Assert.assertNotNull(request);
 		Assert.assertNotNull("test-service", request.getRequestedServiceDefinition());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendResponseSessionNull() throws JMSException {
+		testObject.sendResponse(null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendResponseRequestNull() throws JMSException {
+		testObject.sendResponse(getTestSession(), null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendResponseResponsePayloadNull() throws JMSException {
+		testObject.sendResponse(getTestSession(), getTestGatekeeperRelayRequest("sessionId", CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, new String("does not matter")), null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendResponseResponseInvalidMessageType() throws JMSException {
+		testObject.sendResponse(getTestSession(), getTestGatekeeperRelayRequest("sessionId", "invalid", new String("does not matter")), new String("nor this one"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testSendResponseResponseMessageTypeResponsePayloadMismatch() throws JMSException {
+		testObject.sendResponse(getTestSession(), getTestGatekeeperRelayRequest("sessionId", CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, new String("does not matter")), new String("nor this one"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testSendResponseResponseNormalResponse() throws JMSException {
+		final GSDPollResponseDTO responsePayload = new GSDPollResponseDTO();
+		responsePayload.setRequestedServiceDefinition("test-service");
+		testObject.sendResponse(getTestSession(), getTestGatekeeperRelayRequest("sessionId", CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, new String("does not matter")), responsePayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699")
+	@Test
+	public void testSendResponseResponseErrorResponse() throws JMSException {
+		final ErrorMessageDTO errorPayload = new ErrorMessageDTO("error", 401, ExceptionType.ARROWHEAD, "out there");
+		testObject.sendResponse(getTestSession(), getTestGatekeeperRelayRequest("sessionId", CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, new String("does not matter")), errorPayload);
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -342,6 +393,11 @@ public class ActiveMQGatekeeperRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	public TestSession getTestSession() {
 		return new TestSession();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GatekeeperRelayRequest getTestGatekeeperRelayRequest(final String sessionId, final String messageType, final Object payload) {
+		return new GatekeeperRelayRequest(new TestMessageProducer(), otherPublicKey, sessionId, messageType, payload);
 	}
 	
 	//=================================================================================================
