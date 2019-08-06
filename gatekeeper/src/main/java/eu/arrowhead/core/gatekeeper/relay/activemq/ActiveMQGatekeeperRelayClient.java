@@ -56,7 +56,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final String GENERAL_TOPIC_NAME = "General-" + GENERATED_TOPIC_SUFFIX;
 	private static final String REQUEST_QUEUE_PREFIX = "REQ-";
 	private static final String RESPONSE_QUEUE_PREFIX = "RESP-";
-	private static final String ERROR_CODE = "errorCode";
+	private static final String ERROR_CODE = "\"errorCode\"";
 	
 	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int SESSION_ID_LENGTH = 48;
@@ -276,6 +276,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		MessageProducer messageProducer = null;
 		try {
+			Assert.isTrue(!Utilities.isEmpty(REQUEST_QUEUE_PREFIX), "Peer common name is null or blank.");
 			Assert.notNull(advResponse.getPeerPublicKey(), "Peer public key is null.");
 			Assert.isTrue(!Utilities.isEmpty(advResponse.getSessionId()), "Session id is null or blank.");
 			Assert.notNull(requestPayload, "Payload is null.");

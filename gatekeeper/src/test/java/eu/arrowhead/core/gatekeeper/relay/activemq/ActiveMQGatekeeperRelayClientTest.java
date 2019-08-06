@@ -52,6 +52,7 @@ import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
 
@@ -456,6 +457,177 @@ public class ActiveMQGatekeeperRelayClientTest {
 		testSession.setConsumerWithMessage(ackMsg);
 		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey, "gatekeeper.testcloud2.aitia.arrowhead.eu");
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseSessionNull() throws JMSException {
+		testObject.sendRequestAndReturnResponse(null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseAdvertisementResponseNull() throws JMSException {
+		testObject.sendRequestAndReturnResponse(getTestSession(), null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testSendRequestAndReturnResponseRequestPayloadNull() throws JMSException {
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(null, "sessionId");		
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseInvalidRequestPayloadClass() throws JMSException {
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(null, "sessionId");		
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, new String("not a valid request"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSendRequestAndReturnResponseNoResponse() throws JMSException {
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(null, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		final GatekeeperRelayResponse result = testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+		Assert.assertNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = JMSException.class)
+	public void testSendRequestAndReturnResponseInvalidResponseClass() throws JMSException {
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(new ActiveMQObjectMessage(), "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testSendRequestAndReturnResponseInvalidMessageType() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, "sessionId", new String("does not matter"), clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testSendRequestAndReturnResponseInvalidSessionId() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "otherSessionId", new String("does not matter"), clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseInvalidErrorResponse() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		
+		final class DummyError {
+			private int errorCode = 1;
+			private int somethingElse = 2;
+			@SuppressWarnings("unused") public int getErrorCode() { return errorCode; }
+			@SuppressWarnings("unused")	public int getSomethingElse() { return somethingElse; }
+			@SuppressWarnings("unused")	public void setErrorCode(final int errorCode) { this.errorCode = errorCode; }
+			@SuppressWarnings("unused")	public void setSomethingElse(final int somethingElse) { this.somethingElse = somethingElse; }
+		}
+		
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "sessionId", new DummyError(), clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseErrorResponseUnknownType() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final ErrorMessageDTO error = new ErrorMessageDTO("an error", 42, null, null);
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "sessionId", error, clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testSendRequestAndReturnResponseErrorResponseTypeInvalidParameter() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final ErrorMessageDTO error = new ErrorMessageDTO("an error", 42, ExceptionType.INVALID_PARAMETER, null);
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "sessionId", error, clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendRequestAndReturnResponseNormalResponseInvalidResponseClass() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "sessionId", new String("invalid"), clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = DataNotFoundException.class)
+	public void testSendRequestAndReturnResponseNormalResponseTryingToAccessTheResponseViaWrongMethod() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final GSDPollResponseDTO response = new GSDPollResponseDTO();
+		response.setRequestedServiceDefinition("test-service");
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "sessionId", response, clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		final GatekeeperRelayResponse result = testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+		result.getICNProposalResponse();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSendRequestAndReturnResponseNormalResponseEverythingIsOK() throws JMSException {
+		final RelayCryptographer recipientCryptographer = new RelayCryptographer(otherPrivateKey);
+		final GSDPollResponseDTO response = new GSDPollResponseDTO();
+		response.setRequestedServiceDefinition("test-service");
+		final String encryptedResponse = recipientCryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, "sessionId", response, clientPublicKey);
+		final TextMessage respMsg = new ActiveMQTextMessage();
+		respMsg.setText(encryptedResponse);
+		final GeneralAdvertisementResult advertisementResponse = getTestGeneralAdvertisementResult(respMsg, "sessionId");		
+		final GSDPollRequestDTO requestPayload = new GSDPollRequestDTO();
+		requestPayload.setRequestedServiceDefinition("test-service");
+		final GatekeeperRelayResponse result = testObject.sendRequestAndReturnResponse(getTestSession(), advertisementResponse, requestPayload);
+		Assert.assertNotNull(result);
+		Assert.assertEquals(CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, result.getMessageType());
+		Assert.assertEquals("sessionId", result.getSessionId());
+		Assert.assertNotNull(result.getGSDPollResponse());
+		Assert.assertEquals("test-service", result.getGSDPollResponse().getRequestedServiceDefinition());
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -485,6 +657,11 @@ public class ActiveMQGatekeeperRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	public GatekeeperRelayRequest getTestGatekeeperRelayRequest(final String sessionId, final String messageType, final Object payload) {
 		return new GatekeeperRelayRequest(new TestMessageProducer(), otherPublicKey, sessionId, messageType, payload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GeneralAdvertisementResult getTestGeneralAdvertisementResult(final Message msg, final String sessionId) {
+		return new GeneralAdvertisementResult(new TestMessageConsumer(msg), "gatekeeper.testcloud1.aitia.arrowhead.eu", otherPublicKey, sessionId);
 	}
 	
 	//=================================================================================================
