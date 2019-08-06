@@ -174,7 +174,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		if (reqMsg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) reqMsg;
 			final DecryptedMessageDTO decryptedMessageDTO = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
-			validateSessionId(gaMsg.getSessionId(), decryptedMessageDTO.getSessionId());
+			validateRequest(gaMsg.getSessionId(), decryptedMessageDTO);
 			final Object payload = extractPayload(decryptedMessageDTO, true);
 			final GatekeeperRelayRequest request = new GatekeeperRelayRequest(messageProducer, peerPublicKey, gaMsg.getSessionId(), decryptedMessageDTO.getMessageType(), payload);
 			messageConsumer.close();
@@ -381,6 +381,17 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			throw new AuthException("Unauthorized message on queue.");
 		}
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateRequest(final String sessionId, final DecryptedMessageDTO msg) {
+		logger.debug("validateRequest started...");
+		
+		if (!CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL.equalsIgnoreCase(msg.getMessageType()) && !CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL.equalsIgnoreCase(msg.getMessageType())) {
+			throw new AuthException("Unauthorized message on queue.");
+		}
+		
+		validateSessionId(sessionId, msg.getSessionId());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
