@@ -281,7 +281,7 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException("Cloud with id '" + id +"' not exists");
 			}
 			final Cloud cloud = cloudOpt.get();
-			final Set<Long> extantGatekeeperRelayIds = collectGatkeeperRelayIdsFromCloud(cloud);
+			final Set<Long> extantGatekeeperRelayIds = collectGatekeeperRelayIdsFromCloud(cloud);
 			final Set<Long> extantGatewayRelayIds = collectGatewayRelayIdsFromCloud(cloud);
 			
 			final Set<Long> normalizedGatekeeperRelayIds = new HashSet<>();
@@ -596,7 +596,7 @@ public class GatekeeperDBService {
 		name = name.toLowerCase().trim();
 		
 		if (operator.contains(".") || name.contains(".")) {
-			throw new InvalidParameterException("Cloud operator and name can't contains dot (.)");
+			throw new InvalidParameterException("Cloud operator and name can't contain dot (.)");
 		}
 		
 		secure = secure == null ? false : secure;
@@ -775,7 +775,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Set<Long> collectGatkeeperRelayIdsFromCloud(final Cloud cloud) {
+	private Set<Long> collectGatekeeperRelayIdsFromCloud(final Cloud cloud) {
 		logger.debug("collectGatkeeperRelayIdsFromCloud started...");
 		
 		final Set<Long> idSet = new HashSet<>();
