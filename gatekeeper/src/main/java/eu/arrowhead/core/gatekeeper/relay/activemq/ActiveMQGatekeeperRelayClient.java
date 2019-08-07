@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.DecryptedMessageDTO;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
@@ -36,10 +37,7 @@ import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
@@ -478,25 +476,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		}
 		
 		logger.error("Request returned with {}: {}", dto.getExceptionType(), dto.getErrorMessage());
-		switch (dto.getExceptionType()) {
-	    case ARROWHEAD:
-	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    case AUTH:
-	        throw new AuthException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    case BAD_PAYLOAD:
-	        throw new BadPayloadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    case INVALID_PARAMETER:
-	    	throw new InvalidParameterException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        case DATA_NOT_FOUND:
-            throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        case GENERIC:
-            throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        case UNAVAILABLE:
-	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    default:
-	    	logger.error("Unknown exception type: {}", dto.getExceptionType());
-	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        }
+		DTOUtilities.createExceptionFromErrorMessageDTO(dto);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
