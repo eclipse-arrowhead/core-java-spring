@@ -126,6 +126,9 @@ public class OrchestratorService {
 			final Long systemId) {
 		logger.debug("orchestrationFromStoreWithSystemParameter started ...");		
 		
+		if (orchestrationFormRequestDTO == null) {
+			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
 		orchestrationFormRequestDTO.validateCrossParameterConstraints();
 		
 		final List<OrchestratorStore> entryList;
