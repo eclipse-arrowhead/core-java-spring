@@ -114,7 +114,7 @@ public class GatekeeperControllerRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetRelaysWithoutParameterWithNullPageButDefinedSizeParameter() throws Exception {
+	public void testGetRelaysWithNullPageButDefinedSizeParameter() throws Exception {
 		this.mockMvc.perform(get(RELAYS_MGMT_URI)
 					.param("item_per_page", "1")
 					.accept(MediaType.APPLICATION_JSON))
@@ -123,7 +123,7 @@ public class GatekeeperControllerRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetRelaysWithoutParameterWithDefinedPageButNullSizeParameter() throws Exception {
+	public void testGetRelaysWithDefinedPageButNullSizeParameter() throws Exception {
 		this.mockMvc.perform(get(RELAYS_MGMT_URI)
 					.param("page", "0")
 					.accept(MediaType.APPLICATION_JSON))
@@ -132,7 +132,7 @@ public class GatekeeperControllerRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetRelaysWithoutParameterWithInvalidSortDirectionFlagParameter() throws Exception {
+	public void testGetRelaysWithInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get(RELAYS_MGMT_URI)
 					.param("direction", "invalid")
 					.accept(MediaType.APPLICATION_JSON))
