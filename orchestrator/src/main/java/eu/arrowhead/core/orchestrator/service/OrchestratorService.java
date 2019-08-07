@@ -664,7 +664,6 @@ public class OrchestratorService {
 			final Long providerIdFromResult = serviceRegistryResponseDTO.getProvider().getId();
 			final List<ServiceInterfaceResponseDTO> interfaceListFromResult = serviceRegistryResponseDTO.getInterfaces();
 			final List<ServiceInterfaceResponseDTO> filteredInterfaceList = new ArrayList<>();
-			filteredInterfaceList.clear();
 			
 			if (providerIdInterfaceIdsMap.containsKey(providerIdFromResult)) {
 				
