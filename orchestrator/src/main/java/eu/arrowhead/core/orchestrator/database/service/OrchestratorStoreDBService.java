@@ -268,13 +268,14 @@ public class OrchestratorStoreDBService {
 		if ( consumerSystemId < 1) {
 			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
-		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
-			if ( consumerOption.isEmpty() ) {
-				throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
-			}
-				
+		
 		if ( Utilities.isEmpty(serviceDefinitionName)) {
 			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
+		if ( consumerOption.isEmpty() ) {
+			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
