@@ -375,51 +375,38 @@ public class ActiveMQGatekeeperRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testPublishGeneralAdvertisementSessionNull() throws JMSException {
-		testObject.publishGeneralAdvertisement(null, null, null, null);
+		testObject.publishGeneralAdvertisement(null, null, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testPublishGeneralAdvertisementRecipientCNNull() throws JMSException {
-		testObject.publishGeneralAdvertisement(getTestSession(), null, null, null);
+		testObject.publishGeneralAdvertisement(getTestSession(), null, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testPublishGeneralAdvertisementRecipientCNEmpty() throws JMSException {
-		testObject.publishGeneralAdvertisement(getTestSession(), " ", null, null);
+		testObject.publishGeneralAdvertisement(getTestSession(), " ", null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testPublishGeneralAdvertisementRecipientPublicKeyNull() throws JMSException {
-		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", null, null);
+		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testPublishGeneralAdvertisementRecipientPublicKeyEmpty() throws JMSException {
-		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", " ", null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testPublishGeneralAdvertisementSenderCNNull() throws JMSException {
-		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", Base64.getEncoder().encodeToString(otherPublicKey.getEncoded()), null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testPublishGeneralAdvertisementSenderCNEmpty() throws JMSException {
-		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", Base64.getEncoder().encodeToString(otherPublicKey.getEncoded()), "");
+		testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", " ");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPublishGeneralAdvertisementNoAcknowledgement() throws JMSException {
 		final String recipientPublicKey = Base64.getEncoder().encodeToString(otherPublicKey.getEncoded());
-		final GeneralAdvertisementResult result = testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey,
-											  											 "gatekeeper.testcloud2.aitia.arrowhead.eu");
+		final GeneralAdvertisementResult result = testObject.publishGeneralAdvertisement(getTestSession(), "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey);
 		Assert.assertNull(result);
 	}
 	
@@ -429,7 +416,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 		final String recipientPublicKey = Base64.getEncoder().encodeToString(otherPublicKey.getEncoded());
 		final TestSession testSession = getTestSession();
 		testSession.setConsumerWithMessage(new ActiveMQObjectMessage());
-		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey, "gatekeeper.testcloud2.aitia.arrowhead.eu");
+		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -442,7 +429,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 		ackMsg.setText(encodedMessage);
 		final TestSession testSession = getTestSession();
 		testSession.setConsumerWithMessage(ackMsg);
-		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey, "gatekeeper.testcloud2.aitia.arrowhead.eu");
+		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -455,7 +442,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 		ackMsg.setText(encodedMessage);
 		final TestSession testSession = getTestSession();
 		testSession.setConsumerWithMessage(ackMsg);
-		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey, "gatekeeper.testcloud2.aitia.arrowhead.eu");
+		testObject.publishGeneralAdvertisement(testSession, "gatekeeper.testcloud1.aitia.arrowhead.eu", recipientPublicKey);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

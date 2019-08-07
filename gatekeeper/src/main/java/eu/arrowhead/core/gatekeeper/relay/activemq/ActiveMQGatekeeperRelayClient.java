@@ -238,19 +238,18 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2095")
 	@Override
-	public GeneralAdvertisementResult publishGeneralAdvertisement(final Session session, final String recipientCN, final String recipientPublicKey, final String senderCN) throws JMSException {
+	public GeneralAdvertisementResult publishGeneralAdvertisement(final Session session, final String recipientCN, final String recipientPublicKey) throws JMSException {
 		logger.debug("publishGeneralAdvertisement started...");
 		
 		Assert.notNull(session, "session is null.");
 		Assert.isTrue(!Utilities.isEmpty(recipientCN), "recipientCN is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(recipientPublicKey), "recipientPublicKey is null or blank.");
-		Assert.isTrue(!Utilities.isEmpty(senderCN), "senderCN is null or blank.");
 		final PublicKey peerPublicKey = Utilities.getPublicKeyFromBase64EncodedString(recipientPublicKey);
 
 		final String sessionId = createSessionId();
 		final String encryptedSessionId = encryptSessionId(sessionId, peerPublicKey);
 		final String senderPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
-		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(senderCN, senderPublicKey, recipientCN, encryptedSessionId);
+		final GeneralAdvertisementMessageDTO messageDTO = new GeneralAdvertisementMessageDTO(serverCommonName, senderPublicKey, recipientCN, encryptedSessionId);
 		final TextMessage textMessage = session.createTextMessage(Utilities.toJson(messageDTO));
 
 		MessageProducer producer = null;
