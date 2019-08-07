@@ -310,6 +310,10 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ServiceDefinitionName " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
+		if ( Utilities.isEmpty(serviceInterfaceName)) {
+			throw new InvalidParameterException("ServiceInterface " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
 		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
 		if ( consumerOption.isEmpty() ) {
 			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
@@ -318,10 +322,6 @@ public class OrchestratorStoreDBService {
 		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
 		if ( serviceDefinitionOption.isEmpty() ) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
-		}
-		
-		if ( Utilities.isEmpty(serviceInterfaceName)) {
-			throw new InvalidParameterException("ServiceInterface " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceInterface> serviceInterfaceOption = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName);
