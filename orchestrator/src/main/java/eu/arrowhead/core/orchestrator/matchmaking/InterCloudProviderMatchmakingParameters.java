@@ -28,7 +28,7 @@ public class InterCloudProviderMatchmakingParameters {
 			final List<PreferredProviderDataDTO> preferredGlobalProviders,
 			final boolean storeOrchestration) {
 		Assert.notNull(icnResponseDTO, "icnResponseDTO is null.");
-		Assert.notNull(preferredGlobalProviders, "preferredLocalProviders set is null.");
+		Assert.notNull(preferredGlobalProviders, "preferredLocalProviders list is null.");
 		
 		this.icnResponseDTO = icnResponseDTO;
 		this.preferredGlobalProviders = preferredGlobalProviders;
