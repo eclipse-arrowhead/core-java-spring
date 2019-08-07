@@ -492,24 +492,6 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> filterEntryListByInterfaces(final List<OrchestratorStore> entryList,
-			final List<String> requiredInterfaceList) {
-		logger.debug("filterEntryListByInterfaces started...");
-		
-		final List<OrchestratorStore> filteredEntryList = new ArrayList<>();
-		for (OrchestratorStore orchestratorStore : entryList) {
-			
-			Assert.notNull(orchestratorStore.getServiceInterface(), "ServiceInterface is null.");
-			
-			if (requiredInterfaceList.contains(orchestratorStore.getServiceInterface().getInterfaceName())) {
-				filteredEntryList.add(orchestratorStore);
-			}
-		}
-		
-		return filteredEntryList;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	private List<ServiceRegistryResponseDTO> crossCheckTopPriorityEntries(
 			final List<OrchestratorStore> entryList, 
 			final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
@@ -584,59 +566,6 @@ public class OrchestratorService {
 		
 		return orchestratorDriver.queryAuthorization(orchestrationFormRequestDTO.getRequesterSystem(), serviceQueryResultDTO.getServiceQueryData());
     
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private boolean findOrchestratorStoreInFilteredResponse(final long serviceDefinitionId, final long providerSystemId,
-			final long serviceInterfaceId, final List<ServiceRegistryResponseDTO> filteredServiceQueryResultDTOList) {
-		logger.debug("findOrchestratorStoreInFilteredResponse started...");
-		
-		for (ServiceRegistryResponseDTO serviceRegistryResponseDTO : filteredServiceQueryResultDTOList) {
-			
-			if (serviceRegistryResponseDTO.getServiceDefinition().getId() == serviceDefinitionId) {
-				
-				if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-					
-					for (final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO : serviceRegistryResponseDTO.getInterfaces()) {
-						
-						if (serviceInterfaceResponseDTO.getId() == serviceInterfaceId) {
-							
-							return true;
-							
-						}
-					}					
-				}				
-			}	
-		}
-		
-		return false;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private Map<Long, List<Long>> mapProvidersToServiceDefinitions(final List<OrchestratorStore> entryList) {
-		logger.debug("mapIntrefacesToServiceDefinitions started...");
-		
-		final Map<Long, List<Long>> serviceDefinitionsProvidersMap = new HashMap<>();
-		
-		for (OrchestratorStore orchestratorStore : entryList) {
-			Assert.isTrue(!orchestratorStore.isForeign(), "Provider is foreign");
-			
-			final Long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
-				
-			if (serviceDefinitionsProvidersMap.containsKey(serviceDefinitionId)) {
-				
-				serviceDefinitionsProvidersMap.get(serviceDefinitionId).add(orchestratorStore.getProviderSystemId());
-			
-			}else {
-				
-				final List<Long> serviceProvidersIdList = new ArrayList<>();
-				serviceProvidersIdList.add(orchestratorStore.getServiceInterface().getId());
-				serviceDefinitionsProvidersMap.put(serviceDefinitionId, serviceProvidersIdList);
-				
-			}
-		}
-		
-		return serviceDefinitionsProvidersMap;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -736,11 +665,14 @@ public class OrchestratorService {
 					if (interfaceListFromRequest.contains(interfaceResponseDTO.getInterfaceName())) {
 						filteredInterfaceList.add(interfaceResponseDTO);
 					}
-
 				} 
 			}
-			serviceRegistryResponseDTO.setInterfaces(filteredInterfaceList);
-			filterdResults.add(serviceRegistryResponseDTO);
+			
+			if (!filteredInterfaceList.isEmpty()) {
+				
+				serviceRegistryResponseDTO.setInterfaces(filteredInterfaceList);
+				filterdResults.add(serviceRegistryResponseDTO);
+			}
 			
 		}
 		
