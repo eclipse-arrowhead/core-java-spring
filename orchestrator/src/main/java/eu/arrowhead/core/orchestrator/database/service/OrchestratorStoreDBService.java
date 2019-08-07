@@ -60,8 +60,10 @@ public class OrchestratorStoreDBService {
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "The given PriorityMap has different size than the size of consumer-serviceDeffinition pars in DB";
 	private static final String NOT_VALID_ERROR_MESSAGE = " is not valid.";
+	private static final String NOT_FOREIGN_ERROR_MESSAGE = " is not foreign";
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
+	
 	
 	@Autowired
 	private OrchestratorStoreRepository orchestratorStoreRepository;
@@ -482,6 +484,15 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
 	public OrchestratorStoreResponseDTO getForeignResponseDTO(final OrchestratorStore orchestratorStore) {
+		
+		if (orchestratorStore == null) {
+			throw new InvalidParameterException("OrchestratorStore " + NULL_ERROR_MESSAGE);
+		}
+		
+		if (!orchestratorStore.isForeign()) {
+			throw new InvalidParameterException("OrchestratorStore " + NOT_FOREIGN_ERROR_MESSAGE);
+		}
+		
 		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findById(orchestratorStore.getProviderSystemId());
 		if (foreignSystemOptional.isEmpty()) {
 			throw new InvalidParameterException("ForeignSystemOptional by id: " + orchestratorStore.getProviderSystemId() + NOT_IN_DB_ERROR_MESSAGE);
