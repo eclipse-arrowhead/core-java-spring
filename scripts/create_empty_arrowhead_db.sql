@@ -439,6 +439,9 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gateway_relay` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gatekeeper'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'gatekeeper'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'gatekeeper'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'gatekeeper'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gatekeeper'@'localhost';
 
 DROP USER IF EXISTS 'gatekeeper'@'%';
@@ -447,6 +450,9 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gatekeeper'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'gatekeeper'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gateway_relay` TO 'gatekeeper'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gatekeeper'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'gatekeeper'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'gatekeeper'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'gatekeeper'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gatekeeper'@'%';
 
 -- Gateway
@@ -456,6 +462,9 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gateway'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'gateway'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gateway_relay` TO 'gateway'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gateway'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'gateway'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'gateway'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'gateway'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gateway'@'localhost';
 
 DROP USER IF EXISTS 'gateway'@'%';
@@ -464,6 +473,9 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gateway_relay` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'gateway'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'gateway'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'gateway'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'gateway'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'gateway'@'%';
 
 FLUSH PRIVILEGES;

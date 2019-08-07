@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -12,6 +13,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -26,10 +29,16 @@ import eu.arrowhead.common.dto.RelayType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
+@NamedEntityGraph(name = "relayWithCloudGatekeeperRelayEntries",
+attributeNodes = {
+		  @NamedAttributeNode(value = "cloudGatekeepers")
+})
 public class Relay {
 	
 	//=================================================================================================
 	// members
+	
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "address", "port"); //NOSONAR
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
