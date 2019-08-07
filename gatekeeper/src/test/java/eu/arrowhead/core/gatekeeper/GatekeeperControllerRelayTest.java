@@ -95,7 +95,7 @@ public class GatekeeperControllerRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetRelaysWithoutParameterWithPageAndSizeParameter( ) throws Exception {
+	public void testGetRelaysWithPageAndSizeParameter( ) throws Exception {
 		final int amountOfRelays = 5;
 		final RelayListResponseDTO relayListResponseDTO = createRelayListResponseDTOForDBMocking(amountOfRelays);
 		
