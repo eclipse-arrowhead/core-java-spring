@@ -88,13 +88,13 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	private UriComponents createQuerySystemByDTOUri(final String scheme) {
 		logger.debug("createQuerySystemByDTOUri started...");
 				
-		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI;
+		final String registyUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI;
 		
 		return Utilities.createURI(
 				scheme, 
 				coreSystemRegistrationProperties.getServiceRegistryAddress(), 
 				coreSystemRegistrationProperties.getServiceRegistryPort(), 
-				registerUriStr
+				registyUriStr
 				);
 	}
 }
