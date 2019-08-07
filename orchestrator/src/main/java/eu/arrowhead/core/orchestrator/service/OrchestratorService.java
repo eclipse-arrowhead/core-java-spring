@@ -518,7 +518,7 @@ public class OrchestratorService {
 	    
 	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
 	    final Map<Long, List<String>> serviceDefinitionIdInterfaceIdsMap = mapIntrefacesToServiceDefinitions( onlyLocalEntryList);
-	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapIntrefacesToProviders( onlyLocalEntryList);
+	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapInterfacesToProviders( onlyLocalEntryList);
 	    
 	    for (java.util.Map.Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
 	    	
@@ -602,7 +602,7 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, List<String>> mapIntrefacesToProviders(List<OrchestratorStore> entryList) {
+	private Map<Long, List<String>> mapInterfacesToProviders(List<OrchestratorStore> entryList) {
 		logger.debug("mapIntrefacesToProviders started...");
 		
 		final Map<Long, List<String>> providersInterfacesMap = new HashMap<>();
