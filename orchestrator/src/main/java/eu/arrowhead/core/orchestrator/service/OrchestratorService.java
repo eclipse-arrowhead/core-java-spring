@@ -513,7 +513,7 @@ public class OrchestratorService {
 	    
 	    if (onlyLocalEntryList.isEmpty()) {
 			
-	    	return new ArrayList<>(0);
+	    	return List.of();
 		}
 	    
 	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
