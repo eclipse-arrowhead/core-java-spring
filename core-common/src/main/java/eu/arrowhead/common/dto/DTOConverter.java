@@ -348,7 +348,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static PreferredProviderDataDTO convertOrchestratorStoreResponseDTOToPreferredProviderDataDTO(
+	public static PreferredProviderDataDTO convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(
 			OrchestratorStoreResponseDTO orchestratorStoreResponseDTO) {
 		Assert.notNull(orchestratorStoreResponseDTO, "orchestratorStoreResponseDTO is null");
 		Assert.notNull(orchestratorStoreResponseDTO.getProviderSystem(), "orchestratorStoreResponseDTO.ProviderSystem is null");

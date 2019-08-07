@@ -159,7 +159,7 @@ public class OrchestratorService {
 					}		
 				}else {
 
-					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertOrchestratorStoreResponseDTOToPreferredProviderDataDTO(orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore));					
+					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore));					
 					orchestrationFormRequestDTO.setPreferredProviders(List.of(preferredProviderDataDTO));
 					
 		            final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(orchestrationFormRequestDTO, preferredProviderDataDTO.getProviderCloud());		            
