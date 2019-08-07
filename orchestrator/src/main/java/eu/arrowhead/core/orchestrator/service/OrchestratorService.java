@@ -581,17 +581,21 @@ public class OrchestratorService {
 		
 		for (OrchestratorStore orchestratorStore : entryList) {
 			final Long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
-			
+			final String interfaceName = orchestratorStore.getServiceInterface().getInterfaceName();
 			
 			if (serviceDefinitionsInterfacesMap.containsKey(serviceDefinitionId)) {
 				
-				serviceDefinitionsInterfacesMap.get(serviceDefinitionId ).add(orchestratorStore.getServiceInterface().getInterfaceName());
+				
+				if (!serviceDefinitionsInterfacesMap.get(serviceDefinitionId).contains(interfaceName)) {
+					
+					serviceDefinitionsInterfacesMap.get(serviceDefinitionId).add(interfaceName);
+				}
 			
 			}else {
 				
-				final List<String> serviceInterfaceIdList = new ArrayList<>();
-				serviceInterfaceIdList.add(orchestratorStore.getServiceInterface().getInterfaceName());
-				serviceDefinitionsInterfacesMap.put(serviceDefinitionId, serviceInterfaceIdList);
+				final List<String> serviceInterfaceNameList = new ArrayList<>();
+				serviceInterfaceNameList.add(orchestratorStore.getServiceInterface().getInterfaceName());
+				serviceDefinitionsInterfacesMap.put(serviceDefinitionId, serviceInterfaceNameList);
 				
 			}
 		}
