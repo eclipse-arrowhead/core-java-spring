@@ -561,7 +561,7 @@ public class OrchestratorService {
 	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);    
 	    if (onlyLocalEntryList.isEmpty()) {
 			
-	    	return new ArrayList<>(0);
+	    	return List.of();
 		}
 		
     	final ServiceQueryFormDTO serviceQueryFormDTO = orchestrationFormRequestDTO.getRequestedService();
