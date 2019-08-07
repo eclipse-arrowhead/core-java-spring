@@ -20,7 +20,7 @@ dependency to use them)
 Verify that you have Java (```java -version```), Maven (```mvn -version```), MySQL installed properly!
 
 Pull this code and enter the directory. 
-```git pull https://github.com/arrowhead-f/core-java-spring.git```
+```git clone https://github.com/arrowhead-f/core-java-spring.git```
 
 Run the MySQL script which is in the ```scripts``` folder. If you won't run this script first, the project won't build. 
 
