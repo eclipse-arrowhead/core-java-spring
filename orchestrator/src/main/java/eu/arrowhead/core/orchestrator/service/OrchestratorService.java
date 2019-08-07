@@ -543,15 +543,12 @@ public class OrchestratorService {
 	private List<OrchestratorStore> filterEntryListByForeign(List<OrchestratorStore> entryList) {
 		logger.debug(" filterEntryListByForeign started...");
 		
-		final List<OrchestratorStore> filteredEntryList = new ArrayList<>();		
-		for (final OrchestratorStore orchestratorStore : entryList) {
-			
-			if (!orchestratorStore.isForeign()) {
-				filteredEntryList.add(orchestratorStore);
-			}
+		if (entryList == null || entryList.isEmpty()) {
+			return List.of();
 		}
 		
-		return filteredEntryList;
+		return entryList.stream().filter(e -> !e.isForeign()).collect(Collectors.toList()); 
+		
 	}
 
 	//-------------------------------------------------------------------------------------------------
