@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -520,7 +521,7 @@ public class OrchestratorService {
 	    final Map<Long, List<String>> serviceDefinitionIdInterfaceIdsMap = mapInterfacesToServiceDefinitions( onlyLocalEntryList);
 	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapInterfacesToProviders( onlyLocalEntryList);
 	    
-	    for (java.util.Map.Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
+	    for (Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
 	    	
 	    	final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 	    	
