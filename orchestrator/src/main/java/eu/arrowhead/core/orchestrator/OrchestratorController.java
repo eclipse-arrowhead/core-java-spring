@@ -113,7 +113,7 @@ public class OrchestratorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Get Orchestration process by the consumer SystemId.", response = OrchestrationResponseDTO.class)
+	@ApiOperation(value = "Start ochestration process from the ochestrator store based on consumer system id.", response = OrchestrationResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ORCHESTRATOR_HTTP_400_MESSAGE),
