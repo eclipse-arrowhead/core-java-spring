@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -41,7 +42,8 @@ import io.swagger.annotations.ApiResponses;
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
-@RestController(CommonConstants.GATEKEEPER_URI)
+@RestController
+@RequestMapping(CommonConstants.GATEKEEPER_URI)
 public class GatekeeperController {
 	
 	//=================================================================================================
@@ -433,8 +435,8 @@ public class GatekeeperController {
 		final boolean isAddressInvalid = Utilities.isEmpty(dto.getAddress());
 		final boolean isPortInvalid = dto.getPort() == null || isPortOutOfValidRange(dto.getPort());
 		final boolean isTypeInvalid = Utilities.convertStringToRelayType(dto.getType()) == null;
-		final boolean isGatekeeperRelayAndExclusive = dto.isExclusive() && dto.getType().equalsIgnoreCase(RelayType.GATEKEEPER_RELAY.toString());
-		final boolean isGeneralRelayAndExclusive = dto.isExclusive() && dto.getType().equalsIgnoreCase(RelayType.GENERAL_RELAY.toString());
+		final boolean isGatekeeperRelayAndExclusive = dto.isExclusive() && dto.getType().trim().equalsIgnoreCase(RelayType.GATEKEEPER_RELAY.toString());
+		final boolean isGeneralRelayAndExclusive = dto.isExclusive() && dto.getType().trim().equalsIgnoreCase(RelayType.GENERAL_RELAY.toString());
 		
 		if (isAddressInvalid || isPortInvalid || isTypeInvalid || isGatekeeperRelayAndExclusive || isGeneralRelayAndExclusive) {
 			String exceptionMsg = "RelayRequestDTO is invalid due to the following reasons:";
