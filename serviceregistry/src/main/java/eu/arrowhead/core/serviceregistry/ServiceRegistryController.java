@@ -712,7 +712,7 @@ public class ServiceRegistryController {
 		final String address = request.getAddress();
 		final int port = request.getPort();
 		
-		final SystemResponseDTO result = serviceRegistryDBService.getSystemByNameAndAddressAndPort(systemName, address, port);
+		final SystemResponseDTO result = serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(systemName, address, port);
 		logger.debug("Return system by name: {}, address: {}, port: {}", systemName, address, port);
 		
 		return result;
