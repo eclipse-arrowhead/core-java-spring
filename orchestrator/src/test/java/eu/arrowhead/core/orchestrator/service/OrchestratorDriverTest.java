@@ -205,6 +205,71 @@ public class OrchestratorDriverTest {
 		Assert.assertEquals(1, afterAuthorization.get(0).getInterfaces().get(0).getId());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceRegistryBySystemIdOk() {
+		
+		final UriComponents queryBySystemIdUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI.replace("{id}", "1"));
+
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemIdUri);
+		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemId(1L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryServiceRegistryByIdWithInvalidSystemId() {
+		
+		final UriComponents queryBySystemIdUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI.replace("{id}", "1"));
+
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemIdUri);
+		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemId(-1L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceRegistryBySystemRequestDTOOk() {
+		
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		final SystemRequestDTO requestDTO = new SystemRequestDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemDTOUri);
+		when(httpService.sendRequest(eq(queryBySystemDTOUri), eq(HttpMethod.POST), eq(SystemResponseDTO.class), any(SystemRequestDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryServiceRegistryBySystemRequestDTONullDTO() {
+		
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		final SystemRequestDTO requestDTO = null;
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemDTOUri);
+		when(httpService.sendRequest(eq(queryBySystemDTOUri), eq(HttpMethod.POST), eq(SystemResponseDTO.class), any(SystemRequestDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+	}
 	//=================================================================================================
 	// assistant methods
 	
