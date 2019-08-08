@@ -149,8 +149,12 @@ public class UtilitiesTest {
 	@Test
 	public void testToJSONValidObject() {
 		final ErrorMessageDTO dto = new ErrorMessageDTO("test", 11, ExceptionType.GENERIC, null);
+		final String osName = System.getProperty(OS_NAME).toLowerCase();
+		final String expected = osName.startsWith(WINDOWS_PREFIX) ? "{\r\n  \"errorMessage\" : \"test\",\r\n  \"errorCode\" : 11,\r\n  \"exceptionType\" : \"GENERIC\"\r\n}" : 
+																	"{\n  \"errorMessage\" : \"test\",\n  \"errorCode\" : 11,\n  \"exceptionType\" : \"GENERIC\"\n}";
+
 		final String result = Utilities.toJson(dto);
-		Assert.assertEquals("{\r\n  \"errorMessage\" : \"test\",\r\n  \"errorCode\" : 11,\r\n  \"exceptionType\" : \"GENERIC\"\r\n}", result);
+		Assert.assertEquals(expected, result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
