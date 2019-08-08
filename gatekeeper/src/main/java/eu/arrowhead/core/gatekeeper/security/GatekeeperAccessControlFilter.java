@@ -18,7 +18,7 @@ public class GatekeeperAccessControlFilter extends AccessControlFilter {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
-		//TODO: implement gatekeeper specific logic here
-		// DO NOT USE super.checkClientAuthorized because that implementation rejects any request outside of the cloud
+		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
+		//TODO: implement further rules here
 	}
 }

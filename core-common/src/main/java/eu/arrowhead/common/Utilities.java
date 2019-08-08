@@ -47,6 +47,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -200,6 +201,20 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Nullable
+	public static String toJson(final Object object) {
+		if (object == null) {
+			return null;
+		}
+		
+		try {
+			return mapper.writeValueAsString(object);
+		} catch (final JsonProcessingException ex) {
+			throw new ArrowheadException("The specified object cannot be converted to text.", ex);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Nullable
 	public static <T> T fromJson(final String json, final Class<T> parsedClass) {
 		if (json == null || parsedClass == null) {
 			return null;
@@ -207,8 +222,8 @@ public class Utilities {
 		
 	    try {
 	    	return mapper.readValue(json, parsedClass);
-	    } catch (final IOException e) {
-	      throw new ArrowheadException("The specified string cannot be converted to a(n) " + parsedClass.getSimpleName() + " object.", e);
+	    } catch (final IOException ex) {
+	      throw new ArrowheadException("The specified string cannot be converted to a(n) " + parsedClass.getSimpleName() + " object.", ex);
 	    }
 	}
 	

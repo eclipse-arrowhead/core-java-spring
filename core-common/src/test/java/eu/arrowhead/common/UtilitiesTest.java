@@ -140,6 +140,21 @@ public class UtilitiesTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testToJSONNullObject() {
+		final String result = Utilities.toJson(null);
+		Assert.assertNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testToJSONValidObject() {
+		final ErrorMessageDTO dto = new ErrorMessageDTO("test", 11, ExceptionType.GENERIC, null);
+		final String result = Utilities.toJson(dto);
+		Assert.assertEquals("{\r\n  \"errorMessage\" : \"test\",\r\n  \"errorCode\" : 11,\r\n  \"exceptionType\" : \"GENERIC\"\r\n}", result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testFromJSONNullString() {
 		final ErrorMessageDTO result = Utilities.fromJson(null, ErrorMessageDTO.class);
 		Assert.assertNull(result);
