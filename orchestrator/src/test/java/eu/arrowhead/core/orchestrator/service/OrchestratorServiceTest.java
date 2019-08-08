@@ -1,8 +1,8 @@
 package eu.arrowhead.core.orchestrator.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -18,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.OrchestrationFlags;
@@ -35,10 +36,9 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingParameters;
-import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
-import eu.arrowhead.common.database.entity.System;
 
 @RunWith(SpringRunner.class)
 public class OrchestratorServiceTest {
@@ -808,6 +808,39 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
 		final OrchestrationResponseDTO result = testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromStoreWithSystemIdParameterByNullRequest() {
+		
+		final OrchestrationFormRequestDTO request = null;
+		final Long systemId = 1L;
+
+		testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromStoreWithSystemIdParameterByInvalidSystemId() {
+		
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+		  		build();		
+		serviceForm.setInterfaceRequirements(List.of("HTTP-SECURE-JSON"));
+		
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																					build();
+		final Long systemId = -1L;
+
+		testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
 				
 	}
 }
