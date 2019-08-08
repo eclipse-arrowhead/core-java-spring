@@ -715,8 +715,7 @@ public class OrchestratorServiceTest {
 																				    requestedService(serviceForm).
 																					build();
 		final Long systemId = 1L;
-		
-		
+			
 		final System consumerSystem = new System();
 		consumerSystem.setSystemName("consumerSystemName");
 		consumerSystem.setAddress("localhost");
@@ -732,10 +731,7 @@ public class OrchestratorServiceTest {
 		orchestratorStore.setProviderSystemId(1L);
 		orchestratorStore.setServiceInterface(serviceInterface);
 		
-		
 		final List<OrchestratorStore> entryList = List.of(orchestratorStore);
-		
-
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
 		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
@@ -747,8 +743,7 @@ public class OrchestratorServiceTest {
 		srResult.getServiceQueryData().add(srEntry);
 		
 		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
-		
-		
+				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
@@ -756,7 +751,63 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
 		final OrchestrationResponseDTO result = testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromStoreWithSystemIdParameterByNullIdOk() {
 		
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+		  		build();
 		
+		serviceForm.setInterfaceRequirements(List.of("HTTP-SECURE-JSON"));
+		
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																					build();
+		final Long systemId = null;
+			
+		final System consumerSystem = new System();
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final OrchestratorStore orchestratorStore = new OrchestratorStore();
+		orchestratorStore.setConsumerSystem(consumerSystem);
+		orchestratorStore.setForeign(false);
+		orchestratorStore.setServiceDefinition(serviceDefinition);
+		orchestratorStore.setProviderSystemId(1L);
+		orchestratorStore.setServiceInterface(serviceInterface);
+		
+		final List<OrchestratorStore> entryList = List.of(orchestratorStore);
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+				
+		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any())).thenReturn(systemResponseDTO);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(entryList);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
+		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
+		
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+				
 	}
 }
