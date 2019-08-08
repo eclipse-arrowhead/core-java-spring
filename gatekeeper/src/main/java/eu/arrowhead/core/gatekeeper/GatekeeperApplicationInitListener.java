@@ -71,7 +71,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 				resource.close();
 			} catch (final IOException ex) {
 				logger.error("Error while trying to close message listener: {}", ex.getMessage());
-				logger.debug(ex);
+				logger.debug("Exception:", ex);
 			}
 		}
 		for (final Session session : openConnections) {

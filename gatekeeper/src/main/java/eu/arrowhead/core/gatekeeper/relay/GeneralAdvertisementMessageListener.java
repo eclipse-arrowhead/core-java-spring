@@ -38,6 +38,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 	//-------------------------------------------------------------------------------------------------
 	public GeneralAdvertisementMessageListener(final ApplicationContext appContext, final Session session, final GatekeeperRelayClient relayClient, final int threadPoolSize) {
 		logger.debug("Constructor started...");
+		
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.notNull(session, "Session is null.");
 		Assert.notNull(relayClient, "Gatekeeper relay client is null.");
@@ -58,7 +59,9 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 		
 		if (!closed) {
 			try {
-				threadPool.execute(null); // TODO: create a job here
+				if (msg != null) {
+					threadPool.execute(new GatekeeperTask(appContext, session, relayClient, msg)); 
+				}
 			} catch (final RejectedExecutionException ex) {
 				logger.error("Message rejected at {}", ZonedDateTime.now());
 			}
@@ -71,9 +74,10 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 	@Override
 	public void close() throws IOException {
 		logger.debug("close started...");
+		
 		closed = true;
 		threadPool.shutdownNow();
-		logger.debug("GeneralAdvertisementMessageListener-{} stopped...", id);
 		
+		logger.debug("GeneralAdvertisementMessageListener-{} stopped...", id);
 	}
 }
