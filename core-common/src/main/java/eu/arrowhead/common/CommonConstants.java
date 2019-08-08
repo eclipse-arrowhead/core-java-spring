@@ -52,9 +52,17 @@ public class CommonConstants {
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
 	public static final String JWT_CLAIM_INTERFACE_ID = "iid";
+	public static final String JWT_CLAIM_MESSAGE_TYPE = "mst";
+	public static final String JWT_CLAIM_SESSION_ID = "sid"; // can be the same as service id because we don't use service id and session id at the same time
+	public static final String JWT_CLAIM_PAYLOAD = "pld";  
 	public static final String JWE_KEY_MANAGEMENT_ALG = KeyManagementAlgorithmIdentifiers.RSA_OAEP_256;
 	public static final String JWE_ENCRYPTION_ALG = ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
 	public static final String JWS_SIGN_ALG = AlgorithmIdentifiers.RSA_USING_SHA512;
+	
+	public static final String RELAY_MESSAGE_TYPE_RAW = "raw";
+	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
+	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
+	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
 	
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
