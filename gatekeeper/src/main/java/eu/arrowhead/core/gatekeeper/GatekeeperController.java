@@ -29,12 +29,15 @@ import eu.arrowhead.common.dto.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.GSDQueryFormDTO;
+import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.RelayListResponseDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
+import eu.arrowhead.core.gatekeeper.service.GatekeeperService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -62,6 +65,8 @@ public class GatekeeperController {
 	private static final String RELAYS_BY_ID_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";	
 	private static final String RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ADDRESS + "}" + "/{" + PATH_VARIABLE_PORT + "}";
 	
+	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/inti_gsd";
+	
 	private static final String GET_CLOUDS_MGMT_HTTP_200_MESSAGE = "Cloud entries returned";
 	private static final String GET_CLOUDS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
 	private static final String POST_CLOUDS_MGMT_HTTP_201_MESSAGE = "Cloud entries created";
@@ -82,10 +87,16 @@ public class GatekeeperController {
 	private static final String DELETE_RELAYS_MGMT_HTTP_200_MESSAGE = "Relay entry removed";
 	private static final String DELETE_RELAYS_MGMT_HTTP_400_MESSAGE = "Could not remove Relay entry";
 	
+	private static final String POST_INIT_GSD_HTTP_200_MESSAGE = "GSD results returned";
+	private static final String POST_INIT_GSD_HTTP_400_MESSAGE = "Could not initiate GSD";
+	
 	private final Logger logger = LogManager.getLogger(GatekeeperController.class);
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
+	
+	@Autowired
+	private GatekeeperService gatekeeperService;
 	
 	//=================================================================================================
 	// methods
@@ -415,6 +426,27 @@ public class GatekeeperController {
 		logger.debug("Relay with id '{}' is successfully removed", id);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return the results of Global Service Discovery request", response = GSDQueryResultDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INIT_GSD_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INIT_GSD_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = INIT_GLOBAL_SERVICE_DISCOVERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public GSDQueryResultDTO initiateGlobalServiceDiscovery(@RequestBody final GSDQueryFormDTO gsdForm) {
+		logger.debug("New initiateGlobalServiceDiscovery post request received");
+		
+		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
+		
+		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.createAndSendGSDPollRequest(gsdForm.getRequestedService(), gsdForm.getCloudBoundaries());
+		
+		logger.debug("initiateGlobalServiceDiscovery has been finished");
+		return gsdQueryResultDTO;
+	}
+	
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -470,5 +502,22 @@ public class GatekeeperController {
 			
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, origin);
 		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateGSDQueryFormDTO(final GSDQueryFormDTO gsdForm, final String origin) {
+		logger.debug("validateGSDQueryFormDTO started...");
+		
+		if (gsdForm == null) {
+			throw new BadPayloadException("GSDQueryFormDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (gsdForm.getRequestedService() == null) {
+			throw new BadPayloadException("RequestedService is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (gsdForm.getRequestedService().getServiceDefinitionRequirement() == null) {
+			throw new BadPayloadException("serviceDefinitionRequirement is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
 	}
 }
