@@ -1,5 +1,7 @@
 package eu.arrowhead.core.gatekeeper;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashSet;
@@ -23,6 +25,7 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
+import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementMessageListener;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
 
 @Component
@@ -41,6 +44,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	private int noWorkers;
 	
 	private Set<Session> openConnections = new HashSet<>();
+	private Set<Closeable> listenerResources = new HashSet<>();
 	private GatekeeperRelayClient gatekeeperRelayClient;
 
 	//=================================================================================================
@@ -56,14 +60,22 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		}
 		
 		initializeGatekeeperRelayClient(event.getApplicationContext());
-		subscribeListenersToGatekeepers();
+		subscribeListenersToGatekeepers(event.getApplicationContext());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customDestroy() {
+		for (final Closeable resource : listenerResources) {
+			try {
+				resource.close();
+			} catch (final IOException ex) {
+				logger.error("Error while trying to close message listener: {}", ex.getMessage());
+				logger.debug(ex);
+			}
+		}
 		for (final Session session : openConnections) {
-				gatekeeperRelayClient.closeConnection(session);
+			gatekeeperRelayClient.closeConnection(session);
 		}
 	}
 	
@@ -79,14 +91,16 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void subscribeListenersToGatekeepers() {
+	private void subscribeListenersToGatekeepers(final ApplicationContext appContext) {
 		final Set<Relay> gatekeeperRelays = gatekeeperDBService.getAllLiveGatekeeperRelays();
 		for (final Relay relay : gatekeeperRelays) {
 			try {
 				final Session session = gatekeeperRelayClient.createConnection(relay.getAddress(), relay.getPort());
 				openConnections.add(session);
 				final MessageConsumer consumer = gatekeeperRelayClient.subscribeGeneralAdvertisementTopic(session);
-				consumer.setMessageListener(null); // TODO: continue set here a valid listener
+				final GeneralAdvertisementMessageListener listener = new GeneralAdvertisementMessageListener(appContext, session, gatekeeperRelayClient, noWorkers);
+				listenerResources.add(listener);
+				consumer.setMessageListener(listener); 
 			} catch (final JMSException | ArrowheadException ex) {
 				logger.debug("Error while trying to subscribe relay {}:{}", relay.getAddress(), relay.getPort()); // we skip the wrong ones
 			}
