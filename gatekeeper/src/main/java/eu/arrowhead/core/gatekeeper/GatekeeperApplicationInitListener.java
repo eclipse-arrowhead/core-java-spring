@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
@@ -49,6 +51,12 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); // TODO: add all necessary services
+	}
 		
 	//-------------------------------------------------------------------------------------------------
 	@Override
