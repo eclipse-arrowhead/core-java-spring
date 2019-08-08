@@ -138,6 +138,10 @@ public class OrchestratorService {
 		
 		if ( systemId != null) {
 			
+			if (systemId < 1) {
+				throw new InvalidParameterException("systemId " + LESS_THAN_ONE_ERROR_MESSAGE);
+			}
+			
 			final SystemRequestDTO consumerSystemRequestDTO = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(orchestratorDriver.queryServiceRegistryBySystemId(systemId));
 			
 			entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(systemId);
