@@ -1,5 +1,7 @@
 package eu.arrowhead.core.gatekeeper;
 
+import java.util.ServiceConfigurationError;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,8 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	protected void customInit(final ContextRefreshedEvent event) {
 		logger.debug("customInit started...");
 
-		//TODO
+		if (!sslProperties.isSslEnabled()) {
+			throw new ServiceConfigurationError("Gatekeeper can only started in SECURE mode!");
+		}
 	}
 }

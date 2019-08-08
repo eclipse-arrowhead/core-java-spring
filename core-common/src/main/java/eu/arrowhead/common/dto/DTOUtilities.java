@@ -1,6 +1,22 @@
 package eu.arrowhead.common.dto;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.util.Assert;
+
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.UnavailableServerException;
+
 public class DTOUtilities {
+	
+	//=================================================================================================
+	// members
+	
+	private static final Logger logger = LogManager.getLogger(DTOUtilities.class);
 	
 	//=================================================================================================
 	// methods
@@ -22,6 +38,32 @@ public class DTOUtilities {
 		normalizeSystemRequestDTO(requestCopy);
 		
 		return converted.equals(requestCopy);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
+		Assert.notNull(dto, "Error message object is null.");
+		Assert.notNull(dto.getExceptionType(), "Exception type is null.");
+		
+		switch (dto.getExceptionType()) {
+	    case ARROWHEAD:
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case AUTH:
+	        throw new AuthException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case BAD_PAYLOAD:
+	        throw new BadPayloadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case INVALID_PARAMETER:
+	    	throw new InvalidParameterException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case DATA_NOT_FOUND:
+            throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case GENERIC:
+            throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case UNAVAILABLE:
+	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    default:
+	    	logger.error("Unknown exception type: {}", dto.getExceptionType());
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        }
 	}
 	
 	//=================================================================================================

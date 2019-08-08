@@ -114,6 +114,8 @@ public abstract class ApplicationInitListener {
 		}
 		
 		logger.info("Core system {} revoked {} service(s).", coreSystem.name(), count);
+		
+		customDestroy();
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -127,6 +129,9 @@ public abstract class ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	protected void customInit(final ContextRefreshedEvent event) {}
+	
+	//-------------------------------------------------------------------------------------------------
+	protected void customDestroy() {}
 	
 	//-------------------------------------------------------------------------------------------------
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
