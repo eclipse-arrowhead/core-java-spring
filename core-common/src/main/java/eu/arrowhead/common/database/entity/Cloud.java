@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -27,6 +28,8 @@ public class Cloud {
 	
 	//=================================================================================================
 	// members
+	
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,7 +67,7 @@ public class Cloud {
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<CloudGatekeeperRelay> gatekeeperRelays = new HashSet<>();
 	
-	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany (mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<CloudGatewayRelay> gatewayRelays = new HashSet<>();
 	
