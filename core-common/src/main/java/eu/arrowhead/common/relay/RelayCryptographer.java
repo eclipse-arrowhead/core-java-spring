@@ -41,8 +41,8 @@ public class RelayCryptographer {
 	
 	private final Logger logger = LogManager.getLogger(RelayCryptographer.class);
 
-	private ObjectMapper mapper = new ObjectMapper();
-	private PrivateKey privateKey;
+	private final ObjectMapper mapper = new ObjectMapper();
+	private final PrivateKey privateKey;
 
 	//=================================================================================================
 	// methods
