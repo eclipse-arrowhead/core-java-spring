@@ -22,7 +22,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 	// members
 	
 	private final Logger logger = LogManager.getLogger(GeneralAdvertisementMessageListener.class);
-	private static int ID_COUNTER = 1;
+	private static int idCounter = 1;
 	
 	private final int id;
 	private final ApplicationContext appContext;
@@ -44,7 +44,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 		Assert.notNull(relayClient, "Gatekeeper relay client is null.");
 		Assert.isTrue(threadPoolSize > 0, "threadPoolSize must be a positive number.");
 		
-		this.id = ID_COUNTER++;
+		this.id = idCounter++;
 		this.appContext = appContext;
 		this.session = session;
 		this.relayClient = relayClient;
