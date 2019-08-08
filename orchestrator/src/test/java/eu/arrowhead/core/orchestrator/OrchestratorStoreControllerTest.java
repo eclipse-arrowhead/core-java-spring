@@ -459,7 +459,6 @@ public class OrchestratorStoreControllerTest {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
 	}

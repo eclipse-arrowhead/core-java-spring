@@ -17,8 +17,11 @@ import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConne
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
 import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
+import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -245,6 +248,18 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
+	public static CloudListResponseDTO convertCloudToCloudResponseDTO(final Page<Cloud> entries) {
+		Assert.notNull(entries, "Cloud list is null" );
+		
+		final List<CloudResponseDTO> cloudEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final Cloud entry : entries) {
+			cloudEntries.add(convertCloudToCloudResponseDTO(entry));
+		}
+		
+		return new CloudListResponseDTO(cloudEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public static CloudResponseDTO convertCloudToCloudResponseDTO(final Cloud entity) {
 		Assert.notNull(entity, "Cloud is null" );
 		Assert.notNull(entity.getOperator(), "Cloud.operator is null" );
@@ -254,6 +269,85 @@ public class DTOConverter {
 		
 		return new CloudResponseDTO(entity.getId(), entity.getOperator(), entity.getName(), entity.getSecure(), entity.getNeighbor(), entity.getOwnCloud(), entity.getAuthenticationInfo(),
 								   Utilities.convertZonedDateTimeToUTCString(entity.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entity.getUpdatedAt()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayListResponseDTO convertRelayListToRelayResponseListDTO(final Page<Relay> entries) {
+		Assert.notNull(entries, "Relay list is null" );
+		
+		final List<RelayResponseDTO> relayEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final Relay entry : entries) {
+			relayEntries.add(convertRelayToRelayResponseDTO(entry));
+		}
+		
+		return new RelayListResponseDTO(relayEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayResponseDTO convertRelayToRelayResponseDTO(final Relay entry) {
+		Assert.notNull(entry, "Relay is null");
+		Assert.notNull(entry.getAddress(), "Relay.address is null");
+		Assert.notNull(entry.getType(), "Relay.type is null");
+		Assert.notNull(entry.getCreatedAt(), "Relay.createdAt is null");
+		Assert.notNull(entry.getCreatedAt(), "Relay.updatedAt is null");
+		
+		return new RelayResponseDTO(
+				entry.getId(),
+				entry.getAddress(),
+				entry.getPort(),
+				entry.getSecure(),
+				entry.getExclusive(),
+				entry.getType(),
+				Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public static CloudWithRelaysListResponseDTO convertCloudToCloudWithRelaysListResponseDTO(final Page<Cloud> entries) {
+		Assert.notNull(entries, "Cloud list is null" );
+		
+		final List<CloudWithRelaysResponseDTO> cloudWithRelaysResponseDTOList = new ArrayList<>(entries.getNumberOfElements());
+		for (final Cloud cloud : entries) {
+			Assert.notNull(cloud.getGatekeeperRelays(), "CloudGatekeeperRelay set is null");
+			Assert.notNull(cloud.getGatewayRelays(), "CloudGatewayRelay set is null");
+			
+			cloudWithRelaysResponseDTOList.add(convertCloudToCloudWithRelaysResponseDTO(cloud));
+		}
+		
+		return new CloudWithRelaysListResponseDTO(cloudWithRelaysResponseDTOList, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static CloudWithRelaysResponseDTO convertCloudToCloudWithRelaysResponseDTO(final Cloud cloud) {
+		Assert.notNull(cloud, "Cloud is null");
+		Assert.notNull(cloud.getGatekeeperRelays(), "Gatekeeper relays set is null");
+		Assert.notNull(cloud.getGatewayRelays(), "Gateway relays set is null");
+		
+		final CloudResponseDTO cloudResponseDTO = convertCloudToCloudResponseDTO(cloud);
+		
+		final Set<Relay> gatekeeperRelays = new HashSet<>();
+		for (final CloudGatekeeperRelay conn : cloud.getGatekeeperRelays()) {
+			gatekeeperRelays.add(conn.getRelay());
+		}		
+		
+		final Set<Relay> gatewayRelays = new HashSet<>();
+		for (final CloudGatewayRelay conn : cloud.getGatewayRelays()) {
+			gatewayRelays.add(conn.getRelay());
+		}
+		
+		final List<RelayResponseDTO> gatekeeperRelayListDTO = new ArrayList<>(gatekeeperRelays.size());
+		for (final Relay gatekeeperRelay : gatekeeperRelays) {
+			gatekeeperRelayListDTO.add(convertRelayToRelayResponseDTO(gatekeeperRelay));
+		}
+		
+		final List<RelayResponseDTO> gatewayRelayListDTO = new ArrayList<>(gatewayRelays.size());
+		for (final Relay gatewayRelay : gatewayRelays) {
+			gatewayRelayListDTO.add(convertRelayToRelayResponseDTO(gatewayRelay));
+		}
+		
+		return new CloudWithRelaysResponseDTO(cloudResponseDTO.getId(), cloudResponseDTO.getOperator(), cloudResponseDTO.getName(), cloudResponseDTO.getSecure(),
+											  cloudResponseDTO.getNeighbor(), cloudResponseDTO.getOwnCloud(), cloudResponseDTO.getAuthenticationInfo(),
+											  cloudResponseDTO.getCreatedAt(), cloudResponseDTO.getUpdatedAt(), gatekeeperRelayListDTO, gatewayRelayListDTO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
