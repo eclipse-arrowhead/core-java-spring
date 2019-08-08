@@ -80,19 +80,19 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithNullDTOList() {
+	public void testRegisterBulkCloudsWithRelaysWithNullDTOList() {
 		gatekeeperDBService.registerBulkCloudsWithRelays(null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithEmptyDTOList() {
-		gatekeeperDBService.registerBulkCloudsWithRelays(new ArrayList<>());
+	public void testRegisterBulkCloudsWithRelaysWithEmptyDTOList() {
+		gatekeeperDBService.registerBulkCloudsWithRelays(List.of());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithDTOListContainingNullElement() {
+	public void testRegisterBulkCloudsWithRelaysWithDTOListContainingNullElement() {
 		final List<CloudRequestDTO> dtoList = new ArrayList<>();
 		dtoList.add(null);
 		dtoList.add(new CloudRequestDTO());
@@ -102,8 +102,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithNullOperator() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithNullOperator() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(null);
 		cloudRequestDTO.setName("name");
@@ -111,15 +110,14 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 				
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithBlankOperator() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithBlankOperator() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("");
 		cloudRequestDTO.setName("name");
@@ -127,15 +125,14 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 				
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithOperatorContainsDot() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithOperatorContainsDot() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator.");
 		cloudRequestDTO.setName("name");
@@ -143,15 +140,14 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 				
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithNullName() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithNullName() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName(null);
@@ -159,15 +155,14 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 				
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithBlankName() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithBlankName() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("");
@@ -175,15 +170,14 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 				
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithNameContainsDot() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithNameContainsDot() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name.");
@@ -191,15 +185,14 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 				
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithSecureCloudWithNullAuthInfo() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithSecureCloudWithNullAuthInfo() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -207,15 +200,14 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo(null);
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 					
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithSecureCloudWithBlankAuthInfo() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithSecureCloudWithBlankAuthInfo() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -223,22 +215,21 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("");
 		cloudRequestDTO.setGatewayRelayIds(new ArrayList<>());
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 					
 		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithUniqueConstraintViolationInCloudTable() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithUniqueConstraintViolationInCloudTable() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
 		cloudRequestDTO.setSecure(true);
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(true);
 						
@@ -247,7 +238,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithUniqueConstraintViolationInDTOList() {
+	public void testRegisterBulkCloudsWithRelaysWithUniqueConstraintViolationInDTOList() {
 		final CloudRequestDTO cloudRequestDTO1 = new CloudRequestDTO();
 		cloudRequestDTO1.setOperator("operator");
 		cloudRequestDTO1.setName("name");
@@ -264,9 +255,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO2.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO2.setGatekeeperRelayIds(List.of(1L));
 		
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(cloudRequestDTO1);
-		dtoList.add(cloudRequestDTO2);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO1, cloudRequestDTO2);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 		when(relayRepository.existsById(anyLong())).thenReturn(true);
@@ -276,8 +265,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithNullGatekeeperRelayList() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithNullGatekeeperRelayList() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -285,7 +273,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(null);
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 						
@@ -294,8 +282,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithInvalidGatekeeperRelayid() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithInvalidGatekeeperRelayid() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -303,7 +290,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(-1L));
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 						
@@ -312,8 +299,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithGatekeeperRelayNotExists() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithGatekeeperRelayNotExists() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -321,7 +307,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 		when(relayRepository.existsById(anyLong())).thenReturn(false);
@@ -331,8 +317,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithInvalidGatewayRelayId() {
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
+	public void testRegisterBulkCloudsWithRelaysWithInvalidGatewayRelayId() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -341,7 +326,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(-2L));
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 		when(relayRepository.existsById(1L)).thenReturn(true);
@@ -351,14 +336,13 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithGatewayRelayNotExists() {
+	public void testRegisterBulkCloudsWithRelaysWithGatewayRelayNotExists() {
 		final Relay relayGatekeeper = new Relay("1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
 		relayGatekeeper.setId(1);
 		
 		final Relay relayGateway = new Relay("1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
 		relayGateway.setId(2);
 		
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -367,7 +351,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(2L));
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 		when(relayRepository.existsById(1L)).thenReturn(true);
@@ -378,11 +362,10 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithExclusiveRelayInGatekeeperIdList() {
+	public void testRegisterBulkCloudsWithRelaysWithExclusiveRelayInGatekeeperIdList() {
 		final Relay relay = new Relay("1.1.1.1", 10000, true, true, RelayType.GATEKEEPER_RELAY); //It's not possible to register such Relay in real operation
 		relay.setId(1);
 		
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -390,7 +373,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 		when(relayRepository.existsById(anyLong())).thenReturn(true);
@@ -401,11 +384,10 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithGatewayRelayInGatekeeperIdList() {
+	public void testRegisterBulkCloudsWithRelaysWithGatewayRelayInGatekeeperIdList() {
 		final Relay relay = new Relay("1.1.1.1", 10000, true, false, RelayType.GATEWAY_RELAY);
 		relay.setId(1);
 		
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -413,7 +395,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setNeighbor(true);
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 		when(relayRepository.existsById(anyLong())).thenReturn(true);
@@ -424,14 +406,13 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testregisterBulkCloudsWithRelaysWithGatekeeperRelayInGatewayIdList() {
+	public void testRegisterBulkCloudsWithRelaysWithGatekeeperRelayInGatewayIdList() {
 		final Relay relayGatekeeper = new Relay("1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
 		relayGatekeeper.setId(1);
 		
 		final Relay relayGateway = new Relay("2.2.2.2", 20000, true, false, RelayType.GATEKEEPER_RELAY);
 		relayGateway.setId(2);
 		
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -440,7 +421,7 @@ public class GatekeeperDBServiceCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(2L));
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
 		when(relayRepository.existsById(anyLong())).thenReturn(true);

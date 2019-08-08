@@ -142,8 +142,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayWithNullAddress() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO(null, 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO(null, 10000, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -151,8 +150,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayWithBlankAddress() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("", 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("", 10000, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -160,8 +158,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayInvalidPortMin() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -169,8 +166,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayInvalidPortMax() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -178,8 +174,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayNullPort() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", null, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", null, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -187,8 +182,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithInvalidType() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", 10000, true, false, "INVALID_RELAY_TYPE"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, false, "INVALID_RELAY_TYPE"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -196,8 +190,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithExclusiveGatekeeperRelay() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GATEKEEPER_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GATEKEEPER_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -205,8 +198,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithExclusiveGeneralRelay() {
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, true, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -214,9 +206,8 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithUniqueConstraintViolationInDTOList() {		
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", 10000, false, false, "GENERAL_RELAY"));
-		dtoList.add(new RelayRequestDTO("1.1.1.1", 10000, true, false, "GATEKEEPER_RELAY"));
+		final List<RelayRequestDTO> dtoList =List.of(new RelayRequestDTO("1.1.1.1", 10000, false, false, "GENERAL_RELAY"),
+												     new RelayRequestDTO("1.1.1.1", 10000, true, false, "GATEKEEPER_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -226,8 +217,7 @@ public class GatekeeperDBServiceRelayTest {
 	public void testRegisterBulkRelaysWithUniqueConstraintViolationInRelayTable() {
 		when(relayRepository.existsByAddressAndPort(any(), anyInt())).thenReturn(true);
 		
-		final List<RelayRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(new RelayRequestDTO("1.1.1.1", 10000, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", 10000, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}

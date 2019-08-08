@@ -291,7 +291,7 @@ public class UtilitiesTest {
 	@Test
 	public void testConvertStringToRelayTypeWithInvalidString() {
 		final RelayType convertedType = Utilities.convertStringToRelayType("InvalidString");
-		Assert.assertEquals(null, convertedType);
+		Assert.assertNull(convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
