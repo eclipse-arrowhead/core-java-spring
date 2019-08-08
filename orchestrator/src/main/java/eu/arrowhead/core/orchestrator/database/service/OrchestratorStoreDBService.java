@@ -60,8 +60,10 @@ public class OrchestratorStoreDBService {
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "The given PriorityMap has different size than the size of consumer-serviceDeffinition pars in DB";
 	private static final String NOT_VALID_ERROR_MESSAGE = " is not valid.";
+	private static final String NOT_FOREIGN_ERROR_MESSAGE = " is not foreign";
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
+	
 	
 	@Autowired
 	private OrchestratorStoreRepository orchestratorStoreRepository;
@@ -268,13 +270,14 @@ public class OrchestratorStoreDBService {
 		if ( consumerSystemId < 1) {
 			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
-		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
-			if ( consumerOption.isEmpty() ) {
-				throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
-			}
-				
+		
 		if ( Utilities.isEmpty(serviceDefinitionName)) {
 			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
+		if ( consumerOption.isEmpty() ) {
+			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
@@ -304,22 +307,23 @@ public class OrchestratorStoreDBService {
 		if ( consumerSystemId < 1) {
 			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
-		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
-			if ( consumerOption.isEmpty() ) {
-				throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
-			}
-				
+		
 		if ( Utilities.isEmpty(serviceDefinitionName)) {
 			throw new InvalidParameterException("ServiceDefinitionName " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		if ( Utilities.isEmpty(serviceInterfaceName)) {
+			throw new InvalidParameterException("ServiceInterface " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
+		if ( consumerOption.isEmpty() ) {
+			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
 		if ( serviceDefinitionOption.isEmpty() ) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
-		}
-		
-		if ( Utilities.isEmpty(serviceInterfaceName)) {
-			throw new InvalidParameterException("ServiceInterface " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceInterface> serviceInterfaceOption = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName);
@@ -480,6 +484,15 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
 	public OrchestratorStoreResponseDTO getForeignResponseDTO(final OrchestratorStore orchestratorStore) {
+		
+		if (orchestratorStore == null) {
+			throw new InvalidParameterException("OrchestratorStore " + NULL_ERROR_MESSAGE);
+		}
+		
+		if (!orchestratorStore.isForeign()) {
+			throw new InvalidParameterException("OrchestratorStore " + NOT_FOREIGN_ERROR_MESSAGE);
+		}
+		
 		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findById(orchestratorStore.getProviderSystemId());
 		if (foreignSystemOptional.isEmpty()) {
 			throw new InvalidParameterException("ForeignSystemOptional by id: " + orchestratorStore.getProviderSystemId() + NOT_IN_DB_ERROR_MESSAGE);

@@ -868,8 +868,8 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO getSystemByNameAndAddressAndPort(String systemName, String address, int port) {
-		logger.debug("getSystemByNameAndAddressAndPort started...");
+	public SystemResponseDTO getSystemByNameAndAddressAndPortResponse(final String systemName, final String address, final int port) {
+		logger.debug("getSystemByNameAndAddressAndPortResponse started...");
 		
 		final int validatedPort = validateSystemPort(port);
 		final String validatedSystemName = validateSystemParamString(systemName);

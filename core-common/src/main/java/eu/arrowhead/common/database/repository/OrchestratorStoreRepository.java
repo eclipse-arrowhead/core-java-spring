@@ -29,7 +29,7 @@ public interface OrchestratorStoreRepository extends RefreshableRepository<Orche
 																																final boolean foreign);
 	
 	@Query("SELECT entry FROM OrchestratorStore entry WHERE priority = ?1 AND consumerSystem.id = ?2 ")
-	public List<OrchestratorStore> findAllByPriorityAndSystemId(int topPriority, long consumerSystemId);
+	public List<OrchestratorStore> findAllByPriorityAndSystemId(final int topPriority,final long consumerSystemId);
 	
 	public List<OrchestratorStore> findAllByConsumerSystemAndServiceDefinition(
 			final System consumerSystem,

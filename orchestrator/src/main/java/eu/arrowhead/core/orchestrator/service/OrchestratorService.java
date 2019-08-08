@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -54,6 +55,7 @@ public class OrchestratorService {
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
+	private static final String MORE_THAN_ONE_ERROR_MESSAGE= " must not have more then one element.";
 	
 	private static final int EXPIRING_TIME_IN_MINUTES = 2;
 	
@@ -126,6 +128,9 @@ public class OrchestratorService {
 			final Long systemId) {
 		logger.debug("orchestrationFromStoreWithSystemParameter started ...");		
 		
+		if (orchestrationFormRequestDTO == null) {
+			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
 		orchestrationFormRequestDTO.validateCrossParameterConstraints();
 		
 		final List<OrchestratorStore> entryList;
@@ -159,7 +164,7 @@ public class OrchestratorService {
 					}		
 				}else {
 
-					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertOrchestratorStoreResponseDTOToPreferredProviderDataDTO(orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore));					
+					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore));					
 					orchestrationFormRequestDTO.setPreferredProviders(List.of(preferredProviderDataDTO));
 					
 		            final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(orchestrationFormRequestDTO, preferredProviderDataDTO.getProviderCloud());		            
@@ -264,7 +269,6 @@ public class OrchestratorService {
 		final SystemRequestDTO systemRequestDTO = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(validConsumerSystemResponseDTO);
 		
 	    final OrchestrationFormRequestDTO orchestrationFormRequestDTO = new OrchestrationFormRequestDTO.Builder(systemRequestDTO).build();
-	    orchestrationFormRequestDTO.validateCrossParameterConstraints();
 
 	    return orchestrationFromStoreWithSystemIdParameter(orchestrationFormRequestDTO, systemId);
 
@@ -436,10 +440,8 @@ public class OrchestratorService {
 			throw new InvalidParameterException("SystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemId(systemId);
-		
-		
-		return systemResponseDTO;
+		return orchestratorDriver.queryServiceRegistryBySystemId(systemId);
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -480,8 +482,14 @@ public class OrchestratorService {
 			
 			final String serviceDefinitionName = requestedService.getServiceDefinitionRequirement().trim().toLowerCase();
 			
-			if (requestedService.getInterfaceRequirements() == null || Utilities.isEmpty(requestedService.getInterfaceRequirements().get(0) )) {
+			if (requestedService.getInterfaceRequirements() == null ||
+					requestedService.getInterfaceRequirements().isEmpty() || 
+					Utilities.isEmpty(requestedService.getInterfaceRequirements().get(0))) {
 				throw new InvalidParameterException("InterfaceRequirement " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+			}
+			
+			if (requestedService.getInterfaceRequirements().size() != 1) {
+				throw new InvalidParameterException("InterfaceRequirement " + MORE_THAN_ONE_ERROR_MESSAGE);
 			}
 			final String serviceInterfaceName =  requestedService.getInterfaceRequirements().get(0).trim();
 			
@@ -506,14 +514,14 @@ public class OrchestratorService {
 	    
 	    if (onlyLocalEntryList.isEmpty()) {
 			
-	    	return new ArrayList<>(0);
+	    	return List.of();
 		}
 	    
 	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
-	    final Map<Long, List<String>> serviceDefinitionIdInterfaceIdsMap = mapIntrefacesToServiceDefinitions( onlyLocalEntryList);
-	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapIntrefacesToProviders( onlyLocalEntryList);
+	    final Map<Long, List<String>> serviceDefinitionIdInterfaceIdsMap = mapInterfacesToServiceDefinitions( onlyLocalEntryList);
+	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapInterfacesToProviders( onlyLocalEntryList);
 	    
-	    for (java.util.Map.Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
+	    for (Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
 	    	
 	    	final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 	    	
@@ -535,15 +543,12 @@ public class OrchestratorService {
 	private List<OrchestratorStore> filterEntryListByForeign(List<OrchestratorStore> entryList) {
 		logger.debug(" filterEntryListByForeign started...");
 		
-		final List<OrchestratorStore> filteredEntryList = new ArrayList<>();		
-		for (final OrchestratorStore orchestratorStore : entryList) {
-			
-			if (!orchestratorStore.isForeign()) {
-				filteredEntryList.add(orchestratorStore);
-			}
+		if (entryList == null || entryList.isEmpty()) {
+			return List.of();
 		}
 		
-		return filteredEntryList;
+		return entryList.stream().filter(e -> !e.isForeign()).collect(Collectors.toList()); 
+		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -556,7 +561,7 @@ public class OrchestratorService {
 	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);    
 	    if (onlyLocalEntryList.isEmpty()) {
 			
-	    	return new ArrayList<>(0);
+	    	return List.of();
 		}
 		
     	final ServiceQueryFormDTO serviceQueryFormDTO = orchestrationFormRequestDTO.getRequestedService();
@@ -569,24 +574,28 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, List<String>> mapIntrefacesToServiceDefinitions(List<OrchestratorStore> entryList) {
+	private Map<Long, List<String>> mapInterfacesToServiceDefinitions(List<OrchestratorStore> entryList) {
 		logger.debug("mapIntrefacesToServiceDefinitions started...");
 		
 		final Map<Long, List<String>> serviceDefinitionsInterfacesMap = new HashMap<>();
 		
 		for (OrchestratorStore orchestratorStore : entryList) {
 			final Long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
-			
+			final String interfaceName = orchestratorStore.getServiceInterface().getInterfaceName();
 			
 			if (serviceDefinitionsInterfacesMap.containsKey(serviceDefinitionId)) {
 				
-				serviceDefinitionsInterfacesMap.get(serviceDefinitionId ).add(orchestratorStore.getServiceInterface().getInterfaceName());
+				
+				if (!serviceDefinitionsInterfacesMap.get(serviceDefinitionId).contains(interfaceName)) {
+					
+					serviceDefinitionsInterfacesMap.get(serviceDefinitionId).add(interfaceName);
+				}
 			
 			}else {
 				
-				final List<String> serviceInterfaceIdList = new ArrayList<>();
-				serviceInterfaceIdList.add(orchestratorStore.getServiceInterface().getInterfaceName());
-				serviceDefinitionsInterfacesMap.put(serviceDefinitionId, serviceInterfaceIdList);
+				final List<String> serviceInterfaceNameList = new ArrayList<>();
+				serviceInterfaceNameList.add(orchestratorStore.getServiceInterface().getInterfaceName());
+				serviceDefinitionsInterfacesMap.put(serviceDefinitionId, serviceInterfaceNameList);
 				
 			}
 		}
@@ -595,7 +604,7 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, List<String>> mapIntrefacesToProviders(List<OrchestratorStore> entryList) {
+	private Map<Long, List<String>> mapInterfacesToProviders(List<OrchestratorStore> entryList) {
 		logger.debug("mapIntrefacesToProviders started...");
 		
 		final Map<Long, List<String>> providersInterfacesMap = new HashMap<>();
@@ -655,7 +664,6 @@ public class OrchestratorService {
 			final Long providerIdFromResult = serviceRegistryResponseDTO.getProvider().getId();
 			final List<ServiceInterfaceResponseDTO> interfaceListFromResult = serviceRegistryResponseDTO.getInterfaces();
 			final List<ServiceInterfaceResponseDTO> filteredInterfaceList = new ArrayList<>();
-			filteredInterfaceList.clear();
 			
 			if (providerIdInterfaceIdsMap.containsKey(providerIdFromResult)) {
 				

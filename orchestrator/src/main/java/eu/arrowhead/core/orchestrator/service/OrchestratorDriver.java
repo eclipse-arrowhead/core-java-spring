@@ -91,7 +91,7 @@ public class OrchestratorDriver {
 		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less then 1.");
 		
 		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri().expand(
-				Collections.singletonMap(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId + ""));
+				Map.of(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId + ""));
 		
 		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemIdUri, HttpMethod.GET, SystemResponseDTO.class);
 		

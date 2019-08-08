@@ -335,21 +335,6 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static List<Long> convertServiceInterfaceResponseDTOListToServiceInterfaceIdList(
-			List<ServiceInterfaceResponseDTO> serviceInterfaceResponseDTOList) {
-		Assert.notNull(serviceInterfaceResponseDTOList, "ServiceInterfaceResponseDTOList is null");
-		
-		final List<Long> serviceInterfaceIdList = new ArrayList<>(serviceInterfaceResponseDTOList.size());
-		
-		for (ServiceInterfaceResponseDTO dto : serviceInterfaceResponseDTOList) {
-			
-			serviceInterfaceIdList.add(dto.getId());
-		}
-		
-		return serviceInterfaceIdList;
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	public static SystemRequestDTO convertSystemResponseDTOToSystemRequestDTO(final SystemResponseDTO response) {
 		Assert.notNull(response, "response is null");
 		
@@ -363,9 +348,10 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static PreferredProviderDataDTO convertOrchestratorStoreResponseDTOToPreferredProviderDataDTO(
+	public static PreferredProviderDataDTO convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(
 			OrchestratorStoreResponseDTO orchestratorStoreResponseDTO) {
 		Assert.notNull(orchestratorStoreResponseDTO, "orchestratorStoreResponseDTO is null");
+		Assert.isTrue(orchestratorStoreResponseDTO.getForeign(), "orchestratorStoreResponseDTO is not foreign");
 		Assert.notNull(orchestratorStoreResponseDTO.getProviderSystem(), "orchestratorStoreResponseDTO.ProviderSystem is null");
 		Assert.notNull(orchestratorStoreResponseDTO.getProviderCloud(), "orchestratorStoreResponseDTO.ProviderCloud is null");
 		
