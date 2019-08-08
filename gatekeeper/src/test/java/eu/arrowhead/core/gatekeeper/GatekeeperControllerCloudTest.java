@@ -82,7 +82,7 @@ public class GatekeeperControllerCloudTest {
 	@Test
 	public void testGetCloudsWithoutParameterWithoutParameter( ) throws Exception {
 		final int amountOfClouds = 5;
-		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, false, RelayType.GATEWAY_RELAY, false);
+		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		
 		when(gatekeeperDBService.getCloudsResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
 		
@@ -101,7 +101,7 @@ public class GatekeeperControllerCloudTest {
 	@Test
 	public void testGetCloudsWithPageAndSizeParameter( ) throws Exception {
 		final int amountOfClouds = 5;
-		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, false, RelayType.GATEWAY_RELAY, false);
+		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		
 		when(gatekeeperDBService.getCloudsResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
 		
@@ -151,7 +151,7 @@ public class GatekeeperControllerCloudTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testGetCloudByIdWithExistingId() throws Exception {
-		final CloudWithRelaysResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(1, RelayType.GATEKEEPER_RELAY, false, RelayType.GATEWAY_RELAY, false).getData().get(0);
+		final CloudWithRelaysResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(1, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false).getData().get(0);
 		
 		when(gatekeeperDBService.getCloudByIdResponse(anyLong())).thenReturn(dto);
 		
@@ -178,8 +178,6 @@ public class GatekeeperControllerCloudTest {
 	//Tests of registerClouds
 	
 	//-------------------------------------------------------------------------------------------------
-	
-	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRegisterCloudsOk() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
@@ -193,7 +191,7 @@ public class GatekeeperControllerCloudTest {
 		final List<CloudRequestDTO> dtoList = new ArrayList<>();
 		dtoList.add(cloudRequestDTO);
 		
-		final CloudWithRelaysListResponseDTO responseDTO = createCloudWithRelaysListResponseDTOForDBMocking(1, RelayType.GATEKEEPER_RELAY, false, RelayType.GATEWAY_RELAY, false);
+		final CloudWithRelaysListResponseDTO responseDTO = createCloudWithRelaysListResponseDTOForDBMocking(1, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		
 		when(gatekeeperDBService.registerBulkCloudsWithRelaysResponse(any())).thenReturn(responseDTO);
 		
@@ -244,8 +242,7 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -265,8 +262,7 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -286,8 +282,7 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -307,8 +302,7 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(cloudRequestDTO);
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI)
 					.content(objectMapper.writeValueAsBytes(dtoList))
@@ -318,11 +312,11 @@ public class GatekeeperControllerCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//Tests of updateRelayById
+	//Tests of updateCloudById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUpdateCloudsOk() throws Exception {		
+	public void testUpdateCloudByIdOk() throws Exception {		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
 		cloudRequestDTO.setName("testName");
@@ -332,7 +326,7 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
 		
-		final CloudWithRelaysResponseDTO cloudResponse = createCloudWithRelaysListResponseDTOForDBMocking(1, RelayType.GATEKEEPER_RELAY, false, RelayType.GATEWAY_RELAY, false).getData().get(0);
+		final CloudWithRelaysResponseDTO cloudResponse = createCloudWithRelaysListResponseDTOForDBMocking(1, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false).getData().get(0);
 		
 		when(gatekeeperDBService.updateCloudByIdWithRelaysResponse(anyLong(), any())).thenReturn(cloudResponse);
 		
@@ -351,7 +345,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUpdateCloudsWithInvalidId() throws Exception {
+	public void testUpdateCloudByIdWithInvalidId() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
 		cloudRequestDTO.setName("testName");
@@ -370,7 +364,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUpdateCloudsWithNullOperator() throws Exception {
+	public void testUpdateCloudByIdWithNullOperator() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(null);
 		cloudRequestDTO.setName("testName");
@@ -389,7 +383,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUpdateCloudsWithEmptyOperator() throws Exception {
+	public void testUpdateCloudByIdWithEmptyOperator() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("     ");
 		cloudRequestDTO.setName("testName");
@@ -408,7 +402,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUpdateCloudsWithNullName() throws Exception {
+	public void testUpdateCloudByIdWithNullName() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
 		cloudRequestDTO.setName(null);
@@ -417,11 +411,9 @@ public class GatekeeperControllerCloudTest {
 		cloudRequestDTO.setAuthenticationInfo("testAuthenticationInfo");
 		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
 		cloudRequestDTO.setGatewayRelayIds(List.of(1L));
-		final List<CloudRequestDTO> dtoList = new ArrayList<>();
-		dtoList.add(cloudRequestDTO);
 		
 		this.mockMvc.perform(put(CLOUDS_MGMT_URI + "/1")
-					.content(objectMapper.writeValueAsBytes(dtoList))
+					.content(objectMapper.writeValueAsBytes(cloudRequestDTO))
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
@@ -429,7 +421,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUpdateCloudsWithEmptyName() throws Exception {
+	public void testUpdateCloudByIdWithEmptyName() throws Exception {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("testOperator");
 		cloudRequestDTO.setName("   ");
@@ -532,8 +524,7 @@ public class GatekeeperControllerCloudTest {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private CloudWithRelaysListResponseDTO createCloudWithRelaysListResponseDTOForDBMocking(final int amountOfClouds, final RelayType gatekeeperRelayType, final boolean gatekeeperRelayExclusive
-																											  , final RelayType gatewayRelayType, final boolean gatewayRelayExclusive) {
+	private CloudWithRelaysListResponseDTO createCloudWithRelaysListResponseDTOForDBMocking(final int amountOfClouds, final RelayType gatekeeperRelayType, final RelayType gatewayRelayType, final boolean gatewayRelayExclusive) {
 		final List<CloudWithRelaysResponseDTO> cloudDTOList = new ArrayList<>();
 		
 		for (int i = 1; i <= amountOfClouds; ++i) {
@@ -553,7 +544,7 @@ public class GatekeeperControllerCloudTest {
 			gatekeeperRelay.setAddress("testAddress" + i);
 			gatekeeperRelay.setPort(i * 1000);
 			gatekeeperRelay.setSecure(true);
-			gatekeeperRelay.setExclusive(gatekeeperRelayExclusive);
+			gatekeeperRelay.setExclusive(false);
 			gatekeeperRelay.setType(gatekeeperRelayType);
 			gatekeeperRelay.setCreatedAt(ZonedDateTime.now());
 			gatekeeperRelay.setUpdatedAt(ZonedDateTime.now());

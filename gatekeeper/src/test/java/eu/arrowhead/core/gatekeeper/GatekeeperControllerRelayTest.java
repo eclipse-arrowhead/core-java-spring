@@ -485,7 +485,7 @@ public class GatekeeperControllerRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private RelayListResponseDTO createRelayListResponseDTOForDBMocking(final int amountOfRelay) {
-		final List<RelayResponseDTO> relayDTOs = new ArrayList<>();
+		final List<RelayResponseDTO> relayDTOs = new ArrayList<>(amountOfRelay);
 		
 		for (int i = 1; i <= amountOfRelay; ++i) {
 			final Relay relay = new Relay();
