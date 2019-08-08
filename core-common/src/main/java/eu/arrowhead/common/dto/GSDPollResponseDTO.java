@@ -11,7 +11,7 @@ public class GSDPollResponseDTO implements Serializable {
 		
 	private static final long serialVersionUID = 2276405706860702389L;
 	
-	private CloudWithRelaysResponseDTO providerCloud;
+	private CloudResponseDTO providerCloud;
 	private String requiredServiceDefinition;
 	private List<String> availableInterfaces;
 	private Map<String,String> serviceMetadata;
@@ -23,7 +23,7 @@ public class GSDPollResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------	
 	public GSDPollResponseDTO() {}
 	
-	public GSDPollResponseDTO(final CloudWithRelaysResponseDTO providerCloud, final String requiredServiceDefinition,
+	public GSDPollResponseDTO(final CloudResponseDTO providerCloud, final String requiredServiceDefinition,
 							 final List<String> availableInterfaces, final Map<String, String> serviceMetadata, final Integer serviceVersion) {
 		this.providerCloud = providerCloud;
 		this.requiredServiceDefinition = requiredServiceDefinition;
@@ -33,14 +33,14 @@ public class GSDPollResponseDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public CloudWithRelaysResponseDTO getProviderCloud() { return providerCloud; }
+	public CloudResponseDTO getProviderCloud() { return providerCloud; }
 	public String getRequiredServiceDefinition() { return requiredServiceDefinition; }
 	public List<String> getAvailableInterfaces() { return availableInterfaces; }
 	public Map<String, String> getServiceMetadata() { return serviceMetadata; }
 	public Integer getServiceVersion() { return serviceVersion; }
 
 	//-------------------------------------------------------------------------------------------------	
-	public void setProviderCloud(final CloudWithRelaysResponseDTO providerCloud) { this.providerCloud = providerCloud; }
+	public void setProviderCloud(final CloudResponseDTO providerCloud) { this.providerCloud = providerCloud; }
 	public void setRequiredServiceDefinition(final String requiredServiceDefinition) { this.requiredServiceDefinition = requiredServiceDefinition; }
 	public void setAvailableInterfaces(final List<String> availableInterfaces) { this.availableInterfaces = availableInterfaces; }
 	public void setServiceMetadata(final Map<String, String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
