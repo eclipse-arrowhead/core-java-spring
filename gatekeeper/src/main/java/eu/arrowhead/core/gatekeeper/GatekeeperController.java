@@ -31,10 +31,13 @@ import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.RelayListResponseDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
 import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.service.GatekeeperService;
@@ -66,6 +69,7 @@ public class GatekeeperController {
 	private static final String RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ADDRESS + "}" + "/{" + PATH_VARIABLE_PORT + "}";
 	
 	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/inti_gsd";
+	private static final String INIT_INTER_CLOUD_NEGOTIATIONS_URI = "/init_icn";
 	
 	private static final String GET_CLOUDS_MGMT_HTTP_200_MESSAGE = "Cloud entries returned";
 	private static final String GET_CLOUDS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
@@ -89,6 +93,9 @@ public class GatekeeperController {
 	
 	private static final String POST_INIT_GSD_HTTP_200_MESSAGE = "GSD results returned";
 	private static final String POST_INIT_GSD_HTTP_400_MESSAGE = "Could not initiate GSD";
+	private static final String POST_INIT_ICN_DESCRIPTION = "Starts the inter cloud negotiation process";
+	private static final String POST_INIT_ICN_HTTP_200_MESSAGE = "ICN result returned";
+	private static final String POST_INIT_ICN_HTTP_400_MESSAGE = "Could not initiate inter cloud negotiation";
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperController.class);
 	
@@ -428,7 +435,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return the results of Global Service Discovery request", response = GSDQueryResultDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INIT_GSD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INIT_GSD_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -446,6 +453,25 @@ public class GatekeeperController {
 		return gsdQueryResultDTO;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_INIT_ICN_DESCRIPTION, response = ICNResultDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INIT_ICN_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INIT_ICN_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = INIT_INTER_CLOUD_NEGOTIATIONS_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ICNResultDTO initiateInterCloudNegotiation(@RequestBody final ICNRequestFormDTO icnForm) {
+		logger.debug("New initiateInterCloudNegotiation request received");
+		
+		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + INIT_INTER_CLOUD_NEGOTIATIONS_URI);
+		
+		// TODO
+		
+		logger.debug("Inter cloud negotiation has been finished.");
+		return null;
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -520,4 +546,63 @@ public class GatekeeperController {
 			throw new BadPayloadException("serviceDefinitionRequirement is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateICNRequestFormDTO(final ICNRequestFormDTO icnForm, final String origin) {
+		logger.debug("validateICNRequestFormDTO started...");
+		
+		if (icnForm == null) {
+			throw new BadPayloadException("ICN form is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (icnForm.getRequestedService() == null) {
+			throw new BadPayloadException("Requested service is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(icnForm.getRequestedService().getServiceDefinitionRequirement())) {
+			throw new BadPayloadException("Requested service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		validateId(icnForm.getTargetCloudId(), origin);
+		validateSystemRequestDTO(icnForm.getRequesterSystem(), origin);
+		
+		for (SystemRequestDTO preferredSystem : icnForm.getPreferredSystems()) {
+			validateSystemRequestDTO(preferredSystem, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateId(final Long id, final String origin) {
+		if (id == null || id < 1) {
+			throw new BadPayloadException("Invalid id: " + id, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateSystemRequestDTO(final SystemRequestDTO system, final String origin) {
+		logger.debug("validateSystemRequestDTO started...");
+		
+		if (system == null) {
+			throw new BadPayloadException("System is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(system.getSystemName())) {
+			throw new BadPayloadException("System name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(system.getAddress())) {
+			throw new BadPayloadException("System address is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (system.getPort() == null) {
+			throw new BadPayloadException("System port is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final int validatedPort = system.getPort().intValue();
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".",
+										  HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+
 }

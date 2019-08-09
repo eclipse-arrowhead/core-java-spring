@@ -10,6 +10,8 @@ import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 
 @Service
@@ -28,6 +30,11 @@ public class GatekeeperService {
 	public GSDPollResponseDTO doGSDPoll(final GSDPollRequestDTO request) {
 		//TODO: implement
 		
+		return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ICNResultDTO initICN(final ICNRequestFormDTO form) {
 		return null;
 	}
 
