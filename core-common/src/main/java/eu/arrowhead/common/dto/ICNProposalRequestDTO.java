@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 public class ICNProposalRequestDTO implements Serializable {
 	
 	//=================================================================================================
@@ -21,6 +23,36 @@ public class ICNProposalRequestDTO implements Serializable {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public ICNProposalRequestDTO() {}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ICNProposalRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, final SystemRequestDTO requesterSystem, 
+							     final List<SystemRequestDTO> preferredSystems, final List<RelayRequestDTO> preferredGatewayRelays, final OrchestrationFlags negotiationFlags,
+							     final boolean useGateway) {
+		Assert.notNull(requestedService, "Requested service is null.");
+		Assert.notNull(requesterCloud, "Requester cloud is null.");
+		Assert.notNull(requesterSystem, "Requester system is null.");
+		
+		this.requestedService = requestedService;
+		this.requesterCloud = requesterCloud;
+		this.requesterSystem = requesterSystem;
+		this.useGateway = useGateway;
+		
+		if (preferredSystems != null) {
+			this.preferredSystems = preferredSystems;
+		}
+		
+		if (preferredGatewayRelays != null) {
+			this.preferredGatewayRelays = preferredGatewayRelays;
+		}
+		
+		if (negotiationFlags != null) {
+			this.negotiationFlags = negotiationFlags;
+		}
+
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }

@@ -1,9 +1,10 @@
 package eu.arrowhead.core.gatekeeper.service;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,10 @@ import org.springframework.stereotype.Service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.CloudGatewayRelay;
+import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
@@ -20,9 +25,9 @@ import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
+import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
 @Service
@@ -32,6 +37,9 @@ public class GatekeeperService {
 	// members
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperService.class);
+	
+	@Autowired
+	private CommonDBService commonDBService;
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
@@ -59,6 +67,11 @@ public class GatekeeperService {
 		validateICNForm(form);
 		
 		final Cloud targetCloud = gatekeeperDBService.getCloudById(form.getTargetCloudId());
+		final CloudRequestDTO requesterCloud = getRequesterCloud();
+		final List<RelayRequestDTO> preferredRelays = getPreferredRelays(targetCloud);
+		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
+																		 form.getNegotiationFlags(), form.isUseGateway());
+		
 		
 		return null;
 	}
@@ -125,5 +138,29 @@ public class GatekeeperService {
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getRequesterCloud() {
+		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
+		final CloudRequestDTO result = new CloudRequestDTO();
+		result.setOperator(ownCloud.getOperator());
+		result.setName(ownCloud.getName());
+		result.setAuthenticationInfo(ownCloud.getAuthenticationInfo());
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<RelayRequestDTO> getPreferredRelays(final Cloud targetCloud) {
+		final Set<CloudGatewayRelay> gatewayRelays = targetCloud.getGatewayRelays();
+		final List<RelayRequestDTO> result = new ArrayList<RelayRequestDTO>(gatewayRelays.size());
+		
+		for (final CloudGatewayRelay relayConn : gatewayRelays) {
+			final Relay relay = relayConn.getRelay();
+			result.add(new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getSecure(), relay.getExclusive(), relay.getType().name()));
+		}
+		
+		return result;
 	}
 }

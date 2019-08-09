@@ -68,6 +68,7 @@ public class ICNRequestFormDTO implements Serializable {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	public void setNegotiationFlags(final OrchestrationFlags negotiationFlags) {
 		if (negotiationFlags != null) {
 			this.negotiationFlags = negotiationFlags;
