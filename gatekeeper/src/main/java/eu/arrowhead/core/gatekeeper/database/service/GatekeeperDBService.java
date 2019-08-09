@@ -96,6 +96,34 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	public List<Cloud> getNeighborClouds() {
+		logger.debug("getNeighborClouds started...");
+		
+		try {
+			
+			return cloudRepository.findByNeighbor(true);
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public List<Cloud> getCloudsByIds(final Iterable<Long> ids) {
+		logger.debug("getCloudsByIds started...");
+		
+		try {
+			
+			return cloudRepository.findAllById(ids);
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public CloudWithRelaysResponseDTO getCloudByIdResponse(final long id) {
 		logger.debug("getCloudByIdResponse started...");
 		

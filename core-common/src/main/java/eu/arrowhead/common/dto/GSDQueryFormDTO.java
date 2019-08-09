@@ -11,7 +11,7 @@ public class GSDQueryFormDTO implements Serializable {
 	private static final long serialVersionUID = -6651144276576501218L;
 	
 	private ServiceQueryFormDTO requestedService;
-	private List<CloudResponseDTO> cloudBoundaries;
+	private List<Long> cloudIdBoundaries;
 	
 	//=================================================================================================
 	// methods
@@ -19,16 +19,16 @@ public class GSDQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------	
 	public GSDQueryFormDTO() {}
 	
-	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<CloudResponseDTO> cloudBoundaries) {
+	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<Long> cloudIdBoundaries) {
 		this.requestedService = requestedService;
-		this.cloudBoundaries = cloudBoundaries;
+		this.cloudIdBoundaries = cloudIdBoundaries;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
-	public List<CloudResponseDTO> getCloudBoundaries() { return cloudBoundaries; }
+	public List<Long> getCloudIdBoundaries() { return cloudIdBoundaries; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setCloudBoundaries(final List<CloudResponseDTO> cloudBoundaries) { this.cloudBoundaries = cloudBoundaries; }	
+	public void setCloudIsBoundaries(final List<Long> cloudIdBoundaries) { this.cloudIdBoundaries = cloudIdBoundaries; }	
 }
