@@ -6,18 +6,17 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-public class ICNProposalRequestDTO implements Serializable {
+public class ICNRequestFormDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = -8916389174595364064L;
+	private static final long serialVersionUID = 2348058628698510590L;
 	
 	private ServiceQueryFormDTO requestedService;
-	private CloudRequestDTO requesterCloud;
+	private Long targetCloudId;
 	private SystemRequestDTO requesterSystem;
 	private List<SystemRequestDTO> preferredSystems = new ArrayList<>();
-	private List<RelayRequestDTO> preferredGatewayRelays = new ArrayList<>();
 	private OrchestrationFlags negotiationFlags = new OrchestrationFlags();
 	private boolean useGateway = false;
 	
@@ -25,18 +24,17 @@ public class ICNProposalRequestDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ICNProposalRequestDTO() {}
+	public ICNRequestFormDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ICNProposalRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, final SystemRequestDTO requesterSystem, 
-							     final List<SystemRequestDTO> preferredSystems, final List<RelayRequestDTO> preferredGatewayRelays, final OrchestrationFlags negotiationFlags,
-							     final boolean useGateway) {
+	public ICNRequestFormDTO(final ServiceQueryFormDTO requestedService, final Long targetCloudId, final SystemRequestDTO requesterSystem, final List<SystemRequestDTO> preferredSystems,
+						     final OrchestrationFlags negotiationFlags, final boolean useGateway) {
 		Assert.notNull(requestedService, "Requested service is null.");
-		Assert.notNull(requesterCloud, "Requester cloud is null.");
+		Assert.notNull(targetCloudId, "Target cloud id is null.");
 		Assert.notNull(requesterSystem, "Requester system is null.");
 		
 		this.requestedService = requestedService;
-		this.requesterCloud = requesterCloud;
+		this.targetCloudId = targetCloudId;
 		this.requesterSystem = requesterSystem;
 		this.useGateway = useGateway;
 		
@@ -44,28 +42,22 @@ public class ICNProposalRequestDTO implements Serializable {
 			this.preferredSystems = preferredSystems;
 		}
 		
-		if (preferredGatewayRelays != null) {
-			this.preferredGatewayRelays = preferredGatewayRelays;
-		}
-		
 		if (negotiationFlags != null) {
 			this.negotiationFlags = negotiationFlags;
 		}
-
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
-	public CloudRequestDTO getRequesterCloud() { return requesterCloud; }
+	public Long getTargetCloudId() { return targetCloudId; }
 	public SystemRequestDTO getRequesterSystem() { return requesterSystem; }
 	public List<SystemRequestDTO> getPreferredSystems() { return preferredSystems; }
-	public List<RelayRequestDTO> getPreferredGatewayRelays() { return preferredGatewayRelays; }
 	public OrchestrationFlags getNegotiationFlags() { return negotiationFlags; }
 	public boolean isUseGateway() { return useGateway; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
+	public void setTargetCloudId(final Long targetCloudId) { this.targetCloudId = targetCloudId; }
 	public void setRequesterSystem(final SystemRequestDTO requesterSystem) { this.requesterSystem = requesterSystem; }
 	public void setUseGateway(final boolean useGateway) { this.useGateway = useGateway; }
 	
@@ -73,13 +65,6 @@ public class ICNProposalRequestDTO implements Serializable {
 	public void setPreferredSystems(final List<SystemRequestDTO> preferredSystems) {
 		if (preferredSystems != null) {
 			this.preferredSystems = preferredSystems;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public void setPreferredGatewayRelays(final List<RelayRequestDTO> preferredGatewayRelays) {
-		if (preferredGatewayRelays != null) {
-			this.preferredGatewayRelays = preferredGatewayRelays;
 		}
 	}
 	

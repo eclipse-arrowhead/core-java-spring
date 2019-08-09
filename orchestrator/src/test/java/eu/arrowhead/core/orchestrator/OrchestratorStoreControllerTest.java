@@ -454,7 +454,6 @@ public class OrchestratorStoreControllerTest {
 	private CloudRequestDTO getLocalProviderCloudRequestDTOForTest() {
 		final String operator = "operatorForTest";
 		final String name = "cloudName";
-		final boolean ownCloud = true;	
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(operator);
