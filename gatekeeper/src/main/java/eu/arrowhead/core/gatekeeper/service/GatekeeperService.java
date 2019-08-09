@@ -23,7 +23,12 @@ import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.ICNResultDTO;
+import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
 @Service
 public class GatekeeperService {
