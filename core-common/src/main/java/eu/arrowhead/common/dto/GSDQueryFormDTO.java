@@ -11,7 +11,8 @@ public class GSDQueryFormDTO implements Serializable {
 	private static final long serialVersionUID = -6651144276576501218L;
 	
 	private ServiceQueryFormDTO requestedService;
-	private List<CloudResponseDTO> cloudBoundaries;
+	private List<Long> cloudIdBoundaries;
+	private boolean gatewayIsMandatory = false;
 	
 	//=================================================================================================
 	// methods
@@ -19,16 +20,19 @@ public class GSDQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------	
 	public GSDQueryFormDTO() {}
 	
-	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<CloudResponseDTO> cloudBoundaries) {
+	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<Long> cloudIdBoundaries, final boolean gatewayIsMandatory) {
 		this.requestedService = requestedService;
-		this.cloudBoundaries = cloudBoundaries;
+		this.cloudIdBoundaries = cloudIdBoundaries;
+		this.gatewayIsMandatory = gatewayIsMandatory;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
-	public List<CloudResponseDTO> getCloudBoundaries() { return cloudBoundaries; }
+	public List<Long> getCloudIdBoundaries() { return cloudIdBoundaries; }
+	public boolean isGatewayIsMandatory() { return gatewayIsMandatory; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setCloudBoundaries(final List<CloudResponseDTO> cloudBoundaries) { this.cloudBoundaries = cloudBoundaries; }	
+	public void setCloudIdBoundaries(final List<Long> cloudIdBoundaries) { this.cloudIdBoundaries = cloudIdBoundaries; }
+	public void setGatewayIsMandatory(final boolean gatewayIsMandatory) { this.gatewayIsMandatory = gatewayIsMandatory; }	
 }

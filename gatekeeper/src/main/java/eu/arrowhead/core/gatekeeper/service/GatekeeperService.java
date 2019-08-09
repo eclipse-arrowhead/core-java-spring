@@ -1,14 +1,22 @@
 package eu.arrowhead.core.gatekeeper.service;
 
 import java.security.InvalidParameterException;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -18,8 +26,12 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudResponseDTO;
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
@@ -27,6 +39,9 @@ import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingParameters;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
@@ -43,14 +58,37 @@ public class GatekeeperService {
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
+
+	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
+	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmakeer;
+	
 	
 	//=================================================================================================
 	// methods
 
-	public GSDQueryResultDTO initGSDPoll(final ServiceQueryFormDTO requestedService, final List<CloudResponseDTO> cloudBoundaries) {
-		//TODO
+	public GSDQueryResultDTO initGSDPoll(final GSDQueryFormDTO gsdForm) {
+		logger.debug("initGSDPoll started...");
 		
-		return null;
+		Assert.notNull(gsdForm, "GSDQueryFormDTO is null.");
+		Assert.notNull(gsdForm.getRequestedService(), "requestedService is null.");
+		Assert.notNull(gsdForm.getRequestedService().getServiceDefinitionRequirement(), "serviceDefinitionRequirement is null.");
+		
+		if (gsdForm.getCloudIdBoundaries() == null || gsdForm.getCloudIdBoundaries().isEmpty()) {
+			// If no boundaries were given regarding to the clouds, then send GSD poll requests to the neighbor Clouds
+			
+			final List<Cloud> neighborClouds = gatekeeperDBService.getNeighborClouds();
+			final Map<Cloud, Relay> realyPerCloud = getOneGatekeeperRealyPerCloud(neighborClouds);
+			
+		} else {
+			// If boundaries were given regarding to the clouds, then send GSD poll requests only to those Clouds
+			
+			List<Cloud> clouds = gatekeeperDBService.getCloudsByIds(gsdForm.getCloudIdBoundaries());
+			final Map<Cloud, Relay> realyPerCloud = getOneGatekeeperRealyPerCloud(clouds);
+			
+		}
+		
+		
+		return null; //TODO finalize implementation
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -168,5 +206,22 @@ public class GatekeeperService {
 		}
 		
 		return result;
+	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------	
+	
+	private Map<Cloud, Relay> getOneGatekeeperRealyPerCloud(final List<Cloud> clouds) {
+		logger.debug("collectGatekeeperURIs started...");
+		
+		final Map<Cloud, Relay> realyPerCloud = new HashMap<>();
+		for (final Cloud cloud : clouds) {
+			final Relay relay = gatekeeperMatchmakeer.doMatchmaking(new GatekeeperMatchmakingParameters(cloud));
+			realyPerCloud.put(cloud, relay);
+		}
+		
+		return realyPerCloud;
 	}
 }

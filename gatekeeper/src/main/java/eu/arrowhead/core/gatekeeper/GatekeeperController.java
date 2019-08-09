@@ -68,7 +68,7 @@ public class GatekeeperController {
 	private static final String RELAYS_BY_ID_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";	
 	private static final String RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ADDRESS + "}" + "/{" + PATH_VARIABLE_PORT + "}";
 	
-	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/inti_gsd";
+	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/init_gsd";
 	private static final String INIT_INTER_CLOUD_NEGOTIATIONS_URI = "/init_icn";
 	
 	private static final String GET_CLOUDS_MGMT_HTTP_200_MESSAGE = "Cloud entries returned";
@@ -447,7 +447,7 @@ public class GatekeeperController {
 		
 		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
 		
-		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.initGSDPoll(gsdForm.getRequestedService(), gsdForm.getCloudBoundaries());
+		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.initGSDPoll(gsdForm);
 		
 		logger.debug("initiateGlobalServiceDiscovery has been finished");
 		return gsdQueryResultDTO;
@@ -542,8 +542,16 @@ public class GatekeeperController {
 			throw new BadPayloadException("RequestedService is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (gsdForm.getRequestedService().getServiceDefinitionRequirement() == null) {
-			throw new BadPayloadException("serviceDefinitionRequirement is null", HttpStatus.SC_BAD_REQUEST, origin);
+		if (Utilities.isEmpty(gsdForm.getRequestedService().getServiceDefinitionRequirement())) {
+			throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (gsdForm.getCloudIdBoundaries() != null && !gsdForm.getCloudIdBoundaries().isEmpty()) {
+			for (final Long id : gsdForm.getCloudIdBoundaries()) {
+				if (id == null || id < 1) {
+					throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+				}
+			}
 		}
 	}
 	
