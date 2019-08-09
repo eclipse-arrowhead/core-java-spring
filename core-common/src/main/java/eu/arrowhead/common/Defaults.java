@@ -49,6 +49,9 @@ public class Defaults {
 	
 	public static final int DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = 50;
 	
+	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT = false;
+	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY = false;
+	
 	//=================================================================================================
 	// assistant methods
 	

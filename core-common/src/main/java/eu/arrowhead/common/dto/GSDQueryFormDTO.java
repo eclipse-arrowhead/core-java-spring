@@ -12,6 +12,7 @@ public class GSDQueryFormDTO implements Serializable {
 	
 	private ServiceQueryFormDTO requestedService;
 	private List<Long> cloudIdBoundaries;
+	private boolean gatewayIsMandatory = false;
 	
 	//=================================================================================================
 	// methods
@@ -19,16 +20,19 @@ public class GSDQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------	
 	public GSDQueryFormDTO() {}
 	
-	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<Long> cloudIdBoundaries) {
+	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<Long> cloudIdBoundaries, final boolean gatewayIsMandatory) {
 		this.requestedService = requestedService;
 		this.cloudIdBoundaries = cloudIdBoundaries;
+		this.gatewayIsMandatory = gatewayIsMandatory;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
 	public List<Long> getCloudIdBoundaries() { return cloudIdBoundaries; }
+	public boolean isGatewayIsMandatory() { return gatewayIsMandatory; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setCloudIsBoundaries(final List<Long> cloudIdBoundaries) { this.cloudIdBoundaries = cloudIdBoundaries; }	
+	public void setCloudIdBoundaries(final List<Long> cloudIdBoundaries) { this.cloudIdBoundaries = cloudIdBoundaries; }
+	public void setGatewayIsMandatory(final boolean gatewayIsMandatory) { this.gatewayIsMandatory = gatewayIsMandatory; }	
 }
