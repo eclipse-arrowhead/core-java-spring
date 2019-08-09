@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -40,11 +41,17 @@ public class GatekeeperService {
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperService.class);
 	
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	private boolean gatewayIsPresent;
+	
 	@Autowired
 	private CommonDBService commonDBService;
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
+	
+	@Autowired
+	private GatekeeperDriver gatekeeperDriver;
 
 	//=================================================================================================
 	// methods
@@ -67,9 +74,7 @@ public class GatekeeperService {
 				throw new InvalidParameterException("initGSDPoll failed: Neither preferred clouds were given, nor neighbor clouds registered");
 			} else {
 				cloudsToContact = neighborClouds;
-			}
-			
-			
+			}			
 			
 		} else {
 			// If preferred clouds were given, then send GSD poll requests only to those Clouds
@@ -84,8 +89,11 @@ public class GatekeeperService {
 			
 		}
 		
+		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getRequesterCloud(), gatewayIsPresent);
 		
-		return null; //TODO finalize implementation
+		final List<GSDPollResponseDTO> gsdPollResponses = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
+		
+		return new GSDQueryResultDTO(gsdPollResponses, cloudsToContact.size() - gsdPollResponses.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

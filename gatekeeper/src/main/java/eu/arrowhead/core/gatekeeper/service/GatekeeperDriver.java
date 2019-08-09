@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -66,6 +68,11 @@ public class GatekeeperDriver {
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 
 		relayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<GSDPollResponseDTO> sendGSDPollRequest(List<Cloud> cloudsToContact, GSDPollRequestDTO gsdPollRequestDTO) {
+		return null; //TODO
 	}
 	
 	//-------------------------------------------------------------------------------------------------

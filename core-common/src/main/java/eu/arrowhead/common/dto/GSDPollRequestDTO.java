@@ -11,6 +11,7 @@ public class GSDPollRequestDTO implements Serializable {
 	
 	private ServiceQueryFormDTO requestedService;
 	private CloudRequestDTO requesterCloud;	
+	private boolean gatewayIsPresent = false;
 	
 	//=================================================================================================
 	// methods
@@ -18,16 +19,19 @@ public class GSDPollRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public GSDPollRequestDTO() {} 	
 	
-	public GSDPollRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud) {
+	public GSDPollRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, boolean gatewayIsPresent) {
 		this.requestedService = requestedService;
+		this.gatewayIsPresent = gatewayIsPresent;
 		this.requesterCloud = requesterCloud;
 	}
 
 	//-------------------------------------------------------------------------------------------------	
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
-	public CloudRequestDTO getRequesterCloud() { return requesterCloud; }
-	
+	public CloudRequestDTO getRequesterCloud() { return requesterCloud; } 
+	public boolean isGatewayIsPresent() { return gatewayIsPresent; }
+
 	//-------------------------------------------------------------------------------------------------	
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }	
+	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
+	public void setGatewayIsPresent(boolean gatewayIsPresent) { this.gatewayIsPresent = gatewayIsPresent; }
 }
