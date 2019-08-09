@@ -366,6 +366,14 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static String getCloudCommonName(final String cloudOperator, final String cloudName) {
+		Assert.isTrue(!isEmpty(cloudOperator), "Cloud operator is null or blank.");
+		Assert.isTrue(!isEmpty(cloudName), "Cloud name is null or blank.");
+		
+		return cloudName.trim() + "." + cloudOperator.trim() + ".arrowhead.eu".toLowerCase();  
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static X509Certificate getFirstCertFromKeyStore(final KeyStore keystore) {
 		Assert.notNull(keystore, "Key store is not defined.");
 		
