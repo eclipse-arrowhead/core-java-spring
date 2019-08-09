@@ -566,7 +566,7 @@ public class GatekeeperController {
 		validateId(icnForm.getTargetCloudId(), origin);
 		validateSystemRequestDTO(icnForm.getRequesterSystem(), origin);
 		
-		for (SystemRequestDTO preferredSystem : icnForm.getPreferredSystems()) {
+		for (final SystemRequestDTO preferredSystem : icnForm.getPreferredSystems()) {
 			validateSystemRequestDTO(preferredSystem, origin);
 		}
 	}
@@ -604,5 +604,4 @@ public class GatekeeperController {
 										  HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
-
 }
