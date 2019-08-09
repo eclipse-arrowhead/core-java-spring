@@ -196,7 +196,7 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public CloudWithRelaysResponseDTO updateCloudByIdWithRelaysResponse (final long id, final CloudRequestDTO dto) {
+	public CloudWithRelaysResponseDTO updateCloudByIdWithRelaysResponse(final long id, final CloudRequestDTO dto) {
 		logger.debug("updateCloudByIdWithRelaysResponse started...");
 		
 		final Cloud entry = updateCloudByIdWithRelays(id, dto);
@@ -205,7 +205,7 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Cloud updateCloudByIdWithRelays (final long id, final CloudRequestDTO dto) {
+	public Cloud updateCloudByIdWithRelays(final long id, final CloudRequestDTO dto) {
 		logger.debug("updateCloudByIdWithRelays started...");
 						
 		try {
@@ -332,12 +332,9 @@ public class GatekeeperDBService {
 		}
 
 		try {
-			
-			
 			if (cloudRepository.existsById(id)) {
 				cloudRepository.deleteById(id);
 			}
-			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -368,7 +365,6 @@ public class GatekeeperDBService {
 		try {
 			
 			return relayRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
-			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -388,7 +384,6 @@ public class GatekeeperDBService {
 		logger.debug("updateRelayById started...");
 		
 		try {
-
 			if (id < 1) {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
@@ -399,7 +394,6 @@ public class GatekeeperDBService {
 			}
 			
 			return relayOpt.get();			
-			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -433,13 +427,28 @@ public class GatekeeperDBService {
 			}
 			
 			return relayOpt.get();			
-			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Set<Relay> getAllLiveGatekeeperRelays() {
+		final Set<Relay> result = new HashSet<>();
+		final List<Cloud> clouds = cloudRepository.findAll();
+		for (final Cloud cloud : clouds) {
+			if (!cloud.getOwnCloud()) {
+				final Set<CloudGatekeeperRelay> gatekeeperRelays = cloud.getGatekeeperRelays();
+				for (final CloudGatekeeperRelay gkRelay : gatekeeperRelays) {
+					result.add(gkRelay.getRelay());
+				}
+			}
+		}
+		
+		return result;
 	}
  	
 	//-------------------------------------------------------------------------------------------------	

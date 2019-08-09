@@ -3,6 +3,7 @@ package eu.arrowhead.common.database.entity;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -130,5 +131,27 @@ public class Relay {
 	@Override
 	public String toString() {
 		return "Relay [id = " + id + ", address = " + address + ", port = " + port + ", type = " + type + "]";
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Relay other = (Relay) obj;
+		return id == other.id;
 	}
 }
