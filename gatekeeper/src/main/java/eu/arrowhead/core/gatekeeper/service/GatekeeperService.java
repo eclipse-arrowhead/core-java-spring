@@ -2,11 +2,8 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,9 +30,7 @@ import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
 
 @Service
 public class GatekeeperService {
@@ -50,6 +45,9 @@ public class GatekeeperService {
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
+	
+	@Autowired
+	private GatekeeperDriver gatekeeperDriver;
 
 	//=================================================================================================
 	// methods
@@ -84,12 +82,6 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public GSDQueryResultDTO createAndSendGSDPollRequest(final ServiceQueryFormDTO requestedService, final List<CloudResponseDTO> cloudBoundaries) {
-		//TODO
-		return null;
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	public GSDPollResponseDTO doGSDPoll(final GSDPollRequestDTO request) {
 		//TODO: implement
 		
@@ -108,6 +100,8 @@ public class GatekeeperService {
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
 																		 form.getNegotiationFlags(), form.isUseGateway());
 		
+		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
+		//TODO: continue
 		
 		return null;
 	}
@@ -198,18 +192,5 @@ public class GatekeeperService {
 		}
 		
 		return result;
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private Map<Cloud, Relay> getOneGatekeeperRelayPerCloud(final List<Cloud> clouds) {
-		logger.debug("collectGatekeeperURIs started...");
-		
-		final Map<Cloud, Relay> realyPerCloud = new HashMap<>();
-		for (final Cloud cloud : clouds) {
-			final Relay relay = gatekeeperMatchmakeer.doMatchmaking(new GatekeeperMatchmakingParameters(cloud));
-			realyPerCloud.put(cloud, relay);
-		}
-		
-		return realyPerCloud;
 	}
 }
