@@ -2,7 +2,6 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +30,6 @@ import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
 @Service
@@ -205,18 +203,5 @@ public class GatekeeperService {
 		}
 		
 		return result;
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private Map<Cloud, Relay> getOneGatekeeperRelayPerCloud(final List<Cloud> clouds) {
-		logger.debug("collectGatekeeperURIs started...");
-		
-		final Map<Cloud, Relay> realyPerCloud = new HashMap<>();
-		for (final Cloud cloud : clouds) {
-			final Relay relay = gatekeeperMatchmakeer.doMatchmaking(new GatekeeperMatchmakingParameters(cloud));
-			realyPerCloud.put(cloud, relay);
-		}
-		
-		return realyPerCloud;
 	}
 }
