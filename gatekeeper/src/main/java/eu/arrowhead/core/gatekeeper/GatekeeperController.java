@@ -440,7 +440,7 @@ public class GatekeeperController {
 		
 		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
 		
-		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.createAndSendGSDPollRequest(gsdForm.getRequestedService(), gsdForm.getCloudBoundaries());
+		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.initGSDPoll(gsdForm.getRequestedService(), gsdForm.getCloudBoundaries());
 		
 		logger.debug("initiateGlobalServiceDiscovery has been finished");
 		return gsdQueryResultDTO;
