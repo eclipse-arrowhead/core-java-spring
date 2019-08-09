@@ -1,8 +1,6 @@
 package eu.arrowhead.core.gatekeeper.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -14,16 +12,15 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingParameters;
 
 @Service
 public class GatekeeperService {
@@ -33,9 +30,6 @@ public class GatekeeperService {
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
-	
-	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
-	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmakeer;
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperService.class);
 	
@@ -49,17 +43,21 @@ public class GatekeeperService {
 		Assert.notNull(gsdForm.getRequestedService(), "requestedService is null.");
 		Assert.notNull(gsdForm.getRequestedService().getServiceDefinitionRequirement(), "serviceDefinitionRequirement is null.");
 		
-		if (gsdForm.getCloudIdBoundaries() == null || gsdForm.getCloudIdBoundaries().isEmpty()) {
-			// If no boundaries were given regarding to the clouds, then send GSD poll requests to the neighbor Clouds
+		if (gsdForm.getPreferredCloudIds() == null || gsdForm.getPreferredCloudIds().isEmpty()) {
+			// If no preferred clouds were given, then send GSD poll requests to the neighbor Clouds
 			
 			final List<Cloud> neighborClouds = gatekeeperDBService.getNeighborClouds();
-			final Map<Cloud, Relay> realyPerCloud = getOneGatekeeperRealyPerCloud(neighborClouds);
+			
+			if (neighborClouds.isEmpty()) {
+				throw new InvalidParameterException("");
+			}
+			
+			
 			
 		} else {
-			// If boundaries were given regarding to the clouds, then send GSD poll requests only to those Clouds
+			// If preferred clouds were given, then send GSD poll requests only to those Clouds
 			
-			List<Cloud> clouds = gatekeeperDBService.getCloudsByIds(gsdForm.getCloudIdBoundaries());
-			final Map<Cloud, Relay> realyPerCloud = getOneGatekeeperRealyPerCloud(clouds);
+			final List<Cloud> clouds = gatekeeperDBService.getCloudsByIds(gsdForm.getPreferredCloudIds());
 			
 		}
 		
@@ -79,22 +77,5 @@ public class GatekeeperService {
 		//TODO: implement
 		
 		return null;
-	}
-	
-	//=================================================================================================
-	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------	
-	
-	private Map<Cloud, Relay> getOneGatekeeperRealyPerCloud(final List<Cloud> clouds) {
-		logger.debug("collectGatekeeperURIs started...");
-		
-		final Map<Cloud, Relay> realyPerCloud = new HashMap<>();
-		for (final Cloud cloud : clouds) {
-			final Relay relay = gatekeeperMatchmakeer.doMatchmaking(new GatekeeperMatchmakingParameters(cloud));
-			realyPerCloud.put(cloud, relay);
-		}
-		
-		return realyPerCloud;
 	}
 }
