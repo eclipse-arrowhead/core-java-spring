@@ -2,6 +2,8 @@ package eu.arrowhead.core.orchestrator;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +36,7 @@ import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
@@ -513,6 +516,28 @@ public class OrchestratorControllerTest {
 		Assert.assertEquals(3, response.getResponse().size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getStoreOchestrationProcessResponseOkTest() throws Exception {
+		final  OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
+		
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getStoreOchestrationProcessResponseByInvalidIdTest() throws Exception {
+		final  OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
+		
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/-1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -525,4 +550,4 @@ public class OrchestratorControllerTest {
 						   .andExpect(matcher)
 						   .andReturn();
 	}
-}
+};
