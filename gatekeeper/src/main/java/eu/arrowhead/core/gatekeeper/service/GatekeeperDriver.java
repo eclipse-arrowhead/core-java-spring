@@ -2,9 +2,12 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -14,13 +17,19 @@ import javax.jms.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import antlr.debug.Event;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -53,14 +62,15 @@ public class GatekeeperDriver {
 	//=================================================================================================
 	// methods
 	
-	//-------------------------------------------------------------------------------------------------
-	@PostConstruct
-	public void init() {
+	//-------------------------------------------------------------------------------------------------	
+	@EventListener
+	@Order(15)
+	public void onApplicationEvent(final ContextRefreshedEvent event) {
+		
 		if (!arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)) {
-			throw new ArrowheadException("Server's certificate not found.");
+				throw new ArrowheadException("Server's certificate not found.");
 		}
 		final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
-		
 		if (!arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)) {
 			throw new ArrowheadException("Server's public key is not found.");
 		}
@@ -70,8 +80,39 @@ public class GatekeeperDriver {
 			throw new ArrowheadException("Server's private key is not found.");
 		}
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
+	
+		relayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<GSDPollResponseDTO> sendGSDPollRequest(final List<Cloud> cloudsToContact, final GSDPollRequestDTO gsdPollRequestDTO) {
+		logger.debug("sendGSDPollRequest started...");		
+		Assert.isTrue(cloudsToContact != null && !cloudsToContact.isEmpty(), "cloudsToContact list is null or empty");
+		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
+		Assert.notNull(gsdPollRequestDTO.getRequestedService(), "requestedService is null");
+		Assert.isTrue(!Utilities.isEmpty(gsdPollRequestDTO.getRequestedService().getServiceDefinitionRequirement()), "serviceDefinitionRequirement is empty");
+		Assert.notNull(gsdPollRequestDTO.getRequesterCloud(), "requesterCloud is null");
+		
+		final int numOfCloudsToContact = cloudsToContact.size();
 
-		relayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);
+		final BlockingQueue<GSDPollResponseDTO> queue = new LinkedBlockingQueue<>(numOfCloudsToContact);		
+		final GSDPollRequestExecutor gsdPollRequestExecutor = new GSDPollRequestExecutor(queue, relayClient, gsdPollRequestDTO, getOneGatekeeperRelayPerCloud(cloudsToContact));
+		
+		gsdPollRequestExecutor.execute();
+		
+		final List<GSDPollResponseDTO> gsdPollAnswers = new ArrayList<>(numOfCloudsToContact);
+		for (int i = 0; i < numOfCloudsToContact; ++i) {
+			
+			try {
+				
+				gsdPollAnswers.add(queue.take());
+				
+			} catch (final InterruptedException ex) {
+				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
+			}
+		} 
+		
+		return gsdPollAnswers;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
