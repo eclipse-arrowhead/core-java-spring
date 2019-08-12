@@ -55,27 +55,6 @@ public class GatekeeperDriver {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@PostConstruct
-	public void init() {
-		if (!arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)) {
-			throw new ArrowheadException("Server's certificate not found.");
-		}
-		final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
-		
-		if (!arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)) {
-			throw new ArrowheadException("Server's public key is not found.");
-		}
-		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
-		
-		if (!arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)) {
-			throw new ArrowheadException("Server's private key is not found.");
-		}
-		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
-
-		relayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	public List<GSDPollResponseDTO> sendGSDPollRequest(final List<Cloud> cloudsToContact, final GSDPollRequestDTO gsdPollRequestDTO) {
 		logger.debug("sendGSDPollRequest started...");		
 		Assert.isTrue(cloudsToContact != null && !cloudsToContact.isEmpty(), "cloudsToContact list is null or empty");
@@ -83,6 +62,8 @@ public class GatekeeperDriver {
 		Assert.notNull(gsdPollRequestDTO.getRequestedService(), "requestedService is null");
 		Assert.isTrue(Utilities.isEmpty(gsdPollRequestDTO.getRequestedService().getServiceDefinitionRequirement()), "serviceDefinitionRequirement is empty");
 		Assert.notNull(gsdPollRequestDTO.getRequesterCloud(), "requesterCloud is null");
+		
+		getRelayClient();
 		
 		final int numOfCloudsToContact = cloudsToContact.size();
 
@@ -109,6 +90,9 @@ public class GatekeeperDriver {
 	//-------------------------------------------------------------------------------------------------
 	public ICNProposalResponseDTO sendICNProposal(final Cloud targetCloud, final ICNProposalRequestDTO request) {
 		logger.debug("sendICNProposal started...");
+		
+		getRelayClient();
+		
 		//TODO:
 		
 		return null;
@@ -116,6 +100,29 @@ public class GatekeeperDriver {
 	
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------	
+	private void getRelayClient() {
+		if (relayClient != null) {			
+		
+			if (!arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)) {
+				throw new ArrowheadException("Server's certificate not found.");
+			}
+			final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
+			
+			if (!arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)) {
+				throw new ArrowheadException("Server's public key is not found.");
+			}
+			final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+			
+			if (!arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)) {
+				throw new ArrowheadException("Server's private key is not found.");
+			}
+			final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
+	
+			relayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------		
 	private Map<Cloud, Relay> getOneGatekeeperRelayPerCloud(final List<Cloud> clouds) {
