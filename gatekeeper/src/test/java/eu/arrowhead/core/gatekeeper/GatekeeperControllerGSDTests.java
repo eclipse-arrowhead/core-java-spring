@@ -31,10 +31,11 @@ import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.core.gatekeeper.service.GatekeeperService;
+import eu.arrowhead.core.gatekeeper.service.GatekeeperServiceTestContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = GatekeeperMain.class)
-@ContextConfiguration (classes = { GatekeeperService.class })
+@ContextConfiguration (classes = { GatekeeperServiceTestContext.class })
 public class GatekeeperControllerGSDTests {
 
 	//=================================================================================================
