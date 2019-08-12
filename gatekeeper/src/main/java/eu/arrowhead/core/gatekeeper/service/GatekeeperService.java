@@ -26,7 +26,12 @@ import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
+import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
@@ -124,14 +129,51 @@ public class GatekeeperService {
 																		 form.getNegotiationFlags(), form.isUseGateway());
 		
 		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
-		//TODO: continue
+		
+		if (!form.isUseGateway()) {
+			// just send back the response
+			return new ICNResultDTO(icnResponse.getResponse());
+		}
+		
+		//TODO: gateway-related code
 		
 		return null;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ICNProposalResponseDTO doICNProposal(final ICNProposalRequestDTO request) {
-		//TODO: implement
+	public ICNProposalResponseDTO doICN(final ICNProposalRequestDTO request) {
+		logger.debug("doICN started...");
+		
+		validateICNProposalRequest(request);
+		
+		final PreferredProviderDataDTO[] preferredProviders = getPreferredProviders(request.getPreferredSystems());
+		final OrchestrationFormRequestDTO orchestrationForm = new OrchestrationFormRequestDTO.Builder(request.getRequesterSystem())
+																							 .requesterCloud(request.getRequesterCloud())
+																							 .requestedService(request.getRequestedService())
+																							 .flags(request.getNegotiationFlags())
+																							 .flag(Flag.EXTERNAL_SERVICE_REQUEST, true)
+																							 .preferredProviders(preferredProviders)
+																							 .build();
+		
+		if (request.isUseGateway()) {
+			//TODO: we have to change the requesterSystem name  
+		}
+		
+		OrchestrationResponseDTO orchestrationResponse = gatekeeperDriver.queryOrchestrator(orchestrationForm);
+		if (orchestrationResponse.getResponse().isEmpty()) { // no results
+			return new ICNProposalResponseDTO();
+		}
+		
+		orchestrationResponse = gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(request.getRequesterCloud(), orchestrationResponse);
+		if (orchestrationResponse.getResponse().isEmpty()) { // no accessible results
+			return new ICNProposalResponseDTO();
+		}
+
+		if (!request.isUseGateway()) {
+			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
+		} 
+		
+		//TODO: implement gateway-related code
 		
 		return null;
 	}
@@ -166,6 +208,34 @@ public class GatekeeperService {
 			validateSystemRequest(preferredSystem);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateICNProposalRequest(final ICNProposalRequestDTO request) {
+		logger.debug("validateICNProposalRequest started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("ICN proposal request is null");
+		}
+		
+		if (request.getRequestedService() == null) {
+			throw new InvalidParameterException("Requested service is null");
+		}
+		
+		if (Utilities.isEmpty(request.getRequestedService().getServiceDefinitionRequirement())) {
+			throw new InvalidParameterException("Requested service definition is null or blank");
+		}
+		
+		validateSystemRequest(request.getRequesterSystem());
+		validateCloudRequest(request.getRequesterCloud());
+		
+		for (final SystemRequestDTO preferredSystem : request.getPreferredSystems()) {
+			validateSystemRequest(preferredSystem);
+		}
+		
+		for (final RelayRequestDTO preferredRelay : request.getPreferredGatewayRelays()) {
+			validateRelayRequest(preferredRelay);
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void validateSystemRequest(final SystemRequestDTO system) {
@@ -194,7 +264,57 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private void validateCloudRequest(final CloudRequestDTO cloud) {
+		logger.debug("validateCloudRequest started...");
+		
+		if (cloud == null) {
+			throw new InvalidParameterException("Cloud is null");
+		}
+		
+		if (Utilities.isEmpty(cloud.getOperator())) {
+			throw new InvalidParameterException("Cloud operator is null or blank");
+		}
+		
+		if (Utilities.isEmpty(cloud.getName())) {
+			throw new InvalidParameterException("Cloud name is null or empty");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateRelayRequest(final RelayRequestDTO relay) {
+		logger.debug("validateRelayRequest started...");
+		
+		if (relay == null) {
+			throw new InvalidParameterException("relay is null");
+		}
+			
+		if (Utilities.isEmpty(relay.getAddress())) {
+			throw new InvalidParameterException("Relay address is null or blank");
+		}
+		
+		if (relay.getPort() == null) {
+			throw new InvalidParameterException("Relay port is null");
+		}
+		
+		final int validatedPort = relay.getPort().intValue();
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		}
+		
+		if (Utilities.isEmpty(relay.getType())) {
+			throw new InvalidParameterException("Realy type is null or blank");
+		}
+		
+		final RelayType type = Utilities.convertStringToRelayType(relay.getType());
+		if (type == null || type == RelayType.GATEKEEPER_RELAY) {
+			throw new InvalidParameterException("Realy type is invalid");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private CloudRequestDTO getRequesterCloud() {
+		logger.debug("getRequesterCloud started...");
+		
 		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
 		final CloudRequestDTO result = new CloudRequestDTO();
 		result.setOperator(ownCloud.getOperator());
@@ -206,12 +326,27 @@ public class GatekeeperService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<RelayRequestDTO> getPreferredRelays(final Cloud targetCloud) {
+		logger.debug("getPreferredRelays started...");
+
 		final Set<CloudGatewayRelay> gatewayRelays = targetCloud.getGatewayRelays();
 		final List<RelayRequestDTO> result = new ArrayList<RelayRequestDTO>(gatewayRelays.size());
 		
 		for (final CloudGatewayRelay relayConn : gatewayRelays) {
 			final Relay relay = relayConn.getRelay();
 			result.add(new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getSecure(), relay.getExclusive(), relay.getType().name()));
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private PreferredProviderDataDTO[] getPreferredProviders(final List<SystemRequestDTO> preferredSystems) {
+		logger.debug("getPreferredProviders started...");
+		
+		final PreferredProviderDataDTO[] result = new PreferredProviderDataDTO[preferredSystems.size()];
+		for (int i = 0; i < preferredSystems.size(); ++i) {
+			result[i] = new PreferredProviderDataDTO();
+			result[i].setProviderSystem(preferredSystems.get(i));
 		}
 		
 		return result;

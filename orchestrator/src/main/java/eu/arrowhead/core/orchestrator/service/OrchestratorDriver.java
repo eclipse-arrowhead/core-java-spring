@@ -226,7 +226,7 @@ public class OrchestratorDriver {
 	
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getAuthIntraCheckUri() {
-		logger.debug("getAuthTokenGenerationUri started...");
+		logger.debug("getAuthIntraCheckUri started...");
 		
 		if (arrowheadContext.containsKey(AUTH_INTRA_CHECK_URI_KEY)) {
 			try {
@@ -354,7 +354,7 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long,List<Long>> convertAuthorizationResultsToMap(List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
+	private Map<Long,List<Long>> convertAuthorizationResultsToMap(final List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
 		logger.debug("convertAuthorizationResultsToMap started...");
 
 		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
