@@ -22,6 +22,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.ICNResponseDTO;
@@ -107,10 +108,50 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------	
 	public OrchestrationResponseDTO triggerInterCloud(
-			final OrchestrationFormRequestDTO orchestratorFormRequestDTO) {
+			final OrchestrationFormRequestDTO request) {
 		logger.debug("triggerInterCloud started ...");
 		
-		//TODO implement method logic here
+		// necessary, because we want to use a flag value when we call the check method
+		if (request == null) {
+			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		final OrchestrationFlags flags = request.getOrchestrationFlags();
+		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
+		
+		final List<CloudRequestDTO> preferredClouds = new ArrayList<>();
+		for (PreferredProviderDataDTO provider : request.getPreferredProviders()) {
+		  if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
+		    preferredClouds.add(provider.getProviderCloud());
+		  }
+		}
+	    
+		// final GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(request.getRequestedService(), preferredClouds, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+	    // 
+	    // final CloudResponseDTO targetCloud = OrchestratorDriver.interCloudMatchmaking(result, preferredClouds, flags.get(Flag.PING_PROVIDERS));
+        //
+	    //  ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(request, targetCloud);
+	    //  log.debug("triggerInterCloud: ICN results arrived back to the Orchestrator");
+	    //  for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
+	    //    of.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
+	    //  }
+        //
+	    //  // If matchmaking is requested, we pick one provider from the ICN result
+	    //  if (orchestrationFlags.getOrDefault("matchmaking", false)) {
+	    //    // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
+	    //    List<ArrowheadSystem> preferredSystems = new ArrayList<>();
+	    //    for (PreferredProvider provider : srf.getPreferredProviders()) {
+	    //      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null) {
+	    //        preferredSystems.add(provider.getProviderSystem());
+	    //      }
+	    //    }
+        //
+	    //    log.info("triggerInterCloud returns with 1 OrchestrationForm due to icnMatchmaking");
+	    //    return OrchestratorDriver.icnMatchmaking(icnResult, preferredSystems, false);
+	    //  } else {
+	    //    log.info("triggerInterCloud returns " + icnResult.getOrchResponse().getResponse().size() + " forms without icnMatchmaking");
+	    //    return icnResult.getOrchResponse();
+	    //  }
 		return null;
 	}
 
