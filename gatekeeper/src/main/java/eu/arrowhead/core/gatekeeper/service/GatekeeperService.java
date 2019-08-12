@@ -123,6 +123,8 @@ public class GatekeeperService {
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
 																		 form.getNegotiationFlags(), form.isUseGateway());
 		
+		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
+		//TODO: continue
 		
 		return null;
 	}
