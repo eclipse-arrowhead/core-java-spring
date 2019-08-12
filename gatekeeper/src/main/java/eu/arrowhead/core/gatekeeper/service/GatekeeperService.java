@@ -130,7 +130,13 @@ public class GatekeeperService {
 																		 form.getNegotiationFlags(), form.isUseGateway());
 		
 		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
-		//TODO: continue
+		
+		if (!form.isUseGateway()) {
+			// just send back the response
+			return new ICNResultDTO(icnResponse.getResponse());
+		}
+		
+		//TODO: gateway-related code
 		
 		return null;
 	}
@@ -154,15 +160,21 @@ public class GatekeeperService {
 			//TODO: we have to change the requesterSystem name  
 		}
 		
-		final OrchestrationResponseDTO orchestrationResponse = gatekeeperDriver.queryOrchestrator(orchestrationForm);
+		OrchestrationResponseDTO orchestrationResponse = gatekeeperDriver.queryOrchestrator(orchestrationForm);
 		if (orchestrationResponse.getResponse().isEmpty()) { // no results
 			return new ICNProposalResponseDTO();
 		}
 		
-		final AuthorizationInterCloudCheckResponseDTO authResponse = gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(request.getRequesterCloud(), orchestrationResponse);
-		// filter orch response with auth response
+		orchestrationResponse = gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(request.getRequesterCloud(), orchestrationResponse);
+		if (orchestrationResponse.getResponse().isEmpty()) { // no accessible results
+			return new ICNProposalResponseDTO();
+		}
+
+		if (!request.isUseGateway()) {
+			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
+		} 
 		
-		// two branches 1. without gateway 2. with gateway
+		//TODO: implement gateway-related code
 		
 		return null;
 	}

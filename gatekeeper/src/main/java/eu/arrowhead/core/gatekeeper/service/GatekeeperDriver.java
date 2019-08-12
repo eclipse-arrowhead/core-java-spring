@@ -4,6 +4,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -179,7 +180,7 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloudCheckResponseDTO queryAuthorizationBasedOnOchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
+	public OrchestrationResponseDTO queryAuthorizationBasedOnOchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
 		logger.debug("queryAuthorizationBasedOnOchestrationResponse started...");
 		
 		Assert.notNull(requesterCloud, "Requester cloud is null.");
@@ -188,8 +189,10 @@ public class GatekeeperDriver {
 		final UriComponents authInterCheckUri = getAuthInterCheckUri();
 		final AuthorizationInterCloudCheckRequestDTO authRequest = createAuthorizationRequestFromOrchestrationResponse(requesterCloud, orchestrationResponse);
 		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = httpService.sendRequest(authInterCheckUri, HttpMethod.POST, AuthorizationInterCloudCheckResponseDTO.class, authRequest);
+
+		filterOrchestrationResponseWithAuthData(orchestrationResponse, response.getBody());
 		
-		return response.getBody();
+		return orchestrationResponse;
 	}
 	
 	//=================================================================================================
@@ -266,4 +269,34 @@ public class GatekeeperDriver {
 		return intfs.stream().map(dto -> dto.getId()).collect(Collectors.toList());
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	// method may change orchestration response
+	private void filterOrchestrationResponseWithAuthData(final OrchestrationResponseDTO orchestrationResponse, final AuthorizationInterCloudCheckResponseDTO authResult) {
+		logger.debug("filterOrchestrationResponseWithAuthData started...");
+		
+		final List<OrchestrationResultDTO> results = orchestrationResponse.getResponse();
+		if (authResult.getAuthorizedProviderIdsWithInterfaceIds().isEmpty()) {
+			// consumer has no access to any of the specified providers
+			results.clear();
+		} else {
+			final Map<Long,List<Long>> authMap = convertAuthorizationResultsToMap(authResult.getAuthorizedProviderIdsWithInterfaceIds());
+			for (final Iterator<OrchestrationResultDTO> it = results.iterator(); it.hasNext();) {
+				final OrchestrationResultDTO result = it.next();
+				if (authMap.containsKey(result.getProvider().getId())) {
+					final List<Long> authorizedInterfaceIds = authMap.get(result.getProvider().getId());
+					result.getInterfaces().removeIf(e -> !authorizedInterfaceIds.contains(e.getId()));
+				} else {
+					it.remove();
+				}
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Map<Long,List<Long>> convertAuthorizationResultsToMap(final List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
+		logger.debug("convertAuthorizationResultsToMap started...");
+
+		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
+																					   e -> e.getIdList()));
+	}
 }
