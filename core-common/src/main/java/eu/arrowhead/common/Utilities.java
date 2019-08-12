@@ -370,7 +370,7 @@ public class Utilities {
 		Assert.isTrue(!isEmpty(cloudOperator), "Cloud operator is null or blank.");
 		Assert.isTrue(!isEmpty(cloudName), "Cloud name is null or blank.");
 		
-		return cloudName.trim() + "." + cloudOperator.trim() + ".arrowhead.eu".toLowerCase();  
+		return (cloudName.trim() + "." + cloudOperator.trim() + ".arrowhead.eu").toLowerCase();  
 	}
 	
 	//-------------------------------------------------------------------------------------------------
