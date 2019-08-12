@@ -15,6 +15,7 @@ import javax.jms.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
@@ -32,7 +33,7 @@ public class GSDPollRequestExecutor {
 	private final ThreadPoolExecutor threadPool;
 	private final GatekeeperRelayClient relayClient;
 	private final GSDPollRequestDTO gsdPollRequestDTO;
-	Map<Cloud, Relay> gatekeeperRelayPerCloud;
+	private final Map<Cloud, Relay> gatekeeperRelayPerCloud;
 	
 	private final Logger logger = LogManager.getLogger(GSDPollRequestExecutor.class);
 	
@@ -56,7 +57,7 @@ public class GSDPollRequestExecutor {
 		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
 			
-				final String cloudCN = cloudRelay.getKey().getName() + "." + cloudRelay.getKey().getOperator();
+				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());
 				final Map<String, Session> sessionsToClouds = createSessionsToClouds();
 				
 				threadPool.execute(new GSDPollTask(relayClient,
@@ -85,7 +86,7 @@ public class GSDPollRequestExecutor {
 			
 			try {
 				
-				final String cloudCN = cloudRelay.getKey().getName() + "." + cloudRelay.getKey().getOperator();		
+				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());		
 				final Session session = relayClient.createConnection(cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
 				sessionsForRelays.put(cloudCN, session);						
 				
@@ -95,5 +96,10 @@ public class GSDPollRequestExecutor {
 			}
 		}
 		return sessionsForRelays;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String getRecipientCommonName(final Cloud cloud) {
+		return "gatekeeper." + Utilities.getCloudCommonName(cloud.getOperator(), cloud.getName()); 
 	}
 }

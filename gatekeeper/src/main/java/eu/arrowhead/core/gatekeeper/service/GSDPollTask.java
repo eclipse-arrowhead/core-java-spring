@@ -2,7 +2,6 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import java.util.concurrent.BlockingQueue;
 
-import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +11,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
@@ -67,21 +66,15 @@ public class GSDPollTask implements Runnable{
 						
 			final GeneralAdvertisementResult result = relayClient.publishGeneralAdvertisement(session, recipientCloudCN, recipientCloudPublicKey);
 			if (result == null) {
-//				throw new Timeout exception
+				throw new TimeoutException(recipientCloudCN + " cloud: GeneralAdvertisementResult timeout");
 			}
 			
 			final GatekeeperRelayResponse response = relayClient.sendRequestAndReturnResponse(session, result , gsdPollRequestDTO);
 			if (response == null) {
-//				throw new Timeout exception
+				throw new TimeoutException(recipientCloudCN + " cloud: GatekeeperRelayResponse timeout");
 			}
 			
 			queue.add(response.getGSDPollResponse());
-			
-		} catch (final JMSException | ArrowheadException ex) {
-			
-			logger.debug("Exception:", ex.getMessage());
-			//adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
-			queue.add(new GSDPollResponseDTO());
 			
 		} catch (final Throwable ex) {			
 			//Must catch all throwable, otherwise the blocking queue would block the whole process
