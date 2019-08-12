@@ -94,7 +94,7 @@ public class GatekeeperTask implements Runnable {
 			case CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 				return gatekeeperService.doGSDPoll(request.getGSDPollRequest());
 			case CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
-				return gatekeeperService.doICNProposal(request.getICNProposalRequest());
+				return gatekeeperService.doICN(request.getICNProposalRequest());
 			default:
 				throw new BadPayloadException("Invalid message type: " + request.getMessageType());
 			}

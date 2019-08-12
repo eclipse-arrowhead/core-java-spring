@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.jms.JMSException;
@@ -16,23 +17,37 @@ import javax.jms.Session;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
@@ -46,11 +61,17 @@ public class GatekeeperDriver {
 	//=================================================================================================
 	// members
 	
+	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	
 	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
 	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmaker;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
+	
+	@Autowired
+	private HttpService httpService;
 	
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
@@ -145,6 +166,32 @@ public class GatekeeperDriver {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
+		logger.debug("queryOrchestrator started...");
+		
+		Assert.notNull(form, "form is null.");
+		
+		final UriComponents orchestrationProcessUri = getOrchestrationProcessUri();
+		final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public AuthorizationInterCloudCheckResponseDTO queryAuthorizationBasedOnOchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
+		logger.debug("queryAuthorizationBasedOnOchestrationResponse started...");
+		
+		Assert.notNull(requesterCloud, "Requester cloud is null.");
+		Assert.notNull(orchestrationResponse, "Ochestration response is null.");
+		
+		final UriComponents authInterCheckUri = getAuthInterCheckUri();
+		final AuthorizationInterCloudCheckRequestDTO authRequest = createAuthorizationRequestFromOrchestrationResponse(requesterCloud, orchestrationResponse);
+		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = httpService.sendRequest(authInterCheckUri, HttpMethod.POST, AuthorizationInterCloudCheckResponseDTO.class, authRequest);
+		
+		return response.getBody();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -165,4 +212,58 @@ public class GatekeeperDriver {
 	private String getRecipientCommonName(final Cloud cloud) {
 		return "gatekeeper." + Utilities.getCloudCommonName(cloud.getOperator(), cloud.getName()); 
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getAuthInterCheckUri() {
+		logger.debug("getAuthInterCheckUri started...");
+		
+		if (arrowheadContext.containsKey(AUTH_INTER_CHECK_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(AUTH_INTER_CHECK_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find authorization check URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find authorization check URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getOrchestrationProcessUri() {
+		logger.debug("getOrchestrationProcessUri started...");
+		
+		if (arrowheadContext.containsKey(ORCHESTRATION_PROCESS_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(ORCHESTRATION_PROCESS_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find orchestration process URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find orchestration process URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private AuthorizationInterCloudCheckRequestDTO createAuthorizationRequestFromOrchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
+		final String serviceDefinition = orchestrationResponse.getResponse().get(0).getService().getServiceDefinition(); // response is not empty
+		final List<IdIdListDTO> providerIdsWithInterfaceIds = new ArrayList<>(orchestrationResponse.getResponse().size());
+		for (final OrchestrationResultDTO response : orchestrationResponse.getResponse()) {
+			providerIdsWithInterfaceIds.add(new IdIdListDTO(response.getProvider().getId(), convertServiceInterfaceListToServiceInterfaceIdList(response.getInterfaces())));
+		}
+		
+		return new AuthorizationInterCloudCheckRequestDTO(requesterCloud, serviceDefinition, providerIdsWithInterfaceIds); 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S1612")
+	private List<Long> convertServiceInterfaceListToServiceInterfaceIdList(final List<ServiceInterfaceResponseDTO> intfs) {
+		logger.debug("convertServiceInterfaceListToServiceInterfaceIdList started...");
+		
+		if (intfs == null) {
+			return List.of();
+		}
+		
+		return intfs.stream().map(dto -> dto.getId()).collect(Collectors.toList());
+	}
+
 }
