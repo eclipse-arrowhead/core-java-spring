@@ -66,15 +66,29 @@ public class GSDPollTask implements Runnable{
 		try {
 						
 			final GeneralAdvertisementResult result = relayClient.publishGeneralAdvertisement(session, recipientCloudCN, recipientCloudPublicKey);
+			if (result == null) {
+//				throw new Timeout exception
+			}
+			
 			final GatekeeperRelayResponse response = relayClient.sendRequestAndReturnResponse(session, result , gsdPollRequestDTO);
+			if (response == null) {
+//				throw new Timeout exception
+			}
 			
 			queue.add(response.getGSDPollResponse());
 			
-		} catch (JMSException | ArrowheadException ex) {
-			logger.debug("Exception:", ex.getMessage());			
-		} finally {
+		} catch (final JMSException | ArrowheadException ex) {
+			
+			logger.debug("Exception:", ex.getMessage());
 			//adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
-			queue.add(new GSDPollResponseDTO()); 
+			queue.add(new GSDPollResponseDTO());
+			
+		} catch (final Throwable ex) {			
+			//Must catch all throwable, otherwise the blocking queue would block the whole process
+			
+			logger.debug("Exception:", ex.getMessage());
+			//adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
+			queue.add(new GSDPollResponseDTO()); 			
 		}
 	}
 }

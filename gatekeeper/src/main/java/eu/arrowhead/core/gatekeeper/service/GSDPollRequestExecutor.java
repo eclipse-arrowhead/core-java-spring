@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
@@ -57,12 +56,12 @@ public class GSDPollRequestExecutor {
 		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
 			
-				final String addressPort = cloudRelay.getValue().getAddress() + ":" + cloudRelay.getValue().getPort();
-				final Map<String, Session> sessionsToRelays = createSessionsToRelays();
+				final String cloudCN = cloudRelay.getKey().getName() + "." + cloudRelay.getKey().getOperator();
+				final Map<String, Session> sessionsToClouds = createSessionsToClouds();
 				
 				threadPool.execute(new GSDPollTask(relayClient,
-												   sessionsToRelays.get(addressPort),
-												   cloudRelay.getKey().getName() + "." + cloudRelay.getKey().getOperator(), 
+												   sessionsToClouds.get(cloudCN),
+												   cloudCN,
 												   cloudRelay.getKey().getAuthenticationInfo(), 
 												   gsdPollRequestDTO, 
 												   queue));
@@ -77,7 +76,7 @@ public class GSDPollRequestExecutor {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<String, Session> createSessionsToRelays() {
+	private Map<String, Session> createSessionsToClouds() {
 		logger.debug("createSessionsToRelays started...");
 		
 		final Map<String, Session> sessionsForRelays = new HashMap<>();
@@ -85,12 +84,10 @@ public class GSDPollRequestExecutor {
 		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {
 			
 			try {
-				final String addressPort = cloudRelay.getValue().getAddress() + ":" + cloudRelay.getValue().getPort();
 				
-				if (!sessionsForRelays.containsKey(addressPort)) {
-					final Session session = relayClient.createConnection(cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
-					sessionsForRelays.put(addressPort, session);					
-				}				
+				final String cloudCN = cloudRelay.getKey().getName() + "." + cloudRelay.getKey().getOperator();		
+				final Session session = relayClient.createConnection(cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
+				sessionsForRelays.put(cloudCN, session);						
 				
 			} catch (final JMSException ex) {
 				logger.debug("Exception occured while creating connection for address: {} and port {}:", cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
