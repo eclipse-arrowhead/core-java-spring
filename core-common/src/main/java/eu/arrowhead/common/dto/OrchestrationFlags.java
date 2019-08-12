@@ -27,9 +27,11 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	//-------------------------------------------------------------------------------------------------
 	public OrchestrationFlags(final Map<String,Boolean> map) {
 		this();
-		for (final Entry<String,Boolean> entry : map.entrySet()) {
-			if (flagMap.containsKey(entry.getKey())) {
-				put(flagMap.get(entry.getKey()), entry.getValue());
+		if (map != null) {
+			for (final Entry<String,Boolean> entry : map.entrySet()) {
+				if (flagMap.containsKey(entry.getKey())) {
+					put(flagMap.get(entry.getKey()), entry.getValue());
+				}
 			}
 		}
 	}

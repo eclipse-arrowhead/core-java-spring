@@ -162,7 +162,7 @@ public class OrchestratorDriver {
 	
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getAuthIntraCheckUri() {
-		logger.debug("getAuthTokenGenerationUri started...");
+		logger.debug("getAuthIntraCheckUri started...");
 		
 		if (arrowheadContext.containsKey(AUTH_INTRA_CHECK_URI_KEY)) {
 			try {
