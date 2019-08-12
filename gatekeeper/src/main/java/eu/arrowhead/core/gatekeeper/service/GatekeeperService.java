@@ -19,7 +19,6 @@ import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
@@ -29,7 +28,6 @@ import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
@@ -106,12 +104,6 @@ public class GatekeeperService {
 		return new GSDQueryResultDTO(validResponses, emptyResponses);
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	public GSDQueryResultDTO createAndSendGSDPollRequest(final ServiceQueryFormDTO requestedService, final List<CloudResponseDTO> cloudBoundaries) {
-		//TODO
-		return null;
-	}
-
 	//-------------------------------------------------------------------------------------------------
 	public GSDPollResponseDTO doGSDPoll(final GSDPollRequestDTO request) {
 		//TODO: implement
