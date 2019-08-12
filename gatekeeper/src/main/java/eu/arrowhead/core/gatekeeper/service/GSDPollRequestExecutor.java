@@ -30,7 +30,7 @@ public class GSDPollRequestExecutor {
 	final private static int MAX_THREAD_POOL_SIZE = 20;
 
 	private final BlockingQueue<GSDPollResponseDTO> queue;
-	private ThreadPoolExecutor threadPool;
+	private final ThreadPoolExecutor threadPool;
 	private final GatekeeperRelayClient relayClient;
 	private final GSDPollRequestDTO gsdPollRequestDTO;
 	Map<Cloud, Relay> gatekeeperRelayPerCloud;
@@ -47,11 +47,6 @@ public class GSDPollRequestExecutor {
 		this.relayClient = relayClient;
 		this.gsdPollRequestDTO = gsdPollRequestDTO;
 		this.gatekeeperRelayPerCloud = gatekeeperRelayPerCloud;
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	@PostConstruct
-	public void init() {
 		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.gatekeeperRelayPerCloud.size() > MAX_THREAD_POOL_SIZE ? MAX_THREAD_POOL_SIZE : this.gatekeeperRelayPerCloud.size());
 	}
 	

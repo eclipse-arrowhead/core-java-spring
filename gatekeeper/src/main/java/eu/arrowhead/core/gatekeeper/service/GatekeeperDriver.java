@@ -60,7 +60,7 @@ public class GatekeeperDriver {
 		Assert.isTrue(cloudsToContact != null && !cloudsToContact.isEmpty(), "cloudsToContact list is null or empty");
 		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
 		Assert.notNull(gsdPollRequestDTO.getRequestedService(), "requestedService is null");
-		Assert.isTrue(Utilities.isEmpty(gsdPollRequestDTO.getRequestedService().getServiceDefinitionRequirement()), "serviceDefinitionRequirement is empty");
+		Assert.isTrue(!Utilities.isEmpty(gsdPollRequestDTO.getRequestedService().getServiceDefinitionRequirement()), "serviceDefinitionRequirement is empty");
 		Assert.notNull(gsdPollRequestDTO.getRequesterCloud(), "requesterCloud is null");
 		
 		getRelayClient();
@@ -103,7 +103,7 @@ public class GatekeeperDriver {
 	
 	//-------------------------------------------------------------------------------------------------	
 	private void getRelayClient() {
-		if (relayClient != null) {			
+		if (relayClient == null) {			
 		
 			if (!arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)) {
 				throw new ArrowheadException("Server's certificate not found.");
