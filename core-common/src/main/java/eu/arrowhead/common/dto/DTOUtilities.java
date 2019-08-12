@@ -9,6 +9,7 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 
 public class DTOUtilities {
@@ -58,6 +59,8 @@ public class DTOUtilities {
             throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
         case GENERIC:
             throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case TIMEOUT:
+        	throw new TimeoutException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
         case UNAVAILABLE:
 	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
 	    default:
