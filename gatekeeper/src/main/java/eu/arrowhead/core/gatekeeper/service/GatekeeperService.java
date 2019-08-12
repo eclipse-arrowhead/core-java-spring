@@ -18,7 +18,6 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
