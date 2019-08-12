@@ -7,7 +7,9 @@ import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.Assert;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -49,7 +51,12 @@ public class GSDPollTask implements Runnable{
 	public void run() {
 		logger.debug("GDSPollTask.run started...");
 		
-		//TODO: validate members
+		Assert.notNull(relayClient, "relayClient is null");
+		Assert.notNull(session, "session is null");
+		Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
+		Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudCN is empty");
+		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
+		Assert.notNull(queue, "queue is null");
 		
 		if (Thread.currentThread().isInterrupted()) {
 			logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
@@ -65,6 +72,9 @@ public class GSDPollTask implements Runnable{
 			
 		} catch (JMSException | ArrowheadException ex) {
 			logger.debug("Exception:", ex.getMessage());			
+		} finally {
+			//adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
+			queue.add(new GSDPollResponseDTO()); 
 		}
 	}
 }

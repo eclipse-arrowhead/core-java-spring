@@ -93,7 +93,17 @@ public class GatekeeperService {
 		
 		final List<GSDPollResponseDTO> gsdPollResponses = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
-		return new GSDQueryResultDTO(gsdPollResponses, cloudsToContact.size() - gsdPollResponses.size());
+		final List<GSDPollResponseDTO> validResponses = new ArrayList<>();
+		int emptyResponses = 0;
+		for (final GSDPollResponseDTO gsdResponse : gsdPollResponses) {
+			if (gsdResponse.getProviderCloud() == null) {
+				emptyResponses++;
+			} else {
+				validResponses.add(gsdResponse);		
+			}
+		}
+		
+		return new GSDQueryResultDTO(validResponses, emptyResponses);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
