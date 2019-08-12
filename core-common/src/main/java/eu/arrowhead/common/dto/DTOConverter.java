@@ -472,7 +472,6 @@ public class DTOConverter {
 		cloudRequestDTO.setName(cloudResponseDTO.getName());
 		cloudRequestDTO.setSecure(cloudResponseDTO.getSecure());
 		cloudRequestDTO.setNeighbor(cloudResponseDTO.getNeighbor());
-		cloudRequestDTO.setOwnCloud(cloudResponseDTO.getOwnCloud());
 		cloudRequestDTO.setAuthenticationInfo(cloudResponseDTO.getAuthenticationInfo());
 		
 		return cloudRequestDTO;
