@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +23,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import antlr.debug.Event;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -33,6 +32,7 @@ import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
@@ -125,24 +125,23 @@ public class GatekeeperDriver {
 		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new GatekeeperMatchmakingParameters(targetCloud));
 		try {
 			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort());
-			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, getRecipientCommonName(targetCloud), targetCloud.getAuthenticationInfo());
+			final String recipientCommonName = getRecipientCommonName(targetCloud);
+			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, recipientCommonName, targetCloud.getAuthenticationInfo());
 			if (advResult == null) {
-				//TODO: timeout 
-				return null;
+				throw new TimeoutException(recipientCommonName + " does not acknowledge request in time", HttpStatus.SC_GATEWAY_TIMEOUT, "ICN Proposal to " + recipientCommonName);
 			}
 			
 			final GatekeeperRelayResponse relayResponse = relayClient.sendRequestAndReturnResponse(session, advResult, request);
 			if (relayResponse == null) {
-				//TODO: timeout
-				return null;
+				throw new TimeoutException(recipientCommonName + " does not respond in time", HttpStatus.SC_GATEWAY_TIMEOUT, "ICN Proposal to " + recipientCommonName);
 			}
 			
 			return relayResponse.getICNProposalResponse();
 		} catch (final JMSException ex) {
-			// TODO implement exception handling
-			ex.printStackTrace();
+			logger.debug("Error while sending ICN proposal via relay: {}", ex.getMessage());
+			logger.debug("Exception:", ex);
 			
-			return null;
+			throw new ArrowheadException("Error while sending ICN proposal via relay.", ex);
 		}
 	}
 	
