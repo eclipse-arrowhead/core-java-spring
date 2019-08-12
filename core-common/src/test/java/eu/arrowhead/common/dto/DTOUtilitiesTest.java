@@ -11,6 +11,7 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 
 @RunWith(SpringRunner.class)
@@ -118,10 +119,16 @@ public class DTOUtilitiesTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = TimeoutException.class)
+	public void testCreateExceptionFromErrorMessageDTOTimeoutException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.TIMEOUT, "origin");
+		DTOUtilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = UnavailableServerException.class)
 	public void testCreateExceptionFromErrorMessageDTOUnavailableServerException() {
 		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.UNAVAILABLE, "origin");
 		DTOUtilities.createExceptionFromErrorMessageDTO(error);
 	}
-
 }

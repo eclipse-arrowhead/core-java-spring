@@ -318,6 +318,7 @@ public class Utilities {
 	        	status = HttpStatus.NOT_FOUND;
 	        	break;
 	        case UNAVAILABLE:
+	        case TIMEOUT:
 	        	status = HttpStatus.GATEWAY_TIMEOUT;
 	        	break;
 	        default:
