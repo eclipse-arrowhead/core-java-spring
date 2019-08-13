@@ -29,13 +29,13 @@
       </JDBC>
     </Appenders>
     <Loggers>
-    	<AsyncLogger name="eu.arrowhead" level="debug" additivity="true">
-            <AppenderRef ref="MySQLDatabase" />
-    	</AsyncLogger>
-    
         <Root level="info">
             <AppenderRef ref="ConsoleAppender" /> <!-- comment out this one in production environment -->
             <AppenderRef ref="FileAppender" />
         </Root>
+
+		<AsyncLogger name="eu.arrowhead" level="debug" additivity="true">
+			<AppenderRef ref="MySQLDatabase" />
+		</AsyncLogger>
     </Loggers>
 </Configuration>
