@@ -110,6 +110,10 @@ public class ChoreographerDBService {
     public ChoreographerActionStep addNextStepToChoreographerActionStep(final String stepName, final Set<String> nextActionStepNames) {
         logger.debug("addNextStepToChoreographerActionStep started...");
 
+        if(Utilities.isEmpty(stepName)) {
+            throw new InvalidParameterException("Step name is empty or null.");
+        }
+
         ChoreographerActionStep stepEntry;
         Optional<ChoreographerActionStep> choreographerActionStepOpt = choreographerActionStepRepository.findByName(stepName);
         if (choreographerActionStepOpt.isPresent()) {
@@ -180,7 +184,7 @@ public class ChoreographerDBService {
     public ChoreographerAction addNextActionToChoreographerAction(final String actionName, final String nextActionName) {
         logger.debug("addNextActionToChoreographerAction started...");
 
-        if (Utilities.isEmpty(actionName) || Utilities.isEmpty(nextActionName)) {
+        if (Utilities.isEmpty(actionName)) {
             throw new InvalidParameterException("Action name or next Action name is null or blank.");
         }
 
