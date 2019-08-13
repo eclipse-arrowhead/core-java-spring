@@ -25,6 +25,7 @@ import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
+import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
@@ -41,6 +42,8 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
+import eu.arrowhead.core.orchestrator.matchmaking.InterCloudCloudMatchmakingAlgorithm;
+import eu.arrowhead.core.orchestrator.matchmaking.InterCloudCloudMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
@@ -71,6 +74,9 @@ public class OrchestratorService {
 	
 	@Resource(name = CommonConstants.INTER_CLOUD_PROVIDER_MATCHMAKER)
 	private InterCloudProviderMatchmakingAlgorithm interCloudProviderMatchmaker;
+	
+	@Resource(name = CommonConstants.INTER_CLOUD_CLOUD_MATCHMAKER)
+	private InterCloudCloudMatchmakingAlgorithm interCloudClouderMatchmaker;
 	
 	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
@@ -126,33 +132,36 @@ public class OrchestratorService {
 		  }
 		}
 	    
-		// final GSDResult result = OrchestratorDriver.doGlobalServiceDiscovery(request.getRequestedService(), preferredClouds, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
-	    // 
-	    // final CloudResponseDTO targetCloud = OrchestratorDriver.interCloudMatchmaking(result, preferredClouds, flags.get(Flag.PING_PROVIDERS));
-        //
-	    //  ICNResult icnResult = OrchestratorDriver.doInterCloudNegotiations(request, targetCloud);
-	    //  log.debug("triggerInterCloud: ICN results arrived back to the Orchestrator");
-	    //  for (OrchestrationForm of : icnResult.getOrchResponse().getResponse()) {
-	    //    of.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
-	    //  }
-        //
-	    //  // If matchmaking is requested, we pick one provider from the ICN result
-	    //  if (orchestrationFlags.getOrDefault("matchmaking", false)) {
-	    //    // Getting the list of valid preferred systems from the ServiceRequestForm, which belong to the target cloud
-	    //    List<ArrowheadSystem> preferredSystems = new ArrayList<>();
-	    //    for (PreferredProvider provider : srf.getPreferredProviders()) {
-	    //      if (provider.isGlobal() && provider.getProviderCloud().equals(targetCloud) && provider.getProviderSystem() != null) {
-	    //        preferredSystems.add(provider.getProviderSystem());
-	    //      }
-	    //    }
-        //
-	    //    log.info("triggerInterCloud returns with 1 OrchestrationForm due to icnMatchmaking");
-	    //    return OrchestratorDriver.icnMatchmaking(icnResult, preferredSystems, false);
-	    //  } else {
-	    //    log.info("triggerInterCloud returns " + icnResult.getOrchResponse().getResponse().size() + " forms without icnMatchmaking");
-	    //    return icnResult.getOrchResponse();
-	    //  }
-		return null;
+		final GSDQueryResultDTO result = OrchestratorDriver.doGlobalServiceDiscovery(request.getRequestedService(), preferredClouds, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+
+		final InterCloudCloudMatchmakingParameters iCCMparams = new InterCloudCloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
+		final CloudResponseDTO targetCloud = interCloudClouderMatchmaker.doMatchmaking(iCCMparams);
+        if (targetCloud == null && Utilities.isEmpty(targetCloud.getName())) {
+            
+        	// Return empty response
+            return new OrchestrationResponseDTO();
+ 		}
+		
+		final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(request, DTOConverter.convertCloudResponseDTOToCloudRequestDTO(targetCloud));
+        if (icnResponseDTO == null && icnResponseDTO.getResponse().isEmpty()) {
+           
+        	// Return empty response
+           return new OrchestrationResponseDTO();
+		}
+		
+        for (OrchestrationResultDTO orchestrationResultDTO : icnResponseDTO.getResponse()) {
+        	orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
+		}
+		
+       if (flags.get(Flag.MATCHMAKING)) {
+            
+        	final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResponseDTO, request.getPreferredProviders(), true);		            
+	           
+            return interCloudProviderMatchmaker.doMatchmaking(iCPMparams);
+		}	
+
+
+       return new OrchestrationResponseDTO(icnResponseDTO.getResponse());
 	}
 
 	//-------------------------------------------------------------------------------------------------	

@@ -26,6 +26,7 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
@@ -154,14 +155,23 @@ public class OrchestratorDriver {
 		return providers;
 	}
 	
-	public ICNResponseDTO doInterCloudNegotiations(OrchestrationFormRequestDTO orchestrationFormRequestDTO,
-			CloudRequestDTO providerCloud) {
+	public ICNResponseDTO doInterCloudNegotiations(final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
+			final CloudRequestDTO providerCloud) {
 		logger.debug("doInterCloudNegotiations started...");
 		
 		// TODO Implement additional method logic here
 		return null;
 	}
 
+	
+	public static GSDQueryResultDTO doGlobalServiceDiscovery(final ServiceQueryFormDTO requestedService,
+			final List<CloudRequestDTO> preferredClouds, final boolean metadataSearch, final boolean pingProviders) {
+		logger.debug("doGlobalServiceDiscovery started...");
+		
+		// TODO Implement additional method logic here
+		return null;
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	

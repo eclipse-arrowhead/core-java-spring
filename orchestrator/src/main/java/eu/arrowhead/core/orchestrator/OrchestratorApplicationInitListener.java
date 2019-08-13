@@ -13,7 +13,9 @@ import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.orchestrator.matchmaking.DefaultInterCloudCloudMatchmaker;
 import eu.arrowhead.core.orchestrator.matchmaking.DefaultInterCloudProviderMatchmaker;
+import eu.arrowhead.core.orchestrator.matchmaking.InterCloudCloudMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.RandomIntraCloudProviderMatchmaker;
@@ -34,6 +36,12 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	@Bean(CommonConstants.INTER_CLOUD_PROVIDER_MATCHMAKER)
 	public InterCloudProviderMatchmakingAlgorithm getInterCloudProviderMatchmaker() {
 		return new DefaultInterCloudProviderMatchmaker();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CommonConstants.INTER_CLOUD_CLOUD_MATCHMAKER)
+	public InterCloudCloudMatchmakingAlgorithm getInterCloudCloudMatchmaker() {
+		return new DefaultInterCloudCloudMatchmaker();
 	}
 
 	//=================================================================================================

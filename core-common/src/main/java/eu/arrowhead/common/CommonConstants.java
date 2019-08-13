@@ -209,6 +209,7 @@ public class CommonConstants {
 	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
 	public static final String INTER_CLOUD_PROVIDER_MATCHMAKER = "interCloudProviderMatchmaker";
 	public static final String GATEKEEPER_MATCHMAKER = "gatekeeperMatchmaker";
+	public static final String INTER_CLOUD_CLOUD_MATCHMAKER = "interCloudCloudMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
 	
