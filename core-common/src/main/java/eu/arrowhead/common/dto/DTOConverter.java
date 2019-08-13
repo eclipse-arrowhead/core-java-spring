@@ -1,7 +1,13 @@
 package eu.arrowhead.common.dto;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
@@ -9,8 +15,6 @@ import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 

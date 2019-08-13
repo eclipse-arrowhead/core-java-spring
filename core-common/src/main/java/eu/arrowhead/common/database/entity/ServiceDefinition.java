@@ -5,17 +5,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.Defaults;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+
 @Entity
 @NamedEntityGraph(name = "serviceDefinitionWithServiceRegistryEntries",
 	attributeNodes = {
-			@NamedAttributeNode (value = "serviceRegistryEntries")
+			@NamedAttributeNode(value = "serviceRegistryEntries")
 	})
 public class ServiceDefinition {
 
