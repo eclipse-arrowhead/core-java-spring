@@ -15,7 +15,7 @@ public class OrchestrationResponseDTO implements Serializable {
 	
 	private static final long serialVersionUID = -7019947320156696116L;
 	
-	private List<OrchestrationResultDTO> response = new ArrayList<>();
+	protected List<OrchestrationResultDTO> response = new ArrayList<>();
 	
 	//=================================================================================================
 	// methods
@@ -32,5 +32,9 @@ public class OrchestrationResponseDTO implements Serializable {
 	public List<OrchestrationResultDTO> getResponse() { return response; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setResponse(final List<OrchestrationResultDTO> response) { this.response = response; }
+	public void setResponse(final List<OrchestrationResultDTO> response) {
+		if (response != null) {
+			this.response = response;
+		}
+	}
 }

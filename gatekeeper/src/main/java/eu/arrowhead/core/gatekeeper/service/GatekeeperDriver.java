@@ -4,15 +4,18 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +34,23 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
@@ -51,6 +64,9 @@ public class GatekeeperDriver {
 	
 	//=================================================================================================
 	// members
+	
+	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	
 	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
 	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmaker;
@@ -147,25 +163,52 @@ public class GatekeeperDriver {
 		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new GatekeeperMatchmakingParameters(targetCloud));
 		try {
 			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort());
-			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, getRecipientCommonName(targetCloud), targetCloud.getAuthenticationInfo());
+			final String recipientCommonName = getRecipientCommonName(targetCloud);
+			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, recipientCommonName, targetCloud.getAuthenticationInfo());
 			if (advResult == null) {
-				//TODO: timeout 
-				return null;
+				throw new TimeoutException(recipientCommonName + " does not acknowledge request in time", HttpStatus.SC_GATEWAY_TIMEOUT, "ICN Proposal to " + recipientCommonName);
 			}
 			
 			final GatekeeperRelayResponse relayResponse = relayClient.sendRequestAndReturnResponse(session, advResult, request);
 			if (relayResponse == null) {
-				//TODO: timeout
-				return null;
+				throw new TimeoutException(recipientCommonName + " does not respond in time", HttpStatus.SC_GATEWAY_TIMEOUT, "ICN Proposal to " + recipientCommonName);
 			}
 			
 			return relayResponse.getICNProposalResponse();
 		} catch (final JMSException ex) {
-			// TODO implement exception handling
-			ex.printStackTrace();
+			logger.debug("Error while sending ICN proposal via relay: {}", ex.getMessage());
+			logger.debug("Exception:", ex);
 			
-			return null;
+			throw new ArrowheadException("Error while sending ICN proposal via relay.", ex);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResponseDTO queryOrchestrator(final OrchestrationFormRequestDTO form) {
+		logger.debug("queryOrchestrator started...");
+		
+		Assert.notNull(form, "form is null.");
+		
+		final UriComponents orchestrationProcessUri = getOrchestrationProcessUri();
+		final ResponseEntity<OrchestrationResponseDTO> response = httpService.sendRequest(orchestrationProcessUri, HttpMethod.POST, OrchestrationResponseDTO.class, form);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public OrchestrationResponseDTO queryAuthorizationBasedOnOchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
+		logger.debug("queryAuthorizationBasedOnOchestrationResponse started...");
+		
+		Assert.notNull(requesterCloud, "Requester cloud is null.");
+		Assert.notNull(orchestrationResponse, "Ochestration response is null.");
+		
+		final UriComponents authInterCheckUri = getAuthInterCheckUri();
+		final AuthorizationInterCloudCheckRequestDTO authRequest = createAuthorizationRequestFromOrchestrationResponse(requesterCloud, orchestrationResponse);
+		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = httpService.sendRequest(authInterCheckUri, HttpMethod.POST, AuthorizationInterCloudCheckResponseDTO.class, authRequest);
+
+		filterOrchestrationResponseWithAuthData(orchestrationResponse, response.getBody());
+		
+		return orchestrationResponse;
 	}
 	
 	//=================================================================================================
@@ -202,5 +245,89 @@ public class GatekeeperDriver {
 		}
 		
 		throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getAuthInterCheckUri() {
+		logger.debug("getAuthInterCheckUri started...");
+		
+		if (arrowheadContext.containsKey(AUTH_INTER_CHECK_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(AUTH_INTER_CHECK_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find authorization check URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find authorization check URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getOrchestrationProcessUri() {
+		logger.debug("getOrchestrationProcessUri started...");
+		
+		if (arrowheadContext.containsKey(ORCHESTRATION_PROCESS_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(ORCHESTRATION_PROCESS_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find orchestration process URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find orchestration process URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private AuthorizationInterCloudCheckRequestDTO createAuthorizationRequestFromOrchestrationResponse(final CloudRequestDTO requesterCloud, final OrchestrationResponseDTO orchestrationResponse) {
+		final String serviceDefinition = orchestrationResponse.getResponse().get(0).getService().getServiceDefinition(); // response is not empty
+		final List<IdIdListDTO> providerIdsWithInterfaceIds = new ArrayList<>(orchestrationResponse.getResponse().size());
+		for (final OrchestrationResultDTO response : orchestrationResponse.getResponse()) {
+			providerIdsWithInterfaceIds.add(new IdIdListDTO(response.getProvider().getId(), convertServiceInterfaceListToServiceInterfaceIdList(response.getInterfaces())));
+		}
+		
+		return new AuthorizationInterCloudCheckRequestDTO(requesterCloud, serviceDefinition, providerIdsWithInterfaceIds); 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S1612")
+	private List<Long> convertServiceInterfaceListToServiceInterfaceIdList(final List<ServiceInterfaceResponseDTO> intfs) {
+		logger.debug("convertServiceInterfaceListToServiceInterfaceIdList started...");
+		
+		if (intfs == null) {
+			return List.of();
+		}
+		
+		return intfs.stream().map(dto -> dto.getId()).collect(Collectors.toList());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// method may change orchestration response
+	private void filterOrchestrationResponseWithAuthData(final OrchestrationResponseDTO orchestrationResponse, final AuthorizationInterCloudCheckResponseDTO authResult) {
+		logger.debug("filterOrchestrationResponseWithAuthData started...");
+		
+		final List<OrchestrationResultDTO> results = orchestrationResponse.getResponse();
+		if (authResult.getAuthorizedProviderIdsWithInterfaceIds().isEmpty()) {
+			// consumer has no access to any of the specified providers
+			results.clear();
+		} else {
+			final Map<Long,List<Long>> authMap = convertAuthorizationResultsToMap(authResult.getAuthorizedProviderIdsWithInterfaceIds());
+			for (final Iterator<OrchestrationResultDTO> it = results.iterator(); it.hasNext();) {
+				final OrchestrationResultDTO result = it.next();
+				if (authMap.containsKey(result.getProvider().getId())) {
+					final List<Long> authorizedInterfaceIds = authMap.get(result.getProvider().getId());
+					result.getInterfaces().removeIf(e -> !authorizedInterfaceIds.contains(e.getId()));
+				} else {
+					it.remove();
+				}
+			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Map<Long,List<Long>> convertAuthorizationResultsToMap(final List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
+		logger.debug("convertAuthorizationResultsToMap started...");
+
+		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
+																					   e -> e.getIdList()));
 	}
 }
