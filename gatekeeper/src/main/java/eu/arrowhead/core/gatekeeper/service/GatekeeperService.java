@@ -1,7 +1,9 @@
 package eu.arrowhead.core.gatekeeper.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,8 +19,8 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
@@ -31,7 +33,6 @@ import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
@@ -51,6 +52,9 @@ public class GatekeeperService {
 	
 	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
 	private boolean gatewayIsPresent;
+		
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	private boolean gatewayIsMandatory;
 	
 	@Autowired
 	private CommonDBService commonDBService;
@@ -117,33 +121,50 @@ public class GatekeeperService {
 	//-------------------------------------------------------------------------------------------------
 	public GSDPollResponseDTO doGSDPoll(final GSDPollRequestDTO request) {
 		logger.debug("doGSDPoll started...");
-		//TODO: asserts
 		
-		//Get ServiceQueryResultDTO from Service Registry core system
-		ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceReistryQuery(request.getRequestedService());
+		validateGSDPollRequestDTO(request);
+				
+		//Querying Service Registry core system
+		final ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceReistryQuery(request.getRequestedService());
 		
 		if (srQueryResult.getServiceQueryData() == null || srQueryResult.getServiceQueryData().isEmpty()) {
-			throw new InvalidParameterException("No such service available");
+			return new GSDPollResponseDTO();
 		}
 		
-		//Creating AuthorizationInterCloudCheckRequestDTO
-		List<IdIdListDTO> providerIdsWithInterfaceIds = new ArrayList<>();
-		for (ServiceRegistryResponseDTO srEntryDTO : srQueryResult.getServiceQueryData()) {
-			
-			List<Long> interfaceIds = new ArrayList<>();
-			for (ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
-				interfaceIds.add(interfaceDTO.getId());
-			}
- 			
-			providerIdsWithInterfaceIds.add(new IdIdListDTO(srEntryDTO.getProvider().getId(), interfaceIds));
-			
+		//Querying Authorization core system
+		final Map<Long, List<Long>> authorizedProviderIdsWithInterfaceIdList = gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(srQueryResult.getServiceQueryData(), request.getRequesterCloud(), 
+																																 	  request.getRequestedService().getServiceDefinitionRequirement());
+		if (authorizedProviderIdsWithInterfaceIdList.isEmpty()) {
+			return new GSDPollResponseDTO();
 		}
 		
-		final AuthorizationInterCloudCheckRequestDTO interCloudCheckRequestDTO = new AuthorizationInterCloudCheckRequestDTO(request.getRequesterCloud(), 
-																															request.getRequestedService().getServiceDefinitionRequirement(), 
-																															providerIdsWithInterfaceIds);
+		//Cross checking Service Registry and Authorization results
+		final Set<String> availableInterfaces = new HashSet<>();
+		int numOfProviders = 0;
 		
-		return null;
+		for (final ServiceRegistryResponseDTO srEntryDTO : srQueryResult.getServiceQueryData()) {
+			final long providerId = srEntryDTO.getProvider().getId();
+			
+			if (authorizedProviderIdsWithInterfaceIdList.containsKey(providerId)) {
+				
+				for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
+					
+					if (authorizedProviderIdsWithInterfaceIdList.get(providerId).contains(interfaceDTO.getId())) {
+						availableInterfaces.add(interfaceDTO.getInterfaceName());
+					}
+				}
+				
+				numOfProviders++;	
+			}		
+		}
+		
+		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
+		
+		return new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(ownCloud), 
+									  request.getRequestedService().getServiceDefinitionRequirement(), 
+									  List.copyOf(availableInterfaces), 
+									  numOfProviders, 
+									  request.getRequestedService().getMetadataRequirements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -210,6 +231,45 @@ public class GatekeeperService {
 	
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public void validateGSDPollRequestDTO(final GSDPollRequestDTO gsdPollRequest) {
+		logger.debug("validateGSDPollRequestDTO started...");
+		
+		if (gsdPollRequest == null) {
+			throw new InvalidParameterException("GSDPollRequestDTO is null");
+		}
+		
+		if (gatewayIsMandatory && !gsdPollRequest.isGatewayIsPresent()) {
+			throw new InvalidParameterException("Requester cloud must have gateway available");
+		}
+		
+		if (gsdPollRequest.getRequestedService() == null) {
+			throw new InvalidParameterException("RequestedService is null");
+		}
+		
+		if (Utilities.isEmpty(gsdPollRequest.getRequestedService().getServiceDefinitionRequirement())) {
+			throw new InvalidParameterException("serviceDefinitionRequirement is empty");
+		}
+		
+		if (gsdPollRequest.getRequesterCloud() == null) {
+			throw new InvalidParameterException("RequesterCloud is empty");
+		}
+		
+		final boolean operatorIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getOperator());
+		final boolean nameIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getName());
+		final boolean authInfoIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getAuthenticationInfo());
+		
+		if (operatorIsEmpty || nameIsEmpty || authInfoIsEmpty) {
+			String exceptionMsg = "GSDPollRequestDTO.CloudRequestDTO is invalid due to the following reasons:";
+			exceptionMsg = operatorIsEmpty ? exceptionMsg + " operator is empty, " : exceptionMsg;
+			exceptionMsg = nameIsEmpty ? exceptionMsg + " name is empty, " : exceptionMsg;
+			exceptionMsg = authInfoIsEmpty ? exceptionMsg + " authInfo is empty, " : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
+			
+			throw new InvalidParameterException(exceptionMsg);
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private void validateICNForm(final ICNRequestFormDTO form) {

@@ -30,7 +30,6 @@ import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
@@ -71,7 +70,6 @@ public class GatekeeperController {
 	private static final String RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI = RELAYS_MGMT_URI + "/{" + PATH_VARIABLE_ADDRESS + "}" + "/{" + PATH_VARIABLE_PORT + "}";
 	
 	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/init_gsd";
-	private static final String POLL_GLOBAL_SERVICE_DISCOVERY_URI = "/gsd_poll";
 	private static final String INIT_INTER_CLOUD_NEGOTIATIONS_URI = "/init_icn";
 	
 	private static final String GET_CLOUDS_MGMT_HTTP_200_MESSAGE = "Cloud entries returned";
@@ -96,8 +94,6 @@ public class GatekeeperController {
 	
 	private static final String POST_INIT_GSD_HTTP_200_MESSAGE = "GSD results returned";
 	private static final String POST_INIT_GSD_HTTP_400_MESSAGE = "Could not initiate GSD";
-	private static final String POST_POLL_GSD_HTTP_200_MESSAGE = "GSD repsonse returned";
-	private static final String POST_POLL_GSD_HTTP_400_MESSAGE = "Could not process GSD";
 	private static final String POST_INIT_ICN_DESCRIPTION = "Starts the inter cloud negotiation process";
 	private static final String POST_INIT_ICN_HTTP_200_MESSAGE = "ICN result returned";
 	private static final String POST_INIT_ICN_HTTP_400_MESSAGE = "Could not initiate inter cloud negotiation";
@@ -456,26 +452,6 @@ public class GatekeeperController {
 		
 		logger.debug("initiateGlobalServiceDiscovery has been finished");
 		return gsdQueryResultDTO;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return a Global Service Discovery response", response = GSDPollResponseDTO.class)
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = POST_POLL_GSD_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_POLL_GSD_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PostMapping(path = POLL_GLOBAL_SERVICE_DISCOVERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public GSDPollResponseDTO doGlobalServiceDiscovery(@RequestBody final GSDPollRequestDTO gsdPollRequest) {
-		logger.debug("New doGlobalServiceDiscovery post request received");
-		
-		validateGSDPollRequestDTO(gsdPollRequest, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
-		
-		final GSDPollResponseDTO gsdPollResponseDTO = gatekeeperService.doGSDPoll(gsdPollRequest);
-		
-		logger.debug("doGlobalServiceDiscovery has been finished");
-		return gsdPollResponseDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

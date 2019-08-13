@@ -48,9 +48,9 @@ import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
-import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
@@ -83,8 +83,6 @@ public class GatekeeperDriver {
 	private GatekeeperRelayClient relayClient;
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperDriver.class);
-	
-	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	
 	//=================================================================================================
 	// methods
@@ -151,6 +149,33 @@ public class GatekeeperDriver {
 		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, gueryForm);
 		
 		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Map<Long,List<Long>> sendInterCloudAuthorizationCheckQuery(final List<ServiceRegistryResponseDTO> serviceQueryData, final CloudRequestDTO cloud, final String serviceDefinition) {
+		logger.debug("sendInterCloudAuthorizationCheckQuery started...");		
+		Assert.notNull(serviceQueryData, "serviceQueryData is null.");
+		Assert.notNull(cloud, "cloud is null.");
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is null or empty");
+		
+		final List<IdIdListDTO> providerIdsWithInterfaceIds = new ArrayList<>();
+		for (final ServiceRegistryResponseDTO srEntryDTO : serviceQueryData) {
+			
+			final List<Long> interfaceIds = new ArrayList<>();
+			for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
+				interfaceIds.add(interfaceDTO.getId());
+			}
+ 			
+			providerIdsWithInterfaceIds.add(new IdIdListDTO(srEntryDTO.getProvider().getId(), interfaceIds));
+			
+		}
+		
+		final AuthorizationInterCloudCheckRequestDTO interCloudCheckRequestDTO = new AuthorizationInterCloudCheckRequestDTO(cloud, serviceDefinition, providerIdsWithInterfaceIds);
+		
+		final UriComponents checkUri = getAuthInterCheckUri();
+		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = httpService.sendRequest(checkUri, HttpMethod.POST, AuthorizationInterCloudCheckResponseDTO.class, interCloudCheckRequestDTO);
+		
+		return convertAuthorizationResultsToMap(response.getBody().getAuthorizedProviderIdsWithInterfaceIds());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
