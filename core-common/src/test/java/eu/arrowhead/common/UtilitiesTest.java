@@ -25,7 +25,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.Utilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -56,6 +58,12 @@ public class UtilitiesTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testCalculateDirectionDirectionInvalid() {
+		Utilities.calculateDirection("invalid", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCalculateDirectionDirectionAsc() {
 		final Direction direction = Utilities.calculateDirection(" ASC ", null);
@@ -67,6 +75,34 @@ public class UtilitiesTest {
 	public void testCalculateDirectionDirectionDesc() {
 		final Direction direction = Utilities.calculateDirection("desc", null);
 		Assert.assertEquals(Direction.DESC, direction);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testValidatePageParametersPageAndSizeNull() {
+		final ValidatedPageParams vpp = Utilities.validatePageParameters(null, null, "ASC", "origin");
+		Assert.assertEquals(-1, vpp.getValidatedPage());
+		Assert.assertEquals(-1, vpp.getValidatedSize());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testValidatePageParametersPageNullAndSizeNotNull() {
+		Utilities.validatePageParameters(null, 10, "ASC", "origin");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testValidatePageParametersPageNotNullAndSizeNull() {
+		Utilities.validatePageParameters(0, null, "ASC", "origin");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testValidatePageParametersPageAndSizeNotNull() {
+		final ValidatedPageParams vpp = Utilities.validatePageParameters(1, 15, "ASC", "origin");
+		Assert.assertEquals(1, vpp.getValidatedPage());
+		Assert.assertEquals(15, vpp.getValidatedSize());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -105,6 +141,25 @@ public class UtilitiesTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testToJSONNullObject() {
+		final String result = Utilities.toJson(null);
+		Assert.assertNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testToJSONValidObject() {
+		final ErrorMessageDTO dto = new ErrorMessageDTO("test", 11, ExceptionType.GENERIC, null);
+		final String osName = System.getProperty(OS_NAME).toLowerCase();
+		final String expected = osName.startsWith(WINDOWS_PREFIX) ? "{\r\n  \"errorMessage\" : \"test\",\r\n  \"errorCode\" : 11,\r\n  \"exceptionType\" : \"GENERIC\"\r\n}" : 
+																	"{\n  \"errorMessage\" : \"test\",\n  \"errorCode\" : 11,\n  \"exceptionType\" : \"GENERIC\"\n}";
+
+		final String result = Utilities.toJson(dto);
+		Assert.assertEquals(expected, result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testFromJSONNullString() {
 		final ErrorMessageDTO result = Utilities.fromJson(null, ErrorMessageDTO.class);
 		Assert.assertNull(result);
@@ -126,7 +181,7 @@ public class UtilitiesTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testFromJSONConvertSuccess() {
-		ErrorMessageDTO result = Utilities.fromJson("{ \"exceptionType\": \"AUTH\" }", ErrorMessageDTO.class);
+		final ErrorMessageDTO result = Utilities.fromJson("{ \"exceptionType\": \"AUTH\" }", ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.AUTH, result.getExceptionType());
 	}
 	
@@ -216,6 +271,55 @@ public class UtilitiesTest {
 		final ArrowheadException ex = new ArrowheadException("Does not matter.");
 		final HttpStatus result = Utilities.calculateHttpStatusFromArrowheadException(ex);
 		Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithNullString() {
+		final RelayType convertedType = Utilities.convertStringToRelayType(null);
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithBlankString() {
+		final RelayType convertedType = Utilities.convertStringToRelayType("");
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithInvalidString() {
+		final RelayType convertedType = Utilities.convertStringToRelayType("InvalidString");
+		Assert.assertNull(convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidGatekeeperTypeString() {
+		final RelayType convertedType = Utilities.convertStringToRelayType("GATEKEEPER_RELAY");
+		Assert.assertEquals(RelayType.GATEKEEPER_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidGatewayTypeString() {
+		final RelayType convertedType = Utilities.convertStringToRelayType("GATEWAY_RELAY");
+		Assert.assertEquals(RelayType.GATEWAY_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidGeneralTypeString() {
+		final RelayType convertedType = Utilities.convertStringToRelayType("GENERAL_RELAY");
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConvertStringToRelayTypeWithValidButLowercaseStringWithWhiteSpaces() {
+		final RelayType convertedType = Utilities.convertStringToRelayType(" general_relay ");
+		Assert.assertEquals(RelayType.GENERAL_RELAY, convertedType);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

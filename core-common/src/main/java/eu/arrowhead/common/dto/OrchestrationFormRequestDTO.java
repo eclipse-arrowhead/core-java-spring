@@ -97,7 +97,7 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		//=================================================================================================
 		// members
 		
-		private SystemRequestDTO requesterSystem;
+		private final SystemRequestDTO requesterSystem;
 		private CloudRequestDTO requesterCloud;
 		private ServiceQueryFormDTO requestedService;
 		private final OrchestrationFlags orchestrationFlags = new OrchestrationFlags();

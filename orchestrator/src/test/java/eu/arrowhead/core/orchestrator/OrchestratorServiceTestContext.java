@@ -6,9 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
+import eu.arrowhead.core.orchestrator.service.OrchestratorService;
 
 @Configuration
-public class OrchestratorStoreDBServiceTestContext {
+public class OrchestratorServiceTestContext {
 
 	//=================================================================================================
 	// methods
@@ -18,5 +19,12 @@ public class OrchestratorStoreDBServiceTestContext {
 	@Primary // This bean is primary only in test context
 	public OrchestratorStoreDBService mockOrchestratorStoreDBService() {
 		return Mockito.mock(OrchestratorStoreDBService.class);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean
+	@Primary // This bean is primary only in test context
+	public OrchestratorService mockOrchestratorService() {
+		return Mockito.mock(OrchestratorService.class);
 	}
 }

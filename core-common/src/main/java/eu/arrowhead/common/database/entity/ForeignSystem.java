@@ -19,7 +19,7 @@ import javax.persistence.UniqueConstraint;
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
 public class ForeignSystem {
 	
 	//=================================================================================================
@@ -28,29 +28,29 @@ public class ForeignSystem {
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt", "systemName", "address", "port"); //NOSONAR
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "providerCloudId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "providerCloudId", referencedColumnName = "id", nullable = false)
 	private Cloud providerCloud;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String systemName;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String address;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private int port;
 	
-	@Column (nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
 	//=================================================================================================
@@ -104,16 +104,8 @@ public class ForeignSystem {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "ForeignSystem [id = " + id + ", "
-				+ "providerCloud[providerCloud.id= " + providerCloud.getId() + 
-				", providerCloud.name = " + providerCloud.getName() + 
-				", providerCloud.neighbor = " + providerCloud.getNeighbor() +
-				", providerCloud.secure = " + providerCloud.getSecure() +
-				", providerCloud.operator = " + providerCloud.getOperator() +
-				", providerCloud.ownCloud = " + providerCloud.getOwnCloud() +
-				" ]" + 
-				", systemName = " + systemName + 
-				", address = " + address + 
-				", port = " + port + "]";
+		return "ForeignSystem [id = " + id + ", providerCloud[providerCloud.id= " + providerCloud.getId() + ", providerCloud.name = " + providerCloud.getName() + 
+			   ", providerCloud.neighbor = " + providerCloud.getNeighbor() + ", providerCloud.secure = " + providerCloud.getSecure() + ", providerCloud.operator = " + providerCloud.getOperator() +
+			   ", providerCloud.ownCloud = " + providerCloud.getOwnCloud() + " ], systemName = " + systemName + ", address = " + address + ", port = " + port + "]";
 	}
 }

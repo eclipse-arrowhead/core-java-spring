@@ -16,28 +16,28 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"authorizationInterCloudId", "interfaceId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"authorizationInterCloudId", "interfaceId"}))
 public class AuthorizationInterCloudInterfaceConnection {
 
 	//=================================================================================================
 	// members
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "authorizationInterCloudId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "authorizationInterCloudId", referencedColumnName = "id", nullable = false)
 	private AuthorizationInterCloud authorizationInterCloudEntry; 
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "interfaceId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "interfaceId", referencedColumnName = "id", nullable = false)
 	private ServiceInterface serviceInterface;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 
 	//=================================================================================================
@@ -47,8 +47,7 @@ public class AuthorizationInterCloudInterfaceConnection {
 	public AuthorizationInterCloudInterfaceConnection() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationInterCloudInterfaceConnection(final AuthorizationInterCloud authorizationInterCloudEntry,
-			final ServiceInterface serviceInterface) {
+	public AuthorizationInterCloudInterfaceConnection(final AuthorizationInterCloud authorizationInterCloudEntry, final ServiceInterface serviceInterface) {
 		this.authorizationInterCloudEntry = authorizationInterCloudEntry;
 		this.serviceInterface = serviceInterface;
 	}
@@ -67,7 +66,7 @@ public class AuthorizationInterCloudInterfaceConnection {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public long getId() {return id;}
+	public long getId() { return id; }
 	public AuthorizationInterCloud getAuthorizationInterCloudEntry() { return authorizationInterCloudEntry; }
 	public ServiceInterface getServiceInterface() { return serviceInterface; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }

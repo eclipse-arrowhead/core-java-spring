@@ -29,7 +29,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.ServiceSecurityType;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))
 public class ServiceRegistry {
 	
 	//=================================================================================================
@@ -38,41 +38,41 @@ public class ServiceRegistry {
 	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "serviceId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "serviceId", referencedColumnName = "id", nullable = false)
 	private ServiceDefinition serviceDefinition;
 	
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "systemId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
-	@Column (nullable = true, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = true, length = Defaults.VARCHAR_BASIC)
 	private String serviceUri;
 	
-	@Column (nullable = true)
+	@Column(nullable = true)
 	private ZonedDateTime endOfValidity;
 	
-	@Column (nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'NOT_SECURE'")
+	@Column(nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'NOT_SECURE'")
 	@Enumerated(EnumType.STRING)
 	private ServiceSecurityType secure = ServiceSecurityType.NOT_SECURE;
 	
-	@Column (nullable = true, columnDefinition = "TEXT")
+	@Column(nullable = true, columnDefinition = "TEXT")
 	private String metadata;
 	
-	@Column (nullable = true)
+	@Column(nullable = true)
 	private Integer version = 1;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToMany (mappedBy = "serviceRegistryEntry", fetch = FetchType.EAGER, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "serviceRegistryEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistryInterfaceConnection> interfaceConnections = new HashSet<>();
 
 	//=================================================================================================

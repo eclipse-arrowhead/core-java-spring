@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class CloudRequestDTO implements Serializable {
 
@@ -11,12 +12,11 @@ public class CloudRequestDTO implements Serializable {
 	
 	private String operator;
 	private String name;
-	private String address;
-	private Integer port;
-	private String serviceUri;
 	private Boolean secure;
 	private Boolean neighbor;
-	private Boolean ownCloud;
+	private String authenticationInfo;
+	private List<Long> gatekeeperRelayIds;
+	private List<Long> gatewayRelayIds;
 	
 	//=================================================================================================
 	// methods
@@ -24,20 +24,18 @@ public class CloudRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public String getOperator() { return operator; }
 	public String getName() { return name; }
-	public String getAddress() { return address; }
-	public Integer getPort() { return port; }
-	public String getServiceUri() { return serviceUri; }
 	public Boolean getSecure() { return secure; }
 	public Boolean getNeighbor() { return neighbor; }
-	public Boolean getOwnCloud() { return ownCloud; }
-	
+	public String getAuthenticationInfo() { return authenticationInfo; }	
+	public List<Long> getGatekeeperRelayIds() { return gatekeeperRelayIds; }	
+	public List<Long> getGatewayRelayIds() { return gatewayRelayIds; }
 	//-------------------------------------------------------------------------------------------------
 	public void setOperator(final String operator) { this.operator = operator; }
 	public void setName(final String name) { this.name = name; }
-	public void setAddress(final String address) { this.address = address; }
-	public void setPort(final Integer port) { this.port = port; }
-	public void setServiceUri(final String serviceUri) { this.serviceUri = serviceUri; }
 	public void setSecure(final Boolean secure) { this.secure = secure; }
 	public void setNeighbor(final Boolean neighbor) { this.neighbor = neighbor; }
-	public void setOwnCloud(final Boolean ownCloud) { this.ownCloud = ownCloud; }
+	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
+	public void setGatekeeperRelayIds(final List<Long> gatekeeperRelayIds) { this.gatekeeperRelayIds = gatekeeperRelayIds; }
+	public void setGatewayRelayIds(final List<Long> gatewayRelayIds) { this.gatewayRelayIds = gatewayRelayIds; }
+	
 }
