@@ -105,7 +105,7 @@ public class ChoreographerController {
         logger.debug("New ChoreographerActionStep delete request received with id of " + id + ".");
 
         if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI);
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI);
         }
 
         choreographerDBService.removeActionPlanEntryById(id);
@@ -124,7 +124,7 @@ public class ChoreographerController {
         logger.debug("New ChoreographerActionStep get request received with id: " + id + ".");
 
         if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI);
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI);
         }
 
         ChoreographerActionPlanResponseDTO choreographerActionPlanEntryByIdResponse = choreographerDBService.getChoreographerActionPlanByIdResponse(id);
