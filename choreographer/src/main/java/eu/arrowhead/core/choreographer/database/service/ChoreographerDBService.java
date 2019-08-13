@@ -165,8 +165,8 @@ public class ChoreographerDBService {
         Optional<ChoreographerAction> nextActionOpt = choreographerActionRepository.findByActionName(nextActionName);
         if(nextActionOpt.isPresent()) {
             choreographerAction.setNextAction(nextActionOpt.get());
-        } else {
-            throw new InvalidParameterException("Action with given Action Name of " + nextActionName + "doesn't exist!");
+        } else if (nextActionName != null) {
+            throw new InvalidParameterException("Action with given Action Name of " + nextActionName + " doesn't exist!");
         }
 
         return choreographerActionRepository.saveAndFlush(choreographerAction);
