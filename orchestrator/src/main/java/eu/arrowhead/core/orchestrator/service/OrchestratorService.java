@@ -136,14 +136,14 @@ public class OrchestratorService {
 
 		final InterCloudCloudMatchmakingParameters iCCMparams = new InterCloudCloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
 		final CloudResponseDTO targetCloud = interCloudClouderMatchmaker.doMatchmaking(iCCMparams);
-        if (targetCloud == null && Utilities.isEmpty(targetCloud.getName())) {
+        if (targetCloud == null || Utilities.isEmpty(targetCloud.getName())) {
             
         	// Return empty response
             return new OrchestrationResponseDTO();
  		}
 		
 		final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(request, DTOConverter.convertCloudResponseDTOToCloudRequestDTO(targetCloud));
-        if (icnResponseDTO == null && icnResponseDTO.getResponse().isEmpty()) {
+        if (icnResponseDTO == null || icnResponseDTO.getResponse().isEmpty()) {
            
         	// Return empty response
            return new OrchestrationResponseDTO();
