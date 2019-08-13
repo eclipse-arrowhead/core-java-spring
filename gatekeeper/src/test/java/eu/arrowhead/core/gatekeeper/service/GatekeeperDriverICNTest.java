@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -37,10 +38,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
@@ -62,6 +65,9 @@ public class GatekeeperDriverICNTest {
 	
 	@Mock
 	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmaker;
+	
+	@Mock
+	private Map<String,Object> arrowheadContext;
 	
 	@Mock
 	private HttpService httpService;
@@ -144,6 +150,28 @@ public class GatekeeperDriverICNTest {
 		final Cloud targetCloud = new Cloud("aitia", "testcloud2", true, true, false, "abcd");
 		final ICNProposalResponseDTO result = testingObject.sendICNProposal(targetCloud, new ICNProposalRequestDTO());
 		Assert.assertNotNull(result);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryOrchestratorFormNull() {
+		testingObject.queryOrchestrator(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryOrchestratorURINotFound() {
+		when(arrowheadContext.containsKey(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryOrchestratorURIWrongType() {
+		final String key = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		when(arrowheadContext.containsKey(key)).thenReturn(true);
+		when(arrowheadContext.get(key)).thenReturn("abcd");
+		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
 	}
 	
 	//=================================================================================================
