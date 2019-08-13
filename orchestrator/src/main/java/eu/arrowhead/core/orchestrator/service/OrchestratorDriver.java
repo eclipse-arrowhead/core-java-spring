@@ -26,6 +26,7 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
@@ -164,9 +165,10 @@ public class OrchestratorDriver {
 	}
 
 	
-	public static GSDQueryResultDTO doGlobalServiceDiscovery(final ServiceQueryFormDTO requestedService,
-			final List<CloudRequestDTO> preferredClouds, final boolean metadataSearch, final boolean pingProviders) {
+	public static GSDQueryResultDTO doGlobalServiceDiscovery(final GSDPollRequestDTO request) {
 		logger.debug("doGlobalServiceDiscovery started...");
+		
+		Assert.notNull(request, "GSDPollRequestDTO is null.");
 		
 		// TODO Implement additional method logic here
 		return null;

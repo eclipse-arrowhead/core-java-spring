@@ -25,6 +25,7 @@ import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
+import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationFlags;
@@ -132,7 +133,9 @@ public class OrchestratorService {
 		  }
 		}
 	    
-		final GSDQueryResultDTO result = OrchestratorDriver.doGlobalServiceDiscovery(request.getRequestedService(), preferredClouds, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
+		final GSDQueryResultDTO result = OrchestratorDriver.doGlobalServiceDiscovery(
+				new GSDPollRequestDTO(
+						request.getRequestedService(), request.getRequesterCloud(), gateKeeperIsPresent));
 
 		final InterCloudCloudMatchmakingParameters iCCMparams = new InterCloudCloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
 		final CloudResponseDTO targetCloud = interCloudClouderMatchmaker.doMatchmaking(iCCMparams);
