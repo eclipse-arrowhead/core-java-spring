@@ -61,7 +61,7 @@ public class ChoreographerController {
         return "Got it!";
     }
 
-    @ApiOperation(value = "Register one ore more ActionPlans.",
+    @ApiOperation(value = "Register one or more ActionPlans.",
             notes = "Please note that creating ActionPlans this way means that Actions included in the ActionPlan(s) can't be already existing Actions." +
                     "If you want to create an ActionPlan with already existing Actions please use the corresponding endpoint!")
     @ApiResponses(value = {
@@ -78,7 +78,7 @@ public class ChoreographerController {
         }
     }
 
-    /* @ApiOperation(value = "Register one ore more ActionPlans using already existing Action chains only.")
+    @ApiOperation(value = "Register one or more ActionPlans using already existing Action chains only.")
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
@@ -91,7 +91,7 @@ public class ChoreographerController {
         for (ChoreographerActionPlanRequestWithExistingActionDTO request : requests) {
             choreographerDBService.createChoreographerActionPlanWithExistingActions(request.getActionPlanName(), request.getActions());
         }
-    } */
+    }
 
     @ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.")
     @ApiResponses(value = {

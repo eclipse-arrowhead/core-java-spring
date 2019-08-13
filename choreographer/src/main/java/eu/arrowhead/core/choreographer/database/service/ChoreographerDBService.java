@@ -205,7 +205,7 @@ public class ChoreographerDBService {
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
     }
 
-    /* public ChoreographerActionPlan createChoreographerActionPlanWithExistingActions(final String actionPlanName, List<ChoreographerExistingActionRequestDTO> actions) {
+    public ChoreographerActionPlan createChoreographerActionPlanWithExistingActions(final String actionPlanName, List<ChoreographerExistingActionRequestDTO> actions) {
         logger.debug("createChoreographerActionPlanWithExistingActions started...");
 
         Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
@@ -246,7 +246,7 @@ public class ChoreographerDBService {
         }
 
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
-    } */
+    }
 
     public Page<ChoreographerActionPlan> getChoreographerActionPlanEntries(final int page, final int size, final Direction direction, final String sortField) {
         logger.debug("getChoreographerActionPlanEntries started... ");
