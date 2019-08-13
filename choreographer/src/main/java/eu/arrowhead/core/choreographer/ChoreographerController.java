@@ -4,7 +4,6 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestWithExistingActionDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerExistingActionRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.ApiOperation;
@@ -14,17 +13,26 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
+@CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
@@ -148,24 +156,10 @@ public class ChoreographerController {
             @RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New ChoreographerActionPlan get request received with page: {} and item_per page: {}.", page, size);
 
-        int validatedPage;
-        int validatedSize;
-        if (page == null && size == null) {
-            validatedPage = -1;
-            validatedSize = -1;
-        } else {
-            if (page == null || size == null) {
-                throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI +
-                        CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
-            } else {
-                validatedPage = page;
-                validatedSize = size;
-            }
-        }
-        Sort.Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
+        Utilities.ValidatedPageParams validatedPageParams = Utilities.validatePageParameters(page, size, direction, sortField);
 
-        List<ChoreographerActionPlanResponseDTO> choreographerActionPlanEntriesResponse = choreographerDBService.getChoreographerActionPlanEntriesResponse(validatedPage, validatedSize,
-                validatedDirection, sortField);
+        List<ChoreographerActionPlanResponseDTO> choreographerActionPlanEntriesResponse = choreographerDBService.getChoreographerActionPlanEntriesResponse(validatedPageParams.getValidatedPage(), validatedPageParams.getValidatedSize(),
+                validatedPageParams.getValidatedDirecion(), sortField);
         logger.debug("ChoreographerActionPlans with page: {} and item_per page: {} retrieved successfully", page, size);
 
         return choreographerActionPlanEntriesResponse;
