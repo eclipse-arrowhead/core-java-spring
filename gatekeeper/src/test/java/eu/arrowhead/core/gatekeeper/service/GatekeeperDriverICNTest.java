@@ -2,11 +2,14 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.jms.BytesMessage;
@@ -34,17 +37,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.ServiceSecurityType;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
@@ -174,6 +192,76 @@ public class GatekeeperDriverICNTest {
 		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testQueryAuthorizationBasedOnOchestrationResponseRequestCloudNull() {
+		testingObject.queryAuthorizationBasedOnOchestrationResponse(null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testQueryAuthorizationBasedOnOchestrationResponseOrchestrationResponseNull() {
+		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class) 
+	public void testQueryAuthorizationBasedOnOchestrationResponseOrchestrationResponseEmpty() {
+		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO());
+	}
+
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class) 
+	public void testQueryAuthorizationBasedOnOchestrationResponseURINotFound() {
+		when(arrowheadContext.containsKey(CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class) 
+	public void testQueryAuthorizationBasedOnOchestrationResponseURIWrongType() {
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		when(arrowheadContext.containsKey(key)).thenReturn(true);
+		when(arrowheadContext.get(key)).thenReturn("1234");
+		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test 
+	public void testQueryAuthorizationBasedOnOchestrationResponseNoAccess() {
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		when(arrowheadContext.containsKey(key)).thenReturn(true);
+		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
+		
+		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = new ResponseEntity<>(new AuthorizationInterCloudCheckResponseDTO(), HttpStatus.OK);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(AuthorizationInterCloudCheckResponseDTO.class), any(AuthorizationInterCloudCheckRequestDTO.class)))
+																																												.thenReturn(response);
+		
+		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(getTestOrchestrationResults()));
+		Assert.assertTrue(authorizedResponse.getResponse().isEmpty());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test 
+	public void testQueryAuthorizationBasedOnOchestrationResponseFiltered() {
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		when(arrowheadContext.containsKey(key)).thenReturn(true);
+		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
+		
+		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = new ResponseEntity<>(getTestAuthorizationCheckResponse(), HttpStatus.OK);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(AuthorizationInterCloudCheckResponseDTO.class), any(AuthorizationInterCloudCheckRequestDTO.class)))
+																																												.thenReturn(response);
+		
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(getTestOrchestrationResults());
+		Assert.assertEquals(2, orchestrationResponse.getResponse().size());
+		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), orchestrationResponse);
+		Assert.assertEquals(1, authorizedResponse.getResponse().size());
+		Assert.assertEquals(2, authorizedResponse.getResponse().get(0).getProvider().getId());
+		Assert.assertEquals(1, authorizedResponse.getResponse().get(0).getInterfaces().size());
+		Assert.assertEquals(100, authorizedResponse.getResponse().get(0).getInterfaces().get(0).getId());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -247,5 +335,37 @@ public class GatekeeperDriverICNTest {
 			public Message receive() throws JMSException { return null; }
 			public Message receiveNoWait() throws JMSException { return null; }
 		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestrationResultDTO> getTestOrchestrationResults() {
+		final List<OrchestrationResultDTO> result = new ArrayList<>(2);
+		
+		final ServiceDefinitionResponseDTO service = new ServiceDefinitionResponseDTO(22, "test-service", null, null);
+		final ServiceInterfaceResponseDTO intfs1 = new ServiceInterfaceResponseDTO(100, "HTTP-SECURE-JSON", null, null);
+		final ServiceInterfaceResponseDTO intfs2 = new ServiceInterfaceResponseDTO(101, "HTTP-SECURE-XML", null, null);
+		
+		final SystemResponseDTO provider1 = new SystemResponseDTO(1, "testSystem1", "localhost", 1234, "abcd", null, null);
+		final List<ServiceInterfaceResponseDTO> intfsList1 = new ArrayList<>(1);
+		intfsList1.add(intfs1);
+		final OrchestrationResultDTO dto1 = new OrchestrationResultDTO(provider1, service, "/", ServiceSecurityType.CERTIFICATE, null, intfsList1, 1);
+		result.add(dto1);
+		
+		final SystemResponseDTO provider2 = new SystemResponseDTO(2, "testSystem2", "localhost", 11234, "abcd", null, null);
+		final List<ServiceInterfaceResponseDTO> intfsList2 = new ArrayList<>(2);
+		intfsList2.add(intfs1);
+		intfsList2.add(intfs2);
+		final OrchestrationResultDTO dto2 = new OrchestrationResultDTO(provider2, service, "/", ServiceSecurityType.CERTIFICATE, null, intfsList2, 1);
+		result.add(dto2);
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private AuthorizationInterCloudCheckResponseDTO getTestAuthorizationCheckResponse() {
+		final AuthorizationInterCloudCheckResponseDTO result = new AuthorizationInterCloudCheckResponseDTO();
+		result.setAuthorizedProviderIdsWithInterfaceIds(List.of(new IdIdListDTO(2L, List.of(100L))));
+		
+		return result;
 	}
 }
