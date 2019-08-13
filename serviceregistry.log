@@ -2080,3 +2080,113 @@ Using generated security password: 7df55450-dcff-47a9-871e-7fd48364a30c
 2019-08-01 13:01:53.003  WARN DESKTOP-CB3KCFU --- [l-2 housekeeper] c.z.h.p.HikariPool                       : HikariPool-2 - Thread starvation or clock leap detected (housekeeper delta=6m26s137ms486µs250ns).
 2019-08-01 17:49:49.749  WARN DESKTOP-CB3KCFU --- [l-1 housekeeper] c.z.h.p.HikariPool                       : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h28m30s447ms546µs431ns).
 2019-08-01 17:49:53.957  WARN DESKTOP-CB3KCFU --- [l-2 housekeeper] c.z.h.p.HikariPool                       : HikariPool-2 - Thread starvation or clock leap detected (housekeeper delta=1h28m30s447ms527µs716ns).
+2019-08-13 14:03:59.524  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.s.ServiceRegistryMain              : Starting ServiceRegistryMain on DESKTOP-HTUTBM5 with PID 1200 (C:\dev\core-java-spring\serviceregistry\target\classes started by AITIA in C:\dev\core-java-spring)
+2019-08-13 14:03:59.530  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.s.ServiceRegistryMain              : No active profile set, falling back to default profiles: default
+2019-08-13 14:03:59.544  INFO DESKTOP-HTUTBM5 --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Starting...
+2019-08-13 14:04:00.061  INFO DESKTOP-HTUTBM5 --- [cLoggerConfig-4] c.z.h.HikariDataSource                   : HikariPool-1 - Start completed.
+2019-08-13 14:04:01.144  INFO DESKTOP-HTUTBM5 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data repositories in DEFAULT mode.
+2019-08-13 14:04:01.397  INFO DESKTOP-HTUTBM5 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 230ms. Found 22 repository interfaces.
+2019-08-13 14:04:02.122  INFO DESKTOP-HTUTBM5 --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2019-08-13 14:04:02.130  INFO DESKTOP-HTUTBM5 --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'taskScheduler' has been explicitly defined. Therefore, a default ThreadPoolTaskScheduler will be created.
+2019-08-13 14:04:02.134  INFO DESKTOP-HTUTBM5 --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2019-08-13 14:04:02.275  INFO DESKTOP-HTUTBM5 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration' of type [org.springframework.transaction.annotation.ProxyTransactionManagementConfiguration$$EnhancerBySpringCGLIB$$4495be65] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-08-13 14:04:02.314  INFO DESKTOP-HTUTBM5 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.integration.config.IntegrationManagementConfiguration' of type [org.springframework.integration.config.IntegrationManagementConfiguration$$EnhancerBySpringCGLIB$$af877994] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-08-13 14:04:02.326  INFO DESKTOP-HTUTBM5 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'integrationDisposableAutoCreatedBeans' of type [org.springframework.integration.config.annotation.Disposables] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2019-08-13 14:04:03.102  INFO DESKTOP-HTUTBM5 --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat initialized with port(s): 8443 (https)
+2019-08-13 14:04:03.162  INFO DESKTOP-HTUTBM5 --- [           main] o.a.c.h.Http11NioProtocol                : Initializing ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-08-13 14:04:03.201  INFO DESKTOP-HTUTBM5 --- [           main] o.a.c.c.StandardService                  : Starting service [Tomcat]
+2019-08-13 14:04:03.201  INFO DESKTOP-HTUTBM5 --- [           main] o.a.c.c.StandardEngine                   : Starting Servlet engine: [Apache Tomcat/9.0.19]
+2019-08-13 14:04:03.383  INFO DESKTOP-HTUTBM5 --- [           main] o.a.c.c.C.[.[.[/]                        : Initializing Spring embedded WebApplicationContext
+2019-08-13 14:04:03.384  INFO DESKTOP-HTUTBM5 --- [           main] o.s.w.c.ContextLoader                    : Root WebApplicationContext: initialization completed in 3811 ms
+2019-08-13 14:04:03.469  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.f.ArrowheadFilter                  : SRAccessControlFilter is active
+2019-08-13 14:04:04.111  INFO DESKTOP-HTUTBM5 --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Starting...
+2019-08-13 14:04:04.129  INFO DESKTOP-HTUTBM5 --- [           main] c.z.h.HikariDataSource                   : HikariPool-2 - Start completed.
+2019-08-13 14:04:04.195  INFO DESKTOP-HTUTBM5 --- [           main] o.h.j.i.u.LogHelper                      : HHH000204: Processing PersistenceUnitInfo [
+	name: default
+	...]
+2019-08-13 14:04:04.289  INFO DESKTOP-HTUTBM5 --- [           main] o.h.Version                              : HHH000412: Hibernate Core {5.3.10.Final}
+2019-08-13 14:04:04.293  INFO DESKTOP-HTUTBM5 --- [           main] o.h.c.Environment                        : HHH000206: hibernate.properties not found
+2019-08-13 14:04:04.590  INFO DESKTOP-HTUTBM5 --- [           main] o.h.a.c.Version                          : HCANN000001: Hibernate Commons Annotations {5.0.4.Final}
+2019-08-13 14:04:05.047  INFO DESKTOP-HTUTBM5 --- [           main] o.h.d.Dialect                            : HHH000400: Using dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+2019-08-13 14:04:06.750  INFO DESKTOP-HTUTBM5 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2019-08-13 14:04:07.515  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.q.u.UriCrawlerTaskConfig           : URI Crawler task scheduled.
+2019-08-13 14:04:07.536  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-08-13 14:04:07.546  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-08-13 14:04:07.546  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-08-13 14:04:07.548  INFO DESKTOP-HTUTBM5 --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-08-13 14:04:07.549  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'uriCrawlerTaskScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-08-13 14:04:07.549  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'uriCrawlerTaskScheduler' initialized from an externally provided properties instance.
+2019-08-13 14:04:07.549  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-08-13 14:04:07.550  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory@4822fc53
+2019-08-13 14:04:07.748  WARN DESKTOP-HTUTBM5 --- [           main] aWebConfiguration$JpaWebMvcConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2019-08-13 14:04:07.786  INFO DESKTOP-HTUTBM5 --- [           main] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+2019-08-13 14:04:08.078  INFO DESKTOP-HTUTBM5 --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Providers reachabilitiy task is not adjusted
+2019-08-13 14:04:08.080  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-08-13 14:04:08.082  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-08-13 14:04:08.082  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-08-13 14:04:08.082  INFO DESKTOP-HTUTBM5 --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-08-13 14:04:08.082  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'providersReachabilityTaskScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-08-13 14:04:08.082  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'providersReachabilityTaskScheduler' initialized from an externally provided properties instance.
+2019-08-13 14:04:08.082  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-08-13 14:04:08.083  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@46d2be66
+2019-08-13 14:04:08.085  INFO DESKTOP-HTUTBM5 --- [           main] .c.s.q.t.ProvidersReachabilityTaskConfig : Services end of validity task is not adjusted
+2019-08-13 14:04:08.097  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Using default implementation for ThreadExecutor
+2019-08-13 14:04:08.099  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.SchedulerSignalerImpl              : Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2019-08-13 14:04:08.099  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Quartz Scheduler v.2.3.1 created.
+2019-08-13 14:04:08.099  INFO DESKTOP-HTUTBM5 --- [           main] o.q.s.RAMJobStore                        : RAMJobStore initialized.
+2019-08-13 14:04:08.099  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Scheduler meta-data: Quartz Scheduler (v2.3.1) 'servicesEndOfValidityCheckSheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2019-08-13 14:04:08.099  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler 'servicesEndOfValidityCheckSheduler' initialized from an externally provided properties instance.
+2019-08-13 14:04:08.099  INFO DESKTOP-HTUTBM5 --- [           main] o.q.i.StdSchedulerFactory                : Quartz scheduler version: 2.3.1
+2019-08-13 14:04:08.100  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : JobFactory set to: org.springframework.scheduling.quartz.AdaptableJobFactory@55448710
+2019-08-13 14:04:08.163  INFO DESKTOP-HTUTBM5 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 7e144324-e0ba-4678-b68b-e2f67f8ac9a9
+
+2019-08-13 14:04:08.214  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.f.ArrowheadFilter                  : PayloadSizeFilter is active
+2019-08-13 14:04:08.252  INFO DESKTOP-HTUTBM5 --- [           main] o.s.s.w.a.c.ChannelProcessingFilter      : Validated configuration attributes
+2019-08-13 14:04:08.253  INFO DESKTOP-HTUTBM5 --- [           main] o.s.s.w.DefaultSecurityFilterChain       : Creating filter chain: any request, [org.springframework.security.web.access.channel.ChannelProcessingFilter@49c3487f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5f1d270a, org.springframework.security.web.context.SecurityContextPersistenceFilter@168ffb0, org.springframework.security.web.header.HeaderWriterFilter@213a2fe3, org.springframework.security.web.authentication.logout.LogoutFilter@93fb20b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@59a49dbc, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@37672aa7, eu.arrowhead.common.filter.PayloadSizeFilter@7d14efc, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5180f430, org.springframework.security.web.session.SessionManagementFilter@29ff84fa, org.springframework.security.web.access.ExceptionTranslationFilter@d35d84a]
+2019-08-13 14:04:08.277  INFO DESKTOP-HTUTBM5 --- [           main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [public org.springframework.http.ResponseEntity<springfox.documentation.spring.web.json.Json> springfox.documentation.swagger2.web.Swagger2Controller.getDocumentation(java.lang.String,javax.servlet.http.HttpServletRequest)]
+2019-08-13 14:04:08.427  INFO DESKTOP-HTUTBM5 --- [           main] o.s.s.c.ThreadPoolTaskExecutor           : Initializing ExecutorService 'applicationTaskExecutor'
+2019-08-13 14:04:08.785  INFO DESKTOP-HTUTBM5 --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2019-08-13 14:04:08.872  INFO DESKTOP-HTUTBM5 --- [           main] o.s.i.e.EventDrivenConsumer              : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2019-08-13 14:04:08.872  INFO DESKTOP-HTUTBM5 --- [           main] o.s.i.c.PublishSubscribeChannel          : Channel 'application.errorChannel' has 1 subscriber(s).
+2019-08-13 14:04:08.872  INFO DESKTOP-HTUTBM5 --- [           main] o.s.i.e.EventDrivenConsumer              : started _org.springframework.integration.errorLogger
+2019-08-13 14:04:08.873  INFO DESKTOP-HTUTBM5 --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Context refreshed
+2019-08-13 14:04:08.886  INFO DESKTOP-HTUTBM5 --- [           main] d.s.w.p.DocumentationPluginsBootstrapper : Found 1 custom documentation plugin(s)
+2019-08-13 14:04:08.917  INFO DESKTOP-HTUTBM5 --- [           main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+2019-08-13 14:04:09.103  INFO DESKTOP-HTUTBM5 --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-08-13 14:04:09.103  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Scheduler providersReachabilityTaskScheduler_$_NON_CLUSTERED started.
+2019-08-13 14:04:09.103  INFO DESKTOP-HTUTBM5 --- [           main] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now
+2019-08-13 14:04:09.103  INFO DESKTOP-HTUTBM5 --- [           main] o.q.c.QuartzScheduler                    : Scheduler servicesEndOfValidityCheckSheduler_$_NON_CLUSTERED started.
+2019-08-13 14:04:09.103  INFO DESKTOP-HTUTBM5 --- [           main] o.s.s.q.SchedulerFactoryBean             : Will start Quartz Scheduler [uriCrawlerTaskScheduler] in 16 seconds
+2019-08-13 14:04:09.105  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.ApplicationInitListener            : Core system name: SERVICE_REGISTRY
+2019-08-13 14:04:09.105  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.ApplicationInitListener            : Server mode: SECURED
+2019-08-13 14:04:09.402  INFO DESKTOP-HTUTBM5 --- [           main] o.a.c.h.Http11NioProtocol                : Starting ProtocolHandler ["https-jsse-nio-127.0.0.1-8443"]
+2019-08-13 14:04:09.926  INFO DESKTOP-HTUTBM5 --- [           main] o.s.b.w.e.t.TomcatWebServer              : Tomcat started on port(s): 8443 (https) with context path ''
+2019-08-13 14:04:09.928  INFO DESKTOP-HTUTBM5 --- [           main] e.a.c.s.ServiceRegistryMain              : Started ServiceRegistryMain in 10.863 seconds (JVM running for 12.398)
+2019-08-13 14:04:12.710  INFO DESKTOP-HTUTBM5 --- [0.1-8443-exec-8] o.a.c.c.C.[.[.[/]                        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2019-08-13 14:04:12.710  INFO DESKTOP-HTUTBM5 --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Initializing Servlet 'dispatcherServlet'
+2019-08-13 14:04:12.718  INFO DESKTOP-HTUTBM5 --- [0.1-8443-exec-8] o.s.w.s.DispatcherServlet                : Completed initialization in 7 ms
+2019-08-13 14:04:25.105  INFO DESKTOP-HTUTBM5 --- [rTaskScheduler]] o.s.s.q.SchedulerFactoryBean             : Starting Quartz Scheduler now, after delay of 16 seconds
+2019-08-13 14:04:25.106  INFO DESKTOP-HTUTBM5 --- [rTaskScheduler]] o.q.c.QuartzScheduler                    : Scheduler uriCrawlerTaskScheduler_$_NON_CLUSTERED started.

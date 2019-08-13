@@ -67,6 +67,14 @@ public class ChoreographerDBService {
     public ChoreographerActionStep createChoreographerActionStepWithUsedService(final String stepName, final Set<String> usedServiceNames) {
         logger.debug("createChoreographerActionStep started...");
 
+        if(Utilities.isEmpty(stepName)) {
+            throw new InvalidParameterException("ActionStep name is null or blank.");
+        }
+
+        if(usedServiceNames == null || usedServiceNames.isEmpty()) {
+            throw new InvalidParameterException("UsedService name is null or blank.");
+        }
+
         Optional<ChoreographerActionStep> choreographerActionStepOpt = choreographerActionStepRepository.findByName(stepName);
 
         choreographerActionStepOpt.ifPresent(choreographerActionStep -> {
@@ -133,6 +141,10 @@ public class ChoreographerDBService {
     public ChoreographerAction createChoreographerAction(final String actionName, final List<ChoreographerActionStepRequestDTO> actionSteps) {
         logger.debug("createChoreographerAction started...");
 
+        if(Utilities.isEmpty(actionName)) {
+            throw new InvalidParameterException("Action name is null or blank.");
+        }
+
         Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByActionName(actionName);
 
         choreographerActionOpt.ifPresent(choreographerAction -> {
@@ -143,17 +155,19 @@ public class ChoreographerDBService {
         action.setActionName(actionName);
 
         ChoreographerAction actionEntry = choreographerActionRepository.save(action);
-        for (ChoreographerActionStepRequestDTO actionStep : actionSteps) {
-            ChoreographerActionActionStepConnection connection = choreographerActionActionStepConnectionRepository
-                    .save(new ChoreographerActionActionStepConnection(createChoreographerActionStepWithUsedService(actionStep.getActionStepName(), new HashSet<>(actionStep.getUsedServiceNames())),
-                            actionEntry));
-            actionEntry.getActionActionStepConnections().add(connection);
-        }
+        if(actionSteps != null & !actionSteps.isEmpty()) {
+            for (ChoreographerActionStepRequestDTO actionStep : actionSteps) {
+                ChoreographerActionActionStepConnection connection = choreographerActionActionStepConnectionRepository
+                        .save(new ChoreographerActionActionStepConnection(createChoreographerActionStepWithUsedService(actionStep.getActionStepName(), new HashSet<>(actionStep.getUsedServiceNames())),
+                                actionEntry));
+                actionEntry.getActionActionStepConnections().add(connection);
+            }
 
-        for (ChoreographerActionStepRequestDTO actionStep : actionSteps) {
-            List<String> nextActionStepNames = actionStep.getNextActionStepNames();
-            if(nextActionStepNames != null && !nextActionStepNames.isEmpty()) {
-                addNextStepToChoreographerActionStep(actionStep.getActionStepName(), new HashSet<>(nextActionStepNames));
+            for (ChoreographerActionStepRequestDTO actionStep : actionSteps) {
+                List<String> nextActionStepNames = actionStep.getNextActionStepNames();
+                if(nextActionStepNames != null && !nextActionStepNames.isEmpty()) {
+                    addNextStepToChoreographerActionStep(actionStep.getActionStepName(), new HashSet<>(nextActionStepNames));
+                }
             }
         }
 
@@ -162,8 +176,13 @@ public class ChoreographerDBService {
         return choreographerActionRepository.saveAndFlush(actionEntry);
     }
 
+    @Transactional
     public ChoreographerAction addNextActionToChoreographerAction(final String actionName, final String nextActionName) {
         logger.debug("addNextActionToChoreographerAction started...");
+
+        if (Utilities.isEmpty(actionName) || Utilities.isEmpty(nextActionName)) {
+            throw new InvalidParameterException("Action name or next Action name is null or blank.");
+        }
 
         Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByActionName(actionName);
 
