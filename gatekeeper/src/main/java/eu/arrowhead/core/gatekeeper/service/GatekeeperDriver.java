@@ -15,22 +15,30 @@ import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
@@ -50,12 +58,17 @@ public class GatekeeperDriver {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
+	@Autowired
+	private HttpService httpService;
+	
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
+
+	private GatekeeperRelayClient relayClient;
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperDriver.class);
 	
-	private GatekeeperRelayClient relayClient;
+	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	
 	//=================================================================================================
 	// methods
@@ -114,6 +127,17 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultDTO sendServiceReistryQuery(final ServiceQueryFormDTO gueryForm) {
+		logger.debug("sendServiceReistryQuery started...");		
+		Assert.notNull(gueryForm, "gueryForm is null.");
+		
+		final UriComponents queryUri = getServiceRegistryQueryUri();
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, gueryForm);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public ICNProposalResponseDTO sendICNProposal(final Cloud targetCloud, final ICNProposalRequestDTO request) {
 		logger.debug("sendICNProposal started...");
 		
@@ -163,5 +187,20 @@ public class GatekeeperDriver {
 	//-------------------------------------------------------------------------------------------------
 	private String getRecipientCommonName(final Cloud cloud) {
 		return "gatekeeper." + Utilities.getCloudCommonName(cloud.getOperator(), cloud.getName()); 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getServiceRegistryQueryUri() {
+		logger.debug("getServiceRegistryQueryUri started...");
+		
+		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
 	}
 }

@@ -17,6 +17,7 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
@@ -26,7 +27,11 @@ import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
@@ -106,7 +111,32 @@ public class GatekeeperService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public GSDPollResponseDTO doGSDPoll(final GSDPollRequestDTO request) {
-		//TODO: implement
+		logger.debug("doGSDPoll started...");
+		//TODO: asserts
+		
+		//Get ServiceQueryResultDTO from Service Registry core system
+		ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceReistryQuery(request.getRequestedService());
+		
+		if (srQueryResult.getServiceQueryData() == null || srQueryResult.getServiceQueryData().isEmpty()) {
+			throw new InvalidParameterException("No such service available");
+		}
+		
+		//Creating AuthorizationInterCloudCheckRequestDTO
+		List<IdIdListDTO> providerIdsWithInterfaceIds = new ArrayList<>();
+		for (ServiceRegistryResponseDTO srEntryDTO : srQueryResult.getServiceQueryData()) {
+			
+			List<Long> interfaceIds = new ArrayList<>();
+			for (ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
+				interfaceIds.add(interfaceDTO.getId());
+			}
+ 			
+			providerIdsWithInterfaceIds.add(new IdIdListDTO(srEntryDTO.getProvider().getId(), interfaceIds));
+			
+		}
+		
+		final AuthorizationInterCloudCheckRequestDTO interCloudCheckRequestDTO = new AuthorizationInterCloudCheckRequestDTO(request.getRequesterCloud(), 
+																															request.getRequestedService().getServiceDefinitionRequirement(), 
+																															providerIdsWithInterfaceIds);
 		
 		return null;
 	}
