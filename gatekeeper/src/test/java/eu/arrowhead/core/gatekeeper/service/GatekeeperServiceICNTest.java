@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,11 +18,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -249,6 +253,424 @@ public class GatekeeperServiceICNTest {
 		Assert.assertEquals(1, icnResult.getResponse().size());
 		Assert.assertEquals(resultDTO, icnResult.getResponse().get(0));
 	}
+	
+	//TODO: additional test cases here (when using gateway)
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequestNull() {
+		testingObject.doICN(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequestedServiceNull() {
+		testingObject.doICN(new ICNProposalRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequestedServiceNameNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		request.setRequestedService(requestedService);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequestedServiceNameBlank() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement(" \n");
+		request.setRequestedService(requestedService);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemNameNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setSystemName(null);
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemNameBlank() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setSystemName("");
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemAddressNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setAddress(null);
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemAddressBlank() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setAddress("");
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemPortNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(null);
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemPortTooLow() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(-2);
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterSystemPortTooHigh() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(123456);
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterCloudNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterCloudOperatorNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		cloud.setOperator(null);
+		request.setRequesterCloud(cloud);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterCloudOperatorBlank() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		cloud.setOperator("   ");
+		request.setRequesterCloud(cloud);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterCloudNameNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		cloud.setName(null);
+		request.setRequesterCloud(cloud);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNRequesterCloudNameBlank() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		cloud.setName("");
+		request.setRequesterCloud(cloud);
+		
+		testingObject.doICN(request);
+	}
+
+	// we skip tests about preferred system validation because it uses the same method as requester system validation
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final List<RelayRequestDTO> preferredRelays = new ArrayList<>(1);
+		preferredRelays.add(null);
+		request.setPreferredGatewayRelays(preferredRelays);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayAddressNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setAddress(null);
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayAddressEmpty() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setAddress("");
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayPortNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setPort(null);
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayPortTooLow() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setPort(-273);
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayPortHigh() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setPort(101010);
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayTypeNull() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setType(null);
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayTypeEmpty() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setType("\r");
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayTypeInvalid1() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setType("Not a type");
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNPreferredRelayTypeInvalid2() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setType(RelayType.GATEKEEPER_RELAY.name());
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -263,5 +685,18 @@ public class GatekeeperServiceICNTest {
 		
 		return result;
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getTestCloudRequestDTO() {
+		final CloudRequestDTO result = new CloudRequestDTO();
+		result.setOperator("aitia");
+		result.setName("testcloud1");
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private RelayRequestDTO getTestRelayDTO() {
+		return new RelayRequestDTO("localhost", 1234, true, true, RelayType.GATEWAY_RELAY.name());
+	}
 }
