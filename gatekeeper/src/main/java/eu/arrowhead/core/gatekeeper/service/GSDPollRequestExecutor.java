@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
