@@ -46,6 +46,9 @@ import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
@@ -76,10 +79,10 @@ public class GatekeeperDriver {
 	
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
+
+	private GatekeeperRelayClient relayClient;
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperDriver.class);
-	
-	private GatekeeperRelayClient relayClient;
 	
 	//=================================================================================================
 	// methods
@@ -135,6 +138,44 @@ public class GatekeeperDriver {
 		} 
 		
 		return gsdPollAnswers;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultDTO sendServiceReistryQuery(final ServiceQueryFormDTO gueryForm) {
+		logger.debug("sendServiceReistryQuery started...");		
+		Assert.notNull(gueryForm, "gueryForm is null.");
+		
+		final UriComponents queryUri = getServiceRegistryQueryUri();
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, gueryForm);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Map<Long,List<Long>> sendInterCloudAuthorizationCheckQuery(final List<ServiceRegistryResponseDTO> serviceQueryData, final CloudRequestDTO cloud, final String serviceDefinition) {
+		logger.debug("sendInterCloudAuthorizationCheckQuery started...");		
+		Assert.notNull(serviceQueryData, "serviceQueryData is null.");
+		Assert.notNull(cloud, "cloud is null.");
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "serviceDefinition is null or empty");
+		
+		final List<IdIdListDTO> providerIdsWithInterfaceIds = new ArrayList<>();
+		for (final ServiceRegistryResponseDTO srEntryDTO : serviceQueryData) {
+			
+			final List<Long> interfaceIds = new ArrayList<>();
+			for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
+				interfaceIds.add(interfaceDTO.getId());
+			}
+ 			
+			providerIdsWithInterfaceIds.add(new IdIdListDTO(srEntryDTO.getProvider().getId(), interfaceIds));
+			
+		}
+		
+		final AuthorizationInterCloudCheckRequestDTO interCloudCheckRequestDTO = new AuthorizationInterCloudCheckRequestDTO(cloud, serviceDefinition, providerIdsWithInterfaceIds);
+		
+		final UriComponents checkUri = getAuthInterCheckUri();
+		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = httpService.sendRequest(checkUri, HttpMethod.POST, AuthorizationInterCloudCheckResponseDTO.class, interCloudCheckRequestDTO);
+		
+		return convertAuthorizationResultsToMap(response.getBody().getAuthorizedProviderIdsWithInterfaceIds());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -214,6 +255,21 @@ public class GatekeeperDriver {
 	//-------------------------------------------------------------------------------------------------
 	private String getRecipientCommonName(final Cloud cloud) {
 		return "gatekeeper." + Utilities.getCloudCommonName(cloud.getOperator(), cloud.getName()); 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getServiceRegistryQueryUri() {
+		logger.debug("getServiceRegistryQueryUri started...");
+		
+		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

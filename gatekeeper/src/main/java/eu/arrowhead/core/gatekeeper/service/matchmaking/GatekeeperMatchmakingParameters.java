@@ -24,5 +24,8 @@ public class GatekeeperMatchmakingParameters {
 	//-------------------------------------------------------------------------------------------------
 	public Cloud getCloud() { return cloud; }
 	public long getRandomSeed() { return randomSeed; }
-	
+
+	//-------------------------------------------------------------------------------------------------
+	public void setCloud(final Cloud cloud) { this.cloud = cloud; }
+	public void setRandomSeed(final long randomSeed) { this.randomSeed = randomSeed; }	
 }
