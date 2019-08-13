@@ -1,4 +1,4 @@
-package eu.arrowhead.core.gatekeeper.service;
+package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
 import static org.junit.Assert.assertEquals;
 
