@@ -2,8 +2,23 @@ package eu.arrowhead.core.choreographer.database.service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.*;
-import eu.arrowhead.common.database.repository.*;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerActionActionStepConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlanActionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionStep;
+import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.repository.ChoreographerActionActionStepConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionPlanActionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionStepRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionStepServiceDefinitionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerNextActionStepRepository;
+import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionPlanRepository;
+
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.choreographer.*;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -13,10 +28,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.data.domain.Sort.Direction;
 
 import java.util.*;
@@ -74,8 +87,7 @@ public class ChoreographerDBService {
             throw new InvalidParameterException("One or more of the Services given doesn't exist! Create ALL Services before usage.");
         }
 
-        ChoreographerActionStep step = new ChoreographerActionStep(stepName);
-        ChoreographerActionStep stepEntry = choreographerActionStepRepository.save(step);
+        ChoreographerActionStep stepEntry = choreographerActionStepRepository.save(new ChoreographerActionStep(stepName));
         for (ServiceDefinition serviceDefinition : usedServices) {
             ChoreographerActionStepServiceDefinitionConnection connection =
                     choreographerActionStepServiceDefinitionConnectionRepository.save(new ChoreographerActionStepServiceDefinitionConnection(stepEntry, serviceDefinition));
@@ -173,11 +185,11 @@ public class ChoreographerDBService {
     }
 
     @Transactional (rollbackFor = ArrowheadException.class)
-    public ChoreographerActionPlan createChoreographerActionPlan(final String actionPlanName, List<ChoreographerActionRequestDTO> actions) {
+    public ChoreographerActionPlan createChoreographerActionPlan(final String actionPlanName, final List<ChoreographerActionRequestDTO> actions) {
         logger.debug("createChoreographerActionPlan started...");
 
-        if(Utilities.isEmpty(actionPlanName) || actions.isEmpty()) {
-            throw new InvalidParameterException("actionPlanName or actions is null or blank!");
+        if(Utilities.isEmpty(actionPlanName)) {
+            throw new InvalidParameterException("ActionPlan name is null or blank!");
         }
 
         Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
@@ -190,14 +202,19 @@ public class ChoreographerDBService {
 
         ChoreographerActionPlan actionPlanEntry = choreographerActionPlanRepository.save(actionPlan);
 
-        for(ChoreographerActionRequestDTO action : actions) {
+        if(actions != null && !actions.isEmpty()) {
+            for(ChoreographerActionRequestDTO action : actions) {
                 ChoreographerActionPlanActionConnection connection = choreographerActionPlanActionConnectionRepository
                         .save(new ChoreographerActionPlanActionConnection(actionPlanEntry, createChoreographerAction(action.getActionName(), action.getActionSteps())));
                 actionPlanEntry.getActionPlanActionConnections().add(connection);
-        }
+            }
 
-        for (ChoreographerActionRequestDTO action : actions) {
-            addNextActionToChoreographerAction(action.getActionName(), action.getNextActionName());
+            for (ChoreographerActionRequestDTO action : actions) {
+                addNextActionToChoreographerAction(action.getActionName(), action.getNextActionName());
+            }
+
+        } else {
+            throw new InvalidParameterException("ActionPlan doesn't have any actions or the action field is blank.");
         }
 
         choreographerActionPlanActionConnectionRepository.flush();
