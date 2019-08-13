@@ -40,8 +40,7 @@ public class DefaultInterCloudCloudMatchmaker implements InterCloudCloudMatchmak
 				
 				partnerClouds.add(gSDPollResponseDTO.getProviderCloud());
 			}
-		}
-		
+		}		
 
 	    if (!preferredClouds.isEmpty()) {
 		    for (final CloudRequestDTO preferredCloud : preferredClouds) {
@@ -52,8 +51,7 @@ public class DefaultInterCloudCloudMatchmaker implements InterCloudCloudMatchmak
 		        }
 		      }
 		    }
-	    }
-	    
+	    }	    
 	    
 	    if ( onlyPreferred ) {
 	    	//Return Empty response
