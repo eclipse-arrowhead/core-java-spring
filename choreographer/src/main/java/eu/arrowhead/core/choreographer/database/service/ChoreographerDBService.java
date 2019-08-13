@@ -176,6 +176,10 @@ public class ChoreographerDBService {
     public ChoreographerActionPlan createChoreographerActionPlan(final String actionPlanName, List<ChoreographerActionRequestDTO> actions) {
         logger.debug("createChoreographerActionPlan started...");
 
+        if(Utilities.isEmpty(actionPlanName) || actions.isEmpty()) {
+            throw new InvalidParameterException("actionPlanName or actions is null or blank!");
+        }
+
         Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
 
         choreographerActionPlanOpt.ifPresent(choreographerActionPlan -> {
