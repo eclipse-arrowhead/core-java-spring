@@ -146,7 +146,7 @@ public class ChoreographerController {
             @RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
             @RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-        logger.debug("New AuthorizationIntraCloud get request received with page: {} and item_per page: {}.", page, size);
+        logger.debug("New ChoreographerActionPlan get request received with page: {} and item_per page: {}.", page, size);
 
         int validatedPage;
         int validatedSize;
