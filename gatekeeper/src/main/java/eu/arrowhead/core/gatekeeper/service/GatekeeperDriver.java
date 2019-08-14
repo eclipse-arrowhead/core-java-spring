@@ -134,6 +134,7 @@ public class GatekeeperDriver {
 				
 			} catch (final InterruptedException ex) {
 				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
+				gsdPollRequestExecutor.shutdownExecutionNow();
 			}
 		} 
 		

@@ -77,7 +77,7 @@ public class GatekeeperService {
 		
 		List<Cloud> cloudsToContact;
 		
-		if (gsdForm.getPreferredCloudIds() == null || gsdForm.getPreferredCloudIds().isEmpty()) {
+		if (gsdForm.getPreferredClouds() == null || gsdForm.getPreferredClouds().isEmpty()) {
 			// If no preferred clouds were given, then send GSD poll requests to the neighbor Clouds
 			
 			final List<Cloud> neighborClouds = gatekeeperDBService.getNeighborClouds();
@@ -91,7 +91,7 @@ public class GatekeeperService {
 		} else {
 			// If preferred clouds were given, then send GSD poll requests only to those Clouds
 			
-			final List<Cloud> preferredClouds = gatekeeperDBService.getCloudsByIds(gsdForm.getPreferredCloudIds());
+			final List<Cloud> preferredClouds = getCloudsByCloudRequestDTOs(gsdForm.getPreferredClouds());
 			
 			if (preferredClouds.isEmpty()) {
 				throw new InvalidParameterException("initGSDPoll failed: Given preferred clouds are not exists");
@@ -274,6 +274,18 @@ public class GatekeeperService {
 			
 			throw new InvalidParameterException(exceptionMsg);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<Cloud> getCloudsByCloudRequestDTOs(final List<CloudRequestDTO> cloudDTOs) {
+		logger.debug("getCloudsByCloudRequestDTOs started...");
+		
+		final List<Cloud> clouds = new ArrayList<>();
+		for (final CloudRequestDTO dto : cloudDTOs) {
+			final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(dto.getOperator(), dto.getName());
+			clouds.add(cloud);
+		}
+		return clouds;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
