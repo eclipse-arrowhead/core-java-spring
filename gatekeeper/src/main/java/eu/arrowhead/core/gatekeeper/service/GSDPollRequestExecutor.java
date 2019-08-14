@@ -30,19 +30,16 @@ public class GSDPollRequestExecutor {
 	
 	private static final int MAX_THREAD_POOL_SIZE = 20;
 
-	private BlockingQueue<GSDPollResponseDTO> queue;
-	private ThreadPoolExecutor threadPool;
-	private GatekeeperRelayClient relayClient;
-	private GSDPollRequestDTO gsdPollRequestDTO;
-	private Map<Cloud, Relay> gatekeeperRelayPerCloud;
+	private final BlockingQueue<GSDPollResponseDTO> queue;
+	private final ThreadPoolExecutor threadPool;
+	private final GatekeeperRelayClient relayClient;
+	private final GSDPollRequestDTO gsdPollRequestDTO;
+	private final Map<Cloud, Relay> gatekeeperRelayPerCloud;
 	
 	private final Logger logger = LogManager.getLogger(GSDPollRequestExecutor.class);
 	
 	//=================================================================================================
 	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public GSDPollRequestExecutor() {};
 	
 	//-------------------------------------------------------------------------------------------------	
 	public GSDPollRequestExecutor(final BlockingQueue<GSDPollResponseDTO> queue, final GatekeeperRelayClient relayClient, final GSDPollRequestDTO gsdPollRequestDTO, final Map<Cloud, Relay> gatekeeperRelayPerCloud) {

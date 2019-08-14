@@ -14,7 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -32,8 +31,7 @@ public class GSDPollRequestExecutorTest {
 	//=================================================================================================
 	// members
 	
-	@InjectMocks
-	private final GSDPollRequestExecutor testingObject = new GSDPollRequestExecutor();
+	private GSDPollRequestExecutor testingObject;
 
 	private GatekeeperRelayClient relayClient;
 	
@@ -47,12 +45,8 @@ public class GSDPollRequestExecutorTest {
 	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setUp() {		
-		ReflectionTestUtils.setField(testingObject, "queue", queue);
-		ReflectionTestUtils.setField(testingObject, "gsdPollRequestDTO",  new GSDPollRequestDTO());
-		ReflectionTestUtils.setField(testingObject, "gatekeeperRelayPerCloud",  createGatekeeperRelayPerCloudMap());
-		
 		relayClient = mock(GatekeeperRelayClient.class, "relayClient");
-		ReflectionTestUtils.setField(testingObject, "relayClient", relayClient);
+		testingObject = new GSDPollRequestExecutor(queue, relayClient, new GSDPollRequestDTO(), createGatekeeperRelayPerCloudMap());
 		threadPool = mock(ThreadPoolExecutor.class, "threadPool");
 		ReflectionTestUtils.setField(testingObject, "threadPool",  threadPool);
 	}

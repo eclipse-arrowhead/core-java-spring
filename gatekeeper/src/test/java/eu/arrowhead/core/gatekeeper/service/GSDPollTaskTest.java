@@ -35,7 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
@@ -63,12 +62,7 @@ public class GSDPollTaskTest {
 	@Before
 	public void setUp() {
 		relayClient = mock(GatekeeperRelayClient.class, "relayClient");
-		ReflectionTestUtils.setField(testingObject, "relayClient", relayClient);
-		ReflectionTestUtils.setField(testingObject, "queue", queue);
-		ReflectionTestUtils.setField(testingObject, "session",  getTestSession());
-		ReflectionTestUtils.setField(testingObject, "recipientCloudCN",  "test-cn");
-		ReflectionTestUtils.setField(testingObject, "recipientCloudPublicKey",  "test-key");
-		ReflectionTestUtils.setField(testingObject, "gsdPollRequestDTO",  new GSDPollRequestDTO());
+		testingObject = new GSDPollTask(relayClient, getTestSession(), "test-cn", "test-key", new GSDPollRequestDTO(), queue);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
