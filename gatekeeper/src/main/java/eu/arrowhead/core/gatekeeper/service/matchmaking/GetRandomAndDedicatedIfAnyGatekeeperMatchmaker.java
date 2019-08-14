@@ -32,7 +32,7 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmaker implements Gatekeepe
 	public Relay doMatchmaking(final GatekeeperMatchmakingParameters parameters) {
 		logger.debug("GetRandomAndDedicatedIfAnyGatekeeperMatchmaker.doMatchmaking started...");
 		
-		Assert.notNull(parameters.getCloud(), "GatekeeperMatchmakingParameters is null");
+		Assert.notNull(parameters, "GatekeeperMatchmakingParameters is null");
 		Assert.notNull(parameters.getCloud(), "Cloud is null");
 		Assert.isTrue(parameters.getCloud().getGatekeeperRelays() != null && !parameters.getCloud().getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList is null or empty.");
 		

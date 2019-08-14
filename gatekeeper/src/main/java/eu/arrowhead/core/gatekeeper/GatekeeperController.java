@@ -547,9 +547,9 @@ public class GatekeeperController {
 			throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (gsdForm.getPreferredCloudIds() != null && !gsdForm.getPreferredCloudIds().isEmpty()) {
-			for (final Long id : gsdForm.getPreferredCloudIds()) {
-				validateId(id, origin);
+		if (gsdForm.getPreferredClouds() != null && !gsdForm.getPreferredClouds().isEmpty()) {
+			for (final CloudRequestDTO cloudDTO : gsdForm.getPreferredClouds()) {
+				validateCloudRequestDTO(cloudDTO, origin);
 			}
 		}
 	}

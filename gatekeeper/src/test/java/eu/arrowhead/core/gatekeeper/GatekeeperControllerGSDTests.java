@@ -26,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
@@ -73,9 +74,12 @@ public class GatekeeperControllerGSDTests {
 		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
-		gsdQueryFormDTO.setPreferredCloudIds(List.of(1L, 2L, 3L, 4L));
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("test-operator");
+		cloudRequestDTO.setName("test-name");
+		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
 		
-		when(gatekeeperService.initGSDPoll(any())).thenReturn(new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 3));
+		when(gatekeeperService.initGSDPoll(any())).thenReturn(new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 0));
 		
 		final MvcResult response = this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
 				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
@@ -85,7 +89,7 @@ public class GatekeeperControllerGSDTests {
 				.andReturn();
 		
 		final GSDQueryResultDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), GSDQueryResultDTO.class);
-		assertEquals(3, responseBody.getUnsuccessfulRequests());
+		assertEquals(0, responseBody.getUnsuccessfulRequests());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -136,17 +140,16 @@ public class GatekeeperControllerGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitiateGlobalServiceDiscoveryWithNullIdInPreferreCloudList() throws Exception {
+	public void testInitiateGlobalServiceDiscoveryWithNullCloudInPreferreCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		final List<Long> preferredClouds = new ArrayList<>();
-		preferredClouds.add(1L);
+		final List<CloudRequestDTO> preferredClouds = new ArrayList<>();
 		preferredClouds.add(null);
-		preferredClouds.add(3L);
+		
 		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
-		gsdQueryFormDTO.setPreferredCloudIds(preferredClouds);
+		gsdQueryFormDTO.setPreferredClouds(preferredClouds);
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
 				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
@@ -157,14 +160,84 @@ public class GatekeeperControllerGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitiateGlobalServiceDiscoveryWithInvalidIdInPreferreCloudList() throws Exception {
+	public void testInitiateGlobalServiceDiscoveryWithNullOperatorInPreferreCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
 		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
-		gsdQueryFormDTO.setPreferredCloudIds(List.of(1L, 2L, -3L, 4L));
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator(null);
+		cloudRequestDTO.setName("test-name");
+		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
+		
+		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
+				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitiateGlobalServiceDiscoveryWithBlankOperatorInPreferreCloudList() throws Exception {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		
+		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
+		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("   ");
+		cloudRequestDTO.setName("test-name");
+		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
+		
+		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
+				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitiateGlobalServiceDiscoveryWithNullNameInPreferreCloudList() throws Exception {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		
+		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
+		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("test-operator");
+		cloudRequestDTO.setName(null);
+		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
+		
+		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
+				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitiateGlobalServiceDiscoveryWithBlankNameInPreferreCloudList() throws Exception {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		
+		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
+		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("test-operator");
+		cloudRequestDTO.setName("   ");
+		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
 				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))

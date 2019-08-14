@@ -99,21 +99,6 @@ public class GatekeeperServiceGSDTests {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testInitGSDPollWithNotExistingPreferredCloud() {
-		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
-		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
-		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
-		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
-		gsdQueryFormDTO.setPreferredCloudIds(List.of(134L));
-		
-		when(gatekeeperDBService.getCloudsByIds(any())).thenReturn(new ArrayList<>());
-		
-		gatekeeperService.initGSDPoll(gsdQueryFormDTO);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	// Tests of doGSDPoll
 	
 	@Test(expected = InvalidParameterException.class)
