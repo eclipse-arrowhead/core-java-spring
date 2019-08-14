@@ -50,7 +50,11 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		return List.of(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, CoreSystemService.AUTH_CONTROL_INTRA_SERVICE); // TODO: add all necessary services
+		return List.of(
+				CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, 
+				CoreSystemService.AUTH_CONTROL_INTRA_SERVICE,
+				CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
+				CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATIONS); // TODO: add all necessary services
 	}
 	
 	//-------------------------------------------------------------------------------------------------

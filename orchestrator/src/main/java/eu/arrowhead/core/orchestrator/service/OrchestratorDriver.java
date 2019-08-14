@@ -1,7 +1,6 @@
 package eu.arrowhead.core.orchestrator.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,13 +23,10 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
-import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
@@ -57,7 +53,9 @@ public class OrchestratorDriver {
 	
 	private static final String AUTH_TOKEN_GENERATION_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-
+	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATIONS.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	
 	private static final Logger logger = LogManager.getLogger(OrchestratorDriver.class);
 	
 	@Autowired
@@ -104,7 +102,7 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SystemResponseDTO queryServiceRegistryBySystemRequestDTO(SystemRequestDTO consumerSystemRequestDTO) {
+	public SystemResponseDTO queryServiceRegistryBySystemRequestDTO(final SystemRequestDTO consumerSystemRequestDTO) {
 		logger.debug("queryServiceRegistryBySystemRequestDTO started...");
 		Assert.notNull(consumerSystemRequestDTO, "ConsumerSystemRequestDTO is null.");
 		
@@ -159,21 +157,26 @@ public class OrchestratorDriver {
 		return providers;
 	}
 	
-	public ICNResultDTO doInterCloudNegotiations(final ICNRequestFormDTO icnRequest) {
+	public ICNResultDTO doInterCloudNegotiations(final ICNRequestFormDTO icnForm) {
 		logger.debug("doInterCloudNegotiations started...");
+		Assert.notNull(icnForm, "ICNResultDTO is null.");
 		
-		// TODO Implement additional method logic here
-		return null;
+		final UriComponents icnUri = getGatekeeperICNUri();
+		final ResponseEntity<ICNResultDTO> response = httpService.sendRequest(icnUri, HttpMethod.POST, ICNResultDTO.class, icnForm);
+		
+		return response.getBody();
 	}
 
 	
-	public static GSDQueryResultDTO doGlobalServiceDiscovery(final GSDQueryFormDTO gsdForm ) {
+	public GSDQueryResultDTO doGlobalServiceDiscovery(final GSDQueryFormDTO gsdForm ) {
 		logger.debug("doGlobalServiceDiscovery started...");
 		
 		Assert.notNull(gsdForm, "GSDPollRequestDTO is null.");
 		
-		// TODO Implement additional method logic here
-		return null;
+		final UriComponents gsdUri = getGatekeeperGSDUri();
+		final ResponseEntity<GSDQueryResultDTO> response = httpService.sendRequest(gsdUri, HttpMethod.POST, GSDQueryResultDTO.class, gsdForm);
+		
+		return response.getBody();
 	}
 	
 	//=================================================================================================
@@ -253,6 +256,35 @@ public class OrchestratorDriver {
 		throw new ArrowheadException("Orchestrator can't find authorization check URI.");
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatekeeperGSDUri() {
+		logger.debug("getGatekeeperGSDUri started...");
+		
+		if (arrowheadContext.containsKey(GATEKEEPER_INIT_GSD_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_INIT_GSD_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find gatekeeper init_gsd URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find gatekeeper init_gsd URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatekeeperICNUri() {
+		logger.debug("getGatekeeperICNUri started...");
+		
+		if (arrowheadContext.containsKey(GATEKEEPER_INIT_ICN_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_INIT_ICN_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find gatekeeper init_icn URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find gatekeeper init_icn URI.");
+	}
 	//-------------------------------------------------------------------------------------------------
 	private List<TokenGenHelper> convertOrchestrationResultListToTokenGenHelperList(final List<OrchestrationResultDTO> orList) {
 		logger.debug("convertOrchestrationResultListToTokenGenHelperList started...");

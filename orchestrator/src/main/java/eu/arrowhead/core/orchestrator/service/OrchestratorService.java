@@ -137,7 +137,7 @@ public class OrchestratorService {
 		  }
 		}
 		
-		final GSDQueryResultDTO result = OrchestratorDriver.doGlobalServiceDiscovery(
+		final GSDQueryResultDTO result = orchestratorDriver.doGlobalServiceDiscovery(
 				new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
 
 		final InterCloudCloudMatchmakingParameters iCCMparams = new InterCloudCloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
