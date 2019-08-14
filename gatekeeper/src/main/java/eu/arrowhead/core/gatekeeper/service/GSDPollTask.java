@@ -59,6 +59,7 @@ public class GSDPollTask implements Runnable{
 		
 		if (Thread.currentThread().isInterrupted()) {
 			logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
+			queue.add(new GSDPollResponseDTO());
 			return;
 		}
 		

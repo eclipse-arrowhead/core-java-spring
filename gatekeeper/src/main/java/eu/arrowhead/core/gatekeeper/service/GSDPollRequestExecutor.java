@@ -27,7 +27,7 @@ public class GSDPollRequestExecutor {
 	//=================================================================================================
 	// members
 	
-	final private static int MAX_THREAD_POOL_SIZE = 20;
+	private static final int MAX_THREAD_POOL_SIZE = 20;
 
 	private final BlockingQueue<GSDPollResponseDTO> queue;
 	private final ThreadPoolExecutor threadPool;
@@ -69,8 +69,17 @@ public class GSDPollRequestExecutor {
 			
 			} catch (final RejectedExecutionException ex) {
 				logger.error("GSDPollTask execution rejected at {}", ZonedDateTime.now());
+				
+				//adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
+				queue.add(new GSDPollResponseDTO());
 			}
 		}
+		threadPool.shutdown();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void shutdownExecutionNow() {
+		threadPool.isShutdown();
 	}
 	
 	//=================================================================================================
