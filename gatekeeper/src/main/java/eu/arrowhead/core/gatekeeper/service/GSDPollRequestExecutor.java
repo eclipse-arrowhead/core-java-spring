@@ -79,7 +79,7 @@ public class GSDPollRequestExecutor {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void shutdownExecutionNow() {
-		threadPool.isShutdown();
+		threadPool.shutdownNow();
 	}
 	
 	//=================================================================================================
