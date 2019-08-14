@@ -26,13 +26,17 @@ import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResponseDTO;
+import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.OrchestratorWarnings;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
@@ -132,10 +136,9 @@ public class OrchestratorService {
 		    preferredClouds.add(provider.getProviderCloud());
 		  }
 		}
-	    
+		
 		final GSDQueryResultDTO result = OrchestratorDriver.doGlobalServiceDiscovery(
-				new GSDPollRequestDTO(
-						request.getRequestedService(), request.getRequesterCloud(), gateKeeperIsPresent));
+				new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
 
 		final InterCloudCloudMatchmakingParameters iCCMparams = new InterCloudCloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
 		final CloudResponseDTO targetCloud = interCloudClouderMatchmaker.doMatchmaking(iCCMparams);
@@ -144,27 +147,47 @@ public class OrchestratorService {
         	// Return empty response
             return new OrchestrationResponseDTO();
  		}
+        
+		//TODO implement useGateway fill logic
+		final boolean useGateway = false;			
 		
-		final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(request, DTOConverter.convertCloudResponseDTOToCloudRequestDTO(targetCloud));
-        if (icnResponseDTO == null || icnResponseDTO.getResponse().isEmpty()) {
+		final List<SystemRequestDTO> preferredSystemsFromTargetCloud = new ArrayList<>();
+		request.getPreferredProviders();
+		for (PreferredProviderDataDTO preferredProviderDataDTO : request.getPreferredProviders()) {
+			if (DTOUtilities.equalsCloudInResponseAndRequest(targetCloud, preferredProviderDataDTO.getProviderCloud())) {
+				
+				preferredSystemsFromTargetCloud.add(preferredProviderDataDTO.getProviderSystem());
+			}
+		}
+
+		final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(
+				request.getRequestedService(), 
+				targetCloud.getId(), 
+				request.getRequesterSystem(), 
+				preferredSystemsFromTargetCloud, 
+				flags, 
+				useGateway);
+		
+		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations(icnRequest);
+        if (icnResultDTO == null || icnResultDTO.getResponse().isEmpty()) {
            
         	// Return empty response
            return new OrchestrationResponseDTO();
 		}
 		
-        for (OrchestrationResultDTO orchestrationResultDTO : icnResponseDTO.getResponse()) {
+        for (OrchestrationResultDTO orchestrationResultDTO : icnResultDTO.getResponse()) {
         	orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
 		}
 		
        if (flags.get(Flag.MATCHMAKING)) {
             
-        	final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResponseDTO, request.getPreferredProviders(), true);		            
+        	final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResultDTO, request.getPreferredProviders(), true);		            
 	           
             return interCloudProviderMatchmaker.doMatchmaking(iCPMparams);
 		}	
 
 
-       return new OrchestrationResponseDTO(icnResponseDTO.getResponse());
+       return new OrchestrationResponseDTO(icnResultDTO.getResponse());
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -221,13 +244,25 @@ public class OrchestratorService {
 					}		
 				}else {
 
-					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore));					
-					orchestrationFormRequestDTO.setPreferredProviders(List.of(preferredProviderDataDTO));
+					//TODO implement useGateway fill logic
+					final boolean useGateway = false;
 					
-		            final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(orchestrationFormRequestDTO, preferredProviderDataDTO.getProviderCloud());		            
-		            if (icnResponseDTO != null && !icnResponseDTO.getResponse().isEmpty()) {
+					final OrchestratorStoreResponseDTO foreignStoreEntry = orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore);
+					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(foreignStoreEntry);					
+					orchestrationFormRequestDTO.setPreferredProviders(List.of(preferredProviderDataDTO));					
+
+					final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(
+							orchestrationFormRequestDTO.getRequestedService(), 
+							foreignStoreEntry.getProviderCloud().getId(), 
+							orchestrationFormRequestDTO.getRequesterSystem(), 
+							List.of(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(foreignStoreEntry.getProviderSystem())), 
+							orchestrationFormRequestDTO.getOrchestrationFlags(), 
+							useGateway);
+					
+		            final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations(icnRequest);		            
+		            if (icnResultDTO != null && !icnResultDTO.getResponse().isEmpty()) {
 			            
-		            	final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResponseDTO, orchestrationFormRequestDTO.getPreferredProviders(), true);		            
+		            	final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResultDTO, orchestrationFormRequestDTO.getPreferredProviders(), true);		            
 				           
 			            return interCloudProviderMatchmaker.doMatchmaking(params);
 					}	

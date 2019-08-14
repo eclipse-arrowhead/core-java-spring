@@ -11,7 +11,7 @@ public class GSDQueryFormDTO implements Serializable {
 	private static final long serialVersionUID = -6651144276576501218L;
 	
 	private ServiceQueryFormDTO requestedService;
-	private List<Long> preferredCloudIds;
+	private List<CloudRequestDTO> preferredCloud;
 	
 	//=================================================================================================
 	// methods
@@ -19,16 +19,16 @@ public class GSDQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------	
 	public GSDQueryFormDTO() {}
 	
-	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<Long> preferredCloudIds) {
+	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<CloudRequestDTO> preferredCloud) {
 		this.requestedService = requestedService;
-		this.preferredCloudIds = preferredCloudIds;
+		this.preferredCloud = preferredCloud;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public ServiceQueryFormDTO getRequestedService() { return requestedService; }
-	public List<Long> getPreferredCloudIds() { return preferredCloudIds; }
+	public List<CloudRequestDTO> getPreferredCloud() { return preferredCloud; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setPreferredCloudIds(final List<Long> preferredCloudIds) { this.preferredCloudIds = preferredCloudIds; }
-}
+	public void setPreferredCloud(final List<CloudRequestDTO> preferredCloud) { this.preferredCloud = preferredCloud; }
+}	

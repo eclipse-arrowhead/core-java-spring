@@ -27,8 +27,11 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResponseDTO;
+import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
@@ -156,8 +159,7 @@ public class OrchestratorDriver {
 		return providers;
 	}
 	
-	public ICNResponseDTO doInterCloudNegotiations(final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
-			final CloudRequestDTO providerCloud) {
+	public ICNResultDTO doInterCloudNegotiations(final ICNRequestFormDTO icnRequest) {
 		logger.debug("doInterCloudNegotiations started...");
 		
 		// TODO Implement additional method logic here
@@ -165,10 +167,10 @@ public class OrchestratorDriver {
 	}
 
 	
-	public static GSDQueryResultDTO doGlobalServiceDiscovery(final GSDPollRequestDTO request) {
+	public static GSDQueryResultDTO doGlobalServiceDiscovery(final GSDQueryFormDTO gsdForm ) {
 		logger.debug("doGlobalServiceDiscovery started...");
 		
-		Assert.notNull(request, "GSDPollRequestDTO is null.");
+		Assert.notNull(gsdForm, "GSDPollRequestDTO is null.");
 		
 		// TODO Implement additional method logic here
 		return null;
