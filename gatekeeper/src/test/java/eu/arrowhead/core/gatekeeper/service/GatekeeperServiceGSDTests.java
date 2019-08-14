@@ -78,6 +78,7 @@ public class GatekeeperServiceGSDTests {
 		when(gatekeeperDBService.getNeighborClouds()).thenReturn(List.of(cloud));
 		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
 		when(gatekeeperDriver.sendGSDPollRequest(any(), any())).thenReturn(List.of(new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(cloud), "test-service", List.of("HTTP-SECURE-JSON"), 2, null)));
+		when(gatekeeperDBService.getCloudByOperatorAndName(any(), any())).thenReturn(cloud);
 		
 		final GSDQueryResultDTO result = gatekeeperService.initGSDPoll(gsdQueryFormDTO);
 		assertEquals("operator", result.getResults().get(0).getProviderCloud().getOperator());

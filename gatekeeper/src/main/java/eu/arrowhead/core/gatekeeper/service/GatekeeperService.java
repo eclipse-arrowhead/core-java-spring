@@ -109,8 +109,13 @@ public class GatekeeperService {
 		int emptyResponses = 0;
 		for (final GSDPollResponseDTO gsdResponse : gsdPollResponses) {
 			if (gsdResponse.getProviderCloud() == null) {
+				
 				emptyResponses++;
 			} else {
+				//Changing the cloud details to the local informations based on operator and name
+				final Cloud providerCloudWithLocalDetails = gatekeeperDBService.getCloudByOperatorAndName(gsdResponse.getProviderCloud().getOperator(), gsdResponse.getProviderCloud().getName());
+				gsdResponse.setProviderCloud(DTOConverter.convertCloudToCloudResponseDTO(providerCloudWithLocalDetails));
+				
 				validResponses.add(gsdResponse);		
 			}
 		}
