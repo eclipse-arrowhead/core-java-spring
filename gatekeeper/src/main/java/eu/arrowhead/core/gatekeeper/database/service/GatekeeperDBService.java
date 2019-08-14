@@ -158,6 +158,23 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	public Cloud getCloudByOperatorAndName(final String operator, final String name) {
+		logger.debug("getCloudByOperatorAndName started...");
+		
+		if (Utilities.isEmpty(operator) || Utilities.isEmpty(name)) {
+			throw new InvalidParameterException("operator or name is empty");
+		}
+		
+		final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(operator, name);
+		
+		if (cloudOpt.isEmpty()) {
+			throw new InvalidParameterException("Cloud with the following operator and name not exists: " + operator + ", " + name);
+		}
+		
+		return cloudOpt.get();
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public CloudWithRelaysListResponseDTO registerBulkCloudsWithRelaysResponse(final List<CloudRequestDTO> dtoList) {
 		logger.debug("registerBulkCloudsWithRelaysResponse started...");

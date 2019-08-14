@@ -15,6 +15,7 @@ import javax.jms.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
@@ -32,7 +33,7 @@ public class GSDPollRequestExecutor {
 	private final ThreadPoolExecutor threadPool;
 	private final GatekeeperRelayClient relayClient;
 	private final GSDPollRequestDTO gsdPollRequestDTO;
-	Map<Cloud, Relay> gatekeeperRelayPerCloud;
+	private final Map<Cloud, Relay> gatekeeperRelayPerCloud;
 	
 	private final Logger logger = LogManager.getLogger(GSDPollRequestExecutor.class);
 	
@@ -56,12 +57,12 @@ public class GSDPollRequestExecutor {
 		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
 			
-				final String addressPort = cloudRelay.getValue().getAddress() + ":" + cloudRelay.getValue().getPort();
-				final Map<String, Session> sessionsToRelays = createSessionsToRelays();
+				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());
+				final Map<String, Session> sessionsToClouds = createSessionsToClouds();
 				
 				threadPool.execute(new GSDPollTask(relayClient,
-												   sessionsToRelays.get(addressPort),
-												   cloudRelay.getKey().getName() + "." + cloudRelay.getKey().getOperator(), 
+												   sessionsToClouds.get(cloudCN),
+												   cloudCN,
 												   cloudRelay.getKey().getAuthenticationInfo(), 
 												   gsdPollRequestDTO, 
 												   queue));
@@ -76,7 +77,7 @@ public class GSDPollRequestExecutor {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<String, Session> createSessionsToRelays() {
+	private Map<String, Session> createSessionsToClouds() {
 		logger.debug("createSessionsToRelays started...");
 		
 		final Map<String, Session> sessionsForRelays = new HashMap<>();
@@ -84,12 +85,10 @@ public class GSDPollRequestExecutor {
 		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {
 			
 			try {
-				final String addressPort = cloudRelay.getValue().getAddress() + ":" + cloudRelay.getValue().getPort();
 				
-				if (!sessionsForRelays.containsKey(addressPort)) {
-					final Session session = relayClient.createConnection(cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
-					sessionsForRelays.put(addressPort, session);					
-				}				
+				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());		
+				final Session session = relayClient.createConnection(cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
+				sessionsForRelays.put(cloudCN, session);						
 				
 			} catch (final JMSException ex) {
 				logger.debug("Exception occured while creating connection for address: {} and port {}:", cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
@@ -97,5 +96,10 @@ public class GSDPollRequestExecutor {
 			}
 		}
 		return sessionsForRelays;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String getRecipientCommonName(final Cloud cloud) {
+		return "gatekeeper." + Utilities.getCloudCommonName(cloud.getOperator(), cloud.getName()); 
 	}
 }

@@ -29,6 +29,7 @@ import eu.arrowhead.common.dto.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
@@ -546,12 +547,45 @@ public class GatekeeperController {
 			throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if (gsdForm.getPreferredCloudIds() != null && !gsdForm.getPreferredCloudIds().isEmpty()) {
-			for (final Long id : gsdForm.getPreferredCloudIds()) {
-				if (id == null || id < 1) {
-					throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-				}
+		if (gsdForm.getPreferredClouds() != null && !gsdForm.getPreferredClouds().isEmpty()) {
+			for (final CloudRequestDTO cloudDTO : gsdForm.getPreferredClouds()) {
+				validateCloudRequestDTO(cloudDTO, origin);
 			}
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void validateGSDPollRequestDTO(final GSDPollRequestDTO gsdPollRequest, final String origin) {
+		logger.debug("validateGSDPollRequestDTO started...");
+		
+		if (gsdPollRequest == null) {
+			throw new BadPayloadException("GSDPollRequestDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (gsdPollRequest.getRequestedService() == null) {
+			throw new BadPayloadException("RequestedService is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(gsdPollRequest.getRequestedService().getServiceDefinitionRequirement())) {
+			throw new BadPayloadException("serviceDefinitionRequirement is empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (gsdPollRequest.getRequesterCloud() == null) {
+			throw new BadPayloadException("RequesterCloud is empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final boolean operatorIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getOperator());
+		final boolean nameIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getName());
+		final boolean authInfoIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getAuthenticationInfo());
+		
+		if (operatorIsEmpty || nameIsEmpty || authInfoIsEmpty) {
+			String exceptionMsg = "GSDPollRequestDTO.CloudRequestDTO is invalid due to the following reasons:";
+			exceptionMsg = operatorIsEmpty ? exceptionMsg + " operator is empty, " : exceptionMsg;
+			exceptionMsg = nameIsEmpty ? exceptionMsg + " name is empty, " : exceptionMsg;
+			exceptionMsg = authInfoIsEmpty ? exceptionMsg + " authInfo is empty, " : exceptionMsg;
+			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
+			
+			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 	

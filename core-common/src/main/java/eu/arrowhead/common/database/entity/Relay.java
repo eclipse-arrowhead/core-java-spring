@@ -73,7 +73,7 @@ public class Relay {
 	
 	@OneToMany(mappedBy = "relay", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Set<CloudGatekeeperRelay> cloudGateways = new HashSet<>();
+	private Set<CloudGatewayRelay> cloudGateways = new HashSet<>();
 
 	//=================================================================================================
 	// methods
@@ -113,7 +113,7 @@ public class Relay {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<CloudGatekeeperRelay> getCloudGatekeepers() { return cloudGatekeepers; }
-	public Set<CloudGatekeeperRelay> getCloudGateways() { return cloudGateways; }
+	public Set<CloudGatewayRelay> getCloudGateways() { return cloudGateways; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -125,7 +125,7 @@ public class Relay {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setCloudGatekeepers(final Set<CloudGatekeeperRelay> cloudGatekeepers) { this.cloudGatekeepers = cloudGatekeepers; }
-	public void setCloudGateways(final Set<CloudGatekeeperRelay> cloudGateways) { this.cloudGateways = cloudGateways; }
+	public void setCloudGateways(final Set<CloudGatewayRelay> cloudGateways) { this.cloudGateways = cloudGateways; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
