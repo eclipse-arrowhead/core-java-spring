@@ -225,7 +225,7 @@ public class GatekeeperDriver {
 		logger.debug("queryAuthorizationBasedOnOchestrationResponse started...");
 		
 		Assert.notNull(requesterCloud, "Requester cloud is null.");
-		Assert.notNull(orchestrationResponse, "Ochestration response is null.");
+		Assert.isTrue(orchestrationResponse != null && orchestrationResponse.getResponse() != null && !orchestrationResponse.getResponse().isEmpty(), "Ochestration response is null or empty.");
 		
 		final UriComponents authInterCheckUri = getAuthInterCheckUri();
 		final AuthorizationInterCloudCheckRequestDTO authRequest = createAuthorizationRequestFromOrchestrationResponse(requesterCloud, orchestrationResponse);
@@ -331,7 +331,7 @@ public class GatekeeperDriver {
 		logger.debug("filterOrchestrationResponseWithAuthData started...");
 		
 		final List<OrchestrationResultDTO> results = orchestrationResponse.getResponse();
-		if (authResult.getAuthorizedProviderIdsWithInterfaceIds().isEmpty()) {
+		if (authResult.getAuthorizedProviderIdsWithInterfaceIds() == null || authResult.getAuthorizedProviderIdsWithInterfaceIds().isEmpty()) {
 			// consumer has no access to any of the specified providers
 			results.clear();
 		} else {
