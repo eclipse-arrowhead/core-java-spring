@@ -329,7 +329,7 @@ public class GatekeeperService {
 		logger.debug("getPreferredRelays started...");
 
 		final Set<CloudGatewayRelay> gatewayRelays = targetCloud.getGatewayRelays();
-		final List<RelayRequestDTO> result = new ArrayList<RelayRequestDTO>(gatewayRelays.size());
+		final List<RelayRequestDTO> result = new ArrayList<>(gatewayRelays.size());
 		
 		for (final CloudGatewayRelay relayConn : gatewayRelays) {
 			final Relay relay = relayConn.getRelay();

@@ -26,7 +26,7 @@ public class GSDPollRequestExecutor {
 	//=================================================================================================
 	// members
 	
-	final private static int MAX_THREAD_POOL_SIZE = 20;
+	private static final int MAX_THREAD_POOL_SIZE = 20;
 
 	private final BlockingQueue<GSDPollResponseDTO> queue;
 	private final ThreadPoolExecutor threadPool;
