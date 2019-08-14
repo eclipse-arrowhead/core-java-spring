@@ -3,6 +3,7 @@ package eu.arrowhead.core.orchestrator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -22,6 +23,12 @@ import eu.arrowhead.core.orchestrator.matchmaking.RandomIntraCloudProviderMatchm
 
 @Component
 public class OrchestratorApplicationInitListener extends ApplicationInitListener {
+	
+	//=================================================================================================
+	// members
+	
+	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
+	private boolean gatekeeperIsPresent;
 	
 	//=================================================================================================
 	// methods
@@ -50,11 +57,19 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		
+		if (gatekeeperIsPresent) {
+			
+			return List.of(
+					CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, 
+					CoreSystemService.AUTH_CONTROL_INTRA_SERVICE,
+					CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
+					CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATIONS);
+		}
+		
 		return List.of(
 				CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, 
-				CoreSystemService.AUTH_CONTROL_INTRA_SERVICE,
-				CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
-				CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATIONS); // TODO: add all necessary services
+				CoreSystemService.AUTH_CONTROL_INTRA_SERVICE); // TODO: add all necessary services
 	}
 	
 	//-------------------------------------------------------------------------------------------------
