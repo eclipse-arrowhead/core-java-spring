@@ -467,10 +467,10 @@ public class GatekeeperController {
 		
 		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + INIT_INTER_CLOUD_NEGOTIATIONS_URI);
 		
-		// TODO
+		final ICNResultDTO result = gatekeeperService.initICN(icnForm);
 		
 		logger.debug("Inter cloud negotiation has been finished.");
-		return null;
+		return result;
 	}
 	
 	//=================================================================================================
