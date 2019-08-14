@@ -14,6 +14,7 @@ import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -29,16 +30,19 @@ public class GSDPollRequestExecutor {
 	
 	private static final int MAX_THREAD_POOL_SIZE = 20;
 
-	private final BlockingQueue<GSDPollResponseDTO> queue;
-	private final ThreadPoolExecutor threadPool;
-	private final GatekeeperRelayClient relayClient;
-	private final GSDPollRequestDTO gsdPollRequestDTO;
-	private final Map<Cloud, Relay> gatekeeperRelayPerCloud;
+	private BlockingQueue<GSDPollResponseDTO> queue;
+	private ThreadPoolExecutor threadPool;
+	private GatekeeperRelayClient relayClient;
+	private GSDPollRequestDTO gsdPollRequestDTO;
+	private Map<Cloud, Relay> gatekeeperRelayPerCloud;
 	
 	private final Logger logger = LogManager.getLogger(GSDPollRequestExecutor.class);
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	public GSDPollRequestExecutor() {};
 	
 	//-------------------------------------------------------------------------------------------------	
 	public GSDPollRequestExecutor(final BlockingQueue<GSDPollResponseDTO> queue, final GatekeeperRelayClient relayClient, final GSDPollRequestDTO gsdPollRequestDTO, final Map<Cloud, Relay> gatekeeperRelayPerCloud) {
@@ -53,6 +57,7 @@ public class GSDPollRequestExecutor {
 	//-------------------------------------------------------------------------------------------------
 	public void execute() {
 		logger.debug("GSDPollRequestExecutor.execute started...");
+		validateMembers();
 		
 		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
@@ -110,5 +115,14 @@ public class GSDPollRequestExecutor {
 	//-------------------------------------------------------------------------------------------------
 	private String getRecipientCommonName(final Cloud cloud) {
 		return "gatekeeper." + Utilities.getCloudCommonName(cloud.getOperator(), cloud.getName()); 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateMembers() {
+		Assert.notNull(this.queue, "queue is null");
+		Assert.notNull(this.threadPool, "threadPool is null");
+		Assert.notNull(this.relayClient, "relayClient is null");
+		Assert.notNull(this.gsdPollRequestDTO, "gsdPollRequestDTO is null");
+		Assert.notNull(this.gatekeeperRelayPerCloud, "gatekeeperRelayPerCloud is null");
 	}
 }
