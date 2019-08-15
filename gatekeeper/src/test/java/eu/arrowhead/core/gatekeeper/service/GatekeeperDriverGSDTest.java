@@ -19,7 +19,7 @@ public class GatekeeperDriverGSDTest {
 	//=================================================================================================
 	// members
 		
-	private GatekeeperDriver testingObject;
+	private GatekeeperDriver testingObject = new GatekeeperDriver();
 
 	//=================================================================================================
 	// methods
