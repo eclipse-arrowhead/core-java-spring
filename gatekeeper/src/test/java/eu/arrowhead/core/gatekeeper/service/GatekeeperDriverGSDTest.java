@@ -28,25 +28,25 @@ public class GatekeeperDriverGSDTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testSendGSDPollRequestWithNullCloudList() {
+	public void testSendGSDPollRequestWithNullCloudList() throws InterruptedException {
 		testingObject.sendGSDPollRequest(null, getGSDPollRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testSendGSDPollRequestWithEmptyCloudList() {
+	public void testSendGSDPollRequestWithEmptyCloudList() throws InterruptedException {
 		testingObject.sendGSDPollRequest(new ArrayList<>(), getGSDPollRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testSendGSDPollRequestWithNullGSDPollRequestDTO() {
+	public void testSendGSDPollRequestWithNullGSDPollRequestDTO() throws InterruptedException {
 		testingObject.sendGSDPollRequest(List.of(new Cloud()), null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testSendGSDPollRequestWithNullRequestedService() {
+	public void testSendGSDPollRequestWithNullRequestedService() throws InterruptedException {
 		final GSDPollRequestDTO gsdPollRequestDTO = getGSDPollRequestDTO();
 		gsdPollRequestDTO.setRequestedService(null);
 		
@@ -55,7 +55,7 @@ public class GatekeeperDriverGSDTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testSendGSDPollRequestWithNullRequestedServiceDefinition() {
+	public void testSendGSDPollRequestWithNullRequestedServiceDefinition() throws InterruptedException {
 		final GSDPollRequestDTO gsdPollRequestDTO = getGSDPollRequestDTO();
 		gsdPollRequestDTO.getRequestedService().setServiceDefinitionRequirement(null);
 		
@@ -64,16 +64,16 @@ public class GatekeeperDriverGSDTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testSendGSDPollRequestWithBlankRequestedServiceDefinition() {
+	public void testSendGSDPollRequestWithBlankRequestedServiceDefinition() throws InterruptedException {
 		final GSDPollRequestDTO gsdPollRequestDTO = getGSDPollRequestDTO();
 		gsdPollRequestDTO.getRequestedService().setServiceDefinitionRequirement("   ");
 		
-		testingObject.sendGSDPollRequest(List.of(new Cloud()), gsdPollRequestDTO);
+		testingObject.sendGSDPollRequest(List.of(new Cloud()), gsdPollRequestDTO); 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testSendGSDPollRequestWithNullRequesterCloud() {
+	public void testSendGSDPollRequestWithNullRequesterCloud() throws InterruptedException {
 		final GSDPollRequestDTO gsdPollRequestDTO = getGSDPollRequestDTO();
 		gsdPollRequestDTO.setRequesterCloud(null);;
 		

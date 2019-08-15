@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -41,7 +40,6 @@ public class GatekeeperServiceGSDTests {
 	//=================================================================================================
 	// members
 	
-	@InjectMocks
 	private GatekeeperService gatekeeperService;
 	
 	@Mock
@@ -60,7 +58,7 @@ public class GatekeeperServiceGSDTests {
 	// Tests of initGSDPoll
 	
 	@Test
-	public void testInitGSDPollOK() {
+	public void testInitGSDPollOK() throws InterruptedException {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
@@ -86,7 +84,7 @@ public class GatekeeperServiceGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testInitGSDPollWithoutPreferredAndNeighborClouds() {
+	public void testInitGSDPollWithoutPreferredAndNeighborClouds() throws InterruptedException {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		

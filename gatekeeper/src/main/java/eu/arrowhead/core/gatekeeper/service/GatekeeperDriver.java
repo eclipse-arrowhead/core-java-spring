@@ -110,7 +110,7 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<GSDPollResponseDTO> sendGSDPollRequest(final List<Cloud> cloudsToContact, final GSDPollRequestDTO gsdPollRequestDTO) {
+	public List<GSDPollResponseDTO> sendGSDPollRequest(final List<Cloud> cloudsToContact, final GSDPollRequestDTO gsdPollRequestDTO) throws InterruptedException {
 		logger.debug("sendGSDPollRequest started...");		
 		Assert.isTrue(cloudsToContact != null && !cloudsToContact.isEmpty(), "cloudsToContact list is null or empty");
 		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
@@ -135,6 +135,7 @@ public class GatekeeperDriver {
 			} catch (final InterruptedException ex) {
 				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
 				gsdPollRequestExecutor.shutdownExecutionNow();
+				throw ex;
 			}
 		} 
 		

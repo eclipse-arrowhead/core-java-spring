@@ -68,7 +68,7 @@ public class GatekeeperService {
 	//=================================================================================================
 	// methods
 
-	public GSDQueryResultDTO initGSDPoll(final GSDQueryFormDTO gsdForm) {
+	public GSDQueryResultDTO initGSDPoll(final GSDQueryFormDTO gsdForm) throws InterruptedException {
 		logger.debug("initGSDPoll started...");
 		
 		Assert.notNull(gsdForm, "GSDQueryFormDTO is null.");
