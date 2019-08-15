@@ -96,6 +96,34 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	public List<Cloud> getNeighborClouds() {
+		logger.debug("getNeighborClouds started...");
+		
+		try {
+			
+			return cloudRepository.findByNeighbor(true);
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public List<Cloud> getCloudsByIds(final Iterable<Long> ids) {
+		logger.debug("getCloudsByIds started...");
+		
+		try {
+			
+			return cloudRepository.findAllById(ids);
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public CloudWithRelaysResponseDTO getCloudByIdResponse(final long id) {
 		logger.debug("getCloudByIdResponse started...");
 		
@@ -103,7 +131,8 @@ public class GatekeeperDBService {
 		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public Cloud getCloudById(final long id) {
 		logger.debug("getCloudById started...");
 		
@@ -126,6 +155,23 @@ public class GatekeeperDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public Cloud getCloudByOperatorAndName(final String operator, final String name) {
+		logger.debug("getCloudByOperatorAndName started...");
+		
+		if (Utilities.isEmpty(operator) || Utilities.isEmpty(name)) {
+			throw new InvalidParameterException("operator or name is empty");
+		}
+		
+		final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(operator, name);
+		
+		if (cloudOpt.isEmpty()) {
+			throw new InvalidParameterException("Cloud with the following operator and name not exists: " + operator + ", " + name);
+		}
+		
+		return cloudOpt.get();
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -203,7 +249,8 @@ public class GatekeeperDBService {
 		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Cloud updateCloudByIdWithRelays(final long id, final CloudRequestDTO dto) {
 		logger.debug("updateCloudByIdWithRelays started...");
@@ -265,7 +312,8 @@ public class GatekeeperDBService {
 		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
 	}
 		
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Cloud assignRelaysToCloud(final long id, final List<Long> gatekeeperRelayIds, final List<Long> gatewayRelayIds) {
 		logger.debug("assignRelaysToCloud started...");
@@ -379,7 +427,8 @@ public class GatekeeperDBService {
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public Relay getRelayById(final long id) {
 		logger.debug("updateRelayById started...");
 		
@@ -410,7 +459,8 @@ public class GatekeeperDBService {
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public Relay getRelayByAddressAndPort(String address, final int port) {
 		logger.debug("getRelayByAddressAndPort started...");
 		
@@ -510,7 +560,8 @@ public class GatekeeperDBService {
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Relay updateRelayById(final long id, final String address, final int port, final boolean isSecure, final boolean isExclusive, RelayType type) {
 		logger.debug("updateRelayById started...");
@@ -591,7 +642,7 @@ public class GatekeeperDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateCloudParameters(final boolean withUniqueConstraintCheck, String operator, String name, Boolean secure, Boolean neighbor, final String authenticationInfo,
+	private void validateCloudParameters(final boolean withUniqueConstraintCheck, String operator, String name, Boolean secure, final Boolean neighbor, final String authenticationInfo,
 										 final List<Long> gatekeeperRelayIds, final List<Long> gatewayRealyIds) {
 		logger.debug("validateCloudParameters started...");
 		
@@ -610,7 +661,6 @@ public class GatekeeperDBService {
 		}
 		
 		secure = secure == null ? false : secure;
-		neighbor = neighbor == null ? false : neighbor;
 		
 		if (secure && Utilities.isEmpty(authenticationInfo)) {
 			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
@@ -649,7 +699,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, Boolean secure, Boolean exclusive, final String type) {
+	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, final Boolean secure, Boolean exclusive, final String type) {
 		logger.debug("validateRelayParameters started...");
 		
 		if (Utilities.isEmpty(address)) {
@@ -662,8 +712,6 @@ public class GatekeeperDBService {
 		} else if (isPortOutOfValidRange(port)) {
 			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX);
 		}
-		
-		secure = secure == null ? false : secure;
 		
 		exclusive = exclusive == null ? false : exclusive;
 		

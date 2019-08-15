@@ -17,6 +17,7 @@ import javax.jms.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,8 @@ import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementMessageListener;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 
 @Component
 public class GatekeeperApplicationInitListener extends ApplicationInitListener {
@@ -45,9 +48,18 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Value(CommonConstants.$NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD)
 	private int noWorkers;
 	
-	private Set<Session> openConnections = new HashSet<>();
-	private Set<Closeable> listenerResources = new HashSet<>();
+	private final Set<Session> openConnections = new HashSet<>();
+	private final Set<Closeable> listenerResources = new HashSet<>();
 	private GatekeeperRelayClient gatekeeperRelayClient;
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CommonConstants.GATEKEEPER_MATCHMAKER)
+	public GatekeeperMatchmakingAlgorithm getGatekeeperMatchmakingAlgorithm() {
+		return new GetRandomAndDedicatedIfAnyGatekeeperMatchmaker();
+	}
 
 	//=================================================================================================
 	// assistant methods

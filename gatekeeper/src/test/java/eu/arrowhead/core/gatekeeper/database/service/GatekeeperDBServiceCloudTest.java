@@ -76,6 +76,41 @@ public class GatekeeperDBServiceCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	// Tests of getCloudByOperatorAndName
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithNullOperator() {
+		gatekeeperDBService.getCloudByOperatorAndName(null, "test-name");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithBlankOperator() {
+		gatekeeperDBService.getCloudByOperatorAndName("   ", "test-name");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithNullName() {
+		gatekeeperDBService.getCloudByOperatorAndName("test-operator", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithBlankName() {
+		gatekeeperDBService.getCloudByOperatorAndName("test-operator", "   ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithNotExistingCloud() {
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.ofNullable(null)); 
+		
+		gatekeeperDBService.getCloudByOperatorAndName("test-operator", "test-name");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	// Tests of registerBulkCloudsWithRelays
 	
 	//-------------------------------------------------------------------------------------------------
