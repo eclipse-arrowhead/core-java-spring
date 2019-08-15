@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.database.entity.Cloud;
@@ -20,7 +19,6 @@ public class GatekeeperDriverGSDTest {
 	//=================================================================================================
 	// members
 		
-	@InjectMocks
 	private GatekeeperDriver testingObject;
 
 	//=================================================================================================

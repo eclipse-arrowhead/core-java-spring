@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -40,6 +41,7 @@ public class GatekeeperServiceGSDTests {
 	//=================================================================================================
 	// members
 	
+	@InjectMocks
 	private GatekeeperService gatekeeperService;
 	
 	@Mock
