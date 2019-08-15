@@ -24,6 +24,9 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.GSDQueryFormDTO;
+import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
@@ -270,6 +273,39 @@ public class OrchestratorDriverTest {
 		
 		orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoGlobalServiceDiscoveryOk() {
+		
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		
+		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
+		final GSDQueryFormDTO requestDTO = new GSDQueryFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryGSDUri);
+		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testDoGlobalServiceDiscoveryNullRequest() {
+		
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		
+		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
+		final GSDQueryFormDTO requestDTO = null;
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryGSDUri);
+		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
