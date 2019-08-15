@@ -27,6 +27,8 @@ import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
@@ -304,6 +306,38 @@ public class OrchestratorDriverTest {
 		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
 		
 		orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoInterCloudNegotiationsOk() {
+		
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		
+		final ICNResultDTO responseDTO = new ICNResultDTO();
+		final ICNRequestFormDTO requestDTO = new ICNRequestFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryICNUri);
+		when(httpService.sendRequest(eq(queryICNUri), eq(HttpMethod.POST), eq(ICNResultDTO.class), any(ICNRequestFormDTO.class))).thenReturn(new ResponseEntity<ICNResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doInterCloudNegotiations(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testDoInterCloudNegotiationsNullRequest() {
+		
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		
+		final ICNResultDTO responseDTO = new ICNResultDTO();
+		final ICNRequestFormDTO requestDTO = null;
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryICNUri);
+		when(httpService.sendRequest(eq(queryICNUri), eq(HttpMethod.POST), eq(ICNResultDTO.class), any(ICNRequestFormDTO.class))).thenReturn(new ResponseEntity<ICNResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doInterCloudNegotiations(requestDTO);
 	}
 	
 	//=================================================================================================
