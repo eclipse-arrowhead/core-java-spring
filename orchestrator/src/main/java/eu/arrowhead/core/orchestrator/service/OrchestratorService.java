@@ -167,7 +167,7 @@ public class OrchestratorService {
 		
        if (flags.get(Flag.MATCHMAKING)) {
             
-        	final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResultDTO, request.getPreferredProviders(), true);		            
+        	final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResultDTO, request.getPreferredProviders(), flags.get(Flag.ONLY_PREFERRED));		            
 	           
             return interCloudProviderMatchmaker.doMatchmaking(iCPMparams);
 		}	
