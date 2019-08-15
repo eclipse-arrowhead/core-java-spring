@@ -33,13 +33,11 @@ import javax.jms.TopicSubscriber;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 
 @RunWith(SpringRunner.class)
@@ -48,7 +46,6 @@ public class GSDPollTaskTest {
 	//=================================================================================================
 	// members
 	
-	@InjectMocks
 	private GSDPollTask testingObject;
 
 	private GatekeeperRelayClient relayClient;
@@ -94,7 +91,6 @@ public class GSDPollTaskTest {
 	@Test
 	public void testRunWithThrowingJMSExceptionByRelayClient1() throws JMSException, InterruptedException {
 		doThrow(JMSException.class).when(relayClient).publishGeneralAdvertisement(any(), any(), any());
-		when(relayClient.sendRequestAndReturnResponse(any(), any(), any())).thenReturn(new GatekeeperRelayResponse("session-id", "message-type", new GSDPollResponseDTO()));
 		
 		testingObject.run();
 		
