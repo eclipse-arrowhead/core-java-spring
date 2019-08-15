@@ -146,15 +146,19 @@ public class Cloud {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}	
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}	
+		if (getClass() != obj.getClass()) {		
 			return false;
+		}
 		final Cloud other = (Cloud) obj;
-		if (id != other.id)
+		if (id != other.id) {
 			return false;
+		}
 		return true;
 	}	
 }
