@@ -443,7 +443,7 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = INIT_GLOBAL_SERVICE_DISCOVERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public GSDQueryResultDTO initiateGlobalServiceDiscovery(@RequestBody final GSDQueryFormDTO gsdForm) {
+	@ResponseBody public GSDQueryResultDTO initiateGlobalServiceDiscovery(@RequestBody final GSDQueryFormDTO gsdForm) throws InterruptedException {
 		logger.debug("New initiateGlobalServiceDiscovery post request received");
 		
 		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
