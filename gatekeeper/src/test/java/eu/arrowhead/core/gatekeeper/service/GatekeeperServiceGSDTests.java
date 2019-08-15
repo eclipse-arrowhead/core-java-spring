@@ -60,7 +60,7 @@ public class GatekeeperServiceGSDTests {
 	// Tests of initGSDPoll
 	
 	@Test
-	public void testInitGSDPollOK() {
+	public void testInitGSDPollOK() throws InterruptedException {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
@@ -86,7 +86,7 @@ public class GatekeeperServiceGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testInitGSDPollWithoutPreferredAndNeighborClouds() {
+	public void testInitGSDPollWithoutPreferredAndNeighborClouds() throws InterruptedException {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
