@@ -131,11 +131,6 @@ public class OrchestratorService {
 		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
 		
 		final List<CloudRequestDTO> preferredClouds = getPreferredClouds(request.getPreferredProviders());
-		for (PreferredProviderDataDTO provider : request.getPreferredProviders()) {
-		  if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
-		    preferredClouds.add(provider.getProviderCloud());
-		  }
-		}
 		
 		final GSDQueryResultDTO result = orchestratorDriver.doGlobalServiceDiscovery(
 				new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
