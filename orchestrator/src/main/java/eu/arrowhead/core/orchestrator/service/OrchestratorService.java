@@ -130,7 +130,7 @@ public class OrchestratorService {
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
 		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
 		
-		final List<CloudRequestDTO> preferredClouds = new ArrayList<>();
+		final List<CloudRequestDTO> preferredClouds = getPreferredClouds(request.getPreferredProviders());
 		for (PreferredProviderDataDTO provider : request.getPreferredProviders()) {
 		  if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
 		    preferredClouds.add(provider.getProviderCloud());
@@ -777,5 +777,24 @@ public class OrchestratorService {
 		}
 		
 		return filterdResults;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<CloudRequestDTO> getPreferredClouds(final List<PreferredProviderDataDTO> preferredProviders) {
+		
+		final List<CloudRequestDTO> preferredClouds = new ArrayList<>();
+		
+		if ( preferredProviders == null || preferredProviders.isEmpty()) {
+			
+			return preferredClouds;
+		}
+		
+		for (PreferredProviderDataDTO provider : preferredProviders) {
+		  if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
+		    preferredClouds.add(provider.getProviderCloud());
+		  }
+		}
+		
+		return preferredClouds;
 	}
 }
