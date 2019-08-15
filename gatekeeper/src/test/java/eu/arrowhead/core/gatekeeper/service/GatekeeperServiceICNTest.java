@@ -23,6 +23,8 @@ import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
@@ -671,6 +673,75 @@ public class GatekeeperServiceICNTest {
 		
 		testingObject.doICN(request);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNOrchestratorEmptyResponse() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO());
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		Assert.assertTrue(response.getResponse().isEmpty());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNOrchestratorNoAccess() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(new OrchestrationResponseDTO());
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		Assert.assertTrue(response.getResponse().isEmpty());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoICNOrchestratorEverythingOK() {
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		Assert.assertEquals(1, response.getResponse().size());
+	}
+	
+	//TODO: additional test cases here (when using gateway)
 
 	//=================================================================================================
 	// assistant methods
