@@ -25,11 +25,9 @@ import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
-import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.OrchestrationFlags;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
@@ -81,10 +79,13 @@ public class OrchestratorService {
 	private InterCloudProviderMatchmakingAlgorithm interCloudProviderMatchmaker;
 	
 	@Resource(name = CommonConstants.INTER_CLOUD_CLOUD_MATCHMAKER)
-	private InterCloudCloudMatchmakingAlgorithm interCloudClouderMatchmaker;
+	private InterCloudCloudMatchmakingAlgorithm interCloudCloudMatchmaker;
 	
 	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
+	
+	//TODO implement useGateway fill logic
+	final boolean useGateway = false;
 	
 	//=================================================================================================
 	// methods
@@ -136,24 +137,14 @@ public class OrchestratorService {
 				new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
 
 		final InterCloudCloudMatchmakingParameters iCCMparams = new InterCloudCloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
-		final CloudResponseDTO targetCloud = interCloudClouderMatchmaker.doMatchmaking(iCCMparams);
+		final CloudResponseDTO targetCloud = interCloudCloudMatchmaker.doMatchmaking(iCCMparams);
         if (targetCloud == null || Utilities.isEmpty(targetCloud.getName())) {
             
         	// Return empty response
             return new OrchestrationResponseDTO();
- 		}
-        
-		//TODO implement useGateway fill logic
-		final boolean useGateway = false;			
+ 		}			
 		
-		final List<SystemRequestDTO> preferredSystemsFromTargetCloud = new ArrayList<>();
-		request.getPreferredProviders();
-		for (PreferredProviderDataDTO preferredProviderDataDTO : request.getPreferredProviders()) {
-			if (DTOUtilities.equalsCloudInResponseAndRequest(targetCloud, preferredProviderDataDTO.getProviderCloud())) {
-				
-				preferredSystemsFromTargetCloud.add(preferredProviderDataDTO.getProviderSystem());
-			}
-		}
+		final List<SystemRequestDTO> preferredSystemsFromTargetCloud = getPreferredSystems(request.getPreferredProviders(), targetCloud);
 
 		final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(
 				request.getRequestedService(), 
@@ -180,7 +171,6 @@ public class OrchestratorService {
 	           
             return interCloudProviderMatchmaker.doMatchmaking(iCPMparams);
 		}	
-
 
        return new OrchestrationResponseDTO(icnResultDTO.getResponse());
 	}
@@ -238,9 +228,6 @@ public class OrchestratorService {
 						}
 					}		
 				}else {
-
-					//TODO implement useGateway fill logic
-					final boolean useGateway = false;
 					
 					final OrchestratorStoreResponseDTO foreignStoreEntry = orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore);
 					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(foreignStoreEntry);					
@@ -777,13 +764,12 @@ public class OrchestratorService {
 	//-------------------------------------------------------------------------------------------------
 	private List<CloudRequestDTO> getPreferredClouds(final List<PreferredProviderDataDTO> preferredProviders) {
 		
-		final List<CloudRequestDTO> preferredClouds = new ArrayList<>();
-		
 		if ( preferredProviders == null || preferredProviders.isEmpty()) {
 			
-			return preferredClouds;
+			return List.of();
 		}
 		
+		final List<CloudRequestDTO> preferredClouds = new ArrayList<>(preferredProviders.size());
 		for (PreferredProviderDataDTO provider : preferredProviders) {
 		  if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
 		    preferredClouds.add(provider.getProviderCloud());
@@ -791,5 +777,25 @@ public class OrchestratorService {
 		}
 		
 		return preferredClouds;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<SystemRequestDTO> getPreferredSystems( final List<PreferredProviderDataDTO> preferredProviders, final CloudResponseDTO targetCloud) {
+		
+		if (preferredProviders == null || preferredProviders.isEmpty()) {
+			
+			return List.of();
+		}
+		
+		final List<SystemRequestDTO> preferredSystemsFromTargetCloud = new ArrayList<>(preferredProviders.size());
+		
+		for (PreferredProviderDataDTO preferredProviderDataDTO : preferredProviders) {
+			if (DTOUtilities.equalsCloudInResponseAndRequest(targetCloud, preferredProviderDataDTO.getProviderCloud())) {
+				
+				preferredSystemsFromTargetCloud.add(preferredProviderDataDTO.getProviderSystem());
+			}
+		}
+		
+		return preferredSystemsFromTargetCloud;
 	}
 }
