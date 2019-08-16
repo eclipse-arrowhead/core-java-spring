@@ -25,7 +25,7 @@ public enum CoreSystem {
 	//=================================================================================================
 	// members
 	
-	private int defaultPort;
+	private final int defaultPort;
 	private final List<CoreSystemService> services;
 	
 	//=================================================================================================
