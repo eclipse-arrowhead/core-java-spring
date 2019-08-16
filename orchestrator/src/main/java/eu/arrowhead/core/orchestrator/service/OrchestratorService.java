@@ -245,8 +245,13 @@ public class OrchestratorService {
 		            if (icnResultDTO != null && !icnResultDTO.getResponse().isEmpty()) {
 			            
 		            	final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResultDTO, orchestrationFormRequestDTO.getPreferredProviders(), true);		            
-				           
-			            return interCloudProviderMatchmaker.doMatchmaking(params);
+
+		            	final OrchestrationResponseDTO orchestrationResponseDTO = interCloudProviderMatchmaker.doMatchmaking(params);
+			            
+		            	if ( orchestrationResponseDTO != null && !orchestrationResponseDTO.getResponse().isEmpty() ) {
+							
+		            		return orchestrationResponseDTO;
+						}
 					}	
 				}				
 			}
