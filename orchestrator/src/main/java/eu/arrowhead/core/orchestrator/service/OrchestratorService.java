@@ -154,25 +154,23 @@ public class OrchestratorService {
 				flags, 
 				useGateway);
 		
-		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations(icnRequest);
-        if (icnResultDTO == null || icnResultDTO.getResponse().isEmpty()) {
+		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations( icnRequest );
+        if ( icnResultDTO == null || icnResultDTO.getResponse().isEmpty() ) {
            
         	// Return empty response
            return new OrchestrationResponseDTO();
 		}
 		
-        for (OrchestrationResultDTO orchestrationResultDTO : icnResultDTO.getResponse()) {
-        	orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
-		}
+        updateOrchestrationResultWarningWithForeignWarning( icnResultDTO.getResponse() );
 		
-       if (flags.get(Flag.MATCHMAKING)) {
+       if ( flags.get( Flag.MATCHMAKING ) ) {
             
         	final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResultDTO, request.getPreferredProviders(), flags.get(Flag.ONLY_PREFERRED));		            
 	           
             return interCloudProviderMatchmaker.doMatchmaking(iCPMparams);
 		}	
 
-       return new OrchestrationResponseDTO(icnResultDTO.getResponse());
+       return new OrchestrationResponseDTO( icnResultDTO.getResponse() );
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -242,13 +240,17 @@ public class OrchestratorService {
 							useGateway);
 					
 		            final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations(icnRequest);		            
-		            if (icnResultDTO != null && !icnResultDTO.getResponse().isEmpty()) {
+		            if (icnResultDTO != null && !icnResultDTO.getResponse().isEmpty()) {		            	
+
+		            	updateOrchestrationResultWarningWithForeignWarning(icnResultDTO.getResponse());		            	
 			            
 		            	final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResultDTO, orchestrationFormRequestDTO.getPreferredProviders(), true);		            
 
 		            	final OrchestrationResponseDTO orchestrationResponseDTO = interCloudProviderMatchmaker.doMatchmaking(params);
 			            
 		            	if ( orchestrationResponseDTO != null && !orchestrationResponseDTO.getResponse().isEmpty() ) {
+
+							orchestrationResponseDTO.getResponse().get(0).getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
 							
 		            		return orchestrationResponseDTO;
 						}
@@ -768,6 +770,7 @@ public class OrchestratorService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<CloudRequestDTO> getPreferredClouds(final List<PreferredProviderDataDTO> preferredProviders) {
+		logger.debug("getPreferredClouds started...");
 		
 		if ( preferredProviders == null || preferredProviders.isEmpty()) {
 			
@@ -786,6 +789,7 @@ public class OrchestratorService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<SystemRequestDTO> getPreferredSystems( final List<PreferredProviderDataDTO> preferredProviders, final CloudResponseDTO targetCloud) {
+		logger.debug("getPreferredSystems started...");
 		
 		if (preferredProviders == null || preferredProviders.isEmpty()) {
 			
@@ -803,4 +807,32 @@ public class OrchestratorService {
 		
 		return preferredSystemsFromTargetCloud;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void updateOrchestrationResultWarningWithForeignWarning(final List<OrchestrationResultDTO> response) {
+		logger.debug("updateOrchestrationResultWarningWithForeignWarning started...");
+		
+		for (OrchestrationResultDTO orchestrationResultDTO : response) {
+			if (orchestrationResultDTO.getWarnings() == null) {
+				orchestrationResultDTO.setWarnings(new ArrayList<>(1));
+			}
+			
+			if (!orchestrationResultDTO.getWarnings().isEmpty()) {
+				
+				if (!orchestrationResultDTO.getWarnings().contains(OrchestratorWarnings.FROM_OTHER_CLOUD)) {
+					
+					orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
+				}
+			}else {
+				
+				orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
+			}
+		}
+
+
+			
+			
+		
+	}
+	
 }
