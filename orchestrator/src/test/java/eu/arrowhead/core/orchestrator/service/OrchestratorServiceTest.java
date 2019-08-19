@@ -770,7 +770,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+		final OrchestrationResponseDTO result = testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -829,7 +829,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+		final OrchestrationResponseDTO result = testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -842,7 +842,7 @@ public class OrchestratorServiceTest {
 		final OrchestrationFormRequestDTO request = null;
 		final Long systemId = 1L;
 
-		testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+		testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 				
 	}
 	
@@ -864,7 +864,7 @@ public class OrchestratorServiceTest {
 																					build();
 		final Long systemId = -1L;
 
-		testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+		testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 				
 	}
 	
@@ -901,7 +901,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		
-		testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+		testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -960,7 +960,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+		final OrchestrationResponseDTO result = testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -1015,7 +1015,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.orchestrationFromStoreWithSystemIdParameter(request, systemId);
+		final OrchestrationResponseDTO result = testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
