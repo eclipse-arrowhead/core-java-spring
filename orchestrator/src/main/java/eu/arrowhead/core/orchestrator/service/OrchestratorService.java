@@ -115,75 +115,65 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO orchestrationFromStore(
-			final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
-		logger.debug("orchestrationFromStore started ...");
-		
-		return orchestrationFromStoreWithSystemIdParameter(orchestrationFormRequestDTO, null);
-	}
-
-	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO orchestrationFromStoreWithSystemIdParameter(
+	public OrchestrationResponseDTO topPriorityEntriesOrchestrationProcess(
 			final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
 			final Long systemId) {
-		logger.debug("orchestrationFromStoreWithSystemParameter started ...");		
+		logger.debug("topPriorityEntriesOrchestrationProcess started ...");		
 		
 		if (orchestrationFormRequestDTO == null) {
 			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		orchestrationFormRequestDTO.validateCrossParameterConstraints();
-		
-		final List<OrchestratorStore> entryList;
-		final List<ServiceRegistryResponseDTO> crossCheckedEntryList;
-		
-		if ( systemId != null) {
 			
-			if (systemId < 1) {
-				throw new InvalidParameterException("systemId " + LESS_THAN_ONE_ERROR_MESSAGE);
-			}
-			
-			final SystemRequestDTO consumerSystemRequestDTO = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(orchestratorDriver.queryServiceRegistryBySystemId(systemId));
-			
-			entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(systemId);
-			crossCheckedEntryList = crossCheckTopPriorityEntries(entryList, orchestrationFormRequestDTO, consumerSystemRequestDTO);
-			
-			return compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
-		
-		}else {
-			
-			entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());	
-			crossCheckedEntryList = crossCheckStoreEntries(entryList, orchestrationFormRequestDTO);
-			
-			for (final OrchestratorStore orchestratorStore : entryList) {
-				
-				if (!orchestratorStore.isForeign()) {
-					
-					final Long providerSystemId = orchestratorStore.getProviderSystemId();
-					for (ServiceRegistryResponseDTO serviceRegistryResponseDTO : crossCheckedEntryList) {
-						
-						if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-							
-							return compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), orchestrationFormRequestDTO);							
-						}
-					}		
-				}else {
-
-					final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore));					
-					orchestrationFormRequestDTO.setPreferredProviders(List.of(preferredProviderDataDTO));
-					
-		            final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(orchestrationFormRequestDTO, preferredProviderDataDTO.getProviderCloud());		            
-		            if (icnResponseDTO != null && !icnResponseDTO.getResponse().isEmpty()) {
-			            
-		            	final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResponseDTO, orchestrationFormRequestDTO.getPreferredProviders(), true);		            
-				           
-			            return interCloudProviderMatchmaker.doMatchmaking(params);
-					}	
-				}				
-			}
+		if ( systemId != null && systemId < 1) {
+			throw new InvalidParameterException("systemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		//return empty response if orchestration was not sucessful
-		return new OrchestrationResponseDTO();
+		final long validSystemId = systemId != null ? systemId : validateSystemRequestDTO(orchestrationFormRequestDTO.getRequesterSystem());
+		
+		final SystemRequestDTO consumerSystemRequestDTO = orchestrationFormRequestDTO.getRequesterSystem();
+		
+		final List<OrchestratorStore> entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(validSystemId);
+		if ( entryList == null || entryList.isEmpty() ) {
+			
+			return new OrchestrationResponseDTO(); // empty response
+		}
+		
+		final List<ServiceRegistryResponseDTO> crossCheckedEntryList = crossCheckTopPriorityEntries(entryList, orchestrationFormRequestDTO, consumerSystemRequestDTO);
+		if ( crossCheckedEntryList == null || crossCheckedEntryList.isEmpty() ) {
+			
+			return new OrchestrationResponseDTO(); // empty response
+		}
+		
+		return compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
+				
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public OrchestrationResponseDTO orchestrationFromStore( final OrchestrationFormRequestDTO orchestrationFormRequestDTO ) {
+		logger.debug("orchestrationFromStore started ...");		
+		
+		if ( orchestrationFormRequestDTO == null ) {
+			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if ( orchestrationFormRequestDTO.getRequestedService() == null ) {
+			
+			return topPriorityEntriesOrchestrationProcess(orchestrationFormRequestDTO, null);
+			
+		}
+	
+		orchestrationFormRequestDTO.validateCrossParameterConstraints();
+
+		final List<OrchestratorStore> entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());	        
+		if ( entryList == null || entryList.isEmpty() ) {
+			
+			return new OrchestrationResponseDTO(); // empty response
+		}
+		
+		final List<ServiceRegistryResponseDTO> crossCheckedEntryList = crossCheckStoreEntries(entryList, orchestrationFormRequestDTO);
+        
+		return getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, crossCheckedEntryList);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -274,8 +264,7 @@ public class OrchestratorService {
 		
 	    final OrchestrationFormRequestDTO orchestrationFormRequestDTO = new OrchestrationFormRequestDTO.Builder(systemRequestDTO).build();
 
-	    return orchestrationFromStoreWithSystemIdParameter(orchestrationFormRequestDTO, systemId);
-
+	    return topPriorityEntriesOrchestrationProcess(orchestrationFormRequestDTO, systemId);
 	}
 	
 	//=================================================================================================
@@ -467,18 +456,13 @@ public class OrchestratorService {
 			ServiceQueryFormDTO requestedService) {
 		logger.debug("getOrchestrationStoreEntries started...");
 		
-		final List<OrchestratorStore> retrievedList ;
 		
 		if (requesterSystem == null) {
 			throw new InvalidParameterException("ConsumerSystem " + NULL_PARAMETER_ERROR_MESSAGE);
-		}
-		final long consumerSystemId = validateSystemRequestDTO(requesterSystem);
-		
-		if ( requestedService == null) {
-			
-			retrievedList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(consumerSystemId);
-			
+
 		}else {
+			
+			final long consumerSystemId = validateSystemRequestDTO(requesterSystem);
 			
 			if (Utilities.isEmpty(requestedService.getServiceDefinitionRequirement() )) {
 				throw new InvalidParameterException("ServiceDefinitionRequirement " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
@@ -497,10 +481,8 @@ public class OrchestratorService {
 			}
 			final String serviceInterfaceName =  requestedService.getInterfaceRequirements().get(0).trim();
 			
-			retrievedList = orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(consumerSystemId, serviceDefinitionName, serviceInterfaceName);
+			return orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(consumerSystemId, serviceDefinitionName, serviceInterfaceName);
 		}
-		
-		return retrievedList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -689,5 +671,67 @@ public class OrchestratorService {
 		}
 		
 		return filterdResults;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void updateOrchestrationResultWarningWithForeignWarning(final List<OrchestrationResultDTO> response) {
+		logger.debug("updateOrchestrationResultWarningWithForeignWarning started...");
+		
+		for (OrchestrationResultDTO orchestrationResultDTO : response) {
+			if (orchestrationResultDTO.getWarnings() == null) {
+				orchestrationResultDTO.setWarnings(new ArrayList<>(1));
+			}
+			
+			if (!orchestrationResultDTO.getWarnings().isEmpty()) {
+				
+				if (!orchestrationResultDTO.getWarnings().contains(OrchestratorWarnings.FROM_OTHER_CLOUD)) {
+					
+					orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
+				}
+			}else {
+				
+				orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
+			}
+		}
+	
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private OrchestrationResponseDTO getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(
+			final OrchestrationFormRequestDTO orchestrationFormRequestDTO, 
+			final List<OrchestratorStore> entryList,
+			final List<ServiceRegistryResponseDTO> crossCheckedEntryList) {
+		logger.debug("getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList started...");
+		
+        for (final OrchestratorStore orchestratorStore : entryList) {
+        	
+        	if (!orchestratorStore.isForeign()) {
+        		
+        		final Long providerSystemId = orchestratorStore.getProviderSystemId();
+        		for (ServiceRegistryResponseDTO serviceRegistryResponseDTO : crossCheckedEntryList) {
+        			
+        			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
+        				
+        				return compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), orchestrationFormRequestDTO);							
+        			}
+        		}		
+        	}else {
+        
+        		final PreferredProviderDataDTO preferredProviderDataDTO = DTOConverter.convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(orchestratorStoreDBService.getForeignResponseDTO(orchestratorStore));					
+        		orchestrationFormRequestDTO.setPreferredProviders(List.of(preferredProviderDataDTO));
+        		
+        	        final ICNResponseDTO icnResponseDTO = orchestratorDriver.doInterCloudNegotiations(orchestrationFormRequestDTO, preferredProviderDataDTO.getProviderCloud());		            
+        	        if (icnResponseDTO != null && !icnResponseDTO.getResponse().isEmpty()) {
+                    
+        	        	updateOrchestrationResultWarningWithForeignWarning(icnResponseDTO.getResponse());
+        	        	
+        	        	final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResponseDTO, orchestrationFormRequestDTO.getPreferredProviders(), true);		            
+        	           
+                    return interCloudProviderMatchmaker.doMatchmaking(params);
+        		}	
+        	}				
+        }
+        
+        return new OrchestrationResponseDTO(); // empty response
 	}
 }
