@@ -124,7 +124,6 @@ public class OrchestratorServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testExternalServiceRequestServiceFormNull() {
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.MATCHMAKING, true).
 																					build();
 		
 		testingObject.externalServiceRequest(request);
@@ -320,7 +319,6 @@ public class OrchestratorServiceTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testDynamicOrchestrationServiceFormNull() {
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																					flag(Flag.MATCHMAKING, true).
 																					build();
 		
 		testingObject.dynamicOrchestration(request);
@@ -872,7 +870,7 @@ public class OrchestratorServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testtopPriorityEntriesOrchestrationProcessSystemNotInDB() {
+	public void testOrchestrationFromStoreSystemNotInDB() {
 		
 		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
 		  		build();
