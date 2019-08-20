@@ -61,10 +61,6 @@ public class OrchestrationFormRequestDTO implements Serializable {
             throw new BadPayloadException("Requested service can not be null when \"" + Flag.OVERRIDE_STORE + "\" is TRUE");
         }
         
-        if (requestedService == null && !orchestrationFlags.get(Flag.MATCHMAKING)) {
-            throw new BadPayloadException(Flag.MATCHMAKING + "\" must be TRUE" + "when requested service is null \"");
-        }
-        
         if (requestedService == null && orchestrationFlags.get(Flag.TRIGGER_INTER_CLOUD)) {
             throw new BadPayloadException("Requested service can not be null when \"" + Flag.TRIGGER_INTER_CLOUD + "\" is TRUE");
         }

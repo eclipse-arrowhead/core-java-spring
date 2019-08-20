@@ -526,6 +526,7 @@ public class OrchestratorService {
 	    
 	    final List<ServiceRegistryResponseDTO> filteredServiceQueryResultDTOList = new ArrayList<>();
 	    
+	    //currently only local entries are allowed to be returned by topPriorityOrchestration
 	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);
 	    
 	    if (onlyLocalEntryList.isEmpty()) {
@@ -811,6 +812,11 @@ public class OrchestratorService {
 		final SystemRequestDTO systemRequestDTO = request.getRequesterSystem();
 		final long cloudId = foreignStoreEntry.getProviderCloud().getId();
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = List.of(preferredProviderDataDTO);
+		
+		//orchestrationFromStore 
+		final OrchestrationFlags flags = request.getOrchestrationFlags();
+		flags.put(Flag.MATCHMAKING, true);
+		request.setOrchestrationFlags(flags);
 		
 		final OrchestrationResponseDTO orchestrationResponseDTO = callInterCloudNegotiation(
 				preferredSystemsFromTargetCloud, 
