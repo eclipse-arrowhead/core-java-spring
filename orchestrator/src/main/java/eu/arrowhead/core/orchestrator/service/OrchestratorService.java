@@ -527,6 +527,7 @@ public class OrchestratorService {
 	    final List<ServiceRegistryResponseDTO> filteredServiceQueryResultDTOList = new ArrayList<>();
 	    
 	    //currently only local entries are allowed to be returned by topPriorityOrchestration
+	    logger.info("currently only local entries are allowed to be returned by topPriorityOrchestration");
 	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);
 	    
 	    if (onlyLocalEntryList.isEmpty()) {
