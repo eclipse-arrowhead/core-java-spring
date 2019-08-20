@@ -474,7 +474,9 @@ public class OrchestratorService {
 		}
 		
 		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemRequestDTO(consumerSystemRequestDTO);
-		//TODO implement empty response handling
+		if ( systemResponseDTO == null ) {
+			throw new InvalidParameterException("SystemResponseDTO " + NULL_PARAMETER_ERROR_MESSAGE);
+		}
 		
 		return systemResponseDTO.getId();
 	}
