@@ -157,7 +157,7 @@ public class OrchestratorService {
 			throw new InvalidParameterException("systemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		final long validSystemId = systemId != null ? systemId : validateSystemRequestDTO(orchestrationFormRequestDTO.getRequesterSystem());
+		final long validSystemId = ( systemId != null ? systemId : validateSystemRequestDTO(orchestrationFormRequestDTO.getRequesterSystem()) );
 		
 		final SystemRequestDTO consumerSystemRequestDTO = orchestrationFormRequestDTO.getRequesterSystem();
 		
@@ -474,7 +474,7 @@ public class OrchestratorService {
 		}
 		
 		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemRequestDTO(consumerSystemRequestDTO);
-		
+		//TODO implement empty response handling
 		
 		return systemResponseDTO.getId();
 	}

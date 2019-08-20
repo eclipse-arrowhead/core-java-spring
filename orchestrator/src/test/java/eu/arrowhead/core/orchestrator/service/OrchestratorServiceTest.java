@@ -723,7 +723,7 @@ public class OrchestratorServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testOrchestrationFromStoreWithSystemIdParameterByIdOk() {
+	public void testOrchestrationFromStoreOk() {
 		
 		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
 		  		build();
@@ -829,7 +829,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
@@ -869,8 +869,8 @@ public class OrchestratorServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testOrchestrationFromStoreWithSystemIdParameterBySystemIdNotInDB() {
+	@Test(expected = InvalidParameterException.class)
+	public void testtopPriorityEntriesOrchestrationProcessSystemNotInDB() {
 		
 		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
 		  		build();
@@ -881,7 +881,7 @@ public class OrchestratorServiceTest {
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
 																				    requestedService(serviceForm).
 																					build();
-		final Long systemId = 1L;
+		final Long systemId = null;
 			
 		final System consumerSystem = new System();
 		consumerSystem.setSystemName("consumerSystemName");
@@ -899,7 +899,7 @@ public class OrchestratorServiceTest {
 		
 		final SystemResponseDTO systemResponseDTO = null;
 				
-		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
+		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
 		
 		testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
 	}
