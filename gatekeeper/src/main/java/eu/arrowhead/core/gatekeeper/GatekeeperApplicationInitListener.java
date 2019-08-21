@@ -46,6 +46,12 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
 	
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	private boolean gatewayIsPresent;
+		
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	private boolean gatewayIsMandatory;
+	
 	@Value(CommonConstants.$NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD)
 	private int noWorkers;
 	
@@ -79,6 +85,10 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 
 		if (!sslProperties.isSslEnabled()) {
 			throw new ServiceConfigurationError("Gatekeeper can only started in SECURE mode!");
+		}
+		
+		if (gatewayIsMandatory && !gatewayIsPresent) {
+			throw new ServiceConfigurationError("Gatekeeper can't start with 'gateway_is_present=false' property when the 'gateway_is_mandatory' property is true!");
 		}
 		
 		initializeGatekeeperRelayClient(event.getApplicationContext());
