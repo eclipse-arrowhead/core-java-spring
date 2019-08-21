@@ -93,8 +93,6 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		final UriComponents querySystemByDTOUri = createQuerySystemByDTOUri(scheme);
 		context.put(CommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI, querySystemByDTOUri);
 		
-		context.put(CommonConstants.REQUIRED_URI_LIST, getRequiredCoreSystemServiceUris());
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
