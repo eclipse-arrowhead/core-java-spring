@@ -215,7 +215,10 @@ public class OrchestratorDriverTest {
 	public void testQueryServiceRegistryBySystemIdOk() {
 		
 		final UriComponents queryBySystemIdUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
-		final UriComponents queryBySystemIdUriForTestRequest = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI.replace("{id}", "1"));
+		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(
+				Map.of( CommonConstants.COMMON_FIELD_NAME_ID,  String.valueOf( 1 ) ));
+		
 
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
@@ -224,7 +227,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemIdUri);
 		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
 		
-		orchestratorDriver.queryServiceRegistryBySystemId(1L);
+		orchestratorDriver.queryServiceRegistryBySystemId( 1L );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
