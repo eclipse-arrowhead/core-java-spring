@@ -2,6 +2,8 @@ package eu.arrowhead.core.gatekeeper.relay;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,7 +18,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.gatekeeper.relay.activemq.ActiveMQGatekeeperRelayClient;
 
 public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelayClient {
 	
@@ -25,7 +26,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	
 	private static final ConcurrentMap<String,Session> sessionCache = new ConcurrentHashMap<>();
 	
-	private final ActiveMQGatekeeperRelayClient client;
+	private final GatekeeperRelayClient client;
 	
 	//=================================================================================================
 	// methods
@@ -36,7 +37,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		Assert.notNull(publicKey, "Public key is null.");
 		Assert.notNull(privateKey, "Private key is null.");
 		
-		this.client = new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout);
+		this.client = RelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, false);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -108,5 +109,10 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	@Override
 	public GatekeeperRelayResponse sendRequestAndReturnResponse(final Session session, final GeneralAdvertisementResult advResponse, final Object requestPayload) throws JMSException {
 		return client.sendRequestAndReturnResponse(session, advResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<Session> getCachedSessions() {
+		return new ArrayList<>(sessionCache.values());
 	}
 }
