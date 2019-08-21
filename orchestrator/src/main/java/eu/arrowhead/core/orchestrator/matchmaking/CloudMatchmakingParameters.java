@@ -11,7 +11,7 @@ public class CloudMatchmakingParameters {
 	//=================================================================================================
 	// members
 	
-	protected GSDQueryResultDTO gSDResult;
+	protected GSDQueryResultDTO gsdResult;
 	protected List<CloudRequestDTO> preferredClouds;
 	protected boolean onlyPreferred;
 
@@ -25,17 +25,17 @@ public class CloudMatchmakingParameters {
 	public CloudMatchmakingParameters(final GSDQueryResultDTO gSDResult, final List<CloudRequestDTO> preferredClouds,
 			final boolean onlyPreferred) {
 		
-		this.gSDResult = gSDResult;
+		this.gsdResult = gSDResult;
 		this.preferredClouds = preferredClouds;
 		this.onlyPreferred = onlyPreferred;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public GSDQueryResultDTO getgSDResult() { return gSDResult;	}
+	public GSDQueryResultDTO getGsdResult() { return gsdResult;	}
 	public List<CloudRequestDTO> getPreferredClouds() {	return preferredClouds;	}
 	public boolean isOnlyPreferred() { return onlyPreferred; }
 
-	public void setgSDResult( final GSDQueryResultDTO gSDResult) {	this.gSDResult = gSDResult;	}
+	public void setGsdResult( final GSDQueryResultDTO gsdResult) {	this.gsdResult = gsdResult;	}
 	public void setPreferredClouds( final List<CloudRequestDTO> preferredClouds) {	this.preferredClouds = preferredClouds;	}
 	public void setOnlyPreferred( final boolean onlyPreferred) { this.onlyPreferred = onlyPreferred; }
 }

@@ -30,15 +30,15 @@ public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 		logger.debug("DefaultCloudMatchmaker.doMatchmaking started...");
 		Assert.notNull(params, "params is null");
 		
-		final GSDQueryResultDTO gSDResult = params.getgSDResult();
+		final GSDQueryResultDTO gsdResult = params.getGsdResult();
 		final List<CloudRequestDTO> preferredClouds = params.getPreferredClouds();
 		final boolean onlyPreferred = params.isOnlyPreferred();
 		
-		final List<CloudResponseDTO> partnerClouds = new ArrayList<>(gSDResult.getResults().size());
-		for (GSDPollResponseDTO gSDPollResponseDTO : gSDResult.getResults()) {
-			if ( gSDPollResponseDTO != null &&  gSDPollResponseDTO.getProviderCloud() != null) {
+		final List<CloudResponseDTO> partnerClouds = new ArrayList<>(gsdResult.getResults().size());
+		for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
+			if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
 				
-				partnerClouds.add(gSDPollResponseDTO.getProviderCloud());
+				partnerClouds.add(gsdPollResponseDTO.getProviderCloud());
 			}
 		}		
 
