@@ -91,7 +91,7 @@ public class OrchestratorDriver {
 	//-------------------------------------------------------------------------------------------------
 	public SystemResponseDTO queryServiceRegistryBySystemId(final long consumerSystemId) {
 		logger.debug("queryByIdServiceRegistry started...");
-		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less then 1.");
+		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less than 1.");
 		
 		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri().expand(
 				Map.of(CommonConstants.COMMON_FIELD_NAME_ID, consumerSystemId + ""));
