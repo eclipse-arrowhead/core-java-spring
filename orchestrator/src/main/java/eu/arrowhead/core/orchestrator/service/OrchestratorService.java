@@ -62,7 +62,7 @@ public class OrchestratorService {
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
-	private static final String MORE_THAN_ONE_ERROR_MESSAGE= " must not have more then one element.";
+	private static final String MORE_THAN_ONE_ERROR_MESSAGE= " must not have more than one element.";
 	
 	private static final int EXPIRING_TIME_IN_MINUTES = 2;
 	
