@@ -86,9 +86,6 @@ public class OrchestratorService {
 	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
 	
-	//TODO implement useGateway fill logic
-	final boolean useGateway = false;
-	
 	//=================================================================================================
 	// methods
 
@@ -874,8 +871,7 @@ public class OrchestratorService {
 				cloudId, 
 				systemRequestDTO, 
 				preferredSystemsFromTargetCloud, 
-				flags, 
-				useGateway);
+				flags);
 		
 		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations( icnRequest );
         if ( icnResultDTO == null || icnResultDTO.getResponse().isEmpty() ) {
