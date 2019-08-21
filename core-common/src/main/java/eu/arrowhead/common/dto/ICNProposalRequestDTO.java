@@ -11,7 +11,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = -8916389174595364064L;
+	private static final long serialVersionUID = -644090196952055587L;
 	
 	private ServiceQueryFormDTO requestedService;
 	private CloudRequestDTO requesterCloud;
@@ -19,7 +19,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	private List<SystemRequestDTO> preferredSystems = new ArrayList<>();
 	private List<RelayRequestDTO> preferredGatewayRelays = new ArrayList<>();
 	private OrchestrationFlags negotiationFlags = new OrchestrationFlags();
-	private boolean useGateway = false;
+	private boolean gatewayIsPresent = false;
 	
 	//=================================================================================================
 	// methods
@@ -30,7 +30,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public ICNProposalRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, final SystemRequestDTO requesterSystem, 
 							     final List<SystemRequestDTO> preferredSystems, final List<RelayRequestDTO> preferredGatewayRelays, final OrchestrationFlags negotiationFlags,
-							     final boolean useGateway) {
+							     final boolean gatewayIsPresent) {
 		Assert.notNull(requestedService, "Requested service is null.");
 		Assert.notNull(requesterCloud, "Requester cloud is null.");
 		Assert.notNull(requesterSystem, "Requester system is null.");
@@ -38,7 +38,7 @@ public class ICNProposalRequestDTO implements Serializable {
 		this.requestedService = requestedService;
 		this.requesterCloud = requesterCloud;
 		this.requesterSystem = requesterSystem;
-		this.useGateway = useGateway;
+		this.gatewayIsPresent = gatewayIsPresent;
 		
 		if (preferredSystems != null) {
 			this.preferredSystems = preferredSystems;
@@ -61,13 +61,13 @@ public class ICNProposalRequestDTO implements Serializable {
 	public List<SystemRequestDTO> getPreferredSystems() { return preferredSystems; }
 	public List<RelayRequestDTO> getPreferredGatewayRelays() { return preferredGatewayRelays; }
 	public OrchestrationFlags getNegotiationFlags() { return negotiationFlags; }
-	public boolean isUseGateway() { return useGateway; }
+	public boolean getGatewayIsPresent() { return gatewayIsPresent; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
 	public void setRequesterSystem(final SystemRequestDTO requesterSystem) { this.requesterSystem = requesterSystem; }
-	public void setUseGateway(final boolean useGateway) { this.useGateway = useGateway; }
+	public void setGatewayIsPresent(final boolean gatewayIsPresent) { this.gatewayIsPresent = gatewayIsPresent; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setPreferredSystems(final List<SystemRequestDTO> preferredSystems) {

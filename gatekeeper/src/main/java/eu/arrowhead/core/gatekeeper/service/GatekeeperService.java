@@ -39,6 +39,7 @@ import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
@@ -68,6 +69,7 @@ public class GatekeeperService {
 	//=================================================================================================
 	// methods
 
+	//-------------------------------------------------------------------------------------------------
 	public GSDQueryResultDTO initGSDPoll(final GSDQueryFormDTO gsdForm) throws InterruptedException {
 		logger.debug("initGSDPoll started...");
 		
@@ -182,11 +184,11 @@ public class GatekeeperService {
 		final CloudRequestDTO requesterCloud = getRequesterCloud();
 		final List<RelayRequestDTO> preferredRelays = getPreferredRelays(targetCloud);
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
-																		 form.getNegotiationFlags(), form.isUseGateway());
+																		 form.getNegotiationFlags(), gatewayIsPresent);
 		
 		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
 		
-		if (!form.isUseGateway()) {
+		if (!icnResponse.isUseGateway()) {
 			// just send back the response
 			return new ICNResultDTO(icnResponse.getResponse());
 		}
@@ -210,8 +212,7 @@ public class GatekeeperService {
 																							 .flag(Flag.EXTERNAL_SERVICE_REQUEST, true)
 																							 .preferredProviders(preferredProviders)
 																							 .build();
-		
-		if (request.isUseGateway()) {
+		if (gatewayIsMandatory) {
 			//TODO: we have to change the requesterSystem name  
 		}
 		
@@ -225,8 +226,8 @@ public class GatekeeperService {
 			return new ICNProposalResponseDTO();
 		}
 
-		if (!request.isUseGateway()) {
-			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
+		if (!gatewayIsMandatory) {
+			return new ICNProposalResponseDTO(orchestrationResponse.getResponse(), false);
 		} 
 		
 		//TODO: implement gateway-related code
@@ -322,6 +323,10 @@ public class GatekeeperService {
 		
 		if (request == null) {
 			throw new InvalidParameterException("ICN proposal request is null");
+		}
+		
+		if (gatewayIsMandatory && !request.getGatewayIsPresent()) {
+			throw new AuthException("Services are only available via gateway."); 
 		}
 		
 		if (request.getRequestedService() == null) {

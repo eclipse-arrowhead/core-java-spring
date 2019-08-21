@@ -28,6 +28,7 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementMessageListener;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
@@ -45,12 +46,19 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
 	
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	private boolean gatewayIsPresent;
+		
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	private boolean gatewayIsMandatory;
+	
 	@Value(CommonConstants.$NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD)
 	private int noWorkers;
 	
 	private final Set<Session> openConnections = new HashSet<>();
 	private final Set<Closeable> listenerResources = new HashSet<>();
 	private GatekeeperRelayClient gatekeeperRelayClient;
+	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
 	
 	//=================================================================================================
 	// methods
@@ -79,6 +87,10 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 			throw new ServiceConfigurationError("Gatekeeper can only started in SECURE mode!");
 		}
 		
+		if (gatewayIsMandatory && !gatewayIsPresent) {
+			throw new ServiceConfigurationError("Gatekeeper can't start with 'gateway_is_present=false' property when the 'gateway_is_mandatory' property is true!");
+		}
+		
 		initializeGatekeeperRelayClient(event.getApplicationContext());
 		subscribeListenersToGatekeepers(event.getApplicationContext());
 	}
@@ -94,8 +106,15 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 				logger.debug("Exception:", ex);
 			}
 		}
+		
+		// close connections using listening on advertisement topic
 		for (final Session session : openConnections) {
 			gatekeeperRelayClient.closeConnection(session);
+		}
+		
+		// close connections used by web services
+		for (final Session session : gatekeeperRelayClientWithCache.getCachedSessions()) {
+			gatekeeperRelayClientWithCache.closeConnection(session);
 		}
 	}
 	
@@ -107,7 +126,8 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		final PublicKey publicKey = (PublicKey) context.get(CommonConstants.SERVER_PUBLIC_KEY);
 		final PrivateKey privateKey = (PrivateKey) context.get(CommonConstants.SERVER_PRIVATE_KEY);
 
-		this.gatekeeperRelayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);
+		this.gatekeeperRelayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, false);
+		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

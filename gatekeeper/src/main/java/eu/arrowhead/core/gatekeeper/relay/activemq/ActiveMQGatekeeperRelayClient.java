@@ -116,7 +116,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 				session.close();
 			} catch (final JMSException ex) {
 				logger.debug(ex.getMessage());
-				logger.trace(ex);
+				logger.trace("Stacktrace:", ex);
 			}
 		}
 	}

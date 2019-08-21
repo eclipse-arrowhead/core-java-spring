@@ -8,7 +8,9 @@ public class ICNProposalResponseDTO extends OrchestrationResponseDTO implements 
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = 1797708492119758160L;
+	private static final long serialVersionUID = -1063781197847440272L;
+	
+	private boolean useGateway = false;
 	
 	//=================================================================================================
 	// methods
@@ -19,7 +21,15 @@ public class ICNProposalResponseDTO extends OrchestrationResponseDTO implements 
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public ICNProposalResponseDTO(final List<OrchestrationResultDTO> response) {
+	public ICNProposalResponseDTO(final List<OrchestrationResultDTO> response, final boolean useGateway) {
 		super(response);
+		
+		this.useGateway = useGateway;
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	public boolean isUseGateway() { return useGateway; }
+
+	//-------------------------------------------------------------------------------------------------
+	public void setUseGateway(final boolean useGateway) { this.useGateway = useGateway; }
 }
