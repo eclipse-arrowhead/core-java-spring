@@ -41,7 +41,7 @@ public class DefaultInterCloudProviderMatchmaker implements InterCloudProviderMa
 		}
 		
 		for (final OrchestrationResultDTO orchestratorResultDTO : icnResultDTO.getResponse()) {
-			for (PreferredProviderDataDTO provider :  preferredProviderDataDTOList) {
+			for (final PreferredProviderDataDTO provider :  preferredProviderDataDTOList) {
 				if (DTOUtilities.equalsSystemInResponseAndRequest(orchestratorResultDTO.getProvider(), provider.getProviderSystem())) {
 					logger.debug("The first preferred provider found in icnResponse is selected.");
 					return new OrchestrationResponseDTO(List.of(orchestratorResultDTO));
