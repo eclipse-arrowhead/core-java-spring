@@ -31,6 +31,11 @@ public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 		Assert.notNull(params, "params is null");
 		
 		final GSDQueryResultDTO gsdResult = params.getGsdResult();
+	    if ( gsdResult == null || gsdResult.getResults().isEmpty() ) {
+	    	//Return Empty response
+	    	return new CloudResponseDTO();
+	    }
+		
 		final List<CloudRequestDTO> preferredClouds = params.getPreferredClouds();
 		final boolean onlyPreferred = params.isOnlyPreferred();
 		
