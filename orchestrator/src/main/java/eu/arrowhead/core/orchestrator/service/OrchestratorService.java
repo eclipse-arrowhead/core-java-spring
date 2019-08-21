@@ -536,15 +536,15 @@ public class OrchestratorService {
 		}
 	    
 	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
-	    final Map<Long, List<String>> serviceDefinitionIdInterfaceIdsMap = mapInterfacesToServiceDefinitions( onlyLocalEntryList);
+	    final Map<Long, List<String>> serviceDefinitionIdInterfaceMap = mapInterfacesToServiceDefinitions( onlyLocalEntryList);
 	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapInterfacesToProviders( onlyLocalEntryList);
 	    
-	    for (Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
+	    for (final Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
 	    	
 	    	final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 	    	
 	    	serviceQueryFormDTO.setServiceDefinitionRequirement(entry.getValue());
-		    final List<String> interfaceRequirements = serviceDefinitionIdInterfaceIdsMap.get(entry.getKey());
+		    final List<String> interfaceRequirements = serviceDefinitionIdInterfaceMap.get(entry.getKey());
 		    serviceQueryFormDTO.setInterfaceRequirements(interfaceRequirements);
 		    
 		    final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
