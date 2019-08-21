@@ -3,9 +3,11 @@ package eu.arrowhead.core.orchestrator.service;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -537,7 +539,7 @@ public class OrchestratorService {
 	    
 	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
 	    final Map<Long, List<String>> serviceDefinitionIdInterfaceMap = mapInterfacesToServiceDefinitions( onlyLocalEntryList);
-	    final Map<Long, List<String>> providerIdInterfaceMap = mapInterfacesToProviders( onlyLocalEntryList);
+	    final Map<Long, Set<String>> providerIdInterfaceMap = mapInterfacesToProviders( onlyLocalEntryList);
 	    
 	    for (final Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
 	    	
@@ -625,28 +627,19 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, List<String>> mapInterfacesToProviders(List<OrchestratorStore> entryList) {
+	private Map<Long, Set<String>> mapInterfacesToProviders(List<OrchestratorStore> entryList) {
 		logger.debug("mapIntrefacesToProviders started...");
 		
-		final Map<Long, List<String>> providersInterfacesMap = new HashMap<>();
+		final Map<Long, Set<String>> providersInterfacesMap = new HashMap<>();
 		
 		for (OrchestratorStore orchestratorStore : entryList) {
 			Assert.isTrue(!orchestratorStore.isForeign(), "Provider is foreign");
 			
 			final Long providerSystemId = orchestratorStore.getProviderSystemId();
 			
+			providersInterfacesMap.putIfAbsent(providerSystemId, new HashSet<>());
+			providersInterfacesMap.get(providerSystemId).add(orchestratorStore.getServiceInterface().getInterfaceName());
 			
-			if (providersInterfacesMap.containsKey(providerSystemId)) {
-				
-				providersInterfacesMap.get(providerSystemId ).add(orchestratorStore.getServiceInterface().getInterfaceName());
-			
-			}else {
-				
-				final List<String> serviceInterfaceList = new ArrayList<>();
-				serviceInterfaceList.add(orchestratorStore.getServiceInterface().getInterfaceName());
-				providersInterfacesMap.put(providerSystemId, serviceInterfaceList);
-				
-			}
 		}
 		
 		return providersInterfacesMap;
@@ -673,7 +666,7 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------
 	private List<ServiceRegistryResponseDTO> filterQueryResultByInterfaces(
-			Map<Long, List<String>> providerIdInterfaceIdsMap, ServiceQueryResultDTO queryResult) {
+			Map<Long, Set<String>> providerIdInterfaceIdsMap, ServiceQueryResultDTO queryResult) {
 		logger.debug("filterQueryResultByInterfaces started...");
 		
 		final List<ServiceRegistryResponseDTO> filterdResults = new ArrayList<>();
@@ -688,10 +681,10 @@ public class OrchestratorService {
 			
 			if (providerIdInterfaceIdsMap.containsKey(providerIdFromResult)) {
 				
-				final List<String> interfaceListFromRequest = providerIdInterfaceIdsMap.get(providerIdFromResult);
+				final Set<String> interfaceSetFromRequest = providerIdInterfaceIdsMap.get(providerIdFromResult);
 				for (ServiceInterfaceResponseDTO interfaceResponseDTO : interfaceListFromResult) {
 
-					if (interfaceListFromRequest.contains(interfaceResponseDTO.getInterfaceName())) {
+					if (interfaceSetFromRequest.contains(interfaceResponseDTO.getInterfaceName())) {
 						filteredInterfaceList.add(interfaceResponseDTO);
 					}
 				} 
