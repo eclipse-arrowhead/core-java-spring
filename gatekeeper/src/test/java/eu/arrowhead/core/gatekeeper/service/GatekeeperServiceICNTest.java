@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
@@ -30,6 +32,7 @@ import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
@@ -53,6 +56,13 @@ public class GatekeeperServiceICNTest {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setUp() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsPresent", false);
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", false);
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -239,7 +249,6 @@ public class GatekeeperServiceICNTest {
 		final SystemRequestDTO system = getTestSystemRequestDTO();
 		system.setPort(12345);
 		form.setRequesterSystem(system);
-		form.setUseGateway(false);
 		
 		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
 		targetCloud.setGatewayRelays(Set.of());
@@ -249,7 +258,7 @@ public class GatekeeperServiceICNTest {
 		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO(List.of(resultDTO)));
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO(List.of(resultDTO), false));
 		
 		final ICNResultDTO icnResult = testingObject.initICN(form);
 		Assert.assertEquals(1, icnResult.getResponse().size());
@@ -267,6 +276,13 @@ public class GatekeeperServiceICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testDoICNRequestedServiceNull() {
+		testingObject.doICN(new ICNProposalRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testDoICNRequestedCloudWantsToUseGatewayButRequesterCloudDoesNotSupportedGateways() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
 		testingObject.doICN(new ICNProposalRequestDTO());
 	}
 	

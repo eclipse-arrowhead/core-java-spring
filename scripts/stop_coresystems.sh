@@ -8,6 +8,7 @@ pkill -f authorization
 #pkill -f gateway
 sleep 5s
 pkill -f serviceregistry
+sleep 2s
 
 if pgrep -f serviceregistry
 then
