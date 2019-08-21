@@ -13,7 +13,7 @@ import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 
-public class DefaultInterCloudCloudMatchmaker implements InterCloudCloudMatchmakingAlgorithm {
+public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 	
 	//=================================================================================================
 	// members
@@ -26,8 +26,8 @@ public class DefaultInterCloudCloudMatchmaker implements InterCloudCloudMatchmak
 	//-------------------------------------------------------------------------------------------------	
 
 	@Override
-	public CloudResponseDTO doMatchmaking(InterCloudCloudMatchmakingParameters params) {
-		logger.debug("DefaultInterCloudCloudMatchmaker.doMatchmaking started...");
+	public CloudResponseDTO doMatchmaking(CloudMatchmakingParameters params) {
+		logger.debug("DefaultCloudMatchmaker.doMatchmaking started...");
 		Assert.notNull(params, "params is null");
 		
 		final GSDQueryResultDTO gSDResult = params.getgSDResult();

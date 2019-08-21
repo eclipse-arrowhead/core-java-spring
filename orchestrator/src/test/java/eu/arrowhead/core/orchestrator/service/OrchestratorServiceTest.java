@@ -47,8 +47,8 @@ import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
-import eu.arrowhead.core.orchestrator.matchmaking.InterCloudCloudMatchmakingAlgorithm;
-import eu.arrowhead.core.orchestrator.matchmaking.InterCloudCloudMatchmakingParameters;
+import eu.arrowhead.core.orchestrator.matchmaking.CloudMatchmakingAlgorithm;
+import eu.arrowhead.core.orchestrator.matchmaking.CloudMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
@@ -76,7 +76,7 @@ public class OrchestratorServiceTest {
 	private InterCloudProviderMatchmakingAlgorithm interCloudProviderMatchmaker;
 	
 	@Mock
-	private InterCloudCloudMatchmakingAlgorithm interCloudCloudMatchmaker;
+	private CloudMatchmakingAlgorithm interCloudCloudMatchmaker;
 	
 	//=================================================================================================
 	// methods
@@ -1098,7 +1098,7 @@ public class OrchestratorServiceTest {
 		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
 		    
 		when(orchestratorDriver.doGlobalServiceDiscovery(any(GSDQueryFormDTO.class))).thenReturn(gsdResult);		
-		when(interCloudCloudMatchmaker.doMatchmaking(any(InterCloudCloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
+		when(interCloudCloudMatchmaker.doMatchmaking(any(CloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
 		when(orchestratorDriver.doInterCloudNegotiations(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1191,7 +1191,7 @@ public class OrchestratorServiceTest {
 		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
 		    
 		when(orchestratorDriver.doGlobalServiceDiscovery(any(GSDQueryFormDTO.class))).thenReturn(gsdResult);		
-		when(interCloudCloudMatchmaker.doMatchmaking(any(InterCloudCloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
+		when(interCloudCloudMatchmaker.doMatchmaking(any(CloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
 		when(orchestratorDriver.doInterCloudNegotiations(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	

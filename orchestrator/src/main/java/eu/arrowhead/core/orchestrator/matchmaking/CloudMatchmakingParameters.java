@@ -5,7 +5,7 @@ import java.util.List;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 
-public class InterCloudCloudMatchmakingParameters {
+public class CloudMatchmakingParameters {
 
 	
 	//=================================================================================================
@@ -22,7 +22,7 @@ public class InterCloudCloudMatchmakingParameters {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public InterCloudCloudMatchmakingParameters(final GSDQueryResultDTO gSDResult, final List<CloudRequestDTO> preferredClouds,
+	public CloudMatchmakingParameters(final GSDQueryResultDTO gSDResult, final List<CloudRequestDTO> preferredClouds,
 			final boolean onlyPreferred) {
 		
 		this.gSDResult = gSDResult;

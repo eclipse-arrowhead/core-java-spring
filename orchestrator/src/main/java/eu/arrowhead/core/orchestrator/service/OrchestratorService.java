@@ -45,8 +45,8 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
-import eu.arrowhead.core.orchestrator.matchmaking.InterCloudCloudMatchmakingAlgorithm;
-import eu.arrowhead.core.orchestrator.matchmaking.InterCloudCloudMatchmakingParameters;
+import eu.arrowhead.core.orchestrator.matchmaking.CloudMatchmakingAlgorithm;
+import eu.arrowhead.core.orchestrator.matchmaking.CloudMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
@@ -78,8 +78,8 @@ public class OrchestratorService {
 	@Resource(name = CommonConstants.INTER_CLOUD_PROVIDER_MATCHMAKER)
 	private InterCloudProviderMatchmakingAlgorithm interCloudProviderMatchmaker;
 	
-	@Resource(name = CommonConstants.INTER_CLOUD_CLOUD_MATCHMAKER)
-	private InterCloudCloudMatchmakingAlgorithm interCloudCloudMatchmaker;
+	@Resource(name = CommonConstants.CLOUD_MATCHMAKER)
+	private CloudMatchmakingAlgorithm cloudMatchmaker;
 	
 	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
@@ -839,9 +839,9 @@ public class OrchestratorService {
 		final GSDQueryResultDTO result = orchestratorDriver.doGlobalServiceDiscovery(
 				new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
 
-		final InterCloudCloudMatchmakingParameters iCCMparams = new InterCloudCloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
+		final CloudMatchmakingParameters iCCMparams = new CloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
 		
-		return interCloudCloudMatchmaker.doMatchmaking(iCCMparams);
+		return cloudMatchmaker.doMatchmaking(iCCMparams);
 	}
 	
 	
