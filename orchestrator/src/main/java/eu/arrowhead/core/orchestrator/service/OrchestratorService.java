@@ -669,7 +669,7 @@ public class OrchestratorService {
 			Map<Long, Set<String>> providerIdInterfaceIdsMap, ServiceQueryResultDTO queryResult) {
 		logger.debug("filterQueryResultByInterfaces started...");
 		
-		final List<ServiceRegistryResponseDTO> filterdResults = new ArrayList<>();
+		final List<ServiceRegistryResponseDTO> filteredResults = new ArrayList<>();
 		
 		final List<ServiceRegistryResponseDTO> result = queryResult.getServiceQueryData();
 		
@@ -693,12 +693,12 @@ public class OrchestratorService {
 			if (!filteredInterfaceList.isEmpty()) {
 				
 				serviceRegistryResponseDTO.setInterfaces(filteredInterfaceList);
-				filterdResults.add(serviceRegistryResponseDTO);
+				filteredResults.add(serviceRegistryResponseDTO);
 			}
 			
 		}
 		
-		return filterdResults;
+		return filteredResults;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
