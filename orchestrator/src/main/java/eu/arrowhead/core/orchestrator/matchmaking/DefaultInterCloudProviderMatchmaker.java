@@ -28,12 +28,17 @@ public class DefaultInterCloudProviderMatchmaker implements InterCloudProviderMa
 	public OrchestrationResponseDTO doMatchmaking(InterCloudProviderMatchmakingParameters params) {
 		logger.debug("DefaultInterCloudProviderMatchmaker.doMatchmaking started...");
 		
+		Assert.notNull(params, "params is null");
+		
 		final ICNResultDTO icnResultDTO = params.getIcnResultDTO();
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = params.getPreferredGlobalProviders();
 		final boolean storeOrchestration = params.isStoreOrchestration();
 		
-		Assert.isTrue(icnResultDTO != null && !icnResultDTO.getResponse().isEmpty(), "icnResponseDTO is null or empty.");
-		Assert.notNull(params, "params is null");
+		if (icnResultDTO == null || icnResultDTO.getResponse().isEmpty()) {
+			
+			//returning empty response
+			return new OrchestrationResponseDTO();
+		}
 		
 		for (final OrchestrationResultDTO orchestratorResultDTO : icnResultDTO.getResponse()) {
 			for (PreferredProviderDataDTO provider :  preferredProviderDataDTOList) {
