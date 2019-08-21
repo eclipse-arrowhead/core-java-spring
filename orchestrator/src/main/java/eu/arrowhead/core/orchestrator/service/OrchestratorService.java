@@ -537,7 +537,7 @@ public class OrchestratorService {
 	    
 	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
 	    final Map<Long, List<String>> serviceDefinitionIdInterfaceMap = mapInterfacesToServiceDefinitions( onlyLocalEntryList);
-	    final Map<Long, List<String>> providerIdInterfaceIdsMap = mapInterfacesToProviders( onlyLocalEntryList);
+	    final Map<Long, List<String>> providerIdInterfaceMap = mapInterfacesToProviders( onlyLocalEntryList);
 	    
 	    for (final Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
 	    	
@@ -548,7 +548,7 @@ public class OrchestratorService {
 		    serviceQueryFormDTO.setInterfaceRequirements(interfaceRequirements);
 		    
 		    final ServiceQueryResultDTO queryResult = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO, flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS));
-		    final List<ServiceRegistryResponseDTO> filteredQueryResultByInterfaces = filterQueryResultByInterfaces(providerIdInterfaceIdsMap, queryResult);	
+		    final List<ServiceRegistryResponseDTO> filteredQueryResultByInterfaces = filterQueryResultByInterfaces(providerIdInterfaceMap, queryResult);	
 		    final List<ServiceRegistryResponseDTO> filteredQueryResultByAuthorization = orchestratorDriver.queryAuthorization(consumerSystem, filteredQueryResultByInterfaces);	
 		    
 		    filteredServiceQueryResultDTOList.addAll(filteredQueryResultByAuthorization);
@@ -600,6 +600,9 @@ public class OrchestratorService {
 		for (OrchestratorStore orchestratorStore : entryList) {
 			final Long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
 			final String interfaceName = orchestratorStore.getServiceInterface().getInterfaceName();
+			
+			serviceDefinitionsInterfacesMap.putIfAbsent(serviceDefinitionId, new ArrayList<>());
+			
 			
 			if (serviceDefinitionsInterfacesMap.containsKey(serviceDefinitionId)) {
 				
