@@ -59,9 +59,6 @@ public class CloudRequestDTO implements Serializable {
 		}
 		final CloudRequestDTO other = (CloudRequestDTO) obj;
 		return Objects.equals(name, other.name) && 
-				Objects.equals(operator, other.operator) && 
-				(authenticationInfo == null ? other.authenticationInfo == null : Objects.equals(authenticationInfo, other.authenticationInfo)) &&
-				(neighbor == null ? other.neighbor == null : Objects.equals(neighbor, other.neighbor)) &&
-				(secure == null ? other.secure == null : Objects.equals(secure, other.secure));
+				Objects.equals(operator, other.operator);
 	}
 }
