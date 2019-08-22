@@ -37,8 +37,8 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
@@ -110,7 +110,7 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<GSDPollResponseDTO> sendGSDPollRequest(final List<Cloud> cloudsToContact, final GSDPollRequestDTO gsdPollRequestDTO) throws InterruptedException {
+	public List<ErrorWrapperDTO> sendGSDPollRequest(final List<Cloud> cloudsToContact, final GSDPollRequestDTO gsdPollRequestDTO) throws InterruptedException {
 		logger.debug("sendGSDPollRequest started...");		
 		Assert.isTrue(cloudsToContact != null && !cloudsToContact.isEmpty(), "cloudsToContact list is null or empty");
 		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
@@ -120,12 +120,12 @@ public class GatekeeperDriver {
 		
 		final int numOfCloudsToContact = cloudsToContact.size();
 
-		final BlockingQueue<GSDPollResponseDTO> queue = new LinkedBlockingQueue<>(numOfCloudsToContact);		
+		final BlockingQueue<ErrorWrapperDTO> queue = new LinkedBlockingQueue<>(numOfCloudsToContact);		
 		final GSDPollRequestExecutor gsdPollRequestExecutor = new GSDPollRequestExecutor(queue, relayClient, gsdPollRequestDTO, getOneGatekeeperRelayPerCloud(cloudsToContact));
 		
 		gsdPollRequestExecutor.execute();
 		
-		final List<GSDPollResponseDTO> gsdPollAnswers = new ArrayList<>(numOfCloudsToContact);
+		final List<ErrorWrapperDTO> gsdPollAnswers = new ArrayList<>(numOfCloudsToContact);
 		for (int i = 0; i < numOfCloudsToContact; ++i) {
 			
 			try {

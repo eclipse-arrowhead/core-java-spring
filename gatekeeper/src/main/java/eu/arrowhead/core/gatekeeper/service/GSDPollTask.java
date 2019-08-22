@@ -9,8 +9,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
@@ -28,13 +32,13 @@ public class GSDPollTask implements Runnable{
 	private final String recipientCloudCN;
 	private final String recipientCloudPublicKey;
 	private final GSDPollRequestDTO gsdPollRequestDTO;
-	private final BlockingQueue<GSDPollResponseDTO> queue;
+	private final BlockingQueue<ErrorWrapperDTO> queue;
 
 	//=================================================================================================
 	// methods
 		
 	public GSDPollTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudCN, final String recipientCloudPublicKey,
-					   final GSDPollRequestDTO gsdPollRequestDTO, final BlockingQueue<GSDPollResponseDTO> queue) {
+					   final GSDPollRequestDTO gsdPollRequestDTO, final BlockingQueue<ErrorWrapperDTO> queue) {
 		
 		this.relayClient = relayClient;
 		this.session = session;
@@ -48,23 +52,23 @@ public class GSDPollTask implements Runnable{
 	//-------------------------------------------------------------------------------------------------	
 	@Override
 	public void run() {
-		logger.debug("GDSPollTask.run started...");
-		
-		Assert.notNull(relayClient, "relayClient is null");
-		Assert.notNull(session, "session is null");
-		Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
-		Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudCN is empty");
-		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
-		Assert.notNull(queue, "queue is null");
-		
-		if (Thread.currentThread().isInterrupted()) {
-			logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
-			queue.add(new GSDPollResponseDTO());
-			return;
-		}
-		
 		try {
-						
+			
+			logger.debug("GDSPollTask.run started...");
+			
+			Assert.notNull(relayClient, "relayClient is null");
+			Assert.notNull(session, "session is null");
+			Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
+			Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudCN is empty");
+			Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
+			Assert.notNull(queue, "queue is null");
+			
+			if (Thread.currentThread().isInterrupted()) {
+				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
+				queue.add(new GSDPollResponseDTO());
+				return;
+			}
+										
 			final GeneralAdvertisementResult result = relayClient.publishGeneralAdvertisement(session, recipientCloudCN, recipientCloudPublicKey);
 			if (result == null) {
 				throw new TimeoutException(recipientCloudCN + " cloud: GeneralAdvertisementResult timeout");
@@ -76,6 +80,12 @@ public class GSDPollTask implements Runnable{
 			}
 			
 			queue.add(response.getGSDPollResponse());
+			
+		} catch (final InvalidParameterException | BadPayloadException ex) {	
+			//We forward this two type of arrowhead exception to the caller
+			
+			logger.debug("Exception:", ex.getMessage());
+			queue.add(new ErrorMessageDTO(ex));
 			
 		} catch (final Throwable ex) {			
 			//Must catch all throwable, otherwise the blocking queue would block the whole process
