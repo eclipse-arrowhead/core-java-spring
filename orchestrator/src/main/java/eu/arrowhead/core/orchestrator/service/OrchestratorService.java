@@ -812,15 +812,13 @@ public class OrchestratorService {
 		flags.put(Flag.MATCHMAKING, true);
 		request.setOrchestrationFlags(flags);
 		
-		final OrchestrationResponseDTO orchestrationResponseDTO = callInterCloudNegotiation(
+		return callInterCloudNegotiation(
 				preferredSystemsFromTargetCloud, 
 				serviceQueryFormDTO, 
 				systemRequestDTO, 
 				cloudId, 
 				request.getOrchestrationFlags(), 
 				preferredProviderDataDTOList);
-		
-    	return orchestrationResponseDTO;
 	}
 
 	//-------------------------------------------------------------------------------------------------
