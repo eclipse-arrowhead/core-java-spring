@@ -21,6 +21,9 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.DTOUtilities;
+import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
@@ -105,24 +108,40 @@ public class GatekeeperService {
 		
 		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getRequesterCloud(), gatewayIsPresent);
 		
-		final List<GSDPollResponseDTO> gsdPollResponses = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
+		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
-		final List<GSDPollResponseDTO> validResponses = new ArrayList<>();
-		int emptyResponses = 0;
-		for (final GSDPollResponseDTO gsdResponse : gsdPollResponses) {
-			if (gsdResponse.getProviderCloud() == null) {
+		final List<GSDPollResponseDTO> successfulResponses = new ArrayList<>();
+		final List<ErrorMessageDTO> errorMessageResponses = new ArrayList<>();
+		int unsuccessfulRequests = 0;
+		for (final ErrorWrapperDTO gsdAnswer : gsdPollAnswers) {
+			
+			if (gsdAnswer.isError()) {		
 				
-				emptyResponses++;
+				errorMessageResponses.add((ErrorMessageDTO) gsdAnswer);
+				unsuccessfulRequests++;
+				
 			} else {
-				//Changing the cloud details to the local informations based on operator and name
-				final Cloud providerCloudWithLocalDetails = gatekeeperDBService.getCloudByOperatorAndName(gsdResponse.getProviderCloud().getOperator(), gsdResponse.getProviderCloud().getName());
-				gsdResponse.setProviderCloud(DTOConverter.convertCloudToCloudResponseDTO(providerCloudWithLocalDetails));
 				
-				validResponses.add(gsdResponse);		
-			}
+				final GSDPollResponseDTO gsdResponse = (GSDPollResponseDTO) gsdAnswer;
+				
+				if (gsdResponse.getProviderCloud() == null) {
+					
+					unsuccessfulRequests++;
+				} else {
+					//Changing the cloud details to the local informations based on operator and name
+					final Cloud providerCloudWithLocalDetails = gatekeeperDBService.getCloudByOperatorAndName(gsdResponse.getProviderCloud().getOperator(), gsdResponse.getProviderCloud().getName());
+					gsdResponse.setProviderCloud(DTOConverter.convertCloudToCloudResponseDTO(providerCloudWithLocalDetails));
+					
+					successfulResponses.add(gsdResponse);		
+				}
+			}						
 		}
 		
-		return new GSDQueryResultDTO(validResponses, emptyResponses);
+		if (successfulResponses.isEmpty() && !errorMessageResponses.isEmpty()) {
+			DTOUtilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
+		}
+		
+		return new GSDQueryResultDTO(successfulResponses, unsuccessfulRequests);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

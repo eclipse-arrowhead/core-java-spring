@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class GSDPollResponseDTO implements Serializable {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 
 	//=================================================================================================
 	// members
@@ -45,4 +47,11 @@ public class GSDPollResponseDTO implements Serializable {
 	public void setAvailableInterfaces(final List<String> availableInterfaces) { this.availableInterfaces = availableInterfaces; } 	
 	public void setNumOfProviders(final Integer numOfProviders) { this.numOfProviders = numOfProviders; }
 	public void setServiceMetadata(final Map<String, String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
+
+	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
+	@Override
+	public boolean isError() {
+		return false;
+	}
 }
