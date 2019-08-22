@@ -1,6 +1,6 @@
-    package eu.arrowhead.core.orchestrator.matchmaking;
+package eu.arrowhead.core.orchestrator.matchmaking;
 
-    import java.util.List;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,139 +15,139 @@ import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 
-    public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm {
+public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm {
+    
+    //=================================================================================================
+    // members
+    
+    private static final Logger logger = LogManager.getLogger(RandomWeightedCloudMatchmaker.class);
+
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------    
+    @Override
+    public CloudResponseDTO doMatchmaking(final CloudMatchmakingParameters params) {
+        logger.debug("DefaultInterCloudCloudMatchmaker.doMatchmaking started...");
+        Assert.notNull(params, "params is null");
         
+        final GSDQueryResultDTO gsdResult = params.getGsdResult();
+        if ( gsdResult == null || gsdResult.getResults().isEmpty() ) {
+            
+            //Return Empty response
+            return new CloudResponseDTO();
+        }
+        
+        final List<CloudRequestDTO> preferredClouds = params.getPreferredClouds();
+        final boolean onlyPreferred = params.isOnlyPreferred();
+        
+        final RandomCollection<CloudResponseDTO> randomPreferredCloudCollection = fillUpRandomPreferredCloudCollection( gsdResult, preferredClouds);
+        
+        if (!randomPreferredCloudCollection.isEmpty()) {
+            
+            return randomPreferredCloudCollection.next();
+        }
+        
+        if ( onlyPreferred ) {
+            
+            //Return Empty response
+            return new CloudResponseDTO();
+        }
+
+        final RandomCollection<CloudResponseDTO> randomCloudCollection = fillUpRandomCloudCollection( gsdResult, preferredClouds);
+
+        return randomCloudCollection.isEmpty() ? new CloudResponseDTO() : randomCloudCollection.next();
+
+    }
+
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+    private RandomCollection<CloudResponseDTO> fillUpRandomPreferredCloudCollection(
+            final GSDQueryResultDTO gsdResult,
+            final List<CloudRequestDTO> preferredClouds) {
+        logger.debug("fillUpRandomPreferredCloudCollection started...");
+        
+        final RandomCollection<CloudResponseDTO> randomPreferredCloudCollection = new RandomCollection<>();
+        for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
+            if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
+                                
+                final CloudResponseDTO cloud = gsdPollResponseDTO.getProviderCloud();
+                
+                for (final CloudRequestDTO preferredCloud : preferredClouds) {
+
+                    if (DTOUtilities.equalsCloudInResponseAndRequest(cloud, preferredCloud)) {
+
+                        randomPreferredCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(),
+                                cloud);
+                    }
+                }                
+            }
+        }
+        
+        return randomPreferredCloudCollection;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    private RandomCollection<CloudResponseDTO> fillUpRandomCloudCollection(
+            final GSDQueryResultDTO gsdResult,
+            final List<CloudRequestDTO> preferredClouds) {
+        logger.debug("fillUpRandomCloudCollection started...");
+        
+        final RandomCollection<CloudResponseDTO> randomCloudCollection = new RandomCollection<>();
+        for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
+            if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
+                
+                randomCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(),
+                        gsdPollResponseDTO.getProviderCloud());                
+                
+            }
+        }
+        
+        return randomCloudCollection;
+    }
+
+	//=================================================================================================
+	// nested classes
+	
+	//-------------------------------------------------------------------------------------------------
+    class RandomCollection<E> {
+    	
         //=================================================================================================
         // members
         
-        private static final Logger logger = LogManager.getLogger(RandomWeightedCloudMatchmaker.class);
+        private final NavigableMap<Double, CloudResponseDTO> map = new TreeMap<Double, CloudResponseDTO>();
+        private double total = 0;
 
         //=================================================================================================
         // methods
 
-        //-------------------------------------------------------------------------------------------------    
-        @Override
-        public CloudResponseDTO doMatchmaking(final CloudMatchmakingParameters params) {
-            logger.debug("DefaultInterCloudCloudMatchmaker.doMatchmaking started...");
-            Assert.notNull(params, "params is null");
+        //-------------------------------------------------------------------------------------------------  
+        protected void add(final double weight, final CloudResponseDTO result) {
+            logger.debug("RandomCollection . add started...");
             
-            final GSDQueryResultDTO gsdResult = params.getGsdResult();
-            if ( gsdResult == null || gsdResult.getResults().isEmpty() ) {
-                
-                //Return Empty response
-                return new CloudResponseDTO();
-            }
-            
-            final List<CloudRequestDTO> preferredClouds = params.getPreferredClouds();
-            final boolean onlyPreferred = params.isOnlyPreferred();
-            
-            final RandomCollection<CloudResponseDTO> randomPreferredCloudCollection = fillUpRandomPreferredCloudCollection( gsdResult, preferredClouds);
-            
-            if (!randomPreferredCloudCollection.isEmpty()) {
-                
-                return randomPreferredCloudCollection.next();
-            }
-            
-            if ( onlyPreferred ) {
-                
-                //Return Empty response
-                return new CloudResponseDTO();
-            }
-
-            final RandomCollection<CloudResponseDTO> randomCloudCollection = fillUpRandomCloudCollection( gsdResult, preferredClouds);
-
-            return randomCloudCollection.isEmpty() ? new CloudResponseDTO() : randomCloudCollection.next();
-
-        }
-
-        //-------------------------------------------------------------------------------------------------
-        private RandomCollection<CloudResponseDTO> fillUpRandomPreferredCloudCollection(
-                final GSDQueryResultDTO gsdResult,
-                final List<CloudRequestDTO> preferredClouds) {
-            logger.debug("fillUpRandomPreferredCloudCollection started...");
-            
-            final RandomCollection<CloudResponseDTO> randomPreferredCloudCollection = new RandomCollection<>();
-            for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
-                if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
-                                    
-                    final CloudResponseDTO cloud = gsdPollResponseDTO.getProviderCloud();
-                    
-                    for (final CloudRequestDTO preferredCloud : preferredClouds) {
-
-                        if (DTOUtilities.equalsCloudInResponseAndRequest(cloud, preferredCloud)) {
-
-                            randomPreferredCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(),
-                                    cloud);
-                        }
-                    }                
-                }
-            }
-            
-            return randomPreferredCloudCollection;
+          if (weight <= 0 || map.containsValue(result))
+            return;
+          total += weight;
+          map.put(total, result);
         }
         
-        //-------------------------------------------------------------------------------------------------
-        private RandomCollection<CloudResponseDTO> fillUpRandomCloudCollection(
-                final GSDQueryResultDTO gsdResult,
-                final List<CloudRequestDTO> preferredClouds) {
-            logger.debug("fillUpRandomCloudCollection started...");
-            
-            final RandomCollection<CloudResponseDTO> randomCloudCollection = new RandomCollection<>();
-            for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
-                if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
-                    
-                    randomCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(),
-                            gsdPollResponseDTO.getProviderCloud());                
-                    
-                }
-            }
-            
-            return randomCloudCollection;
-        }
-
-    	//=================================================================================================
-    	// nested classes
-    	
-    	//-------------------------------------------------------------------------------------------------
-        class RandomCollection<E> {
-        	
-            //=================================================================================================
-            // members
-            
-            private final NavigableMap<Double, CloudResponseDTO> map = new TreeMap<Double, CloudResponseDTO>();
-            private double total = 0;
-
-            //=================================================================================================
-            // methods
-
-            //-------------------------------------------------------------------------------------------------  
-            protected void add(final double weight, final CloudResponseDTO result) {
-                logger.debug("RandomCollection . add started...");
-                
-              if (weight <= 0 || map.containsValue(result))
-                return;
-              total += weight;
-              map.put(total, result);
-            }
-            
-			//------------------------------------------------------------------------------------------------- 
-			protected CloudResponseDTO next() {
-			    logger.debug("RandomCollection . next started...");
-			    
-			  double value = ThreadLocalRandom.current().nextDouble() * total;
-			  return map.ceilingEntry(value).getValue();
-			}
-			
-			//-------------------------------------------------------------------------------------------------
-	        protected boolean isEmpty() {
-	            logger.debug("RandomCollection . isEmpty started...");
-	          
-	            return total == 0;
-	        }
-
-        }
+		//------------------------------------------------------------------------------------------------- 
+		protected CloudResponseDTO next() {
+		    logger.debug("RandomCollection . next started...");
+		    
+		  double value = ThreadLocalRandom.current().nextDouble() * total;
+		  return map.ceilingEntry(value).getValue();
+		}
+	
+		//-------------------------------------------------------------------------------------------------
+	    protected boolean isEmpty() {
+	        logger.debug("RandomCollection . isEmpty started...");
+	      
+	        return total == 0;
+	    }
 
     }
 
-
-
+}
