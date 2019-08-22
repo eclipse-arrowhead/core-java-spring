@@ -112,7 +112,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 			gatekeeperRelayClient.closeConnection(session);
 		}
 		
-		// close connections used by web services
+		// close connections used by web services and gatekeeper tasks
 		for (final Session session : gatekeeperRelayClientWithCache.getCachedSessions()) {
 			gatekeeperRelayClientWithCache.closeConnection(session);
 		}
@@ -138,7 +138,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 				final Session session = gatekeeperRelayClient.createConnection(relay.getAddress(), relay.getPort());
 				openConnections.add(session);
 				final MessageConsumer consumer = gatekeeperRelayClient.subscribeGeneralAdvertisementTopic(session);
-				final GeneralAdvertisementMessageListener listener = new GeneralAdvertisementMessageListener(appContext, session, gatekeeperRelayClient, noWorkers);
+				final GeneralAdvertisementMessageListener listener = new GeneralAdvertisementMessageListener(appContext, relay.getAddress(), relay.getPort(), gatekeeperRelayClientWithCache, noWorkers);
 				listenerResources.add(listener);
 				consumer.setMessageListener(listener); 
 			} catch (final JMSException | ArrowheadException ex) {

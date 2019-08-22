@@ -16,7 +16,7 @@ import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 
-public class GSDPollTask implements Runnable{
+public class GSDPollTask implements Runnable {
 	
 	//=================================================================================================
 	// members

@@ -239,7 +239,7 @@ public class GatekeeperService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public void validateGSDPollRequestDTO(final GSDPollRequestDTO gsdPollRequest) {
+	private void validateGSDPollRequestDTO(final GSDPollRequestDTO gsdPollRequest) {
 		logger.debug("validateGSDPollRequestDTO started...");
 		
 		if (gsdPollRequest == null) {
@@ -264,13 +264,11 @@ public class GatekeeperService {
 		
 		final boolean operatorIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getOperator());
 		final boolean nameIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getName());
-		final boolean authInfoIsEmpty = Utilities.isEmpty(gsdPollRequest.getRequesterCloud().getAuthenticationInfo());
 		
-		if (operatorIsEmpty || nameIsEmpty || authInfoIsEmpty) {
+		if (operatorIsEmpty || nameIsEmpty) {
 			String exceptionMsg = "GSDPollRequestDTO.CloudRequestDTO is invalid due to the following reasons:";
 			exceptionMsg = operatorIsEmpty ? exceptionMsg + " operator is empty, " : exceptionMsg;
 			exceptionMsg = nameIsEmpty ? exceptionMsg + " name is empty, " : exceptionMsg;
-			exceptionMsg = authInfoIsEmpty ? exceptionMsg + " authInfo is empty, " : exceptionMsg;
 			exceptionMsg = exceptionMsg.substring(0, exceptionMsg.length() - 1);
 			
 			throw new InvalidParameterException(exceptionMsg);

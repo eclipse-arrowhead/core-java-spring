@@ -268,44 +268,6 @@ public class GatekeeperServiceGSDTests {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testDoGSDPollWithNullRequesterCloudAuthInfo() {
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsPresent", false);
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsMandatory", false);
-		
-		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
-		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
-		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
-		cloudDTO.setOperator("test-operator");
-		cloudDTO.setName("test-name");
-		cloudDTO.setSecure(true);
-		cloudDTO.setNeighbor(true);
-		cloudDTO.setAuthenticationInfo(null);
-		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testDoGSDPollWithBlankRequesterCloudAuthInfo() {
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsPresent", false);
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsMandatory", false);
-		
-		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
-		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
-		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
-		cloudDTO.setOperator("test-operator");
-		cloudDTO.setName("test-name");
-		cloudDTO.setSecure(true);
-		cloudDTO.setNeighbor(true);
-		cloudDTO.setAuthenticationInfo("  ");
-		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testDoGSDPollWithNoServiceRegistryQueryResults() {
 		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsPresent", false);
