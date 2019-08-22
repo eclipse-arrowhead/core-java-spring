@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 

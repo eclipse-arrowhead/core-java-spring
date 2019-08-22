@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.DTOUtilities;
-import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
