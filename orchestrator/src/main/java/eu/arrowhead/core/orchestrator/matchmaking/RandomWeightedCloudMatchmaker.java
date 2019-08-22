@@ -53,11 +53,10 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
             //Return Empty response
             return new CloudResponseDTO();
         }
-
+        
         final RandomCollection<CloudResponseDTO> randomCloudCollection = fillUpRandomCloudCollection( gsdResult, preferredClouds);
-
+        
         return randomCloudCollection.isEmpty() ? new CloudResponseDTO() : randomCloudCollection.next();
-
     }
 
 	//=================================================================================================
@@ -113,7 +112,7 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
 	
 	//-------------------------------------------------------------------------------------------------
     class RandomCollection<E> {
-    	
+        
         //=================================================================================================
         // members
         
@@ -127,26 +126,29 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
         protected void add(final double weight, final CloudResponseDTO result) {
             logger.debug("RandomCollection . add started...");
             
-          if (weight <= 0 || map.containsValue(result))
-            return;
-          total += weight;
-          map.put(total, result);
+            if (weight <= 0 || map.containsValue(result)) {
+            	
+            	return;
+            }
+            
+            total += weight;
+            map.put(total, result);
         }
         
-		//------------------------------------------------------------------------------------------------- 
-		protected CloudResponseDTO next() {
-		    logger.debug("RandomCollection . next started...");
-		    
-		  double value = ThreadLocalRandom.current().nextDouble() * total;
-		  return map.ceilingEntry(value).getValue();
-		}
-	
-		//-------------------------------------------------------------------------------------------------
-	    protected boolean isEmpty() {
-	        logger.debug("RandomCollection . isEmpty started...");
-	      
-	        return total == 0;
-	    }
+        //------------------------------------------------------------------------------------------------- 
+        protected CloudResponseDTO next() {
+            logger.debug("RandomCollection . next started...");
+            
+            double value = ThreadLocalRandom.current().nextDouble() * total;
+            return map.ceilingEntry(value).getValue();
+        }
+        
+        //-------------------------------------------------------------------------------------------------
+        protected boolean isEmpty() {
+            logger.debug("RandomCollection . isEmpty started...");
+            
+            return total == 0;
+        }
 
     }
 
