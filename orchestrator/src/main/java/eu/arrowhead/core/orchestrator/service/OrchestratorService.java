@@ -283,7 +283,7 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestrationResponseDTO storeOchestrationProcessResponse(long systemId) {
+	public OrchestrationResponseDTO storeOchestrationProcessResponse(final long systemId) {
 		logger.debug("storeOchestrationProcessResponse started ...");
 		
 		final SystemResponseDTO validConsumerSystemResponseDTO  =  validateSystemId(systemId);
@@ -481,8 +481,8 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> getOrchestrationStoreEntries(SystemRequestDTO requesterSystem,
-			ServiceQueryFormDTO requestedService) {
+	private List<OrchestratorStore> getOrchestrationStoreEntries(final SystemRequestDTO requesterSystem,
+			final ServiceQueryFormDTO requestedService) {
 		logger.debug("getOrchestrationStoreEntries started...");
 		
 		
@@ -557,7 +557,7 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> filterEntryListByForeign(List<OrchestratorStore> entryList) {
+	private List<OrchestratorStore> filterEntryListByForeign(final List<OrchestratorStore> entryList) {
 		logger.debug(" filterEntryListByForeign started...");
 		
 		if (entryList == null || entryList.isEmpty()) {
@@ -569,8 +569,8 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<ServiceRegistryResponseDTO> crossCheckStoreEntries(List<OrchestratorStore> entryList,
-			OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+	private List<ServiceRegistryResponseDTO> crossCheckStoreEntries(final List<OrchestratorStore> entryList,
+			final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("crossCheckStoreEntries started...");
 		
 		final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();
@@ -591,12 +591,12 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, List<String>> mapInterfacesToServiceDefinitions(List<OrchestratorStore> entryList) {
+	private Map<Long, List<String>> mapInterfacesToServiceDefinitions(final List<OrchestratorStore> entryList) {
 		logger.debug("mapIntrefacesToServiceDefinitions started...");
 		
 		final Map<Long, List<String>> serviceDefinitionsInterfacesMap = new HashMap<>();
 		
-		for (OrchestratorStore orchestratorStore : entryList) {
+		for (final OrchestratorStore orchestratorStore : entryList) {
 			final Long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
 			final String interfaceName = orchestratorStore.getServiceInterface().getInterfaceName();
 			
@@ -624,12 +624,12 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, Set<String>> mapInterfacesToProviders(List<OrchestratorStore> entryList) {
+	private Map<Long, Set<String>> mapInterfacesToProviders(final List<OrchestratorStore> entryList) {
 		logger.debug("mapIntrefacesToProviders started...");
 		
 		final Map<Long, Set<String>> providersInterfacesMap = new HashMap<>();
 		
-		for (OrchestratorStore orchestratorStore : entryList) {
+		for (final OrchestratorStore orchestratorStore : entryList) {
 			Assert.isTrue(!orchestratorStore.isForeign(), "Provider is foreign");
 			
 			final Long providerSystemId = orchestratorStore.getProviderSystemId();
@@ -643,12 +643,12 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, String> mapServiceDefinitionsToServiceDefinitionIds(List<OrchestratorStore> entryList) {
+	private Map<Long, String> mapServiceDefinitionsToServiceDefinitionIds(final List<OrchestratorStore> entryList) {
 		logger.debug("mapServiceDefinitionsToServiceDefinitionIds started...");
 		
 		final Map<Long, String> serviceDefinitionsIdToStringMap = new HashMap<>();
 		
-		for (OrchestratorStore orchestratorStore : entryList) {
+		for (final OrchestratorStore orchestratorStore : entryList) {
 			final ServiceDefinition serviceDefinition = orchestratorStore.getServiceDefinition();
 			
 			if (!serviceDefinitionsIdToStringMap.containsKey(serviceDefinition.getId())) {
@@ -663,7 +663,7 @@ public class OrchestratorService {
 
 	//-------------------------------------------------------------------------------------------------
 	private List<ServiceRegistryResponseDTO> filterQueryResultByInterfaces(
-			Map<Long, Set<String>> providerIdInterfaceIdsMap, ServiceQueryResultDTO queryResult) {
+			final Map<Long, Set<String>> providerIdInterfaceIdsMap, final ServiceQueryResultDTO queryResult) {
 		logger.debug("filterQueryResultByInterfaces started...");
 		
 		final List<ServiceRegistryResponseDTO> filteredResults = new ArrayList<>();
@@ -679,7 +679,7 @@ public class OrchestratorService {
 			if (providerIdInterfaceIdsMap.containsKey(providerIdFromResult)) {
 				
 				final Set<String> interfaceSetFromRequest = providerIdInterfaceIdsMap.get(providerIdFromResult);
-				for (ServiceInterfaceResponseDTO interfaceResponseDTO : interfaceListFromResult) {
+				for (final ServiceInterfaceResponseDTO interfaceResponseDTO : interfaceListFromResult) {
 
 					if (interfaceSetFromRequest.contains(interfaceResponseDTO.getInterfaceName())) {
 						filteredInterfaceList.add(interfaceResponseDTO);
@@ -708,7 +708,7 @@ public class OrchestratorService {
 		}
 		
 		final List<CloudRequestDTO> preferredClouds = new ArrayList<>(preferredProviders.size());
-		for (PreferredProviderDataDTO provider : preferredProviders) {
+		for (final PreferredProviderDataDTO provider : preferredProviders) {
 		  if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
 		    preferredClouds.add(provider.getProviderCloud());
 		  }
@@ -728,7 +728,7 @@ public class OrchestratorService {
 		
 		final List<SystemRequestDTO> preferredSystemsFromTargetCloud = new ArrayList<>(preferredProviders.size());
 		
-		for (PreferredProviderDataDTO preferredProviderDataDTO : preferredProviders) {
+		for (final PreferredProviderDataDTO preferredProviderDataDTO : preferredProviders) {
 			if (DTOUtilities.equalsCloudInResponseAndRequest(targetCloud, preferredProviderDataDTO.getProviderCloud())) {
 				
 				preferredSystemsFromTargetCloud.add(preferredProviderDataDTO.getProviderSystem());
@@ -742,7 +742,7 @@ public class OrchestratorService {
 	private void updateOrchestrationResultWarningWithForeignWarning(final List<OrchestrationResultDTO> response) {
 		logger.debug("updateOrchestrationResultWarningWithForeignWarning started...");
 		
-		for (OrchestrationResultDTO orchestrationResultDTO : response) {
+		for (final OrchestrationResultDTO orchestrationResultDTO : response) {
 			if (orchestrationResultDTO.getWarnings() == null) {
 				orchestrationResultDTO.setWarnings(new ArrayList<>(1));
 			}
@@ -773,7 +773,7 @@ public class OrchestratorService {
         	if (!orchestratorStore.isForeign()) {
         		
         		final Long providerSystemId = orchestratorStore.getProviderSystemId();
-        		for (ServiceRegistryResponseDTO serviceRegistryResponseDTO : crossCheckedEntryList) {
+        		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : crossCheckedEntryList) {
         			
         			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
         				
