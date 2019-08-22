@@ -198,9 +198,9 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
-		final List<ServiceRegistryResponseDTO> crossCheckedEntryList = crossCheckStoreEntries(entryList, orchestrationFormRequestDTO);
+		final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries = getAuthorizedServiceRegistryEntries(entryList, orchestrationFormRequestDTO);
         
-		return getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, crossCheckedEntryList);
+		return getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, authorizedLocalServiceRegistryEntries);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -569,7 +569,7 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<ServiceRegistryResponseDTO> crossCheckStoreEntries(final List<OrchestratorStore> entryList,
+	private List<ServiceRegistryResponseDTO> getAuthorizedServiceRegistryEntries(final List<OrchestratorStore> entryList,
 			final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("crossCheckStoreEntries started...");
 		
@@ -765,21 +765,19 @@ public class OrchestratorService {
 	private OrchestrationResponseDTO getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(
 			final OrchestrationFormRequestDTO request, 
 			final List<OrchestratorStore> entryList,
-			final List<ServiceRegistryResponseDTO> crossCheckedEntryList) {
+			final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries) {
 		logger.debug("getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList started...");
 		
         for (final OrchestratorStore orchestratorStore : entryList) {
         	
         	if (!orchestratorStore.isForeign()) {
         		
-        		final Long providerSystemId = orchestratorStore.getProviderSystemId();
-        		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : crossCheckedEntryList) {
-        			
-        			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-        				
-        				return compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);							
-        			}
-        		}
+				final OrchestrationResponseDTO orchestrationResponseDTO = crossCheckLocalStoreEntry( orchestratorStore, request, authorizedLocalServiceRegistryEntries);
+            	
+				if ( orchestrationResponseDTO != null && !orchestrationResponseDTO.getResponse().isEmpty() ) {
+
+            		return orchestrationResponseDTO;
+				}
         		
         	}else {       		
 
@@ -793,6 +791,25 @@ public class OrchestratorService {
 		}
         
         return new OrchestrationResponseDTO(); // empty response
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private OrchestrationResponseDTO crossCheckLocalStoreEntry(
+			final OrchestratorStore orchestratorStore,
+			final OrchestrationFormRequestDTO request,
+			final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries) {
+		logger.debug("crossCheckLocalStoreEntry started ...");
+		
+		final Long providerSystemId = orchestratorStore.getProviderSystemId();
+		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : authorizedLocalServiceRegistryEntries) {
+			
+			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
+				
+				return compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);							
+			}
+		}
+		
+		return new OrchestrationResponseDTO(); // empty response
 	}
 
 	//-------------------------------------------------------------------------------------------------
