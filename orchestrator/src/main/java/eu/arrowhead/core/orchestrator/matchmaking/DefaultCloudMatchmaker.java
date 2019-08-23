@@ -18,7 +18,7 @@ public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 	//=================================================================================================
 	// members
 	
-	private static final Logger logger = LogManager.getLogger(DefaultInterCloudProviderMatchmaker.class);
+	private static final Logger logger = LogManager.getLogger(DefaultCloudMatchmaker.class);
 
 	//=================================================================================================
 	// methods

@@ -28,7 +28,7 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
     //-------------------------------------------------------------------------------------------------    
     @Override
     public CloudResponseDTO doMatchmaking(final CloudMatchmakingParameters params) {
-        logger.debug("DefaultInterCloudCloudMatchmaker.doMatchmaking started...");
+        logger.debug("RandomWeightedCloudMatchmaker.doMatchmaking started...");
         Assert.notNull(params, "params is null");
         
         final GSDQueryResultDTO gsdResult = params.getGsdResult();
