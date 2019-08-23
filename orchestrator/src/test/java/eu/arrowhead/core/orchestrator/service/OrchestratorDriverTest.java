@@ -393,7 +393,7 @@ public class OrchestratorDriverTest {
 		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
 		final GSDQueryFormDTO requestDTO = new GSDQueryFormDTO();
 		
-		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
 		when(arrowheadContext.get(any(String.class))).thenReturn(new Object());
 		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
 		
