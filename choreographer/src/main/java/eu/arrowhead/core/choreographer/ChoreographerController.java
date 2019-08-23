@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -81,14 +82,13 @@ public class ChoreographerController {
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public void registerActionPlans(@RequestBody final List<ChoreographerActionPlanRequestDTO> requests) {
-
-
         for (ChoreographerActionPlanRequestDTO request : requests) {
+            checkChoreographerActionPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
             choreographerDBService.createChoreographerActionPlan(request.getActionPlanName(), request.getActions());
         }
     }
 
-    @ApiOperation(value = "Register one or more ActionPlans using already existing Action chains only.")
+    @ApiOperation(value = "Register one or more ActionPlans using already existing Action chains only. Do NOT use until further update!")
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
@@ -165,5 +165,13 @@ public class ChoreographerController {
         logger.debug("ChoreographerActionPlans with page: {} and item_per page: {} retrieved successfully", page, size);
 
         return choreographerActionPlanEntriesResponse;
+    }
+
+    private void checkChoreographerActionPlanRequest(final ChoreographerActionPlanRequestDTO request, final String origin) {
+        logger.debug("checkChoreographerActionPlanRequest started...");
+
+        if(Utilities.isEmpty(request.getActionPlanName())) {
+            throw new BadPayloadException("ActionPlan name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+        }
     }
 }
