@@ -47,7 +47,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		
 		synchronized (sessionCache) {
 			Session session = createSessionIfNecessary(host, port);
-			if (isSessionClosed(session)) {
+			if (isConnectionClosed(session)) {
 				sessionCache.values().remove(session);
 				session = createSessionIfNecessary(host, port);
 			}
@@ -65,6 +65,12 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 			}
 			client.closeConnection(session);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean isConnectionClosed(final Session session) {
+		return client.isConnectionClosed(session);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -110,19 +116,6 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	
 	//=================================================================================================
 	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------
-	private boolean isSessionClosed(final Session session) {
-		try {
-			// can't call isClosed() as Session interface does not have such method. However, at least in ActiveMQ implementation getAcknowledge() checks whether the session is closed or not before
-			// returning a value and throws an exception if the session is closed. Other JMS implementation may not work this way.
-			session.getAcknowledgeMode();
-			
-			return false;
-		} catch (final JMSException ex) {
-			return true;
-		}
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private Session createSessionIfNecessary(final String host, final int port) throws JMSException {
