@@ -225,7 +225,9 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemIdUri);
 		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
 		
-		orchestratorDriver.queryServiceRegistryBySystemId( 1L );
+		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemId( 1L );
+		
+		Assert.assertTrue( systemResponseDTO != null );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -295,7 +297,9 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemDTOUri);
 		when(httpService.sendRequest(eq(queryBySystemDTOUri), eq(HttpMethod.POST), eq(SystemResponseDTO.class), any(SystemRequestDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
 		
-		orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+		
+		Assert.assertTrue( systemResponseDTO != null );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -359,7 +363,9 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.get(any(String.class))).thenReturn(queryGSDUri);
 		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
 		
-		orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+		final GSDQueryResultDTO gsdQueryResultDTO = orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+
+		Assert.assertTrue( gsdQueryResultDTO != null );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -423,7 +429,9 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.get(any(String.class))).thenReturn(queryICNUri);
 		when(httpService.sendRequest(eq(queryICNUri), eq(HttpMethod.POST), eq(ICNResultDTO.class), any(ICNRequestFormDTO.class))).thenReturn(new ResponseEntity<ICNResultDTO>(responseDTO, HttpStatus.OK));
 		
-		orchestratorDriver.doInterCloudNegotiations(requestDTO);
+		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations(requestDTO);
+		
+		Assert.assertTrue( icnResultDTO != null );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
