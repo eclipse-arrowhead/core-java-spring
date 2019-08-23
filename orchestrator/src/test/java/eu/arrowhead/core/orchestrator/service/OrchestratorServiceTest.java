@@ -916,8 +916,8 @@ public class OrchestratorServiceTest {
 		provider.setAddress("localhost");
 		provider.setPort(1234);
 		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
-																				    requestedService(serviceForm).
 																					build();
+		request.setRequesterSystem(provider);
 		final Long systemId = 1L;
 			
 		final System consumerSystem = new System();
@@ -957,11 +957,14 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
+		
+		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
+		
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
-		final OrchestrationResponseDTO result = testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(!result.getResponse().isEmpty());
