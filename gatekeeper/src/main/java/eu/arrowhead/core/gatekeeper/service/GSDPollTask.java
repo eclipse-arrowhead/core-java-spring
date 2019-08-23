@@ -20,7 +20,7 @@ import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 
-public class GSDPollTask implements Runnable{
+public class GSDPollTask implements Runnable {
 	
 	//=================================================================================================
 	// members
@@ -53,7 +53,6 @@ public class GSDPollTask implements Runnable{
 	@Override
 	public void run() {
 		try {
-			
 			logger.debug("GDSPollTask.run started...");
 			
 			Assert.notNull(relayClient, "relayClient is null");
