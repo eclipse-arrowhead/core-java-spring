@@ -24,8 +24,8 @@ public class DefaultInterCloudProviderMatchmaker implements InterCloudProviderMa
 
 	//-------------------------------------------------------------------------------------------------	
 	@Override
-	public OrchestrationResponseDTO doMatchmaking(InterCloudProviderMatchmakingParameters params) {
-		logger.debug("DefaultInterCloudProviderMatchmaker.doMatchmaking started...");
+	public OrchestrationResponseDTO doMatchmaking(final InterCloudProviderMatchmakingParameters params) {
+		logger.debug("DefaultInterCloudProviderMatchmakerTest.doMatchmaking started...");
 		
 		Assert.notNull(params, "params is null");
 		

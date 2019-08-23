@@ -138,7 +138,7 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
         protected CloudResponseDTO next() {
             logger.debug("RandomCollection . next started...");
             
-            double value = ThreadLocalRandom.current().nextDouble() * total;
+            final double value = ThreadLocalRandom.current().nextDouble() * total;
             return map.ceilingEntry(value).getValue();
         }
         

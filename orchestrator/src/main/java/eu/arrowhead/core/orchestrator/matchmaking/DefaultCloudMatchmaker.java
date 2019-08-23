@@ -26,7 +26,7 @@ public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 	//-------------------------------------------------------------------------------------------------	
 
 	@Override
-	public CloudResponseDTO doMatchmaking(CloudMatchmakingParameters params) {
+	public CloudResponseDTO doMatchmaking(final CloudMatchmakingParameters params) {
 		logger.debug("DefaultCloudMatchmaker.doMatchmaking started...");
 		Assert.notNull(params, "params is null");
 		
