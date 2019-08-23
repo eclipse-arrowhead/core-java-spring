@@ -28,7 +28,6 @@ public final class AutoWiringSpringBeanQuartzTaskFactory extends SpringBeanJobFa
     //-------------------------------------------------------------------------------------------------
     @Override
     protected Object createJobInstance(final TriggerFiredBundle bundle) throws Exception {
-
         final Object task = super.createJobInstance(bundle);
         beanFactory.autowireBean(task);
         return task;
