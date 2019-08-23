@@ -245,7 +245,7 @@ public class ChoreographerDBService {
         return choreographerActionPlanRepository.saveAndFlush(actionPlanEntry);
     }
 
-    public ChoreographerActionPlan createChoreographerActionPlanWithExistingActions(final String actionPlanName, List<ChoreographerExistingActionRequestDTO> actions) {
+    public ChoreographerActionPlan createChoreographerActionPlanWithExistingActions(final String actionPlanName, List<ChoreographerActionRequestDTO> actions) {
         logger.debug("createChoreographerActionPlanWithExistingActions started...");
 
         Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
@@ -259,7 +259,7 @@ public class ChoreographerDBService {
         ChoreographerActionPlan actionPlanEntry = choreographerActionPlanRepository.save(actionPlan);
 
         List<ChoreographerAction> choreographerActions = new ArrayList<>(actions.size());
-        for(ChoreographerExistingActionRequestDTO action : actions) {
+        for(ChoreographerActionRequestDTO action : actions) {
             String nextActionName = action.getNextActionName();
             if(nextActionName != null) {
                 Optional<ChoreographerAction> nextActionOptional = choreographerActionRepository.findByActionName(nextActionName);

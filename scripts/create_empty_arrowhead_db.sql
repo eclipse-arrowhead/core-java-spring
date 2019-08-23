@@ -274,7 +274,7 @@ CREATE TABLE `choreographer_action_plan` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `action_plan_name` varchar(255) UNIQUE NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_action`;
@@ -292,7 +292,7 @@ CREATE TABLE `choreographer_action_step` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) UNIQUE NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `choreographer_action_plan_action_connection`;
