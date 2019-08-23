@@ -17,7 +17,6 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
 
 public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelayClient {
 	
@@ -46,21 +45,14 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
-		final String cacheKey = host + ":" + port;
-		try {
-			return sessionCache.computeIfAbsent(cacheKey, key -> {
-				try {
-					return client.createConnection(host, port);
-				} catch (final JMSException ex) {
-					throw new ArrowheadException("JMSException", ex);
-				}
-			});
-		} catch (final ArrowheadException ex) {
-			if (ex.getCause() instanceof JMSException) {
-				throw (JMSException) ex.getCause();
-			} else {
-				throw ex;
+		synchronized (sessionCache) {
+			Session session = createSessionIfNecessary(host, port);
+			if (isSessionClosed(session)) {
+				sessionCache.values().remove(session);
+				session = createSessionIfNecessary(host, port);
 			}
+			
+			return session;
 		}
 	}
 
@@ -114,5 +106,34 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	//-------------------------------------------------------------------------------------------------
 	public List<Session> getCachedSessions() {
 		return new ArrayList<>(sessionCache.values());
+	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isSessionClosed(final Session session) {
+		try {
+			// can't call isClosed() as Session interface does not have such method. However, at least in ActiveMQ implementation getAcknowledge() checks whether the session is closed or not before
+			// returning a value and throws an exception if the session is closed. Other JMS implementation may not work this way.
+			session.getAcknowledgeMode();
+			
+			return false;
+		} catch (final JMSException ex) {
+			return true;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Session createSessionIfNecessary(final String host, final int port) throws JMSException {
+		final String cacheKey = host + ":" + port;
+		Session session = sessionCache.get(cacheKey);
+		if (session == null) {
+			session = client.createConnection(host, port);
+			sessionCache.put(cacheKey, session);
+			
+		}
+		
+		return session;
 	}
 }

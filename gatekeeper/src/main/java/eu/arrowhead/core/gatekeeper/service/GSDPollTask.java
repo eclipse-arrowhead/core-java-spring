@@ -53,7 +53,6 @@ public class GSDPollTask implements Runnable {
 	@Override
 	public void run() {
 		try {
-			
 			logger.debug("GDSPollTask.run started...");
 			
 			Assert.notNull(relayClient, "relayClient is null");
