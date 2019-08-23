@@ -67,32 +67,46 @@ public class ChoreographerDBService {
     public ChoreographerActionStep createChoreographerActionStepWithUsedService(final String stepName, final Set<String> usedServiceNames) {
         logger.debug("createChoreographerActionStep started...");
 
-        if(Utilities.isEmpty(stepName)) {
-            throw new InvalidParameterException("ActionStep name is null or blank.");
+        try {
+            if(Utilities.isEmpty(stepName)) {
+                throw new InvalidParameterException("ActionStep name is null or blank.");
+            }
+
+            if(usedServiceNames == null || usedServiceNames.isEmpty()) {
+                throw new InvalidParameterException("UsedService name is null or blank.");
+            }
+
+            Optional<ChoreographerActionStep> choreographerActionStepOpt = choreographerActionStepRepository.findByName(stepName);
+
+            choreographerActionStepOpt.ifPresent(choreographerActionStep -> {
+                throw new InvalidParameterException("One or more ActionSteps with the given names already exist! ActionStep NAMES must be UNIQUE!");
+            });
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
-
-        if(usedServiceNames == null || usedServiceNames.isEmpty()) {
-            throw new InvalidParameterException("UsedService name is null or blank.");
-        }
-
-        Optional<ChoreographerActionStep> choreographerActionStepOpt = choreographerActionStepRepository.findByName(stepName);
-
-        choreographerActionStepOpt.ifPresent(choreographerActionStep -> {
-            throw new InvalidParameterException("One or more ActionSteps with the given names already exist! ActionStep NAMES must be UNIQUE!");
-        });
 
         List<ServiceDefinition> usedServices = new ArrayList<>(usedServiceNames.size());
-        for (String name : usedServiceNames) {
-            Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findByServiceDefinition(name);
-            if (serviceOpt.isPresent()) {
-                usedServices.add(serviceOpt.get());
-            } else {
-                logger.debug("Service Definition with name of " + name + " doesn't exist!");
+        try {
+            for (String name : usedServiceNames) {
+                Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findByServiceDefinition(name);
+                if (serviceOpt.isPresent()) {
+                    usedServices.add(serviceOpt.get());
+                } else {
+                    logger.debug("Service Definition with name of " + name + " doesn't exist!");
+                }
             }
-        }
 
-        if (usedServices.size() != usedServiceNames.size()) {
-            throw new InvalidParameterException("One or more of the Services given doesn't exist! Create ALL Services before usage.");
+            if (usedServices.size() != usedServiceNames.size()) {
+                throw new InvalidParameterException("One or more of the Services given doesn't exist! Create ALL Services before usage.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         ChoreographerActionStep stepEntry = choreographerActionStepRepository.save(new ChoreographerActionStep(stepName));
@@ -110,26 +124,47 @@ public class ChoreographerDBService {
     public ChoreographerActionStep addNextStepToChoreographerActionStep(final String stepName, final Set<String> nextActionStepNames) {
         logger.debug("addNextStepToChoreographerActionStep started...");
 
-        if(Utilities.isEmpty(stepName)) {
-            throw new InvalidParameterException("Step name is empty or null.");
+        try {
+            if(Utilities.isEmpty(stepName)) {
+                throw new InvalidParameterException("Step name is empty or null.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         ChoreographerActionStep stepEntry;
         Optional<ChoreographerActionStep> choreographerActionStepOpt = choreographerActionStepRepository.findByName(stepName);
-        if (choreographerActionStepOpt.isPresent()) {
-            stepEntry = choreographerActionStepOpt.get();
-        } else {
-            throw new InvalidParameterException("The Choreographer Action Step doesn't exist!");
+        try {
+            if (choreographerActionStepOpt.isPresent()) {
+                stepEntry = choreographerActionStepOpt.get();
+            } else {
+                throw new InvalidParameterException("The Choreographer Action Step doesn't exist!");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         List<ChoreographerActionStep> nextActionSteps = new ArrayList<>(nextActionStepNames.size());
-        for(String nextActionStepName : nextActionStepNames) {
-            Optional<ChoreographerActionStep> actionStepOpt = choreographerActionStepRepository.findByName(nextActionStepName);
-            if (actionStepOpt.isPresent()) {
-                nextActionSteps.add(actionStepOpt.get());
-            } else {
-                throw new InvalidParameterException("Action Step with name of " + nextActionStepName + " doesn't exist!");
+        try {
+            for(String nextActionStepName : nextActionStepNames) {
+                Optional<ChoreographerActionStep> actionStepOpt = choreographerActionStepRepository.findByName(nextActionStepName);
+                if (actionStepOpt.isPresent()) {
+                    nextActionSteps.add(actionStepOpt.get());
+                } else {
+                    throw new InvalidParameterException("Action Step with name of " + nextActionStepName + " doesn't exist!");
+                }
             }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         for(ChoreographerActionStep actionStep : nextActionSteps) {
@@ -145,15 +180,22 @@ public class ChoreographerDBService {
     public ChoreographerAction createChoreographerAction(final String actionName, final List<ChoreographerActionStepRequestDTO> actionSteps) {
         logger.debug("createChoreographerAction started...");
 
-        if(Utilities.isEmpty(actionName)) {
-            throw new InvalidParameterException("Action name is null or blank.");
+        try {
+            if(Utilities.isEmpty(actionName)) {
+                throw new InvalidParameterException("Action name is null or blank.");
+            }
+
+            Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByActionName(actionName);
+
+            choreographerActionOpt.ifPresent(choreographerAction -> {
+                throw new InvalidParameterException("One or more Actions with the given names already exist! Action NAMES must be UNIQUE!");
+            });
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
-
-        Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByActionName(actionName);
-
-        choreographerActionOpt.ifPresent(choreographerAction -> {
-            throw new InvalidParameterException("One or more Actions with the given names already exist! Action NAMES must be UNIQUE!");
-        });
 
         ChoreographerAction action = new ChoreographerAction();
         action.setActionName(actionName);
@@ -184,24 +226,46 @@ public class ChoreographerDBService {
     public ChoreographerAction addNextActionToChoreographerAction(final String actionName, final String nextActionName) {
         logger.debug("addNextActionToChoreographerAction started...");
 
-        if (Utilities.isEmpty(actionName)) {
-            throw new InvalidParameterException("Action name or next Action name is null or blank.");
+        try {
+            if (Utilities.isEmpty(actionName)) {
+                throw new InvalidParameterException("Action name or next Action name is null or blank.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByActionName(actionName);
 
         ChoreographerAction choreographerAction;
-        if(choreographerActionOpt.isPresent()) {
-            choreographerAction = choreographerActionOpt.get();
-        } else {
-            throw new InvalidParameterException("Action with given Action Name of " + actionName + "doesn't exist!");
+
+        try {
+            if(choreographerActionOpt.isPresent()) {
+                choreographerAction = choreographerActionOpt.get();
+            } else {
+                throw new InvalidParameterException("Action with given Action Name of " + actionName + "doesn't exist!");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         Optional<ChoreographerAction> nextActionOpt = choreographerActionRepository.findByActionName(nextActionName);
-        if(nextActionOpt.isPresent()) {
-            choreographerAction.setNextAction(nextActionOpt.get());
-        } else if (nextActionName != null) {
-            throw new InvalidParameterException("Action with given Action Name of " + nextActionName + " doesn't exist!");
+        try {
+            if(nextActionOpt.isPresent()) {
+                choreographerAction.setNextAction(nextActionOpt.get());
+            } else if (nextActionName != null) {
+                throw new InvalidParameterException("Action with given Action Name of " + nextActionName + " doesn't exist!");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         return choreographerActionRepository.saveAndFlush(choreographerAction);
@@ -211,33 +275,47 @@ public class ChoreographerDBService {
     public ChoreographerActionPlan createChoreographerActionPlan(final String actionPlanName, final List<ChoreographerActionRequestDTO> actions) {
         logger.debug("createChoreographerActionPlan started...");
 
-        if(Utilities.isEmpty(actionPlanName)) {
-            throw new InvalidParameterException("ActionPlan name is null or blank!");
+        try {
+            if(Utilities.isEmpty(actionPlanName)) {
+                throw new InvalidParameterException("ActionPlan name is null or blank!");
+            }
+
+            Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
+
+            choreographerActionPlanOpt.ifPresent(choreographerActionPlan -> {
+                throw new InvalidParameterException("ActionPlan with given name already exists! ActionPlan NAMES must be UNIQUE!");
+            });
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
-
-        Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
-
-        choreographerActionPlanOpt.ifPresent(choreographerActionPlan -> {
-            throw new InvalidParameterException("ActionPlan with given name already exists! ActionPlan NAMES must be UNIQUE!");
-        });
 
         ChoreographerActionPlan actionPlan = new ChoreographerActionPlan(actionPlanName);
 
         ChoreographerActionPlan actionPlanEntry = choreographerActionPlanRepository.save(actionPlan);
 
-        if(actions != null && !actions.isEmpty()) {
-            for(ChoreographerActionRequestDTO action : actions) {
-                ChoreographerActionPlanActionConnection connection = choreographerActionPlanActionConnectionRepository
-                        .save(new ChoreographerActionPlanActionConnection(actionPlanEntry, createChoreographerAction(action.getActionName(), action.getActionSteps())));
-                actionPlanEntry.getActionPlanActionConnections().add(connection);
-            }
+        try {
+            if(actions != null && !actions.isEmpty()) {
+                for(ChoreographerActionRequestDTO action : actions) {
+                    ChoreographerActionPlanActionConnection connection = choreographerActionPlanActionConnectionRepository
+                            .save(new ChoreographerActionPlanActionConnection(actionPlanEntry, createChoreographerAction(action.getActionName(), action.getActionSteps())));
+                    actionPlanEntry.getActionPlanActionConnections().add(connection);
+                }
 
-            for (ChoreographerActionRequestDTO action : actions) {
-                addNextActionToChoreographerAction(action.getActionName(), action.getNextActionName());
-            }
+                for (ChoreographerActionRequestDTO action : actions) {
+                    addNextActionToChoreographerAction(action.getActionName(), action.getNextActionName());
+                }
 
-        } else {
-            throw new InvalidParameterException("ActionPlan doesn't have any actions or the action field is blank.");
+            } else {
+                throw new InvalidParameterException("ActionPlan doesn't have any actions or the action field is blank.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         choreographerActionPlanActionConnectionRepository.flush();
@@ -250,33 +328,47 @@ public class ChoreographerDBService {
 
         Optional<ChoreographerActionPlan> choreographerActionPlanOpt = choreographerActionPlanRepository.findByActionPlanName(actionPlanName);
 
-        choreographerActionPlanOpt.ifPresent(choreographerActionPlan -> {
-            throw new InvalidParameterException("ActionPlan with given name already exists! ActionPlan NAMES must be UNIQUE!");
-        });
+        try {
+            choreographerActionPlanOpt.ifPresent(choreographerActionPlan -> {
+                throw new InvalidParameterException("ActionPlan with given name already exists! ActionPlan NAMES must be UNIQUE!");
+            });
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
 
         ChoreographerActionPlan actionPlan = new ChoreographerActionPlan(actionPlanName);
 
         ChoreographerActionPlan actionPlanEntry = choreographerActionPlanRepository.save(actionPlan);
 
         List<ChoreographerAction> choreographerActions = new ArrayList<>(actions.size());
-        for(ChoreographerActionRequestDTO action : actions) {
-            String nextActionName = action.getNextActionName();
-            if(nextActionName != null) {
-                Optional<ChoreographerAction> nextActionOptional = choreographerActionRepository.findByActionName(nextActionName);
-                if(nextActionOptional.isPresent()) {
-                    Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionNameAndNextAction(action.getActionName(), nextActionOptional.get());
-                    if(actionOptional.isPresent()) {
-                        choreographerActions.add(actionOptional.get());
+        try {
+            for(ChoreographerActionRequestDTO action : actions) {
+                String nextActionName = action.getNextActionName();
+                if(nextActionName != null) {
+                    Optional<ChoreographerAction> nextActionOptional = choreographerActionRepository.findByActionName(nextActionName);
+                    if(nextActionOptional.isPresent()) {
+                        Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionNameAndNextAction(action.getActionName(), nextActionOptional.get());
+                        if(actionOptional.isPresent()) {
+                            choreographerActions.add(actionOptional.get());
+                        } else {
+                            throw new InvalidParameterException("One or more given Actions are not present in the database! Please create them first!");
+                        }
                     } else {
-                        throw new InvalidParameterException("One or more given Actions are not present in the database! Please create them first!");
+                        throw new InvalidParameterException("The NextAction you defined for an Action doesn't match with the Action's initial NextAction!");
                     }
                 } else {
-                    throw new InvalidParameterException("The NextAction you defined for an Action doesn't match with the Action's initial NextAction!");
+                    Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionName(action.getActionName());
+                    actionOptional.ifPresent(choreographerActions::add);
                 }
-            } else {
-                Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByActionName(action.getActionName());
-                actionOptional.ifPresent(choreographerActions::add);
             }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         for (ChoreographerAction action : choreographerActions) {
@@ -296,11 +388,12 @@ public class ChoreographerDBService {
         Direction validatedDirection = direction == null ? Direction.ASC : direction;
         String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
-        if(!ChoreographerActionPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-            throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
-        }
-
         try {
+            if (!ChoreographerActionPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+                throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+            }
+
+
             return choreographerActionPlanRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
