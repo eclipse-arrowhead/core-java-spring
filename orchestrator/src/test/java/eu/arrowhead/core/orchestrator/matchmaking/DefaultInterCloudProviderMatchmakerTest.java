@@ -7,12 +7,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.dto.ICNResponseDTO;
 import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 
@@ -135,6 +133,16 @@ public class DefaultInterCloudProviderMatchmakerTest {
 		Assert.assertEquals(1, orchestrationResponseDTO.getResponse().size() );
 		Assert.assertTrue(orDTO1.getProvider().getSystemName().equalsIgnoreCase(orchestrationResponseDTO.getResponse().get(0).getProvider().getSystemName()));
 	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void doMatchmakingNullParams() {		
+		
+		final InterCloudProviderMatchmakingParameters params = null;		
+		
+		algorithm.doMatchmaking(params);
+		
 	}
 
 }
