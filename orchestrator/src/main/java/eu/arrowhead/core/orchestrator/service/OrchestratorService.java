@@ -846,6 +846,10 @@ public class OrchestratorService {
 		
 		final GSDQueryResultDTO result = orchestratorDriver.doGlobalServiceDiscovery(
 				new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
+		if ( result == null || result.getResults() == null || result.getResults().isEmpty() ) {
+			
+			return new CloudResponseDTO();
+		}
 
 		final CloudMatchmakingParameters iCCMparams = new CloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
 		
