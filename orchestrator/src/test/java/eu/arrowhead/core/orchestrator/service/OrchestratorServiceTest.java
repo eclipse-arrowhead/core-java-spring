@@ -1004,12 +1004,22 @@ public class OrchestratorServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testOrchestrationFromStoreWithSystemIdParameterByNullRequest() {
+	public void testTopPriorityEntriesOrchestrationProcessWithSystemIdParameterByNullRequest() {
 		
 		final OrchestrationFormRequestDTO request = null;
 		final Long systemId = 1L;
 
 		testingObject.topPriorityEntriesOrchestrationProcess(request, systemId);
+				
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testOrchestrationFromStoreWithSystemIdParameterByNullRequest() {
+		
+		final OrchestrationFormRequestDTO request = null;
+
+		testingObject.orchestrationFromStore(request);
 				
 	}
 	
@@ -1245,7 +1255,221 @@ public class OrchestratorServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testOrchestrationFromStoreWithSystemIdParameterByIdBySREntryWithMoreThenOneInterfaceOk() {
+	public void testOrchestrationFromStoreWithNullStoreEntryListOk() {
+		
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+				interfaces(serviceInterface.getInterfaceName()).
+		  		build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																					build();
+		final Long systemId = 1L;
+			
+		final System consumerSystem = new System();
+		consumerSystem.setId(systemId);
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+		final OrchestratorStore orchestratorStoreForeign = new OrchestratorStore();
+		orchestratorStoreForeign.setConsumerSystem(consumerSystem);
+		orchestratorStoreForeign.setForeign(true);
+		orchestratorStoreForeign.setServiceDefinition(serviceDefinition);
+		orchestratorStoreForeign.setProviderSystemId(1L);
+		orchestratorStoreForeign.setServiceInterface(serviceInterface);
+		
+		final OrchestratorStore orchestratorStore = new OrchestratorStore();
+		orchestratorStore.setConsumerSystem(consumerSystem);
+		orchestratorStore.setForeign(false);
+		orchestratorStore.setServiceDefinition(serviceDefinition);
+		orchestratorStore.setProviderSystemId(1L);
+		orchestratorStore.setServiceInterface(serviceInterface);
+		
+		final List<OrchestratorStore> entryList = List.of(orchestratorStoreForeign);
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+		
+		final CloudResponseDTO providerCloud1 = new CloudResponseDTO(
+				1L, 
+				"operator1", 
+				"cloudname1", 
+				false, 
+				true, 
+				false, 
+				null, 
+				null, 
+				null);
+		final OrchestratorStoreResponseDTO foreignStoreEntry = new OrchestratorStoreResponseDTO();
+		foreignStoreEntry.setProviderCloud(providerCloud1);
+		foreignStoreEntry.setProviderSystem(systemResponseDTO);
+		foreignStoreEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		foreignStoreEntry.setServiceInterface(new ServiceInterfaceResponseDTO(
+				1L,
+				serviceInterface.getInterfaceName(),
+				null,
+				null));
+		foreignStoreEntry.setForeign(true);
+		
+		final OrchestrationResultDTO orchestrationResultDTO = new OrchestrationResultDTO(
+				systemResponseDTO, 
+				serviceDefinitionResponseDTO, 
+				"serviceUri", 
+				ServiceSecurityType.NOT_SECURE , 
+				Map.of(), 
+				interfaces, 
+				1);
+		orchestrationResultDTO.setWarnings(new ArrayList<>());
+		
+		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
+		
+		
+		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
+		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
+		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
+     		
+		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
+		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
+		
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn( null );
+		
+		when(orchestratorDriver.doInterCloudNegotiations(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
+		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
+	
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		
+		Assert.assertNotNull(result);
+		Assert.assertTrue(result.getResponse().isEmpty());
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOrchestrationFromStoreWithEmptyStoreEntriesOk() {
+		
+		final ServiceDefinition serviceDefinition = new ServiceDefinition("serviceDefinition");
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+				interfaces(serviceInterface.getInterfaceName()).
+		  		build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																					build();
+		final Long systemId = 1L;
+			
+		final System consumerSystem = new System();
+		consumerSystem.setId(systemId);
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+		final OrchestratorStore orchestratorStoreForeign = new OrchestratorStore();
+		orchestratorStoreForeign.setConsumerSystem(consumerSystem);
+		orchestratorStoreForeign.setForeign(true);
+		orchestratorStoreForeign.setServiceDefinition(serviceDefinition);
+		orchestratorStoreForeign.setProviderSystemId(1L);
+		orchestratorStoreForeign.setServiceInterface(serviceInterface);
+		
+		final OrchestratorStore orchestratorStore = new OrchestratorStore();
+		orchestratorStore.setConsumerSystem(consumerSystem);
+		orchestratorStore.setForeign(false);
+		orchestratorStore.setServiceDefinition(serviceDefinition);
+		orchestratorStore.setProviderSystemId(1L);
+		orchestratorStore.setServiceInterface(serviceInterface);
+		
+		final List<OrchestratorStore> entryList = List.of(orchestratorStoreForeign);
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+		
+		final CloudResponseDTO providerCloud1 = new CloudResponseDTO(
+				1L, 
+				"operator1", 
+				"cloudname1", 
+				false, 
+				true, 
+				false, 
+				null, 
+				null, 
+				null);
+		final OrchestratorStoreResponseDTO foreignStoreEntry = new OrchestratorStoreResponseDTO();
+		foreignStoreEntry.setProviderCloud(providerCloud1);
+		foreignStoreEntry.setProviderSystem(systemResponseDTO);
+		foreignStoreEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		foreignStoreEntry.setServiceInterface(new ServiceInterfaceResponseDTO(
+				1L,
+				serviceInterface.getInterfaceName(),
+				null,
+				null));
+		foreignStoreEntry.setForeign(true);
+		
+		final OrchestrationResultDTO orchestrationResultDTO = new OrchestrationResultDTO(
+				systemResponseDTO, 
+				serviceDefinitionResponseDTO, 
+				"serviceUri", 
+				ServiceSecurityType.NOT_SECURE , 
+				Map.of(), 
+				interfaces, 
+				1);
+		orchestrationResultDTO.setWarnings(new ArrayList<>());
+		
+		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
+		
+		
+		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
+		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
+		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
+		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
+		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
+     		
+		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
+		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
+		
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of());
+		
+		when(orchestratorDriver.doInterCloudNegotiations(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
+		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
+	
+		final OrchestrationResponseDTO result = testingObject.orchestrationFromStore(request);
+		
+		Assert.assertNotNull(result);
+		Assert.assertTrue(result.getResponse().isEmpty());
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTopPriorityEntriesOrchestrationProcessWithSystemIdParameterByIdBySREntryWithMoreThenOneInterfaceOk() {
 		
 		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
 		  		build();
