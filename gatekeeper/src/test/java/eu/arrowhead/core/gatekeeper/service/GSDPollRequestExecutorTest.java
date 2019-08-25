@@ -20,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.RelayType;
@@ -35,7 +36,7 @@ public class GSDPollRequestExecutorTest {
 
 	private GatekeeperRelayClient relayClient;
 	
-	private final BlockingQueue<GSDPollResponseDTO> queue = new LinkedBlockingQueue<>(1);
+	private final BlockingQueue<ErrorWrapperDTO> queue = new LinkedBlockingQueue<>(1);
 	
 	private ThreadPoolExecutor threadPool;
 	
@@ -58,7 +59,7 @@ public class GSDPollRequestExecutorTest {
 		
 		testingObject.execute();
 		
-		final GSDPollResponseDTO gsdPollResponseDTO = queue.take();
+		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
 		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}

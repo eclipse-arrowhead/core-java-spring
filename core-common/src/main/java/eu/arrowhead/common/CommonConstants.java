@@ -199,12 +199,13 @@ public class CommonConstants {
 	public static final String ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
 	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
 	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
-	
+
+	public static final String RELAY_CHECK_INTERVAL = "relay_check_interval"; // in seconds
+	public static final String $RELAY_CHECK_INTERVAL_WD = "${" + RELAY_CHECK_INTERVAL + ":" + Defaults.DEFAULT_RELAY_CHECK_INTERVAL + "}";
 	public static final String GATEKEEPER_IS_GATEWAY_PRESENT = "gateway_is_present";
 	public static final String $GATEKEEPER_IS_GATEWAY_PRESENT_WD = "${" + GATEKEEPER_IS_GATEWAY_PRESENT + ":" + Defaults.DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT + "}";
 	public static final String GATEKEEPER_IS_GATEWAY_MANDATORY = "gateway_is_mandatory";
 	public static final String $GATEKEEPER_IS_GATEWAY_MANDATORY_WD = "${" + GATEKEEPER_IS_GATEWAY_MANDATORY + ":" + Defaults.DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY + "}";
-	
 	
 	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
 	public static final String INTER_CLOUD_PROVIDER_MATCHMAKER = "interCloudProviderMatchmaker";

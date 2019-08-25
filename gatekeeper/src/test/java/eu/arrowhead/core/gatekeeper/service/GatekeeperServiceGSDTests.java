@@ -22,6 +22,7 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
@@ -82,6 +83,35 @@ public class GatekeeperServiceGSDTests {
 		
 		final GSDQueryResultDTO result = gatekeeperService.initGSDPoll(gsdQueryFormDTO);
 		assertEquals("operator", result.getResults().get(0).getProviderCloud().getOperator());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitGSDPollWithErrorMessageDTOInGSDPollAnswer() throws InterruptedException {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
+		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
+		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
+		
+		final Cloud cloud1 = new Cloud("operator1", "name1", true, true, false, "dfsgdfsgdfh");
+		cloud1.setCreatedAt(ZonedDateTime.now());
+		cloud1.setUpdatedAt(ZonedDateTime.now());
+		
+		final Cloud cloud2 = new Cloud("operator2", "name2", true, true, false, "dsvbgasdg");
+		cloud2.setCreatedAt(ZonedDateTime.now());
+		cloud2.setUpdatedAt(ZonedDateTime.now());
+		
+		final Cloud ownCloud = new Cloud("operatorOwn", "nameOwn", true, true, true, "fadgafdh");
+		ownCloud.setCreatedAt(ZonedDateTime.now());
+		ownCloud.setUpdatedAt(ZonedDateTime.now());
+		
+		when(gatekeeperDBService.getNeighborClouds()).thenReturn(List.of(cloud1, cloud2));
+		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
+		when(gatekeeperDriver.sendGSDPollRequest(any(), any())).thenReturn(List.of(new GSDPollResponseDTO(), new ErrorMessageDTO(new InvalidParameterException("test"))));
+		when(gatekeeperDBService.getCloudByOperatorAndName(any(), any())).thenReturn(cloud1);
+		
+		gatekeeperService.initGSDPoll(gsdQueryFormDTO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -263,44 +293,6 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setSecure(true);
 		cloudDTO.setNeighbor(true);
 		cloudDTO.setAuthenticationInfo("test-auth-info");
-		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testDoGSDPollWithNullRequesterCloudAuthInfo() {
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsPresent", false);
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsMandatory", false);
-		
-		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
-		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
-		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
-		cloudDTO.setOperator("test-operator");
-		cloudDTO.setName("test-name");
-		cloudDTO.setSecure(true);
-		cloudDTO.setNeighbor(true);
-		cloudDTO.setAuthenticationInfo(null);
-		
-		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = InvalidParameterException.class)
-	public void testDoGSDPollWithBlankRequesterCloudAuthInfo() {
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsPresent", false);
-		ReflectionTestUtils.setField(gatekeeperService, "gatewayIsMandatory", false);
-		
-		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
-		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
-		final CloudRequestDTO cloudDTO = new CloudRequestDTO();
-		cloudDTO.setOperator("test-operator");
-		cloudDTO.setName("test-name");
-		cloudDTO.setSecure(true);
-		cloudDTO.setNeighbor(true);
-		cloudDTO.setAuthenticationInfo("  ");
 		
 		gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
 	}

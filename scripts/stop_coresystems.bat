@@ -12,6 +12,7 @@ FOR /F "tokens=1" %%p in ('"jps -v | find "authorization""') DO taskkill /pid %%
 timeout /t %time_to_sleep% /nobreak > NUL
 FOR /F "tokens=1" %%p in ('"jps -v | find "serviceregistry""') DO taskkill /pid %%p > NUL 2>&1
 
+timeout /t 2 /nobreak > NUL
 SET STILL_THERE=""
 
 FOR /F "tokens=1" %%p in ('"jps -v | find "serviceregistry""') DO set STILL_THERE=%%p

@@ -25,7 +25,8 @@ public class GatekeeperTask implements Runnable {
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperTask.class);
 
-	private final Session session;
+	private final String relayHost;
+	private final int relayPort;
 	private final GatekeeperRelayClient relayClient;
 	private final Message msg;
 	
@@ -35,15 +36,17 @@ public class GatekeeperTask implements Runnable {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public GatekeeperTask(final ApplicationContext appContext, final Session session, final GatekeeperRelayClient relayClient, final Message msg) {
+	public GatekeeperTask(final ApplicationContext appContext, final String relayHost, final int relayPort, final GatekeeperRelayClient relayClient, final Message msg) {
 		logger.debug("Constructor started...");
 		
 		Assert.notNull(appContext, "appContext is null.");
-		Assert.notNull(session, "Session is null.");
+		Assert.isTrue(!Utilities.isEmpty(relayHost), "relayHost is null or blank.");
+		Assert.isTrue(relayPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && relayPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "relayPort is invalid.");
 		Assert.notNull(relayClient, "relayClient is null.");
 		Assert.notNull(msg, "Message is null");
 		
-		this.session = session;
+		this.relayHost = relayHost;
+		this.relayPort = relayPort;
 		this.relayClient = relayClient;
 		this.msg = msg;
 		this.gatekeeperService = appContext.getBean(GatekeeperService.class);
@@ -77,6 +80,7 @@ public class GatekeeperTask implements Runnable {
 	private void handleMessage(final GeneralAdvertisementMessageDTO gaMsg) {
 		logger.debug("handleMessage started...");
 		try {
+			final Session session = relayClient.createConnection(relayHost, relayPort);
 			final GatekeeperRelayRequest request = relayClient.sendAcknowledgementAndReturnRequest(session, gaMsg);
 			final Object response = handleRequest(request);
 			relayClient.sendResponse(session, request, response);

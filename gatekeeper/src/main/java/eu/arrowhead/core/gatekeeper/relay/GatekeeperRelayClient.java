@@ -15,6 +15,7 @@ public interface GatekeeperRelayClient {
 	//-------------------------------------------------------------------------------------------------
 	public Session createConnection(final String host, final int port) throws JMSException;
 	public void closeConnection(final Session session);
+	public boolean isConnectionClosed(final Session session);
 	
 	//-------------------------------------------------------------------------------------------------
 	public MessageConsumer subscribeGeneralAdvertisementTopic(final Session session) throws JMSException;

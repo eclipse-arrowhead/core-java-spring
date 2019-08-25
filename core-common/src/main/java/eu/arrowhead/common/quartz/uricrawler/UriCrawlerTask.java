@@ -97,7 +97,7 @@ public class UriCrawlerTask implements Job {
 			logger.debug("STOPPED: URI crawler task.");
 		} catch (final SchedulerException ex) {
 			logger.error(ex.getMessage());
-			logger.debug(ex);
+			logger.debug("Stacktrace:", ex);
 		}
 	}
 	
@@ -176,7 +176,7 @@ public class UriCrawlerTask implements Job {
 			}
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
-			logger.debug(ex);
+			logger.debug("Stacktrace:", ex);
 		}
 		
 		return false;
