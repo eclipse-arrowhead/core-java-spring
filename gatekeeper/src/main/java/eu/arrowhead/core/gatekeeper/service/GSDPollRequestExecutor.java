@@ -19,6 +19,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
@@ -30,7 +31,7 @@ public class GSDPollRequestExecutor {
 	
 	private static final int MAX_THREAD_POOL_SIZE = 20;
 
-	private final BlockingQueue<GSDPollResponseDTO> queue;
+	private final BlockingQueue<ErrorWrapperDTO> queue;
 	private final ThreadPoolExecutor threadPool;
 	private final GatekeeperRelayClient relayClient;
 	private final GSDPollRequestDTO gsdPollRequestDTO;
@@ -42,7 +43,7 @@ public class GSDPollRequestExecutor {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public GSDPollRequestExecutor(final BlockingQueue<GSDPollResponseDTO> queue, final GatekeeperRelayClient relayClient, final GSDPollRequestDTO gsdPollRequestDTO, final Map<Cloud, Relay> gatekeeperRelayPerCloud) {
+	public GSDPollRequestExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final GSDPollRequestDTO gsdPollRequestDTO, final Map<Cloud, Relay> gatekeeperRelayPerCloud) {
 		
 		this.queue = queue;
 		this.relayClient = relayClient;

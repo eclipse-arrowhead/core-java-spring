@@ -2,6 +2,7 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -9,7 +10,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 
 @JsonInclude(Include.NON_NULL)
-public class ErrorMessageDTO implements Serializable {
+public class ErrorMessageDTO implements Serializable, ErrorWrapperDTO {
 	
 	//=================================================================================================
 	// members
@@ -68,5 +69,12 @@ public class ErrorMessageDTO implements Serializable {
 	@Override
 	public String toString() {
 		return "ErrorMessageDTO [errorMessage = " + errorMessage + ", errorCode = " + errorCode + ", exceptionType = " + exceptionType + ", origin = " + origin + "]";
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
+	@Override
+	public boolean isError() {
+		return true;
 	}
 }

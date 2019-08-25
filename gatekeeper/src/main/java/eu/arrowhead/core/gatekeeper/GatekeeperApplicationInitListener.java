@@ -1,20 +1,13 @@
 package eu.arrowhead.core.gatekeeper;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
-import java.util.Set;
 
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -24,12 +17,8 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
+import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
-import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementMessageListener;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
@@ -39,10 +28,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	
 	//=================================================================================================
 	// members
-	
-	@Autowired
-	private GatekeeperDBService gatekeeperDBService;
-	
+
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
 	
@@ -52,13 +38,9 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
 	private boolean gatewayIsMandatory;
 	
-	@Value(CommonConstants.$NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD)
-	private int noWorkers;
-	
-	private final Set<Session> openConnections = new HashSet<>();
-	private final Set<Closeable> listenerResources = new HashSet<>();
-	private GatekeeperRelayClient gatekeeperRelayClient;
 	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
+	
+	private RelaySubscriberDataContainer relaySubscriberDataContainer; // initialization is on demand to avoid circular dependencies 
 	
 	//=================================================================================================
 	// methods
@@ -92,27 +74,18 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		}
 		
 		initializeGatekeeperRelayClient(event.getApplicationContext());
-		subscribeListenersToGatekeepers(event.getApplicationContext());
+		relaySubscriberDataContainer = event.getApplicationContext().getBean(RelaySubscriberDataContainer.class);
+		relaySubscriberDataContainer.init();
+		System.out.println();
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customDestroy() {
-		for (final Closeable resource : listenerResources) {
-			try {
-				resource.close();
-			} catch (final IOException ex) {
-				logger.error("Error while trying to close message listener: {}", ex.getMessage());
-				logger.debug("Exception:", ex);
-			}
-		}
-		
 		// close connections using listening on advertisement topic
-		for (final Session session : openConnections) {
-			gatekeeperRelayClient.closeConnection(session);
-		}
+		relaySubscriberDataContainer.close();
 		
-		// close connections used by web services
+		// close connections used by web services and gatekeeper tasks
 		for (final Session session : gatekeeperRelayClientWithCache.getCachedSessions()) {
 			gatekeeperRelayClientWithCache.closeConnection(session);
 		}
@@ -126,24 +99,6 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		final PublicKey publicKey = (PublicKey) context.get(CommonConstants.SERVER_PUBLIC_KEY);
 		final PrivateKey privateKey = (PrivateKey) context.get(CommonConstants.SERVER_PRIVATE_KEY);
 
-		this.gatekeeperRelayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, false);
 		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void subscribeListenersToGatekeepers(final ApplicationContext appContext) {
-		final Set<Relay> gatekeeperRelays = gatekeeperDBService.getAllLiveGatekeeperRelays();
-		for (final Relay relay : gatekeeperRelays) {
-			try {
-				final Session session = gatekeeperRelayClient.createConnection(relay.getAddress(), relay.getPort());
-				openConnections.add(session);
-				final MessageConsumer consumer = gatekeeperRelayClient.subscribeGeneralAdvertisementTopic(session);
-				final GeneralAdvertisementMessageListener listener = new GeneralAdvertisementMessageListener(appContext, session, gatekeeperRelayClient, noWorkers);
-				listenerResources.add(listener);
-				consumer.setMessageListener(listener); 
-			} catch (final JMSException | ArrowheadException ex) {
-				logger.debug("Error while trying to subscribe relay {}:{}", relay.getAddress(), relay.getPort()); // we skip the wrong ones
-			}
-		}
 	}
 }

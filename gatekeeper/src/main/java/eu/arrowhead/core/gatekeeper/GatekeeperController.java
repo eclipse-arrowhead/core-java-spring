@@ -97,6 +97,7 @@ public class GatekeeperController {
 	private static final String POST_INIT_ICN_DESCRIPTION = "Starts the inter cloud negotiation process";
 	private static final String POST_INIT_ICN_HTTP_200_MESSAGE = "ICN result returned";
 	private static final String POST_INIT_ICN_HTTP_400_MESSAGE = "Could not initiate inter cloud negotiation";
+	private static final String POST_INIT_ICN_HTTP_504_MESSAGE = "Timeout occurs in the communication via relay.";
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperController.class);
 	
@@ -460,7 +461,8 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_INIT_ICN_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_INIT_ICN_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_GATEWAY_TIMEOUT, message = POST_INIT_ICN_HTTP_504_MESSAGE)
 	})
 	@PostMapping(path = INIT_INTER_CLOUD_NEGOTIATION_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ICNResultDTO initiateInterCloudNegotiation(@RequestBody final ICNRequestFormDTO icnForm) {

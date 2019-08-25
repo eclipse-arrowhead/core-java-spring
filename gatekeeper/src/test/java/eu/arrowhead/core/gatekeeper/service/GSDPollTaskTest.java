@@ -1,6 +1,7 @@
 package eu.arrowhead.core.gatekeeper.service;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -35,8 +36,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 
@@ -50,7 +56,7 @@ public class GSDPollTaskTest {
 
 	private GatekeeperRelayClient relayClient;
 	
-	private final BlockingQueue<GSDPollResponseDTO> queue = new LinkedBlockingQueue<>(1);;
+	private final BlockingQueue<ErrorWrapperDTO> queue = new LinkedBlockingQueue<>(1);;
 	
 	//=================================================================================================
 	// methods
@@ -69,7 +75,7 @@ public class GSDPollTaskTest {
 		
 		testingObject.run();
 		
-		final GSDPollResponseDTO gsdPollResponseDTO = queue.take();
+		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
 		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
@@ -82,7 +88,7 @@ public class GSDPollTaskTest {
 		
 		testingObject.run();
 		
-		final GSDPollResponseDTO gsdPollResponseDTO = queue.take();
+		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
 		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
@@ -94,7 +100,7 @@ public class GSDPollTaskTest {
 		
 		testingObject.run();
 		
-		final GSDPollResponseDTO gsdPollResponseDTO = queue.take();
+		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
 		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
@@ -108,9 +114,59 @@ public class GSDPollTaskTest {
 		
 		testingObject.run();
 		
-		final GSDPollResponseDTO gsdPollResponseDTO = queue.take();
+		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
 		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWithThrowingInvalidParameterExceptionByRelayClient1() throws JMSException, InterruptedException {
+		doThrow(new InvalidParameterException("test")).when(relayClient).publishGeneralAdvertisement(any(), any(), any());
+		
+		testingObject.run();
+		
+		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
+		
+		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.INVALID_PARAMETER);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWithThrowingInvalidParameterExceptionExceptionByRelayClient2() throws JMSException, InterruptedException {
+		when(relayClient.publishGeneralAdvertisement(any(), any(), any())).thenReturn(new GeneralAdvertisementResult(getTestMessageConsumer(), "peer-cn", getDummyPublicKey(), "session-id"));
+		doThrow(new InvalidParameterException("test")).when(relayClient).sendRequestAndReturnResponse(any(), any(), any());
+		
+		testingObject.run();
+		
+		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
+		
+		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.INVALID_PARAMETER);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWithThrowingBadPayloadExceptionByRelayClient1() throws JMSException, InterruptedException {
+		doThrow(new BadPayloadException("test")).when(relayClient).publishGeneralAdvertisement(any(), any(), any());
+		
+		testingObject.run();
+		
+		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
+		
+		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.BAD_PAYLOAD);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWithThrowingBadPayloadExceptionByRelayClient2() throws JMSException, InterruptedException {
+		when(relayClient.publishGeneralAdvertisement(any(), any(), any())).thenReturn(new GeneralAdvertisementResult(getTestMessageConsumer(), "peer-cn", getDummyPublicKey(), "session-id"));
+		doThrow(new BadPayloadException("test")).when(relayClient).sendRequestAndReturnResponse(any(), any(), any());
+		
+		testingObject.run();
+		
+		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
+		
+		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.BAD_PAYLOAD);
 	}
 	
 	//=================================================================================================
