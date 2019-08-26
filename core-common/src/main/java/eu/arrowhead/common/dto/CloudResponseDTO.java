@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class CloudResponseDTO implements Serializable {
 
@@ -62,4 +63,28 @@ public class CloudResponseDTO implements Serializable {
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }	
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, name, operator);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final CloudResponseDTO other = (CloudResponseDTO) obj;
+		return Objects.equals( id, other.id) &&
+				Objects.equals(name, other.name) && 
+				Objects.equals(operator, other.operator);
+	}
 }
