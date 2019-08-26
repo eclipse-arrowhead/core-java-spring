@@ -46,6 +46,13 @@ public class GSDPollTask implements Runnable {
 		this.recipientCloudPublicKey = recipientCloudPublicKey;
 		this.gsdPollRequestDTO = gsdPollRequestDTO;
 		this.queue = queue;
+		
+		Assert.notNull(relayClient, "relayClient is null");
+		Assert.notNull(session, "session is null");
+		Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
+		Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudCN is empty");
+		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
+		Assert.notNull(queue, "queue is null");
 	}
 
 
@@ -54,13 +61,6 @@ public class GSDPollTask implements Runnable {
 	public void run() {
 		try {
 			logger.debug("GDSPollTask.run started...");
-			
-			Assert.notNull(relayClient, "relayClient is null");
-			Assert.notNull(session, "session is null");
-			Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
-			Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudCN is empty");
-			Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
-			Assert.notNull(queue, "queue is null");
 			
 			if (Thread.currentThread().isInterrupted()) {
 				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
