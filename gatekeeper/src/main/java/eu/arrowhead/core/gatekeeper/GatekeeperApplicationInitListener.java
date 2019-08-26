@@ -76,7 +76,6 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		initializeGatekeeperRelayClient(event.getApplicationContext());
 		relaySubscriberDataContainer = event.getApplicationContext().getBean(RelaySubscriberDataContainer.class);
 		relaySubscriberDataContainer.init();
-		System.out.println();
 	}
 
 	//-------------------------------------------------------------------------------------------------
