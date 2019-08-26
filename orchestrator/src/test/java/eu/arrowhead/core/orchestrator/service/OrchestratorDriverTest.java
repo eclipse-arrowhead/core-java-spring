@@ -227,7 +227,7 @@ public class OrchestratorDriverTest {
 		
 		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemId( 1L );
 		
-		Assert.assertTrue( systemResponseDTO != null );
+		Assert.assertNotNull( systemResponseDTO );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ public class OrchestratorDriverTest {
 		
 		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
 		
-		Assert.assertTrue( systemResponseDTO != null );
+		Assert.assertNotNull( systemResponseDTO );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ public class OrchestratorDriverTest {
 		
 		final GSDQueryResultDTO gsdQueryResultDTO = orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
 
-		Assert.assertTrue( gsdQueryResultDTO != null );
+		Assert.assertNotNull( gsdQueryResultDTO );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -431,7 +431,7 @@ public class OrchestratorDriverTest {
 		
 		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations(requestDTO);
 		
-		Assert.assertTrue( icnResultDTO != null );
+		Assert.assertNotNull( icnResultDTO );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
