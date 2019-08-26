@@ -205,7 +205,7 @@ public class GatekeeperDBService {
 				}				
 
 
-				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
 				
 				final String operator = dto.getOperator().toLowerCase().trim();
 				final String name = dto.getName().toLowerCase().trim();
@@ -271,7 +271,7 @@ public class GatekeeperDBService {
 			}
 			final Cloud cloud = cloudOpt.get();
 			
-			validateCloudParameters(false, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+			validateCloudParameters(false, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
 			final String dtoOperator = dto.getOperator().toLowerCase().trim();
 			final String dtoName = dto.getName().toLowerCase().trim();
 			final boolean dtoSecure = dto.getSecure() == null ? false : dto.getSecure();
@@ -527,7 +527,7 @@ public class GatekeeperDBService {
 				if (dto == null) {
 					throw new InvalidParameterException("List of RelayRequestDTO contains null element");
 				}				
-				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), dto.getType());
+				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isExclusive(), dto.getType());
 				
 				final String address = dto.getAddress().toLowerCase().trim();
 				final String uniqueConstraint = address  + ":" + dto.getPort();
@@ -585,7 +585,7 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException("Type of relay couldn't be updated");
 			}
 			
-			validateRelayParameters(false, address, port, isSecure, isExclusive, type.toString());
+			validateRelayParameters(false, address, port, isExclusive, type.toString());
 			if (!relay.getAddress().equalsIgnoreCase(address) || relay.getPort() != port) {
 				checkUniqueConstraintOfRelayTable(address, port);
 			}
@@ -642,7 +642,7 @@ public class GatekeeperDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateCloudParameters(final boolean withUniqueConstraintCheck, String operator, String name, Boolean secure, final Boolean neighbor, final String authenticationInfo,
+	private void validateCloudParameters(final boolean withUniqueConstraintCheck, String operator, String name, Boolean secure, final String authenticationInfo,
 										 final List<Long> gatekeeperRelayIds, final List<Long> gatewayRealyIds) {
 		logger.debug("validateCloudParameters started...");
 		
@@ -699,7 +699,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, final Boolean secure, Boolean exclusive, final String type) {
+	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, Boolean exclusive, final String type) {
 		logger.debug("validateRelayParameters started...");
 		
 		if (Utilities.isEmpty(address)) {
