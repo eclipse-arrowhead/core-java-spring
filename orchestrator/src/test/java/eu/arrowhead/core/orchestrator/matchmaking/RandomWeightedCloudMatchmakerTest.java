@@ -1,10 +1,12 @@
 package eu.arrowhead.core.orchestrator.matchmaking;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.CloudRequestDTO;
@@ -25,7 +27,7 @@ public class RandomWeightedCloudMatchmakerTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testDoMatchmakingMoreWeightResultsMoreMatching() {		
+	public void testDoMatchmakingOk() {		
 		
 		final boolean onlyPreferred = false;
 		final List<CloudRequestDTO> preferredClouds = List.of();
@@ -76,27 +78,16 @@ public class RandomWeightedCloudMatchmakerTest {
 				preferredClouds, 
 				onlyPreferred);	
 		
-		int provider1 = 0;
-		int provider2 = 0;
-		for (int i = 0; i < 100; i++) {
-			
-			final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
-			
-			if (cloudResponseDTO.getName().equalsIgnoreCase(providerCloud1.getName())) {
-				
-				++provider1;
-			}else {
-				++provider2;
-			}
-		}
+		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue( provider1 > provider2 );
-
+		Assert.assertNotNull( cloudResponseDTO );
+		Assert.assertNotNull( cloudResponseDTO.getName() );
+		Assert.assertNotNull( cloudResponseDTO.getOperator() );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testDoMatchmakingMoreWeightResultsMoreMatchingOnlyIfItIsPreferred() {		
+	public void testDoMatchmakingReturnsPreferred() {		
 		
 		final boolean onlyPreferred = false;
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
@@ -151,21 +142,13 @@ public class RandomWeightedCloudMatchmakerTest {
 				preferredClouds, 
 				onlyPreferred);	
 		
-		int provider1 = 0;
-		int provider2 = 0;
-		for (int i = 0; i < 100; i++) {
-			
-			final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
-			
-			if (cloudResponseDTO.getName().equalsIgnoreCase(providerCloud1.getName())) {
-				
-				++provider1;
-			}else {
-				++provider2;
-			}
-		}
+		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertFalse( provider1 > provider2 );
+		Assert.assertNotNull( cloudResponseDTO );
+		Assert.assertNotNull( cloudResponseDTO.getName() );
+		Assert.assertNotNull( cloudResponseDTO.getOperator() );
+		Assert.assertTrue( cloudResponseDTO.getOperator().equalsIgnoreCase(
+				preferredClouds.get(0).getOperator()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -227,7 +210,7 @@ public class RandomWeightedCloudMatchmakerTest {
 		
 		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue( cloudResponseDTO.getName() == null );
+		Assert.assertNull( cloudResponseDTO.getName() );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -289,7 +272,7 @@ public class RandomWeightedCloudMatchmakerTest {
 		
 		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue( cloudResponseDTO.getName() != null );
+		Assert.assertNotNull( cloudResponseDTO.getName() );
 	}
 
 	
@@ -320,7 +303,7 @@ public class RandomWeightedCloudMatchmakerTest {
 		
 		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue( cloudResponseDTO.getName() == null );
+		Assert.assertNull( cloudResponseDTO.getName() );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -347,7 +330,7 @@ public class RandomWeightedCloudMatchmakerTest {
 		
 		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue( cloudResponseDTO.getName() == null );
+		Assert.assertNull( cloudResponseDTO.getName() );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -409,12 +392,12 @@ public class RandomWeightedCloudMatchmakerTest {
 		
 		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue( cloudResponseDTO.getName() == null );
+		Assert.assertNull( cloudResponseDTO.getName() );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testDoMatchmakingAddingAProviderMoreThenOnceNotResultsMoreMatching() {		
+	public void testDoMatchmakingAddingAProviderMoreThenOnce() {		
 		
 		final boolean onlyPreferred = false;
 		final List<CloudRequestDTO> preferredClouds = List.of();
@@ -469,21 +452,11 @@ public class RandomWeightedCloudMatchmakerTest {
 				preferredClouds, 
 				onlyPreferred);	
 		
-		int provider1 = 0;
-		int provider2 = 0;
-		for (int i = 0; i < 100; i++) {
-			
-			final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
-			
-			if (cloudResponseDTO.getName().equalsIgnoreCase(providerCloud1.getName())) {
-				
-				++provider1;
-			}else {
-				++provider2;
-			}
-		}
+		final CloudResponseDTO cloudResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue( provider1 > provider2 );
+		Assert.assertNotNull( cloudResponseDTO );
+		Assert.assertNotNull( cloudResponseDTO.getName() );
+		Assert.assertNotNull( cloudResponseDTO.getOperator() );
 
 	}
 
