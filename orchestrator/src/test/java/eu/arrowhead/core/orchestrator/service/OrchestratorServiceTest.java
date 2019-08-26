@@ -2599,6 +2599,181 @@ public class OrchestratorServiceTest {
 		
 		Assert.assertNotNull(orchestrationResult);
 		Assert.assertTrue(!orchestrationResult.getResponse().isEmpty());
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTriggerInterCloudWithNullICNResultDTO() {
+		
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+	
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+		  		build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("cloud2name");
+		providerCloud.setOperator("operator");
+		
+		final CloudResponseDTO cloudResponseDTO = new CloudResponseDTO(
+				1L, 
+				"operator", 
+				"cloud2name", 
+				false, 
+				true, 
+				false,
+				"",
+				"",
+				"");
+		
+		final PreferredProviderDataDTO preferredProviderDataDTO = new PreferredProviderDataDTO();
+		preferredProviderDataDTO.setProviderSystem(provider);
+		preferredProviderDataDTO.setProviderCloud(providerCloud);
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    preferredProviders(preferredProviderDataDTO).
+																				    flag(Flag.MATCHMAKING, true).
+																					build();
+
+		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(
+				cloudResponseDTO, 
+				serviceDefinitionResponseDTO.getServiceDefinition(), 
+				List.of(serviceInterface.getInterfaceName()), 
+				1, 
+				Map.of());
+		
+		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
+		
+		final System consumerSystem = new System();
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+	final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+			
+		final OrchestrationResultDTO orchestrationResultDTO = new OrchestrationResultDTO(
+				systemResponseDTO, 
+				serviceDefinitionResponseDTO, 
+				"serviceUri", 
+				ServiceSecurityType.NOT_SECURE , 
+				Map.of(), 
+				interfaces, 
+				1);
+		orchestrationResultDTO.setWarnings(new ArrayList<>());
+		
+		final ICNResultDTO icnResultDTO = null;
+		    
+		when(orchestratorDriver.doGlobalServiceDiscovery(any(GSDQueryFormDTO.class))).thenReturn(gsdResult);		
+		when(cloudMatchmaker.doMatchmaking(any(CloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
+		when(orchestratorDriver.doInterCloudNegotiations(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
+		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
+	
+		final OrchestrationResponseDTO orchestrationResult = testingObject.triggerInterCloud(request);
+		
+		Assert.assertNotNull(orchestrationResult);
+		Assert.assertTrue(orchestrationResult.getResponse().isEmpty());
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testTriggerInterCloudWithMatchmakingFalse() {
+		
+		final ServiceInterface serviceInterface = new ServiceInterface("HTTP-SECURE-JSON");
+		
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final List<ServiceInterfaceResponseDTO> interfaces = List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null));
+	
+		final ServiceQueryFormDTO serviceForm = new ServiceQueryFormDTO.Builder("service").
+		  		build();
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("localhost");
+		provider.setPort(1234);
+		
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("cloud2name");
+		providerCloud.setOperator("operator");
+		
+		final CloudResponseDTO cloudResponseDTO = new CloudResponseDTO(
+				1L, 
+				"operator", 
+				"cloud2name", 
+				false, 
+				true, 
+				false,
+				"",
+				"",
+				"");
+		
+		final PreferredProviderDataDTO preferredProviderDataDTO = new PreferredProviderDataDTO();
+		preferredProviderDataDTO.setProviderSystem(provider);
+		preferredProviderDataDTO.setProviderCloud(providerCloud);
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO.Builder(new SystemRequestDTO()).
+																				    requestedService(serviceForm).
+																				    preferredProviders(preferredProviderDataDTO).
+																				    flag(Flag.MATCHMAKING, false).
+																					build();
+
+		final GSDPollResponseDTO gsdPollResponseDTO = new GSDPollResponseDTO(
+				cloudResponseDTO, 
+				serviceDefinitionResponseDTO.getServiceDefinition(), 
+				List.of(serviceInterface.getInterfaceName()), 
+				1, 
+				Map.of());
+		
+		final GSDQueryResultDTO gsdResult = new GSDQueryResultDTO(List.of(gsdPollResponseDTO), 0);
+		
+		final System consumerSystem = new System();
+		consumerSystem.setSystemName("consumerSystemName");
+		consumerSystem.setAddress("localhost");
+		consumerSystem.setPort(1234);
+		
+	final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
+		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(interfaces);
+		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
+		srResult.getServiceQueryData().add(srEntry);
+		
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(consumerSystem);
+			
+		final OrchestrationResultDTO orchestrationResultDTO = new OrchestrationResultDTO(
+				systemResponseDTO, 
+				serviceDefinitionResponseDTO, 
+				"serviceUri", 
+				ServiceSecurityType.NOT_SECURE , 
+				Map.of(), 
+				interfaces, 
+				1);
+		orchestrationResultDTO.setWarnings(new ArrayList<>());
+		
+		final ICNResultDTO icnResultDTO = new ICNResultDTO(List.of(orchestrationResultDTO));
+		    
+		when(orchestratorDriver.doGlobalServiceDiscovery(any(GSDQueryFormDTO.class))).thenReturn(gsdResult);		
+		when(cloudMatchmaker.doMatchmaking(any(CloudMatchmakingParameters.class))).thenReturn(cloudResponseDTO);
+		when(orchestratorDriver.doInterCloudNegotiations(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
+		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
+	
+		final OrchestrationResponseDTO orchestrationResult = testingObject.triggerInterCloud(request);
+		
+		Assert.assertNotNull(orchestrationResult);
+		Assert.assertTrue(!orchestrationResult.getResponse().isEmpty());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
