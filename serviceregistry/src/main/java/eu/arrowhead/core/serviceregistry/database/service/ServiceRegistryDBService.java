@@ -499,7 +499,7 @@ public class ServiceRegistryDBService {
 		}
 		
 		try {
-			final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+			final Optional<ServiceDefinition> serviceDefinitionOptional = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition.toLowerCase().trim());
 			if (serviceDefinitionOptional.isPresent()) {
 				return serviceRegistryRepository.findAllByServiceDefinition(serviceDefinitionOptional.get(), PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 			} else {
@@ -921,7 +921,7 @@ public class ServiceRegistryDBService {
 		logger.debug("checkConstraintsOfSystemTable started...");
 		
 		try {
-			final Optional<System> find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName, validatedAddress, validatedPort);
+			final Optional<System> find = systemRepository.findBySystemNameAndAddressAndPort(validatedSystemName.toLowerCase().trim(), validatedAddress.toLowerCase().trim(), validatedPort);
 			if (find.isPresent()) {
 				throw new InvalidParameterException("System with name: " + validatedSystemName + ", address: " + validatedAddress +	", port: " + validatedPort + " already exists.");
 			}
@@ -1018,7 +1018,7 @@ public class ServiceRegistryDBService {
 		logger.debug("checkConstraintsOfServiceDefinitionTable started...");
 		
 		try {
-			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+			final Optional<ServiceDefinition> find = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition.toLowerCase().trim());
 			if (find.isPresent()) {
 				throw new InvalidParameterException(serviceDefinition + " definition already exists");
 			}
@@ -1084,7 +1084,7 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private System findOrCreateSystem(final String systemName, final String address, final int port, final String authenticationInfo) {
-		final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
+		final Optional<System> optProvider = systemRepository.findBySystemNameAndAddressAndPort(systemName.toLowerCase().trim(), address.toLowerCase().trim(), port);
 		System provider;
 		if (optProvider.isPresent()) {
 			provider = optProvider.get();
@@ -1100,7 +1100,7 @@ public class ServiceRegistryDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	private ServiceDefinition findOrCreateServiceDefinition(final String serviceDef) {
-		final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(serviceDef);
+		final Optional<ServiceDefinition> optServiceDefinition = serviceDefinitionRepository.findByServiceDefinition(serviceDef.toLowerCase().trim());
 		
 		return optServiceDefinition.isPresent() ? optServiceDefinition.get() : createServiceDefinition(serviceDef);
 	}

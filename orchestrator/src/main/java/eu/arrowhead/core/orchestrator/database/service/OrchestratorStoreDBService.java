@@ -227,7 +227,7 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
-		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
 		if (serviceDefinitionOption.isEmpty()) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
 		}
@@ -235,7 +235,7 @@ public class OrchestratorStoreDBService {
 		final ServiceInterface validServiceInterface; 
 		if (serviceInterfaceName != null) {
 			if (interfaceNameVerifier.isValid(serviceInterfaceName)) {
-				final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName);
+				final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName.toUpperCase().trim());
 				if (serviceInterfaceOptional.isEmpty())  {
 					throw new InvalidParameterException("ServiceInterfaceName " + NOT_IN_DB_ERROR_MESSAGE);
 				}
@@ -280,7 +280,7 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
-		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
 		if ( serviceDefinitionOption.isEmpty() ) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
 		}
@@ -321,7 +321,7 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
-		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
 		if ( serviceDefinitionOption.isEmpty() ) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
 		}
@@ -532,7 +532,7 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ServiceInterfaceName " + NOT_VALID_ERROR_MESSAGE);
 		}
 		
-		final String validServiceInterfaceName = serviceInterfaceName;
+		final String validServiceInterfaceName = serviceInterfaceName.toUpperCase().trim();
 		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
 		if (serviceInterfaceOptional.isEmpty()) {
 			throw new InvalidParameterException("ServiceInterface by serviceDefinitionName " + validServiceInterfaceName + NOT_IN_DB_ERROR_MESSAGE);
@@ -881,7 +881,7 @@ public class OrchestratorStoreDBService {
 		if (!interfaceNameVerifier.isValid(serviceInterfaceName)) {
 			throw new InvalidParameterException("ServiceInterfaceName " + NOT_VALID_ERROR_MESSAGE);
 		}
-		final String validServiceInterfaceName = serviceInterfaceName;
+		final String validServiceInterfaceName = serviceInterfaceName.toUpperCase().trim();
 		
 		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
 		if (serviceInterfaceOptional.isEmpty()) {

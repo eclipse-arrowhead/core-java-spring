@@ -165,7 +165,7 @@ public class GatekeeperDBService {
 			throw new InvalidParameterException("operator or name is empty");
 		}
 		
-		final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(operator, name);
+		final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(operator.toLowerCase().trim(), name.toLowerCase().trim());
 		
 		if (cloudOpt.isEmpty()) {
 			throw new InvalidParameterException("Cloud with the following operator and name not exists: " + operator + ", " + name);
