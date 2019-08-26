@@ -602,21 +602,9 @@ public class OrchestratorService {
 			
 			serviceDefinitionsInterfacesMap.putIfAbsent(serviceDefinitionId, new ArrayList<>());
 			
-			
-			if (serviceDefinitionsInterfacesMap.containsKey(serviceDefinitionId)) {
+			if (!serviceDefinitionsInterfacesMap.get(serviceDefinitionId).contains(interfaceName)) {
 				
-				
-				if (!serviceDefinitionsInterfacesMap.get(serviceDefinitionId).contains(interfaceName)) {
-					
-					serviceDefinitionsInterfacesMap.get(serviceDefinitionId).add(interfaceName);
-				}
-			
-			}else {
-				
-				final List<String> serviceInterfaceNameList = new ArrayList<>();
-				serviceInterfaceNameList.add(orchestratorStore.getServiceInterface().getInterfaceName());
-				serviceDefinitionsInterfacesMap.put(serviceDefinitionId, serviceInterfaceNameList);
-				
+				serviceDefinitionsInterfacesMap.get(serviceDefinitionId).add(interfaceName);
 			}
 		}
 		
