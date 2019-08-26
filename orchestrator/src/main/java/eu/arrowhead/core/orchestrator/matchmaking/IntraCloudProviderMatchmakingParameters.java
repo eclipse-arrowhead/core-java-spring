@@ -22,7 +22,7 @@ public class IntraCloudProviderMatchmakingParameters {
 	
 	//-------------------------------------------------------------------------------------------------
 	public IntraCloudProviderMatchmakingParameters(final List<PreferredProviderDataDTO> preferredLocalProviders) {
-		Assert.notNull(preferredLocalProviders, "preferredLocalProviders set is null.");
+		Assert.notNull(preferredLocalProviders, "preferredLocalProviders list is null.");
 		this.preferredLocalProviders = preferredLocalProviders;
 	}
 

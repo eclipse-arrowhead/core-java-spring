@@ -2,6 +2,7 @@ package eu.arrowhead.common.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class CloudRequestDTO implements Serializable {
 
@@ -38,4 +39,26 @@ public class CloudRequestDTO implements Serializable {
 	public void setGatekeeperRelayIds(final List<Long> gatekeeperRelayIds) { this.gatekeeperRelayIds = gatekeeperRelayIds; }
 	public void setGatewayRelayIds(final List<Long> gatewayRelayIds) { this.gatewayRelayIds = gatewayRelayIds; }
 	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		return Objects.hash(operator, name);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final CloudRequestDTO other = (CloudRequestDTO) obj;
+		return Objects.equals(name, other.name) && 
+				Objects.equals(operator, other.operator);
+	}
 }

@@ -24,6 +24,11 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.GSDQueryFormDTO;
+import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
@@ -203,6 +208,277 @@ public class OrchestratorDriverTest {
 		Assert.assertEquals(2, afterAuthorization.get(0).getProvider().getId());
 		Assert.assertEquals(1, afterAuthorization.get(0).getInterfaces().size());
 		Assert.assertEquals(1, afterAuthorization.get(0).getInterfaces().get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceRegistryBySystemIdOk() {
+		
+		final UriComponents queryBySystemIdUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(
+				Map.of( CommonConstants.COMMON_FIELD_NAME_ID,  String.valueOf( 1 ) ));
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemIdUri);
+		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemId( 1L );
+		
+		Assert.assertNotNull( systemResponseDTO );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceRegistryBySystemIdApplicationContextNotContainingKey() {
+		
+		final UriComponents queryBySystemIdUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(
+				Map.of( CommonConstants.COMMON_FIELD_NAME_ID,  String.valueOf( 1 ) ));
+			
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemIdUri);
+		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemId( 1L );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceRegistryBySystemIdApplicationContextReturningIncorrectClass() {
+		
+		final UriComponents queryBySystemIdUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(
+				Map.of( CommonConstants.COMMON_FIELD_NAME_ID,  String.valueOf( 1 ) ));
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(new Object());
+		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemId( 1L );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryServiceRegistryByIdWithInvalidSystemId() {
+		
+		final UriComponents queryBySystemIdUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(
+				Map.of( CommonConstants.COMMON_FIELD_NAME_ID,  String.valueOf( 1 ) ));
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemIdUri);
+		when(httpService.sendRequest(eq(queryBySystemIdUriForTestRequest), eq(HttpMethod.GET), eq(SystemResponseDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemId(-1L);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryServiceRegistryBySystemRequestDTOOk() {
+		
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		final SystemRequestDTO requestDTO = new SystemRequestDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemDTOUri);
+		when(httpService.sendRequest(eq(queryBySystemDTOUri), eq(HttpMethod.POST), eq(SystemResponseDTO.class), any(SystemRequestDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+		
+		Assert.assertNotNull( systemResponseDTO );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceRegistryBySystemRequestDTOContextNotCointainingKey() {
+		
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		final SystemRequestDTO requestDTO = new SystemRequestDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemDTOUri);
+		when(httpService.sendRequest(eq(queryBySystemDTOUri), eq(HttpMethod.POST), eq(SystemResponseDTO.class), any(SystemRequestDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryServiceRegistryBySystemRequestDTOApplicationContextReturningIncorrectClass() {
+		
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		final SystemRequestDTO requestDTO = new SystemRequestDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(new Object());
+		when(httpService.sendRequest(eq(queryBySystemDTOUri), eq(HttpMethod.POST), eq(SystemResponseDTO.class), any(SystemRequestDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryServiceRegistryBySystemRequestDTONullDTO() {
+		
+		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443,CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+		
+		final SystemResponseDTO responseDTO = new SystemResponseDTO();
+		final SystemRequestDTO requestDTO = null;
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryBySystemDTOUri);
+		when(httpService.sendRequest(eq(queryBySystemDTOUri), eq(HttpMethod.POST), eq(SystemResponseDTO.class), any(SystemRequestDTO.class))).thenReturn(new ResponseEntity<SystemResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.queryServiceRegistryBySystemRequestDTO(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoGlobalServiceDiscoveryOk() {
+		
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		
+		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
+		final GSDQueryFormDTO requestDTO = new GSDQueryFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryGSDUri);
+		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
+		
+		final GSDQueryResultDTO gsdQueryResultDTO = orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+
+		Assert.assertNotNull( gsdQueryResultDTO );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testDoGlobalServiceDiscoveryContextNotContainsKey() {
+		
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		
+		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
+		final GSDQueryFormDTO requestDTO = new GSDQueryFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryGSDUri);
+		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testDoGlobalServiceDiscoveryContextReturnNotCorrectClass() {
+		
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		
+		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
+		final GSDQueryFormDTO requestDTO = new GSDQueryFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(new Object());
+		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testDoGlobalServiceDiscoveryNullRequest() {
+		
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		
+		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
+		final GSDQueryFormDTO requestDTO = null;
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryGSDUri);
+		when(httpService.sendRequest(eq(queryGSDUri), eq(HttpMethod.POST), eq(GSDQueryResultDTO.class), any(GSDQueryFormDTO.class))).thenReturn(new ResponseEntity<GSDQueryResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doGlobalServiceDiscovery(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoInterCloudNegotiationsOk() {
+		
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		
+		final ICNResultDTO responseDTO = new ICNResultDTO();
+		final ICNRequestFormDTO requestDTO = new ICNRequestFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryICNUri);
+		when(httpService.sendRequest(eq(queryICNUri), eq(HttpMethod.POST), eq(ICNResultDTO.class), any(ICNRequestFormDTO.class))).thenReturn(new ResponseEntity<ICNResultDTO>(responseDTO, HttpStatus.OK));
+		
+		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations(requestDTO);
+		
+		Assert.assertNotNull( icnResultDTO );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testDoInterCloudNegotiationsNotContainsKey() {
+		
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		
+		final ICNResultDTO responseDTO = new ICNResultDTO();
+		final ICNRequestFormDTO requestDTO = new ICNRequestFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryICNUri);
+		when(httpService.sendRequest(eq(queryICNUri), eq(HttpMethod.POST), eq(ICNResultDTO.class), any(ICNRequestFormDTO.class))).thenReturn(new ResponseEntity<ICNResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doInterCloudNegotiations(requestDTO);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testDoInterCloudNegotiationsContextReturnsNotCorrectClass() {
+		
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		
+		final ICNResultDTO responseDTO = new ICNResultDTO();
+		final ICNRequestFormDTO requestDTO = new ICNRequestFormDTO();
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(new Object());
+		when(httpService.sendRequest(eq(queryICNUri), eq(HttpMethod.POST), eq(ICNResultDTO.class), any(ICNRequestFormDTO.class))).thenReturn(new ResponseEntity<ICNResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doInterCloudNegotiations(requestDTO);
+	}
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testDoInterCloudNegotiationsNullRequest() {
+		
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449,CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		
+		final ICNResultDTO responseDTO = new ICNResultDTO();
+		final ICNRequestFormDTO requestDTO = null;
+		
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(queryICNUri);
+		when(httpService.sendRequest(eq(queryICNUri), eq(HttpMethod.POST), eq(ICNResultDTO.class), any(ICNRequestFormDTO.class))).thenReturn(new ResponseEntity<ICNResultDTO>(responseDTO, HttpStatus.OK));
+		
+		orchestratorDriver.doInterCloudNegotiations(requestDTO);
 	}
 	
 	//=================================================================================================

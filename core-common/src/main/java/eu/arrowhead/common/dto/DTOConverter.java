@@ -408,6 +408,27 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
+		Assert.notNull(foreignSystem, "ForeignSystem is null");
+		
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
+		Assert.notNull(system, "System is null");
+		
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
+		systemRequestDTO.setAddress(system.getAddress());
+		systemRequestDTO.setSystemName(system.getSystemName());
+		systemRequestDTO.setPort(system.getPort());
+		systemRequestDTO.setAuthenticationInfo(systemRequestDTO.getAuthenticationInfo());
+		
+		return systemRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static SystemRequestDTO convertSystemResponseDTOToSystemRequestDTO(final SystemResponseDTO response) {
 		Assert.notNull(response, "response is null");
 		
@@ -418,6 +439,42 @@ public class DTOConverter {
 		result.setAuthenticationInfo(response.getAuthenticationInfo());
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static PreferredProviderDataDTO convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(
+			OrchestratorStoreResponseDTO orchestratorStoreResponseDTO) {
+		Assert.notNull(orchestratorStoreResponseDTO, "orchestratorStoreResponseDTO is null");
+		Assert.isTrue(orchestratorStoreResponseDTO.getForeign(), "orchestratorStoreResponseDTO is not foreign");
+		Assert.notNull(orchestratorStoreResponseDTO.getProviderSystem(), "orchestratorStoreResponseDTO.ProviderSystem is null");
+		Assert.notNull(orchestratorStoreResponseDTO.getProviderCloud(), "orchestratorStoreResponseDTO.ProviderCloud is null");
+		
+		final PreferredProviderDataDTO preferredProviderDataDTO = new PreferredProviderDataDTO();
+		
+		final SystemRequestDTO providerSystemRequestDTO = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(orchestratorStoreResponseDTO.getProviderSystem());
+		preferredProviderDataDTO.setProviderSystem(providerSystemRequestDTO);
+		
+		final CloudRequestDTO cloudRequestDTO = convertCloudResponseDTOToCloudRequestDTO(orchestratorStoreResponseDTO.getProviderCloud());
+		preferredProviderDataDTO.setProviderCloud(cloudRequestDTO);
+
+		return preferredProviderDataDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static CloudRequestDTO convertCloudResponseDTOToCloudRequestDTO(final CloudResponseDTO cloudResponseDTO) {
+		Assert.notNull(cloudResponseDTO, "cloudResponseDTO is null");
+		Assert.notNull(cloudResponseDTO.getOperator(), "cloudResponseDTO.Operator is null");
+		Assert.notNull(cloudResponseDTO.getName(), "cloudResponseDTO.Name is null");
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		
+		cloudRequestDTO.setOperator(cloudResponseDTO.getOperator());
+		cloudRequestDTO.setName(cloudResponseDTO.getName());
+		cloudRequestDTO.setSecure(cloudResponseDTO.getSecure());
+		cloudRequestDTO.setNeighbor(cloudResponseDTO.getNeighbor());
+		cloudRequestDTO.setAuthenticationInfo(cloudResponseDTO.getAuthenticationInfo());
+		
+		return cloudRequestDTO;
 	}
 	
 	//=================================================================================================
@@ -475,11 +532,4 @@ public class DTOConverter {
 		return result;
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
-		Assert.notNull(foreignSystem, "ForeignSystem is null");
-		
-		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
-									 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
-	}
 }

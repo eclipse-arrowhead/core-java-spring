@@ -44,6 +44,8 @@ public class CommonConstants {
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
+	public static final String SR_QUERY_BY_SYSTEM_ID_URI = "service.registry.query.by.system.id.uri";
+	public static final String SR_QUERY_BY_SYSTEM_DTO_URI = "service.registry.query.by.system.dto.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
 	
@@ -85,6 +87,8 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 	
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
@@ -160,6 +164,8 @@ public class CommonConstants {
 
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
+	
+	public static final String SORT_FIELD_PRIORITY = "priority";
 
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
@@ -202,7 +208,9 @@ public class CommonConstants {
 	public static final String $GATEKEEPER_IS_GATEWAY_MANDATORY_WD = "${" + GATEKEEPER_IS_GATEWAY_MANDATORY + ":" + Defaults.DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY + "}";
 	
 	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
+	public static final String INTER_CLOUD_PROVIDER_MATCHMAKER = "interCloudProviderMatchmaker";
 	public static final String GATEKEEPER_MATCHMAKER = "gatekeeperMatchmaker";
+	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
 	
