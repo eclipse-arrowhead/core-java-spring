@@ -81,21 +81,16 @@ public class GatekeeperService {
 		Assert.notNull(gsdForm.getRequestedService().getServiceDefinitionRequirement(), "serviceDefinitionRequirement is null.");
 		
 		List<Cloud> cloudsToContact;
-		
 		if (gsdForm.getPreferredClouds() == null || gsdForm.getPreferredClouds().isEmpty()) {
 			// If no preferred clouds were given, then send GSD poll requests to the neighbor Clouds
-			
 			final List<Cloud> neighborClouds = gatekeeperDBService.getNeighborClouds();
-			
 			if (neighborClouds.isEmpty()) {
 				throw new InvalidParameterException("initGSDPoll failed: Neither preferred clouds were given, nor neighbor clouds registered");
 			} else {
 				cloudsToContact = neighborClouds;
 			}			
-			
 		} else {
 			// If preferred clouds were given, then send GSD poll requests only to those Clouds
-			
 			final List<Cloud> preferredClouds = getCloudsByCloudRequestDTOs(gsdForm.getPreferredClouds());
 			
 			if (preferredClouds.isEmpty()) {
@@ -103,32 +98,24 @@ public class GatekeeperService {
 			} else {
 				cloudsToContact = preferredClouds;
 			}
-			
 		}
 		
 		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getRequesterCloud(), gatewayIsPresent);
-		
 		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
 		final List<GSDPollResponseDTO> successfulResponses = new ArrayList<>();
 		final List<ErrorMessageDTO> errorMessageResponses = new ArrayList<>();
 		int unsuccessfulRequests = 0;
 		for (final ErrorWrapperDTO gsdAnswer : gsdPollAnswers) {
-			
 			if (gsdAnswer.isError()) {		
-				
 				errorMessageResponses.add((ErrorMessageDTO) gsdAnswer);
 				unsuccessfulRequests++;
-				
 			} else {
-				
 				final GSDPollResponseDTO gsdResponse = (GSDPollResponseDTO) gsdAnswer;
-				
 				if (gsdResponse.getProviderCloud() == null) {
-					
 					unsuccessfulRequests++;
 				} else {
-					//Changing the cloud details to the local informations based on operator and name
+					// Changing the cloud details to the local informations based on operator and name
 					final Cloud providerCloudWithLocalDetails = gatekeeperDBService.getCloudByOperatorAndName(gsdResponse.getProviderCloud().getOperator(), gsdResponse.getProviderCloud().getName());
 					gsdResponse.setProviderCloud(DTOConverter.convertCloudToCloudResponseDTO(providerCloudWithLocalDetails));
 					
@@ -150,31 +137,28 @@ public class GatekeeperService {
 		
 		validateGSDPollRequestDTO(request);
 				
-		//Querying Service Registry core system
+		// Querying Service Registry core system
 		final ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceReistryQuery(request.getRequestedService());
 		
 		if (srQueryResult.getServiceQueryData() == null || srQueryResult.getServiceQueryData().isEmpty()) {
 			return new GSDPollResponseDTO();
 		}
 		
-		//Querying Authorization core system
+		// Querying Authorization core system
 		final Map<Long, List<Long>> authorizedProviderIdsWithInterfaceIdList = gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(srQueryResult.getServiceQueryData(), request.getRequesterCloud(), 
 																																 	  request.getRequestedService().getServiceDefinitionRequirement());
 		if (authorizedProviderIdsWithInterfaceIdList.isEmpty()) {
 			return new GSDPollResponseDTO();
 		}
 		
-		//Cross checking Service Registry and Authorization results
+		// Cross checking Service Registry and Authorization results
 		final Set<String> availableInterfaces = new HashSet<>();
 		int numOfProviders = 0;
 		
 		for (final ServiceRegistryResponseDTO srEntryDTO : srQueryResult.getServiceQueryData()) {
 			final long providerId = srEntryDTO.getProvider().getId();
-			
 			if (authorizedProviderIdsWithInterfaceIdList.containsKey(providerId)) {
-				
 				for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
-					
 					if (authorizedProviderIdsWithInterfaceIdList.get(providerId).contains(interfaceDTO.getId())) {
 						availableInterfaces.add(interfaceDTO.getInterfaceName());
 					}
@@ -186,11 +170,8 @@ public class GatekeeperService {
 		
 		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
 		
-		return new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(ownCloud), 
-									  request.getRequestedService().getServiceDefinitionRequirement(), 
-									  List.copyOf(availableInterfaces), 
-									  numOfProviders, 
-									  request.getRequestedService().getMetadataRequirements());
+		return new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(ownCloud), request.getRequestedService().getServiceDefinitionRequirement(), List.copyOf(availableInterfaces), 
+									  numOfProviders, request.getRequestedService().getMetadataRequirements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -303,6 +284,7 @@ public class GatekeeperService {
 			final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(dto.getOperator(), dto.getName());
 			clouds.add(cloud);
 		}
+		
 		return clouds;
 	}
 	

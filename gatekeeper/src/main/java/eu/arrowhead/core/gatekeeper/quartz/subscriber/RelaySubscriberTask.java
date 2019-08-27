@@ -117,5 +117,4 @@ public class RelaySubscriberTask implements Job {
 			logger.debug("Error while trying to subscribe relay {}:{}", relay.getAddress(), relay.getPort()); // we skip the wrong ones
 		}
 	}
-	
 }

@@ -47,7 +47,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
-allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.GATEKEEPER_URI)
@@ -112,7 +112,7 @@ public class GatekeeperController {
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
@@ -124,7 +124,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Cloud entries by the given parameters", response = CloudWithRelaysListResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -139,8 +139,8 @@ public class GatekeeperController {
 		logger.debug("New getClouds get request recieved with page: {} and item_per page: {}", page, size);
 				
 		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI);
-		
-		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirecion(), sortField);
+		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+																									validParameters.getValidatedDirecion(), sortField);
 		
 		logger.debug("Clouds  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return cloudsResponse;
@@ -148,7 +148,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Cloud entry", response = CloudWithRelaysResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -171,7 +171,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return created Cloud entries", response = CloudWithRelaysListResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CLOUDS_MGMT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CLOUDS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -186,6 +186,7 @@ public class GatekeeperController {
 		if (dtoList == null || dtoList.isEmpty()) {
 			throw new BadPayloadException("List of CloudRequestDTO is empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
 		for (final CloudRequestDTO dto : dtoList) {
 			validateCloudRequestDTO(dto, origin);
 		}
@@ -198,7 +199,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return updated Cloud entry", response = CloudWithRelaysResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_CLOUDS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_CLOUDS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -212,8 +213,8 @@ public class GatekeeperController {
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		validateCloudRequestDTO(dto, origin);
 		
+		validateCloudRequestDTO(dto, origin);
 		final CloudWithRelaysResponseDTO cloudResponse = gatekeeperDBService.updateCloudByIdWithRelaysResponse(id, dto);
 		
 		logger.debug("Cloud with id '{}' is successfully updated", id);
@@ -222,7 +223,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return Cloud entry with its Relay entries", response = CloudWithRelaysListResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_CLOUDS_ASSIGN_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CLOUDS_ASSIGN_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -270,7 +271,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Remove requested Cloud entry")
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_CLOUDS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_CLOUDS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -290,7 +291,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Relay entries by the given parameters", response = RelayListResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_RELAYS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -305,8 +306,8 @@ public class GatekeeperController {
 		logger.debug("New getRelays get request recieved with page: {} and item_per page: {}", page, size);
 		
 		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI);
-		
-		final RelayListResponseDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), validParameters.getValidatedDirecion(), sortField);
+		final RelayListResponseDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
+																					      validParameters.getValidatedDirecion(), sortField);
 		
 		logger.debug("Relays  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return relaysResponse;
@@ -314,7 +315,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Relay entry", response = RelayResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_RELAYS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -337,7 +338,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Relay entry", response = RelayResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_RELAYS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -366,7 +367,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return created Relay entries", response = RelayListResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_RELAYS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -381,6 +382,7 @@ public class GatekeeperController {
 		if (dtoList == null || dtoList.isEmpty()) {
 			throw new BadPayloadException("List of RelayRequestDTO is empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+		
 		for (final RelayRequestDTO dto : dtoList) {
 			validateRelayRequestDTO(dto, origin);
 		}
@@ -393,7 +395,7 @@ public class GatekeeperController {
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return updated Relay entry", response = RelayResponseDTO.class)
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_RELAYS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -407,9 +409,10 @@ public class GatekeeperController {
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		validateRelayRequestDTO(dto, origin);
 		
-		final RelayResponseDTO relayResponse = gatekeeperDBService.updateRelayByIdResponse(id, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), Utilities.convertStringToRelayType(dto.getType()));
+		validateRelayRequestDTO(dto, origin);
+		final RelayResponseDTO relayResponse = gatekeeperDBService.updateRelayByIdResponse(id, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(),
+																						   Utilities.convertStringToRelayType(dto.getType()));
 		
 		logger.debug("Relay with id '{}' is successfully updated", id);
 		return relayResponse;
@@ -417,7 +420,7 @@ public class GatekeeperController {
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Remove requested Relay entry")
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_RELAYS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_RELAYS_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -448,7 +451,6 @@ public class GatekeeperController {
 		logger.debug("New initiateGlobalServiceDiscovery post request received");
 		
 		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
-		
 		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.initGSDPoll(gsdForm);
 		
 		logger.debug("initiateGlobalServiceDiscovery has been finished");
@@ -469,7 +471,6 @@ public class GatekeeperController {
 		logger.debug("New initiateInterCloudNegotiation request received");
 		
 		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + INIT_INTER_CLOUD_NEGOTIATION_URI);
-		
 		final ICNResultDTO result = gatekeeperService.initICN(icnForm);
 		
 		logger.debug("Inter cloud negotiation has been finished.");
@@ -502,7 +503,8 @@ public class GatekeeperController {
 		if (isAddressInvalid || isPortInvalid || isTypeInvalid || isGatekeeperRelayAndExclusive || isGeneralRelayAndExclusive) {
 			String exceptionMsg = "RelayRequestDTO is invalid due to the following reasons:";
 			exceptionMsg = isAddressInvalid ? exceptionMsg + " address is empty, " : exceptionMsg;
-			exceptionMsg = isPortInvalid ? exceptionMsg + " port is null or should be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX  + ",": exceptionMsg;
+			exceptionMsg = isPortInvalid ? exceptionMsg + " port is null or should be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX  + "," :
+										   exceptionMsg;
 			exceptionMsg = isTypeInvalid ? exceptionMsg + " type '" + dto.getType() + "' is not valid," : exceptionMsg;
 			exceptionMsg = isGatekeeperRelayAndExclusive ? exceptionMsg + " GATEKEEPER_REALY type couldn't be exclusive," : exceptionMsg;
 			exceptionMsg = isGeneralRelayAndExclusive ? exceptionMsg + " GENERAL_REALY type couldn't be exclusive," : exceptionMsg;
