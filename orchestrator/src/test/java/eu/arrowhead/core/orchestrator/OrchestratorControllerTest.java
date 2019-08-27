@@ -1,8 +1,8 @@
 package eu.arrowhead.core.orchestrator;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,7 +36,6 @@ import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
@@ -519,7 +518,7 @@ public class OrchestratorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getStoreOchestrationProcessResponseOkTest() throws Exception {
-		final  OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/1")
@@ -530,13 +529,13 @@ public class OrchestratorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getStoreOchestrationProcessResponseByInvalidIdTest() throws Exception {
-		final  OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/-1")
-					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isBadRequest())
-					.andReturn();
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
