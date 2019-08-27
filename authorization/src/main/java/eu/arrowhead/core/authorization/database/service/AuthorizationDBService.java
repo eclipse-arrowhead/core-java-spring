@@ -423,7 +423,7 @@ public class AuthorizationDBService {
 					logger.debug("Invalid provider id: {}", providerId);
 				} else {
 					final Optional<AuthorizationIntraCloud> authIntraOpt = authorizationIntraCloudRepository.findByConsumerIdAndProviderIdAndServiceDefinitionId(consumerId, providerId,
-																																							 serviceDefinitionId);
+																																							 	 serviceDefinitionId);
 					if (authIntraOpt.isPresent()) {
 						final Set<AuthorizationIntraCloudInterfaceConnection> interfaceConnections = authIntraOpt.get().getInterfaceConnections();
 						final List<Long> authorizedInterfaces = new ArrayList<>();
@@ -477,11 +477,11 @@ public class AuthorizationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
-	public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudResponse(final String cloudOperator, final String cloudName, final String serviceDefinition, final List<IdIdListDTO> providerIdsWithInterfaceIds) {	
+	public AuthorizationInterCloudCheckResponseDTO checkAuthorizationInterCloudResponse(final String cloudOperator, final String cloudName, final String serviceDefinition,
+																						final List<IdIdListDTO> providerIdsWithInterfaceIds) {	
 		logger.debug("checkAuthorizationInterCloudResponse started...");
 		
 		try {
-			
 			final boolean isCloudOperatorInvalid = Utilities.isEmpty(cloudOperator);
 			final boolean isCloudNameInvalid = Utilities.isEmpty(cloudName);
 			final boolean isServiceDefinitionInvalid = Utilities.isEmpty(serviceDefinition);
@@ -497,13 +497,13 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException(exceptionMsg);
 			}
 			
-			final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(cloudOperator, cloudName);
+			final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(cloudOperator.toLowerCase().trim(), cloudName.toLowerCase().trim());
 			if (cloudOpt.isEmpty()) {
 				throw new InvalidParameterException("No cloud exists with the following operator and name: " + cloudOperator + ", " + cloudName);
 			}
 			final Cloud cloud = cloudOpt.get();
 			
-			final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+			final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition.toLowerCase().trim());
 			if (serviceOpt.isEmpty()) {
 				throw new InvalidParameterException(serviceDefinition + " service definition not exists");
 			}
@@ -596,7 +596,8 @@ public class AuthorizationDBService {
 			
 			final List<AuthorizationIntraCloud> authIntraEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
 			for (final AuthorizationIntraCloud authIntraEntry : authIntraEntries) {
-				final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry, serviceInterface));
+				final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry,
+																																													   serviceInterface));
 				authIntraEntry.getInterfaceConnections().add(connection);
 			}
 			authorizationIntraCloudInterfaceConnectionRepository.flush();
@@ -638,7 +639,8 @@ public class AuthorizationDBService {
 		final List<AuthorizationIntraCloud> authIntraEntries = authorizationIntraCloudRepository.saveAll(toBeSaved);
 		for (final AuthorizationIntraCloud authIntraEntry : authIntraEntries) {
 			for (final ServiceInterface serviceInterface : interfaces) {
-				final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry, serviceInterface));
+				final AuthorizationIntraCloudInterfaceConnection connection = authorizationIntraCloudInterfaceConnectionRepository.save(new AuthorizationIntraCloudInterfaceConnection(authIntraEntry,
+																																													   serviceInterface));
 				authIntraEntry.getInterfaceConnections().add(connection);
 			}
 		}

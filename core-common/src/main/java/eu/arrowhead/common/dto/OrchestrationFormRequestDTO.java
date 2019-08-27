@@ -45,9 +45,15 @@ public class OrchestrationFormRequestDTO implements Serializable {
 	public void setRequesterSystem(final SystemRequestDTO requesterSystem) { this.requesterSystem = requesterSystem; }
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
-	public void setPreferredProviders(final List<PreferredProviderDataDTO> preferredProviders) { this.preferredProviders = preferredProviders; }
 	public void setOrchestrationFlags(final Map<String,Boolean> orchestrationFlags) { this.orchestrationFlags = new OrchestrationFlags(orchestrationFlags); }
 	public void setCommands(final Map<String,String> commands) { this.commands = commands; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setPreferredProviders(final List<PreferredProviderDataDTO> preferredProviders) {
+		if (preferredProviders != null) {
+			this.preferredProviders = preferredProviders;
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public OrchestrationFormRequestDTO validateCrossParameterConstraints() {
@@ -139,7 +145,7 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		
 		//-------------------------------------------------------------------------------------------------
 		public Builder preferredProviders(final PreferredProviderDataDTO... preferredProviders) {
-			this.preferredProviders = preferredProviders == null || preferredProviders.length == 0 ? null : Arrays.asList(preferredProviders);
+			this.preferredProviders = preferredProviders == null || preferredProviders.length == 0 ? List.of() : Arrays.asList(preferredProviders);
 			return this;
 		}
 		

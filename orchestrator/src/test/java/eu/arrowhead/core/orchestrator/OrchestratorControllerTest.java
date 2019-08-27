@@ -1,7 +1,9 @@
 package eu.arrowhead.core.orchestrator;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -513,6 +515,34 @@ public class OrchestratorControllerTest {
 		Assert.assertEquals(3, response.getResponse().size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getStoreOchestrationProcessResponseOkTest() throws Exception {
+		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
+		
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getStoreOchestrationProcessResponseByInvalidIdTest() throws Exception {
+		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
+		
+		final MvcResult result = this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/-1")
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/{" + CommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
+		Assert.assertEquals("Consumer system :  Id must be greater than 0. ", error.getErrorMessage());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -525,4 +555,4 @@ public class OrchestratorControllerTest {
 						   .andExpect(matcher)
 						   .andReturn();
 	}
-}
+};

@@ -2,6 +2,8 @@ package eu.arrowhead.core.gatekeeper.relay;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -15,8 +17,6 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.gatekeeper.relay.activemq.ActiveMQGatekeeperRelayClient;
 
 public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelayClient {
 	
@@ -25,7 +25,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	
 	private static final ConcurrentMap<String,Session> sessionCache = new ConcurrentHashMap<>();
 	
-	private final ActiveMQGatekeeperRelayClient client;
+	private final GatekeeperRelayClient client;
 	
 	//=================================================================================================
 	// methods
@@ -36,7 +36,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		Assert.notNull(publicKey, "Public key is null.");
 		Assert.notNull(privateKey, "Private key is null.");
 		
-		this.client = new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout);
+		this.client = RelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, false);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -45,21 +45,14 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
-		final String cacheKey = host + ":" + port;
-		try {
-			return sessionCache.computeIfAbsent(cacheKey, key -> {
-				try {
-					return client.createConnection(host, port);
-				} catch (final JMSException ex) {
-					throw new ArrowheadException("JMSException", ex);
-				}
-			});
-		} catch (final ArrowheadException ex) {
-			if (ex.getCause() instanceof JMSException) {
-				throw (JMSException) ex.getCause();
-			} else {
-				throw ex;
+		synchronized (sessionCache) {
+			Session session = createSessionIfNecessary(host, port);
+			if (isConnectionClosed(session)) {
+				sessionCache.values().remove(session);
+				session = createSessionIfNecessary(host, port);
 			}
+			
+			return session;
 		}
 	}
 
@@ -72,6 +65,12 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 			}
 			client.closeConnection(session);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean isConnectionClosed(final Session session) {
+		return client.isConnectionClosed(session);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -108,5 +107,25 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	@Override
 	public GatekeeperRelayResponse sendRequestAndReturnResponse(final Session session, final GeneralAdvertisementResult advResponse, final Object requestPayload) throws JMSException {
 		return client.sendRequestAndReturnResponse(session, advResponse, requestPayload);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<Session> getCachedSessions() {
+		return new ArrayList<>(sessionCache.values());
+	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private Session createSessionIfNecessary(final String host, final int port) throws JMSException {
+		final String cacheKey = host + ":" + port;
+		Session session = sessionCache.get(cacheKey);
+		if (session == null) {
+			session = client.createConnection(host, port);
+			sessionCache.put(cacheKey, session);
+		}
+		
+		return session;
 	}
 }

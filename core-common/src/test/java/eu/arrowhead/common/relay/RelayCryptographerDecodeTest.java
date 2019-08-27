@@ -144,5 +144,4 @@ public class RelayCryptographerDecodeTest {
 			public String getAlgorithm() { return null;	}
 		};
 	}
-
 }

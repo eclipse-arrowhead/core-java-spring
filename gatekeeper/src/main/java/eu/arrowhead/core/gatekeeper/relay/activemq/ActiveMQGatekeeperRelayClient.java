@@ -17,6 +17,7 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQSession;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -116,9 +117,19 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 				session.close();
 			} catch (final JMSException ex) {
 				logger.debug(ex.getMessage());
-				logger.trace(ex);
+				logger.trace("Stacktrace:", ex);
 			}
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean isConnectionClosed(final Session session) {
+		if (session instanceof ActiveMQSession) {
+			return ((ActiveMQSession) session).isClosed();
+		}
+		
+		return true;
 	}
 
 	//-------------------------------------------------------------------------------------------------

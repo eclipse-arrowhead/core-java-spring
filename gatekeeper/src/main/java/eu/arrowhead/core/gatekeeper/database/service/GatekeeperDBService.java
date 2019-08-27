@@ -65,15 +65,16 @@ public class GatekeeperDBService {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public CloudWithRelaysListResponseDTO getCloudsResponse (final int page, final int size, final Direction direction, final String sortField) {
+	public CloudWithRelaysListResponseDTO getCloudsResponse(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getClouds getCloudsResponse...");
 		
 		final Page<Cloud> entries = getClouds(page, size, direction, sortField);
+		
 		return DTOConverter.convertCloudToCloudWithRelaysListResponseDTO(entries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public Page<Cloud> getClouds (final int page, final int size, final Direction direction, final String sortField) {
+	public Page<Cloud> getClouds(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getClouds started...");
 		
 		final int validatedPage = page < 0 ? 0 : page;
@@ -86,9 +87,7 @@ public class GatekeeperDBService {
 		}
 		
 		try {
-			
 			return cloudRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
-			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -96,19 +95,44 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	public List<Cloud> getNeighborClouds() {
+		logger.debug("getNeighborClouds started...");
+		
+		try {
+			return cloudRepository.findByNeighbor(true);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public List<Cloud> getCloudsByIds(final Iterable<Long> ids) {
+		logger.debug("getCloudsByIds started...");
+		
+		try {
+			return cloudRepository.findAllById(ids);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public CloudWithRelaysResponseDTO getCloudByIdResponse(final long id) {
 		logger.debug("getCloudByIdResponse started...");
 		
 		final Cloud entry = getCloudById(id);
+		
 		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public Cloud getCloudById(final long id) {
 		logger.debug("getCloudById started...");
 		
 		try {
-
 			if (id < 1) {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
@@ -119,7 +143,6 @@ public class GatekeeperDBService {
 			}
 			
 			return cloudOpt.get();			
-			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -129,11 +152,28 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	public Cloud getCloudByOperatorAndName(final String operator, final String name) {
+		logger.debug("getCloudByOperatorAndName started...");
+		
+		if (Utilities.isEmpty(operator) || Utilities.isEmpty(name)) {
+			throw new InvalidParameterException("operator or name is empty");
+		}
+		
+		final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(operator.toLowerCase().trim(), name.toLowerCase().trim());
+		if (cloudOpt.isEmpty()) {
+			throw new InvalidParameterException("Cloud with the following operator and name not exists: " + operator + ", " + name);
+		}
+		
+		return cloudOpt.get();
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public CloudWithRelaysListResponseDTO registerBulkCloudsWithRelaysResponse(final List<CloudRequestDTO> dtoList) {
 		logger.debug("registerBulkCloudsWithRelaysResponse started...");
 		
 		final List<Cloud> entries = registerBulkCloudsWithRelays(dtoList);
+		
 		return DTOConverter.convertCloudToCloudWithRelaysListResponseDTO(new PageImpl<Cloud>(entries));
 	}
 	
@@ -143,7 +183,6 @@ public class GatekeeperDBService {
 		logger.debug("registerBulkCloudsWithRelays started...");
 		
 		try {
-			
 			final Map<String, Cloud> cloudsToSave = new HashMap<>();
 			final Map<String, List<Relay>> gatekeeperRelaysForClouds = new HashMap<>();
 			final Map<String, List<Relay>> gatewayRelaysForClouds = new HashMap<>();
@@ -153,13 +192,11 @@ public class GatekeeperDBService {
 			}
 			
 			for (final CloudRequestDTO dto : dtoList) {
-				
 				if (dto == null) {
 					throw new InvalidParameterException("List of CloudRequestDTO contains null element");
 				}				
 
-
-				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+				validateCloudParameters(true, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
 				
 				final String operator = dto.getOperator().toLowerCase().trim();
 				final String name = dto.getName().toLowerCase().trim();
@@ -167,11 +204,9 @@ public class GatekeeperDBService {
 				final boolean neighbor = dto.getNeighbor() == null ? false : dto.getNeighbor();
 				
 				final String cloudUniqueConstraint = operator + "." + name;
-				
 				if (cloudsToSave.containsKey(cloudUniqueConstraint)) {
 					throw new InvalidParameterException("List of CloudRequestDTO contains uinque constraint violation: " + dto.getOperator() + " operator with " + dto.getName() + " name");
 				}
-				
 				cloudsToSave.put(cloudUniqueConstraint, new Cloud(operator, name, secure, neighbor, false, dto.getAuthenticationInfo()));
 				
 				gatekeeperRelaysForClouds.put(cloudUniqueConstraint, collectAndValidateGatekeeperRelays(dto.getGatekeeperRelayIds()));
@@ -181,11 +216,9 @@ public class GatekeeperDBService {
 			final List<Cloud> savedClouds = cloudRepository.saveAll(cloudsToSave.values());
 			cloudRepository.flush();
 			
-			
 			final Set<Long> savedCloudIds = saveCloudAndRelayConnections(savedClouds, gatekeeperRelaysForClouds, gatewayRelaysForClouds);
-			//TODO: start to listen gatekeeper relay topics
-			return cloudRepository.findAllById(savedCloudIds);			
 			
+			return cloudRepository.findAllById(savedCloudIds);			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -200,16 +233,17 @@ public class GatekeeperDBService {
 		logger.debug("updateCloudByIdWithRelaysResponse started...");
 		
 		final Cloud entry = updateCloudByIdWithRelays(id, dto);
+		
 		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Cloud updateCloudByIdWithRelays(final long id, final CloudRequestDTO dto) {
 		logger.debug("updateCloudByIdWithRelays started...");
 						
 		try {
-
 			if (id < 1) {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
@@ -224,7 +258,8 @@ public class GatekeeperDBService {
 			}
 			final Cloud cloud = cloudOpt.get();
 			
-			validateCloudParameters(false, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getNeighbor(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+			validateCloudParameters(false, dto.getOperator(), dto.getName(), dto.getSecure(), dto.getAuthenticationInfo(), dto.getGatekeeperRelayIds(), dto.getGatewayRelayIds());
+			
 			final String dtoOperator = dto.getOperator().toLowerCase().trim();
 			final String dtoName = dto.getName().toLowerCase().trim();
 			final boolean dtoSecure = dto.getSecure() == null ? false : dto.getSecure();
@@ -246,8 +281,8 @@ public class GatekeeperDBService {
 			
 			final Cloud savedCloud = cloudRepository.saveAndFlush(cloud);
 			cloudRepository.refresh(cloud);
-			return savedCloud;
 			
+			return savedCloud;
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -262,16 +297,17 @@ public class GatekeeperDBService {
 		logger.debug("assignRelaysToCloud started...");
 		
 		final Cloud entry = assignRelaysToCloud(id, gatekeeperRelayIds, gatewayRelayIds);
+		
 		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(entry);
 	}
 		
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Cloud assignRelaysToCloud(final long id, final List<Long> gatekeeperRelayIds, final List<Long> gatewayRelayIds) {
 		logger.debug("assignRelaysToCloud started...");
 		
 		try {
-
 			if (id < 1) {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
@@ -281,12 +317,12 @@ public class GatekeeperDBService {
 				throw new InvalidParameterException("Cloud with id '" + id +"' not exists");
 			}
 			final Cloud cloud = cloudOpt.get();
+			
 			final Set<Long> extantGatekeeperRelayIds = collectGatekeeperRelayIdsFromCloud(cloud);
 			final Set<Long> extantGatewayRelayIds = collectGatewayRelayIdsFromCloud(cloud);
 			
 			final Set<Long> normalizedGatekeeperRelayIds = new HashSet<>();
 			if (gatekeeperRelayIds != null && !gatekeeperRelayIds.isEmpty()) {		
-				
 				for (final Long relayId : gatekeeperRelayIds) {
 					if (relayId != null && relayId >= 1 && !extantGatekeeperRelayIds.contains(relayId) ) {					
 						normalizedGatekeeperRelayIds.add(relayId);
@@ -298,7 +334,6 @@ public class GatekeeperDBService {
 			
 			final Set<Long> normalizedGatewayRelayIds = new HashSet<>();
 			if (gatewayRelayIds != null && !gatewayRelayIds.isEmpty()) {		
-				
 				for (final Long relayId : gatewayRelayIds) {
 					if (relayId != null && relayId >= 1 && !extantGatewayRelayIds.contains(relayId)) {
 						normalizedGatewayRelayIds.add(relayId);
@@ -310,10 +345,9 @@ public class GatekeeperDBService {
 			
 			final List<Relay> gatekeeperRelays = collectAndValidateGatekeeperRelays(normalizedGatekeeperRelayIds);
 			final List<Relay> gatewayRelays = collectAndValidateGatewayRelays(normalizedGatewayRelayIds);
-			
 			final Set<Long> savedCloudIds = saveCloudAndRelayConnections(cloud, gatekeeperRelays, gatewayRelays);
-			return cloudRepository.findById(savedCloudIds.iterator().next()).get();
 			
+			return cloudRepository.findById(savedCloudIds.iterator().next()).get();
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -346,6 +380,7 @@ public class GatekeeperDBService {
 		logger.debug("getRelaysResponse started...");
 		
 		final Page<Relay> entries = getRelays(page, size, direction, sortField);
+		
 		return DTOConverter.convertRelayListToRelayResponseListDTO(entries);
 	}
 	
@@ -363,7 +398,6 @@ public class GatekeeperDBService {
 		}
 		
 		try {
-			
 			return relayRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -376,10 +410,12 @@ public class GatekeeperDBService {
 		logger.debug("getRelayByIdResponse started...");
 		
 		final Relay entry = getRelayById(id);
+		
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public Relay getRelayById(final long id) {
 		logger.debug("updateRelayById started...");
 		
@@ -407,15 +443,16 @@ public class GatekeeperDBService {
 		logger.debug("getRelayByAddressAndPortResponse started...");
 		
 		final Relay entry = getRelayByAddressAndPort(address, port);
+		
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	public Relay getRelayByAddressAndPort(String address, final int port) {
 		logger.debug("getRelayByAddressAndPort started...");
 		
 		try {
-			
 			if (Utilities.isEmpty(address)) {
 				throw new InvalidParameterException("Address is empty");
 			}
@@ -457,7 +494,8 @@ public class GatekeeperDBService {
 		logger.debug("registerBulkRelaysResponse started...");
 		
 		final List<Relay> entries = registerBulkRelays(dtoList);
-		return DTOConverter.convertRelayListToRelayResponseListDTO(new PageImpl<Relay>(entries));
+		
+		return DTOConverter.convertRelayListToRelayResponseListDTO(new PageImpl<>(entries));
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -473,11 +511,11 @@ public class GatekeeperDBService {
 			}
 			
 			for (final RelayRequestDTO dto : dtoList) {
-				
 				if (dto == null) {
 					throw new InvalidParameterException("List of RelayRequestDTO contains null element");
-				}				
-				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isSecure(), dto.isExclusive(), dto.getType());
+				}
+				
+				validateRelayParameters(true, dto.getAddress(), dto.getPort(), dto.isExclusive(), dto.getType());
 				
 				final String address = dto.getAddress().toLowerCase().trim();
 				final String uniqueConstraint = address  + ":" + dto.getPort();
@@ -491,8 +529,8 @@ public class GatekeeperDBService {
 			
 			final List<Relay> savedRelays = relayRepository.saveAll(relaysToSave.values());
 			relayRepository.flush();
-			return savedRelays;
 			
+			return savedRelays;
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -507,16 +545,17 @@ public class GatekeeperDBService {
 		logger.debug("updateRelayByIdResponse started...");
 		
 		final Relay entry = updateRelayById(id, address, port, isSecure, isExclusive, type);
+		
 		return DTOConverter.convertRelayToRelayResponseDTO(entry);
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public Relay updateRelayById(final long id, final String address, final int port, final boolean isSecure, final boolean isExclusive, RelayType type) {
 		logger.debug("updateRelayById started...");
 		
 		try {
-
 			if (id < 1) {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
@@ -529,12 +568,14 @@ public class GatekeeperDBService {
 			
 			if (type == null) {
 				type = relay.getType();
-			}			
+			}
+			
 			if (relay.getType() != type) { 
 				throw new InvalidParameterException("Type of relay couldn't be updated");
 			}
 			
-			validateRelayParameters(false, address, port, isSecure, isExclusive, type.toString());
+			validateRelayParameters(false, address, port, isExclusive, type.toString());
+			
 			if (!relay.getAddress().equalsIgnoreCase(address) || relay.getPort() != port) {
 				checkUniqueConstraintOfRelayTable(address, port);
 			}
@@ -546,7 +587,6 @@ public class GatekeeperDBService {
 			relay.setType(type);
 			
 			return relayRepository.saveAndFlush(relay);			
-			
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -561,7 +601,6 @@ public class GatekeeperDBService {
 		logger.debug("removeRelayById started...");
 		
 		try {
-
 			if (id < 1) {
 				throw new InvalidParameterException(ID_NOT_VALID_ERROR_MESSAGE);
 			}
@@ -578,7 +617,6 @@ public class GatekeeperDBService {
 				
 				relayRepository.deleteById(id);
 			}			
-		
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -591,7 +629,7 @@ public class GatekeeperDBService {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateCloudParameters(final boolean withUniqueConstraintCheck, String operator, String name, Boolean secure, Boolean neighbor, final String authenticationInfo,
+	private void validateCloudParameters(final boolean withUniqueConstraintCheck, String operator, String name, Boolean secure, final String authenticationInfo,
 										 final List<Long> gatekeeperRelayIds, final List<Long> gatewayRealyIds) {
 		logger.debug("validateCloudParameters started...");
 		
@@ -610,7 +648,6 @@ public class GatekeeperDBService {
 		}
 		
 		secure = secure == null ? false : secure;
-		neighbor = neighbor == null ? false : neighbor;
 		
 		if (secure && Utilities.isEmpty(authenticationInfo)) {
 			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
@@ -649,7 +686,7 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, Boolean secure, Boolean exclusive, final String type) {
+	private void validateRelayParameters(final boolean withUniqueConstraintCheck, String address, final Integer port, Boolean exclusive, final String type) {
 		logger.debug("validateRelayParameters started...");
 		
 		if (Utilities.isEmpty(address)) {
@@ -662,8 +699,6 @@ public class GatekeeperDBService {
 		} else if (isPortOutOfValidRange(port)) {
 			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX);
 		}
-		
-		secure = secure == null ? false : secure;
 		
 		exclusive = exclusive == null ? false : exclusive;
 		
@@ -697,6 +732,7 @@ public class GatekeeperDBService {
 	//-------------------------------------------------------------------------------------------------	
 	private boolean isPortOutOfValidRange(final int port) {
 		logger.debug("isPortOutOfValidRange started...");
+		
 		return port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX;
 	}
 	
@@ -712,9 +748,9 @@ public class GatekeeperDBService {
 				if (relay.getExclusive()) {
 					throw new InvalidParameterException("Relay with gatekeeper purpose couldn't be exclusive");
 				}
-				if (relay.getType() != RelayType.GATEKEEPER_RELAY 
-						&& relay.getType() != RelayType.GENERAL_RELAY) {
-					throw new InvalidParameterException("Relay with gatekeeper purpose could be only " + RelayType.GATEKEEPER_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
+				if (relay.getType() != RelayType.GATEKEEPER_RELAY && relay.getType() != RelayType.GENERAL_RELAY) {
+					throw new InvalidParameterException("Relay with gatekeeper purpose could be only " + RelayType.GATEKEEPER_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " +
+														 relay.getType() + " type");
 				}
 			}			
 		}
@@ -731,9 +767,9 @@ public class GatekeeperDBService {
 			gatewayRelays = relayRepository.findAllById(gatekewayRelayIds);
 			
 			for (final Relay relay : gatewayRelays) {
-				if (relay.getType() != RelayType.GATEWAY_RELAY 
-						&& relay.getType() != RelayType.GENERAL_RELAY) {
-					throw new InvalidParameterException("Relay with gateway purpose could be only " + RelayType.GATEWAY_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " + relay.getType() + " type");
+				if (relay.getType() != RelayType.GATEWAY_RELAY && relay.getType() != RelayType.GENERAL_RELAY) {
+					throw new InvalidParameterException("Relay with gateway purpose could be only " + RelayType.GATEWAY_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " +
+														 relay.getType() + " type");
 				}
 			}
 		}
@@ -748,7 +784,6 @@ public class GatekeeperDBService {
 		final List<CloudGatekeeperRelay> cloudGatekeeperRelaysToSave = new ArrayList<>();
 		final List<CloudGatewayRelay> cloudGatewayRelaysToSave = new ArrayList<>();
 		final Set<Long> savedCloudIds = new HashSet<>();
-		
 		for (final Cloud cloud : savedClouds) {
 			final String cloudUniqueConstraint = cloud.getOperator() + "." + cloud.getName();
 			
@@ -763,7 +798,8 @@ public class GatekeeperDBService {
 			}
 			
 			savedCloudIds.add(cloud.getId());
-		}			
+		}
+		
 		cloudGatekeeperRelayRepository.saveAll(cloudGatekeeperRelaysToSave);
 		cloudGatekeeperRelayRepository.flush();
 		
@@ -779,8 +815,7 @@ public class GatekeeperDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Set<Long> saveCloudAndRelayConnections (final Cloud cloud, final List<Relay> gatekeeperRelaysForClouds, final List<Relay> gatewayRelaysForClouds) {
-		return saveCloudAndRelayConnections(List.of(cloud), 
-											Map.of(cloud.getOperator() + "." + cloud.getName(), gatekeeperRelaysForClouds),
+		return saveCloudAndRelayConnections(List.of(cloud), Map.of(cloud.getOperator() + "." + cloud.getName(), gatekeeperRelaysForClouds),
 											Map.of(cloud.getOperator() + "." + cloud.getName(), gatewayRelaysForClouds));
 	}
 	
@@ -815,9 +850,7 @@ public class GatekeeperDBService {
 		final Set<Long> relaysConnToKeep = new HashSet<>();
 		final Set<Long> relaysConnToDelete = new HashSet<>();
 		final Set<Long> relaysToAssign = new HashSet<>();
-		
 		for (final CloudGatekeeperRelay relayConn : cloud.getGatekeeperRelays()) {
-			
 			boolean relayConnToRemove = true;
 			for (final Long dtoRelayId : gatekeeperRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
@@ -856,9 +889,7 @@ public class GatekeeperDBService {
 		final Set<Long> relaysConnToKeep = new HashSet<>();
 		final Set<Long> relaysConnToDelete = new HashSet<>();
 		final Set<Long> relaysToAssign = new HashSet<>();
-		
 		for (final CloudGatewayRelay relayConn : cloud.getGatewayRelays()) {
-			
 			boolean relayConnToRemove = true;
 			for (final Long dtoRelayId : gatewayRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {

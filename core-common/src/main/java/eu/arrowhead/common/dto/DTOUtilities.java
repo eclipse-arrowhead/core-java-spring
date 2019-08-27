@@ -9,6 +9,7 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 
 public class DTOUtilities {
@@ -41,6 +42,25 @@ public class DTOUtilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static boolean equalsCloudInResponseAndRequest(final CloudResponseDTO response, final CloudRequestDTO request) {
+		if (response == null) {
+			return request == null;
+		}
+		
+		if (request == null) {
+			return false;
+		}
+		
+		final CloudRequestDTO converted = DTOConverter.convertCloudResponseDTOToCloudRequestDTO(response);
+		normalizeCloudRequestDTO(converted);
+		
+		final CloudRequestDTO requestCopy = copyCloudRequestDTO(request);
+		normalizeCloudRequestDTO(requestCopy);
+		
+		return converted.equals(requestCopy);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
 		Assert.notNull(dto, "Error message object is null.");
 		Assert.notNull(dto.getExceptionType(), "Exception type is null.");
@@ -58,6 +78,8 @@ public class DTOUtilities {
             throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
         case GENERIC:
             throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case TIMEOUT:
+        	throw new TimeoutException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
         case UNAVAILABLE:
 	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
 	    default:
@@ -99,6 +121,35 @@ public class DTOUtilities {
 		final String address = dto.getAddress();
 		if (address != null) {
 			dto.setAddress(address.toLowerCase().trim());
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static CloudRequestDTO copyCloudRequestDTO(final CloudRequestDTO orig) {
+		if (orig == null) {
+			return null;
+		}
+		
+		final CloudRequestDTO result = new CloudRequestDTO();
+		result.setName(orig.getName());
+		result.setOperator(orig.getOperator());
+		result.setSecure(orig.getSecure());
+		result.setNeighbor(orig.getNeighbor());
+		result.setAuthenticationInfo(orig.getAuthenticationInfo());
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static void normalizeCloudRequestDTO(final CloudRequestDTO dto) {
+		final String cloudName = dto.getName();
+		if (cloudName != null) {
+			dto.setName(cloudName.toLowerCase().trim());
+		}
+		
+		final String operator = dto.getOperator();
+		if (operator != null) {
+			dto.setOperator(operator.toLowerCase().trim());
 		}
 	}
 }

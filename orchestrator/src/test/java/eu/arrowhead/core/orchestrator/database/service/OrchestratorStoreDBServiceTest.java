@@ -829,7 +829,6 @@ public class OrchestratorStoreDBServiceTest {
 																																								thenReturn(Optional.ofNullable(null));
 		
 		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOForTest());
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -847,13 +846,11 @@ public class OrchestratorStoreDBServiceTest {
 																																								thenReturn(Optional.ofNullable(null));
 		
 		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOWithPriorityNotPresentInDBForTest());
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void createForeignOrchestratorStoreEntityWithPriorityPresentInDBEntitiesTest() {
-		
 		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(getSystemForTest()));
 		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.of(getProviderCloudForTest()));		
 		when(systemRepository.findBySystemNameAndAddressAndPort(any(), any(), anyInt())).thenReturn(Optional.of(getSystemForTest()));
@@ -866,7 +863,6 @@ public class OrchestratorStoreDBServiceTest {
 		when(orchestratorStoreRepository.saveAndFlush(any())).thenReturn(getOrchestratorStore());
 		
 		orchestratorStoreDBService.createOrchestratorStoreEntity(getForeignOrchestratorStoreRequestDTOForTest());
-		
 	}
 	
 	//=================================================================================================
@@ -986,7 +982,6 @@ public class OrchestratorStoreDBServiceTest {
 	private CloudRequestDTO getLocalProviderCloudRequestDTOForTest() {
 		final String operator = "operatorForTest";
 		final String name = "cloudName";
-		final boolean ownCloud = true;	
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(operator);
@@ -999,7 +994,6 @@ public class OrchestratorStoreDBServiceTest {
 	private CloudRequestDTO getForeignProviderCloudRequestDTOForTest() {
 		final String operator = "operatorForTest";
 		final String name = "cloudName";
-		final boolean ownCloud = false;	
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(operator);

@@ -10,15 +10,19 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class GKSwaggerConfig extends DefaultSwaggerConfig{
+public class GKSwaggerConfig extends DefaultSwaggerConfig {
 	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
 	public GKSwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_GATEKEEPER);		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public Docket customizeSwagger() {
 		return configureSwaggerForCoreSystem(this.getClass().getPackageName());
 	}
-			
 }

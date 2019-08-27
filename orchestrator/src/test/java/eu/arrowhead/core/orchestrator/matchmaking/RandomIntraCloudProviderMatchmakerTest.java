@@ -114,5 +114,4 @@ public class RandomIntraCloudProviderMatchmakerTest {
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(List.of(dto1, dto2), new IntraCloudProviderMatchmakingParameters(List.of(ppDTO)));
 		Assert.assertEquals(2, selected.getId());
 	}
-
 }
