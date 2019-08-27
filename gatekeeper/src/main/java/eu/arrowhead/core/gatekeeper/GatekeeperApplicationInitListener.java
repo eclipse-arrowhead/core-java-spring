@@ -19,7 +19,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
-import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 
@@ -98,6 +98,6 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		final PublicKey publicKey = (PublicKey) context.get(CommonConstants.SERVER_PUBLIC_KEY);
 		final PrivateKey privateKey = (PrivateKey) context.get(CommonConstants.SERVER_PRIVATE_KEY);
 
-		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
+		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
 	}
 }
