@@ -60,13 +60,14 @@ public class OrchestratorService {
 	//=================================================================================================
 	// members
 	
-	private static final Logger logger = LogManager.getLogger(OrchestratorService.class);
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
 	private static final String MORE_THAN_ONE_ERROR_MESSAGE= " must not have more than one element.";
 	
 	private static final int EXPIRING_TIME_IN_MINUTES = 2;
+	
+	private static final Logger logger = LogManager.getLogger(OrchestratorService.class);
 	
 	@Autowired
 	private OrchestratorDriver orchestratorDriver;
@@ -118,8 +119,7 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO triggerInterCloud(
-			final OrchestrationFormRequestDTO request) {
+	public OrchestrationResponseDTO triggerInterCloud(final OrchestrationFormRequestDTO request) {
 		logger.debug("triggerInterCloud started ...");
 		
 		// necessary, because we want to use a flag value when we call the check method
@@ -132,69 +132,59 @@ public class OrchestratorService {
 		
 		final CloudResponseDTO targetCloud = callGSD(request, flags);
         if (targetCloud == null || Utilities.isEmpty(targetCloud.getName())) {
-            
         	// Return empty response
             return new OrchestrationResponseDTO();
  		}	
         
         return callInterCloudNegotiation(request, targetCloud, flags);
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO topPriorityEntriesOrchestrationProcess(
-			final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
-			final Long systemId) {
+	public OrchestrationResponseDTO topPriorityEntriesOrchestrationProcess(final OrchestrationFormRequestDTO orchestrationFormRequestDTO, final Long systemId) {
 		logger.debug("topPriorityEntriesOrchestrationProcess started ...");		
 		
 		if (orchestrationFormRequestDTO == null) {
 			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
+		
 		orchestrationFormRequestDTO.validateCrossParameterConstraints();
 			
-		if ( systemId != null && systemId < 1) {
+		if (systemId != null && systemId < 1) {
 			throw new InvalidParameterException("systemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		final long validSystemId = ( systemId != null ? systemId : validateSystemRequestDTO(orchestrationFormRequestDTO.getRequesterSystem()) );
-		
+		final long validSystemId = (systemId != null ? systemId.longValue() : validateSystemRequestDTO(orchestrationFormRequestDTO.getRequesterSystem()));
 		final SystemRequestDTO consumerSystemRequestDTO = orchestrationFormRequestDTO.getRequesterSystem();
 		
 		final List<OrchestratorStore> entryList = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(validSystemId);
-		if ( entryList == null || entryList.isEmpty() ) {
-			
+		if (entryList == null || entryList.isEmpty()) {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
 		final List<ServiceRegistryResponseDTO> crossCheckedEntryList = crossCheckTopPriorityEntries(entryList, orchestrationFormRequestDTO, consumerSystemRequestDTO);
-		if ( crossCheckedEntryList == null || crossCheckedEntryList.isEmpty() ) {
-			
+		if (crossCheckedEntryList == null || crossCheckedEntryList.isEmpty()) {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
 		return compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
-				
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public OrchestrationResponseDTO orchestrationFromStore( final OrchestrationFormRequestDTO orchestrationFormRequestDTO ) {
+	public OrchestrationResponseDTO orchestrationFromStore(final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("orchestrationFromStore started ...");		
 		
-		if ( orchestrationFormRequestDTO == null ) {
+		if (orchestrationFormRequestDTO == null) {
 			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		if ( orchestrationFormRequestDTO.getRequestedService() == null ) {
-			
+		if (orchestrationFormRequestDTO.getRequestedService() == null) {
 			return topPriorityEntriesOrchestrationProcess(orchestrationFormRequestDTO, null);
-			
 		}
 	
 		orchestrationFormRequestDTO.validateCrossParameterConstraints();
 
-		final List<OrchestratorStore> entryList = getOrchestrationStoreEntries( orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());	        
-		if ( entryList == null || entryList.isEmpty() ) {
-			
+		final List<OrchestratorStore> entryList = getOrchestrationStoreEntries(orchestrationFormRequestDTO.getRequesterSystem(), orchestrationFormRequestDTO.getRequestedService());	        
+		if (entryList == null || entryList.isEmpty()) {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
@@ -288,7 +278,6 @@ public class OrchestratorService {
 		
 		final SystemResponseDTO validConsumerSystemResponseDTO  =  validateSystemId(systemId);
 		final SystemRequestDTO systemRequestDTO = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(validConsumerSystemResponseDTO);
-		
 	    final OrchestrationFormRequestDTO orchestrationFormRequestDTO = new OrchestrationFormRequestDTO.Builder(systemRequestDTO).build();
 
 	    return topPriorityEntriesOrchestrationProcess(orchestrationFormRequestDTO, systemId);
@@ -461,7 +450,6 @@ public class OrchestratorService {
 		}
 		
 		return orchestratorDriver.queryServiceRegistryBySystemId(systemId);
-
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -473,7 +461,7 @@ public class OrchestratorService {
 		}
 		
 		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemRequestDTO(consumerSystemRequestDTO);
-		if ( systemResponseDTO == null ) {
+		if (systemResponseDTO == null) {
 			throw new InvalidParameterException("SystemResponseDTO " + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
@@ -481,67 +469,54 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStore> getOrchestrationStoreEntries(final SystemRequestDTO requesterSystem,
-			final ServiceQueryFormDTO requestedService) {
+	private List<OrchestratorStore> getOrchestrationStoreEntries(final SystemRequestDTO requesterSystem, final ServiceQueryFormDTO requestedService) {
 		logger.debug("getOrchestrationStoreEntries started...");
-		
 		
 		if (requesterSystem == null) {
 			throw new InvalidParameterException("ConsumerSystem " + NULL_PARAMETER_ERROR_MESSAGE);
-
-		}else {
-			
-			final long consumerSystemId = validateSystemRequestDTO(requesterSystem);
-			
-			if (Utilities.isEmpty(requestedService.getServiceDefinitionRequirement() )) {
-				throw new InvalidParameterException("ServiceDefinitionRequirement " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
-			}
-			
-			final String serviceDefinitionName = requestedService.getServiceDefinitionRequirement().trim().toLowerCase();
-			
-			if (requestedService.getInterfaceRequirements() == null ||
-					requestedService.getInterfaceRequirements().isEmpty() || 
-					Utilities.isEmpty(requestedService.getInterfaceRequirements().get(0))) {
-				throw new InvalidParameterException("InterfaceRequirement " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
-			}
-			
-			if (requestedService.getInterfaceRequirements().size() != 1) {
-				throw new InvalidParameterException("InterfaceRequirement " + MORE_THAN_ONE_ERROR_MESSAGE);
-			}
-			final String serviceInterfaceName =  requestedService.getInterfaceRequirements().get(0).trim();
-			
-			return orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(consumerSystemId, serviceDefinitionName, serviceInterfaceName);
 		}
+		
+		if (Utilities.isEmpty(requestedService.getServiceDefinitionRequirement())) {
+			throw new InvalidParameterException("ServiceDefinitionRequirement " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		final String serviceDefinitionName = requestedService.getServiceDefinitionRequirement().trim().toLowerCase();
+		
+		if (requestedService.getInterfaceRequirements() == null || requestedService.getInterfaceRequirements().isEmpty() || Utilities.isEmpty(requestedService.getInterfaceRequirements().get(0))) {
+			throw new InvalidParameterException("InterfaceRequirement " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (requestedService.getInterfaceRequirements().size() != 1) {
+			throw new InvalidParameterException("InterfaceRequirement " + MORE_THAN_ONE_ERROR_MESSAGE);
+		}
+		
+		final String serviceInterfaceName =  requestedService.getInterfaceRequirements().get(0).trim();
+		
+		final long consumerSystemId = validateSystemRequestDTO(requesterSystem);
+		
+		return orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(consumerSystemId, serviceDefinitionName, serviceInterfaceName);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<ServiceRegistryResponseDTO> crossCheckTopPriorityEntries(
-			final List<OrchestratorStore> entryList, 
-			final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
-			final SystemRequestDTO consumerSystem) {
+	private List<ServiceRegistryResponseDTO> crossCheckTopPriorityEntries(final List<OrchestratorStore> entryList, final OrchestrationFormRequestDTO orchestrationFormRequestDTO,
+																		  final SystemRequestDTO consumerSystem) {
 		logger.debug("crossCheckTopPriorityEntries started...");
-		
-		final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();	   
 	    
-	    final List<ServiceRegistryResponseDTO> filteredServiceQueryResultDTOList = new ArrayList<>();
-	    
-	    //currently only local entries are allowed to be returned by topPriorityOrchestration
-	    logger.debug("currently only local entries are allowed to be returned by topPriorityOrchestration");
+		logger.debug("currently only local entries are allowed to be returned by topPriorityOrchestration");
 	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);
 	    
 	    if (onlyLocalEntryList.isEmpty()) {
-			
 	    	return List.of();
 		}
 	    
-	    final Map<Long, String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds( onlyLocalEntryList); 
-	    final Map<Long, List<String>> serviceDefinitionIdInterfaceMap = mapInterfacesToServiceDefinitions( onlyLocalEntryList);
-	    final Map<Long, Set<String>> providerIdInterfaceMap = mapInterfacesToProviders( onlyLocalEntryList);
+	    final Map<Long,String> serviceDefinitionsIdsMap = mapServiceDefinitionsToServiceDefinitionIds(onlyLocalEntryList); 
+	    final Map<Long,List<String>> serviceDefinitionIdInterfaceMap = mapInterfacesToServiceDefinitions(onlyLocalEntryList);
+	    final Map<Long,Set<String>> providerIdInterfaceMap = mapInterfacesToProviders(onlyLocalEntryList);
 	    
+	    final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();	   
+	    final List<ServiceRegistryResponseDTO> filteredServiceQueryResultDTOList = new ArrayList<>();
 	    for (final Entry<Long, String> entry : serviceDefinitionsIdsMap.entrySet()) {
-	    	
 	    	final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
-	    	
 	    	serviceQueryFormDTO.setServiceDefinitionRequirement(entry.getValue());
 		    final List<String> interfaceRequirements = serviceDefinitionIdInterfaceMap.get(entry.getKey());
 		    serviceQueryFormDTO.setInterfaceRequirements(interfaceRequirements);
@@ -565,45 +540,36 @@ public class OrchestratorService {
 		}
 		
 		return entryList.stream().filter(e -> !e.isForeign()).collect(Collectors.toList()); 
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<ServiceRegistryResponseDTO> getAuthorizedServiceRegistryEntries(final List<OrchestratorStore> entryList,
-			final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
+	private List<ServiceRegistryResponseDTO> getAuthorizedServiceRegistryEntries(final List<OrchestratorStore> entryList, final OrchestrationFormRequestDTO orchestrationFormRequestDTO) {
 		logger.debug("crossCheckStoreEntries started...");
-		
-		final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();
 		
 	    final List<OrchestratorStore> onlyLocalEntryList = filterEntryListByForeign(entryList);    
 	    if (onlyLocalEntryList.isEmpty()) {
-			
 	    	return List.of();
 		}
 		
     	final ServiceQueryFormDTO serviceQueryFormDTO = orchestrationFormRequestDTO.getRequestedService();
     	serviceQueryFormDTO.setInterfaceRequirements(List.of(orchestrationFormRequestDTO.getRequestedService().getInterfaceRequirements().get(0)));
-    	
+    	final OrchestrationFlags flags = orchestrationFormRequestDTO.getOrchestrationFlags();
 		final ServiceQueryResultDTO serviceQueryResultDTO = orchestratorDriver.queryServiceRegistry(serviceQueryFormDTO,  flags.get(Flag.METADATA_SEARCH), flags.get(Flag.PING_PROVIDERS)); 
 		
 		return orchestratorDriver.queryAuthorization(orchestrationFormRequestDTO.getRequesterSystem(), serviceQueryResultDTO.getServiceQueryData());
-    
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, List<String>> mapInterfacesToServiceDefinitions(final List<OrchestratorStore> entryList) {
-		logger.debug("mapIntrefacesToServiceDefinitions started...");
+	private Map<Long,List<String>> mapInterfacesToServiceDefinitions(final List<OrchestratorStore> entryList) {
+		logger.debug("mapInterfacesToServiceDefinitions started...");
 		
-		final Map<Long, List<String>> serviceDefinitionsInterfacesMap = new HashMap<>();
-		
+		final Map<Long,List<String>> serviceDefinitionsInterfacesMap = new HashMap<>();
 		for (final OrchestratorStore orchestratorStore : entryList) {
 			final Long serviceDefinitionId = orchestratorStore.getServiceDefinition().getId();
 			final String interfaceName = orchestratorStore.getServiceInterface().getInterfaceName();
 			
 			serviceDefinitionsInterfacesMap.putIfAbsent(serviceDefinitionId, new ArrayList<>());
-			
 			if (!serviceDefinitionsInterfacesMap.get(serviceDefinitionId).contains(interfaceName)) {
-				
 				serviceDefinitionsInterfacesMap.get(serviceDefinitionId).add(interfaceName);
 			}
 		}
@@ -612,37 +578,31 @@ public class OrchestratorService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, Set<String>> mapInterfacesToProviders(final List<OrchestratorStore> entryList) {
-		logger.debug("mapIntrefacesToProviders started...");
+	private Map<Long,Set<String>> mapInterfacesToProviders(final List<OrchestratorStore> entryList) {
+		logger.debug("mapInterfacesToProviders started...");
 		
-		final Map<Long, Set<String>> providersInterfacesMap = new HashMap<>();
+		final Map<Long,Set<String>> providersInterfacesMap = new HashMap<>();
 		
 		for (final OrchestratorStore orchestratorStore : entryList) {
 			Assert.isTrue(!orchestratorStore.isForeign(), "Provider is foreign");
 			
 			final Long providerSystemId = orchestratorStore.getProviderSystemId();
-			
 			providersInterfacesMap.putIfAbsent(providerSystemId, new HashSet<>());
 			providersInterfacesMap.get(providerSystemId).add(orchestratorStore.getServiceInterface().getInterfaceName());
-			
 		}
 		
 		return providersInterfacesMap;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long, String> mapServiceDefinitionsToServiceDefinitionIds(final List<OrchestratorStore> entryList) {
+	private Map<Long,String> mapServiceDefinitionsToServiceDefinitionIds(final List<OrchestratorStore> entryList) {
 		logger.debug("mapServiceDefinitionsToServiceDefinitionIds started...");
 		
-		final Map<Long, String> serviceDefinitionsIdToStringMap = new HashMap<>();
-		
+		final Map<Long,String> serviceDefinitionsIdToStringMap = new HashMap<>();
 		for (final OrchestratorStore orchestratorStore : entryList) {
 			final ServiceDefinition serviceDefinition = orchestratorStore.getServiceDefinition();
-			
 			if (!serviceDefinitionsIdToStringMap.containsKey(serviceDefinition.getId())) {
-				
 				serviceDefinitionsIdToStringMap.put(serviceDefinition.getId(), serviceDefinition.getServiceDefinition());
-			
 			}
 		}
 		
@@ -650,25 +610,20 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<ServiceRegistryResponseDTO> filterQueryResultByInterfaces(
-			final Map<Long, Set<String>> providerIdInterfaceIdsMap, final ServiceQueryResultDTO queryResult) {
+	private List<ServiceRegistryResponseDTO> filterQueryResultByInterfaces(final Map<Long, Set<String>> providerIdInterfaceIdsMap, final ServiceQueryResultDTO queryResult) {
 		logger.debug("filterQueryResultByInterfaces started...");
 		
 		final List<ServiceRegistryResponseDTO> filteredResults = new ArrayList<>();
 		
 		final List<ServiceRegistryResponseDTO> result = queryResult.getServiceQueryData();
-		
 		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : result) {
-			
 			final Long providerIdFromResult = serviceRegistryResponseDTO.getProvider().getId();
 			final List<ServiceInterfaceResponseDTO> interfaceListFromResult = serviceRegistryResponseDTO.getInterfaces();
 			final List<ServiceInterfaceResponseDTO> filteredInterfaceList = new ArrayList<>();
 			
 			if (providerIdInterfaceIdsMap.containsKey(providerIdFromResult)) {
-				
 				final Set<String> interfaceSetFromRequest = providerIdInterfaceIdsMap.get(providerIdFromResult);
 				for (final ServiceInterfaceResponseDTO interfaceResponseDTO : interfaceListFromResult) {
-
 					if (interfaceSetFromRequest.contains(interfaceResponseDTO.getInterfaceName())) {
 						filteredInterfaceList.add(interfaceResponseDTO);
 					}
@@ -676,11 +631,9 @@ public class OrchestratorService {
 			}
 			
 			if (!filteredInterfaceList.isEmpty()) {
-				
 				serviceRegistryResponseDTO.setInterfaces(filteredInterfaceList);
 				filteredResults.add(serviceRegistryResponseDTO);
 			}
-			
 		}
 		
 		return filteredResults;
@@ -690,35 +643,31 @@ public class OrchestratorService {
 	private List<CloudRequestDTO> getPreferredClouds(final List<PreferredProviderDataDTO> preferredProviders) {
 		logger.debug("getPreferredClouds started...");
 		
-		if ( preferredProviders == null || preferredProviders.isEmpty()) {
-			
+		if (preferredProviders == null || preferredProviders.isEmpty()) {
 			return List.of();
 		}
 		
 		final List<CloudRequestDTO> preferredClouds = new ArrayList<>(preferredProviders.size());
 		for (final PreferredProviderDataDTO provider : preferredProviders) {
-		  if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
-		    preferredClouds.add(provider.getProviderCloud());
-		  }
+			if (provider.isGlobal() && !preferredClouds.contains(provider.getProviderCloud())) {
+				preferredClouds.add(provider.getProviderCloud());
+			}
 		}
 		
 		return preferredClouds;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<SystemRequestDTO> getPreferredSystems( final List<PreferredProviderDataDTO> preferredProviders, final CloudResponseDTO targetCloud) {
+	private List<SystemRequestDTO> getPreferredSystems(final List<PreferredProviderDataDTO> preferredProviders, final CloudResponseDTO targetCloud) {
 		logger.debug("getPreferredSystems started...");
 		
 		if (preferredProviders == null || preferredProviders.isEmpty()) {
-			
 			return List.of();
 		}
 		
 		final List<SystemRequestDTO> preferredSystemsFromTargetCloud = new ArrayList<>(preferredProviders.size());
-		
 		for (final PreferredProviderDataDTO preferredProviderDataDTO : preferredProviders) {
 			if (DTOUtilities.equalsCloudInResponseAndRequest(targetCloud, preferredProviderDataDTO.getProviderCloud())) {
-				
 				preferredSystemsFromTargetCloud.add(preferredProviderDataDTO.getProviderSystem());
 			}
 		}
@@ -735,44 +684,26 @@ public class OrchestratorService {
 				orchestrationResultDTO.setWarnings(new ArrayList<>(1));
 			}
 			
-			if (!orchestrationResultDTO.getWarnings().isEmpty()) {
-				
-				if (!orchestrationResultDTO.getWarnings().contains(OrchestratorWarnings.FROM_OTHER_CLOUD)) {
-					
-					orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
-				}
-			}else {
-				
+			if (!orchestrationResultDTO.getWarnings().contains(OrchestratorWarnings.FROM_OTHER_CLOUD)) {
 				orchestrationResultDTO.getWarnings().add(OrchestratorWarnings.FROM_OTHER_CLOUD);
 			}
 		}
-	
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationResponseDTO getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(
-			final OrchestrationFormRequestDTO request, 
-			final List<OrchestratorStore> entryList,
-			final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries) {
+	private OrchestrationResponseDTO getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(final OrchestrationFormRequestDTO request, final List<OrchestratorStore> entryList,
+																							   final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries) {
 		logger.debug("getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList started...");
 		
         for (final OrchestratorStore orchestratorStore : entryList) {
-        	
         	if (!orchestratorStore.isForeign()) {
-        		
-				final OrchestrationResponseDTO orchestrationResponseDTO = crossCheckLocalStoreEntry( orchestratorStore, request, authorizedLocalServiceRegistryEntries);
-            	
-				if ( orchestrationResponseDTO != null && !orchestrationResponseDTO.getResponse().isEmpty() ) {
-
+				final OrchestrationResponseDTO orchestrationResponseDTO = crossCheckLocalStoreEntry(orchestratorStore, request, authorizedLocalServiceRegistryEntries);
+				if (orchestrationResponseDTO != null && !orchestrationResponseDTO.getResponse().isEmpty()) {
             		return orchestrationResponseDTO;
 				}
-        		
-        	}else {       		
-
-				final OrchestrationResponseDTO orchestrationResponseDTO = crossCheckForeignStoreEntry( orchestratorStore, request);
-            	
-				if ( orchestrationResponseDTO != null && !orchestrationResponseDTO.getResponse().isEmpty() ) {
-
+        	} else {       		
+				final OrchestrationResponseDTO orchestrationResponseDTO = crossCheckForeignStoreEntry(orchestratorStore, request);
+				if (orchestrationResponseDTO != null && !orchestrationResponseDTO.getResponse().isEmpty()) {
             		return orchestrationResponseDTO;
 				}
 			}				
@@ -782,17 +713,13 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationResponseDTO crossCheckLocalStoreEntry(
-			final OrchestratorStore orchestratorStore,
-			final OrchestrationFormRequestDTO request,
-			final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries) {
+	private OrchestrationResponseDTO crossCheckLocalStoreEntry(final OrchestratorStore orchestratorStore, final OrchestrationFormRequestDTO request, 
+															   final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries) {
 		logger.debug("crossCheckLocalStoreEntry started ...");
 		
 		final Long providerSystemId = orchestratorStore.getProviderSystemId();
 		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : authorizedLocalServiceRegistryEntries) {
-			
 			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-				
 				return compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);							
 			}
 		}
@@ -812,18 +739,12 @@ public class OrchestratorService {
 		final long cloudId = foreignStoreEntry.getProviderCloud().getId();
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = List.of(preferredProviderDataDTO);
 		
-		//orchestrationFromStore 
+		// orchestrationFromStore 
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
 		flags.put(Flag.MATCHMAKING, true);
 		request.setOrchestrationFlags(flags);
 		
-		return callInterCloudNegotiation(
-				preferredSystemsFromTargetCloud, 
-				serviceQueryFormDTO, 
-				systemRequestDTO, 
-				cloudId, 
-				request.getOrchestrationFlags(), 
-				preferredProviderDataDTOList);
+		return callInterCloudNegotiation(preferredSystemsFromTargetCloud, serviceQueryFormDTO, systemRequestDTO, cloudId, request.getOrchestrationFlags(), preferredProviderDataDTOList);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -832,10 +753,8 @@ public class OrchestratorService {
 		
 		final List<CloudRequestDTO> preferredClouds = getPreferredClouds(request.getPreferredProviders());
 		
-		final GSDQueryResultDTO result = orchestratorDriver.doGlobalServiceDiscovery(
-				new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
-		if ( result == null || result.getResults() == null || result.getResults().isEmpty() ) {
-			
+		final GSDQueryResultDTO result = orchestratorDriver.doGlobalServiceDiscovery(new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
+		if (result == null || result.getResults() == null || result.getResults().isEmpty()) {
 			return new CloudResponseDTO();
 		}
 
@@ -844,58 +763,40 @@ public class OrchestratorService {
 		return cloudMatchmaker.doMatchmaking(iCCMparams);
 	}
 	
-	
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationResponseDTO callInterCloudNegotiation(
-			final OrchestrationFormRequestDTO request,
-			final CloudResponseDTO targetCloud, 
-			final OrchestrationFlags flags) {
+	private OrchestrationResponseDTO callInterCloudNegotiation(final OrchestrationFormRequestDTO request, final CloudResponseDTO targetCloud, final OrchestrationFlags flags) {
 		logger.debug("callInterCloudNegotiation started ...");
 
 		final List<SystemRequestDTO> preferredSystemsFromTargetCloud = getPreferredSystems(request.getPreferredProviders(), targetCloud);
 		final ServiceQueryFormDTO serviceQueryFormDTO = request.getRequestedService();
 		final SystemRequestDTO systemRequestDTO = request.getRequesterSystem();
 		final long cloudId = targetCloud.getId();
-
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = request.getPreferredProviders();
 		
 		return callInterCloudNegotiation(preferredSystemsFromTargetCloud, serviceQueryFormDTO, systemRequestDTO, cloudId, flags, preferredProviderDataDTOList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationResponseDTO callInterCloudNegotiation(
-			final List<SystemRequestDTO> preferredSystemsFromTargetCloud,
-			final ServiceQueryFormDTO serviceQueryFormDTO,
-			final SystemRequestDTO systemRequestDTO,
-			final long cloudId,
-			final OrchestrationFlags flags,
-			final List<PreferredProviderDataDTO> preferredProviderDataDTOList ) {
-		
+	private OrchestrationResponseDTO callInterCloudNegotiation(final List<SystemRequestDTO> preferredSystemsFromTargetCloud, final ServiceQueryFormDTO serviceQueryFormDTO, 
+															   final SystemRequestDTO systemRequestDTO,	final long cloudId, final OrchestrationFlags flags, 
+															   final List<PreferredProviderDataDTO> preferredProviderDataDTOList) {
 		logger.debug("callInterCloudNegotiation with detailed parameters started ...");
 
-		final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(
-				serviceQueryFormDTO, 
-				cloudId, 
-				systemRequestDTO, 
-				preferredSystemsFromTargetCloud, 
-				flags);
-		
-		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiations( icnRequest );
-        if ( icnResultDTO == null || icnResultDTO.getResponse().isEmpty() ) {
-           
+		final ICNRequestFormDTO icnRequest = new ICNRequestFormDTO(serviceQueryFormDTO,	cloudId, systemRequestDTO, preferredSystemsFromTargetCloud,	flags);
+		final ICNResultDTO icnResultDTO = orchestratorDriver.doInterCloudNegotiation(icnRequest);
+        if (icnResultDTO == null || icnResultDTO.getResponse().isEmpty()) {
         	// Return empty response
            return new OrchestrationResponseDTO();
 		}
 		
-        updateOrchestrationResultWarningWithForeignWarning( icnResultDTO.getResponse() );
+        updateOrchestrationResultWarningWithForeignWarning(icnResultDTO.getResponse());
 		
-       if ( flags.get( Flag.MATCHMAKING ) ) {
-            
+       if (flags.get(Flag.MATCHMAKING)) {
     	    final InterCloudProviderMatchmakingParameters iCPMparams = new InterCloudProviderMatchmakingParameters(icnResultDTO, preferredProviderDataDTOList, flags.get(Flag.ONLY_PREFERRED));		
 	           
             return interCloudProviderMatchmaker.doMatchmaking(iCPMparams);
 		}	
 
-       return new OrchestrationResponseDTO( icnResultDTO.getResponse() );
+       return new OrchestrationResponseDTO(icnResultDTO.getResponse());
 	}
 }

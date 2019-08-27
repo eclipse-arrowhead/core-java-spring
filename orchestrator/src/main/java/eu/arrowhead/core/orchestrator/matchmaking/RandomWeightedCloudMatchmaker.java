@@ -32,29 +32,25 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
         Assert.notNull(params, "params is null");
         
         final GSDQueryResultDTO gsdResult = params.getGsdResult();
-        if ( gsdResult == null || gsdResult.getResults().isEmpty() ) {
-            
-            //Return Empty response
+        if (gsdResult == null || gsdResult.getResults().isEmpty()) {
+            // Return empty response
             return new CloudResponseDTO();
         }
         
         final List<CloudRequestDTO> preferredClouds = params.getPreferredClouds();
         final boolean onlyPreferred = params.isOnlyPreferred();
         
-        final RandomCollection randomPreferredCloudCollection = fillUpRandomPreferredCloudCollection( gsdResult, preferredClouds);
-        
+        final RandomCollection randomPreferredCloudCollection = fillUpRandomPreferredCloudCollection(gsdResult, preferredClouds);
         if (!randomPreferredCloudCollection.isEmpty()) {
-            
             return randomPreferredCloudCollection.next();
         }
         
-        if ( onlyPreferred ) {
-            
-            //Return Empty response
+        if (onlyPreferred) {
+            // Return empty response
             return new CloudResponseDTO();
         }
         
-        final RandomCollection randomCloudCollection = fillUpRandomCloudCollection( gsdResult );
+        final RandomCollection randomCloudCollection = fillUpRandomCloudCollection(gsdResult);
         
         return randomCloudCollection.isEmpty() ? new CloudResponseDTO() : randomCloudCollection.next();
     }
@@ -63,23 +59,17 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-    private RandomCollection fillUpRandomPreferredCloudCollection(
-            final GSDQueryResultDTO gsdResult,
-            final List<CloudRequestDTO> preferredClouds) {
+    private RandomCollection fillUpRandomPreferredCloudCollection(final GSDQueryResultDTO gsdResult, final List<CloudRequestDTO> preferredClouds) {
         logger.debug("fillUpRandomPreferredCloudCollection started...");
         
         final RandomCollection randomPreferredCloudCollection = new RandomCollection();
         for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
-            if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
-                                
+            if (gsdPollResponseDTO != null && gsdPollResponseDTO.getProviderCloud() != null) {
                 final CloudResponseDTO cloud = gsdPollResponseDTO.getProviderCloud();
                 
                 for (final CloudRequestDTO preferredCloud : preferredClouds) {
-
                     if (DTOUtilities.equalsCloudInResponseAndRequest(cloud, preferredCloud)) {
-
-                        randomPreferredCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(),
-                                cloud);
+                        randomPreferredCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(), cloud);
                     }
                 }                
             }
@@ -89,17 +79,13 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
     }
     
     //-------------------------------------------------------------------------------------------------
-    private RandomCollection fillUpRandomCloudCollection(
-            final GSDQueryResultDTO gsdResult ) {
+    private RandomCollection fillUpRandomCloudCollection(final GSDQueryResultDTO gsdResult) {
         logger.debug("fillUpRandomCloudCollection started...");
         
         final RandomCollection randomCloudCollection = new RandomCollection();
         for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
-            if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
-                
-                randomCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(),
-                        gsdPollResponseDTO.getProviderCloud());                
-                
+            if (gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
+                randomCloudCollection.add(gsdPollResponseDTO.getNumOfProviders(), gsdPollResponseDTO.getProviderCloud());                
             }
         }
         
@@ -115,7 +101,7 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
         //=================================================================================================
         // members
         
-        private final NavigableMap<Double, CloudResponseDTO> map = new TreeMap<>();
+        private final NavigableMap<Double,CloudResponseDTO> map = new TreeMap<>();
         private int total = 0;
 
         //=================================================================================================
@@ -126,7 +112,6 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
             logger.debug("RandomCollection . add started...");
             
             if (weight <= 0 || map.containsValue(result)) {
-            	
             	return;
             }
             
@@ -148,7 +133,5 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
             
             return map.isEmpty();
         }
-
     }
-
 }

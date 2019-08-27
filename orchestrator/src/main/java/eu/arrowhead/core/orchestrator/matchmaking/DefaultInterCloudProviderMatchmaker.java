@@ -34,8 +34,7 @@ public class DefaultInterCloudProviderMatchmaker implements InterCloudProviderMa
 		final boolean storeOrchestration = params.isStoreOrchestration();
 		
 		if (icnResultDTO == null || icnResultDTO.getResponse().isEmpty()) {
-			
-			//returning empty response
+			// returning empty response
 			return new OrchestrationResponseDTO();
 		}
 		
@@ -49,14 +48,11 @@ public class DefaultInterCloudProviderMatchmaker implements InterCloudProviderMa
 		}
 		
 		if (storeOrchestration) {
-			
-			//returning empty response
+			// returning empty response
 			return new OrchestrationResponseDTO();
 		}
 		
 		logger.debug("no match was found between preferred providers, the first one is selected.");
-		
 		return  new OrchestrationResponseDTO(List.of(icnResultDTO.getResponse().get(0)));
 	}
-
 }

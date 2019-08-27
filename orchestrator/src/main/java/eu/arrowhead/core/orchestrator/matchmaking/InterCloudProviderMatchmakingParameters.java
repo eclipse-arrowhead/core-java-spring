@@ -9,13 +9,13 @@ import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 
 public class InterCloudProviderMatchmakingParameters {
+	
 	//=================================================================================================
 	// members
 	
 	protected ICNResultDTO icnResultDTO;
 	protected List<PreferredProviderDataDTO> preferredGlobalProviders = new ArrayList<>();
 	protected boolean storeOrchestration;
-
 	
 	// additional parameter can be add here to provide information to the various matchmaking algorithms
 	
@@ -23,10 +23,7 @@ public class InterCloudProviderMatchmakingParameters {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public InterCloudProviderMatchmakingParameters(
-			final ICNResultDTO icnResultDTO, 
-			final List<PreferredProviderDataDTO> preferredGlobalProviders,
-			final boolean storeOrchestration) {
+	public InterCloudProviderMatchmakingParameters(final ICNResultDTO icnResultDTO,	final List<PreferredProviderDataDTO> preferredGlobalProviders, final boolean storeOrchestration) {
 		Assert.notNull(icnResultDTO, "icnResultDTO is null.");
 		Assert.notNull(preferredGlobalProviders, "preferredLocalProviders list is null.");
 		
@@ -46,6 +43,8 @@ public class InterCloudProviderMatchmakingParameters {
 			this.preferredGlobalProviders = preferredGlobalProviders;
 		}
 	}
-	public void setIcnResponseDTO(ICNResultDTO icnResultDTO) { this.icnResultDTO = icnResultDTO; }
-	public void setStoreOrchestration(boolean storeOrchestration) { this.storeOrchestration = storeOrchestration; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setIcnResponseDTO(final ICNResultDTO icnResultDTO) { this.icnResultDTO = icnResultDTO; }
+	public void setStoreOrchestration(final boolean storeOrchestration) { this.storeOrchestration = storeOrchestration; }
 }

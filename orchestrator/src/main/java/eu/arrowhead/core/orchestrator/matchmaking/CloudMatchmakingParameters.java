@@ -6,7 +6,6 @@ import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 
 public class CloudMatchmakingParameters {
-
 	
 	//=================================================================================================
 	// members
@@ -14,7 +13,6 @@ public class CloudMatchmakingParameters {
 	protected GSDQueryResultDTO gsdResult;
 	protected List<CloudRequestDTO> preferredClouds;
 	protected boolean onlyPreferred;
-
 	
 	// additional parameter can be add here to provide information to the various matchmaking algorithms
 	
@@ -22,9 +20,7 @@ public class CloudMatchmakingParameters {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudMatchmakingParameters(final GSDQueryResultDTO gsdResult, final List<CloudRequestDTO> preferredClouds,
-			final boolean onlyPreferred) {
-		
+	public CloudMatchmakingParameters(final GSDQueryResultDTO gsdResult, final List<CloudRequestDTO> preferredClouds, final boolean onlyPreferred) {
 		this.gsdResult = gsdResult;
 		this.preferredClouds = preferredClouds;
 		this.onlyPreferred = onlyPreferred;
@@ -35,7 +31,8 @@ public class CloudMatchmakingParameters {
 	public List<CloudRequestDTO> getPreferredClouds() {	return preferredClouds;	}
 	public boolean isOnlyPreferred() { return onlyPreferred; }
 
-	public void setGsdResult( final GSDQueryResultDTO gsdResult) {	this.gsdResult = gsdResult;	}
-	public void setPreferredClouds( final List<CloudRequestDTO> preferredClouds) {	this.preferredClouds = preferredClouds;	}
-	public void setOnlyPreferred( final boolean onlyPreferred) { this.onlyPreferred = onlyPreferred; }
+	//-------------------------------------------------------------------------------------------------
+	public void setGsdResult(final GSDQueryResultDTO gsdResult) { this.gsdResult = gsdResult; }
+	public void setPreferredClouds(final List<CloudRequestDTO> preferredClouds) { this.preferredClouds = preferredClouds; }
+	public void setOnlyPreferred(final boolean onlyPreferred) { this.onlyPreferred = onlyPreferred; }
 }
