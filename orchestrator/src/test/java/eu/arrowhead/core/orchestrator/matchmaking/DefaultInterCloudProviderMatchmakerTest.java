@@ -28,7 +28,6 @@ public class DefaultInterCloudProviderMatchmakerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void doMatchmakingNoMatchingPreferredProviderNoStoreOrchestrationOk() {		
-		
 		final SystemResponseDTO system1 = new SystemResponseDTO(1, "system1", "localhost", 1234, null, null, null);
 		final SystemResponseDTO system2 = new SystemResponseDTO(1, "system2", "localhost", 4567, null, null, null);
 		
@@ -52,20 +51,16 @@ public class DefaultInterCloudProviderMatchmakerTest {
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = List.of(ppDTO);
 		final boolean storeOchestration = false;
 		
-		final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(
-				icnResultDTO, preferredProviderDataDTOList, storeOchestration);		
-		
+		final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResultDTO, preferredProviderDataDTOList, storeOchestration);		
 		final OrchestrationResponseDTO orchestrationResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertEquals(1, orchestrationResponseDTO.getResponse().size() );
+		Assert.assertEquals(1, orchestrationResponseDTO.getResponse().size());
 		Assert.assertTrue(orDTO1.getProvider().getSystemName().equalsIgnoreCase(orchestrationResponseDTO.getResponse().get(0).getProvider().getSystemName()));
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void doMatchmakingNoMatchingPreferredProviderStoreOrchestrationOk() {		
-		
 		final SystemResponseDTO system1 = new SystemResponseDTO(1, "system1", "localhost", 1234, null, null, null);
 		final SystemResponseDTO system2 = new SystemResponseDTO(1, "system2", "localhost", 4567, null, null, null);
 		
@@ -89,19 +84,15 @@ public class DefaultInterCloudProviderMatchmakerTest {
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = List.of(ppDTO);
 		final boolean storeOchestration = true;
 		
-		final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(
-				icnResultDTO, preferredProviderDataDTOList, storeOchestration);		
-		
+		final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResultDTO, preferredProviderDataDTOList, storeOchestration);		
 		final OrchestrationResponseDTO orchestrationResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertTrue(orchestrationResponseDTO.getResponse().isEmpty() );
-	
+		Assert.assertTrue(orchestrationResponseDTO.getResponse().isEmpty());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void doMatchmakingMatchingPreferredProviderStoreOrchestrationOk() {		
-		
 		final SystemResponseDTO system1 = new SystemResponseDTO(1, "system1", "localhost", 1234, null, null, null);
 		final SystemResponseDTO system2 = new SystemResponseDTO(1, "system2", "localhost", 4567, null, null, null);
 		
@@ -125,24 +116,17 @@ public class DefaultInterCloudProviderMatchmakerTest {
 		final List<PreferredProviderDataDTO> preferredProviderDataDTOList = List.of(ppDTO);
 		final boolean storeOchestration = true;
 		
-		final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(
-				icnResultDTO, preferredProviderDataDTOList, storeOchestration);		
-		
+		final InterCloudProviderMatchmakingParameters params = new InterCloudProviderMatchmakingParameters(icnResultDTO, preferredProviderDataDTOList, storeOchestration);		
 		final OrchestrationResponseDTO orchestrationResponseDTO = algorithm.doMatchmaking(params);
 		
-		Assert.assertEquals(1, orchestrationResponseDTO.getResponse().size() );
+		Assert.assertEquals(1, orchestrationResponseDTO.getResponse().size());
 		Assert.assertTrue(orDTO1.getProvider().getSystemName().equalsIgnoreCase(orchestrationResponseDTO.getResponse().get(0).getProvider().getSystemName()));
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void doMatchmakingNullParams() {		
-		
 		final InterCloudProviderMatchmakingParameters params = null;		
-		
 		algorithm.doMatchmaking(params);
-		
 	}
-
 }

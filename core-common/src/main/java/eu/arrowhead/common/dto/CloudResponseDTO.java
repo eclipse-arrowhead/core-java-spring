@@ -5,7 +5,6 @@ import java.util.Objects;
 
 public class CloudResponseDTO implements Serializable {
 
-
 	//=================================================================================================
 	// members
 	
@@ -28,8 +27,7 @@ public class CloudResponseDTO implements Serializable {
 	public CloudResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudResponseDTO(final long id, final String operator, final String name, final boolean secure,
-							final boolean neighbor, final boolean ownCloud, final String authenticationInfo,
+	public CloudResponseDTO(final long id, final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud, final String authenticationInfo,
 							final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.operator = operator;
@@ -83,8 +81,7 @@ public class CloudResponseDTO implements Serializable {
 			return false;
 		}
 		final CloudResponseDTO other = (CloudResponseDTO) obj;
-		return Objects.equals( id, other.id) &&
-				Objects.equals(name, other.name) && 
-				Objects.equals(operator, other.operator);
+		
+		return id == other.id;
 	}
 }

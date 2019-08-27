@@ -42,7 +42,6 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmaker implements Gatekeepe
 		
 		final List<Relay> gatekeeperTypeRelays = new ArrayList<>();
 		final List<Relay> generalTypeRelays = new ArrayList<>();
-		
 		for (final CloudGatekeeperRelay relayConn : parameters.getCloud().getGatekeeperRelays()) {
 			if (relayConn.getRelay().getType() == RelayType.GATEKEEPER_RELAY) {
 				gatekeeperTypeRelays.add(relayConn.getRelay());
@@ -56,6 +55,5 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmaker implements Gatekeepe
 		} else {
 			return generalTypeRelays.get(rng.nextInt(generalTypeRelays.size()));
 		}
-		
 	}
 }

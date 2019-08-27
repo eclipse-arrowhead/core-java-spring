@@ -18,7 +18,6 @@ public class CloudRelaysAssignmentRequestDTO implements Serializable {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	
 	public Long getCloudId() { return cloudId; }
 	public List<Long> getGatekeeperRelayIds() { return gatekeeperRelayIds; }
 	public List<Long> getGatewayRelayIds() { return gatewayRelayIds; }
@@ -27,5 +26,4 @@ public class CloudRelaysAssignmentRequestDTO implements Serializable {
 	public void setCloudId(final Long cloudId) { this.cloudId = cloudId; }
 	public void setGatekeeperRelayIds(final List<Long> gatekeeperRelayIds) { this.gatekeeperRelayIds = gatekeeperRelayIds; }
 	public void setGatewayRelayIds(final List<Long> gatewayRelayIds) { this.gatewayRelayIds = gatewayRelayIds; }
-	
 }

@@ -41,6 +41,3 @@ public class AuthorizationInterCloudRequestDTO implements Serializable {
 	public void setServiceDefinitionIdList(final List<Long> serviceDefinitionIdList) { this.serviceDefinitionIdList = serviceDefinitionIdList; }
 	public void setInterfaceIdList(final List<Long> interfaceIdList) { this.interfaceIdList = interfaceIdList; }
 }
-
-
-

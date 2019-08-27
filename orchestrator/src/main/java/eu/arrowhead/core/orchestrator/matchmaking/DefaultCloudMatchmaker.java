@@ -24,15 +24,14 @@ public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-
 	@Override
 	public CloudResponseDTO doMatchmaking(final CloudMatchmakingParameters params) {
 		logger.debug("DefaultCloudMatchmaker.doMatchmaking started...");
 		Assert.notNull(params, "params is null");
 		
 		final GSDQueryResultDTO gsdResult = params.getGsdResult();
-	    if ( gsdResult == null || gsdResult.getResults().isEmpty() ) {
-	    	//Return Empty response
+	    if (gsdResult == null || gsdResult.getResults().isEmpty()) {
+	    	// Return empty response
 	    	return new CloudResponseDTO();
 	    }
 		
@@ -41,8 +40,7 @@ public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 		
 		final List<CloudResponseDTO> partnerClouds = new ArrayList<>(gsdResult.getResults().size());
 		for (final GSDPollResponseDTO gsdPollResponseDTO : gsdResult.getResults()) {
-			if ( gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
-				
+			if (gsdPollResponseDTO != null &&  gsdPollResponseDTO.getProviderCloud() != null) {
 				partnerClouds.add(gsdPollResponseDTO.getProviderCloud());
 			}
 		}		
@@ -50,22 +48,19 @@ public class DefaultCloudMatchmaker implements CloudMatchmakingAlgorithm {
 	    if (!preferredClouds.isEmpty()) {
 		    for (final CloudRequestDTO preferredCloud : preferredClouds) {
 		        for (final CloudResponseDTO partnerCloud : partnerClouds) {
-		          if (DTOUtilities.equalsCloudInResponseAndRequest(partnerCloud, preferredCloud)) {
-		           
-		        	  return partnerCloud;
+					if (DTOUtilities.equalsCloudInResponseAndRequest(partnerCloud, preferredCloud)) {
+						return partnerCloud;
+					}
 		        }
-		      }
 		    }
 	    }	    
 	    
-	    if ( onlyPreferred ) {
-	    	//Return Empty response
+	    if (onlyPreferred) {
+	    	// Return empty response
 	    	return new CloudResponseDTO();
 	    }
        
 	    // Return the first 
 	    return partnerClouds.get(0);
-
 	}
-
 }

@@ -24,9 +24,9 @@ import eu.arrowhead.common.Defaults;
 
 @Entity
 @NamedEntityGraph(name = "serviceDefinitionWithServiceRegistryEntries",
-	attributeNodes = {
-			@NamedAttributeNode (value = "serviceRegistryEntries")
-	})
+				  attributeNodes = {
+						  @NamedAttributeNode (value = "serviceRegistryEntries")
+})
 public class ServiceDefinition {
 
 	//=================================================================================================

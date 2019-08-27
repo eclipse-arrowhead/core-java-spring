@@ -21,5 +21,4 @@ public class GetFirstGatekeeperMatchmaker implements GatekeeperMatchmakingAlgori
 		
 		return parameters.getCloud().getGatekeeperRelays().iterator().next().getRelay();
 	}
-	
 }

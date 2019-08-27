@@ -36,7 +36,7 @@ import eu.arrowhead.core.gatekeeper.service.GatekeeperServiceTestContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = GatekeeperMain.class)
-@ContextConfiguration (classes = { GatekeeperServiceTestContext.class })
+@ContextConfiguration(classes = { GatekeeperServiceTestContext.class })
 public class GatekeeperControllerGSDTests {
 
 	//=================================================================================================
@@ -64,9 +64,10 @@ public class GatekeeperControllerGSDTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of initiateGlobalServiceDiscovery
+	//=================================================================================================
+	// Tests of initiateGlobalServiceDiscovery
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitiateGlobalServiceDiscoveryOk() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
@@ -82,11 +83,11 @@ public class GatekeeperControllerGSDTests {
 		when(gatekeeperService.initGSDPoll(any())).thenReturn(new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 0));
 		
 		final MvcResult response = this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+											   .content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final GSDQueryResultDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), GSDQueryResultDTO.class);
 		assertEquals(0, responseBody.getUnsuccessfulRequests());
@@ -95,15 +96,14 @@ public class GatekeeperControllerGSDTests {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitiateGlobalServiceDiscoveryWithNullRequestedService() throws Exception {
-		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(null);
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -116,10 +116,10 @@ public class GatekeeperControllerGSDTests {
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -132,10 +132,10 @@ public class GatekeeperControllerGSDTests {
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -146,16 +146,15 @@ public class GatekeeperControllerGSDTests {
 		final List<CloudRequestDTO> preferredClouds = new ArrayList<>();
 		preferredClouds.add(null);
 		
-		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
 		gsdQueryFormDTO.setPreferredClouds(preferredClouds);
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -163,7 +162,6 @@ public class GatekeeperControllerGSDTests {
 	public void testInitiateGlobalServiceDiscoveryWithNullOperatorInPreferreCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
 		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
@@ -174,10 +172,10 @@ public class GatekeeperControllerGSDTests {
 		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -185,7 +183,6 @@ public class GatekeeperControllerGSDTests {
 	public void testInitiateGlobalServiceDiscoveryWithBlankOperatorInPreferreCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
 		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
@@ -196,10 +193,10 @@ public class GatekeeperControllerGSDTests {
 		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -207,7 +204,6 @@ public class GatekeeperControllerGSDTests {
 	public void testInitiateGlobalServiceDiscoveryWithNullNameInPreferreCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
 		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
@@ -218,10 +214,10 @@ public class GatekeeperControllerGSDTests {
 		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -229,7 +225,6 @@ public class GatekeeperControllerGSDTests {
 	public void testInitiateGlobalServiceDiscoveryWithBlankNameInPreferreCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
-		
 		
 		final GSDQueryFormDTO gsdQueryFormDTO = new GSDQueryFormDTO();
 		gsdQueryFormDTO.setRequestedService(serviceQueryFormDTO);
@@ -240,9 +235,9 @@ public class GatekeeperControllerGSDTests {
 		gsdQueryFormDTO.setPreferredClouds(List.of(cloudRequestDTO));
 		
 		this.mockMvc.perform(post(INIT_GLOBAL_SERVICE_DISCOVERY_URI)
-				.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(gsdQueryFormDTO))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 }

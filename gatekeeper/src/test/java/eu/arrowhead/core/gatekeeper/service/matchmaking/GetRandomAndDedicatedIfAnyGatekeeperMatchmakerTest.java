@@ -153,27 +153,20 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 	}
 	
 	//=================================================================================================
-	// assistant
+	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
 	private GatekeeperMatchmakingParameters createGatekeeperMatchmakingParameters(final Cloud cloud, final List<Relay> gatekeeperRelays, final long randomSeed) {
-		
 		for (final Relay relay : gatekeeperRelays) {
-			
 			if (relay.getType() == RelayType.GATEWAY_RELAY) {
-				
 				final CloudGatewayRelay conn = new CloudGatewayRelay(cloud, relay);
 				cloud.getGatewayRelays().add(conn);
 				relay.getCloudGateways().add(conn);
-				
 			} else {
-				
 				final CloudGatekeeperRelay conn = new CloudGatekeeperRelay(cloud, relay);
 				cloud.getGatekeeperRelays().add(conn);
 				relay.getCloudGatekeepers().add(conn);				
 			}
-			
-			
 		}
 	
 		final GatekeeperMatchmakingParameters parameters = new GatekeeperMatchmakingParameters(cloud);
@@ -181,5 +174,4 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 		
 		return parameters;
 	}
-
 }

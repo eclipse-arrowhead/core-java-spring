@@ -124,7 +124,6 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		if (session == null) {
 			session = client.createConnection(host, port);
 			sessionCache.put(cacheKey, session);
-			
 		}
 		
 		return session;

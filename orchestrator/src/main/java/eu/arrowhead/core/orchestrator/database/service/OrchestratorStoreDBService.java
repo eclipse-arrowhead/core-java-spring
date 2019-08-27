@@ -64,7 +64,6 @@ public class OrchestratorStoreDBService {
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
 	
-	
 	@Autowired
 	private OrchestratorStoreRepository orchestratorStoreRepository;
 	
@@ -94,7 +93,6 @@ public class OrchestratorStoreDBService {
 		logger.debug("getOrchestratorStoreById started...");
 		
 		final OrchestratorStore orchestratorStore = getOrchestratorStoreById(orchestratorStoreId);
-		
 		if (orchestratorStore.isForeign()) {
 			return getForeignResponseDTO(orchestratorStore);
 		} else {
@@ -465,8 +463,8 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestratorStore> getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(
-			final long consumerSystemId) {
+	public List<OrchestratorStore> getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(final long consumerSystemId) {
+		logger.debug("getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId started...");
 		
 		if (consumerSystemId < 1) {
 			throw new InvalidParameterException( "ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
@@ -484,6 +482,7 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3655")
 	public OrchestratorStoreResponseDTO getForeignResponseDTO(final OrchestratorStore orchestratorStore) {
+		logger.debug("getForeignResponseDTO started...");
 		
 		if (orchestratorStore == null) {
 			throw new InvalidParameterException("OrchestratorStore " + NULL_ERROR_MESSAGE);
@@ -831,6 +830,7 @@ public class OrchestratorStoreDBService {
 		for (final OrchestratorStore orchestratorStoreToUpdate : updatedOrchestratorStoreEntryList) {
 			orchestratorStoreRepository.save(orchestratorStoreToUpdate);
 		}
+		
 		orchestratorStoreRepository.flush();
 	}
 	
@@ -980,5 +980,4 @@ public class OrchestratorStoreDBService {
 			return null;
 		}
 	}
-
 }

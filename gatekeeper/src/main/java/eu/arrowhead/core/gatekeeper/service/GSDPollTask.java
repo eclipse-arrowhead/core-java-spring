@@ -39,7 +39,6 @@ public class GSDPollTask implements Runnable {
 		
 	public GSDPollTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudCN, final String recipientCloudPublicKey,
 					   final GSDPollRequestDTO gsdPollRequestDTO, final BlockingQueue<ErrorWrapperDTO> queue) {
-		
 		Assert.notNull(relayClient, "relayClient is null");
 		Assert.notNull(session, "session is null");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
@@ -79,18 +78,17 @@ public class GSDPollTask implements Runnable {
 			}
 			
 			queue.add(response.getGSDPollResponse());
-			
 		} catch (final InvalidParameterException | BadPayloadException ex) {	
-			//We forward this two type of arrowhead exception to the caller
+			// We forward this two type of arrowhead exception to the caller
 			
 			logger.debug("Exception:", ex.getMessage());
 			queue.add(new ErrorMessageDTO(ex));
 			
 		} catch (final Throwable ex) {			
-			//Must catch all throwable, otherwise the blocking queue would block the whole process
-			
+			// Must catch all throwable, otherwise the blocking queue would block the whole process
 			logger.debug("Exception:", ex.getMessage());
-			//adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
+			
+			// adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
 			queue.add(new GSDPollResponseDTO()); 			
 		}
 	}

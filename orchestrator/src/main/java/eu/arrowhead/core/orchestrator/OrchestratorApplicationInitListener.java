@@ -57,19 +57,12 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		
 		if (gatekeeperIsPresent) {
-			
-			return List.of(
-					CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, 
-					CoreSystemService.AUTH_CONTROL_INTRA_SERVICE,
-					CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
-					CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATIONS);
+			return List.of(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, CoreSystemService.AUTH_CONTROL_INTRA_SERVICE, CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
+						   CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION);
 		}
 		
-		return List.of(
-				CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, 
-				CoreSystemService.AUTH_CONTROL_INTRA_SERVICE); // TODO: add all necessary services
+		return List.of(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE,	CoreSystemService.AUTH_CONTROL_INTRA_SERVICE);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -82,7 +75,6 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		}
 		
 		final ApplicationContext appContext = event.getApplicationContext();
-		
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 		
@@ -92,7 +84,6 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		
 		final UriComponents querySystemByDTOUri = createQuerySystemByDTOUri(scheme);
 		context.put(CommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI, querySystemByDTOUri);
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -101,12 +92,7 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 				
 		final String registyUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI;
 		
-		return Utilities.createURI(
-				scheme, 
-				coreSystemRegistrationProperties.getServiceRegistryAddress(), 
-				coreSystemRegistrationProperties.getServiceRegistryPort(), 
-				registyUriStr
-				);
+		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(),	registyUriStr);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -115,11 +101,6 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 				
 		final String registyUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI;
 		
-		return Utilities.createURI(
-				scheme, 
-				coreSystemRegistrationProperties.getServiceRegistryAddress(), 
-				coreSystemRegistrationProperties.getServiceRegistryPort(), 
-				registyUriStr
-				);
+		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registyUriStr);
 	}
 }

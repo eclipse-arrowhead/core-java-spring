@@ -22,7 +22,6 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 	@Autowired
 	private CommonDBService commonDBService; 
 
-
 	//=================================================================================================
 	// assistant methods
 	

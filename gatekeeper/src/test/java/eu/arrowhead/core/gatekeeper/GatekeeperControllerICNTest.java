@@ -39,7 +39,7 @@ import eu.arrowhead.core.gatekeeper.service.GatekeeperServiceTestContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = GatekeeperMain.class)
-@ContextConfiguration (classes = { GatekeeperServiceTestContext.class })
+@ContextConfiguration(classes = { GatekeeperServiceTestContext.class })
 public class GatekeeperControllerICNTest {
 
 	//=================================================================================================

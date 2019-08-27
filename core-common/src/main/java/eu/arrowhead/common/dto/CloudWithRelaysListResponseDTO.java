@@ -3,7 +3,7 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class CloudWithRelaysListResponseDTO implements Serializable{
+public class CloudWithRelaysListResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members

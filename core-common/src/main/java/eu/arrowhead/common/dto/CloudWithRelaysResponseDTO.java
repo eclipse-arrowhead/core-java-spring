@@ -19,8 +19,7 @@ public class CloudWithRelaysResponseDTO extends CloudResponseDTO {
 	public CloudWithRelaysResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public CloudWithRelaysResponseDTO(final long id, final String operator, final String name, final boolean secure,
-									  final boolean neighbor, final boolean ownCloud, final String authenticationInfo,
+	public CloudWithRelaysResponseDTO(final long id, final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud, final String authenticationInfo,
 									  final String createdAt, final String updatedAt, final List<RelayResponseDTO> gatekeeperRelays, final List<RelayResponseDTO> gatewayRelays) {
 		super(id, operator, name, secure, neighbor, ownCloud, authenticationInfo, createdAt, updatedAt);
 		this.gatekeeperRelays = gatekeeperRelays;

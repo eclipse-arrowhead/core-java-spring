@@ -49,6 +49,7 @@ public class SystemRequestDTO implements Serializable {
 			return false;
 		}
 		final SystemRequestDTO other = (SystemRequestDTO) obj;
+		
 		return Objects.equals(address, other.address) && Objects.equals(port, other.port) && Objects.equals(systemName, other.systemName);
 	}
 }

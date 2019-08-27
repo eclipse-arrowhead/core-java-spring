@@ -291,15 +291,8 @@ public class DTOConverter {
 		Assert.notNull(entry.getCreatedAt(), "Relay.createdAt is null");
 		Assert.notNull(entry.getCreatedAt(), "Relay.updatedAt is null");
 		
-		return new RelayResponseDTO(
-				entry.getId(),
-				entry.getAddress(),
-				entry.getPort(),
-				entry.getSecure(),
-				entry.getExclusive(),
-				entry.getType(),
-				Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));		
+		return new RelayResponseDTO(entry.getId(), entry.getAddress(), entry.getPort(), entry.getSecure(), entry.getExclusive(), entry.getType(),
+									Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));		
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -442,8 +435,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static PreferredProviderDataDTO convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(
-			OrchestratorStoreResponseDTO orchestratorStoreResponseDTO) {
+	public static PreferredProviderDataDTO convertForeignOrchestratorStoreResponseDTOToPreferredProviderDataDTO(final OrchestratorStoreResponseDTO orchestratorStoreResponseDTO) {
 		Assert.notNull(orchestratorStoreResponseDTO, "orchestratorStoreResponseDTO is null");
 		Assert.isTrue(orchestratorStoreResponseDTO.getForeign(), "orchestratorStoreResponseDTO is not foreign");
 		Assert.notNull(orchestratorStoreResponseDTO.getProviderSystem(), "orchestratorStoreResponseDTO.ProviderSystem is null");
@@ -531,5 +523,4 @@ public class DTOConverter {
 		
 		return result;
 	}
-
 }

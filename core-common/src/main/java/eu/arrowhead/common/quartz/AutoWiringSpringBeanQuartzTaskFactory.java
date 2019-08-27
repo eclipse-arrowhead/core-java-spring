@@ -18,7 +18,6 @@ public final class AutoWiringSpringBeanQuartzTaskFactory extends SpringBeanJobFa
     //-------------------------------------------------------------------------------------------------
     @Override
     public void setApplicationContext(final ApplicationContext applicationContext) {
-
         beanFactory = applicationContext.getAutowireCapableBeanFactory();
     }
 

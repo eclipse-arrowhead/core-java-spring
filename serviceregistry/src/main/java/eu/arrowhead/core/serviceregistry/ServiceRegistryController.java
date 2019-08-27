@@ -687,8 +687,8 @@ public class ServiceRegistryController {
 		}
 		
 		final SystemResponseDTO result = serviceRegistryDBService.getSystemById(systemId);
+
 		logger.debug("Return system by id: {}", systemId);
-		
 		return result;
 	}
 	
@@ -703,18 +703,16 @@ public class ServiceRegistryController {
 	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SystemResponseDTO queryRegistryBySystemDTO(@RequestBody final SystemRequestDTO request) {
 		logger.debug("Service query by systemRequestDTO request received");
-		
 
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI +
-										  CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
 		final int port = request.getPort();
 		
 		final SystemResponseDTO result = serviceRegistryDBService.getSystemByNameAndAddressAndPortResponse(systemName, address, port);
+
 		logger.debug("Return system by name: {}, address: {}, port: {}", systemName, address, port);
-		
 		return result;
 	}
 		

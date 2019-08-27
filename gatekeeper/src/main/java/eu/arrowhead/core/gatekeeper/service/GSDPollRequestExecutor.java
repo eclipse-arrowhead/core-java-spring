@@ -35,7 +35,7 @@ public class GSDPollRequestExecutor {
 	private final ThreadPoolExecutor threadPool;
 	private final GatekeeperRelayClient relayClient;
 	private final GSDPollRequestDTO gsdPollRequestDTO;
-	private final Map<Cloud, Relay> gatekeeperRelayPerCloud;
+	private final Map<Cloud,Relay> gatekeeperRelayPerCloud;
 	
 	private final Logger logger = LogManager.getLogger(GSDPollRequestExecutor.class);
 	
@@ -43,8 +43,8 @@ public class GSDPollRequestExecutor {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public GSDPollRequestExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final GSDPollRequestDTO gsdPollRequestDTO, final Map<Cloud, Relay> gatekeeperRelayPerCloud) {
-		
+	public GSDPollRequestExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final GSDPollRequestDTO gsdPollRequestDTO, 
+								  final Map<Cloud,Relay> gatekeeperRelayPerCloud) {
 		this.queue = queue;
 		this.relayClient = relayClient;
 		this.gsdPollRequestDTO = gsdPollRequestDTO;
@@ -57,26 +57,20 @@ public class GSDPollRequestExecutor {
 		logger.debug("GSDPollRequestExecutor.execute started...");
 		validateMembers();
 		
-		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
+		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
-			
 				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());
 				final Map<String, Session> sessionsToClouds = createSessionsToClouds();
 				
-				threadPool.execute(new GSDPollTask(relayClient,
-												   sessionsToClouds.get(cloudCN),
-												   cloudCN,
-												   cloudRelay.getKey().getAuthenticationInfo(), 
-												   gsdPollRequestDTO, 
-												   queue));
-			
+				threadPool.execute(new GSDPollTask(relayClient, sessionsToClouds.get(cloudCN), cloudCN, cloudRelay.getKey().getAuthenticationInfo(), gsdPollRequestDTO, queue));
 			} catch (final RejectedExecutionException ex) {
 				logger.error("GSDPollTask execution rejected at {}", ZonedDateTime.now());
 				
-				//adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
+				// adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
 				queue.add(new GSDPollResponseDTO());
 			}
 		}
+		
 		threadPool.shutdown();
 	}
 	
@@ -89,24 +83,22 @@ public class GSDPollRequestExecutor {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<String, Session> createSessionsToClouds() {
+	private Map<String,Session> createSessionsToClouds() {
 		logger.debug("createSessionsToRelays started...");
 		
-		final Map<String, Session> sessionsForRelays = new HashMap<>();
+		final Map<String,Session> sessionsForRelays = new HashMap<>();
 		
-		for (final Entry<Cloud, Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {
-			
+		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {
 			try {
-				
 				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());		
 				final Session session = relayClient.createConnection(cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
 				sessionsForRelays.put(cloudCN, session);						
-				
 			} catch (final JMSException ex) {
 				logger.debug("Exception occured while creating connection for address: {} and port {}:", cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
 				logger.debug("Exception message: {}:", ex.getMessage());
 			}
 		}
+		
 		return sessionsForRelays;
 	}
 	

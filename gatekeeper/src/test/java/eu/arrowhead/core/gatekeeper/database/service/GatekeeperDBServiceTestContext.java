@@ -17,5 +17,4 @@ public class GatekeeperDBServiceTestContext {
 	public GatekeeperDBService mockGatekeeperDBService() {
 		return Mockito.mock(GatekeeperDBService.class);
 	}
-
 }

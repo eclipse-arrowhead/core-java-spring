@@ -119,19 +119,15 @@ public class GatekeeperDriver {
 		Assert.notNull(gsdPollRequestDTO.getRequesterCloud(), "requesterCloud is null");
 		
 		final int numOfCloudsToContact = cloudsToContact.size();
-
 		final BlockingQueue<ErrorWrapperDTO> queue = new LinkedBlockingQueue<>(numOfCloudsToContact);		
+
 		final GSDPollRequestExecutor gsdPollRequestExecutor = new GSDPollRequestExecutor(queue, relayClient, gsdPollRequestDTO, getOneGatekeeperRelayPerCloud(cloudsToContact));
-		
 		gsdPollRequestExecutor.execute();
 		
 		final List<ErrorWrapperDTO> gsdPollAnswers = new ArrayList<>(numOfCloudsToContact);
 		for (int i = 0; i < numOfCloudsToContact; ++i) {
-			
 			try {
-				
 				gsdPollAnswers.add(queue.take());
-				
 			} catch (final InterruptedException ex) {
 				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
 				gsdPollRequestExecutor.shutdownExecutionNow();
@@ -162,18 +158,15 @@ public class GatekeeperDriver {
 		
 		final List<IdIdListDTO> providerIdsWithInterfaceIds = new ArrayList<>();
 		for (final ServiceRegistryResponseDTO srEntryDTO : serviceQueryData) {
-			
 			final List<Long> interfaceIds = new ArrayList<>();
 			for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
 				interfaceIds.add(interfaceDTO.getId());
 			}
  			
 			providerIdsWithInterfaceIds.add(new IdIdListDTO(srEntryDTO.getProvider().getId(), interfaceIds));
-			
 		}
 		
 		final AuthorizationInterCloudCheckRequestDTO interCloudCheckRequestDTO = new AuthorizationInterCloudCheckRequestDTO(cloud, serviceDefinition, providerIdsWithInterfaceIds);
-		
 		final UriComponents checkUri = getAuthInterCheckUri();
 		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = httpService.sendRequest(checkUri, HttpMethod.POST, AuthorizationInterCloudCheckResponseDTO.class, interCloudCheckRequestDTO);
 		
@@ -242,10 +235,10 @@ public class GatekeeperDriver {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------		
-	private Map<Cloud, Relay> getOneGatekeeperRelayPerCloud(final List<Cloud> clouds) {
+	private Map<Cloud,Relay> getOneGatekeeperRelayPerCloud(final List<Cloud> clouds) {
 		logger.debug("getOneGatekeeperRelayPerCloud started...");
 		
-		final Map<Cloud, Relay> realyPerCloud = new HashMap<>();
+		final Map<Cloud,Relay> realyPerCloud = new HashMap<>();
 		for (final Cloud cloud : clouds) {
 			final Relay relay = gatekeeperMatchmaker.doMatchmaking(new GatekeeperMatchmakingParameters(cloud));
 			realyPerCloud.put(cloud, relay);

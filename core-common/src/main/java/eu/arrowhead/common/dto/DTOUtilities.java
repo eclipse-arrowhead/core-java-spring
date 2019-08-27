@@ -59,6 +59,7 @@ public class DTOUtilities {
 		
 		return converted.equals(requestCopy);
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
 		Assert.notNull(dto, "Error message object is null.");
