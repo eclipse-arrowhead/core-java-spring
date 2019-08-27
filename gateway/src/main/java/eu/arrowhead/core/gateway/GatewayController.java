@@ -2,12 +2,20 @@ package eu.arrowhead.core.gateway;
 
 import org.apache.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -16,7 +24,14 @@ import io.swagger.annotations.ApiResponses;
 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
+@RequestMapping(CommonConstants.GATEWAY_URI)
 public class GatewayController {
+	
+	
+	private static final String CONNECT_PROVIDER_URI = "/connect_provider";
+	
+	private static final String POST_CONNECT_PROVIDER_HTTP_201_MESSAGE = "Connection created";
+	private static final String POST_CONNECT_PROVIDER_HTTP_400_MESSAGE = "Could not create connection";
 	
 	//=================================================================================================
 	// methods
@@ -31,5 +46,22 @@ public class GatewayController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Creates an SSLSocket and Message queue between the given Relay and Provider and return the necesarry connection informations", response = GatewayProviderConnectionResponseDTO.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_PROVIDER_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_PROVIDER_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@PostMapping(path = CONNECT_PROVIDER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public GatewayProviderConnectionResponseDTO connectProvider(@RequestBody GatewayProviderConnectionRequestDTO request) {
+		
+		//TODO: implement
+		
+		return new GatewayProviderConnectionResponseDTO();
 	}
 }

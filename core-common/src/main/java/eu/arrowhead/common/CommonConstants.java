@@ -103,6 +103,8 @@ public class CommonConstants {
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
+	
+	public static final String GATEWAY_URI = "/gateway";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
