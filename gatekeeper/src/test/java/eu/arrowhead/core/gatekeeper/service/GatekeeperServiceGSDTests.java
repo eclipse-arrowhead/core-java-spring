@@ -57,9 +57,10 @@ public class GatekeeperServiceGSDTests {
 	//=================================================================================================
 	// methods
 		
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of initGSDPoll
 	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitGSDPollOK() throws InterruptedException {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
@@ -78,7 +79,8 @@ public class GatekeeperServiceGSDTests {
 		
 		when(gatekeeperDBService.getNeighborClouds()).thenReturn(List.of(cloud));
 		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
-		when(gatekeeperDriver.sendGSDPollRequest(any(), any())).thenReturn(List.of(new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(cloud), "test-service", List.of("HTTP-SECURE-JSON"), 2, null)));
+		when(gatekeeperDriver.sendGSDPollRequest(any(), any())).thenReturn(List.of(new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(cloud), "test-service",
+																		   								  List.of("HTTP-SECURE-JSON"), 2, null)));
 		when(gatekeeperDBService.getCloudByOperatorAndName(any(), any())).thenReturn(cloud);
 		
 		final GSDQueryResultDTO result = gatekeeperService.initGSDPoll(gsdQueryFormDTO);
@@ -128,7 +130,7 @@ public class GatekeeperServiceGSDTests {
 		gatekeeperService.initGSDPoll(gsdQueryFormDTO);
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of doGSDPoll
 	
 	@Test(expected = InvalidParameterException.class)

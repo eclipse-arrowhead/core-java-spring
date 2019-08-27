@@ -119,8 +119,6 @@ public class GSDPollRequestExecutorTest {
 	//-------------------------------------------------------------------------------------------------
 	public Session getTestSession() {
 		return new Session() {
-
-			//-------------------------------------------------------------------------------------------------
 			public void close() throws JMSException {}
 			public Queue createQueue(final String queueName) throws JMSException { return null;	}
 			public Topic createTopic(final String topicName) throws JMSException { return null;	}
@@ -157,7 +155,6 @@ public class GSDPollRequestExecutorTest {
 			public TemporaryQueue createTemporaryQueue() throws JMSException { return null; }
 			public TemporaryTopic createTemporaryTopic() throws JMSException { return null;	}
 			public void unsubscribe(final String name) throws JMSException {}
-
 		};
 	}
 }

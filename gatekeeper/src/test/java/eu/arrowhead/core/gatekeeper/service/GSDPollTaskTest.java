@@ -76,7 +76,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
-		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
 	
@@ -89,7 +88,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
-		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
 	
@@ -101,7 +99,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
-		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
 	
@@ -115,7 +112,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
-		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
 	
@@ -127,7 +123,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
-		
 		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.INVALID_PARAMETER);
 	}
 	
@@ -140,7 +135,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
-		
 		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.INVALID_PARAMETER);
 	}
 	
@@ -152,7 +146,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
-		
 		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.BAD_PAYLOAD);
 	}
 	
@@ -165,7 +158,6 @@ public class GSDPollTaskTest {
 		testingObject.run();
 		
 		final ErrorMessageDTO gsdPollResponseDTO = (ErrorMessageDTO) queue.take();
-		
 		assertTrue(gsdPollResponseDTO.getExceptionType() == ExceptionType.BAD_PAYLOAD);
 	}
 	
@@ -175,8 +167,6 @@ public class GSDPollTaskTest {
 	//-------------------------------------------------------------------------------------------------
 	public Session getTestSession() {
 		return new Session() {
-
-			//-------------------------------------------------------------------------------------------------
 			public void close() throws JMSException {}
 			public Queue createQueue(final String queueName) throws JMSException { return null;	}
 			public Topic createTopic(final String topicName) throws JMSException { return null;	}
@@ -213,15 +203,12 @@ public class GSDPollTaskTest {
 			public TemporaryQueue createTemporaryQueue() throws JMSException { return null; }
 			public TemporaryTopic createTemporaryTopic() throws JMSException { return null;	}
 			public void unsubscribe(final String name) throws JMSException {}
-
 		};
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public MessageConsumer getTestMessageConsumer() {
 		return new MessageConsumer() {
-
-			//-------------------------------------------------------------------------------------------------
 			public Message receive(final long timeout) throws JMSException { return null; }
 			public void close() throws JMSException {}
 			public String getMessageSelector() throws JMSException { return null; }
@@ -236,8 +223,6 @@ public class GSDPollTaskTest {
 	@SuppressWarnings("serial")
 	private PublicKey getDummyPublicKey() {
 		return new PublicKey() {
-			
-			//-------------------------------------------------------------------------------------------------
 			public String getFormat() { return null; }
 			public byte[] getEncoded() { return null; }
 			public String getAlgorithm() { return null; }
