@@ -19,7 +19,8 @@ public class GSDPollRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public GSDPollRequestDTO() {} 	
 	
-	public GSDPollRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, boolean gatewayIsPresent) {
+	//-------------------------------------------------------------------------------------------------
+	public GSDPollRequestDTO(final ServiceQueryFormDTO requestedService, final CloudRequestDTO requesterCloud, final boolean gatewayIsPresent) {
 		this.requestedService = requestedService;
 		this.gatewayIsPresent = gatewayIsPresent;
 		this.requesterCloud = requesterCloud;
@@ -33,5 +34,5 @@ public class GSDPollRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------	
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
-	public void setGatewayIsPresent(boolean gatewayIsPresent) { this.gatewayIsPresent = gatewayIsPresent; }
+	public void setGatewayIsPresent(final boolean gatewayIsPresent) { this.gatewayIsPresent = gatewayIsPresent; }
 }

@@ -31,8 +31,8 @@ import eu.arrowhead.common.dto.RelayType;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
 @NamedEntityGraph(name = "relayWithCloudGatekeeperRelayEntries",
-attributeNodes = {
-		  @NamedAttributeNode(value = "cloudGatekeepers")
+				  attributeNodes = {
+						  @NamedAttributeNode(value = "cloudGatekeepers")
 })
 public class Relay {
 	
@@ -152,6 +152,7 @@ public class Relay {
 			return false;
 		}
 		final Relay other = (Relay) obj;
+		
 		return id == other.id;
 	}
 }

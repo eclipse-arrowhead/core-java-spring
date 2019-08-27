@@ -30,6 +30,7 @@ public class CloudRequestDTO implements Serializable {
 	public String getAuthenticationInfo() { return authenticationInfo; }	
 	public List<Long> getGatekeeperRelayIds() { return gatekeeperRelayIds; }	
 	public List<Long> getGatewayRelayIds() { return gatewayRelayIds; }
+	
 	//-------------------------------------------------------------------------------------------------
 	public void setOperator(final String operator) { this.operator = operator; }
 	public void setName(final String name) { this.name = name; }
@@ -58,7 +59,7 @@ public class CloudRequestDTO implements Serializable {
 			return false;
 		}
 		final CloudRequestDTO other = (CloudRequestDTO) obj;
-		return Objects.equals(name, other.name) && 
-				Objects.equals(operator, other.operator);
+		
+		return Objects.equals(name, other.name) && Objects.equals(operator, other.operator);
 	}
 }

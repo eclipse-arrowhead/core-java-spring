@@ -25,8 +25,9 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	//-------------------------------------------------------------------------------------------------	
 	public GSDPollResponseDTO() {}
 	
-	public GSDPollResponseDTO(final CloudResponseDTO providerCloud, final String requiredServiceDefinition, final List<String> availableInterfaces, 
-							  final Integer numOfProviders, final Map<String, String> serviceMetadata) {
+	//-------------------------------------------------------------------------------------------------
+	public GSDPollResponseDTO(final CloudResponseDTO providerCloud, final String requiredServiceDefinition, final List<String> availableInterfaces, final Integer numOfProviders, 
+							  final Map<String,String> serviceMetadata) {
 		this.providerCloud = providerCloud;
 		this.requiredServiceDefinition = requiredServiceDefinition;
 		this.availableInterfaces = availableInterfaces;
@@ -39,14 +40,14 @@ public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 	public String getRequiredServiceDefinition() { return requiredServiceDefinition; }
 	public List<String> getAvailableInterfaces() { return availableInterfaces; }	
 	public Integer getNumOfProviders() { return numOfProviders; }
-	public Map<String, String> getServiceMetadata() { return serviceMetadata; }
+	public Map<String,String> getServiceMetadata() { return serviceMetadata; }
 
 	//-------------------------------------------------------------------------------------------------	
 	public void setProviderCloud(final CloudResponseDTO providerCloud) { this.providerCloud = providerCloud; }
 	public void setRequiredServiceDefinition(final String requiredServiceDefinition) { this.requiredServiceDefinition = requiredServiceDefinition; }
 	public void setAvailableInterfaces(final List<String> availableInterfaces) { this.availableInterfaces = availableInterfaces; } 	
 	public void setNumOfProviders(final Integer numOfProviders) { this.numOfProviders = numOfProviders; }
-	public void setServiceMetadata(final Map<String, String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
+	public void setServiceMetadata(final Map<String,String> serviceMetadata) { this.serviceMetadata = serviceMetadata; }
 
 	//-------------------------------------------------------------------------------------------------
 	@JsonIgnore

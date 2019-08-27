@@ -19,6 +19,7 @@ public class GSDQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------	
 	public GSDQueryFormDTO() {}
 	
+	//-------------------------------------------------------------------------------------------------
 	public GSDQueryFormDTO(final ServiceQueryFormDTO requestedService, final List<CloudRequestDTO> preferredClouds) {
 		this.requestedService = requestedService;
 		this.preferredClouds = preferredClouds;

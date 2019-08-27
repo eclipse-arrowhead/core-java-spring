@@ -160,6 +160,7 @@ public class ServiceRegistry {
 		}
 		
 		final ServiceRegistry other = (ServiceRegistry) obj;
+		
 		return id == other.id;
 	}
 }

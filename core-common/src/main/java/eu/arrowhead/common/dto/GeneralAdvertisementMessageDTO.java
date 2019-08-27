@@ -43,8 +43,8 @@ public class GeneralAdvertisementMessageDTO implements Serializable {
 	public String getSessionId() { return sessionId; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setSenderCN(String senderCN) { this.senderCN = senderCN; }
-	public void setSenderPublicKey(String senderPublicKey) { this.senderPublicKey = senderPublicKey; }
-	public void setRecipientCN(String recipientCN) { this.recipientCN = recipientCN; }
-	public void setSessionId(String sessionId) { this.sessionId = sessionId; }
+	public void setSenderCN(final String senderCN) { this.senderCN = senderCN; }
+	public void setSenderPublicKey(final String senderPublicKey) { this.senderPublicKey = senderPublicKey; }
+	public void setRecipientCN(final String recipientCN) { this.recipientCN = recipientCN; }
+	public void setSessionId(final String sessionId) { this.sessionId = sessionId; }
 }
