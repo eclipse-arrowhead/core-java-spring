@@ -40,19 +40,19 @@ public class GSDPollTask implements Runnable {
 	public GSDPollTask(final GatekeeperRelayClient relayClient, final Session session, final String recipientCloudCN, final String recipientCloudPublicKey,
 					   final GSDPollRequestDTO gsdPollRequestDTO, final BlockingQueue<ErrorWrapperDTO> queue) {
 		
-		this.relayClient = relayClient;
-		this.session = session;
-		this.recipientCloudCN = recipientCloudCN;
-		this.recipientCloudPublicKey = recipientCloudPublicKey;
-		this.gsdPollRequestDTO = gsdPollRequestDTO;
-		this.queue = queue;
-		
 		Assert.notNull(relayClient, "relayClient is null");
 		Assert.notNull(session, "session is null");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudCN), "recipientCloudCN is empty");
 		Assert.isTrue(!Utilities.isEmpty(recipientCloudPublicKey), "recipientCloudCN is empty");
 		Assert.notNull(gsdPollRequestDTO, "gsdPollRequestDTO is null");
 		Assert.notNull(queue, "queue is null");
+		
+		this.relayClient = relayClient;
+		this.session = session;
+		this.recipientCloudCN = recipientCloudCN;
+		this.recipientCloudPublicKey = recipientCloudPublicKey;
+		this.gsdPollRequestDTO = gsdPollRequestDTO;
+		this.queue = queue;		
 	}
 
 
