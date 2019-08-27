@@ -110,19 +110,19 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
 	// nested classes
 	
 	//-------------------------------------------------------------------------------------------------
-    class RandomCollection {
+    private static class RandomCollection {
         
         //=================================================================================================
         // members
         
         private final NavigableMap<Double, CloudResponseDTO> map = new TreeMap<>();
-        private double total = 0;
+        private int total = 0;
 
         //=================================================================================================
         // methods
 
         //-------------------------------------------------------------------------------------------------  
-        protected void add(final double weight, final CloudResponseDTO result) {
+        public void add(final int weight, final CloudResponseDTO result) {
             logger.debug("RandomCollection . add started...");
             
             if (weight <= 0 || map.containsValue(result)) {
@@ -131,11 +131,11 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
             }
             
             total += weight;
-            map.put(total, result);
+            map.put((double) total, result);
         }
         
         //------------------------------------------------------------------------------------------------- 
-        protected CloudResponseDTO next() {
+        public CloudResponseDTO next() {
             logger.debug("RandomCollection . next started...");
             
             final double value = ThreadLocalRandom.current().nextDouble() * total;
@@ -143,10 +143,10 @@ public class RandomWeightedCloudMatchmaker implements CloudMatchmakingAlgorithm 
         }
         
         //-------------------------------------------------------------------------------------------------
-        protected boolean isEmpty() {
+        public boolean isEmpty() {
             logger.debug("RandomCollection . isEmpty started...");
             
-            return total == 0;
+            return map.isEmpty();
         }
 
     }

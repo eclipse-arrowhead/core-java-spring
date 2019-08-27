@@ -22,10 +22,10 @@ public class CloudMatchmakingParameters {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudMatchmakingParameters(final GSDQueryResultDTO gSDResult, final List<CloudRequestDTO> preferredClouds,
+	public CloudMatchmakingParameters(final GSDQueryResultDTO gsdResult, final List<CloudRequestDTO> preferredClouds,
 			final boolean onlyPreferred) {
 		
-		this.gsdResult = gSDResult;
+		this.gsdResult = gsdResult;
 		this.preferredClouds = preferredClouds;
 		this.onlyPreferred = onlyPreferred;
 	}
