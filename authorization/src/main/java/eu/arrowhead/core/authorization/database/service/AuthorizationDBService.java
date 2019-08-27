@@ -497,13 +497,13 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException(exceptionMsg);
 			}
 			
-			final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(cloudOperator, cloudName);
+			final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(cloudOperator.toLowerCase().trim(), cloudName.toLowerCase().trim());
 			if (cloudOpt.isEmpty()) {
 				throw new InvalidParameterException("No cloud exists with the following operator and name: " + cloudOperator + ", " + cloudName);
 			}
 			final Cloud cloud = cloudOpt.get();
 			
-			final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition);
+			final Optional<ServiceDefinition> serviceOpt = serviceDefinitionRepository.findByServiceDefinition(serviceDefinition.toLowerCase().trim());
 			if (serviceOpt.isEmpty()) {
 				throw new InvalidParameterException(serviceDefinition + " service definition not exists");
 			}
