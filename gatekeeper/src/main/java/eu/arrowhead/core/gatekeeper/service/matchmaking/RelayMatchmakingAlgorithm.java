@@ -2,11 +2,11 @@ package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
 import eu.arrowhead.common.database.entity.Relay;
 
-public interface GatekeeperMatchmakingAlgorithm {
+public interface RelayMatchmakingAlgorithm {
 
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Relay doMatchmaking(final GatekeeperMatchmakingParameters parameters);
+	public Relay doMatchmaking(final RelayMatchmakingParameters parameters);
 }
