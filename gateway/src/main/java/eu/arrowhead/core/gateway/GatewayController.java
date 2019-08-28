@@ -1,6 +1,13 @@
 package eu.arrowhead.core.gateway;
 
+import java.security.PublicKey;
+import java.util.Base64;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +24,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -28,12 +36,22 @@ allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACC
 @RequestMapping(CommonConstants.GATEWAY_URI)
 public class GatewayController {
 	
+	//=================================================================================================
+	// members
 	
 	private static final String CONNECT_PROVIDER_URI = "/connect_provider";
 	private static final String CONNECT_CONSUMER_URI = "/connect_consumer";
 	
 	private static final String POST_CONNECT_HTTP_201_MESSAGE = "Connection created";
 	private static final String POST_CONNECT_HTTP_400_MESSAGE = "Could not create connection";
+	
+	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
+	
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
+	
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	private boolean secure;
 	
 	//=================================================================================================
 	// methods
@@ -48,6 +66,18 @@ public class GatewayController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Returns the public key of the Gateway core service as a Base64 encoded text", response = String.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_PUBLIC_KEY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_GATEWAY_KEY_URI)
+	public String getPublicKey() {
+		return acquireAndConvertPublicKey();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -82,5 +112,25 @@ public class GatewayController {
 		//TODO: implement
 		
 		return -1;
+	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private String acquireAndConvertPublicKey() {
+		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_GATEWAY_KEY_URI;
+		
+		if (!secure) {
+			throw new ArrowheadException("Gateway core service runs in insecure mode.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
+		}
+		
+		if (!arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)) {
+			throw new ArrowheadException("Public key is not available.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
+		}
+		
+		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		
+		return Base64.getEncoder().encodeToString(publicKey.getEncoded());
 	}
 }
