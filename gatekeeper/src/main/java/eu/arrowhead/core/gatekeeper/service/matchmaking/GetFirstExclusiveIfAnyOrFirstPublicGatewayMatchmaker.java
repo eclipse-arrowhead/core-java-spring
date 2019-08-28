@@ -2,6 +2,8 @@ package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
@@ -13,6 +15,7 @@ public class GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker implements Rel
 	
 	//=================================================================================================
 	// members
+	private static final Logger logger = LogManager.getLogger(GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker.class);
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
@@ -22,12 +25,14 @@ public class GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker implements Rel
 
 	//-------------------------------------------------------------------------------------------------
 	/** 
-	 * This algorithm returns the first dedicated Gateway Relay if a cloud has any,
-	 * otherwise return the first public Relay (non-exclusive GATEWAY_RELAY or GENERAL_RELAY type),
-	 * or return null if matchmaking is not possible.
+	 * This algorithm returns the first exclusive Gateway Relay if a cloud has any,
+	 * otherwise returns the first public Gateway Relay (non-exclusive GATEWAY_RELAY or GENERAL_RELAY type)
+	 * or returns null if matchmaking is not possible.
 	 */
 	@Override
 	public Relay doMatchmaking(final RelayMatchmakingParameters parameters) {
+		logger.debug("GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker.doMatchmaking started...");
+		
 		Assert.notNull(parameters, "RelayMatchmakingParameters is null");
 		Assert.notNull(parameters.getCloud(), "Cloud is null");
 		

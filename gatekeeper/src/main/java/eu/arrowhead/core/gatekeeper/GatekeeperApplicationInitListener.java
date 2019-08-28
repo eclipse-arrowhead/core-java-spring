@@ -20,9 +20,9 @@ import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
 import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmaker;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 
 @Component
 public class GatekeeperApplicationInitListener extends ApplicationInitListener {
@@ -55,7 +55,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Bean(CommonConstants.GATEWAY_MATCHMAKER)
 	public RelayMatchmakingAlgorithm getGatewayRelayMatchmakingAlgorithm() {
-		return new GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker();
+		return new GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmaker();
 	}
 
 	//=================================================================================================
