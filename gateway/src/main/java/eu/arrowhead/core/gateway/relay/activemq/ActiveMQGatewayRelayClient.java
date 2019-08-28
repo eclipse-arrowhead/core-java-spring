@@ -1,6 +1,5 @@
 package eu.arrowhead.core.gateway.relay.activemq;
 
-import java.security.InvalidParameterException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -27,6 +26,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
@@ -113,6 +113,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2095")
 	@Override
 	public ProviderSideRelayInfo initializeProviderSideRelay(final Session session, final MessageListener listener) throws JMSException {
 		logger.debug("initializeProviderSideRelay started...");
@@ -145,6 +146,8 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2095")
+	@Override
 	public ConsumerSideRelayInfo initializeConsumerSideRelay(final Session session, final MessageListener listener, final String peerName, final String queueId) throws JMSException {
 		logger.debug("initializeConsumerSideRelay started...");
 		
@@ -177,6 +180,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Override
 	public void sendBytes(final Session session, final MessageProducer sender, final PublicKey peerPublicKey, final byte[] bytes) throws JMSException {
 		logger.debug("sendBytes started...");
 		
@@ -192,6 +196,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Override
 	public byte[] getBytesFromMessage(final Message msg, final PublicKey peerPublicKey) throws JMSException {
 		logger.debug("getBytesFromMessage started...");
 		
@@ -212,6 +217,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Override
 	public void sendCloseControlMessage(final Session session, final MessageProducer sender, final String queueId) throws JMSException {
 		logger.debug("sendCloseControlMessage started...");
 		
@@ -229,12 +235,13 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 			final TextMessage msg = session.createTextMessage(CLOSE_COMMAND + queueId);
 			
 			sender.send(msg);
+		} else {
+			throw new JMSException("Invalid destination class: " + sender.getDestination().getClass().getSimpleName());
 		}
-		
-		throw new JMSException("Invalid destination class: " + sender.getDestination().getClass().getSimpleName());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Override
 	public void handleCloseControlMessage(final Message msg, final Session session) throws JMSException {
 		logger.debug("handleCloseControlMessage started...");
 		
@@ -252,12 +259,12 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 				}
 				
 				session.close();
+			} else {
+				throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
 			}
-			
-			throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
+		} else {
+			throw new JMSException("Invalid message class: " + msg.getClass().getSimpleName());
 		}
-		
-		throw new JMSException("Invalid message class: " + msg.getClass().getSimpleName());
 	}
 	
 	//=================================================================================================
@@ -276,6 +283,6 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 			throw new InvalidParameterException("Missing queue id");
 		}
 		
-		return parts[1];
+		return parts[1].trim();
 	}
 }

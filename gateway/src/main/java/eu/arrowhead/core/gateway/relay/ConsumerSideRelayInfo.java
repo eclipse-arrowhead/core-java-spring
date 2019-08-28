@@ -1,17 +1,13 @@
 package eu.arrowhead.core.gateway.relay;
 
-import java.io.Serializable;
-
 import javax.jms.MessageProducer;
 
 import org.springframework.util.Assert;
 
-public class ConsumerSideRelayInfo implements Serializable {
+public class ConsumerSideRelayInfo {
 
 	//=================================================================================================
 	// members
-	
-	private static final long serialVersionUID = 7792982096033437783L;
 	
 	private final MessageProducer messageSender;
 	private final MessageProducer controlMessageSender;
