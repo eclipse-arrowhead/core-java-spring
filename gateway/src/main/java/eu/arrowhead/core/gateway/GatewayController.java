@@ -38,9 +38,13 @@ public class GatewayController {
 	
 	//=================================================================================================
 	// members
+	private static final String ACTIVE_SESSIONS_MGMT_URI = CommonConstants.MGMT_URI + "/sessions";
 	
 	private static final String CONNECT_PROVIDER_URI = "/connect_provider";
 	private static final String CONNECT_CONSUMER_URI = "/connect_consumer";
+	
+	private static final String GET_ACTIVE_SESSIONS_HTTP_200_MESSAGE = "Sessions returned";
+	private static final String GET_ACTIVE_SESSIONS_HTTP_400_MESSAGE = "Could not return sessions";
 	
 	private static final String POST_CONNECT_HTTP_201_MESSAGE = "Connection created";
 	private static final String POST_CONNECT_HTTP_400_MESSAGE = "Could not create connection";
@@ -78,6 +82,22 @@ public class GatewayController {
 	@GetMapping(path = CommonConstants.OP_GATEWAY_KEY_URI)
 	public String getPublicKey() {
 		return acquireAndConvertPublicKey();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return active Gateway sessions", response = Object.class)
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = GET_ACTIVE_SESSIONS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ACTIVE_SESSIONS_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = ACTIVE_SESSIONS_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public Object getActiveSessions() {
+		
+		//TODO: implement
+		
+		return null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
