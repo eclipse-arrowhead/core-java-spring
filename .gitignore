@@ -49,4 +49,5 @@ wrapper
 gatekeeper/gatekeeper\.log
 /eventhandler/*.log
 /orchestrator/*.log
-/gateway/*.log
+
+*.log
