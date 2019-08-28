@@ -62,7 +62,7 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 		gatewayRelay.setAddress("3.3.3.3");
 		gatewayRelay.setPort(3000);
 		gatewayRelay.setSecure(true);
-		gatewayRelay.setExclusive(false);
+		gatewayRelay.setExclusive(true);
 		gatewayRelay.setType(RelayType.GATEWAY_RELAY);
 		
 		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(gatekeeperRelay, generalRelay, gatewayRelay), System.currentTimeMillis());
@@ -97,7 +97,7 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 		gatewayRelay.setAddress("3.3.3.3");
 		gatewayRelay.setPort(3000);
 		gatewayRelay.setSecure(true);
-		gatewayRelay.setExclusive(false);
+		gatewayRelay.setExclusive(true);
 		gatewayRelay.setType(RelayType.GATEWAY_RELAY);
 		
 		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(generalRelay, gatewayRelay), System.currentTimeMillis());
@@ -158,7 +158,7 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 	//-------------------------------------------------------------------------------------------------
 	private RelayMatchmakingParameters createRelayMatchmakingParameters(final Cloud cloud, final List<Relay> gatekeeperRelays, final long randomSeed) {
 		for (final Relay relay : gatekeeperRelays) {
-			if (relay.getType() == RelayType.GATEWAY_RELAY) {
+			if (relay.getType() == RelayType.GATEWAY_RELAY && relay.getExclusive()) {
 				final CloudGatewayRelay conn = new CloudGatewayRelay(cloud, relay);
 				cloud.getGatewayRelays().add(conn);
 				relay.getCloudGateways().add(conn);
