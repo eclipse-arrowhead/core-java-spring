@@ -119,7 +119,7 @@ public class GatewayController {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String acquireAndConvertPublicKey() {
-		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_GATEWAY_KEY_URI;
+		final String origin = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_KEY_URI;
 		
 		if (!secure) {
 			throw new ArrowheadException("Gateway core service runs in insecure mode.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
