@@ -45,19 +45,15 @@ public class GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmaker implements R
 			rng = new Random(parameters.getRandomSeed());
 		}
 		
-		final List<Relay> exclusiveGatewayRelays = new ArrayList<>();
-		
-		if (!parameters.getCloud().getGatewayRelays().isEmpty()) {
-			for (final CloudGatewayRelay relayConn : parameters.getCloud().getGatewayRelays()) {
-				exclusiveGatewayRelays.add(relayConn.getRelay());
-			}
-			return exclusiveGatewayRelays.get(rng.nextInt(exclusiveGatewayRelays.size()));
+		final List<CloudGatewayRelay> exclusiveGatewayRelayConnections = List.copyOf(parameters.getCloud().getGatewayRelays());
+		if (!exclusiveGatewayRelayConnections.isEmpty()) {			
+			return exclusiveGatewayRelayConnections.get(rng.nextInt(exclusiveGatewayRelayConnections.size())).getRelay();
 		}
 		
 		final List<Relay> nonExclusiveGatewayRelays = new ArrayList<>();
 		final List<Relay> generalRelays = new ArrayList<>();
 		
-		final List<Relay> publicRelays = gatekeeperDBService.getPublicRelaysByType(RelayType.GATEWAY_RELAY);
+		final List<Relay> publicRelays = gatekeeperDBService.getPublicGatewayRelays();
 		for (final Relay relay : publicRelays) {
 			if (relay.getType() == RelayType.GATEWAY_RELAY) {
 				nonExclusiveGatewayRelays.add(relay);

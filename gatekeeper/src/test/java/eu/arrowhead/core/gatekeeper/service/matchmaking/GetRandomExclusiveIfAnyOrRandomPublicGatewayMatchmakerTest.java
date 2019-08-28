@@ -1,7 +1,8 @@
 package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -67,7 +68,8 @@ public class GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmakerTest {
 		
 		final Relay relayMatch = algorithm.doMatchmaking(parameters);
 		
-		assertEquals(RelayType.GATEWAY_RELAY, relayMatch.getType());		
+		assertEquals(RelayType.GATEWAY_RELAY, relayMatch.getType());
+		assertTrue(relayMatch.getExclusive());
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -144,11 +146,12 @@ public class GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmakerTest {
 		gatewayRelay.setType(RelayType.GATEWAY_RELAY);
 		
 		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(), System.currentTimeMillis());
-		when(gatekeeperDBService.getPublicRelaysByType(any())).thenReturn(List.of(gatewayRelay, generalRelay));
+		when(gatekeeperDBService.getPublicGatewayRelays()).thenReturn(List.of(gatewayRelay, generalRelay));
 		
 		final Relay relayMatch = algorithm.doMatchmaking(parameters);
 		
-		assertEquals(RelayType.GATEWAY_RELAY, relayMatch.getType());		
+		assertEquals(RelayType.GATEWAY_RELAY, relayMatch.getType());
+		assertFalse(relayMatch.getExclusive());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -163,13 +166,13 @@ public class GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmakerTest {
 		cloud.setOwnCloud(false);
 		cloud.setAuthenticationInfo("test-auth-info");
 		
-		final Relay gaetwayRelay1 = new Relay();
-		gaetwayRelay1.setId(1);
-		gaetwayRelay1.setAddress("1.1.1.1");
-		gaetwayRelay1.setPort(1000);
-		gaetwayRelay1.setSecure(true);
-		gaetwayRelay1.setExclusive(false);
-		gaetwayRelay1.setType(RelayType.GATEWAY_RELAY);
+		final Relay gatewayRelay1 = new Relay();
+		gatewayRelay1.setId(1);
+		gatewayRelay1.setAddress("1.1.1.1");
+		gatewayRelay1.setPort(1000);
+		gatewayRelay1.setSecure(true);
+		gatewayRelay1.setExclusive(false);
+		gatewayRelay1.setType(RelayType.GATEWAY_RELAY);
 		
 		final Relay gatewayRelay2 = new Relay();
 		gatewayRelay2.setId(2);
@@ -190,11 +193,11 @@ public class GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmakerTest {
 		final long seed = System.currentTimeMillis();
 		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(), seed);
 		final Random rng = new Random(seed);
-		when(gatekeeperDBService.getPublicRelaysByType(any())).thenReturn(List.of(gaetwayRelay1, gatewayRelay2, gatewayRelay3));
+		when(gatekeeperDBService.getPublicGatewayRelays()).thenReturn(List.of(gatewayRelay1, gatewayRelay2, gatewayRelay3));
 		
 		final Relay relayMatch = algorithm.doMatchmaking(parameters);
 		
-		assertEquals(List.of(gaetwayRelay1, gatewayRelay2, gatewayRelay3).get(rng.nextInt(3)).getId(), relayMatch.getId());
+		assertEquals(List.of(gatewayRelay1, gatewayRelay2, gatewayRelay3).get(rng.nextInt(3)).getId(), relayMatch.getId());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -236,7 +239,7 @@ public class GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmakerTest {
 		final long seed = System.currentTimeMillis();
 		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(), seed);
 		final Random rng = new Random(seed);
-		when(gatekeeperDBService.getPublicRelaysByType(any())).thenReturn(List.of(generalRelay1, generalRelay2, generalRelay3));
+		when(gatekeeperDBService.getPublicGatewayRelays()).thenReturn(List.of(generalRelay1, generalRelay2, generalRelay3));
 		
 		final Relay relayMatch = algorithm.doMatchmaking(parameters);
 		

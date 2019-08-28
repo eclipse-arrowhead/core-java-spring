@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
 public class GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm {
@@ -40,7 +39,7 @@ public class GetFirstExclusiveIfAnyOrFirstPublicGatewayMatchmaker implements Rel
 			return parameters.getCloud().getGatewayRelays().iterator().next().getRelay();
 		}
 		
-		final List<Relay> publicGatewayRelays = gatekeeperDBService.getPublicRelaysByType(RelayType.GATEWAY_RELAY);
+		final List<Relay> publicGatewayRelays = gatekeeperDBService.getPublicGatewayRelays();
 		if (!publicGatewayRelays.isEmpty()) {
 			return publicGatewayRelays.get(0);
 		}

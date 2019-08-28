@@ -406,40 +406,12 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	public List<Relay> getPublicRelaysByType(final RelayType type) {
+	public List<Relay> getPublicGatewayRelays() {
 		logger.debug("getPublicRelaysByType started...");
 				
 		try {
 			
-			final List<Relay> allNonExclusiveRelay = relayRepository.findAllByExclusive(false);			
-			final List<Relay> publicRelays = new ArrayList<>();
-			
-			if (type == RelayType.GATEKEEPER_RELAY) {
-				
-				for (final Relay relay : allNonExclusiveRelay) {
-					if (relay.getType() == RelayType.GATEKEEPER_RELAY || relay.getType() == RelayType.GENERAL_RELAY) {
-						publicRelays.add(relay);
-					}
-				}	
-				
-			} else if (type == RelayType.GATEWAY_RELAY) {
-				
-				for (final Relay relay : allNonExclusiveRelay) {
-					if (relay.getType() == RelayType.GATEWAY_RELAY || relay.getType() == RelayType.GENERAL_RELAY) {
-						publicRelays.add(relay);
-					}
-				}
-				
-			} else {
-				
-				for (final Relay relay : allNonExclusiveRelay) {
-					if (relay.getType() == RelayType.GENERAL_RELAY) {
-						publicRelays.add(relay);
-					}
-				}
-			}			
-			
-			return publicRelays;
+			return relayRepository.findAllByExclusiveAndTypeIn(false, List.of(RelayType.GATEWAY_RELAY, RelayType.GENERAL_RELAY));
 			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
