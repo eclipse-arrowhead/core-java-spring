@@ -1,6 +1,8 @@
 package eu.arrowhead.core.gatekeeper.database.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -112,6 +114,50 @@ public class GatekeeperDBServiceRelayTest {
 		when(relayRepository.findByAddressAndPort(any(), anyInt())).thenReturn(Optional.ofNullable(null));
 		
 		gatekeeperDBService.getRelayByAddressAndPort("1.1.1.1", 10000);
+	}
+	
+	//=================================================================================================
+	// Tests of getPublicRelaysByType
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicRelaysByTypeWithGatekeeperRelayType() {
+		when(relayRepository.findAllByExclusive(false)).thenReturn(List.of(new Relay("host-a", 1000, true, false, RelayType.GATEKEEPER_RELAY),
+																   		   new Relay("host-b", 2000, true, false, RelayType.GATEWAY_RELAY),
+																   		   new Relay("host-c", 3000, true, false, RelayType.GENERAL_RELAY)));
+		
+		List<Relay> publicRelays = gatekeeperDBService.getPublicRelaysByType(RelayType.GATEKEEPER_RELAY);
+		
+		assertEquals(2, publicRelays.size());
+		assertTrue(publicRelays.get(0).getType() == RelayType.GATEKEEPER_RELAY || publicRelays.get(0).getType() == RelayType.GENERAL_RELAY);
+		assertTrue(publicRelays.get(1).getType() == RelayType.GATEKEEPER_RELAY || publicRelays.get(1).getType() == RelayType.GENERAL_RELAY);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicRelaysByTypeWithGatewayRelayType() {
+		when(relayRepository.findAllByExclusive(false)).thenReturn(List.of(new Relay("host-a", 1000, true, false, RelayType.GATEKEEPER_RELAY),
+																   		   new Relay("host-b", 2000, true, false, RelayType.GATEWAY_RELAY),
+																   		   new Relay("host-c", 3000, true, false, RelayType.GENERAL_RELAY)));
+		
+		List<Relay> publicRelays = gatekeeperDBService.getPublicRelaysByType(RelayType.GATEWAY_RELAY);
+		
+		assertEquals(2, publicRelays.size());
+		assertTrue(publicRelays.get(0).getType() == RelayType.GATEWAY_RELAY || publicRelays.get(0).getType() == RelayType.GENERAL_RELAY);
+		assertTrue(publicRelays.get(1).getType() == RelayType.GATEWAY_RELAY || publicRelays.get(1).getType() == RelayType.GENERAL_RELAY);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicRelaysByTypeWithGeneralRelayType() {
+		when(relayRepository.findAllByExclusive(false)).thenReturn(List.of(new Relay("host-a", 1000, true, false, RelayType.GATEKEEPER_RELAY),
+																   		   new Relay("host-b", 2000, true, false, RelayType.GATEWAY_RELAY),
+																   		   new Relay("host-c", 3000, true, false, RelayType.GENERAL_RELAY)));
+		
+		List<Relay> publicRelays = gatekeeperDBService.getPublicRelaysByType(RelayType.GENERAL_RELAY);
+		
+		assertEquals(1, publicRelays.size());
+		assertTrue(publicRelays.get(0).getType() == RelayType.GENERAL_RELAY);
 	}
 	
 	//=================================================================================================
