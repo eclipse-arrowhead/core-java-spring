@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -18,6 +19,7 @@ public interface RelayRepository extends RefreshableRepository<Relay,Long> {
 	//-------------------------------------------------------------------------------------------------
 	public boolean existsByAddressAndPort(final String address, final int port);
 	public Optional<Relay> findByAddressAndPort(final String address, final int port);
+	public List<Relay> findAllByExclusive(final boolean exclusive);
 	
 	//-------------------------------------------------------------------------------------------------
 	@EntityGraph(value = "relayWithCloudGatekeeperRelayEntries" , type = EntityGraphType.FETCH)

@@ -406,6 +406,48 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	public List<Relay> getPublicRelaysByType(final RelayType type) {
+		logger.debug("getPublicRelaysByType started...");
+				
+		try {
+			
+			final List<Relay> allNonExclusiveRelay = relayRepository.findAllByExclusive(false);			
+			final List<Relay> publicRelays = new ArrayList<>();
+			
+			if (type == RelayType.GATEKEEPER_RELAY) {
+				
+				for (final Relay relay : allNonExclusiveRelay) {
+					if (relay.getType() == RelayType.GATEKEEPER_RELAY || relay.getType() == RelayType.GENERAL_RELAY) {
+						publicRelays.add(relay);
+					}
+				}	
+				
+			} else if (type == RelayType.GATEWAY_RELAY) {
+				
+				for (final Relay relay : allNonExclusiveRelay) {
+					if (relay.getType() == RelayType.GATEWAY_RELAY || relay.getType() == RelayType.GENERAL_RELAY) {
+						publicRelays.add(relay);
+					}
+				}
+				
+			} else {
+				
+				for (final Relay relay : allNonExclusiveRelay) {
+					if (relay.getType() == RelayType.GENERAL_RELAY) {
+						publicRelays.add(relay);
+					}
+				}
+			}			
+			
+			return publicRelays;
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public RelayResponseDTO getRelayByIdResponse(final long id) {
 		logger.debug("getRelayByIdResponse started...");
 		

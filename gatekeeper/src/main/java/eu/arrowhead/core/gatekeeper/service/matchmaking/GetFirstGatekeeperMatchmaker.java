@@ -15,7 +15,7 @@ public class GetFirstGatekeeperMatchmaker implements RelayMatchmakingAlgorithm {
 	 */
 	@Override
 	public Relay doMatchmaking(final RelayMatchmakingParameters parameters) {
-		Assert.notNull(parameters, "GatekeeperMatchmakingParameters is null");
+		Assert.notNull(parameters, "RelayMatchmakingParameters is null");
 		Assert.notNull(parameters.getCloud(), "Cloud is null");
 		Assert.isTrue(parameters.getCloud().getGatekeeperRelays() != null && !parameters.getCloud().getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList is null or empty.");
 		
