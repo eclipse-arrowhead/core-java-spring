@@ -18,7 +18,7 @@ public class EventPublishResponseDTO implements Serializable {
 	public EventPublishResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public EventPublishResponseDTO(Map<String, Boolean> attemptedDeliveryMap) {
+	public EventPublishResponseDTO(final Map<String, Boolean> attemptedDeliveryMap) {
 		
 		this.attemptedDeliveryMap = attemptedDeliveryMap;
 	}
@@ -28,6 +28,6 @@ public class EventPublishResponseDTO implements Serializable {
 
 
 	//-------------------------------------------------------------------------------------------------
-	public void setAttemptedDeliveryMap(Map<String, Boolean> attemptedDeliveryMap) { this.attemptedDeliveryMap = attemptedDeliveryMap; }
+	public void setAttemptedDeliveryMap( final Map<String, Boolean> attemptedDeliveryMap) { this.attemptedDeliveryMap = attemptedDeliveryMap; }
 
 }

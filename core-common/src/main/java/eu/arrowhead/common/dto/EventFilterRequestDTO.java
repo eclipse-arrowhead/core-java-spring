@@ -11,7 +11,7 @@ public class EventFilterRequestDTO implements Serializable{
 	
 	private static final long serialVersionUID = -6411715397801888776L;
 	
-	private EventTypeRequestDTO eventType;
+	private String eventType;
 	private SystemRequestDTO subscriberSystem;
 	private Map<String, String> filterMetaData;
 	private String notifyUri;
@@ -29,9 +29,9 @@ public class EventFilterRequestDTO implements Serializable{
 	
 	//-------------------------------------------------------------------------------------------------
 
-	public EventFilterRequestDTO( EventTypeRequestDTO eventType, SystemRequestDTO subscriberSystem,
-			Map<String, String> filterMetaData, String notifyUri, Boolean matchMetaData, String startDate,
-			String endDate, Set<SystemRequestDTO> sources ) {
+	public EventFilterRequestDTO( final String eventType, final SystemRequestDTO subscriberSystem,
+			final Map<String, String> filterMetaData, final String notifyUri, final Boolean matchMetaData, final String startDate,
+			final String endDate, final Set<SystemRequestDTO> sources ) {
 		
 		this.eventType = eventType;
 		this.subscriberSystem = subscriberSystem;
@@ -44,7 +44,7 @@ public class EventFilterRequestDTO implements Serializable{
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventTypeRequestDTO getEventType() {	return eventType; }
+	public String getEventType() {	return eventType; }
 	public SystemRequestDTO getSubscriberSystem() {	return subscriberSystem; }
 	public Map<String, String> getFilterMetaData() { return filterMetaData; }
 	public String getNotifyUri() { return notifyUri; }
@@ -54,13 +54,13 @@ public class EventFilterRequestDTO implements Serializable{
 	public Set<SystemRequestDTO> getSources() {	return sources;	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void setEventType( EventTypeRequestDTO eventType ) { this.eventType = eventType; }
-	public void setSubscriberSystem( SystemRequestDTO subscriberSystem ) { this.subscriberSystem = subscriberSystem; }
-	public void setFilterMetaData(Map<String, String> filterMetaData) { this.filterMetaData = filterMetaData; }
-	public void setNotifyUri(String notifyUri) { this.notifyUri = notifyUri; }
-	public void setMatchMetaData(Boolean matchMetaData) { this.matchMetaData = matchMetaData; }
-	public void setStartDate(String startDate) { this.startDate = startDate; }
-	public void setEndDate(String endDate) { this.endDate = endDate; }
-	public void setSources(Set<SystemRequestDTO> sources) { this.sources = sources;	}
+	public void setEventType( final String eventType ) { this.eventType = eventType; }
+	public void setSubscriberSystem( final SystemRequestDTO subscriberSystem ) { this.subscriberSystem = subscriberSystem; }
+	public void setFilterMetaData( final Map<String, String> filterMetaData ) { this.filterMetaData = filterMetaData; }
+	public void setNotifyUri( final String notifyUri ) { this.notifyUri = notifyUri; }
+	public void setMatchMetaData( final Boolean matchMetaData ) { this.matchMetaData = matchMetaData; }
+	public void setStartDate( final String startDate ) { this.startDate = startDate; }
+	public void setEndDate( final String endDate ) { this.endDate = endDate; }
+	public void setSources( final Set<SystemRequestDTO> sources ) { this.sources = sources;	}
 
 }
