@@ -58,15 +58,13 @@ public class EventHandlerControllerTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void echoTest() throws Exception {
 
 		this.mockMvc.perform(get(CommonConstants.ECHO_URI)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-		
+				.andExpect(status().isOk());		
 	}
 	
 	//=================================================================================================
