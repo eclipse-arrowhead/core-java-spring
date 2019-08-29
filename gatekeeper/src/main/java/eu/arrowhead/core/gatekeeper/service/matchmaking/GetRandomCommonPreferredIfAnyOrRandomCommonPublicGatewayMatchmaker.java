@@ -1,6 +1,8 @@
 package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,16 +13,19 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
-public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm {
-	
+public class GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm {
+
 	//=================================================================================================
 	// members
-	private static final Logger logger = LogManager.getLogger(GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker.class);
+	private static final Logger logger = LogManager.getLogger(GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker.class);
 	
 	@Autowired
 	private GatekeeperDBService gatekeeperDBService;
+	
+	private Random rng;
 
 	//=================================================================================================
 	// methods
@@ -28,15 +33,19 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker im
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public Relay doMatchmaking(final RelayMatchmakingParameters parameters) {
-		logger.debug("GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker.doMatchmaking started...");
+		logger.debug("GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker.doMatchmaking started...");
 		
 		Assert.notNull(parameters, "RelayMatchmakingParameters is null");
 		Assert.notNull(parameters.getCloud(), "Cloud is null");
 		Assert.notNull(parameters.getPreferredGatewayRelays(), "Preferred relay list is null");
 		Assert.notNull(parameters.getKnownGatewayRelays(), "Known relay list is null");
 		
+		if (rng == null) {
+			rng = new Random(parameters.getRandomSeed());
+		}
+		
 		if (!parameters.getCloud().getGatewayRelays().isEmpty() && !parameters.getPreferredGatewayRelays().isEmpty()) {			
-			final Relay commonPreferredRelay = getFirstPreferredCommonRelay(parameters.getCloud().getGatewayRelays(), parameters.getPreferredGatewayRelays());
+			final Relay commonPreferredRelay = getRandomPreferredCommonRelay(parameters.getCloud().getGatewayRelays(), parameters.getPreferredGatewayRelays());
 			if (commonPreferredRelay != null) {
 				return commonPreferredRelay;
 			}
@@ -44,7 +53,7 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker im
 		
 		final List<Relay> publicGatewayRelays = gatekeeperDBService.getPublicGatewayRelays();		
 		if (!publicGatewayRelays.isEmpty() && !parameters.getKnownGatewayRelays().isEmpty()) {
-			return getFirstPublicCommonRelay(publicGatewayRelays, parameters.getKnownGatewayRelays());			
+			return getRandomPublicCommonRelay(publicGatewayRelays, parameters.getKnownGatewayRelays());			
 		}
 		
 		return null;
@@ -54,26 +63,46 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker im
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private Relay getFirstPreferredCommonRelay(final Set<CloudGatewayRelay> relayConnections, final List<RelayRequestDTO> relayRequests) {
+	private Relay getRandomPreferredCommonRelay(final Set<CloudGatewayRelay> relayConnections, final List<RelayRequestDTO> relayRequests) {
+		final List<Relay> commonRelays = new ArrayList<>();
 		for (final CloudGatewayRelay relayConn : relayConnections) {
 			for (final RelayRequestDTO requestedRelay : relayRequests) {				
 				if (relayConn.getRelay().getAddress().equalsIgnoreCase(requestedRelay.getAddress()) && relayConn.getRelay().getPort() == requestedRelay.getPort()) {						
-					return relayConn.getRelay();
+					commonRelays.add(relayConn.getRelay());
 				}						
 			}
+		}
+		
+		if (!commonRelays.isEmpty() ) {
+			return commonRelays.get(rng.nextInt(commonRelays.size()));
 		}
 		
 		return null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Relay getFirstPublicCommonRelay(final List<Relay> relays, final List<RelayRequestDTO> relayRequests) {
+	private Relay getRandomPublicCommonRelay(final List<Relay> relays, final List<RelayRequestDTO> relayRequests) {
+		final List<Relay> commonGatewayRelays = new ArrayList<>();
+		final List<Relay> commonGeneralRelays = new ArrayList<>();
+		
 		for (final Relay relay : relays) {
 			for (final RelayRequestDTO requestedRelay : relayRequests) {				
 				if (relay.getAddress().equalsIgnoreCase(requestedRelay.getAddress()) && relay.getPort() == requestedRelay.getPort()) {						
-					return relay;
+					if (relay.getType() == RelayType.GATEWAY_RELAY) {
+						commonGatewayRelays.add(relay);
+					} else {
+						commonGeneralRelays.add(relay);
+					}
 				}						
 			}
+		}
+		
+		if (!commonGatewayRelays.isEmpty() ) {
+			return commonGatewayRelays.get(rng.nextInt(commonGatewayRelays.size()));
+		}
+		
+		if (!commonGeneralRelays.isEmpty() ) {
+			return commonGeneralRelays.get(rng.nextInt(commonGeneralRelays.size()));
 		}
 		
 		return null;
