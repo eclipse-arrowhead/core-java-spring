@@ -172,7 +172,7 @@ public class GatewayAccessControlFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private GatewayProviderConnectionRequestDTO createGatewayProviderConnectionRequestDTO() {
-		return new GatewayProviderConnectionRequestDTO(new RelayRequestDTO(), new SystemRequestDTO(), new SystemRequestDTO(), new CloudRequestDTO(), new CloudRequestDTO(), "test-service", true, 30000, "");
+		return new GatewayProviderConnectionRequestDTO(new RelayRequestDTO(), new SystemRequestDTO(), new SystemRequestDTO(), new CloudRequestDTO(), new CloudRequestDTO(), "test-service", "");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
