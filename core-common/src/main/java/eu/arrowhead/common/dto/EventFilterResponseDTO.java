@@ -12,7 +12,7 @@ public class EventFilterResponseDTO implements Serializable{
 	private static final long serialVersionUID = 3014273687545696205L;
 	
 	private long id;
-	private EventTypeRequestDTO eventType;
+	private EventTypeResponseDTO eventType;
 	private SystemRequestDTO subscriberSystem;
 	private Map<String, String> filterMetaData;
 	private String notifyUri;
@@ -30,7 +30,7 @@ public class EventFilterResponseDTO implements Serializable{
 	public EventFilterResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO( final long id, final EventTypeRequestDTO eventType, final SystemRequestDTO subscriberSystem,
+	public EventFilterResponseDTO( final long id, final EventTypeResponseDTO eventType, final SystemRequestDTO subscriberSystem,
 			final Map<String, String> filterMetaData, final String notifyUri, final boolean matchMetaData, final String startDate,
 			final String endDate, final Set<SystemRequestDTO> sources, final String createdAt, final String updatedAt ) {
 		super();
@@ -49,7 +49,7 @@ public class EventFilterResponseDTO implements Serializable{
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public EventTypeRequestDTO getEventType() {	return eventType; }
+	public EventTypeResponseDTO getEventType() {	return eventType; }
 	public SystemRequestDTO getSubscriberSystem() {	return subscriberSystem; }
 	public Map<String, String> getFilterMetaData() { return filterMetaData; }
 	public String getNotifyUri() { return notifyUri; }
@@ -62,7 +62,7 @@ public class EventFilterResponseDTO implements Serializable{
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId( final long id ) { this.id = id; }
-	public void setEventType( final EventTypeRequestDTO eventType ) { this.eventType = eventType; }
+	public void setEventType( final EventTypeResponseDTO eventType ) { this.eventType = eventType; }
 	public void setSubscriberSystem( final SystemRequestDTO subscriberSystem ) { this.subscriberSystem = subscriberSystem; }
 	public void setFilterMetaData( final Map<String, String> filterMetaData ) { this.filterMetaData = filterMetaData; }
 	public void setNotifyUri( final String notifyUri ) { this.notifyUri = notifyUri; }
