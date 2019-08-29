@@ -16,7 +16,7 @@ public class EventHandlerTestContext {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
 	@Primary // This bean is primary only in test context
-	public EventHandlerService mockOrchestratorStoreDBService() {
+	public EventHandlerService mockEventHandlerService() {
 		return Mockito.mock(EventHandlerService.class);
 	}
 	

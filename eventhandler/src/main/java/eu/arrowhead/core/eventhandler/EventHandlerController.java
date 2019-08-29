@@ -18,7 +18,6 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;

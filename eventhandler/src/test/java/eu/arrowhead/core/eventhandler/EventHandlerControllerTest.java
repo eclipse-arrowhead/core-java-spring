@@ -2,6 +2,7 @@ package eu.arrowhead.core.eventhandler;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,22 +58,68 @@ public class EventHandlerControllerTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void echoTest() throws Exception {
+
+		this.mockMvc.perform(get(CommonConstants.ECHO_URI)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+		
+	}
+	
 	//=================================================================================================
 	// Test of subscription
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void getSubscriptionTest() throws Exception {
+	public void subscriptionTest() throws Exception {
 		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
+				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes(getEventFilterRequestDTOForTest()))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
 		
 		Assert.assertNotNull( result );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void subscriptionWithNullEventTypeTest() throws Exception {
+		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEventFilterRequestDTOWithNullEventTypeForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void subscriptionWithEmptyEventTypeTest() throws Exception {
+		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(getEventFilterRequestDTOWithEmptyEventTypeForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType"));
 	}
 
 	//=================================================================================================
@@ -92,6 +139,34 @@ public class EventHandlerControllerTest {
 				null); //sources)
 	}
 
+	//-------------------------------------------------------------------------------------------------	
+	private Object getEventFilterRequestDTOWithNullEventTypeForTest() {
+		
+		return new EventFilterRequestDTO(
+				null, //EventType
+				getSystemRequestDTO(), 
+				null, //filterMetaData
+				"notifyUri", 
+				false, //matchMetaData
+				null, //startDate
+				null, //endDate, 
+				null); //sources)
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private Object getEventFilterRequestDTOWithEmptyEventTypeForTest() {
+		
+		return new EventFilterRequestDTO(
+				"   ", //EventType
+				getSystemRequestDTO(), 
+				null, //filterMetaData
+				"notifyUri", 
+				false, //matchMetaData
+				null, //startDate
+				null, //endDate, 
+				null); //sources)
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	private EventFilterResponseDTO getEventFilterResponseDTOForTest() {
 		
