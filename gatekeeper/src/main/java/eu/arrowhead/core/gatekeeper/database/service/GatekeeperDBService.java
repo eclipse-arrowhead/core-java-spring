@@ -32,9 +32,9 @@ import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.RelayListResponseDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayResponseDTO;
-import eu.arrowhead.common.dto.RelayListResponseDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -406,6 +406,20 @@ public class GatekeeperDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
+	public List<Relay> getPublicGatewayRelays() {
+		logger.debug("getPublicRelaysByType started...");
+				
+		try {
+			
+			return relayRepository.findAllByExclusiveAndTypeIn(false, List.of(RelayType.GATEWAY_RELAY, RelayType.GENERAL_RELAY));
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
 	public RelayResponseDTO getRelayByIdResponse(final long id) {
 		logger.debug("getRelayByIdResponse started...");
 		
@@ -767,9 +781,9 @@ public class GatekeeperDBService {
 			gatewayRelays = relayRepository.findAllById(gatekewayRelayIds);
 			
 			for (final Relay relay : gatewayRelays) {
-				if (relay.getType() != RelayType.GATEWAY_RELAY && relay.getType() != RelayType.GENERAL_RELAY) {
-					throw new InvalidParameterException("Relay with gateway purpose could be only " + RelayType.GATEWAY_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " +
-														 relay.getType() + " type");
+				if (relay.getType() != RelayType.GATEWAY_RELAY || !relay.getExclusive()) {
+					final String exclusivity = relay.getExclusive() ? "exclusive" : "non-exclusive";
+					throw new InvalidParameterException("Gateway dedicated relay could be only exclusive" + RelayType.GATEWAY_RELAY + " type, but not " + exclusivity + relay.getType() + " type");
 				}
 			}
 		}
@@ -912,6 +926,6 @@ public class GatekeeperDBService {
 		final List<CloudGatewayRelay> entriesToDelete = cloudGatewayRelayRepository.findAllById(relaysConnToDelete);
 		cloudGatewayRelayRepository.deleteInBatch(entriesToDelete);
 		
-		return collectAndValidateGatekeeperRelays(relaysToAssign);
+		return collectAndValidateGatewayRelays(relaysToAssign);
 	}
 }
