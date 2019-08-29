@@ -55,7 +55,7 @@ import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayRequest;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
-import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 
 @RunWith(SpringRunner.class)
 public class ActiveMQGatekeeperRelayClientTest {
@@ -95,25 +95,25 @@ public class ActiveMQGatekeeperRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameNull() {
-		RelayClientFactory.createGatekeeperRelayClient(null, null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient(null, null, null, 0);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameEmpty() {
-		RelayClientFactory.createGatekeeperRelayClient(" ", null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient(" ", null, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorPublicKeyNull() {
-		RelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", null, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorPrivateKeyNull() {
-		RelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
