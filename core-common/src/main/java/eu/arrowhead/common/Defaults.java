@@ -53,6 +53,8 @@ public class Defaults {
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT = false;
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY = false;
 	
+	public static final int DEFAULT_GATEWAY_SOCKET_TIMEOUT = 30000;
+	
 	//=================================================================================================
 	// assistant methods
 	
