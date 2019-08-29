@@ -448,12 +448,12 @@ public class GatekeeperService {
 		}
 		
 		if (Utilities.isEmpty(relay.getType())) {
-			throw new InvalidParameterException("Realy type is null or blank");
+			throw new InvalidParameterException("Relay type is null or blank");
 		}
 		
 		final RelayType type = Utilities.convertStringToRelayType(relay.getType());
 		if (type == null || type == RelayType.GATEKEEPER_RELAY) {
-			throw new InvalidParameterException("Realy type is invalid");
+			throw new InvalidParameterException("Relay type is invalid");
 		}
 	}
 	
