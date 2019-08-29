@@ -19,7 +19,7 @@ public enum CoreSystem {
 	ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(CoreSystemService.ORCHESTRATION_SERVICE)), 
 	GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY, CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION)),
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of()), // TODO: add services,
-	EVENT_HANDLER(Defaults.DEFAULT_EVENT_HANDLER_PORT, List.of()), // TODO: add services
+	EVENT_HANDLER(Defaults.DEFAULT_EVENT_HANDLER_PORT, List.of(CoreSystemService.EVENTHANDLER_SUBSCRIPTION_SERVICE, CoreSystemService.EVENTHANDLER_UNSUBSCRIPTION_SERVICE, CoreSystemService.EVENTHANDLER_PUBLISH_SERVICE)), 
 	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of()); // TODO: add services		
 	
 	//=================================================================================================
