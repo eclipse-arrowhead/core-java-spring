@@ -29,12 +29,15 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
-	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "public-key";
+	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
+	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
+	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
+	public static final String CORE_SERVICE_GATEWAY_CONNECT_PROVIDER = "gw-connect-provider";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -106,6 +109,9 @@ public class CommonConstants {
 	
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
+	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
+	public static final String OP_GATEWAY_CONNECT_CONSUMER_URI = "/connect_consumer";
+
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -212,6 +218,7 @@ public class CommonConstants {
 	
 	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
 	public static final String INTER_CLOUD_PROVIDER_MATCHMAKER = "interCloudProviderMatchmaker";
+	public static final String ICN_PROVIDER_MATCHMAKER = "icnProviderMatchmaker";
 	public static final String GATEKEEPER_MATCHMAKER = "gatekeeperMatchmaker";
 	public static final String GATEWAY_MATCHMAKER = "gatewayMatchmaker";
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";

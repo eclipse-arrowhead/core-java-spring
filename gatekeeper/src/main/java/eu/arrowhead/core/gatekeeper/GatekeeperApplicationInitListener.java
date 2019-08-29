@@ -22,6 +22,8 @@ import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmaker;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RandomICNProviderMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 
 @Component
@@ -57,6 +59,12 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	public RelayMatchmakingAlgorithm getGatewayRelayMatchmakingAlgorithm() {
 		return new GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmaker();
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CommonConstants.ICN_PROVIDER_MATCHMAKER)
+	public ICNProviderMatchmakingAlgorithm getICNProviderMatchmaker() {
+		return new RandomICNProviderMatchmaker();
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -64,7 +72,12 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); // TODO: add all necessary services
+		if (gatewayIsPresent) {
+			return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE,
+						   CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE); 
+		}
+		
+		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); 
 	}
 		
 	//-------------------------------------------------------------------------------------------------

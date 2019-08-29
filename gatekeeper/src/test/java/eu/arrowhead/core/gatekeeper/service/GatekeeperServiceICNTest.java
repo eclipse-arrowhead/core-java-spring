@@ -287,6 +287,15 @@ public class GatekeeperServiceICNTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testDoICNRequestedCloudWantsToUseGatewayButNoRelaysAreProvided() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
+		ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		request.setGatewayIsPresent(true);
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testDoICNRequestedServiceNameNull() {
 		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();

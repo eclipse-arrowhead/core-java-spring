@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
@@ -35,6 +38,7 @@ import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
@@ -45,6 +49,10 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingParameters;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
 @Service
 public class GatekeeperService {
@@ -68,6 +76,12 @@ public class GatekeeperService {
 	
 	@Autowired
 	private GatekeeperDriver gatekeeperDriver;
+	
+	@Resource(name = CommonConstants.ICN_PROVIDER_MATCHMAKER)
+	private ICNProviderMatchmakingAlgorithm icnProviderMatchmaker;
+	
+	@Resource(name = CommonConstants.GATEWAY_MATCHMAKER)
+	private RelayMatchmakingAlgorithm gatewayMatchmaker;
 
 	//=================================================================================================
 	// methods
@@ -183,8 +197,9 @@ public class GatekeeperService {
 		final Cloud targetCloud = gatekeeperDBService.getCloudById(form.getTargetCloudId());
 		final CloudRequestDTO requesterCloud = getRequesterCloud();
 		final List<RelayRequestDTO> preferredRelays = getPreferredRelays(targetCloud);
+		final List<RelayRequestDTO> knownRelays = getKnownRelays();
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
-																		 form.getNegotiationFlags(), gatewayIsPresent);
+																		 knownRelays, form.getNegotiationFlags(), gatewayIsPresent);
 		
 		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
 		
@@ -213,7 +228,8 @@ public class GatekeeperService {
 																							 .preferredProviders(preferredProviders)
 																							 .build();
 		if (gatewayIsMandatory) {
-			//TODO: we have to change the requesterSystem name  
+			// changing the requesterSystem for the sake of proper token generation
+			orchestrationForm.getRequesterSystem().setSystemName(CoreSystem.GATEWAY.name().toLowerCase());
 		}
 		
 		OrchestrationResponseDTO orchestrationResponse = gatekeeperDriver.queryOrchestrator(orchestrationForm);
@@ -230,6 +246,13 @@ public class GatekeeperService {
 			return new ICNProposalResponseDTO(orchestrationResponse.getResponse(), false);
 		} 
 		
+		// in gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider
+		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
+		final Relay selectedRelay = selectRelay(request);
+		
+		if (selectedRelay == null) {
+			throw new AuthException("No common communication relay was found.");
+		}
 		//TODO: implement gateway-related code
 		
 		return null;
@@ -326,6 +349,10 @@ public class GatekeeperService {
 		
 		if (gatewayIsMandatory && !request.getGatewayIsPresent()) {
 			throw new AuthException("Services are only available via gateway."); 
+		}
+		
+		if (gatewayIsMandatory && request.getPreferredGatewayRelays().isEmpty() && request.getKnownGatewayRelays().isEmpty()) {
+			throw new AuthException("Services are only available via relay.");
 		}
 		
 		if (request.getRequestedService() == null) {
@@ -451,6 +478,13 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private List<RelayRequestDTO> getKnownRelays() {
+		logger.debug("getKnownRelays started...");
+		
+		return DTOConverter.convertRelayListToRelayRequestDTOList(gatekeeperDBService.getPublicGatewayRelays());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private PreferredProviderDataDTO[] getPreferredProviders(final List<SystemRequestDTO> preferredSystems) {
 		logger.debug("getPreferredProviders started...");
 		
@@ -462,4 +496,15 @@ public class GatekeeperService {
 		
 		return result;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Relay selectRelay(final ICNProposalRequestDTO request) {
+		final Cloud requesterCloud = gatekeeperDBService.getCloudByOperatorAndName(request.getRequesterCloud().getOperator(), request.getRequesterCloud().getName());
+		final RelayMatchmakingParameters relayMMParams = new RelayMatchmakingParameters(requesterCloud);
+		relayMMParams.setPreferredGatewayRelays(request.getPreferredGatewayRelays());
+		relayMMParams.setKnownGatewayRelays(request.getKnownGatewayRelays());
+		
+		return gatewayMatchmaker.doMatchmaking(relayMMParams);
+	}
+
 }

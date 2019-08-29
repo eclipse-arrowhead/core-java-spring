@@ -34,6 +34,7 @@ public class GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmaker implements R
 	 * otherwise returns a random public Gateway Relay (non-exclusive GATEWAY_RELAY or GENERAL_RELAY type)
 	 * or return null if matchmaking is not possible.
 	 */
+	//TODO: reimplement
 	@Override
 	public Relay doMatchmaking(final RelayMatchmakingParameters parameters) {
 		logger.debug("GetRandomExclusiveIfAnyOrRandomPublicGatewayMatchmaker.doMatchmaking started...");

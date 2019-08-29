@@ -40,9 +40,6 @@ public class GatewayController {
 	// members
 	private static final String ACTIVE_SESSIONS_MGMT_URI = CommonConstants.MGMT_URI + "/sessions";
 	
-	private static final String CONNECT_PROVIDER_URI = "/connect_provider";
-	private static final String CONNECT_CONSUMER_URI = "/connect_consumer";
-	
 	private static final String GET_ACTIVE_SESSIONS_HTTP_200_MESSAGE = "Sessions returned";
 	private static final String GET_ACTIVE_SESSIONS_HTTP_400_MESSAGE = "Could not return sessions";
 	
@@ -101,7 +98,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Creates an SSLSocket and Message queue between the given Relay and Provider and return the necesarry connection informations", response = GatewayProviderConnectionResponseDTO.class)
+	@ApiOperation(value = "Creates a Socket and Message queue between the given Relay and Provider and return the necesarry connection informations", response = GatewayProviderConnectionResponseDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
@@ -109,7 +106,7 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@PostMapping(path = CONNECT_PROVIDER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public GatewayProviderConnectionResponseDTO connectProvider(@RequestBody final GatewayProviderConnectionRequestDTO request) {
 		
 		//TODO: implement
@@ -118,7 +115,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Creates an SSLServerSocket between the given Relay and Consumer and return the SSLServerSocket port", response = Integer.class)
+	@ApiOperation(value = "Creates a ServerSocket between the given Relay and Consumer and return the ServerSocket port", response = Integer.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
@@ -126,7 +123,7 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@PostMapping(path = CONNECT_CONSUMER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Integer connectConsumer(@RequestBody final GatewayConsumerConnectionRequestDTO request) {
 		
 		//TODO: implement
