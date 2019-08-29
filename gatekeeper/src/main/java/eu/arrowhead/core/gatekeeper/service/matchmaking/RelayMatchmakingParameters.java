@@ -4,7 +4,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.database.entity.Cloud;
 
-public class GatekeeperMatchmakingParameters {
+public class RelayMatchmakingParameters {
 
 	//=================================================================================================
 	// members
@@ -16,7 +16,7 @@ public class GatekeeperMatchmakingParameters {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public GatekeeperMatchmakingParameters(final Cloud cloud) {
+	public RelayMatchmakingParameters(final Cloud cloud) {
 		Assert.notNull(cloud, "cloud is null.");
 		this.cloud = cloud;
 	}

@@ -69,8 +69,8 @@ import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingParameters;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDriverICNTest {
@@ -82,7 +82,7 @@ public class GatekeeperDriverICNTest {
 	private GatekeeperDriver testingObject;
 	
 	@Mock
-	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmaker;
+	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
 	
 	@Mock
 	private Map<String,Object> arrowheadContext;
@@ -118,7 +118,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testSendICNProposalRelayProblem() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 
 		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(JMSException.class);
 		
@@ -129,7 +129,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = TimeoutException.class)
 	public void testSendICNProposalNoAcknowledgement() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
 		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(null);
@@ -142,7 +142,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = TimeoutException.class)
 	public void testSendICNProposalNoResponse() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
 		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
@@ -157,7 +157,7 @@ public class GatekeeperDriverICNTest {
 	@Test
 	public void testSendICNProposalEverythingOK() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
 		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");

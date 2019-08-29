@@ -56,8 +56,8 @@ import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingParameters;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
 @Component
 public class GatekeeperDriver {
@@ -69,7 +69,7 @@ public class GatekeeperDriver {
 	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	
 	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
-	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmaker;
+	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -180,7 +180,7 @@ public class GatekeeperDriver {
 		Assert.notNull(targetCloud, "Target cloud is null.");
 		Assert.notNull(request, "Request is null.");
 		
-		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new GatekeeperMatchmakingParameters(targetCloud));
+		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(targetCloud));
 		try {
 			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort());
 			final String recipientCommonName = getRecipientCommonName(targetCloud);
@@ -240,7 +240,7 @@ public class GatekeeperDriver {
 		
 		final Map<Cloud,Relay> realyPerCloud = new HashMap<>();
 		for (final Cloud cloud : clouds) {
-			final Relay relay = gatekeeperMatchmaker.doMatchmaking(new GatekeeperMatchmakingParameters(cloud));
+			final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(cloud));
 			realyPerCloud.put(cloud, relay);
 		}
 		
