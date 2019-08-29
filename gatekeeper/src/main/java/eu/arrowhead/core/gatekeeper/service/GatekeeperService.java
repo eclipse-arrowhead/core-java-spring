@@ -31,6 +31,7 @@ import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
@@ -114,7 +115,7 @@ public class GatekeeperService {
 			}
 		}
 		
-		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getRequesterCloud(), gatewayIsPresent);
+		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent);
 		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
 		final List<GSDPollResponseDTO> successfulResponses = new ArrayList<>();
@@ -195,7 +196,7 @@ public class GatekeeperService {
 		validateICNForm(form);
 		
 		final Cloud targetCloud = gatekeeperDBService.getCloudById(form.getTargetCloudId());
-		final CloudRequestDTO requesterCloud = getRequesterCloud();
+		final CloudRequestDTO requesterCloud = getOwnCloud();
 		final List<RelayRequestDTO> preferredRelays = getPreferredRelays(targetCloud);
 		final List<RelayRequestDTO> knownRelays = getKnownRelays();
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
@@ -245,15 +246,22 @@ public class GatekeeperService {
 		if (!gatewayIsMandatory) {
 			return new ICNProposalResponseDTO(orchestrationResponse.getResponse(), false);
 		} 
-		
-		// in gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider
-		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
+
+		// gateway is used so we need a relay
 		final Relay selectedRelay = selectRelay(request);
-		
 		if (selectedRelay == null) {
 			throw new AuthException("No common communication relay was found.");
 		}
-		//TODO: implement gateway-related code
+		
+		// in gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider
+		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
+		final String gatewayPublicKey = gatekeeperDriver.queryGatewayPublicKey();
+		
+		final SystemRequestDTO providerSystem = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(selectedResult.getProvider());
+		final GatewayProviderConnectionRequestDTO connectionRequest	= new GatewayProviderConnectionRequestDTO(DTOConverter.convertRelayToRelayRequestDTO(selectedRelay), request.getRequesterSystem(),
+																											  providerSystem, request.getRequesterCloud(), getOwnCloud(),
+																											  request.getRequestedService().getServiceDefinitionRequirement(), gatewayPublicKey);
+		//TODO: continue implementing gateway-related code
 		
 		return null;
 	}
@@ -450,7 +458,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private CloudRequestDTO getRequesterCloud() {
+	private CloudRequestDTO getOwnCloud() {
 		logger.debug("getRequesterCloud started...");
 		
 		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode

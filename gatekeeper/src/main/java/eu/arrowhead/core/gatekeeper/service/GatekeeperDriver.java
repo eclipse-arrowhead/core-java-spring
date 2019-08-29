@@ -67,6 +67,7 @@ public class GatekeeperDriver {
 	
 	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_PUBLIC_KEY_URI_KEY = CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	
 	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
@@ -231,6 +232,16 @@ public class GatekeeperDriver {
 		return orchestrationResponse;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public String queryGatewayPublicKey() {
+		logger.debug("queryPublicKey started...");
+		
+		final UriComponents publicKeyUri = getGatewayPublicKeyUri();
+		final ResponseEntity<String> response = httpService.sendRequest(publicKeyUri, HttpMethod.GET, String.class);
+		
+		return response.getBody();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -295,6 +306,21 @@ public class GatekeeperDriver {
 		}
 		
 		throw new ArrowheadException("Gatekeeper can't find orchestration process URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatewayPublicKeyUri() {
+		logger.debug("getGatewayPublicKeyUri started...");
+		
+		if (arrowheadContext.containsKey(GATEWAY_PUBLIC_KEY_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEWAY_PUBLIC_KEY_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find gateway public key URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find gateway public key URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
