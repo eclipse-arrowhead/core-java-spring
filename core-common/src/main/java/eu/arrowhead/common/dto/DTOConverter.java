@@ -301,10 +301,17 @@ public class DTOConverter {
 		
 		final List<RelayRequestDTO> result = new ArrayList<>(relays.size());
 		for (final Relay relay : relays) {
-			result.add(new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getSecure(), relay.getExclusive(), relay.getType().name()));
+			result.add(convertRelayToRelayRequestDTO(relay));
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayRequestDTO convertRelayToRelayRequestDTO(final Relay relay) {
+		Assert.notNull(relay, "relay is null.");
+		
+		return new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getSecure(), relay.getExclusive(), relay.getType().name());
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
