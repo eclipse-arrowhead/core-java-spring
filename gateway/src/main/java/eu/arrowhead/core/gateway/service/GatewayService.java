@@ -3,9 +3,12 @@ package eu.arrowhead.core.gateway.service;
 import java.security.InvalidParameterException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.jms.JMSException;
+import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,10 +79,26 @@ public class GatewayService {
 		logger.debug("connectProvider started...");
 
 		validateProviderConnectionRequest(request);
-		//TODO: implement
+		
+		final ZonedDateTime now = ZonedDateTime.now();
+		final RelayRequestDTO relay = request.getRelay();
+		final Session session = getRelaySession(relay);
+		
+		try {
+			//TODO: create thread
+			relayClient.initializeProviderSideRelay(session, null);
+			//TODO: create active session
+			//TODO: start thread
+			
+			//TODO: implement
+		} catch (final Throwable t) {
+			//TODO: handle exceptions
+			relayClient.closeConnection(session);
+		}
+		
 		return null;
 	}
-	
+
 	//=================================================================================================
 	// assistant methods
 
@@ -177,6 +196,19 @@ public class GatewayService {
 		
 		if (Utilities.isEmpty(cloud.getName())) {
 			throw new InvalidParameterException("Cloud name is null or empty");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Session getRelaySession(final RelayRequestDTO relay) {
+		try {
+			return relayClient.createConnection(relay.getAddress(), relay.getPort());
+		} catch (final JMSException ex) {
+			logger.debug("Exception occured while creating connection for address: {} and port {}:", relay.getAddress(), relay.getPort());
+			logger.debug("Exception message: {}:", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			
+			throw new ArrowheadException("Error while trying to connect relay at " + relay.getAddress() + ":" + relay.getPort(), ex);
 		}
 	}
 }
