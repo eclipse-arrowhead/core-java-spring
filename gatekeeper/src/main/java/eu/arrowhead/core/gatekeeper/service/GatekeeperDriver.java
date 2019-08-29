@@ -92,6 +92,8 @@ public class GatekeeperDriver {
 	@EventListener
 	@Order(15) // to make sure GatekeeperApplicationInitListener finished before this method is called (the common name and the keys are added to the context in the init listener)
 	public void onApplicationEvent(final ContextRefreshedEvent event) {
+		logger.debug("onApplicationEvent started...");
+		
 		if (!arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)) {
 			throw new ArrowheadException("Server's certificate not found.");
 		}

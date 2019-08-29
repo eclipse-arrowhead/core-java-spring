@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,6 +50,8 @@ public class GatewayController {
 	
 	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	
+	private final Logger logger = LogManager.getLogger(GatewayController.class);
+	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
@@ -78,6 +82,8 @@ public class GatewayController {
 	})
 	@GetMapping(path = CommonConstants.OP_GATEWAY_KEY_URI)
 	public String getPublicKey() {
+		logger.debug("New public key GET request received...");
+		
 		return acquireAndConvertPublicKey();
 	}
 	
@@ -136,6 +142,8 @@ public class GatewayController {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String acquireAndConvertPublicKey() {
+		logger.debug("acquireAndConvertPublicKey started...");
+		
 		final String origin = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_KEY_URI;
 		
 		if (!secure) {
