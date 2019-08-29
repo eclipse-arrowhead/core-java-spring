@@ -232,6 +232,8 @@ public class CommonConstants {
 	public static final String GATEWAY_SOCKET_TIMEOUT = "gateway_socket_timeout";
 	public static final String $GATEWAY_SOCKET_TIMEOUT_WD = "${" + GATEWAY_SOCKET_TIMEOUT + ":" + Defaults.DEFAULT_GATEWAY_SOCKET_TIMEOUT + "}";
 
+	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
+
 	//=================================================================================================
 	// assistant methods
 

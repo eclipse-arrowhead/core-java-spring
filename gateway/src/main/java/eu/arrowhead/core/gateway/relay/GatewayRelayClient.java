@@ -11,6 +11,11 @@ import javax.jms.Session;
 import eu.arrowhead.common.relay.RelayClient;
 
 public interface GatewayRelayClient extends RelayClient {
+	
+	//=================================================================================================
+	// members
+	
+	public static final String CONTROL_QUEUE_SUFFIX = "-CONTROL";
 
 	//=================================================================================================
 	// methods
