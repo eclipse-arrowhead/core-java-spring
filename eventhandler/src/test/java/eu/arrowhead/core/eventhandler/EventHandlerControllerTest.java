@@ -1,0 +1,133 @@
+package eu.arrowhead.core.eventhandler;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.dto.EventFilterRequestDTO;
+import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.EventTypeResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.core.eventhandler.service.EventHandlerService;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = EventHandlerMain.class)
+@ContextConfiguration(classes = { EventHandlerTestContext.class })
+public class EventHandlerControllerTest {
+
+	//=================================================================================================
+	// members
+
+	@Autowired
+	private WebApplicationContext wac;
+	
+	private MockMvc mockMvc;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
+	
+	@MockBean(name = "mockEventHandlerService") 
+	EventHandlerService eventHandlerService;
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setup() {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	}
+	
+	//=================================================================================================
+	// Test of subscription
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getSubscriptionTest() throws Exception {
+		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
+				.content(objectMapper.writeValueAsBytes(getEventFilterRequestDTOForTest()))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+	}
+
+	//=================================================================================================
+	//Assistant methods
+	
+	//-------------------------------------------------------------------------------------------------	
+	private Object getEventFilterRequestDTOForTest() {
+		
+		return new EventFilterRequestDTO(
+				"eventType", 
+				getSystemRequestDTO(), 
+				null, //filterMetaData
+				"notifyUri", 
+				false, //matchMetaData
+				null, //startDate
+				null, //endDate, 
+				null); //sources)
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private EventFilterResponseDTO getEventFilterResponseDTOForTest() {
+		
+		return new EventFilterResponseDTO(
+				1L, 
+				getEventType(), 
+				getSystemRequestDTO(),//subscriberSystem, 
+				null, //filterMetaData, 
+				"notifyUri", 
+				false, //matchMetaData, 
+				null, //startDate, 
+				null, //endDate, 
+				null, //sources, 
+				"createdAt", 
+				"updatedAt" );
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private EventTypeResponseDTO getEventType() {
+		
+		return new EventTypeResponseDTO(
+				1L, 
+				"eventTypeName", 
+				"createdAt", 
+				"updatedAt");
+				
+	}
+
+	//-------------------------------------------------------------------------------------------------	
+	private SystemRequestDTO getSystemRequestDTO() {
+		
+		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
+		systemRequestDTO.setSystemName("systemName");
+		systemRequestDTO.setAddress("localhost");
+		systemRequestDTO.setPort(12345);	
+		
+		return systemRequestDTO;
+	}
+}

@@ -3,9 +3,13 @@ package eu.arrowhead.core.eventhandler.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import eu.arrowhead.common.dto.EventFilterRequestDTO;
+import eu.arrowhead.common.dto.EventFilterResponseDTO;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
 
+@Service
 public class EventHandlerService {
 
 	//=================================================================================================
@@ -28,5 +32,10 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	public EventFilterResponseDTO subscriptionRequest(EventFilterRequestDTO request) {
+		logger.debug("subscriptionRequest started ...");
 		
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
