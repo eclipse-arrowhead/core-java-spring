@@ -37,7 +37,7 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmakerTes
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testDoMatchmakingWithHavingCommonPreferredGatewayRelays() {
+	public void testDoMatchmakingWithHavingCommonPreferredAndPublicGatewayRelays() {
 		final Cloud localInstanceOfRequesterCloud = new Cloud();
 		localInstanceOfRequesterCloud.setId(1);
 		localInstanceOfRequesterCloud.setOperator("test-operator");
@@ -64,20 +64,20 @@ public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmakerTes
 		preferredRelay1.setAddress(commonRelayAddress1);
 		preferredRelay1.setPort(commonRelayPort1);
 		
-		final Relay localInstanceOfPreferredRelay2 = new Relay();
-		localInstanceOfPreferredRelay2.setId(4);
-		localInstanceOfPreferredRelay2.setAddress(commonRelayAddress2);
-		localInstanceOfPreferredRelay2.setPort(commonRelayPort2);
-		localInstanceOfPreferredRelay2.setSecure(true);
-		localInstanceOfPreferredRelay2.setExclusive(true);
-		localInstanceOfPreferredRelay2.setType(RelayType.GATEWAY_RELAY);
+		final Relay localInstanceOfPublicRelay2 = new Relay();
+		localInstanceOfPublicRelay2.setId(4);
+		localInstanceOfPublicRelay2.setAddress(commonRelayAddress2);
+		localInstanceOfPublicRelay2.setPort(commonRelayPort2);
+		localInstanceOfPublicRelay2.setSecure(true);
+		localInstanceOfPublicRelay2.setExclusive(false);
+		localInstanceOfPublicRelay2.setType(RelayType.GATEWAY_RELAY);
 		
 		final RelayRequestDTO preferredRelay2 = new RelayRequestDTO();
 		preferredRelay2.setAddress(commonRelayAddress2);
 		preferredRelay2.setPort(commonRelayPort2);
 		
 		final RelayMatchmakingParameters parameters = createRelayMatchmakingParametersWithLocalRelayConnsOfRequesterCloud(localInstanceOfRequesterCloud,
-																														  List.of(localInstanceOfPreferredRelay1, localInstanceOfPreferredRelay2),
+																														  List.of(localInstanceOfPreferredRelay1, localInstanceOfPublicRelay2),
 																														  System.currentTimeMillis());
 		parameters.setPreferredGatewayRelays(List.of(preferredRelay1, preferredRelay2));
 		
