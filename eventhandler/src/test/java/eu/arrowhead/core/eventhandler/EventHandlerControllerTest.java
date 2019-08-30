@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -30,6 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.EventTypeResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;
@@ -494,9 +497,28 @@ public class EventHandlerControllerTest {
 		Assert.assertNotNull( result );
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+	}
+	
 	//=================================================================================================
 	//Assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------	
 	private EventFilterRequestDTO getEventFilterRequestDTOForTest() {
 		
@@ -577,4 +599,23 @@ public class EventHandlerControllerTest {
 		
 		return systemRequestDTO;
 	}
+	
+	//-------------------------------------------------------------------------------------------------		
+	private EventPublishRequestDTO getEventPublishRequestDTOForTest() {
+		
+		return new EventPublishRequestDTO(
+				"eventType", 
+				getSystemRequestDTO(), //source, 
+				null, //metaData, 
+				"deliveryCompleteUri", 
+				"payload", 
+				"timeStamp");
+	}
+
+	//-------------------------------------------------------------------------------------------------	
+	private EventPublishResponseDTO getEventPublishResponseDTO() {
+		
+		return new EventPublishResponseDTO( Map.of("subscriberUri", true));
+	}
+
 }
