@@ -35,9 +35,11 @@ import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
 import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
+import eu.arrowhead.core.gateway.thread.ConsumerSideServerSocketThread;
 import eu.arrowhead.core.gateway.thread.ProviderSideSocketThread;
 
 @Component
@@ -150,9 +152,27 @@ public class GatewayService {
 		final RelayRequestDTO relay = request.getRelay();
 		final Session session = getRelaySession(relay);
 
-		//TODO: continue
-		
-		return serverPort;
+		ConsumerSideServerSocketThread thread = null;
+		try {
+			thread = new ConsumerSideServerSocketThread(appContext, serverPort, relayClient, session, request.getProviderGWPublicKey(), request.getQueueId(), gatewaySocketTimeout, 
+														request.getConsumer().getSystemName(), request.getServiceDefinition());
+			final ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
+			thread.init(info.getMessageSender());
+			thread.start();
+			
+			return serverPort;
+		} catch (final JMSException ex) {
+			relayClient.closeConnection(session);
+			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
+		} catch (final ArrowheadException ex) {
+			relayClient.closeConnection(session);
+			
+			if (thread != null && thread.isInitialized()) {
+				thread.setInterrupted(true);
+			}
+			
+			throw ex;
+		}
 	}
 
 	//=================================================================================================
