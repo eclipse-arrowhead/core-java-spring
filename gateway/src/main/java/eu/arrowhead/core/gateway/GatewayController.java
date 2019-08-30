@@ -140,10 +140,14 @@ public class GatewayController {
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Integer connectConsumer(@RequestBody final GatewayConsumerConnectionRequestDTO request) {
+		logger.debug("connectConsumer started...");
+
+		//TODO: request check
+
+		final int serverPort = gatewayService.connectConsumer(request);
 		
-		//TODO: implement
-		
-		return -1;
+		logger.debug("connectConsumer finished...");
+		return serverPort;
 	}
 	
 	//=================================================================================================
