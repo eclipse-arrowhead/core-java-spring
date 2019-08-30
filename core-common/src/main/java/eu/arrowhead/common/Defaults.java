@@ -53,6 +53,9 @@ public class Defaults {
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT = false;
 	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY = false;
 	
+	public static final boolean DEFAULT_EVENT_HANDLER_TTL_SCHEDULED = false;
+	public static final int DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES = 13;
+	
 	//=================================================================================================
 	// assistant methods
 	

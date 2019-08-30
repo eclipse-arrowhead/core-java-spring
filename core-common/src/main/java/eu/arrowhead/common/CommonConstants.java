@@ -225,6 +225,11 @@ public class CommonConstants {
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 Defaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";
+	
+	public static final String EVENT_HANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
+	public static final String $EVENT_HANDLER_TTL_SCHEDULED_WD = "${" + EVENT_HANDLER_TTL_SCHEDULED + ":" + Defaults.DEFAULT_EVENT_HANDLER_TTL_SCHEDULED + "}";
+	public static final String EVENT_HANDLER_TTL_INTERVAL = "event_handler_ttl_interval";
+	public static final String $EVENT_HANDLER_TTL_INTERVAL_WD = "${" + EVENT_HANDLER_TTL_INTERVAL + ":" + Defaults.DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES + "}";
 
 	//=================================================================================================
 	// assistant methods
