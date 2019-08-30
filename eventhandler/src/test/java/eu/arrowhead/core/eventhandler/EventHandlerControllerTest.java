@@ -1,6 +1,7 @@
 package eu.arrowhead.core.eventhandler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -473,6 +474,24 @@ public class EventHandlerControllerTest {
 		
 		Assert.assertNotNull( result );
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System name is null or blank."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void unSubscriptionTest() throws Exception {
+		
+		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		
+		doNothing().when(eventHandlerService).unSubscriptionRequest(any());
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
 	}
 	
 	//=================================================================================================

@@ -19,6 +19,8 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;
@@ -45,6 +47,9 @@ public class EventHandlerController {
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
+	private static final String POST_EVENTHANDLER_PUBLISH_DESCRIPTION = "Publish event"; //TODO add meaningful description
+	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; //TODO add meaningful description
+	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; //TODO add meaningful description
 	
 	private final Logger logger = LogManager.getLogger(EventHandlerController.class);
 	
@@ -93,13 +98,31 @@ public class EventHandlerController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(path = CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public EventFilterResponseDTO unSubscription(@RequestBody final EventFilterRequestDTO request) {
+	@ResponseBody public void unSubscription(@RequestBody final EventFilterRequestDTO request) {
 		logger.debug("unSubscription started ...");
 		
 		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION;
 		checkEventFilterRequestDTO(request, origin);
 		
-	    return eventHandlerService.unSubscriptionRequest(request);
+	    eventHandlerService.unSubscriptionRequest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_EVENTHANDLER_PUBLISH_DESCRIPTION, response = EventPublishResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_EVENTHANDLER_PUBLISH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public EventPublishResponseDTO publish(@RequestBody final EventPublishRequestDTO request) {
+		logger.debug("publish started ...");
+		
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH;
+		checkEventPublishRequestDTO(request, origin);
+		
+	    return eventHandlerService.publishRequest(request);
 	}
 	
 	//=================================================================================================
@@ -165,4 +188,34 @@ public class EventHandlerController {
 										  HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkEventPublishRequestDTO(final EventPublishRequestDTO request, final String origin) {
+		logger.debug("checkEventPublishRequestDTO started ...");
+		
+		if (request == null) {
+			throw new BadPayloadException("Request" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		checkSystemRequestDTO(request.getSource(), origin);
+		
+		if ( Utilities.isEmpty( request.getEventType() )) {
+			throw new BadPayloadException("Request.EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if ( Utilities.isEmpty( request.getTimeStamp() )) {
+			throw new BadPayloadException("Request.TimeStamp" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}	
+		
+		if ( Utilities.isEmpty( request.getPayload() )) {
+			throw new BadPayloadException("Request.Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}		
+		
+		if ( Utilities.isEmpty( request.getDeliveryCompleteUri() )) {
+			throw new BadPayloadException("Request.DeliveryCompleteUri" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		// TODO implement additional method logic here
+		
+	}
+
 }

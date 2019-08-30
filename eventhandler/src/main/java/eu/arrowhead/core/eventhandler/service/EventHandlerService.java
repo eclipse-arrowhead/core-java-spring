@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
 
 @Service
@@ -35,15 +37,23 @@ public class EventHandlerService {
 	public EventFilterResponseDTO subscriptionRequest( final EventFilterRequestDTO request) {
 		logger.debug("subscriptionRequest started ...");
 		
-		// TODO Auto-generated method stub
+		// TODO Implement additional method logic here 
 		return null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO unSubscriptionRequest( final EventFilterRequestDTO request) {
+	public void unSubscriptionRequest( final EventFilterRequestDTO request) {
 		logger.debug("unSubscriptionRequest started ...");
 		
-		// TODO Auto-generated method stub
+		// TODO Implement additional method logic here 
+		return ;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public EventPublishResponseDTO publishRequest(final EventPublishRequestDTO request) {
+		logger.debug("publishRequest started ...");
+				
+		// TODO Implement additional method logic here 
 		return null;
 	}
 }
