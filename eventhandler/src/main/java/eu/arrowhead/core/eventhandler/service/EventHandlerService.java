@@ -32,8 +32,16 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO subscriptionRequest(EventFilterRequestDTO request) {
+	public EventFilterResponseDTO subscriptionRequest( final EventFilterRequestDTO request) {
 		logger.debug("subscriptionRequest started ...");
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public EventFilterResponseDTO unSubscriptionRequest( final EventFilterRequestDTO request) {
+		logger.debug("unSubscriptionRequest started ...");
 		
 		// TODO Auto-generated method stub
 		return null;

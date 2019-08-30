@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,10 @@ public class EventHandlerController {
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Subcribtion to the events specified in requested eventFilter ";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
-
+	private static final String PUT_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Unsubcribtion from the events specified in requested eventFilter ";
+	private static final String PUT_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
+	private static final String PUT_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
+	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
@@ -80,6 +84,24 @@ public class EventHandlerController {
 	    return eventHandlerService.subscriptionRequest(request);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = PUT_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION, response = EventFilterResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PutMapping(path = CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public EventFilterResponseDTO unSubscription(@RequestBody final EventFilterRequestDTO request) {
+		logger.debug("unSubscription started ...");
+		
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION;
+		checkEventFilterRequestDTO(request, origin);
+		
+	    return eventHandlerService.unSubscriptionRequest(request);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -94,11 +116,11 @@ public class EventHandlerController {
 		checkSystemRequestDTO(request.getSubscriberSystem(), origin);
 		
 		if ( Utilities.isEmpty( request.getEventType() )) {
-			throw new BadPayloadException("Request.EventType " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);	
+			throw new BadPayloadException("Request.EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);	
 		}
 		
 		if ( Utilities.isEmpty( request.getNotifyUri() )) {
-			throw new BadPayloadException("Request.NotifyUri " + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);	
+			throw new BadPayloadException("Request.NotifyUri" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);	
 		}
 		
 		if (request.getMatchMetaData() == null) {
@@ -107,15 +129,14 @@ public class EventHandlerController {
 		
 		if ( request.getMatchMetaData() && ( request.getFilterMetaData() == null || request.getFilterMetaData().isEmpty() )) {
 			
-			throw new BadPayloadException("Request.MatchMetaData is true but Request.FilterMetaData " + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Request.MatchMetaData is true but Request.FilterMetaData" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (request.getSources() != null && !request.getSources().isEmpty()) {
 			for (final SystemRequestDTO systemRequestDTO : request.getSources()) {
 				checkSystemRequestDTO(systemRequestDTO, origin);
 			}
-		}
-		
+		}	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
