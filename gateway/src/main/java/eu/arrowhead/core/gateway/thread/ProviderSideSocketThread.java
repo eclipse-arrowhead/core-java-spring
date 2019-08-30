@@ -53,6 +53,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	private InputStream inProvider;
 	private OutputStream outProvider;
 	private boolean interrupted = false;
+	private boolean initialized = false;
 	
 	//=================================================================================================
 	// methods
@@ -82,11 +83,14 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	
 	//-------------------------------------------------------------------------------------------------
 	public void init(final String queueId, final MessageProducer sender) {
+		logger.debug("init started...");
+		
 		Assert.isTrue(!Utilities.isEmpty(queueId), "Queue id is null or blank.");
 		Assert.notNull(sender, "sender is null.");
 		
 		this.queueId = queueId;
 		this.sender = sender;
+		this.initialized = true;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -94,7 +98,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	public void onMessage(final Message message) {
 		logger.debug("onMessage started...");
 		
-		Assert.notNull(outProvider, "output stream is null.");
+		Assert.notNull(outProvider, "Output stream is null.");
 		try {
 			if (isControlMessage(message)) {
 				relayClient.handleCloseControlMessage(message, relaySession);
@@ -124,9 +128,13 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	public void run() {
 		logger.debug("run started...");
 		
-		final SSLContext sslContext = SSLContextFactory.createProviderSideSSLContext(sslProperties);
-		final SSLSocketFactory socketFactory = sslContext.getSocketFactory();
+		if (!initialized) {
+			throw new IllegalStateException("Thread is not initialized.");
+		}
+		
 		try {
+			final SSLContext sslContext = SSLContextFactory.createProviderSideSSLContext(sslProperties);
+			final SSLSocketFactory socketFactory = sslContext.getSocketFactory();
 			sslProviderSocket = (SSLSocket) socketFactory.createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort().intValue());
 			sslProviderSocket.setSoTimeout(timeout);
 			inProvider = sslProviderSocket.getInputStream();
