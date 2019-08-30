@@ -516,6 +516,200 @@ public class EventHandlerControllerTest {
 		Assert.assertNotNull( result );
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishNullEventTypeTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setEventType( null );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType is null or blank."));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishEmptyEventTypeTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setEventType( "   " );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType is null or blank."));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishNulTimeStampTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( null );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.TimeStamp is null or blank."));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishEmptyTimeStampTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "   " );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.TimeStamp is null or blank."));	
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public  void publishInvalidSourceTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		
+		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
+		systemRequestDTO.setSystemName( null );
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( systemRequestDTO );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("System name is null or blank."));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishNullPayloadTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setPayload( null );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.Payload is null or blank."));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishEmptyPayloadTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setPayload( "   " );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.Payload is null or blank."));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishNullDeliveryCompleteUriTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setDeliveryCompleteUri( null );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.DeliveryCompleteUri is null or blank."));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void publishEmptyDeliveryCompleteUriTest() throws Exception {
+		
+		final EventPublishResponseDTO dto = getEventPublishResponseDTO();
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setDeliveryCompleteUri( "   " );
+		
+		when(eventHandlerService.publishRequest(any())).thenReturn( dto );
+		
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_PUBLISH)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( result );
+		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.DeliveryCompleteUri is null or blank."));	
+	}
+	
 	//=================================================================================================
 	//Assistant methods
 
