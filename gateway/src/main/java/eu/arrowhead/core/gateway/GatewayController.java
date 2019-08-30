@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.core.gateway.service.GatewayService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -57,6 +59,9 @@ public class GatewayController {
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
+	
+	@Autowired
+	private GatewayService gatewayService;
 	
 	//=================================================================================================
 	// methods
@@ -114,10 +119,14 @@ public class GatewayController {
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public GatewayProviderConnectionResponseDTO connectProvider(@RequestBody final GatewayProviderConnectionRequestDTO request) {
+		logger.debug("connectProvider started...");
 		
-		//TODO: implement
+		//TODO: request check
 		
-		return new GatewayProviderConnectionResponseDTO();
+		final GatewayProviderConnectionResponseDTO response = gatewayService.connectProvider(request);
+		
+		logger.debug("connectProvider finished...");
+		return response;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
