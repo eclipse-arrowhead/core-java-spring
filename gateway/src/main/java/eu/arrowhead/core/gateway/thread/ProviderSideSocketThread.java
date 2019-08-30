@@ -3,7 +3,6 @@ package eu.arrowhead.core.gateway.thread;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.UnknownHostException;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,6 +10,7 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.net.ssl.SSLContext;
@@ -35,6 +35,8 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	//=================================================================================================
 	// members
 	
+	private static final int BUFFER_SIZE = 1024;
+	
 	private static final Logger logger = LogManager.getLogger(ProviderSideSocketThread.class);
 	
 	private final GatewayRelayClient relayClient;
@@ -46,6 +48,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	private final SSLProperties sslProperties;
 	
 	private String queueId;
+	private MessageProducer sender;
 	private SSLSocket sslProviderSocket;
 	private InputStream inProvider;
 	private OutputStream outProvider;
@@ -78,10 +81,12 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setQueueId(final String queueId) {
+	public void init(final String queueId, final MessageProducer sender) {
 		Assert.isTrue(!Utilities.isEmpty(queueId), "Queue id is null or blank.");
+		Assert.notNull(sender, "sender is null.");
 		
 		this.queueId = queueId;
+		this.sender = sender;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -126,10 +131,28 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 			sslProviderSocket.setSoTimeout(timeout);
 			inProvider = sslProviderSocket.getInputStream();
 			outProvider = sslProviderSocket.getOutputStream();
-			//TODO: continue
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			while (true) {
+				if (interrupted) {
+					close();
+					return;
+				}
+				
+				final byte[] buffer = new byte[BUFFER_SIZE];
+				final int size = inProvider.read(buffer);
+				
+				if (size < 0) { // end of stream
+					close();
+				} else {
+					final byte[] data = new byte[size];
+					System.arraycopy(buffer, 0, data, 0, size);
+					relayClient.sendBytes(relaySession, sender, consumerGatewayPublicKey, data);
+				}
+			}
+		} catch (final IOException | JMSException | ArrowheadException ex) {
+			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			close();
 		}
 	}
 	
