@@ -231,8 +231,13 @@ public class CommonConstants {
 	
 	public static final String GATEWAY_SOCKET_TIMEOUT = "gateway_socket_timeout";
 	public static final String $GATEWAY_SOCKET_TIMEOUT_WD = "${" + GATEWAY_SOCKET_TIMEOUT + ":" + Defaults.DEFAULT_GATEWAY_SOCKET_TIMEOUT + "}";
-
+	public static final String GATEWAY_MIN_PORT = "min_port";
+	public static final String $GATEWAY_MIN_PORT_WD = "${" + GATEWAY_MIN_PORT + ":" + Defaults.DEFAULT_GATEWAY_MIN_PORT + "}";
+	public static final String GATEWAY_MAX_PORT = "max_port";
+	public static final String $GATEWAY_MAX_PORT_WD = "${" + GATEWAY_MAX_PORT + ":" + Defaults.DEFAULT_GATEWAY_MAX_PORT + "}";
+	
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
+	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
 
 	//=================================================================================================
 	// assistant methods

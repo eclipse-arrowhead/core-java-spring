@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.annotation.Resource;
 import javax.jms.JMSException;
@@ -26,12 +27,14 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
 import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
@@ -51,6 +54,9 @@ public class GatewayService {
 	
 	@Resource(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	
+	@Resource(name = CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
+	private ConcurrentLinkedQueue<Integer> availablePorts;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -121,6 +127,32 @@ public class GatewayService {
 			
 			throw ex;
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public int connectConsumer(final GatewayConsumerConnectionRequestDTO request) {
+		logger.debug("connectConsumer started...");
+		
+		//TODO: request check
+		
+		final ZonedDateTime now = ZonedDateTime.now();
+		final Integer serverPort = availablePorts.poll();
+		
+		if (serverPort == null) { // no free port
+			throw new UnavailableServerException("No available gateway port.");
+		}
+		
+		final ActiveSessionDTO activeSession = new ActiveSessionDTO(request.getQueueId(), request.getPeerName(), request.getConsumer(), request.getConsumerCloud(), request.getProvider(), 
+																	request.getProviderCloud(), request.getServiceDefinition(), request.getRelay(), Utilities.convertZonedDateTimeToUTCString(now),
+																	serverPort);
+		activeSessions.put(request.getQueueId(), activeSession);
+		
+		final RelayRequestDTO relay = request.getRelay();
+		final Session session = getRelaySession(relay);
+
+		//TODO: continue
+		
+		return serverPort;
 	}
 
 	//=================================================================================================

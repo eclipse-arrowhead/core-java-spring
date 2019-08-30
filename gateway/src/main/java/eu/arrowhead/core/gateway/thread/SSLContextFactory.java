@@ -36,7 +36,7 @@ public class SSLContextFactory {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public static SSLContext createProviderSideSSLContext(final SSLProperties sslProps) {
+	public static SSLContext createGatewaySSLContext(final SSLProperties sslProps) {
 		logger.debug("createProviderSideSSLContext started...");
 		Assert.notNull(sslProps, "sslProps is null.");
 		
