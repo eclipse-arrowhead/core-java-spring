@@ -258,7 +258,7 @@ public class GatekeeperServiceICNTest {
 		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO(List.of(resultDTO), false));
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO(List.of(resultDTO)));
 		
 		final ICNResultDTO icnResult = testingObject.initICN(form);
 		Assert.assertEquals(1, icnResult.getResponse().size());

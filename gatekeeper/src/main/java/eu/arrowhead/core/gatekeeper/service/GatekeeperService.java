@@ -32,6 +32,7 @@ import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
@@ -244,7 +245,7 @@ public class GatekeeperService {
 		}
 
 		if (!gatewayIsMandatory) {
-			return new ICNProposalResponseDTO(orchestrationResponse.getResponse(), false);
+			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
 		} 
 
 		// gateway is used so we need a relay
@@ -261,9 +262,9 @@ public class GatekeeperService {
 		final GatewayProviderConnectionRequestDTO connectionRequest	= new GatewayProviderConnectionRequestDTO(DTOConverter.convertRelayToRelayRequestDTO(selectedRelay), request.getRequesterSystem(),
 																											  providerSystem, request.getRequesterCloud(), getOwnCloud(),
 																											  request.getRequestedService().getServiceDefinitionRequirement(), gatewayPublicKey);
-		//TODO: continue implementing gateway-related code
+		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
 		
-		return null;
+		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
 	}
 	
 	//=================================================================================================

@@ -39,6 +39,8 @@ import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
@@ -68,6 +70,7 @@ public class GatekeeperDriver {
 	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	private static final String GATEWAY_PUBLIC_KEY_URI_KEY = CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_CONNECT_PROVIDER_URI_KEY = CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
 	
 	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
@@ -244,6 +247,18 @@ public class GatekeeperDriver {
 		return response.getBody();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public GatewayProviderConnectionResponseDTO connectProvider(final GatewayProviderConnectionRequestDTO request) {
+		logger.debug("connectProvider started...");
+
+		// TODO: check request (assert)
+		
+		final UriComponents connectProviderUri = getGatewayConnectProviderUri();
+		final ResponseEntity<GatewayProviderConnectionResponseDTO> response = httpService.sendRequest(connectProviderUri, HttpMethod.POST, GatewayProviderConnectionResponseDTO.class, request);
+		
+		return response.getBody();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -323,6 +338,21 @@ public class GatekeeperDriver {
 		}
 		
 		throw new ArrowheadException("Gatekeeper can't find gateway public key URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatewayConnectProviderUri() {
+		logger.debug("getGatewayConnectProviderUri started...");
+		
+		if (arrowheadContext.containsKey(GATEWAY_CONNECT_PROVIDER_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEWAY_CONNECT_PROVIDER_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find gateway connect provider URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find gateway connect provider URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
