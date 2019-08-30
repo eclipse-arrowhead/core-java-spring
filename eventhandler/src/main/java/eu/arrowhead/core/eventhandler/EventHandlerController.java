@@ -11,18 +11,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.Utilities.ValidatedPageParams;
+import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.EventFilterListResponseDTO;
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -37,6 +42,15 @@ public class EventHandlerController {
 	//=================================================================================================
 	// members
 	
+	private static final String PATH_VARIABLE_ID = "id";
+
+	private static final String EVENTHANDLER_MGMT_URI =  CommonConstants.MGMT_URI + "/subscriptions";
+	private static final String EVENTHANLER_BY_ID_MGMT_URI = EVENTHANDLER_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	
+	private static final String GET_EVENTHANDLER_MGMT_DESCRIPTION = "Return requested EventFilter entries by the given parameters";
+	private static final String GET_EVENTHANDLER_MGMT_HTTP_200_MESSAGE = "EventFilter entries returned";
+	private static final String GET_EVENTHANDLER_MGMT_HTTP_400_MESSAGE = "Could not retrieve EventFilter entries";
+	
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Subcribtion to the events specified in requested eventFilter ";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
@@ -47,6 +61,7 @@ public class EventHandlerController {
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
+	
 	private static final String POST_EVENTHANDLER_PUBLISH_DESCRIPTION = "Publish event"; //TODO add meaningful description
 	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; //TODO add meaningful description
 	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; //TODO add meaningful description
@@ -55,6 +70,9 @@ public class EventHandlerController {
 	
 	@Autowired
 	EventHandlerService eventHandlerService;
+	
+	@Autowired
+	EventHandlerDBService eventHandlerDBService;
 	
 	//=================================================================================================
 	// methods
@@ -69,6 +87,30 @@ public class EventHandlerController {
 	@GetMapping(path = CommonConstants.ECHO_URI)
 	public String echoService() {
 		return "Got it!";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_EVENTHANDLER_MGMT_DESCRIPTION, response = EventFilterListResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_EVENTHANDLER_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EVENTHANDLER_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = EVENTHANDLER_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public EventFilterListResponseDTO getEventFilters(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New getEventFilters get request recieved with page: {} and item_per page: {}", page, size);
+				
+		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.EVENTHANDLER_URI + EVENTHANDLER_MGMT_URI);
+		final EventFilterListResponseDTO eventFiltersResponse = eventHandlerDBService.getEventHandlersResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+																									validParameters.getValidatedDirecion(), sortField);
+		
+		logger.debug("EventFilters  with page: {} and item_per page: {} retrieved successfully", page, size);
+		return eventFiltersResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

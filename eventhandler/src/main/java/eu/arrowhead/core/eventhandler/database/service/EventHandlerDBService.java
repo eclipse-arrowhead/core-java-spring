@@ -3,11 +3,13 @@ package eu.arrowhead.core.eventhandler.database.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.database.repository.EventFilterRepository;
 import eu.arrowhead.common.database.repository.EventTypeRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.EventFilterListResponseDTO;
 
 @Service
 public class EventHandlerDBService {
@@ -33,10 +35,15 @@ public class EventHandlerDBService {
 	@Autowired
 	private SystemRepository systemRepository;
 
-
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-
+	public EventFilterListResponseDTO getEventHandlersResponse(final int validatedPage, final int validatedSize,
+			final Direction validatedDirecion, final String sortField) {
+		logger.debug("getEventHandlersResponse started ...");
+		
+		// TODO implement additional method logic
+		return null;
+	}
 }
