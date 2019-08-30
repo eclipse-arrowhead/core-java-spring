@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.core.gateway.service.ActiveSession;
+import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 
 @Component
 public class GatewayApplicationInitListener extends ApplicationInitListener {
@@ -17,7 +17,7 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
-	public ConcurrentHashMap<String,ActiveSession> getActiveSessions() {
+	public ConcurrentHashMap<String,ActiveSessionDTO> getActiveSessions() {
 		return new ConcurrentHashMap<>();
 	}
 	

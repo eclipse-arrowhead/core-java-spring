@@ -38,8 +38,6 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	// members
 	
 	private static final String TCP = "tcp";
-	private static final String REQUEST_QUEUE_PREFIX = "REQ-";
-	private static final String RESPONSE_QUEUE_PREFIX = "RESP-";
 	private static final String CLOSE_COMMAND = "CLOSE ";
 	
 	private static final int CLIENT_ID_LENGTH = 16;

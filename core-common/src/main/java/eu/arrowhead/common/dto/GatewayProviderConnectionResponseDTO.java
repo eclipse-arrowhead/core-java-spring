@@ -7,10 +7,11 @@ public class GatewayProviderConnectionResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -4211429949859969009L;
+	private static final long serialVersionUID = -2685072058660027564L;
 	
-	private String queueName;
-	private String controlQueueName;
+	private String queueId;
+	private String peerName;
+	private String providerGWPublicKey;
 	
 	//=================================================================================================
 	// methods
@@ -19,16 +20,19 @@ public class GatewayProviderConnectionResponseDTO implements Serializable {
 	public GatewayProviderConnectionResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public GatewayProviderConnectionResponseDTO(final String queueName, final String controlQueueName) {
-		this.queueName = queueName;
-		this.controlQueueName = controlQueueName;
+	public GatewayProviderConnectionResponseDTO(final String queueId, final String peerName, final String providerGWPublicKey) {
+		this.queueId = queueId;
+		this.peerName = peerName;
+		this.providerGWPublicKey = providerGWPublicKey;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public String getQueueName() { return queueName; }
-	public String getControlQueueName() { return controlQueueName; }
+	public String getQueueId() { return queueId; }
+	public String getPeerName() { return peerName; }
+	public String getProviderGWPublicKey() { return providerGWPublicKey; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setQueueName(final String queueName) { this.queueName = queueName; }
-	public void setControlQueueName(final String controlQueueName) { this.controlQueueName = controlQueueName; }		
+	public void setQueueId(final String queueId) { this.queueId = queueId; }
+	public void setPeerName(final String peerName) { this.peerName = peerName; }
+	public void setProviderGWPublicKey(final String providerGWPublicKey) { this.providerGWPublicKey = providerGWPublicKey; }
 }

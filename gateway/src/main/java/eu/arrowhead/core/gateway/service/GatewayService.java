@@ -4,15 +4,20 @@ import java.security.InvalidParameterException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -29,6 +34,8 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
+import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
+import eu.arrowhead.core.gateway.thread.ProviderSideSocketThread;
 
 @Component
 public class GatewayService {
@@ -37,10 +44,16 @@ public class GatewayService {
 	// members
 	
 	@Value(CommonConstants.$GATEWAY_SOCKET_TIMEOUT_WD)
-	private long gatewaySocketTimeout;
+	private int gatewaySocketTimeout;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
+	
+	@Resource(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
+	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	
+	@Autowired
+	private ApplicationContext appContext;
 	
 	private final Logger logger = LogManager.getLogger(GatewayService.class);
 	
@@ -84,19 +97,30 @@ public class GatewayService {
 		final RelayRequestDTO relay = request.getRelay();
 		final Session session = getRelaySession(relay);
 		
+		ProviderSideSocketThread thread = null;
 		try {
-			//TODO: create thread
-			relayClient.initializeProviderSideRelay(session, null);
-			//TODO: create active session
-			//TODO: start thread
+			thread = new ProviderSideSocketThread(appContext, relayClient, session, request, gatewaySocketTimeout);
+			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, thread);
+			thread.init(info.getQueueId(), info.getMessageSender());
+			final ActiveSessionDTO activeSession = new ActiveSessionDTO(info.getQueueId(), info.getPeerName(), request.getConsumer(), request.getConsumerCloud(), request.getProvider(),
+																		request.getProviderCloud(), request.getServiceDefinition(), request.getRelay(), Utilities.convertZonedDateTimeToUTCString(now),
+																		null);
+			activeSessions.put(info.getQueueId(), activeSession);
+			thread.start();
 			
-			//TODO: implement
-		} catch (final Throwable t) {
-			//TODO: handle exceptions
+			return new GatewayProviderConnectionResponseDTO(info.getQueueId(), info.getPeerName(), Base64.getEncoder().encodeToString(myPublicKey.getEncoded()));
+		} catch (final JMSException ex) {
 			relayClient.closeConnection(session);
+			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
+		} catch (final ArrowheadException ex) {
+			relayClient.closeConnection(session);
+			
+			if (thread != null && thread.isInitialized()) {
+				thread.setInterrupted(true);
+			}
+			
+			throw ex;
 		}
-		
-		return null;
 	}
 
 	//=================================================================================================

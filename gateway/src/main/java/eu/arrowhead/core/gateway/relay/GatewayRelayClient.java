@@ -15,6 +15,8 @@ public interface GatewayRelayClient extends RelayClient {
 	//=================================================================================================
 	// members
 	
+	public static final String REQUEST_QUEUE_PREFIX = "REQ-";
+	public static final String RESPONSE_QUEUE_PREFIX = "RESP-";
 	public static final String CONTROL_QUEUE_SUFFIX = "-CONTROL";
 
 	//=================================================================================================

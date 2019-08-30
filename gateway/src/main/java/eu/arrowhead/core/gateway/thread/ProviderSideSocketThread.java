@@ -28,7 +28,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
-import eu.arrowhead.core.gateway.service.ActiveSession;
+import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 
 public class ProviderSideSocketThread extends Thread implements MessageListener {
 	
@@ -44,7 +44,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	private final GatewayProviderConnectionRequestDTO connectionRequest;
 	private final PublicKey consumerGatewayPublicKey;
 	private final int timeout;
-	private final ConcurrentHashMap<String,ActiveSession> activeSessions;
+	private final ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
 	private final SSLProperties sslProperties;
 	
 	private String queueId;
@@ -92,6 +92,11 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		this.sender = sender;
 		this.initialized = true;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public boolean isInitialized() {
+		return initialized;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -102,7 +107,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		try {
 			if (isControlMessage(message)) {
 				relayClient.handleCloseControlMessage(message, relaySession);
-				close();
+				closeAndInterrupt();
 			} else {
 				final byte[] bytes = relayClient.getBytesFromMessage(message, consumerGatewayPublicKey);
 				outProvider.write(bytes);
@@ -110,7 +115,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		} catch (final JMSException | ArrowheadException | IOException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
-			close();
+			closeAndInterrupt();
 		}
 	}
 	
@@ -122,6 +127,9 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		super.interrupt();
 		interrupted = true;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setInterrupted(final boolean interrupted) { this.interrupted = interrupted; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -150,7 +158,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 				final int size = inProvider.read(buffer);
 				
 				if (size < 0) { // end of stream
-					close();
+					closeAndInterrupt();
 				} else {
 					final byte[] data = new byte[size];
 					System.arraycopy(buffer, 0, data, 0, size);
@@ -160,7 +168,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		} catch (final IOException | JMSException | ArrowheadException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
-			close();
+			closeAndInterrupt();
 		}
 	}
 	
@@ -211,7 +219,11 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		}
 		
 		relayClient.closeConnection(relaySession);
-		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void closeAndInterrupt() {
+		close();
 		interrupt();
 	}
 }
