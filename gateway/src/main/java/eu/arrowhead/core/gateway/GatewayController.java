@@ -1,5 +1,6 @@
 package eu.arrowhead.core.gateway;
 
+import java.security.InvalidParameterException;
 import java.security.PublicKey;
 import java.util.Base64;
 import java.util.Map;
@@ -24,10 +25,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gateway.service.GatewayService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -121,7 +128,7 @@ public class GatewayController {
 	@ResponseBody public GatewayProviderConnectionResponseDTO connectProvider(@RequestBody final GatewayProviderConnectionRequestDTO request) {
 		logger.debug("connectProvider started...");
 		
-		//TODO: request check
+		validateProviderConnectionRequest(request, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI);
 		
 		final GatewayProviderConnectionResponseDTO response = gatewayService.connectProvider(request);
 		
@@ -142,7 +149,7 @@ public class GatewayController {
 	@ResponseBody public Integer connectConsumer(@RequestBody final GatewayConsumerConnectionRequestDTO request) {
 		logger.debug("connectConsumer started...");
 
-		//TODO: request check
+		validateConsumerConnectionRequest(request, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI);
 
 		final int serverPort = gatewayService.connectConsumer(request);
 		
@@ -170,5 +177,133 @@ public class GatewayController {
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 		
 		return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateProviderConnectionRequest(final GatewayProviderConnectionRequestDTO request, final String origin) {
+		logger.debug("validateProviderConnectionRequest started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("request is null.");
+		}
+		
+		validateRelay(request.getRelay(), origin);
+		validateSystem(request.getConsumer(), origin);
+		validateSystem(request.getProvider(), origin);
+		validateCloud(request.getConsumerCloud(), origin);
+		validateCloud(request.getProviderCloud(), origin);
+		
+		if (Utilities.isEmpty(request.getServiceDefinition())) {
+			throw new InvalidParameterException("Service definition is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getConsumerGWPublicKey())) {
+			throw new InvalidParameterException("Consumer gateway public key is null or blank.");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateConsumerConnectionRequest(final GatewayConsumerConnectionRequestDTO request, final String origin) {
+		logger.debug("validateConsumerConnectionRequest started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("request is null.");
+		}
+		
+		validateRelay(request.getRelay(), origin);
+		validateSystem(request.getConsumer(), origin);
+		validateSystem(request.getProvider(), origin);
+		validateCloud(request.getConsumerCloud(), origin);
+		validateCloud(request.getProviderCloud(), origin);
+		
+		if (Utilities.isEmpty(request.getServiceDefinition())) {
+			throw new InvalidParameterException("Service definition is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getProviderGWPublicKey())) {
+			throw new InvalidParameterException("Provider gateway public key is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getQueueId())) {
+			throw new InvalidParameterException("Queue id is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getPeerName())) {
+			throw new InvalidParameterException("Peer name is null or blank.");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateRelay(final RelayRequestDTO relay, final String origin) {
+		logger.debug("validateRelay started...");
+		
+		if (relay == null) {
+			throw new BadPayloadException("Relay is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+			
+		if (Utilities.isEmpty(relay.getAddress())) {
+			throw new BadPayloadException("Relay address is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (relay.getPort() == null) {
+			throw new BadPayloadException("Relay port is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final int validatedPort = relay.getPort().intValue();
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(relay.getType())) {
+			throw new BadPayloadException("Relay type is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final RelayType type = Utilities.convertStringToRelayType(relay.getType());
+		if (type == null || type == RelayType.GATEKEEPER_RELAY) {
+			throw new BadPayloadException("Relay type is invalid", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateSystem(final SystemRequestDTO system, final String origin) {
+		logger.debug("validateSystem started...");
+		
+		if (system == null) {
+			throw new BadPayloadException("System is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(system.getSystemName())) {
+			throw new BadPayloadException("System name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(system.getAddress())) {
+			throw new BadPayloadException("System address is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (system.getPort() == null) {
+			throw new BadPayloadException("System port is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final int validatedPort = system.getPort().intValue();
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloud(final CloudRequestDTO cloud, final String origin) {
+		logger.debug("validateCloud started...");
+		
+		if (cloud == null) {
+			throw new BadPayloadException("Cloud is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(cloud.getOperator())) {
+			throw new BadPayloadException("Cloud operator is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(cloud.getName())) {
+			throw new BadPayloadException("Cloud name is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
 	}
 }

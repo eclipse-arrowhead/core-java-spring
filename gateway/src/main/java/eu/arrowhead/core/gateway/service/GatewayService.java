@@ -135,7 +135,7 @@ public class GatewayService {
 	public int connectConsumer(final GatewayConsumerConnectionRequestDTO request) {
 		logger.debug("connectConsumer started...");
 		
-		//TODO: request check
+		validateConsumerConnectionRequest(request);
 		
 		final ZonedDateTime now = ZonedDateTime.now();
 		final Integer serverPort = availablePorts.poll();
@@ -198,6 +198,37 @@ public class GatewayService {
 		
 		if (Utilities.isEmpty(request.getConsumerGWPublicKey())) {
 			throw new InvalidParameterException("Consumer gateway public key is null or blank.");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateConsumerConnectionRequest(final GatewayConsumerConnectionRequestDTO request) {
+		logger.debug("validateConsumerConnectionRequest started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("request is null.");
+		}
+		
+		validateRelay(request.getRelay());
+		validateSystem(request.getConsumer());
+		validateSystem(request.getProvider());
+		validateCloud(request.getConsumerCloud());
+		validateCloud(request.getProviderCloud());
+		
+		if (Utilities.isEmpty(request.getServiceDefinition())) {
+			throw new InvalidParameterException("Service definition is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getProviderGWPublicKey())) {
+			throw new InvalidParameterException("Provider gateway public key is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getQueueId())) {
+			throw new InvalidParameterException("Queue id is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getPeerName())) {
+			throw new InvalidParameterException("Peer name is null or blank.");
 		}
 	}
 	

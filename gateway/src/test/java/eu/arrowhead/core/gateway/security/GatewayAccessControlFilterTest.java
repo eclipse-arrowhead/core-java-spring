@@ -120,7 +120,6 @@ public class GatewayAccessControlFilterTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO: fix this test isBadRequest
 	@Test
 	public void testConnectProviderCertificateGatekeeper() throws Exception {
 		this.mockMvc.perform(post(GATEWAY_CONNECT_PROVIDER_URI)
@@ -129,7 +128,7 @@ public class GatewayAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(createGatewayProviderConnectionRequestDTO()))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isCreated());
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -145,7 +144,6 @@ public class GatewayAccessControlFilterTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	//TODO: fix this test isBadRequest
 	@Test
 	public void testConnectConsumerCertificateGatekeeper() throws Exception {
 		this.mockMvc.perform(post(GATEWAY_CONNECT_CONSUMER_URI)
@@ -154,7 +152,7 @@ public class GatewayAccessControlFilterTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(createGatewayConsumerConnectionRequestDTO()))
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isCreated());
+					.andExpect(status().isBadRequest()); //Bad request result means that the request gone through the filter
 	}
 	
 	//-------------------------------------------------------------------------------------------------

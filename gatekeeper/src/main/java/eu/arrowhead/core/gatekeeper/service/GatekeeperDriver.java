@@ -48,17 +48,20 @@ import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
@@ -253,7 +256,14 @@ public class GatekeeperDriver {
 	public GatewayProviderConnectionResponseDTO connectProvider(final GatewayProviderConnectionRequestDTO request) {
 		logger.debug("connectProvider started...");
 
-		// TODO: check request (assert)
+		Assert.notNull(request, "request is null.");
+		validateRelay(request.getRelay());
+		validateSystem(request.getConsumer());
+		validateSystem(request.getProvider());
+		validateCloud(request.getConsumerCloud());
+		validateCloud(request.getProviderCloud());
+		Assert.isTrue(!Utilities.isEmpty(request.getServiceDefinition()), "service definition is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getConsumerGWPublicKey()), "consumer gateway public key is null or blank.");
 		
 		final UriComponents connectProviderUri = getGatewayConnectProviderUri();
 		final ResponseEntity<GatewayProviderConnectionResponseDTO> response = httpService.sendRequest(connectProviderUri, HttpMethod.POST, GatewayProviderConnectionResponseDTO.class, request);
@@ -265,7 +275,16 @@ public class GatekeeperDriver {
 	public int connectConsumer(final GatewayConsumerConnectionRequestDTO request) {
 		logger.debug("connectConsumer started...");
 
-		// TODO: check request (assert)
+		Assert.notNull(request, "request is null.");
+		validateRelay(request.getRelay());
+		validateSystem(request.getConsumer());
+		validateSystem(request.getProvider());
+		validateCloud(request.getConsumerCloud());
+		validateCloud(request.getProviderCloud());
+		Assert.isTrue(!Utilities.isEmpty(request.getServiceDefinition()), "service definition is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getProviderGWPublicKey()), "provider gateway public key is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getQueueId()), "queue id is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getPeerName()), "peer name is null or blank.");
 		
 		final UriComponents connectConsumerUri = getGatewayConnectConsumerUri();
 		final ResponseEntity<Integer> response = httpService.sendRequest(connectConsumerUri, HttpMethod.POST, Integer.class, request);
@@ -443,5 +462,49 @@ public class GatekeeperDriver {
 
 		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
 																					   e -> e.getIdList()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateRelay(final RelayRequestDTO relay) {
+		logger.debug("validateRelay started...");
+		
+		Assert.notNull(relay, "relay is null.");
+		Assert.isTrue(!Utilities.isEmpty(relay.getAddress()), "relay address is null or blank");
+		Assert.notNull(relay.getPort(), "relay port is null");
+		validateSystemPortRange(relay.getPort());
+		Assert.isTrue(!Utilities.isEmpty(relay.getType()), "relay type is null or blank");
+		final RelayType relayType = Utilities.convertStringToRelayType(relay.getType());
+		if (relayType == null || relayType == RelayType.GATEKEEPER_RELAY) {
+			throw new IllegalArgumentException("Relay type is invalid");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateSystem(final SystemRequestDTO system) {
+		logger.debug("validateSystem started...");
+		
+		Assert.notNull(system, "system is null");
+		Assert.isTrue(!Utilities.isEmpty(system.getSystemName()), "system name is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(system.getAddress()), "system address is null or blank");
+		Assert.notNull(system.getPort(), "system port is null");
+		validateSystemPortRange(system.getPort());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloud(final CloudRequestDTO cloud) {
+		logger.debug("validateCloud started...");
+		
+		Assert.notNull(cloud, "Cloud is null");
+		Assert.isTrue(!Utilities.isEmpty(cloud.getOperator()), "cloud operator is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(cloud.getName()), "cloud name is null or blank");		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateSystemPortRange(final int port) {
+		logger.debug("validateSystemPortRange started...");
+		
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new IllegalArgumentException("port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		}
 	}
 }
