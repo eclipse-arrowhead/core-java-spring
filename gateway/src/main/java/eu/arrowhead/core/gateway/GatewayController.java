@@ -3,7 +3,9 @@ package eu.arrowhead.core.gateway;
 import java.security.InvalidParameterException;
 import java.security.PublicKey;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -35,6 +37,7 @@ import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.service.GatewayService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -63,6 +66,9 @@ public class GatewayController {
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
+	
+	@Resource(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
+	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions; 
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
@@ -100,19 +106,18 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return active Gateway sessions", response = Object.class)
+	@ApiOperation(value = "Return active Gateway sessions", response = ActiveSessionDTO.class)
 	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = GET_ACTIVE_SESSIONS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ACTIVE_SESSIONS_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ACTIVE_SESSIONS_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = ACTIVE_SESSIONS_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public Object getActiveSessions() {
+	@ResponseBody public List<ActiveSessionDTO> getActiveSessions() {
+		logger.debug("getActiveSessions started...");
 		
-		//TODO: implement
-		
-		return null;
+		return List.copyOf(activeSessions.values());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
