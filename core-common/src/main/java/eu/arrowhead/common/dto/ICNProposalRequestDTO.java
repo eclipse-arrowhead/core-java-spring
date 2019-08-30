@@ -21,6 +21,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	private List<RelayRequestDTO> preferredGatewayRelays = new ArrayList<>();
 	private OrchestrationFlags negotiationFlags = new OrchestrationFlags();
 	private boolean gatewayIsPresent = false;
+	private String consumerGatewayPublicKey;
 	
 	//=================================================================================================
 	// methods
@@ -68,12 +69,14 @@ public class ICNProposalRequestDTO implements Serializable {
 	public List<RelayRequestDTO> getKnownGatewayRelays() { return knownGatewayRelays; }
 	public OrchestrationFlags getNegotiationFlags() { return negotiationFlags; }
 	public boolean getGatewayIsPresent() { return gatewayIsPresent; }
+	public String getConsumerGatewayPublicKey() { return consumerGatewayPublicKey; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
 	public void setRequesterSystem(final SystemRequestDTO requesterSystem) { this.requesterSystem = requesterSystem; }
 	public void setGatewayIsPresent(final boolean gatewayIsPresent) { this.gatewayIsPresent = gatewayIsPresent; }
+	public void setConsumerGatewayPublicKey(String consumerGatewayPublicKey) { this.consumerGatewayPublicKey = consumerGatewayPublicKey; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setPreferredSystems(final List<SystemRequestDTO> preferredSystems) {

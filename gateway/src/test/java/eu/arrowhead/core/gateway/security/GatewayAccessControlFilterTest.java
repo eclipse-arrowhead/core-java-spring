@@ -120,6 +120,7 @@ public class GatewayAccessControlFilterTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO: fix this test isBadRequest
 	@Test
 	public void testConnectProviderCertificateGatekeeper() throws Exception {
 		this.mockMvc.perform(post(GATEWAY_CONNECT_PROVIDER_URI)
@@ -144,6 +145,7 @@ public class GatewayAccessControlFilterTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	//TODO: fix this test isBadRequest
 	@Test
 	public void testConnectConsumerCertificateGatekeeper() throws Exception {
 		this.mockMvc.perform(post(GATEWAY_CONNECT_CONSUMER_URI)
@@ -177,6 +179,7 @@ public class GatewayAccessControlFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private GatewayConsumerConnectionRequestDTO createGatewayConsumerConnectionRequestDTO() {
-		return new GatewayConsumerConnectionRequestDTO(new RelayRequestDTO(), "xy", "xy_control", new SystemRequestDTO(), new SystemRequestDTO(), new CloudRequestDTO(), new CloudRequestDTO(), "test-service", true, 30000, "");
+		return new GatewayConsumerConnectionRequestDTO(new RelayRequestDTO(), "queueId", "peerName", "key", new SystemRequestDTO(), new SystemRequestDTO(), new CloudRequestDTO(),
+													   new CloudRequestDTO(), "test-service");
 	}
 }

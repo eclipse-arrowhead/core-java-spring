@@ -488,6 +488,13 @@ public class DTOConverter {
 		return cloudRequestDTO;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayRequestDTO convertRelayResponseDTOToRelayRequestDTO(final RelayResponseDTO response) {
+		Assert.notNull(response, "Relay response is null.");
+		
+		return new RelayRequestDTO(response.getAddress(), response.getPort(), response.isSecure(), response.isExclusive(), response.getType().name());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	

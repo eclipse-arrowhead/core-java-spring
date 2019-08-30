@@ -31,6 +31,7 @@ import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
@@ -50,6 +51,7 @@ import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingParameters;
@@ -202,17 +204,47 @@ public class GatekeeperService {
 		final List<RelayRequestDTO> knownRelays = getKnownRelays();
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
 																		 knownRelays, form.getNegotiationFlags(), gatewayIsPresent);
+		String consumerGWPublicKey = null;
+		if (gatewayIsPresent) {
+			consumerGWPublicKey = gatekeeperDriver.queryGatewayPublicKey();
+			proposal.setConsumerGatewayPublicKey(consumerGWPublicKey);
+		}
 		
 		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
 		
+		if (icnResponse.getResponse().isEmpty()) {
+			return new ICNResultDTO();
+		}
+ 		
 		if (!icnResponse.isUseGateway()) {
 			// just send back the response
 			return new ICNResultDTO(icnResponse.getResponse());
 		}
 		
-		//TODO: gateway-related code
-		
-		return null;
+		final OrchestrationResultDTO result = icnResponse.getResponse().get(0);
+		final GatewayConsumerConnectionRequestDTO connectionRequest = new GatewayConsumerConnectionRequestDTO(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(icnResponse.getRelay()),
+																											  icnResponse.getConnectionInfo().getQueueId(), 
+																											  icnResponse.getConnectionInfo().getPeerName(),
+																											  icnResponse.getConnectionInfo().getProviderGWPublicKey(), form.getRequesterSystem(),
+																											  DTOConverter.convertSystemResponseDTOToSystemRequestDTO(result.getProvider()) ,
+																											  requesterCloud, getCloudRequestDTO(targetCloud),
+																											  form.getRequestedService().getServiceDefinitionRequirement());
+		try {
+			final int serverPort = gatekeeperDriver.connectConsumer(connectionRequest);
+			
+			// change provider in result to make sure consumer will connect via the gateway
+			result.getProvider().setSystemName(CoreSystem.GATEWAY.name().toLowerCase());
+			result.getProvider().setAddress(gatekeeperDriver.getGatewayHost());
+			result.getProvider().setPort(serverPort);
+			result.getProvider().setAuthenticationInfo(consumerGWPublicKey);
+			
+			return new ICNResultDTO(List.of(result));
+		} catch (final UnavailableServerException ex) {
+			logger.error("Error while connect to consumer via gateway: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			
+			return new ICNResultDTO();
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -256,12 +288,12 @@ public class GatekeeperService {
 		
 		// in gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider
 		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
-		final String gatewayPublicKey = gatekeeperDriver.queryGatewayPublicKey();
 		
 		final SystemRequestDTO providerSystem = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(selectedResult.getProvider());
 		final GatewayProviderConnectionRequestDTO connectionRequest	= new GatewayProviderConnectionRequestDTO(DTOConverter.convertRelayToRelayRequestDTO(selectedRelay), request.getRequesterSystem(),
 																											  providerSystem, request.getRequesterCloud(), getOwnCloud(),
-																											  request.getRequestedService().getServiceDefinitionRequirement(), gatewayPublicKey);
+																											  request.getRequestedService().getServiceDefinitionRequirement(), 
+																											  request.getConsumerGatewayPublicKey());
 		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
 		
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
@@ -460,13 +492,21 @@ public class GatekeeperService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private CloudRequestDTO getOwnCloud() {
-		logger.debug("getRequesterCloud started...");
+		logger.debug("getOwnCloud started...");
 		
 		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
+		return getCloudRequestDTO(ownCloud);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getCloudRequestDTO(final Cloud cloud) {
+		logger.debug("getCloudRequestDTO started...");
+		Assert.notNull(cloud, "cloud is null.");
+		
 		final CloudRequestDTO result = new CloudRequestDTO();
-		result.setOperator(ownCloud.getOperator());
-		result.setName(ownCloud.getName());
-		result.setAuthenticationInfo(ownCloud.getAuthenticationInfo());
+		result.setOperator(cloud.getOperator());
+		result.setName(cloud.getName());
+		result.setAuthenticationInfo(cloud.getAuthenticationInfo());
 		
 		return result;
 	}
