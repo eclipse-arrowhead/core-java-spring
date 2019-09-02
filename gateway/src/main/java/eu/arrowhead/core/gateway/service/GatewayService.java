@@ -23,6 +23,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -36,6 +37,7 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
+import eu.arrowhead.core.gateway.relay.ControlRelayInfo;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
 import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
@@ -175,6 +177,25 @@ public class GatewayService {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public void closeSession(final ActiveSessionDTO sessionDTO) {
+		logger.debug("closeSession started...");
+		
+		validateCloseSessionRequest(sessionDTO);
+		
+		final Session session = getRelaySession(sessionDTO.getRelay());
+		
+		try {
+			final ControlRelayInfo controlRelayInfo = relayClient.initializeControlRelay(session, sessionDTO.getPeerName(), sessionDTO.getQueueId());
+			relayClient.sendCloseControlMessage(session, controlRelayInfo.getControlRequestMessageSender(), sessionDTO.getQueueId());
+			relayClient.sendCloseControlMessage(session, controlRelayInfo.getControlResponseMessageSender(), sessionDTO.getQueueId());
+		} catch (final JMSException ex) {
+			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
+		} finally {
+			relayClient.closeConnection(session);			
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -230,6 +251,16 @@ public class GatewayService {
 		if (Utilities.isEmpty(request.getPeerName())) {
 			throw new InvalidParameterException("Peer name is null or blank.");
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloseSessionRequest(final ActiveSessionDTO sessionDTO) {
+		logger.debug("validateCloseSessionRequest started...");
+		
+		Assert.notNull(sessionDTO, "ActiveSessionDTO is null.");
+		Assert.isTrue(!Utilities.isEmpty(sessionDTO.getPeerName()), "peerName is null.");
+		Assert.isTrue(!Utilities.isEmpty(sessionDTO.getQueueId()), "queueId is null.");
+		validateRelay(sessionDTO.getRelay());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -25,6 +25,7 @@ public interface GatewayRelayClient extends RelayClient {
 	//-------------------------------------------------------------------------------------------------
 	public ProviderSideRelayInfo initializeProviderSideRelay(final Session session, final MessageListener listener) throws JMSException;
 	public ConsumerSideRelayInfo initializeConsumerSideRelay(final Session session, final MessageListener listener, final String peerName, final String queueId) throws JMSException;
+	public ControlRelayInfo initializeControlRelay(final Session session, final String peerName, final String queueId) throws JMSException;
 	
 	public void sendBytes(final Session session, final MessageProducer sender, final PublicKey peerPublicKey, final byte[] bytes) throws JMSException;
 	public byte[] getBytesFromMessage(final Message msg, final PublicKey peerPublicKey) throws JMSException;
