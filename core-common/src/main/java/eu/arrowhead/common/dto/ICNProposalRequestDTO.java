@@ -57,7 +57,6 @@ public class ICNProposalRequestDTO implements Serializable {
 		if (negotiationFlags != null) {
 			this.negotiationFlags = negotiationFlags;
 		}
-
 	}
 	
 	//-------------------------------------------------------------------------------------------------
