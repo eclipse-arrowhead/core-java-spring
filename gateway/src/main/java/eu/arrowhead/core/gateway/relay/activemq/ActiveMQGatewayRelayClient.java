@@ -29,6 +29,7 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
+import eu.arrowhead.core.gateway.relay.ControlRelayInfo;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
 
@@ -176,6 +177,27 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		return new ConsumerSideRelayInfo(messageSender, controlMessageSender);
 	}
 	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public ControlRelayInfo initializeControlRelay(final Session session, final String peerName, final String queueId) throws JMSException {
+		logger.debug("initializeControlRelay started...");
+		
+		Assert.notNull(session, "session is null.");
+		Assert.isTrue(!Utilities.isEmpty(peerName), "peerName is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(queueId), "queueId is null or blank.");
+		
+		final String requestControlQueueName = REQUEST_QUEUE_PREFIX + peerName + "-" + queueId + CONTROL_QUEUE_SUFFIX;
+		final Queue requestControlQueue = session.createQueue(requestControlQueueName);	
+		final MessageProducer controlRequestMessageSender = session.createProducer(requestControlQueue);
+		
+		final String responsetControlQueueName = RESPONSE_QUEUE_PREFIX + peerName + "-" + queueId + CONTROL_QUEUE_SUFFIX;
+		final Queue responseControlQueue = session.createQueue(responsetControlQueueName);
+		final MessageProducer controlResponseMessageSender = session.createProducer(responseControlQueue);
+		
+		return new ControlRelayInfo(controlRequestMessageSender, controlResponseMessageSender);
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void sendBytes(final Session session, final MessageProducer sender, final PublicKey peerPublicKey, final byte[] bytes) throws JMSException {

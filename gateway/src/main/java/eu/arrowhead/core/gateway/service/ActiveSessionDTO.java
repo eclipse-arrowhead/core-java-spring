@@ -21,6 +21,9 @@ public class ActiveSessionDTO implements Serializable {
 	
 	private static final long serialVersionUID = -7284074955400443451L;
 	
+	private String queueId;
+	private String peerName;
+	
 	private SystemRequestDTO consumer;
 	private CloudRequestDTO consumerCloud;
 	
@@ -51,6 +54,8 @@ public class ActiveSessionDTO implements Serializable {
 		Assert.isTrue(!Utilities.isEmpty(queueId), "queueId is null.");
 		Assert.notNull(relay, "relay is null.");
 		
+		this.queueId = queueId;
+		this.peerName = peerName;
 		this.consumer = consumer;
 		this.consumerCloud = consumerCloud;
 		this.provider = provider;
@@ -67,6 +72,8 @@ public class ActiveSessionDTO implements Serializable {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public String getQueueId() { return queueId; }
+	public String getPeerName() { return peerName; }
 	public SystemRequestDTO getConsumer() { return consumer; }
 	public CloudRequestDTO getConsumerCloud() { return consumerCloud; }
 	public SystemRequestDTO getProvider() { return provider; }
@@ -80,7 +87,9 @@ public class ActiveSessionDTO implements Serializable {
 	public String getSessionStartedAt() { return sessionStartedAt; }
 	public Integer getConsumerServerSocketPort() { return consumerServerSocketPort; }
 
-	//-------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------	
+	public void setQueueId(final String queueId) { this.queueId = queueId; }
+	public void setPeerName(final String peerName) { this.peerName = peerName; }
 	public void setConsumer(final SystemRequestDTO consumer) { this.consumer = consumer; }
 	public void setConsumerCloud(final CloudRequestDTO consumerCloud) { this.consumerCloud = consumerCloud; }
 	public void setProvider(final SystemRequestDTO provider) { this.provider = provider; }
@@ -92,5 +101,5 @@ public class ActiveSessionDTO implements Serializable {
 	public void setResponseQueue(final String responseQueue) { this.responseQueue = responseQueue; }
 	public void setResponseControlQueue(final String responseControlQueue) { this.responseControlQueue = responseControlQueue; }
 	public void setSessionStartedAt(final String sessionStartedAt) { this.sessionStartedAt = sessionStartedAt; }
-	public void setConsumerServerSocketPort(final Integer consumerServerSocketPort) { this.consumerServerSocketPort = consumerServerSocketPort; }
+	public void setConsumerServerSocketPort(final Integer consumerServerSocketPort) { this.consumerServerSocketPort = consumerServerSocketPort; }	
 }
