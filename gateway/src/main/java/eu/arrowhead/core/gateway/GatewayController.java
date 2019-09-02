@@ -2,6 +2,9 @@ package eu.arrowhead.core.gateway;
 
 import java.security.InvalidParameterException;
 import java.security.PublicKey;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.Utilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
@@ -38,6 +43,7 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
+import eu.arrowhead.core.gateway.service.ActiveSessionListDTO;
 import eu.arrowhead.core.gateway.service.GatewayService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -106,7 +112,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return active Gateway sessions", response = ActiveSessionDTO.class)
+	@ApiOperation(value = "Return active Gateway sessions", response = ActiveSessionListDTO.class)
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ACTIVE_SESSIONS_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ACTIVE_SESSIONS_HTTP_400_MESSAGE),
@@ -114,10 +120,31 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = ACTIVE_SESSIONS_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public List<ActiveSessionDTO> getActiveSessions() {
+	@ResponseBody public ActiveSessionListDTO getActiveSessions(
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size) {
 		logger.debug("getActiveSessions started...");
 		
-		return List.copyOf(activeSessions.values());
+		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, "ASC", CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
+		final List<ActiveSessionDTO> sessionList = new ArrayList<>(activeSessions.size());
+		sessionList.addAll(activeSessions.values());
+		sessionList.sort((s1, s2) -> createLocalDatefromStringDateTime(s1.getSessionStartedAt()).compareTo(createLocalDatefromStringDateTime(s2.getSessionStartedAt())));
+		
+		final ActiveSessionListDTO response = new ActiveSessionListDTO(sessionList, sessionList.size());
+		if (validParameters.getValidatedPage() >= 0 && validParameters.getValidatedSize() >= 1) {			
+			final int start = validParameters.getValidatedPage() * validParameters.getValidatedSize();
+			final int end = start + validParameters.getValidatedSize() > sessionList .size() ? sessionList .size() : start + validParameters.getValidatedSize();	
+			response.setData(sessionList.subList(start, end));
+		} else if (validParameters.getValidatedPage() == -1 && validParameters.getValidatedSize() == -1) {
+			//Do nothing
+		} else {
+			throw new BadPayloadException("Page parameter has to be equals or greater than zero and size parameter has to be equals or greater than one.",
+					HttpStatus.SC_BAD_REQUEST, CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);			
+		}
+		
+		logger.debug("getActiveSessions finished...");
+		return response;
+		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -310,5 +337,14 @@ public class GatewayController {
 		if (Utilities.isEmpty(cloud.getName())) {
 			throw new BadPayloadException("Cloud name is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
+	}
+	
+	///-------------------------------------------------------------------------------------------------
+	private ZonedDateTime createLocalDatefromStringDateTime(final String dateTime) {
+		final String[] dateTimeSplit = dateTime.split(" ");
+		final String[] date = dateTimeSplit[0].split("-");
+		final String[] time = dateTimeSplit[1].split(":");
+		return ZonedDateTime.of(Integer.valueOf(date[0]), Integer.valueOf(date[1]), Integer.valueOf(date[2]), Integer.valueOf(time[0]), Integer.valueOf(time[1]), Integer.valueOf(time[2]), 0,
+								ZoneOffset.UTC);
 	}
 }
