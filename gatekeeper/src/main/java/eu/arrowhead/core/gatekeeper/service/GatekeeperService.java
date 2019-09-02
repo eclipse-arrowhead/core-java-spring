@@ -398,11 +398,11 @@ public class GatekeeperService {
 		}
 		
 		if (request.getRequestedService() == null) {
-			throw new InvalidParameterException("Requested service is null");
+			throw new InvalidParameterException("Requested service is null.");
 		}
 		
 		if (Utilities.isEmpty(request.getRequestedService().getServiceDefinitionRequirement())) {
-			throw new InvalidParameterException("Requested service definition is null or blank");
+			throw new InvalidParameterException("Requested service definition is null or blank.");
 		}
 		
 		validateSystemRequest(request.getRequesterSystem());
@@ -414,6 +414,14 @@ public class GatekeeperService {
 		
 		for (final RelayRequestDTO preferredRelay : request.getPreferredGatewayRelays()) {
 			validateRelayRequest(preferredRelay);
+		}
+		
+		for (final RelayRequestDTO knownRelay : request.getKnownGatewayRelays()) {
+			validateRelayRequest(knownRelay);
+		}
+		
+		if (gatewayIsMandatory && Utilities.isEmpty(request.getConsumerGatewayPublicKey())) {
+			throw new InvalidParameterException("Consumer gateway public key is null or blank.");
 		}
 	}
 
