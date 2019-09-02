@@ -46,6 +46,7 @@ import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;
 import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
+import eu.arrowhead.core.gateway.relay.ControlRelayInfo;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
 import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
 
@@ -194,6 +195,45 @@ public class ActiveMQGatewayRelayClientTest {
 		final ConsumerSideRelayInfo result = testObject.initializeConsumerSideRelay(getTestSession(), getTestMessageListener(), "gateway.testcloud1.aitia.arrowhead.eu", "12sfsdfsdfasddasd234");
 		Assert.assertNotNull(result);
 		Assert.assertNotNull(result.getMessageSender());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitializeControlRelaySessionNull() throws JMSException {
+		testObject.initializeControlRelay(null, "gateway.testcloud1.aitia.arrowhead.eu", "12sfsdfsdfasddasd234");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitializeControlRelayPeerNameNull() throws JMSException {
+		testObject.initializeControlRelay(getTestSession(), null, "12sfsdfsdfasddasd234");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitializeControlRelayPeerNameEmpty() throws JMSException {
+		testObject.initializeControlRelay(getTestSession(), "", "12sfsdfsdfasddasd234");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitializeControlRelayQueueIdNull() throws JMSException {
+		testObject.initializeControlRelay(getTestSession(), "gateway.testcloud1.aitia.arrowhead.eu", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitializeControlRelayQueueIdBlank() throws JMSException {
+		testObject.initializeControlRelay(getTestSession(), "gateway.testcloud1.aitia.arrowhead.eu", "   ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitializeControlRelayOk() throws JMSException {
+		final ControlRelayInfo result = testObject.initializeControlRelay(getTestSession(), "gateway.testcloud1.aitia.arrowhead.eu", "12sfsdfsdfasddasd234");
+		Assert.assertNotNull(result);
+		Assert.assertNotNull(result.getControlRequestMessageSender());
+		Assert.assertNotNull(result.getControlResponseMessageSender());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
