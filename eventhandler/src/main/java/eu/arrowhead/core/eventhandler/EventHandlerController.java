@@ -21,8 +21,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.Utilities.ValidatedPageParams;
-import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
-import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.EventFilterListResponseDTO;
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
