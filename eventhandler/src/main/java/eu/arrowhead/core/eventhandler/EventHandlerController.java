@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,6 +58,14 @@ public class EventHandlerController {
 	private static final String GET_EVENTHANDLER_BY_ID_MGMT_HTTP_200_MESSAGE = "EventFilter entriy returned";
 	private static final String GET_EVENTHANDLER_BY_ID_MGMT_HTTP_400_MESSAGE = "Could not retrieve EventFilter entry";
 	
+	private static final String DELETE_EVENTHANDLER_MGMT_DESCRIPTION = "Delete requested EventFilter entry by the given id";
+	private static final String DELETE_EVENTHANDLER_MGMT_HTTP_200_MESSAGE = "EventFilter entriy deleted";
+	private static final String DELETE_EVENTHANDLER_MGMT_HTTP_400_MESSAGE = "Could not delete EventFilter entry";
+	
+	private static final String PUT_EVENTHANDLER_MGMT_DESCRIPTION = "Update requested EventFilter entry by the given id and parameters";
+	private static final String PUT_EVENTHANDLER_MGMT_HTTP_200_MESSAGE = "Updated EventFilter entry returned";
+	private static final String PUT_EVENTHANDLER_MGMT_HTTP_400_MESSAGE = "Could not update EventFilter entry";	
+	
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Subcribtion to the events specified in requested eventFilter ";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
@@ -71,7 +80,7 @@ public class EventHandlerController {
 	private static final String POST_EVENTHANDLER_PUBLISH_DESCRIPTION = "Publish event"; //TODO add meaningful description
 	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; //TODO add meaningful description
 	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; //TODO add meaningful description
-	
+
 	private final Logger logger = LogManager.getLogger(EventHandlerController.class);
 	
 	@Autowired
@@ -112,7 +121,7 @@ public class EventHandlerController {
 		logger.debug("New getEventFilters get request recieved with page: {} and item_per page: {}", page, size);
 				
 		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.EVENTHANDLER_URI + EVENTHANDLER_MGMT_URI);
-		final EventFilterListResponseDTO eventFiltersResponse = eventHandlerDBService.getEventHandlersResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+		final EventFilterListResponseDTO eventFiltersResponse = eventHandlerDBService.getEventHandlersRequest(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																									validParameters.getValidatedDirecion(), sortField);
 		
 		logger.debug("EventFilters  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -131,16 +140,68 @@ public class EventHandlerController {
 	@ResponseBody public EventFilterResponseDTO getEventFilterById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New getEventFilterById get request recieved with id: {}", id);
 		
-		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION;
+		final String origin = CommonConstants.EVENTHANDLER_URI + EVENTHANLER_BY_ID_MGMT_URI;
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final EventFilterResponseDTO eventFilterResponse = eventHandlerDBService.getEventFilterByIdResponse(id);
+		final EventFilterResponseDTO eventFilterResponse = eventHandlerDBService.getEventFilterByIdRequest(id);
 		
 		logger.debug("EventFilter entry with id: {} successfully retrieved", id);
 		
 		return eventFilterResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = DELETE_EVENTHANDLER_MGMT_DESCRIPTION)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EVENTHANDLER_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EVENTHANDLER_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = EVENTHANLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public void deleteEventFilter(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New deleteEventFilter delete request recieved with id: {}", id);
+		
+		final String origin = CommonConstants.EVENTHANDLER_URI + EVENTHANLER_BY_ID_MGMT_URI;
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		eventHandlerDBService.deleteEventFilterRequest(id);
+		
+		logger.debug("EventFilter entry with id: {} successfully deleted", id);
+		
+		return;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = PUT_EVENTHANDLER_MGMT_DESCRIPTION, response = EventFilterResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_EVENTHANDLER_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_EVENTHANDLER_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PutMapping(path = EVENTHANLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public EventFilterResponseDTO updateEventFilter(
+			@PathVariable(value = PATH_VARIABLE_ID) final long id,
+			@RequestBody final EventFilterRequestDTO request) {
+		logger.debug("New updateEventFilter put request recieved with id: {}", id);
+		
+		final String origin = CommonConstants.EVENTHANDLER_URI + EVENTHANLER_BY_ID_MGMT_URI;
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		checkEventFilterRequestDTO(request, origin);
+		
+		final EventFilterResponseDTO response = eventHandlerDBService.updateEventFilterRequest(id);
+		
+		logger.debug("EventFilter entry with id: {} successfully updated", id);
+		
+		return response;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

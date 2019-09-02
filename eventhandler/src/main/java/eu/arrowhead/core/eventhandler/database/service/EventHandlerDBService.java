@@ -40,17 +40,33 @@ public class EventHandlerDBService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterListResponseDTO getEventHandlersResponse(final int validatedPage, final int validatedSize,
+	public EventFilterListResponseDTO getEventHandlersRequest(final int validatedPage, final int validatedSize,
 			final Direction validatedDirecion, final String sortField) {
-		logger.debug("getEventHandlersResponse started ...");
+		logger.debug("getEventHandlersRequest started ...");
 		
 		// TODO implement additional method logic
 		return null;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO getEventFilterByIdResponse(final long id) {
-		logger.debug("getEventFilterByIdResponse started ...");
+	public EventFilterResponseDTO getEventFilterByIdRequest(final long id) {
+		logger.debug("getEventFilterByIdRequest started ...");
+		
+		// TODO implement additional method logic
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void deleteEventFilterRequest(final long id) {
+		logger.debug("deleteEventFilterRequest started ...");
+		
+		// TODO implement additional method logic
+		return;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public EventFilterResponseDTO updateEventFilterRequest(final long id) {
+		logger.debug("updateEventFilterRequest started ...");
 		
 		// TODO implement additional method logic
 		return null;
