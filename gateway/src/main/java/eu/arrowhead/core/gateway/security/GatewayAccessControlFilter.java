@@ -32,7 +32,8 @@ public class GatewayAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.contains(CommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else {
+		} else if (requestTarget.endsWith(CommonConstants.OP_GATEWAY_KEY_URI) || requestTarget.endsWith(CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI)
+				   || requestTarget.endsWith(CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI)) {
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForChecks, requestTarget);
 		}
 	}
