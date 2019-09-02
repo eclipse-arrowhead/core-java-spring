@@ -55,6 +55,12 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customInit(final ContextRefreshedEvent event) {
+		logger.debug("customInit started...");
+
+		if (!sslProperties.isSslEnabled()) {
+			throw new ServiceConfigurationError("Gateway can only started in SECURE mode!");
+		}
+		
 		if (minPort > maxPort) {
 			throw new ServiceConfigurationError("Available port interval is invalid: [" + minPort + " - " + maxPort + "]");
 		}

@@ -5,11 +5,29 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.Serializable;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
 
+import javax.jms.BytesMessage;
+import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
+import javax.jms.Queue;
+import javax.jms.QueueBrowser;
+import javax.jms.Session;
+import javax.jms.StreamMessage;
+import javax.jms.TemporaryQueue;
+import javax.jms.TemporaryTopic;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,6 +35,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -42,6 +62,9 @@ public class GatewayServiceTest {
 	@Mock
 	private Map<String,Object> arrowheadContext;
 	
+	@Spy
+	private ApplicationContext appContext;
+	
 	private GatewayRelayClient relayClient;
 
 	//=================================================================================================
@@ -52,6 +75,7 @@ public class GatewayServiceTest {
 	public void setUp() {
 		relayClient = mock(GatewayRelayClient.class, "relayClient");
 		ReflectionTestUtils.setField(testingObject, "relayClient", relayClient);
+		ReflectionTestUtils.setField(testingObject, "gatewaySocketTimeout", 60000);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -406,6 +430,17 @@ public class GatewayServiceTest {
 		testingObject.connectProvider(request);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testConnectProviderOtherRelayIssue() throws JMSException {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenThrow(new JMSException("test"));
+		
+		testingObject.connectProvider(request);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -429,8 +464,53 @@ public class GatewayServiceTest {
 		providerCloud.setName("testcloud2");
 		providerCloud.setOperator("elte");
 		
-		return new GatewayProviderConnectionRequestDTO(relay, consumer, provider, consumerCloud, providerCloud, "test-service", "consumerGWPublicKey");
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
+		
+		return new GatewayProviderConnectionRequestDTO(relay, consumer, provider, consumerCloud, providerCloud, "test-service", publicKey);
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private Session getTestSession() {
+		return new Session() {
 
+			//-------------------------------------------------------------------------------------------------
+			public void close() throws JMSException {}
+			public Queue createQueue(final String queueName) throws JMSException { return null;	}
+			public Topic createTopic(final String topicName) throws JMSException { return null;	}
+			public MessageConsumer createConsumer(final Destination destination) throws JMSException { return null; }
+			public MessageProducer createProducer(final Destination destination) throws JMSException { return null;	}
+			public TextMessage createTextMessage(final String text) throws JMSException { return null; }
+			public BytesMessage createBytesMessage() throws JMSException { return null; }
+			public MapMessage createMapMessage() throws JMSException { return null; }
+			public Message createMessage() throws JMSException { return null; }
+			public ObjectMessage createObjectMessage() throws JMSException { return null; }
+			public ObjectMessage createObjectMessage(final Serializable object) throws JMSException { return null; }
+			public StreamMessage createStreamMessage() throws JMSException { return null; }
+			public TextMessage createTextMessage() throws JMSException { return null; }
+			public boolean getTransacted() throws JMSException { return false; 	}
+			public int getAcknowledgeMode() throws JMSException { return 0; }
+			public void commit() throws JMSException {}
+			public void rollback() throws JMSException {}
+			public void recover() throws JMSException {}
+			public MessageListener getMessageListener() throws JMSException { return null; }
+			public void setMessageListener(final MessageListener listener) throws JMSException {}
+			public void run() {}
+			public MessageConsumer createConsumer(final Destination destination, final String messageSelector) throws JMSException { return null; }
+			public MessageConsumer createConsumer(final Destination destination, final String messageSelector, final boolean noLocal) throws JMSException { return null; }
+			public MessageConsumer createSharedConsumer(final Topic topic, final String sharedSubscriptionName) throws JMSException { return null; }
+			public MessageConsumer createSharedConsumer(final Topic topic, final String sharedSubscriptionName, final String messageSelector) throws JMSException { return null; }
+			public TopicSubscriber createDurableSubscriber(final Topic topic, final String name) throws JMSException { return null; }
+			public TopicSubscriber createDurableSubscriber(final Topic topic, final String name, final String messageSelector, final boolean noLocal) throws JMSException { return null; }
+			public MessageConsumer createDurableConsumer(final Topic topic, final String name) throws JMSException { return null; }
+			public MessageConsumer createDurableConsumer(final Topic topic, final String name, final String messageSelector, final boolean noLocal) throws JMSException { return null; }
+			public MessageConsumer createSharedDurableConsumer(final Topic topic, final String name) throws JMSException { return null; }
+			public MessageConsumer createSharedDurableConsumer(final Topic topic, final String name, final String messageSelector) throws JMSException { return null;	}
+			public QueueBrowser createBrowser(final Queue queue) throws JMSException { return null; }
+			public QueueBrowser createBrowser(final Queue queue, final String messageSelector) throws JMSException { return null; }
+			public TemporaryQueue createTemporaryQueue() throws JMSException { return null; }
+			public TemporaryTopic createTemporaryTopic() throws JMSException { return null;	}
+			public void unsubscribe(final String name) throws JMSException {}
+
+		};
+	}
 }
