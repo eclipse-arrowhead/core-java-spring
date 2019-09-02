@@ -195,7 +195,7 @@ public class EventHandlerController {
 		
 		checkEventFilterRequestDTO(request, origin);
 		
-		final EventFilterResponseDTO response = eventHandlerDBService.updateEventFilterRequest(id);
+		final EventFilterResponseDTO response = eventHandlerDBService.updateEventFilterRequest(id, request);
 		
 		logger.debug("EventFilter entry with id: {} successfully updated", id);
 		

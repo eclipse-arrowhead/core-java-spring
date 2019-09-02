@@ -19,6 +19,8 @@ import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConne
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
+import eu.arrowhead.common.database.entity.EventFilter;
+import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.Relay;
@@ -469,9 +471,51 @@ public class DTOConverter {
 		return cloudRequestDTO;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static EventFilterResponseDTO convertEventFilterToEventFilterResponseDTO(final EventFilter eventFilter){
+		Assert.notNull(eventFilter, "eventFilter is null");
+		Assert.notNull(eventFilter.getConsumerSystem(), "eventFilter.ConsumerSystem is null" );
+		Assert.notNull(eventFilter.getEventType(), "eventFilter.EventType is null");
+		Assert.notNull(eventFilter.getNotifyUri(), "eventFilter.NotifyUri is null");
+		Assert.notNull(eventFilter.getCreatedAt(), "eventFilter.CreatedAt is null");
+		Assert.notNull(eventFilter.getUpdatedAt(), "eventFilter.UpdatedAt is null");
+		
+		final String startDate = eventFilter.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(eventFilter.getStartDate());
+		final String endDate = eventFilter.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(eventFilter.getEndDate());
+		
+		final Set<SystemResponseDTO> sources = convertEventFilterSourcesToSystemResponseDTOSet(eventFilter.getSources());
+		
+		return new EventFilterResponseDTO(
+				eventFilter.getId(), 
+				convertEventTypeToEventTypeResponseDTO(eventFilter.getEventType()), 
+				convertSystemToSystemResponseDTO(eventFilter.getConsumerSystem()), 
+				Utilities.text2Map(eventFilter.getFilterMetaData()), 
+				eventFilter.getNotifyUri(), 
+				eventFilter.isMatchMetaData(), 
+				startDate, 
+				endDate, 
+				sources, 
+				Utilities.convertZonedDateTimeToUTCString(eventFilter.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(eventFilter.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static EventTypeResponseDTO convertEventTypeToEventTypeResponseDTO(final EventType eventType){
+		Assert.notNull(eventType, "eventType is null");
+		Assert.notNull(eventType.getEventTypeName(), "eventType.EvenTypeName is null" );
+
+		return new EventTypeResponseDTO(
+				eventType.getId(), 
+				eventType.getEventTypeName(),
+				Utilities.convertZonedDateTimeToUTCString(eventType.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(eventType.getUpdatedAt())
+				);
+	}
+	
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private DTOConverter() {
 		throw new UnsupportedOperationException();
@@ -522,5 +566,22 @@ public class DTOConverter {
 		result.sort((dto1, dto2) -> dto1.getInterfaceName().compareToIgnoreCase(dto2.getInterfaceName()));
 		
 		return result;
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	private static Set<SystemResponseDTO> convertEventFilterSourcesToSystemResponseDTOSet(final String sources) {
+		//TODO implement method logic here
+		// or use connection table for registering EventFilter-AllowedEventSourceSystem connections
+		//final Set systemResponseDTOJSONSet = Utilities.fromJson(sources, Set.class);
+		//---
+		//final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet<>();
+		//
+		//for (Object systemResponseDTOJSON : systemResponseDTOJSONSet) {
+		//	
+		//	final SystemResponseDTO systemResponseDTO = Utilities.fromJson(systemResponseDTOJSON.toString(), SystemResponseDTO.class);
+		//}
+		
+		return null;
 	}
 }

@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
@@ -36,9 +37,8 @@ public class EventHandlerService {
 	//-------------------------------------------------------------------------------------------------
 	public EventFilterResponseDTO subscriptionRequest( final EventFilterRequestDTO request) {
 		logger.debug("subscriptionRequest started ...");
-		
-		// TODO Implement additional method logic here 
-		return null;
+				 
+		return DTOConverter.convertEventFilterToEventFilterResponseDTO(eventHandlerDBService.subscription(request));
 	}
 	
 	//-------------------------------------------------------------------------------------------------

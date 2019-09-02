@@ -35,6 +35,7 @@ import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.EventTypeResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;
 
 @RunWith(SpringRunner.class)
@@ -761,7 +762,7 @@ public class EventHandlerControllerTest {
 		return new EventFilterResponseDTO(
 				1L, 
 				getEventType(), 
-				getSystemRequestDTO(),//subscriberSystem, 
+				getSystemResponseDTO(),//subscriberSystem, 
 				null, //filterMetaData, 
 				"notifyUri", 
 				false, //matchMetaData, 
@@ -792,6 +793,17 @@ public class EventHandlerControllerTest {
 		systemRequestDTO.setPort(12345);	
 		
 		return systemRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private SystemResponseDTO getSystemResponseDTO() {
+		
+		final SystemResponseDTO systemResponseDTO = new SystemResponseDTO();
+		systemResponseDTO.setSystemName("systemName");
+		systemResponseDTO.setAddress("localhost");
+		systemResponseDTO.setPort(12345);	
+		
+		return systemResponseDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------		

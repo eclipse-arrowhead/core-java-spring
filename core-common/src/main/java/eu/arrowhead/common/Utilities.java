@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.ServiceConfigurationError;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.naming.InvalidNameException;
@@ -468,6 +469,13 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static String getDatetimePattern() { return dateTimePattern; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public static String convertSetToText(final Set<String> set) { 
+		
+		return toJson(set); 
+	}
+	
 	
 	//=================================================================================================
 	// assistant methods

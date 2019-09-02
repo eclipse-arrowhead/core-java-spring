@@ -1,16 +1,22 @@
 package eu.arrowhead.core.eventhandler.database.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import eu.arrowhead.common.database.entity.EventFilter;
 import eu.arrowhead.common.database.repository.EventFilterRepository;
 import eu.arrowhead.common.database.repository.EventTypeRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.EventFilterListResponseDTO;
+import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 
 @Service
 public class EventHandlerDBService {
@@ -65,10 +71,38 @@ public class EventHandlerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO updateEventFilterRequest(final long id) {
+	public EventFilterResponseDTO updateEventFilterRequest(final long id, final EventFilterRequestDTO eventFilterRequestDTO) {
 		logger.debug("updateEventFilterRequest started ...");
 		
 		// TODO implement additional method logic
+		return null;
+	}	
+
+	//-------------------------------------------------------------------------------------------------
+	public EventFilter subscription(final EventFilterRequestDTO eventFilterRequestDTO) {
+		logger.debug("subscription started ...");
+		
+		final EventFilter validEventFilter = validateEventFilterRequestDTO(eventFilterRequestDTO);		
+		
+		return eventFilterRepository.saveAndFlush(validEventFilter);
+
+	}
+	
+	//=================================================================================================
+	//Assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private EventFilter validateEventFilterRequestDTO(final EventFilterRequestDTO eventFilterRequestDTO) {
+		logger.debug("validateEventFilterRequestDTO started ...");
+		
+		final EventFilter eventFilter = new EventFilter();
+		
+		final Set<String> systemResponseDTOJsonSet = new HashSet();
+		for (final SystemRequestDTO systemRequestDTO : eventFilterRequestDTO.getSources()) {
+			//TODO checkIf system is valid and is in db, then convert to system response then convert to Json then add to SET
+		}
+		// TODO implement additional method logic
+		
 		return null;
 	}
 }
