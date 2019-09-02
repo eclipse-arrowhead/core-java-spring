@@ -1,6 +1,5 @@
 package eu.arrowhead.core.gateway.service;
 
-import java.security.InvalidParameterException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.ZonedDateTime;
@@ -34,6 +33,7 @@ import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
