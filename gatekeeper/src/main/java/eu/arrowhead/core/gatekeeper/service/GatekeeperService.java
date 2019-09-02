@@ -221,7 +221,8 @@ public class GatekeeperService {
 			return new ICNResultDTO(icnResponse.getResponse());
 		}
 		
-		final OrchestrationResultDTO result = icnResponse.getResponse().get(0);
+		// initializing gateway connection
+		final OrchestrationResultDTO result = icnResponse.getResponse().get(0); // in gateway mode there is only one result in the response object
 		final GatewayConsumerConnectionRequestDTO connectionRequest = new GatewayConsumerConnectionRequestDTO(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(icnResponse.getRelay()),
 																											  icnResponse.getConnectionInfo().getQueueId(), 
 																											  icnResponse.getConnectionInfo().getPeerName(),

@@ -18,9 +18,12 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
@@ -29,9 +32,11 @@ import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.RelayResponseDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
@@ -240,6 +245,31 @@ public class GatekeeperServiceICNTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testInitICNEverythingOKButNoResult() {
+		final ICNRequestFormDTO form = new ICNRequestFormDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		form.setRequestedService(requestedService);
+		form.setTargetCloudId(1L);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		form.setRequesterSystem(system);
+		
+		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
+		targetCloud.setGatewayRelays(Set.of());
+		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
+		
+		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
+		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
+		
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO());
+		
+		final ICNResultDTO icnResult = testingObject.initICN(form);
+		Assert.assertEquals(0, icnResult.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testInitICNEverythingOKWithoutGateway() {
 		final ICNRequestFormDTO form = new ICNRequestFormDTO();
 		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
@@ -265,7 +295,41 @@ public class GatekeeperServiceICNTest {
 		Assert.assertEquals(resultDTO, icnResult.getResponse().get(0));
 	}
 	
-	//TODO: additional test cases here (when using gateway)
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitICNEverythingOKWithGateway() {
+		final ICNRequestFormDTO form = new ICNRequestFormDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		form.setRequestedService(requestedService);
+		form.setTargetCloudId(1L);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		form.setRequesterSystem(system);
+		
+		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
+		targetCloud.setGatewayRelays(Set.of());
+		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
+		
+		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
+		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
+		
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO());
+		RelayResponseDTO relay = new RelayResponseDTO();
+		relay.setType(RelayType.GATEWAY_RELAY);
+		final ICNProposalResponseDTO icnResponse = new ICNProposalResponseDTO(resultDTO, relay, new GatewayProviderConnectionResponseDTO());
+		
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(icnResponse);
+		when(gatekeeperDriver.connectConsumer(any(GatewayConsumerConnectionRequestDTO.class))).thenReturn(33333);
+		when(gatekeeperDriver.getGatewayHost()).thenReturn("127.0.0.1");
+		
+		final ICNResultDTO icnResult = testingObject.initICN(form);
+		Assert.assertEquals(1, icnResult.getResponse().size());
+		Assert.assertEquals(CoreSystem.GATEWAY.name().toLowerCase(), icnResponse.getResponse().get(0).getProvider().getSystemName());
+		Assert.assertEquals("127.0.0.1", icnResponse.getResponse().get(0).getProvider().getAddress());
+		Assert.assertEquals(33333, icnResponse.getResponse().get(0).getProvider().getPort());
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
