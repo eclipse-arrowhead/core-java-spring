@@ -163,8 +163,8 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CLOSE_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void closeActiveSession(@RequestBody final ActiveSessionDTO request) {
+	@PostMapping(path = CLOSE_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public void closeActiveSession(@RequestBody final ActiveSessionDTO request) {
 		logger.debug("closeSession started...");
 		
 		validateActiveSessionDTO(request, CommonConstants.GATEWAY_URI + CLOSE_SESSION_MGMT_URI);		
