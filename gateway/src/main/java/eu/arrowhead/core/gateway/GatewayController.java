@@ -130,6 +130,10 @@ public class GatewayController {
 		logger.debug("getActiveSessions started...");
 		
 		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, "ASC", CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
+		if (activeSessions.isEmpty()) {
+			return new ActiveSessionListDTO(List.of(), 0);
+		}
+		
 		final List<ActiveSessionDTO> sessionList = new ArrayList<>(activeSessions.size());
 		sessionList.addAll(activeSessions.values());
 		sessionList.sort((s1, s2) -> createZonedDateTimeFromStringDateTime(s1.getSessionStartedAt()).compareTo(createZonedDateTimeFromStringDateTime(s2.getSessionStartedAt())));
