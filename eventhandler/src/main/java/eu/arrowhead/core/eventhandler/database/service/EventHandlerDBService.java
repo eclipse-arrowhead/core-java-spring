@@ -10,6 +10,7 @@ import eu.arrowhead.common.database.repository.EventFilterRepository;
 import eu.arrowhead.common.database.repository.EventTypeRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.EventFilterListResponseDTO;
+import eu.arrowhead.common.dto.EventFilterResponseDTO;
 
 @Service
 public class EventHandlerDBService {
@@ -42,6 +43,14 @@ public class EventHandlerDBService {
 	public EventFilterListResponseDTO getEventHandlersResponse(final int validatedPage, final int validatedSize,
 			final Direction validatedDirecion, final String sortField) {
 		logger.debug("getEventHandlersResponse started ...");
+		
+		// TODO implement additional method logic
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public EventFilterResponseDTO getEventFilterByIdResponse(final long id) {
+		logger.debug("getEventFilterByIdResponse started ...");
 		
 		// TODO implement additional method logic
 		return null;

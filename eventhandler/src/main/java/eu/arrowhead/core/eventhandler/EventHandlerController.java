@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.Utilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.EventFilterListResponseDTO;
 import eu.arrowhead.common.dto.EventFilterRequestDTO;
 import eu.arrowhead.common.dto.EventFilterResponseDTO;
@@ -50,6 +52,10 @@ public class EventHandlerController {
 	private static final String GET_EVENTHANDLER_MGMT_DESCRIPTION = "Return requested EventFilter entries by the given parameters";
 	private static final String GET_EVENTHANDLER_MGMT_HTTP_200_MESSAGE = "EventFilter entries returned";
 	private static final String GET_EVENTHANDLER_MGMT_HTTP_400_MESSAGE = "Could not retrieve EventFilter entries";
+	
+	private static final String GET_EVENTHANDLER_BY_ID_MGMT_DESCRIPTION = "Return requested EventFilter entry by the given id";
+	private static final String GET_EVENTHANDLER_BY_ID_MGMT_HTTP_200_MESSAGE = "EventFilter entriy returned";
+	private static final String GET_EVENTHANDLER_BY_ID_MGMT_HTTP_400_MESSAGE = "Could not retrieve EventFilter entry";
 	
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Subcribtion to the events specified in requested eventFilter ";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
@@ -111,6 +117,30 @@ public class EventHandlerController {
 		
 		logger.debug("EventFilters  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return eventFiltersResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_EVENTHANDLER_BY_ID_MGMT_DESCRIPTION, response = EventFilterResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_EVENTHANDLER_BY_ID_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_EVENTHANDLER_BY_ID_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = EVENTHANLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public EventFilterResponseDTO getEventFilterById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New getEventFilterById get request recieved with id: {}", id);
+		
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION;
+		if (id < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final EventFilterResponseDTO eventFilterResponse = eventHandlerDBService.getEventFilterByIdResponse(id);
+		
+		logger.debug("EventFilter entry with id: {} successfully retrieved", id);
+		
+		return eventFilterResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
