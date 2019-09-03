@@ -648,7 +648,7 @@ public class GatekeeperDriverICNTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
-	public void testGetGatewayURIWrongType() {
+	public void testGetGatewayHostURIWrongType() {
 		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(true);
 		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn("not an URI");
 		testingObject.getGatewayHost();
