@@ -408,7 +408,7 @@ public class GatewayController {
 		}
 		
 		if (Utilities.isEmpty(cloud.getName())) {
-			throw new BadPayloadException("Cloud name is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Cloud name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 	
