@@ -46,6 +46,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.CloudRequestDTO;
+import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
@@ -470,7 +471,91 @@ public class GatewayServiceTest {
 		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
 		Assert.assertEquals(key, response.getProviderGWPublicKey());
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerRequestNull() {
+		testingObject.connectConsumer(null);
+	}
+
+	// we skip the relay check tests because it uses the same method than in connectProvider
+	// we skip the consumer check tests because it uses the same method than in connectProvider
+	// we skip the provider check tests because it uses the same method than in connectProvider
+	// we skip the consumer cloud check tests because it uses the same method than in connectProvider
+	// we skip the provider cloud check tests because it uses the same method than in connectProvider
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerServiceDefinitionNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerServiceDefinitionEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("          ");
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerProviderGWPublicKeyNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setProviderGWPublicKey(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerProviderGWPublicKeyEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setProviderGWPublicKey("");
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerQueueIdNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setQueueId(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerQueueIdEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setQueueId("");
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerPeerNameNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setPeerName(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testConnectConsumerPeerNameEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setPeerName("   ");
+		
+		testingObject.connectConsumer(request);
+	}
+
 	//=================================================================================================
 	// assistant methods
 	
@@ -572,5 +657,28 @@ public class GatewayServiceTest {
 			public long getDeliveryDelay() throws JMSException { return 0; }
 			public void close() throws JMSException {}
 		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private GatewayConsumerConnectionRequestDTO getTestGatewayConsumerConnectionRequestDTO() {
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("abc.de");
+		consumer.setPort(22001);
+		consumer.setAuthenticationInfo("consAuth");
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("fgh.de");
+		provider.setPort(22002);
+		provider.setAuthenticationInfo("provAuth");
+		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
+		consumerCloud.setName("testcloud1");
+		consumerCloud.setOperator("aitia");
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("testcloud2");
+		providerCloud.setOperator("elte");
+		
+		return new GatewayConsumerConnectionRequestDTO(relay, "queueId", "peerName", "providerGWPublicKey", consumer, provider, consumerCloud, providerCloud, "test-service");
 	}
 }
