@@ -441,6 +441,158 @@ public class GatewayServiceTest {
 		testingObject.connectProvider(request);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionNullRequest() {
+		testingObject.closeSession(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionNullPeerName() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName(null);
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionBlankPeerName() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("  ");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionNullQueueId() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId(null);
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionBlankQueueId() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("  ");
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionNullRelay() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(null);
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionNullRelayAddress() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO(null, 1000, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionBlankRelayAddress() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("  ", 1000, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionNullRelayPort() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", null, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionRelayPortOutOfRangeMin() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionRelayPortOutOfRangeMax() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, true, "GATEWAY_RELAY"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionRelayNullType() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, null));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCloseSessionRelayInvalidType() {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "invalid"));
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCloseSessionCannotConnectRelay() throws JMSException {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(new JMSException("test"));
+		
+		testingObject.closeSession(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCloseSessionOtherRelayIssue() throws JMSException {
+		final ActiveSessionDTO request = new ActiveSessionDTO();
+		request.setPeerName("test.peer.name");
+		request.setQueueId("test-queue-id");
+		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.initializeControlRelay(any(Session.class), any(String.class), any(String.class))).thenThrow(new JMSException("test"));
+		
+		testingObject.closeSession(request);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	

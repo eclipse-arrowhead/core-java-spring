@@ -257,9 +257,18 @@ public class GatewayService {
 	private void validateCloseSessionRequest(final ActiveSessionDTO sessionDTO) {
 		logger.debug("validateCloseSessionRequest started...");
 		
-		Assert.notNull(sessionDTO, "ActiveSessionDTO is null.");
-		Assert.isTrue(!Utilities.isEmpty(sessionDTO.getPeerName()), "peerName is null.");
-		Assert.isTrue(!Utilities.isEmpty(sessionDTO.getQueueId()), "queueId is null.");
+		if (sessionDTO == null) {
+			throw new InvalidParameterException("ActiveSessionDTO is null.");
+		}
+		
+		if (Utilities.isEmpty(sessionDTO.getPeerName())) {
+			throw new InvalidParameterException("peerName is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(sessionDTO.getQueueId())) {
+			throw new InvalidParameterException("queueId is null or blank.");
+		}
+		
 		validateRelay(sessionDTO.getRelay());
 	}
 	
