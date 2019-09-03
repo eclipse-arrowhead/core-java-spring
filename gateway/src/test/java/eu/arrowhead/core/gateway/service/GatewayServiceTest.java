@@ -11,6 +11,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.jms.BytesMessage;
 import javax.jms.CompletionListener;
@@ -54,6 +55,8 @@ import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.UnavailableServerException;
+import eu.arrowhead.core.gateway.relay.ConsumerSideRelayInfo;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
 
@@ -74,6 +77,9 @@ public class GatewayServiceTest {
 	
 	@Mock
 	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	
+	@Mock
+	private ConcurrentLinkedQueue<Integer> availablePorts;
 	
 	private GatewayRelayClient relayClient;
 
@@ -555,6 +561,54 @@ public class GatewayServiceTest {
 		
 		testingObject.connectConsumer(request);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = UnavailableServerException.class)
+	public void testConnectConsumerNoFreePort() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		when(availablePorts.poll()).thenReturn(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testConnectConsumerCannotConnectRelay() throws JMSException {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		when(availablePorts.poll()).thenReturn(54321);
+		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
+		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(new JMSException("test"));
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testConnectConsumerOtherRelayIssue() throws JMSException {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		when(availablePorts.poll()).thenReturn(54321);
+		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
+		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenThrow(new JMSException("test"));
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerEverythingOK() throws JMSException {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		when(availablePorts.poll()).thenReturn(54321);
+		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
+		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		final MessageProducer producer = getTestMessageProducer();
+		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer));
+		
+		final int serverPort = testingObject.connectConsumer(request);
+		Assert.assertEquals(54321, serverPort);
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -678,7 +732,8 @@ public class GatewayServiceTest {
 		final CloudRequestDTO providerCloud = new CloudRequestDTO();
 		providerCloud.setName("testcloud2");
 		providerCloud.setOperator("elte");
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
 		
-		return new GatewayConsumerConnectionRequestDTO(relay, "queueId", "peerName", "providerGWPublicKey", consumer, provider, consumerCloud, providerCloud, "test-service");
+		return new GatewayConsumerConnectionRequestDTO(relay, "queueId", "peerName", publicKey, consumer, provider, consumerCloud, providerCloud, "test-service");
 	}
 }
