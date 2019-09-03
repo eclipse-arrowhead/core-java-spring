@@ -130,6 +130,10 @@ public class GatewayController {
 		logger.debug("getActiveSessions started...");
 		
 		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, "ASC", CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
+		if (activeSessions.isEmpty()) {
+			return new ActiveSessionListDTO(List.of(), 0);
+		}
+		
 		final List<ActiveSessionDTO> sessionList = new ArrayList<>(activeSessions.size());
 		sessionList.addAll(activeSessions.values());
 		sessionList.sort((s1, s2) -> createZonedDateTimeFromStringDateTime(s1.getSessionStartedAt()).compareTo(createZonedDateTimeFromStringDateTime(s2.getSessionStartedAt())));
@@ -159,8 +163,8 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CLOSE_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void closeActiveSession(@RequestBody final ActiveSessionDTO request) {
+	@PostMapping(path = CLOSE_SESSION_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public void closeActiveSession(@RequestBody final ActiveSessionDTO request) {
 		logger.debug("closeSession started...");
 		
 		validateActiveSessionDTO(request, CommonConstants.GATEWAY_URI + CLOSE_SESSION_MGMT_URI);		

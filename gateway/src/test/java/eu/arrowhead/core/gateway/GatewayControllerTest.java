@@ -126,6 +126,17 @@ public class GatewayControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testGetActiveSessionsWithNoActiveSessions() throws Exception {
+		activeSessions.clear();
+		final MvcResult result = getActiveSessions(status().isOk(), "1", "8");
+		final ActiveSessionListDTO responseBody = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ActiveSessionListDTO.class);
+		
+		Assert.assertEquals(0, responseBody.getData().size());
+		Assert.assertEquals(0, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testGetActiveSessionsWithValidPageAndSizeParameter() throws Exception {
 		final int page = 1;
 		final int size = 5;
