@@ -1,10 +1,14 @@
 package eu.arrowhead.core.gateway.thread;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.BytesMessage;
@@ -27,13 +31,15 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
+import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.command.ActiveMQTextMessage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
@@ -274,6 +280,52 @@ public class ProviderSideSocketThreadTest {
 		Assert.assertTrue(!testingObject.isInitialized());
 		testingObject.init("queueId", getTestMessageProducer());
 		Assert.assertTrue(testingObject.isInitialized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testOnMessageOutProviderNull() {
+		testingObject.onMessage(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageCloseControlMessage() throws JMSException {
+		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
+		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
+		final ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
+		doNothing().when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
+		testingObject.onMessage(message);
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageExceptionThrown() throws JMSException {
+		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
+		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
+		final ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
+		doThrow(new JMSException("test")).when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
+		testingObject.onMessage(message);
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testOnMessageNormalMessage() throws JMSException {
+		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10);
+		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
+		final ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setJMSDestination(new ActiveMQQueue("bla"));
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1});
+		testingObject.onMessage(message);
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(!interrupted);
+		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1}, outputStream.toByteArray());
 	}
 	
 	//=================================================================================================
