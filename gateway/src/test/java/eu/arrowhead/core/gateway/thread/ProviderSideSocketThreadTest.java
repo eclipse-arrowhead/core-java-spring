@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.BytesMessage;
+import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -52,6 +53,8 @@ public class ProviderSideSocketThreadTest {
 	private ApplicationContext appContext;
 	private GatewayRelayClient relayClient;
 	
+	private ProviderSideSocketThread testingObject;
+	
 	//=================================================================================================
 	// methods
 	
@@ -60,6 +63,13 @@ public class ProviderSideSocketThreadTest {
 	public void setUp() {
 		relayClient = mock(GatewayRelayClient.class, "relayClient");
 		appContext = mock(ApplicationContext.class, "appContext");
+		
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
+		when(appContext.getBean(SSLProperties.class)).thenReturn(new SSLProperties());
+		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
+		
+		testingObject = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -237,13 +247,33 @@ public class ProviderSideSocketThreadTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testConstructorOk() {
-		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-		when(appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
-		when(appContext.getBean(SSLProperties.class)).thenReturn(new SSLProperties());
-		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
-		
-		final ProviderSideSocketThread thread = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
-		Assert.assertEquals("provider.test-service", thread.getName());
+		Assert.assertEquals("provider.test-service", testingObject.getName());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitQueueIdNull() {
+		testingObject.init(null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitQueueIdEmpty() {
+		testingObject.init(" ", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitSenderNull() {
+		testingObject.init("queueId", null);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOk() {
+		Assert.assertTrue(!testingObject.isInitialized());
+		testingObject.init("queueId", getTestMessageProducer());
+		Assert.assertTrue(testingObject.isInitialized());
 	}
 	
 	//=================================================================================================
@@ -317,5 +347,35 @@ public class ProviderSideSocketThreadTest {
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
 		
 		return new GatewayProviderConnectionRequestDTO(relay, consumer, provider, consumerCloud, providerCloud, "test-service", publicKey);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MessageProducer getTestMessageProducer() {
+		return new MessageProducer() {
+			
+			//-------------------------------------------------------------------------------------------------
+			public void setTimeToLive(long timeToLive) throws JMSException {}
+			public void setPriority(int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
+			public void setDisableMessageID(boolean value) throws JMSException {}
+			public void setDeliveryMode(int deliveryMode) throws JMSException {	}
+			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message) throws JMSException {}
+			public void send(Message message) throws JMSException {}
+			public long getTimeToLive() throws JMSException { return 0; }
+			public int getPriority() throws JMSException { return 0; }
+			public boolean getDisableMessageTimestamp() throws JMSException { return false;	}
+			public boolean getDisableMessageID() throws JMSException { return false; }
+			public Destination getDestination() throws JMSException { return null; }
+			public int getDeliveryMode() throws JMSException { return 0; }
+			public long getDeliveryDelay() throws JMSException { return 0; }
+			public void close() throws JMSException {}
+		};
 	}
 }
