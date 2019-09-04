@@ -43,6 +43,8 @@ import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
+import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckRequestDTO;
+import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.TokenDataDTO;
@@ -498,6 +500,41 @@ public class AuthorizationController {
 		final AuthorizationIntraCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationIntraCloudRequest(consumer.getSystemName(), consumer.getAddress(), consumer.getPort(),
 																															request.getServiceDefinitionId(), providerIdsWithInterfaceIdsSet);
 		logger.debug("checkAuthorizationIntraCloudRequest has been finished");
+		
+		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Checks whether the subscriber System can recieve events from a list of publisher Systems", response = AuthorizationSubscriptionCheckResponseDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_AUTHORIZATION_INTRA_CLOUD_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_AUTHORIZATION_INTRA_CLOUD_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_AUTH_EVENTHANDLER_CHECK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public AuthorizationSubscriptionCheckResponseDTO checkAuthorizationSubscriptionRequest(@RequestBody final AuthorizationSubscriptionCheckRequestDTO request) {
+		logger.debug("New AuthorizationEventHandler check request recieved");
+		
+		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_EVENTHANDLER_CHECK_URI;
+		final SystemRequestDTO consumer = request.getConsumer();
+		if (consumer == null) {
+			throw new BadPayloadException("Consumer is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		checkSystemRequest(consumer, origin, false);
+		
+		if(request.getPublishers() != null && !request.getPublishers().isEmpty()) {
+			
+			for (final SystemRequestDTO publisher : request.getPublishers()) {
+				
+				checkSystemRequest(publisher, origin, false);
+			}
+		}
+		
+		final AuthorizationSubscriptionCheckResponseDTO response = authorizationDBService.checkAuthorizationSubscriptionRequest(consumer.getSystemName(), consumer.getAddress(), consumer.getPort(),
+																															request.getPublishers());
+		logger.debug("checkAuthorizationEventHandlerRequest has been finished");
 		
 		return response;
 	}

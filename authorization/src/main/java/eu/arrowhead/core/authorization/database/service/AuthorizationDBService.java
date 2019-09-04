@@ -1,6 +1,7 @@
 package eu.arrowhead.core.authorization.database.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -39,8 +40,12 @@ import eu.arrowhead.common.dto.AuthorizationInterCloudResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
 import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
+import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -548,6 +553,45 @@ public class AuthorizationDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public AuthorizationSubscriptionCheckResponseDTO checkAuthorizationSubscriptionRequest(final String consumerName,
+			final String consumerAddress, final Integer consumerPort, final Set<SystemRequestDTO> publishers) {
+		logger.debug("checkAuthorizationSubscriptionRequest started...");
+		
+		try {
+			
+			final System consumer = checkAndGetConsumer(consumerName, consumerAddress, consumerPort);		
+			
+			final List<AuthorizationIntraCloud> authIntraOpt = authorizationIntraCloudRepository.findAllByConsumerSystem(consumer);
+			final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authIntraOpt.size());
+			
+			for (final AuthorizationIntraCloud authorizationIntraCloud : authIntraOpt) {
+				final SystemResponseDTO authorizedPublisher = DTOConverter.convertSystemToSystemResponseDTO(authorizationIntraCloud.getProviderSystem());
+				
+				if (publishers != null && !publishers.isEmpty()) {
+					
+					for (SystemRequestDTO systemRequestDTO : publishers) {
+						
+						if (DTOUtilities.equalsSystemInResponseAndRequest(authorizedPublisher, systemRequestDTO)) {
+							
+							authorizedPublishers.add(authorizedPublisher);
+						}
+					}
+				}else {
+					
+					authorizedPublishers.add(authorizedPublisher);
+				}
+			}			
+			
+			return new AuthorizationSubscriptionCheckResponseDTO(DTOConverter.convertSystemToSystemResponseDTO(consumer), authorizedPublishers );
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -809,4 +853,5 @@ public class AuthorizationDBService {
 			throw new InvalidParameterException("Consumer with name: " + name + ", address: " + address + " and port: " + port + " is not exist in the database.");
 		}
 	}
+
 }

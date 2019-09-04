@@ -256,8 +256,8 @@ CREATE TABLE `event_handler_event` (
   CONSTRAINT `event_provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `eventtype`;
-  CREATE TABLE `eventtype` (
+DROP TABLE IF EXISTS `event_type`;
+  CREATE TABLE `event_type` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `eventtype_name` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -266,13 +266,12 @@ DROP TABLE IF EXISTS `eventtype`;
   UNIQUE KEY `eventtype` (`eventtype_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `event_filter`;
-CREATE TABLE `event_filter` (
+DROP TABLE IF EXISTS `subscription`;
+CREATE TABLE `subscription` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `consumer_system_id` bigint(20) NOT NULL,
   `event_type_id` bigint(20) NOT NULL,
   `match_metadata` int(1) NOT NULL DEFAULT 0,
-  `sources` text,
   `notify_uri` text,
   `metadata` text,
   `start_date` timestamp ,
@@ -281,7 +280,21 @@ CREATE TABLE `event_filter` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `consumer_system` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `event_type` FOREIGN KEY (`event_type_id`) REFERENCES `eventtype` (`id`) ON DELETE CASCADE
+  CONSTRAINT `event_type` FOREIGN KEY (`event_type_id`) REFERENCES `event_type` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `subscription_publisher_connection`;
+CREATE TABLE `subscription_publisher_connection` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `subscription_id` bigint(20) NOT NULL,
+  `system_id` bigint(20) NOT NULL,
+  `authorized` int(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pair` (`subscription_id`,`system_id`),
+  CONSTRAINT `subscription_constraint` FOREIGN KEY (`subscription_id`) REFERENCES `subscription` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `system_constraint` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `event_handler_event_subscriber`;
@@ -434,6 +447,9 @@ DROP USER IF EXISTS 'event_handler'@'localhost';
 CREATE USER IF NOT EXISTS 'event_handler'@'localhost' IDENTIFIED BY 'gRLjXbqu9YwYhfK';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event` TO 'event_handler'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event_subscriber` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`subscription` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`event_type` TO 'event_handler'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`subscription_publisher_connection` TO 'event_handler'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'event_handler'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'localhost';
 
@@ -441,6 +457,9 @@ DROP USER IF EXISTS 'event_handler'@'%';
 CREATE USER IF NOT EXISTS 'event_handler'@'%' IDENTIFIED BY 'gRLjXbqu9YwYhfK';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event` TO 'event_handler'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`event_handler_event_subscriber` TO 'event_handler'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`subscription` TO 'event_handler'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`event_type` TO 'event_handler'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`subscription_publisher_connection` TO 'event_handler'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'event_handler'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'%';
 
