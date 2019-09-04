@@ -562,26 +562,7 @@ public class AuthorizationDBService {
 			
 			final System consumer = checkAndGetConsumer(consumerName, consumerAddress, consumerPort);		
 			
-			final List<AuthorizationIntraCloud> authIntraOpt = authorizationIntraCloudRepository.findAllByConsumerSystem(consumer);
-			final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authIntraOpt.size());
-			
-			for (final AuthorizationIntraCloud authorizationIntraCloud : authIntraOpt) {
-				final SystemResponseDTO authorizedPublisher = DTOConverter.convertSystemToSystemResponseDTO(authorizationIntraCloud.getProviderSystem());
-				
-				if (publishers != null && !publishers.isEmpty()) {
-					
-					for (SystemRequestDTO systemRequestDTO : publishers) {
-						
-						if (DTOUtilities.equalsSystemInResponseAndRequest(authorizedPublisher, systemRequestDTO)) {
-							
-							authorizedPublishers.add(authorizedPublisher);
-						}
-					}
-				}else {
-					
-					authorizedPublishers.add(authorizedPublisher);
-				}
-			}			
+			final Set<SystemResponseDTO> authorizedPublishers = getAuthorizedPublishers(consumer, publishers);
 			
 			return new AuthorizationSubscriptionCheckResponseDTO(DTOConverter.convertSystemToSystemResponseDTO(consumer), authorizedPublishers );
 		} catch (final InvalidParameterException ex) {
@@ -593,8 +574,8 @@ public class AuthorizationDBService {
 	}
 	
 	//=================================================================================================
-	// assistant methods
-	
+	// assistant methods	
+
 	//-------------------------------------------------------------------------------------------------
 	private void checkConstraintsOfAuthorizationIntraCloudTable(final System consumer, final System provider, final ServiceDefinition serviceDefinition) {
 		logger.debug("checkConstraintsOfAuthorizationIntraCloudTable started...");
@@ -854,4 +835,32 @@ public class AuthorizationDBService {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private Set<SystemResponseDTO> getAuthorizedPublishers(final System consumer, final Set<SystemRequestDTO> publishers) {
+		logger.debug("getAuthorizedProviders started...");
+		
+		final List<AuthorizationIntraCloud> authIntraOpt = authorizationIntraCloudRepository.findAllByConsumerSystem(consumer);
+		
+		final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authIntraOpt.size());
+		
+		for (final AuthorizationIntraCloud authorizationIntraCloud : authIntraOpt) {
+			final SystemResponseDTO authorizedPublisher = DTOConverter.convertSystemToSystemResponseDTO(authorizationIntraCloud.getProviderSystem());
+			
+			if (publishers != null && !publishers.isEmpty()) {
+				
+				for (final SystemRequestDTO systemRequestDTO : publishers) {
+					
+					if (DTOUtilities.equalsSystemInResponseAndRequest(authorizedPublisher, systemRequestDTO)) {
+						
+						authorizedPublishers.add(authorizedPublisher);
+					}
+				}
+			}else {
+				
+				authorizedPublishers.add(authorizedPublisher);
+			}
+		}
+		
+		return authorizedPublishers;
+	}
 }
