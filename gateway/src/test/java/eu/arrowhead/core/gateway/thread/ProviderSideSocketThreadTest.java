@@ -436,7 +436,6 @@ public class ProviderSideSocketThreadTest {
 			public TemporaryQueue createTemporaryQueue() throws JMSException { return null; }
 			public TemporaryTopic createTemporaryTopic() throws JMSException { return null;	}
 			public void unsubscribe(final String name) throws JMSException {}
-
 		};
 	}
 	
