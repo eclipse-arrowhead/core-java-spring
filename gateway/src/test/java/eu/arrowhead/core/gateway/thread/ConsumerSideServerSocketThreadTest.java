@@ -5,8 +5,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.jms.BytesMessage;
+import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -25,12 +28,18 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)
@@ -42,6 +51,8 @@ public class ConsumerSideServerSocketThreadTest {
 	private ApplicationContext appContext;
 	private GatewayRelayClient relayClient;
 	
+	private ConsumerSideServerSocketThread testingObject;
+	
 	//=================================================================================================
 	// methods
 	
@@ -50,6 +61,15 @@ public class ConsumerSideServerSocketThreadTest {
 	public void setUp() {
 		relayClient = mock(GatewayRelayClient.class, "relayClient");
 		appContext = mock(ApplicationContext.class, "appContext");
+		
+		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		when(appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
+		when(appContext.getBean(CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE, ConcurrentLinkedQueue.class)).thenReturn(new ConcurrentLinkedQueue<>());
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
+		
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
+
+		testingObject = new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), publicKey, "queueId", 60000, "consumer", "test-service");
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -125,6 +145,20 @@ public class ConsumerSideServerSocketThreadTest {
 		new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), "providerGWPublicKey", "", 60000, "consumer", "");
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitSenderNull() {
+		testingObject.init(null);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOk() {
+		Assert.assertTrue(!testingObject.isInitialized());
+		testingObject.init(getTestMessageProducer());
+		Assert.assertTrue(testingObject.isInitialized());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -170,5 +204,50 @@ public class ConsumerSideServerSocketThreadTest {
 			public TemporaryTopic createTemporaryTopic() throws JMSException { return null;	}
 			public void unsubscribe(final String name) throws JMSException {}
 		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MessageProducer getTestMessageProducer() {
+		return new MessageProducer() {
+			
+			//-------------------------------------------------------------------------------------------------
+			public void setTimeToLive(long timeToLive) throws JMSException {}
+			public void setPriority(int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
+			public void setDisableMessageID(boolean value) throws JMSException {}
+			public void setDeliveryMode(int deliveryMode) throws JMSException {	}
+			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message) throws JMSException {}
+			public void send(Message message) throws JMSException {}
+			public long getTimeToLive() throws JMSException { return 0; }
+			public int getPriority() throws JMSException { return 0; }
+			public boolean getDisableMessageTimestamp() throws JMSException { return false;	}
+			public boolean getDisableMessageID() throws JMSException { return false; }
+			public Destination getDestination() throws JMSException { return null; }
+			public int getDeliveryMode() throws JMSException { return 0; }
+			public long getDeliveryDelay() throws JMSException { return 0; }
+			public void close() throws JMSException {}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLProperties getTestSSLPropertiesForThread() {
+		final SSLProperties sslProps = new SSLProperties();
+		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
+		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
+		final Resource keystore = new ClassPathResource("certificates/gateway.p12");
+		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
+		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
+		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
+		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
+		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+		
+		return sslProps;
 	}
 }
