@@ -330,11 +330,11 @@ public class ProviderSideSocketThreadTest {
 		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla"));
-		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1});
+		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
 		testingObject.onMessage(message);
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(!interrupted);
-		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1}, outputStream.toByteArray());
+		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }, outputStream.toByteArray());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
