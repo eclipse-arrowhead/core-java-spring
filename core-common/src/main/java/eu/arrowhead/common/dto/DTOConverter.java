@@ -20,6 +20,7 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
@@ -483,7 +484,36 @@ public class DTOConverter {
 		final String startDate = subscription.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getStartDate());
 		final String endDate = subscription.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getEndDate());
 		
-		final Set<SystemResponseDTO> sources = convertEventFilterSourcesToSystemResponseDTOSet(subscription.getSources());
+		final Set<SystemResponseDTO> sources = collectPublishersFromSubscription(subscription.getPublisherConnections());
+		
+		return new SubscriptionResponseDTO(
+				subscription.getId(), 
+				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
+				convertSystemToSystemResponseDTO(subscription.getConsumerSystem()), 
+				Utilities.text2Map(subscription.getFilterMetaData()), 
+				subscription.getNotifyUri(), 
+				subscription.isMatchMetaData(), 
+				startDate, 
+				endDate, 
+				sources, 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionResponseDTO convertSubscriptionToOnlyAuthorizedSourcesSubscriptionResponseDTO(final Subscription subscription){
+		Assert.notNull(subscription, "subscription is null");
+		Assert.notNull(subscription.getConsumerSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
+		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
+		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
+		Assert.notNull(subscription.getUpdatedAt(), "subscription.UpdatedAt is null");
+		
+		final String startDate = subscription.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getStartDate());
+		final String endDate = subscription.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getEndDate());
+		
+		final Set<SystemResponseDTO> sources = collectAuthorizedPublishersFromSubscription(subscription.getPublisherConnections());
 		
 		return new SubscriptionResponseDTO(
 				subscription.getId(), 
@@ -570,18 +600,30 @@ public class DTOConverter {
 	
 	
 	//-------------------------------------------------------------------------------------------------
-	private static Set<SystemResponseDTO> convertEventFilterSourcesToSystemResponseDTOSet(final String sources) {
-		//TODO implement method logic here
-		// or use connection table for registering Subscription-AllowedEventSourceSystem connections
-		//final Set systemResponseDTOJSONSet = Utilities.fromJson(sources, Set.class);
-		//---
-		//final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet<>();
-		//
-		//for (Object systemResponseDTOJSON : systemResponseDTOJSONSet) {
-		//	
-		//	final SystemResponseDTO systemResponseDTO = Utilities.fromJson(systemResponseDTOJSON.toString(), SystemResponseDTO.class);
-		//}
+	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
+		final Set<SystemResponseDTO> result = new HashSet<SystemResponseDTO>(connections.size());
 		
-		return null;
+		for (final SubscriptionPublisherConnection conn : connections) {
+			
+			result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
+			
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static Set<SystemResponseDTO> collectAuthorizedPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
+		final Set<SystemResponseDTO> result = new HashSet<SystemResponseDTO>(connections.size());
+		
+		for (final SubscriptionPublisherConnection conn : connections) {
+			
+			if (conn.isAuhtorized()) {
+				result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
+			}
+						
+		}
+		
+		return result;
 	}
 }

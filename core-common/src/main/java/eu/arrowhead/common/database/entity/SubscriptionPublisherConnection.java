@@ -16,8 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subscriptionId", "eventTypeId"}))
-public class SubscriptionEventTypeConnection {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subscriptionId", "systemId"}))
+public class SubscriptionPublisherConnection {
 	//=================================================================================================
 	// members
 	
@@ -30,8 +30,8 @@ public class SubscriptionEventTypeConnection {
 	private Subscription subscriptionEntry;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "eventTypeId", referencedColumnName = "id", nullable = false)
-	private EventType eventType;
+	@JoinColumn(name = "systemId", referencedColumnName = "id", nullable = false)
+	private System system;
 	
 	@Column(nullable = false )
 	private boolean authorized;
@@ -46,12 +46,12 @@ public class SubscriptionEventTypeConnection {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionEventTypeConnection() {}
+	public SubscriptionPublisherConnection() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionEventTypeConnection(final Subscription subscriptionEntry, final EventType eventType) {
+	public SubscriptionPublisherConnection(final Subscription subscriptionEntry, final System system) {
 		this.subscriptionEntry = subscriptionEntry;
-		this.eventType = eventType;
+		this.system = system;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ public class SubscriptionEventTypeConnection {
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public Subscription getSubscriptionEntry() { return subscriptionEntry; }
-	public EventType getEventType() { return eventType; }
+	public System getSystem() { return system; }
 	public boolean isAuhtorized() { return authorized; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
@@ -78,7 +78,7 @@ public class SubscriptionEventTypeConnection {
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setSubscriptionEntry(final Subscription subscriptionEntry) { this.subscriptionEntry = subscriptionEntry; }
-	public void setEventType(final EventType eventType) { this.eventType = eventType; }
+	public void setSystem(final System system) { this.system = system; }
 	public void setAuthorized(final boolean authorized) { this.authorized = authorized; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
@@ -86,9 +86,9 @@ public class SubscriptionEventTypeConnection {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "SubscriptionEventTypeConnection [id = " + id + 
+		return "SubscriptionPublisherConnection [id = " + id + 
 				", subscriptionEntry = " + subscriptionEntry + 
-				", eventType = " + eventType + 
+				", system = " + system + 
 				", authorized = " + authorized + "]";
 	}
 }

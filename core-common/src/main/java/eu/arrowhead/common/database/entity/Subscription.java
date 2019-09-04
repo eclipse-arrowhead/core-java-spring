@@ -1,7 +1,9 @@
 package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +13,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class Subscription {
@@ -33,9 +39,6 @@ public class Subscription {
 	@ManyToOne( fetch = FetchType.EAGER)
 	@JoinColumn( name = "consumerSystemId", referencedColumnName = "id", nullable = false)
 	private System consumerSystem;
-	
-	@Column(nullable = true)
-	private String sources;
 	
 	@Column(nullable = true, columnDefinition = "TEXT")
 	private String filterMetaData;
@@ -58,6 +61,11 @@ public class Subscription {
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
+	@OneToMany(mappedBy = "subscriptionEntry", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Set<SubscriptionPublisherConnection> publisherConnections = new HashSet<>();
+
+	
 	//=================================================================================================
 	// methods
 
@@ -75,9 +83,8 @@ public class Subscription {
 		this.matchMetaData = matchMetaData;
 		this.startDate = startDate;
 		this.endDate = endDate;
-		this.sources = sources;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
@@ -88,6 +95,8 @@ public class Subscription {
 	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() { this.updatedAt = ZonedDateTime.now(); }
+	
+	//-------------------------------------------------------------------------------------------------	
 	public long getId() { return id; }
 	public EventType getEventType() { return eventType;	}
 	public System getConsumerSystem() { return consumerSystem; }
@@ -97,8 +106,8 @@ public class Subscription {
 	public ZonedDateTime getStartDate() { return startDate; }
 	public ZonedDateTime getEndDate() { return endDate; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
-	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public String getSources() { return sources; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }	
+	public Set<SubscriptionPublisherConnection> getPublisherConnections() {	return publisherConnections; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setId( final long id) { this.id = id; }
@@ -111,7 +120,9 @@ public class Subscription {
 	public void setEndDate( final ZonedDateTime endDate) { this.endDate = endDate; }
 	public void setCreatedAt( final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt( final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setSources( final String sources) { this.sources = sources; }
+	public void setPublisherConnections(final Set<SubscriptionPublisherConnection> publisherConnections) {
+		this.publisherConnections = publisherConnections;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
