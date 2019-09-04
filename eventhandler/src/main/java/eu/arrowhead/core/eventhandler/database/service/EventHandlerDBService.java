@@ -1,6 +1,7 @@
 package eu.arrowhead.core.eventhandler.database.service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -9,15 +10,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.database.repository.SubscriptionRepository;
+import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
 import eu.arrowhead.common.database.repository.EventTypeRepository;
+import eu.arrowhead.common.database.repository.SubscriptionPublisherConnectionRepository;
+import eu.arrowhead.common.database.repository.SubscriptionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 @Service
 public class EventHandlerDBService {
@@ -36,6 +47,9 @@ public class EventHandlerDBService {
 	
 	@Autowired
 	private SubscriptionRepository subscriptionRepository;
+	
+	@Autowired
+	private SubscriptionPublisherConnectionRepository subscriptionPublisherConnectionRepository;
 	
 	@Autowired
 	private EventTypeRepository eventTypeRepository;
@@ -78,40 +92,134 @@ public class EventHandlerDBService {
 		// TODO implement additional method logic
 		return null;
 	}	
-
-	//-------------------------------------------------------------------------------------------------
-	public Subscription subscription(final SubscriptionRequestDTO subscriptionFilterRequestDTO) {
-		logger.debug("subscription started ...");
-		
-		final Subscription validSubscription = validateSubscriptionRequestDTO(subscriptionFilterRequestDTO);		
-		
-		return subscriptionRepository.saveAndFlush(validSubscription);
-
-	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Subscription registerSubscription(final SystemRequestDTO subscriber, final SubscriptionRequestDTO request,
-			final boolean onlyPreferred, final Set<SystemResponseDTO> authorizedPublishers) {
-		// TODO Auto-generated method stub
-		return null;
+	public Subscription registerSubscription(final SubscriptionRequestDTO request,
+			final Set<SystemResponseDTO> authorizedPublishers) {
+		logger.debug("registerSubscription started ...");
+		
+		final Subscription subscription = validateSubscriptionRequestDTO(request);
+		try {
+			final Subscription subscriptionEntry = subscriptionRepository.save(subscription);
+			addAndSaveSubscriptionEntryPublisherConnections(subscriptionEntry, request, authorizedPublishers);
+			
+			return subscriptionRepository.saveAndFlush(subscriptionEntry);
+			
+			
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	}
 	
 	//=================================================================================================
 	//Assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private Subscription validateSubscriptionRequestDTO(final SubscriptionRequestDTO subscriptionRequestDTO) {
+	private Subscription validateSubscriptionRequestDTO(final SubscriptionRequestDTO request) {
 		logger.debug("validatesubscriptionRequestDTO started ...");
 		
+		final System validSubscriberSystem = validateSystemRequestDTO(request.getSubscriberSystem());
+		final EventType validEventType = validateEventType(request.getEventType());
+		
 		final Subscription subscription = new Subscription();
+		subscription.setConsumerSystem(validSubscriberSystem);
+		subscription.setEventType(validEventType);
+		subscription.setNotifyUri(request.getNotifyUri());
+		subscription.setFilterMetaData(Utilities.map2Text(request.getFilterMetaData()));
+		subscription.setOnlyPreferred(request.getSources() != null && !request.getSources().isEmpty()); //TODO orginize to method
+		subscription.setMatchMetaData(request.getMatchMetaData());
+		//TODO validate dates by comparing to currentTime and threshold
+		subscription.setStartDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getStartDate()));
+		subscription.setEndDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getEndDate()));
 		
-		final Set<String> systemResponseDTOJsonSet = new HashSet();
-		for (final SystemRequestDTO systemRequestDTO : subscriptionRequestDTO.getSources()) {
-			//TODO checkIf system is valid and is in db, then convert to system response then convert to Json then add to SET
-		}
-		// TODO implement additional method logic
-		
-		return null;
+		return subscription;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private System validateSystemRequestDTO(final SystemRequestDTO systemRequestDTO) {
+		logger.debug("validateSystemRequestDTO started...");
 
+		final String address = systemRequestDTO.getAddress().trim().toLowerCase();
+		final String systemName = systemRequestDTO.getSystemName().trim().toLowerCase();
+		final int port = systemRequestDTO.getPort();
+		
+		final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
+		if (systemOptional.isEmpty()) {
+			throw new InvalidParameterException("System by systemName: " + systemName + ", address: " + address + ", port: " + port + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		return systemOptional.get();
+	}	
+
+	//-------------------------------------------------------------------------------------------------
+	private EventType validateEventType(final String eventType) {
+		logger.debug("validateEventType started...");
+		
+		final String validEventTypeName = eventType.toUpperCase().trim();//TODO create normalizer in Utilities
+		final Optional<EventType> eventTypeOptional = eventTypeRepository.findByEventTypeName( validEventTypeName );
+		if ( eventTypeOptional.isEmpty() ) {
+			
+			return eventTypeRepository.saveAndFlush(new EventType( validEventTypeName ));
+		}
+		
+		return eventTypeOptional.get();
+	}	
+
+	//-------------------------------------------------------------------------------------------------
+	private Set<System> getPreferredPublisherSystems(final Set<SystemRequestDTO> sources) {
+		logger.debug("getPreferredPublisherSystems started...");
+		
+		final Set<System> preferredSystems = new HashSet<>();
+		
+		for (final SystemRequestDTO source : sources) {
+			
+			preferredSystems.add(validateSystemRequestDTO(source));
+		}
+		
+		return preferredSystems;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void addAndSaveSubscriptionEntryPublisherConnections(final Subscription subscriptionEntry,
+			final SubscriptionRequestDTO request, final Set<SystemResponseDTO> authorizedPublishers) {
+		
+		if (subscriptionEntry.isOnlyPreffered()) {
+			
+			final Set<System> preferredPublisherSystems = getPreferredPublisherSystems( request.getSources());
+			
+			for (final System system : preferredPublisherSystems) {
+				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);
+				conn.setAuthorized(false);
+				for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
+					
+					if (DTOUtilities.equalsSystemInResponseAndRequest(systemResponseDTO, DTOConverter.convertSystemToSystemRequestDTO(system))) {
+						conn.setAuthorized(true);
+						break;
+					}
+				}
+				
+				subscriptionEntry.getPublisherConnections().add(conn);
+			}
+		} else {
+			
+			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
+				
+				final System system = new System(
+						systemResponseDTO.getSystemName(), 
+						systemResponseDTO.getAddress(), 
+						systemResponseDTO.getPort(), 
+						systemResponseDTO.getAuthenticationInfo());
+				system.setId(systemResponseDTO.getId());
+						
+				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);
+				conn.setAuthorized(true);
+				
+				subscriptionEntry.getPublisherConnections().add(conn);
+			}
+		}
+		subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
+	
+	}
 }

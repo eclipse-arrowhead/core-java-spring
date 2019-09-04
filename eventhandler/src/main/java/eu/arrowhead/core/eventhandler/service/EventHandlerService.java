@@ -54,13 +54,10 @@ public class EventHandlerService {
 		checkSystemRequestDTO(request.getSubscriberSystem(), true);
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();
 		
-		final boolean onlyPreferred = request.getSources() == null || request.getSources().isEmpty() ?
-				false : true ;
-		
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
 		//final AuthorizationSubscriptionCheckResponseDTO 
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(eventHandlerDBService.registerSubscription(subscriber, request, onlyPreferred, authorizedPublishers));
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(eventHandlerDBService.registerSubscription(request, authorizedPublishers));
 	}
 
 	//-------------------------------------------------------------------------------------------------
