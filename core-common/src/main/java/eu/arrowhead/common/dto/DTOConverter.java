@@ -19,7 +19,7 @@ import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConne
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
-import eu.arrowhead.common.database.entity.EventFilter;
+import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
@@ -472,31 +472,31 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static EventFilterResponseDTO convertEventFilterToEventFilterResponseDTO(final EventFilter eventFilter){
-		Assert.notNull(eventFilter, "eventFilter is null");
-		Assert.notNull(eventFilter.getConsumerSystem(), "eventFilter.ConsumerSystem is null" );
-		Assert.notNull(eventFilter.getEventType(), "eventFilter.EventType is null");
-		Assert.notNull(eventFilter.getNotifyUri(), "eventFilter.NotifyUri is null");
-		Assert.notNull(eventFilter.getCreatedAt(), "eventFilter.CreatedAt is null");
-		Assert.notNull(eventFilter.getUpdatedAt(), "eventFilter.UpdatedAt is null");
+	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription){
+		Assert.notNull(subscription, "subscription is null");
+		Assert.notNull(subscription.getConsumerSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
+		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
+		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
+		Assert.notNull(subscription.getUpdatedAt(), "subscription.UpdatedAt is null");
 		
-		final String startDate = eventFilter.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(eventFilter.getStartDate());
-		final String endDate = eventFilter.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(eventFilter.getEndDate());
+		final String startDate = subscription.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getStartDate());
+		final String endDate = subscription.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getEndDate());
 		
-		final Set<SystemResponseDTO> sources = convertEventFilterSourcesToSystemResponseDTOSet(eventFilter.getSources());
+		final Set<SystemResponseDTO> sources = convertEventFilterSourcesToSystemResponseDTOSet(subscription.getSources());
 		
-		return new EventFilterResponseDTO(
-				eventFilter.getId(), 
-				convertEventTypeToEventTypeResponseDTO(eventFilter.getEventType()), 
-				convertSystemToSystemResponseDTO(eventFilter.getConsumerSystem()), 
-				Utilities.text2Map(eventFilter.getFilterMetaData()), 
-				eventFilter.getNotifyUri(), 
-				eventFilter.isMatchMetaData(), 
+		return new SubscriptionResponseDTO(
+				subscription.getId(), 
+				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
+				convertSystemToSystemResponseDTO(subscription.getConsumerSystem()), 
+				Utilities.text2Map(subscription.getFilterMetaData()), 
+				subscription.getNotifyUri(), 
+				subscription.isMatchMetaData(), 
 				startDate, 
 				endDate, 
 				sources, 
-				Utilities.convertZonedDateTimeToUTCString(eventFilter.getCreatedAt()), 
-				Utilities.convertZonedDateTimeToUTCString(eventFilter.getUpdatedAt())
+				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
 				);
 	}
 	
@@ -572,7 +572,7 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> convertEventFilterSourcesToSystemResponseDTOSet(final String sources) {
 		//TODO implement method logic here
-		// or use connection table for registering EventFilter-AllowedEventSourceSystem connections
+		// or use connection table for registering Subscription-AllowedEventSourceSystem connections
 		//final Set systemResponseDTOJSONSet = Utilities.fromJson(sources, Set.class);
 		//---
 		//final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet<>();

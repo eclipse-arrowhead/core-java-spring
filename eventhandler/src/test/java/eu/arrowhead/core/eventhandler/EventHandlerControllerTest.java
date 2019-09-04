@@ -29,8 +29,9 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.EventFilterRequestDTO;
-import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.SubscriptionResponseDTO;
+import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.EventTypeResponseDTO;
@@ -81,12 +82,12 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionTest() throws Exception {
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getEventFilterRequestDTOForTest()))
+				.content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOForTest()))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
@@ -97,12 +98,12 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullEventTypeTest() throws Exception {
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getEventFilterRequestDTOWithNullEventTypeForTest()))
+				.content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithNullEventTypeForTest()))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
 				.andReturn();
@@ -114,12 +115,12 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithEmptyEventTypeTest() throws Exception {
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.OP_EVENTHANDLER_SUBSCRIPTION)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getEventFilterRequestDTOWithEmptyEventTypeForTest()))
+				.content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithEmptyEventTypeForTest()))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest())
 				.andReturn();
@@ -131,9 +132,9 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullSubscriberSystemTest() throws Exception {
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSubscriberSystem( null );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -152,9 +153,9 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullSubscriberSystemNameTest() throws Exception {
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( null );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -174,9 +175,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithEmptySubscriberSystemNameTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( "   " );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -196,9 +197,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithNullSubscriberSystemAddressTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( null );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -218,9 +219,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithEmptySubscriberSystemAddressTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( "   " );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -240,9 +241,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithNullSubscriberSystemPortTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setPort( null );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -262,9 +263,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithInvalidSubscriberSystemPortTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setPort( -1 );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -284,9 +285,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithNullNotifyUriTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setNotifyUri( null );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -306,9 +307,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithEmptyNotifyUriTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setNotifyUri( "   " );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -328,9 +329,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithNullMatchMetaDataTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setMatchMetaData( null );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -350,9 +351,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithMetaDataTrueButNullFilterMetaDataTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setMatchMetaData( true );
 		request.setFilterMetaData( null );
 		
@@ -373,9 +374,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithMetaDataTrueButEmptyFilterMetaDataTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setMatchMetaData( true );
 		request.setFilterMetaData( new HashMap<String, String>( 0 ) );
 		
@@ -396,9 +397,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithNullSourcesTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( null );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -417,9 +418,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithEmptySourcesTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( Set.of() );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -438,9 +439,9 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithSourcesWithValidSourceTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( Set.of( getSystemRequestDTO() ) );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -459,12 +460,12 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithSourcesWithInValidSourceTest() throws Exception {
 		
-		final EventFilterResponseDTO dto = getEventFilterResponseDTOForTest();
+		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
 		final SystemRequestDTO invalidSource = getSystemRequestDTO();
 		invalidSource.setSystemName( null );
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( Set.of( invalidSource ) );
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
@@ -484,7 +485,7 @@ public class EventHandlerControllerTest {
 	@Test
 	public void unSubscriptionTest() throws Exception {
 		
-		final EventFilterRequestDTO request = getEventFilterRequestDTOForTest();
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		
 		doNothing().when(eventHandlerService).unSubscriptionRequest(any());
 		
@@ -715,9 +716,9 @@ public class EventHandlerControllerTest {
 	//Assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
-	private EventFilterRequestDTO getEventFilterRequestDTOForTest() {
+	private SubscriptionRequestDTO getSubscriptionRequestDTOForTest() {
 		
-		return new EventFilterRequestDTO(
+		return new SubscriptionRequestDTO(
 				"eventType", 
 				getSystemRequestDTO(), 
 				null, //filterMetaData
@@ -729,9 +730,9 @@ public class EventHandlerControllerTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	private EventFilterRequestDTO getEventFilterRequestDTOWithNullEventTypeForTest() {
+	private SubscriptionRequestDTO getSubscriptionRequestDTOWithNullEventTypeForTest() {
 		
-		return new EventFilterRequestDTO(
+		return new SubscriptionRequestDTO(
 				null, //EventType
 				getSystemRequestDTO(), 
 				null, //filterMetaData
@@ -743,9 +744,9 @@ public class EventHandlerControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private EventFilterRequestDTO getEventFilterRequestDTOWithEmptyEventTypeForTest() {
+	private SubscriptionRequestDTO getSubscriptionRequestDTOWithEmptyEventTypeForTest() {
 		
-		return new EventFilterRequestDTO(
+		return new SubscriptionRequestDTO(
 				"   ", //EventType
 				getSystemRequestDTO(), 
 				null, //filterMetaData
@@ -757,9 +758,9 @@ public class EventHandlerControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private EventFilterResponseDTO getEventFilterResponseDTOForTest() {
+	private SubscriptionResponseDTO getSubscriptionResponseDTOForTest() {
 		
-		return new EventFilterResponseDTO(
+		return new SubscriptionResponseDTO(
 				1L, 
 				getEventType(), 
 				getSystemResponseDTO(),//subscriberSystem, 

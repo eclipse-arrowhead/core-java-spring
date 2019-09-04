@@ -9,13 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
-import eu.arrowhead.common.database.entity.EventFilter;
-import eu.arrowhead.common.database.repository.EventFilterRepository;
+import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.database.repository.SubscriptionRepository;
 import eu.arrowhead.common.database.repository.EventTypeRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.EventFilterListResponseDTO;
-import eu.arrowhead.common.dto.EventFilterRequestDTO;
-import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
+import eu.arrowhead.common.dto.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 
 @Service
@@ -34,7 +34,7 @@ public class EventHandlerDBService {
 	private static final Logger logger = LogManager.getLogger(EventHandlerDBService.class);
 	
 	@Autowired
-	private EventFilterRepository eventFilterRepository;
+	private SubscriptionRepository subscriptionRepository;
 	
 	@Autowired
 	private EventTypeRepository eventTypeRepository;
@@ -46,7 +46,7 @@ public class EventHandlerDBService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterListResponseDTO getEventHandlersRequest(final int validatedPage, final int validatedSize,
+	public SubscriptionListResponseDTO getSubscriptionsRequest(final int validatedPage, final int validatedSize,
 			final Direction validatedDirecion, final String sortField) {
 		logger.debug("getEventHandlersRequest started ...");
 		
@@ -55,36 +55,36 @@ public class EventHandlerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO getEventFilterByIdRequest(final long id) {
-		logger.debug("getEventFilterByIdRequest started ...");
+	public SubscriptionResponseDTO getSubscriptionByIdRequest(final long id) {
+		logger.debug("getSubscriptionByIdRequest started ...");
 		
 		// TODO implement additional method logic
 		return null;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void deleteEventFilterRequest(final long id) {
-		logger.debug("deleteEventFilterRequest started ...");
+	public void deleteSubscriptionRequest(final long id) {
+		logger.debug("deleteSubscriptionRequest started ...");
 		
 		// TODO implement additional method logic
 		return;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO updateEventFilterRequest(final long id, final EventFilterRequestDTO eventFilterRequestDTO) {
-		logger.debug("updateEventFilterRequest started ...");
+	public SubscriptionResponseDTO updateSubscriptionRequest(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
+		logger.debug("updateSubscriptionRequest started ...");
 		
 		// TODO implement additional method logic
 		return null;
 	}	
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilter subscription(final EventFilterRequestDTO eventFilterRequestDTO) {
+	public Subscription subscription(final SubscriptionRequestDTO subscriptionFilterRequestDTO) {
 		logger.debug("subscription started ...");
 		
-		final EventFilter validEventFilter = validateEventFilterRequestDTO(eventFilterRequestDTO);		
+		final Subscription validSubscription = validateSubscriptionRequestDTO(subscriptionFilterRequestDTO);		
 		
-		return eventFilterRepository.saveAndFlush(validEventFilter);
+		return subscriptionRepository.saveAndFlush(validSubscription);
 
 	}
 	
@@ -92,13 +92,13 @@ public class EventHandlerDBService {
 	//Assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private EventFilter validateEventFilterRequestDTO(final EventFilterRequestDTO eventFilterRequestDTO) {
-		logger.debug("validateEventFilterRequestDTO started ...");
+	private Subscription validateSubscriptionRequestDTO(final SubscriptionRequestDTO subscriptionRequestDTO) {
+		logger.debug("validatesubscriptionRequestDTO started ...");
 		
-		final EventFilter eventFilter = new EventFilter();
+		final Subscription subscription = new Subscription();
 		
 		final Set<String> systemResponseDTOJsonSet = new HashSet();
-		for (final SystemRequestDTO systemRequestDTO : eventFilterRequestDTO.getSources()) {
+		for (final SystemRequestDTO systemRequestDTO : subscriptionRequestDTO.getSources()) {
 			//TODO checkIf system is valid and is in db, then convert to system response then convert to Json then add to SET
 		}
 		// TODO implement additional method logic

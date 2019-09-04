@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-public class EventFilterRequestDTO implements Serializable{
+public class SubscriptionRequestDTO implements Serializable{
 	
 	//=================================================================================================
 	// members
@@ -25,11 +25,11 @@ public class EventFilterRequestDTO implements Serializable{
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterRequestDTO() {}
+	public SubscriptionRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
 
-	public EventFilterRequestDTO( final String eventType, final SystemRequestDTO subscriberSystem,
+	public SubscriptionRequestDTO( final String eventType, final SystemRequestDTO subscriberSystem,
 			final Map<String, String> filterMetaData, final String notifyUri, final Boolean matchMetaData, final String startDate,
 			final String endDate, final Set<SystemRequestDTO> sources ) {
 		

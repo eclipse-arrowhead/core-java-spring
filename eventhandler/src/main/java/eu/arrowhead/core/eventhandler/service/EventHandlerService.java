@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.EventFilterRequestDTO;
-import eu.arrowhead.common.dto.EventFilterResponseDTO;
+import eu.arrowhead.common.dto.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
@@ -35,14 +35,14 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilterResponseDTO subscriptionRequest( final EventFilterRequestDTO request) {
+	public SubscriptionResponseDTO subscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("subscriptionRequest started ...");
 				 
-		return DTOConverter.convertEventFilterToEventFilterResponseDTO(eventHandlerDBService.subscription(request));
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(eventHandlerDBService.subscription(request));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void unSubscriptionRequest( final EventFilterRequestDTO request) {
+	public void unSubscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("unSubscriptionRequest started ...");
 		
 		// TODO Implement additional method logic here 

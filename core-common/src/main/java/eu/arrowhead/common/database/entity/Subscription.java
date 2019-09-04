@@ -15,7 +15,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
 @Entity
-public class EventFilter {
+public class Subscription {
 
 	//=================================================================================================
 	// members
@@ -62,10 +62,10 @@ public class EventFilter {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public EventFilter() {}
+	public Subscription() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public EventFilter(final EventType eventType, final System consumerSystem, final String filterMetaData,
+	public Subscription(final EventType eventType, final System consumerSystem, final String filterMetaData,
 			final String notifyUri, final boolean matchMetaData, final ZonedDateTime startDate, final ZonedDateTime endDate, final String sources) {
 
 		this.eventType = eventType;
@@ -116,7 +116,7 @@ public class EventFilter {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "EventFilter [id=" + id + ", eventType=" + eventType + ", consumerSystem=" + consumerSystem
+		return "Subscription [id=" + id + ", eventType=" + eventType + ", consumerSystem=" + consumerSystem
 				+ ", matchMetaData=" + matchMetaData + "]";
 	}
 }
