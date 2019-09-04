@@ -1,13 +1,21 @@
 package eu.arrowhead.core.eventhandler.service;
 
+import java.util.Set;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
@@ -37,10 +45,24 @@ public class EventHandlerService {
 	//-------------------------------------------------------------------------------------------------
 	public SubscriptionResponseDTO subscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("subscriptionRequest started ...");
-				 
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(eventHandlerDBService.subscription(request));
+		
+		if (request == null) {
+			
+			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		checkSystemRequestDTO(request.getSubscriberSystem(), true);
+		final SystemRequestDTO subscriber = request.getSubscriberSystem();
+		
+		final boolean onlyPreferred = request.getSources() == null || request.getSources().isEmpty() ?
+				false : true ;
+		
+		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
+		
+		//final AuthorizationSubscriptionCheckResponseDTO 
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(eventHandlerDBService.registerSubscription(subscriber, request, onlyPreferred, authorizedPublishers));
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public void unSubscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("unSubscriptionRequest started ...");
@@ -56,4 +78,34 @@ public class EventHandlerService {
 		// TODO Implement additional method logic here 
 		return null;
 	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkSystemRequestDTO(final SystemRequestDTO system, final boolean portRangeCheck) {
+		logger.debug("checkSystemRequestDTO started...");
+		
+		if (system == null) {
+			throw new InvalidParameterException("System" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(system.getSystemName())) {
+			throw new InvalidParameterException("System name" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(system.getAddress())) {
+			throw new InvalidParameterException("System address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (system.getPort() == null) {
+			throw new InvalidParameterException("System port" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		final int validatedPort = system.getPort().intValue();
+		if (portRangeCheck && (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
+			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		}
+	}	
+
 }

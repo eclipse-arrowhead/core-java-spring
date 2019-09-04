@@ -17,6 +17,7 @@ import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 
 @Service
 public class EventHandlerDBService {
@@ -88,6 +89,13 @@ public class EventHandlerDBService {
 
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public Subscription registerSubscription(final SystemRequestDTO subscriber, final SubscriptionRequestDTO request,
+			final boolean onlyPreferred, final Set<SystemResponseDTO> authorizedPublishers) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	//=================================================================================================
 	//Assistant methods
 
@@ -105,4 +113,5 @@ public class EventHandlerDBService {
 		
 		return null;
 	}
+
 }

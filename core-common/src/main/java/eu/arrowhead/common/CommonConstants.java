@@ -32,6 +32,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "public-key";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
+	public static final String CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION = "authorization-control-subscription";
+	
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";

@@ -49,6 +49,9 @@ public class Subscription {
 	@Column( nullable = false)
 	private boolean matchMetaData;
 	
+	@Column( nullable = false)
+	private boolean onlyPreferred;
+	
 	@Column(nullable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime startDate;
 	
@@ -74,13 +77,14 @@ public class Subscription {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Subscription(final EventType eventType, final System consumerSystem, final String filterMetaData,
-			final String notifyUri, final boolean matchMetaData, final ZonedDateTime startDate, final ZonedDateTime endDate, final String sources) {
+			final String notifyUri, final boolean matchMetaData, final boolean onlyPreferred, final ZonedDateTime startDate, final ZonedDateTime endDate, final String sources) {
 
 		this.eventType = eventType;
 		this.consumerSystem = consumerSystem;
 		this.filterMetaData = filterMetaData;
 		this.notifyUri = notifyUri;
 		this.matchMetaData = matchMetaData;
+		this.onlyPreferred = onlyPreferred;
 		this.startDate = startDate;
 		this.endDate = endDate;
 	}
@@ -103,6 +107,7 @@ public class Subscription {
 	public String getFilterMetaData() { return filterMetaData; }
 	public String getNotifyUri() { return notifyUri; }
 	public boolean isMatchMetaData() { return matchMetaData; }
+	public boolean isOnlyPreffered() { return onlyPreferred; }
 	public ZonedDateTime getStartDate() { return startDate; }
 	public ZonedDateTime getEndDate() { return endDate; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
@@ -116,6 +121,7 @@ public class Subscription {
 	public void setFilterMetaData( final String filterMetaData) { this.filterMetaData = filterMetaData; }
 	public void setNotifyUri( final String notifyUri) { this.notifyUri = notifyUri; }
 	public void setMatchMetaData( final boolean matchMetaData) { this.matchMetaData = matchMetaData; }
+	public void setOnlyPreferred( final boolean onlyPreferred) { this.onlyPreferred = onlyPreferred; }
 	public void setStartDate( final ZonedDateTime startDate) { this.startDate = startDate; }
 	public void setEndDate( final ZonedDateTime endDate) { this.endDate = endDate; }
 	public void setCreatedAt( final ZonedDateTime createdAt) { this.createdAt = createdAt; }
@@ -128,6 +134,6 @@ public class Subscription {
 	@Override
 	public String toString() {
 		return "Subscription [id=" + id + ", eventType=" + eventType + ", consumerSystem=" + consumerSystem
-				+ ", matchMetaData=" + matchMetaData + "]";
+				+ ", matchMetaData=" + matchMetaData + ", onlyPreferred=" + onlyPreferred +  "]";
 	}
 }
