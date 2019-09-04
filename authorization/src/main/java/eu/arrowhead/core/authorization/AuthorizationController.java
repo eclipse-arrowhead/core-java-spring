@@ -512,11 +512,11 @@ public class AuthorizationController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_AUTH_EVENTHANDLER_CHECK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public AuthorizationSubscriptionCheckResponseDTO checkAuthorizationSubscriptionRequest(@RequestBody final AuthorizationSubscriptionCheckRequestDTO request) {
 		logger.debug("New AuthorizationEventHandler check request recieved");
 		
-		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_EVENTHANDLER_CHECK_URI;
+		final String origin = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI;
 		final SystemRequestDTO consumer = request.getConsumer();
 		if (consumer == null) {
 			throw new BadPayloadException("Consumer is null", HttpStatus.SC_BAD_REQUEST, origin);
