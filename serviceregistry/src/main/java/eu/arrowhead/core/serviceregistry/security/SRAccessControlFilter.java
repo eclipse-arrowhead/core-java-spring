@@ -110,7 +110,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	//-------------------------------------------------------------------------------------------------
 	protected boolean  isClientACoreSystem(final String clientCN, final String cloudCN) {
-		for(final CoreSystem coreSystem : CoreSystem.values()) {
+		for (final CoreSystem coreSystem : CoreSystem.values()) {
 			final String coreSystemCN = coreSystem.name().toLowerCase() + "." + cloudCN;
 			if (clientCN.equalsIgnoreCase(coreSystemCN)) {
 				return true;
