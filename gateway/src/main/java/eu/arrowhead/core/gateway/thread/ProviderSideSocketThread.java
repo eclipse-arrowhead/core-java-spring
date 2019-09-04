@@ -135,7 +135,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	@Override
 	public void run() {
 		logger.debug("run started...");
-		
+
 		if (!initialized) {
 			throw new IllegalStateException("Thread is not initialized.");
 		}

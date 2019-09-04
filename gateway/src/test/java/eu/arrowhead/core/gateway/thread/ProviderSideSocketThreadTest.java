@@ -75,7 +75,7 @@ public class ProviderSideSocketThreadTest {
 		when(appContext.getBean(SSLProperties.class)).thenReturn(new SSLProperties());
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		
-		testingObject = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 0);
+		testingObject = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -326,6 +326,12 @@ public class ProviderSideSocketThreadTest {
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(!interrupted);
 		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1}, outputStream.toByteArray());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalStateException.class)
+	public void testRunNotInitialized() {
+		testingObject.run();
 	}
 	
 	//=================================================================================================

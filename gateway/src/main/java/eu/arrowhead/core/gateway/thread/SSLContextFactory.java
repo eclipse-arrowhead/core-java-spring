@@ -47,7 +47,7 @@ public class SSLContextFactory {
 			keyStore.load(sslProps.getKeyStore().getInputStream(), sslProps.getKeyStorePassword().toCharArray());
 			final String kmfAlgorithm = System.getProperty(SSL_KEY_MANAGER_FACTORY_ALGORITHM, KeyManagerFactory.getDefaultAlgorithm());
 		    final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(kmfAlgorithm);
-		    keyManagerFactory.init(keyStore, sslProps.getKeyPassword().toCharArray());
+		    keyManagerFactory.init(keyStore, sslProps.getKeyStorePassword().toCharArray());
 			
 		    final KeyStore trustStore = KeyStore.getInstance(sslProps.getKeyStoreType());
 		    trustStore.load(sslProps.getTrustStore().getInputStream(), sslProps.getTrustStorePassword().toCharArray());
@@ -56,7 +56,7 @@ public class SSLContextFactory {
 		    trustManagerFactory.init(trustStore);
 		    
 		    final SSLContext sslContext = SSLContext.getInstance(TLS);
-		    //TODO: old implementation use dummy trustmanagers here
+		    //TODO: old implementation use dummy trust managers here
 		    sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
 
 			return sslContext;
@@ -64,7 +64,7 @@ public class SSLContextFactory {
 			logger.error("SSL context creation failed: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			
-			throw new ServiceConfigurationError("Provider side SSL context creation failed.", ex);
+			throw new ServiceConfigurationError("SSL context creation failed.", ex);
 		}
 	}
 	
@@ -82,7 +82,10 @@ public class SSLContextFactory {
 		final String messageNotDefined = " is not defined.";
 		Assert.isTrue(!Utilities.isEmpty(sslProps.getKeyStoreType()), CommonConstants.KEYSTORE_TYPE + messageNotDefined);
 		Assert.notNull(sslProps.getKeyStore(), CommonConstants.KEYSTORE_PATH + messageNotDefined);
-		Assert.isTrue(sslProps.getKeyStore().exists(), CommonConstants.KEYSTORE_PATH + " file is not found.");
+		Assert.isTrue(sslProps.getKeyStore().exists(), CommonConstants.KEYSTORE_PATH + " is not found.");
 		Assert.notNull(sslProps.getKeyStorePassword(), CommonConstants.KEYSTORE_PASSWORD + messageNotDefined);
+		Assert.notNull(sslProps.getTrustStore(), CommonConstants.TRUSTSTORE_PATH + messageNotDefined);
+		Assert.isTrue(sslProps.getTrustStore().exists(), CommonConstants.TRUSTSTORE_PATH + " is not found.");
+		Assert.notNull(sslProps.getTrustStorePassword(), CommonConstants.TRUSTSTORE_PASSWORD + messageNotDefined);
 	}
 }
