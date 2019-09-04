@@ -1,12 +1,15 @@
 package eu.arrowhead.core.gateway.thread;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +33,10 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -38,6 +45,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -72,7 +81,7 @@ public class ProviderSideSocketThreadTest {
 		
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
-		when(appContext.getBean(SSLProperties.class)).thenReturn(new SSLProperties());
+		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		
 		testingObject = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
@@ -334,6 +343,55 @@ public class ProviderSideSocketThreadTest {
 		testingObject.run();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenInternalExceptionThrown() {
+		final SSLProperties sslProps = getTestSSLPropertiesForThread();
+		ReflectionTestUtils.setField(sslProps, "keyStoreType", "invalid");
+		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
+		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
+		
+		final ProviderSideSocketThread thread = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
+		thread.init("queueId", getTestMessageProducer());
+		thread.run();
+
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(thread, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenOtherSideCloseTheConnectionAfterSendingSomeBytes() throws JMSException {
+		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		testingObject.init("queueId", getTestMessageProducer());
+		new Thread() {
+			public void run() {
+				try {
+					final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestServerThread());
+					final SSLServerSocketFactory serverSocketFactory = sslContext.getServerSocketFactory();
+					final SSLServerSocket sslServerSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(22002);
+					sslServerSocket.setNeedClientAuth(true);
+					sslServerSocket.setSoTimeout(600000);
+					
+					final SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
+					final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
+					outConsumer.write(new byte[] { 1,2,3,4 });
+					
+					sslConsumerSocket.close();
+					sslServerSocket.close();
+				} catch (final Exception ex) {
+					ex.printStackTrace();
+					fail();
+				}
+			};
+		}.start();
+		
+		testingObject.run();
+		verify(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -392,7 +450,7 @@ public class ProviderSideSocketThreadTest {
 		consumer.setAuthenticationInfo("consAuth");
 		final SystemRequestDTO provider = new SystemRequestDTO();
 		provider.setSystemName("provider");
-		provider.setAddress("fgh.de");
+		provider.setAddress("127.0.0.1");
 		provider.setPort(22002);
 		provider.setAuthenticationInfo("provAuth");
 		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
@@ -435,5 +493,35 @@ public class ProviderSideSocketThreadTest {
 			public long getDeliveryDelay() throws JMSException { return 0; }
 			public void close() throws JMSException {}
 		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLProperties getTestSSLPropertiesForThread() {
+		final SSLProperties sslProps = new SSLProperties();
+		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
+		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
+		final Resource keystore = new ClassPathResource("certificates/gateway.p12");
+		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
+		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
+		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
+		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
+		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+		
+		return sslProps;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLProperties getTestSSLPropertiesForTestServerThread() {
+		final SSLProperties sslProps = new SSLProperties();
+		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
+		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
+		final Resource keystore = new ClassPathResource("certificates/authorization.p12");
+		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
+		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
+		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
+		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
+		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+		
+		return sslProps;
 	}
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.PublicKey;
+import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -173,7 +174,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 					relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
 				}
 			}
-		} catch (final IOException | JMSException | ArrowheadException ex) {
+		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			closeAndInterrupt();
