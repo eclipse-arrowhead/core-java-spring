@@ -2385,6 +2385,986 @@ public class GatewayControllerTest {
 		Assert.assertEquals("Cloud name is null or blank", error.getErrorMessage());		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullServiceDefinition() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition(null);
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Service definition is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankServiceDefinition() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("   ");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Service definition is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullGWPublicKey() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey(null);
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Provider gateway public key is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankGWPublicKey() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("   ");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Provider gateway public key is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullQueueId() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId(null);
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Queue id is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankQueueId() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId(null);
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Queue id is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullPeerName() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName(null);
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Peer name is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankPeerName() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("    ");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Peer name is null or blank.", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullRelay() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		request.setRelay(null);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay is null", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullRelayAddress() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress(null);
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankRelayAddress() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("       ");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullRelayPort() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(null);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay port is null", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerRelayPortOutOfRangeMin() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerRelayPortOutOfRangeMax() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullRelayType() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType(null);
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankRelayType() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("    ");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerInvalidRelayType() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEKEEPER_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Relay type is invalid", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullSystem() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		request.setConsumer(null);
+		request.setProvider(null);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullSystemName() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName(null);
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System name is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankSystemName() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("   ");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System name is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullSystemAdress() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress(null);
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System address is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankSystemAdress() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("      ");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System address is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullSystemPort() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(null);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System port is null", error.getErrorMessage());
+	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerSystemPortOutOfRangeMin() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerSystemPortOutOfRangeMax() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullCloud() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		request.setConsumerCloud(null);
+		request.setProviderCloud(null);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Cloud is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullCloudOperator() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator(null);
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankCloudOperator() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("   ");
+		cloud.setName("test-name");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerNullCloudName() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName(null);
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Cloud name is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testConnectConsumerBlankCloudName() throws Exception {
+		final GatewayConsumerConnectionRequestDTO request = new GatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("test-service");
+		request.setQueueId("test-queue-id");
+		request.setPeerName("test.peer.name");
+		request.setProviderGWPublicKey("test-key");
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("test-address");
+		relay.setPort(2000);
+		relay.setType("GATEWAY_RELAY");
+		request.setRelay(relay);
+		final SystemRequestDTO system = new SystemRequestDTO();
+		system.setSystemName("test-system");
+		system.setAddress("test-system-address");
+		system.setPort(1000);
+		request.setConsumer(system);
+		request.setProvider(system);
+		final CloudRequestDTO cloud = new CloudRequestDTO();
+		cloud.setOperator("test-operator");
+		cloud.setName("   ");
+		request.setConsumerCloud(cloud);
+		request.setProviderCloud(cloud);
+		
+		final MvcResult result = getConnectConsumer(status().isBadRequest(), request);
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
+		Assert.assertEquals("Cloud name is null or blank", error.getErrorMessage());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
