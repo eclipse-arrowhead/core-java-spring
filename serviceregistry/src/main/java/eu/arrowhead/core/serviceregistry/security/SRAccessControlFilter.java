@@ -23,9 +23,10 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	// members
 	
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY };
-	private static final CoreSystemService[] publicCoreSystemServices = {CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE};
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
+	private static final CoreSystemService[] publicCoreSystemServices = {CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
+																		 CoreSystemService.EVENT_PUBLISH, CoreSystemService.EVENT_SUBSCRIBE};
 	
 	//=================================================================================================
 	// assistant methods
@@ -51,7 +52,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQuery, requestTarget);				
 			} else {
 				// Public core system services are allowed to query directly by the local systems
-				checkIfRequestedServiceIsAnPublicCoreSystemService(requestJSON);
+				checkIfRequestedServiceIsAPublicCoreSystemService(requestJSON);
 			}			
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI)) {
 			// Only dedicated core systems can use this service
@@ -95,7 +96,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkIfRequestedServiceIsAnPublicCoreSystemService(final String requestJSON) {
+	private void checkIfRequestedServiceIsAPublicCoreSystemService(final String requestJSON) {
 		final ServiceQueryFormDTO requestBody = Utilities.fromJson(requestJSON, ServiceQueryFormDTO.class);
 		
 		for (final CoreSystemService service : publicCoreSystemServices) {
