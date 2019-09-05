@@ -54,7 +54,6 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private MessageProducer sender;
 	private SSLServerSocket sslServerSocket;
 	private SSLSocket sslConsumerSocket;
-	private InputStream inConsumer;
 	private OutputStream outConsumer;
 	private boolean interrupted = false;
 	private boolean initialized = false;
@@ -154,7 +153,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			sslServerSocket.setSoTimeout(timeout);
 			
 			sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
-			inConsumer = sslConsumerSocket.getInputStream();
+			final InputStream inConsumer = sslConsumerSocket.getInputStream();
 			outConsumer = sslConsumerSocket.getOutputStream();
 			
 			while (true) {

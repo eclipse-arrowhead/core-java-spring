@@ -1,6 +1,5 @@
 package eu.arrowhead.core.gateway.thread;
 
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -375,13 +374,12 @@ public class ProviderSideSocketThreadTest {
 					
 					final SSLSocket sslConsumerSocket = (SSLSocket) sslServerSocket.accept();
 					final OutputStream outConsumer = sslConsumerSocket.getOutputStream();
-					outConsumer.write(new byte[] { 1,2,3,4 });
+					outConsumer.write(new byte[] { 1, 2, 3, 4 });
 					
 					sslConsumerSocket.close();
 					sslServerSocket.close();
 				} catch (final Exception ex) {
 					ex.printStackTrace();
-					fail();
 				}
 			};
 		}.start();

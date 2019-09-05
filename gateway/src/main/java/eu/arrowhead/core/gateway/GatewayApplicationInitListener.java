@@ -1,8 +1,10 @@
 package eu.arrowhead.core.gateway;
 
+import java.util.Queue;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -31,14 +33,14 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
-	public ConcurrentHashMap<String,ActiveSessionDTO> getActiveSessions() {
+	public ConcurrentMap<String,ActiveSessionDTO> getActiveSessions() {
 		return new ConcurrentHashMap<>();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean(name = CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
-	public ConcurrentLinkedQueue<Integer> getAvailablePorts() {
-		final ConcurrentLinkedQueue<Integer> queue = new ConcurrentLinkedQueue<Integer>();
+	public Queue<Integer> getAvailablePorts() {
+		final ConcurrentLinkedQueue<Integer> queue = new ConcurrentLinkedQueue<>();
 		if (minPort <= maxPort) {
 			for (int i = minPort; i <= maxPort; ++i) {
 				queue.offer(i);

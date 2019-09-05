@@ -4,9 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,9 @@ import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -73,9 +78,7 @@ public class ConsumerSideServerSocketThreadTest {
 		when(appContext.getBean(CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE, ConcurrentLinkedQueue.class)).thenReturn(new ConcurrentLinkedQueue<>());
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
-		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
-
-		testingObject = new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), publicKey, "queueId", 60000, "consumer", "test-service");
+		initTestingObject();
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -211,6 +214,49 @@ public class ConsumerSideServerSocketThreadTest {
 		Assert.assertArrayEquals(new byte[] { 10, 8, 6, 4,  2, 9, 7, 5, 3, 1 }, outputStream.toByteArray());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalStateException.class)
+	public void testRunNotInitialized() {
+		testingObject.run();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenInternalExceptionThrown() {
+		final SSLProperties sslProps = getTestSSLPropertiesForThread();
+		ReflectionTestUtils.setField(sslProps, "keyStoreType", "invalid");
+		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
+		
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
+		final ConsumerSideServerSocketThread thread = new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), publicKey, "queueId", 60000, "consumer", "test-service");
+
+		thread.init(getTestMessageProducer());
+		thread.run();
+
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(thread, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunWhenOtherSideCloseTheConnectionAfterSendingSomeBytes() throws Exception {
+		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		testingObject.init(getTestMessageProducer());
+		testingObject.start();
+	
+		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(getTestSSLPropertiesForTestOtherSocket());
+		final SSLSocketFactory socketFactory = (SSLSocketFactory) sslContext.getSocketFactory();
+		final SSLSocket sslProviderSocket = (SSLSocket) socketFactory.createSocket("localhost", 22003);
+		final OutputStream outProvider = sslProviderSocket.getOutputStream();
+		outProvider.write(new byte[] { 5, 6, 7, 8 });
+		Thread.sleep(1); // it's necessary: without it the test fails most of the time but not always
+		sslProviderSocket.close();
+
+		verify(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
+		Assert.assertTrue(interrupted);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -301,5 +347,27 @@ public class ConsumerSideServerSocketThreadTest {
 		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
 		
 		return sslProps;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private SSLProperties getTestSSLPropertiesForTestOtherSocket() {
+		final SSLProperties sslProps = new SSLProperties();
+		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
+		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
+		final Resource keystore = new ClassPathResource("certificates/authorization.p12");
+		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
+		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
+		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
+		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
+		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+		
+		return sslProps;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void initTestingObject() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
+
+		testingObject = new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), publicKey, "queueId", 600000, "consumer", "test-service");
 	}
 }

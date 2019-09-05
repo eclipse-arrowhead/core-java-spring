@@ -51,7 +51,6 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	private String queueId;
 	private MessageProducer sender;
 	private SSLSocket sslProviderSocket;
-	private InputStream inProvider;
 	private OutputStream outProvider;
 	private boolean interrupted = false;
 	private boolean initialized = false;
@@ -146,7 +145,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 			final SSLSocketFactory socketFactory = sslContext.getSocketFactory();
 			sslProviderSocket = (SSLSocket) socketFactory.createSocket(connectionRequest.getProvider().getAddress(), connectionRequest.getProvider().getPort().intValue());
 			sslProviderSocket.setSoTimeout(timeout);
-			inProvider = sslProviderSocket.getInputStream();
+			final InputStream inProvider = sslProviderSocket.getInputStream();
 			outProvider = sslProviderSocket.getOutputStream();
 			
 			while (true) {
