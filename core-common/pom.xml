@@ -12,6 +12,7 @@
   	<description>Common resources for the Arrowhead core services</description>
   
   	<build>
+  	
 		<plugins>
 			<plugin>
     			<groupId>org.springframework.boot</groupId>
@@ -20,6 +21,33 @@
           			<skip>true</skip>
     			</configuration>
   			</plugin>
+  			
+  			<plugin>
+  				<groupId>org.apache.maven.plugins</groupId>
+	  			<artifactId>maven-shade-plugin</artifactId>
+	  			<executions>
+	  				<execution>
+	  					<phase>package</phase>
+	  					<goals>
+	  						<goal>shade</goal>
+	  					</goals>
+			  			<configuration>
+							<finalName>arrowhead-client-common</finalName>
+							<minimizeJar>true</minimizeJar>
+							<filters>
+								<filter>
+									<artifact>eu.arrowhead:arrowhead-core-common</artifact>
+									<includes>
+										<include>eu/arrowhead/common/core/*.*</include>
+										<include>eu/arrowhead/common/dto/*.*</include>
+									</includes>
+								</filter>
+							</filters>
+						</configuration>	
+	  				</execution>
+	  			</executions>
+  			</plugin>
+  			
 	 	</plugins>
   	</build>
 </project>
