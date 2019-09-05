@@ -27,6 +27,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
@@ -338,6 +339,12 @@ public class ServiceRegistryController {
 			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
 		}
 		
+		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
+			if (coreSystemService.getServiceDefinition().equalsIgnoreCase(serviceDefinition.trim())) {
+				throw new BadPayloadException("serviceDefinition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
+			}
+		}
+		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 		logger.debug("{} service definition successfully registered.", serviceDefinition);
 		
@@ -364,6 +371,12 @@ public class ServiceRegistryController {
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
 			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
+		}
+		
+		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
+			if (coreSystemService.getServiceDefinition().equalsIgnoreCase(serviceDefinition.trim())) {
+				throw new BadPayloadException("serviceDefinition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
+			}
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
