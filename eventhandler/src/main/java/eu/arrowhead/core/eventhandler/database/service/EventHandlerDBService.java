@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import eu.arrowhead.common.database.repository.SubscriptionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
@@ -56,6 +58,9 @@ public class EventHandlerDBService {
 	
 	@Autowired
 	private SystemRepository systemRepository;
+	
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	private boolean secure;
 
 	//=================================================================================================
 	// methods
@@ -111,6 +116,27 @@ public class EventHandlerDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Set<Subscription> getInvolvedSubscriptions(final EventPublishRequestDTO request) {
+		logger.debug("getInvolvedSubscriptions started ...");
+		
+		final EventType validEventType = validateEventType(request.getEventType());
+		
+		if (!secure) {
+			
+			return subscriptionRepository.findAllByEventType(validEventType);
+			
+		}
+		
+		
+		//TODO maybe handle this in separte method ...
+		final Set<Subscription> involvedSubscriptions = subscriptionRepository.findAllByEventType(validEventType);
+		final System validProviderSystem = validateSystemRequestDTO(request.getSource());
+		
+		return filterInvolvedSubscriptionsByAuthorizedProviders(involvedSubscriptions, validProviderSystem);
+		
 	}
 	
 	//=================================================================================================
@@ -184,6 +210,7 @@ public class EventHandlerDBService {
 	//-------------------------------------------------------------------------------------------------
 	private void addAndSaveSubscriptionEntryPublisherConnections(final Subscription subscriptionEntry,
 			final SubscriptionRequestDTO request, final Set<SystemResponseDTO> authorizedPublishers) {
+		logger.debug("addAndSaveSubscriptionEntryPublisherConnections started...");
 		
 		if (subscriptionEntry.isOnlyPreffered()) {
 			
@@ -221,5 +248,17 @@ public class EventHandlerDBService {
 		}
 		subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
 	
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private Set<Subscription> filterInvolvedSubscriptionsByAuthorizedProviders(final Set<Subscription> involvedSubscriptions,
+			final System validProviderSystem) {
+		logger.debug("filterInvolvedSubscriptionsByAuthorizedProviders started...");
+		
+		final Set<Subscription> involvedConnections = subscriptionPublisherConnectionRepository.findAllBySystemAndAuthorized(validProviderSystem, true);
+
+		involvedConnections.retainAll(involvedSubscriptions);
+		
+		return involvedConnections;
 	}
 }

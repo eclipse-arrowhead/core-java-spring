@@ -229,6 +229,9 @@ public class CommonConstants {
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 Defaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";
 
+	public static final String TIME_STAMP_TOLERANCE_SECONDS = "time_stamp_tolerance";
+	public static final String $TIME_STAMP_TOLERANCE_SECONDS_WD = "${" + TIME_STAMP_TOLERANCE_SECONDS + ":" + Defaults.DEFAULT_TIME_STAMP_TOLERANCE_SECONDS + "}";
+	
 	//=================================================================================================
 	// assistant methods
 

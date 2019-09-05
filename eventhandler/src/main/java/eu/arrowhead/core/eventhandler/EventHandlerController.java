@@ -1,5 +1,8 @@
 package eu.arrowhead.core.eventhandler;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,18 +70,25 @@ public class EventHandlerController {
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Subcribtion to the events specified in requested Subscription ";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
 	private static final String POST_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
+	
 	private static final String PUT_EVENTHANDLER_SUBSCRIPTION_DESCRIPTION = "Unsubcribtion from the events specified in requested Subscription ";
 	private static final String PUT_EVENTHANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
 	private static final String PUT_EVENTHANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
-	
-	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
-	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	
 	private static final String POST_EVENTHANDLER_PUBLISH_DESCRIPTION = "Publish event"; //TODO add meaningful description
 	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; //TODO add meaningful description
 	private static final String POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; //TODO add meaningful description
 
+	
+	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
+	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
+	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
+	private static final String WRONG_FORMAT_ERROR_MESSAGE = " is in wrong format. ";
+	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future then the tolerated time difference";
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past then the tolerated time difference";;
+
+	private static final long TOLERANCE = Long.getLong(CommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD);
+	
 	private final Logger logger = LogManager.getLogger(EventHandlerController.class);
 	
 	@Autowired
@@ -253,6 +263,8 @@ public class EventHandlerController {
 		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH;
 		checkEventPublishRequestDTO(request, origin);
 		
+		validateTimeStamp(request, origin);
+		
 	    return eventHandlerService.publishRequest(request);
 	}
 	
@@ -334,10 +346,6 @@ public class EventHandlerController {
 			throw new BadPayloadException("Request.EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if ( Utilities.isEmpty( request.getTimeStamp() )) {
-			throw new BadPayloadException("Request.TimeStamp" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}	
-		
 		if ( Utilities.isEmpty( request.getPayload() )) {
 			throw new BadPayloadException("Request.Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}		
@@ -347,6 +355,42 @@ public class EventHandlerController {
 		}
 		// TODO implement additional method logic here
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of EventPublishRequestDTO
+	private void validateTimeStamp(EventPublishRequestDTO request, String origin) {
+		logger.debug("validateTimeStamp started ...");
+		
+		if ( Utilities.isEmpty( request.getTimeStamp() )) {
+			
+			request.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+		
+		} else	{
+			
+			final ZonedDateTime now = ZonedDateTime.now();
+			final ZonedDateTime timeStamp;
+
+			try {
+				
+				timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimeStamp());
+			
+			} catch (DateTimeParseException ex) {
+				
+				throw new BadPayloadException("Request.TimeStamp" + WRONG_FORMAT_ERROR_MESSAGE + ex, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (timeStamp.isAfter(now.plusSeconds(TOLERANCE))) {
+				
+				throw new BadPayloadException("Request.TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+			
+			if (timeStamp.isBefore(now.minusSeconds(TOLERANCE))) {
+				
+				throw new BadPayloadException("Request.TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+			}
+
+		}
 	}
 
 }

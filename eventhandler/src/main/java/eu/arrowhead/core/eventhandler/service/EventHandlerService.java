@@ -5,10 +5,12 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
@@ -71,14 +73,20 @@ public class EventHandlerService {
 	//-------------------------------------------------------------------------------------------------
 	public EventPublishResponseDTO publishRequest(final EventPublishRequestDTO request) {
 		logger.debug("publishRequest started ...");
-				
-		// TODO Implement additional method logic here 
-		return null;
+		
+		checkSystemRequestDTO(request.getSource(), false);
+		
+		final Set<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptions(request);
+		//TODO some subscriptions require metadata filtering which my be time consuming complex process
+		// so from here handle it in different thread
+		
+		
+		return new EventPublishResponseDTO(); //always return empty response
 	}
 	
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private void checkSystemRequestDTO(final SystemRequestDTO system, final boolean portRangeCheck) {
 		logger.debug("checkSystemRequestDTO started...");
