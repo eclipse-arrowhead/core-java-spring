@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
@@ -774,8 +775,14 @@ public class ServiceRegistryController {
 			needChange = true;
 		}
 		
+		
 		if (!Utilities.isEmpty(request.getSystemName())) {
 			needChange = true;
+			for (final CoreSystem coreSysteam : CoreSystem.values()) {
+				if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
+					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+				}
+			}
 		}
 		
 		if (request.getPort() != null) {
@@ -814,6 +821,12 @@ public class ServiceRegistryController {
 		
 		if (Utilities.isEmpty(request.getSystemName())) {
 			throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		for (final CoreSystem coreSysteam : CoreSystem.values()) {
+			if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
+				throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, origin);
+			}
 		}
 		
 		if (Utilities.isEmpty(request.getAddress())) {
