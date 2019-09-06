@@ -32,8 +32,15 @@
 	  						<goal>shade</goal>
 	  					</goals>
 			  			<configuration>
-							<finalName>arrowhead-client-common</finalName>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+             				<shadedClassifierName>client-skeleton</shadedClassifierName>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<minimizeJar>true</minimizeJar>
+							<artifactSet>
+								<includes>
+									<include>eu.arrowhead:arrowhead-core-common</include>
+								</includes>
+							</artifactSet>
 							<filters>
 								<filter>
 									<artifact>eu.arrowhead:arrowhead-core-common</artifact>
