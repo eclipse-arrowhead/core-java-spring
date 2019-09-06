@@ -33,9 +33,10 @@
 	  					</goals>
 			  			<configuration>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
-             				<shadedClassifierName>client-skeleton</shadedClassifierName>
+							<outputDirectory>../client-skeleton-common/repo/eu/arrowhead/core-client/skeleton</outputDirectory>
+             				<finalName>core-client-skeleton</finalName>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<minimizeJar>true</minimizeJar>
+							<minimizeJar>false</minimizeJar>
 							<artifactSet>
 								<includes>
 									<include>eu.arrowhead:arrowhead-core-common</include>
@@ -45,8 +46,10 @@
 								<filter>
 									<artifact>eu.arrowhead:arrowhead-core-common</artifact>
 									<includes>
+										<include>eu/arrowhead/common/Utilities.class</include>
 										<include>eu/arrowhead/common/core/*.*</include>
 										<include>eu/arrowhead/common/dto/*.*</include>
+										<include>eu/arrowhead/common/exception/*.*</include>
 									</includes>
 								</filter>
 							</filters>

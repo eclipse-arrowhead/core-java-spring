@@ -25,6 +25,8 @@
 wrapper
 /authorization/target
 /core-common/target
+/client-skeleton-common/target
+/client-skeleton-common/lib
 /client-skeleton-provider/target
 /eventhandler/target
 /gatekeeper/target

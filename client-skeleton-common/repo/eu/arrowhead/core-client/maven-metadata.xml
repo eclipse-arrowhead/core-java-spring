@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>eu.arrowhead</groupId>
+  <artifactId>core-client</artifactId>
+  <versioning>
+    <release>skeleton</release>
+    <versions>
+      <version>skeleton</version>
+    </versions>
+    <lastUpdated>20190906182721</lastUpdated>
+  </versioning>
+</metadata>
