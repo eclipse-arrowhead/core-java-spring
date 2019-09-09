@@ -28,8 +28,26 @@
 		</dependency>
 	</dependencies>
 	
-	<build>  	
+	<build>
 		<plugins>
+			<plugin>
+		      		<groupId>org.apache.maven.plugins</groupId>
+		      		<artifactId>maven-dependency-plugin</artifactId>
+		      		<executions>
+		      			<execution>
+		      				<phase>clean</phase>
+		      				<goals>
+		      					<goal>purge-local-repository</goal>
+		      				</goals>
+		      				<configuration>
+		      					<resolutionFuzziness>core-client:skeleton</resolutionFuzziness>
+		      					<actTransitively>false</actTransitively>
+		      					<reResolve>false</reResolve>
+		      				</configuration>
+		      			</execution>
+		      		</executions>
+		      	</plugin>
+		
 			<plugin>
     			<groupId>org.springframework.boot</groupId>
     			<artifactId>spring-boot-maven-plugin</artifactId>
@@ -37,6 +55,7 @@
           			<skip>true</skip>
     			</configuration>
   			</plugin>  			
+  			
   		</plugins>
   	</build>	
 </project>
