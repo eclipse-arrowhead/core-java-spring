@@ -543,6 +543,21 @@ public class DTOConverter {
 				);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static EventDTO convertEventPublishRequestDTOToEventDTO(final EventPublishRequestDTO eventPublishRequestDTO){
+		Assert.notNull(eventPublishRequestDTO, "eventPublishRequestDTO is null");
+		Assert.notNull(eventPublishRequestDTO.getEventType(), "eventPublishRequestDTO.EvenType is null" );
+		Assert.notNull(eventPublishRequestDTO.getPayload(), "eventPublishRequestDTO.Payload is null" );
+		Assert.notNull(eventPublishRequestDTO.getTimeStamp(), "eventPublishRequestDTO.TimeStamp is null" );
+		
+		return new EventDTO(
+				eventPublishRequestDTO.getEventType(), 
+				eventPublishRequestDTO.getMetaData(),
+				eventPublishRequestDTO.getPayload(),
+				eventPublishRequestDTO.getTimeStamp()
+				);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 

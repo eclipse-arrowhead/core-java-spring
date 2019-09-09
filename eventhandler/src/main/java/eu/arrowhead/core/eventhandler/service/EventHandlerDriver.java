@@ -2,6 +2,7 @@ package eu.arrowhead.core.eventhandler.service;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -16,8 +17,10 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckRequestDTO;
 import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckResponseDTO;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -55,6 +58,15 @@ public class EventHandlerDriver {
 		return response.getBody().getPublishers();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public void publishEvent(final EventPublishRequestDTO request, final Set<Subscription> involvedSubscriptions) {
+		logger.debug("publishEvent started...");
+		
+		final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);
+		
+		publishRequestExecutor.execute();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -72,4 +84,5 @@ public class EventHandlerDriver {
 		
 		throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
 	}
+
 }

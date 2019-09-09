@@ -1,31 +1,18 @@
 package eu.arrowhead.core.eventhandler.service;
 
-import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
-
-import javax.jms.JMSException;
-import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.ErrorWrapperDTO;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
+import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.http.HttpService;
 
 public class PublishRequestExecutor {
 	//=================================================================================================
@@ -36,6 +23,7 @@ public class PublishRequestExecutor {
 	private final ThreadPoolExecutor threadPool;
 	private final EventPublishRequestDTO publishRequestDTO;
 	private final Set<Subscription> involvedSubscriptions;
+	private final HttpService httpService;
 	
 	private final Logger logger = LogManager.getLogger(PublishRequestExecutor.class);
 	
@@ -44,13 +32,15 @@ public class PublishRequestExecutor {
 	
 	//-------------------------------------------------------------------------------------------------	
 	public PublishRequestExecutor(final EventPublishRequestDTO publishRequestDTO, 
-								  final Set<Subscription> involvedSubscriptions) {
+								  final Set<Subscription> involvedSubscriptions,
+								  final HttpService httpService) {
 		
 		this.publishRequestDTO = publishRequestDTO;
 		this.involvedSubscriptions = involvedSubscriptions;
 		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(
 				this.involvedSubscriptions.size() > MAX_THREAD_POOL_SIZE ? 
 						MAX_THREAD_POOL_SIZE : this.involvedSubscriptions.size());
+		this.httpService = httpService;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -61,7 +51,7 @@ public class PublishRequestExecutor {
 		for ( final Subscription subscription : involvedSubscriptions ) {			
 			try {
 
-				threadPool.execute(new PublishEventTask(subscription, publishRequestDTO));
+				threadPool.execute(new PublishEventTask(subscription, publishRequestDTO, httpService));
 			} catch (final RejectedExecutionException ex) {
 				logger.error("PublishEventTask execution rejected at {}", ZonedDateTime.now());
 				

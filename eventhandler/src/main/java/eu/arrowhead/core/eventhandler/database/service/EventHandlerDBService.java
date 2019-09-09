@@ -154,7 +154,7 @@ public class EventHandlerDBService {
 		subscription.setEventType(validEventType);
 		subscription.setNotifyUri(request.getNotifyUri());
 		subscription.setFilterMetaData(Utilities.map2Text(request.getFilterMetaData()));
-		subscription.setOnlyPreferred(request.getSources() != null && !request.getSources().isEmpty()); //TODO orginize to method
+		subscription.setOnlyPredefinedPublishers(request.getSources() != null && !request.getSources().isEmpty()); //TODO orginize to method
 		subscription.setMatchMetaData(request.getMatchMetaData());
 		//TODO validate dates by comparing to currentTime and threshold
 		subscription.setStartDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getStartDate()));
@@ -212,7 +212,7 @@ public class EventHandlerDBService {
 			final SubscriptionRequestDTO request, final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("addAndSaveSubscriptionEntryPublisherConnections started...");
 		
-		if (subscriptionEntry.isOnlyPreffered()) {
+		if (subscriptionEntry.isOnlyPredefinedPublishers()) {
 			
 			final Set<System> preferredPublisherSystems = getPreferredPublisherSystems( request.getSources());
 			

@@ -1,14 +1,21 @@
 package eu.arrowhead.core.eventhandler.service;
 
-import javax.jms.Session;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.util.UriComponents;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.http.HttpService;
 
 public class PublishEventTask implements Runnable{
 
@@ -18,18 +25,19 @@ public class PublishEventTask implements Runnable{
 	private final Logger logger = LogManager.getLogger(PublishEventTask.class);
 	
 	private final Subscription subscription;
-	private final Session session;
 	private final EventPublishRequestDTO publishRequestDTO;
+	private final HttpService httpService;
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-	public PublishEventTask(final Subscription subscription, final EventPublishRequestDTO publishRequestDTO) {
+	public PublishEventTask(final Subscription subscription, final EventPublishRequestDTO publishRequestDTO,
+			final HttpService httpService) {
 		
 		this.subscription = subscription;
 		this.publishRequestDTO = publishRequestDTO;
-		this.session = getSession();
+		this.httpService = httpService;
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -44,13 +52,17 @@ public class PublishEventTask implements Runnable{
 				return;
 			}
 			
-			//TODO fork by conditonal session is managed(reguraly checked or frashly crated):
-			// if true send request
-			// else first send isAlive then send request ...
+			final UriComponents subscriptionUri = getSubscriptionUri( subscription );
+
+			final ResponseEntity response = httpService.sendRequest( subscriptionUri, HttpMethod.POST, ResponseEntity.class, DTOConverter.convertEventPublishRequestDTOToEventDTO( publishRequestDTO ));		
 			
-			//if (response == null) {
-			//	throw new TimeoutException(subscription.getSystem.getName + " subscriber: SendEventRequest timeout");
-			//}
+			if (response == null) {
+				throw new TimeoutException(subscription.getConsumerSystem().getSystemName() + " subscriber: SendEventRequest timeout");
+			}
+			
+			if ( !response.getStatusCode().is2xxSuccessful()) {
+				throw new ArrowheadException(subscription.getConsumerSystem().getSystemName() + " subscriber: SendEventRequest unsuccessful: " + response.getStatusCode());
+			}		
 			
 		} catch (final InvalidParameterException | BadPayloadException ex) {	
 			
@@ -64,12 +76,20 @@ public class PublishEventTask implements Runnable{
 	
 	//=================================================================================================
 	//Assistant methods
-
-	//-------------------------------------------------------------------------------------------------	
-	private Session getSession() {
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getSubscriptionUri(Subscription subscription ) {
+		logger.debug("getSubscriptionUri started...");
 		
-		//TODO create or get cached
-		return null;
+		final String scheme = Utilities.isEmpty( subscription.getConsumerSystem().getAuthenticationInfo() ) ? CommonConstants.HTTP : CommonConstants.HTTPS;
+		try {
+			
+			return Utilities.createURI(scheme, subscription.getConsumerSystem().getAddress(), subscription.getConsumerSystem().getPort(), subscription.getNotifyUri());
+		
+		} catch (final ClassCastException ex) {
+			throw new ArrowheadException("EventHandler can't find subscription URI.");
+		}
+		
 	}
 
 }

@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -77,9 +78,8 @@ public class EventHandlerService {
 		checkSystemRequestDTO(request.getSource(), false);
 		
 		final Set<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptions(request);
-		//TODO some subscriptions require metadata filtering which my be time consuming complex process
-		// so from here handle it in different thread
 		
+		eventHandlerDriver.publishEvent(request, involvedSubscriptions);
 		
 		return new EventPublishResponseDTO(); //always return empty response
 	}
