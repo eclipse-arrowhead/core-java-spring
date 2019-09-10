@@ -24,6 +24,8 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.EventPublishResponseDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
@@ -136,6 +138,19 @@ public class EventHandlerDBService {
 		final System validProviderSystem = validateSystemRequestDTO(request.getSource());
 		
 		return filterInvolvedSubscriptionsByAuthorizedProviders(involvedSubscriptions, validProviderSystem);
+		
+	}
+	
+	public void publishSubscriberAuthorizationUpdateRequest(final IdIdListDTO request) {
+		logger.debug("publishSubscriberAuthorizationUpdateRequest started ...");
+		
+		//TODO implement method logic here
+		
+		//get involved subscriptions by id
+		//get involved subscriptions filtered by onlyPreRequestedPublishers
+		//for onlyPre... get connections and if publisher in idList update it to true if not in list update to false
+		//for not onlyPre ... update or create connection for all publishers in idList  to true 
+		//final Set<Subscription> involvedSubscriptions = subscriptionRepository.findAllBySubscriberSystemId();
 		
 	}
 	
@@ -261,4 +276,5 @@ public class EventHandlerDBService {
 		
 		return involvedConnections;
 	}
+
 }

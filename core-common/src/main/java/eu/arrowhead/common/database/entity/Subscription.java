@@ -37,8 +37,8 @@ public class Subscription {
 	private EventType eventType;
 	
 	@ManyToOne( fetch = FetchType.EAGER)
-	@JoinColumn( name = "consumerSystemId", referencedColumnName = "id", nullable = false)
-	private System consumerSystem;
+	@JoinColumn( name = "subscriberSystemId", referencedColumnName = "id", nullable = false)
+	private System subscriberSystem;
 	
 	@Column(nullable = true, columnDefinition = "TEXT")
 	private String filterMetaData;
@@ -76,11 +76,11 @@ public class Subscription {
 	public Subscription() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Subscription(final EventType eventType, final System consumerSystem, final String filterMetaData,
+	public Subscription(final EventType eventType, final System subscriberSystem, final String filterMetaData,
 			final String notifyUri, final boolean matchMetaData, final boolean onlyPredefinedPublishers, final ZonedDateTime startDate, final ZonedDateTime endDate, final String sources) {
 
 		this.eventType = eventType;
-		this.consumerSystem = consumerSystem;
+		this.subscriberSystem = subscriberSystem;
 		this.filterMetaData = filterMetaData;
 		this.notifyUri = notifyUri;
 		this.matchMetaData = matchMetaData;
@@ -103,7 +103,7 @@ public class Subscription {
 	//-------------------------------------------------------------------------------------------------	
 	public long getId() { return id; }
 	public EventType getEventType() { return eventType;	}
-	public System getConsumerSystem() { return consumerSystem; }
+	public System getSubscriberSystem() { return subscriberSystem; }
 	public String getFilterMetaData() { return filterMetaData; }
 	public String getNotifyUri() { return notifyUri; }
 	public boolean isMatchMetaData() { return matchMetaData; }
@@ -117,7 +117,7 @@ public class Subscription {
 	//-------------------------------------------------------------------------------------------------
 	public void setId( final long id) { this.id = id; }
 	public void setEventType( final EventType eventType) {	this.eventType = eventType;	}
-	public void setConsumerSystem( final System consumerSystem) { this.consumerSystem = consumerSystem; }
+	public void setSubscriberSystem( final System subscriberSystem) { this.subscriberSystem = subscriberSystem; }
 	public void setFilterMetaData( final String filterMetaData) { this.filterMetaData = filterMetaData; }
 	public void setNotifyUri( final String notifyUri) { this.notifyUri = notifyUri; }
 	public void setMatchMetaData( final boolean matchMetaData) { this.matchMetaData = matchMetaData; }
@@ -133,7 +133,7 @@ public class Subscription {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
-		return "Subscription [id=" + id + ", eventType=" + eventType + ", consumerSystem=" + consumerSystem
+		return "Subscription [id=" + id + ", eventType=" + eventType + ", subscriberSystem=" + subscriberSystem
 				+ ", matchMetaData=" + matchMetaData + ", onlyPredefinedPublishers=" + onlyPredefinedPublishers +  "]";
 	}
 }

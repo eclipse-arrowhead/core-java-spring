@@ -29,6 +29,7 @@ import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
+import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
@@ -268,6 +269,25 @@ public class EventHandlerController {
 	    return eventHandlerService.publishRequest(request);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_EVENTHANDLER_PUBLISH_DESCRIPTION)
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENTHANDLER_PUBLISH_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENTHANDLER_PUBLISH_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_EVENTHANDLER_PUBLISH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public void publishSubscriberAuthorizationUpdate(@RequestBody final IdIdListDTO request) {
+		logger.debug("publishSubscriberAuthorizationUpdate started ...");
+		
+		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH;
+
+		checkIdIdListDTO( request , origin );
+		
+	    eventHandlerDBService.publishSubscriberAuthorizationUpdateRequest(request);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -359,7 +379,7 @@ public class EventHandlerController {
 	
 	//-------------------------------------------------------------------------------------------------
 	// This method may CHANGE the content of EventPublishRequestDTO
-	private void validateTimeStamp(EventPublishRequestDTO request, String origin) {
+	private void validateTimeStamp(final EventPublishRequestDTO request, final String origin) {
 		logger.debug("validateTimeStamp started ...");
 		
 		if ( Utilities.isEmpty( request.getTimeStamp() )) {
@@ -375,7 +395,7 @@ public class EventHandlerController {
 				
 				timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimeStamp());
 			
-			} catch (DateTimeParseException ex) {
+			} catch (final DateTimeParseException ex) {
 				
 				throw new BadPayloadException("Request.TimeStamp" + WRONG_FORMAT_ERROR_MESSAGE + ex, HttpStatus.SC_BAD_REQUEST, origin);
 			}
@@ -392,5 +412,34 @@ public class EventHandlerController {
 
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkIdIdListDTO(final IdIdListDTO request, final String origin) {
+		logger.debug("checkIdIdListDTO started ...");
+		
+		if (request == null) {
+			throw new BadPayloadException("Request" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}	
+		
+		if (request.getId() == null) {
+			throw new BadPayloadException("Request.Id" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}	
+		
+		if (request.getId() < 1) {
+			throw new BadPayloadException("Request.Id" + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (request.getIdList() != null && !request.getIdList().isEmpty()) {
+		
+			for ( final  Long id: request.getIdList()) {
+				
+				if (id != null && id < 1) {
+					throw new BadPayloadException("Request.IdList.Id" + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+				}
+			}
+		}
+		
+	}
+
 
 }

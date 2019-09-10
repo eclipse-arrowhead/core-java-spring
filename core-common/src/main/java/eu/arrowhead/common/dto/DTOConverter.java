@@ -475,7 +475,7 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription){
 		Assert.notNull(subscription, "subscription is null");
-		Assert.notNull(subscription.getConsumerSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
 		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
 		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
 		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
@@ -489,7 +489,7 @@ public class DTOConverter {
 		return new SubscriptionResponseDTO(
 				subscription.getId(), 
 				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
-				convertSystemToSystemResponseDTO(subscription.getConsumerSystem()), 
+				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
 				Utilities.text2Map(subscription.getFilterMetaData()), 
 				subscription.getNotifyUri(), 
 				subscription.isMatchMetaData(), 
@@ -504,7 +504,7 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	public static SubscriptionResponseDTO convertSubscriptionToOnlyAuthorizedSourcesSubscriptionResponseDTO(final Subscription subscription){
 		Assert.notNull(subscription, "subscription is null");
-		Assert.notNull(subscription.getConsumerSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
 		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
 		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
 		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
@@ -518,7 +518,7 @@ public class DTOConverter {
 		return new SubscriptionResponseDTO(
 				subscription.getId(), 
 				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
-				convertSystemToSystemResponseDTO(subscription.getConsumerSystem()), 
+				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
 				Utilities.text2Map(subscription.getFilterMetaData()), 
 				subscription.getNotifyUri(), 
 				subscription.isMatchMetaData(), 
