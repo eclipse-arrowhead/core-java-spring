@@ -2,13 +2,12 @@ package eu.arrowhead.client.skeleton.provider;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
-import eu.arrowhead.client.skeleton.common.ArrowheadService;
+import eu.arrowhead.common.CommonConstants;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "eu.arrowhead")
+@ComponentScan(basePackages = {CommonConstants.BASE_PACKAGE}) //TODO: add custom packages if any
 public class ProviderMain {
 
 	//=================================================================================================
@@ -16,9 +15,6 @@ public class ProviderMain {
 
 	//-------------------------------------------------------------------------------------------------
 	public static void main(final String[] args) {
-		ConfigurableApplicationContext context = SpringApplication.run(ProviderMain.class, args);
-		context.getBean(ArrowheadService.class).echoServiceRegistry();
-	}
-	
-	
+		SpringApplication.run(ProviderMain.class, args);
+	}	
 }
