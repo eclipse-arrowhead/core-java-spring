@@ -15,8 +15,12 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -87,6 +91,18 @@ public class ArrowheadService {
 		final UriComponents unregisterUri = Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort, queryMap, unregisterUriStr);
 		
 		return httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ResponseEntity<String> echoOrchestrator() {
+		final ServiceQueryFormDTO request = new ServiceQueryFormDTO();
+		request.setServiceDefinitionRequirement(CommonConstants.CORE_SERVICE_ORCH_PROCESS);
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort,
+								CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI), HttpMethod.GET, ServiceQueryResultDTO.class, request);
+		
+		final SystemResponseDTO orchestrator = response.getBody().getServiceQueryData().get(0).getProvider();
+		
+		return httpService.sendRequest(Utilities.createURI(getUriScheme(), orchestrator.getAddress(), orchestrator.getPort(), CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI), HttpMethod.GET, String.class);
 	}
 	
 	//=================================================================================================

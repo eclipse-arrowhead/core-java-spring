@@ -1,4 +1,4 @@
-package eu.arrowhead.client.skeleton.provider;
+package eu.arrowhead.client.skeleton.consumer;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
@@ -22,7 +22,7 @@ import eu.arrowhead.common.exception.UnavailableServerException;
 
 @Component
 public class ApplicationInitListener {
-	
+
 	//=================================================================================================
 	// members
 	
@@ -45,6 +45,13 @@ public class ApplicationInitListener {
 		} else {
 			logger.info("Service Registry is NOT available.");
 		}
+		
+		//Checking the availability of Orchestrator Core System
+		if (checkOrchestratorIsAlive()) {
+			logger.info("Orchestrator is available.");
+		} else {
+			logger.info("Orchestrator is NOT available.");
+		}
 
 		//TODO: implement here any custom behavior on application start up
 	}
@@ -62,6 +69,16 @@ public class ApplicationInitListener {
 	private boolean checkServiceRegistryIsAlive() {
 		try {
 			final ResponseEntity<String> response = arrowheadService.echoServiceRegistry();
+			return response.getStatusCode() == HttpStatus.OK;			
+		} catch (final UnavailableServerException ex) {
+			return false;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean checkOrchestratorIsAlive() {
+		try {
+			final ResponseEntity<String> response = arrowheadService.echoOrchestrator();
 			return response.getStatusCode() == HttpStatus.OK;			
 		} catch (final UnavailableServerException ex) {
 			return false;

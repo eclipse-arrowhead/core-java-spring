@@ -37,7 +37,10 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 		
 		final String cloudCN = getServerCloudCN();
-		if (requestTarget.contains(CommonConstants.MGMT_URI)) {
+		
+		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
+			// Everybody in the local cloud can test the server => no further check is necessary
+		} else if (requestTarget.contains(CommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI)) {
