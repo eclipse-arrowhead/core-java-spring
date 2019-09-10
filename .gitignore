@@ -28,6 +28,7 @@ wrapper
 /client-skeleton-common/target
 /client-skeleton-common/repo/eu/arrowhead/core-client/skeleton/*.jar
 /client-skeleton-provider/target
+/client-skeleton-consumer/target
 /eventhandler/target
 /gatekeeper/target
 /gateway/target
