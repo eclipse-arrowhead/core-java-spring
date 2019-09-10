@@ -98,7 +98,7 @@ public class ArrowheadService {
 		final ServiceQueryFormDTO request = new ServiceQueryFormDTO();
 		request.setServiceDefinitionRequirement(CommonConstants.CORE_SERVICE_ORCH_PROCESS);
 		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort,
-								CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI), HttpMethod.GET, ServiceQueryResultDTO.class, request);
+								CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI), HttpMethod.GET, ServiceQueryResultDTO.class, request);
 		
 		final SystemResponseDTO orchestrator = response.getBody().getServiceQueryData().get(0).getProvider();
 		
