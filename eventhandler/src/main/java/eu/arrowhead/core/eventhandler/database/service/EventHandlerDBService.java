@@ -303,10 +303,12 @@ public class EventHandlerDBService {
 						conn.setAuthorized( false );
 					}
 				}
-				
-				subscriptionPublisherConnectionRepository.saveAll( involvedPublisherSystems );
-				subscriptionPublisherConnectionRepository.flush();
 			}
+			
+			subscriptionPublisherConnectionRepository.saveAll( involvedPublisherSystems );
+			subscriptionPublisherConnectionRepository.flush();
+			
+			return;
 			
 		} else {
 			
@@ -327,9 +329,12 @@ public class EventHandlerDBService {
 				
 				subscriptionEntry.getPublisherConnections().add(conn);
 			}
+			
+			subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
+			subscriptionPublisherConnectionRepository.flush();
+			
+			return;
 		}
-		subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
-		subscriptionPublisherConnectionRepository.flush();
 	}
 
 	//-------------------------------------------------------------------------------------------------
