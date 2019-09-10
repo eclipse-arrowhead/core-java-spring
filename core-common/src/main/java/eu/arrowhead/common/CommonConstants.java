@@ -40,6 +40,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENTHANDLER_SUBSCRIPTION = "eventhandler-subscription";
 	public static final String CORE_SERVICE_EVENTHANDLER_UNSUBSCRIPTION = "eventhandler-unsubscription";
 	public static final String CORE_SERVICE_EVENTHANDLER_PUBLISH = "eventhandler-publish";
+	public static final String CORE_SERVICE_EVENTHANDLER_PUBLISH_AUTH_UPDATE = "eventhandler-publish-auth-update";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -114,6 +115,7 @@ public class CommonConstants {
 	public static final String OP_EVENTHANDLER_SUBSCRIPTION = "/subscription";
 	public static final String OP_EVENTHANDLER_UNSUBSCRIPTION = "/unsubscription";
 	public static final String OP_EVENTHANDLER_PUBLISH = "/publish";
+	public static final String OP_EVENTHANDLER_PUBLISH_AUTH_UPDATE = "/publish_auth_update";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
