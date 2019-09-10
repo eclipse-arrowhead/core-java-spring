@@ -57,11 +57,11 @@ public class PublishEventTask implements Runnable{
 			final ResponseEntity response = httpService.sendRequest( subscriptionUri, HttpMethod.POST, ResponseEntity.class, DTOConverter.convertEventPublishRequestDTOToEventDTO( publishRequestDTO ));		
 			
 			if (response == null) {
-				throw new TimeoutException(subscription.getConsumerSystem().getSystemName() + " subscriber: SendEventRequest timeout");
+				throw new TimeoutException(subscription.getSubscriberSystem().getSystemName() + " subscriber: SendEventRequest timeout");
 			}
 			
 			if ( !response.getStatusCode().is2xxSuccessful()) {
-				throw new ArrowheadException(subscription.getConsumerSystem().getSystemName() + " subscriber: SendEventRequest unsuccessful: " + response.getStatusCode());
+				throw new ArrowheadException(subscription.getSubscriberSystem().getSystemName() + " subscriber: SendEventRequest unsuccessful: " + response.getStatusCode());
 			}		
 			
 		} catch (final InvalidParameterException | BadPayloadException ex) {	
@@ -81,10 +81,10 @@ public class PublishEventTask implements Runnable{
 	private UriComponents getSubscriptionUri(Subscription subscription ) {
 		logger.debug("getSubscriptionUri started...");
 		
-		final String scheme = Utilities.isEmpty( subscription.getConsumerSystem().getAuthenticationInfo() ) ? CommonConstants.HTTP : CommonConstants.HTTPS;
+		final String scheme = Utilities.isEmpty( subscription.getSubscriberSystem().getAuthenticationInfo() ) ? CommonConstants.HTTP : CommonConstants.HTTPS;
 		try {
 			
-			return Utilities.createURI(scheme, subscription.getConsumerSystem().getAddress(), subscription.getConsumerSystem().getPort(), subscription.getNotifyUri());
+			return Utilities.createURI(scheme, subscription.getSubscriberSystem().getAddress(), subscription.getSubscriberSystem().getPort(), subscription.getNotifyUri());
 		
 		} catch (final ClassCastException ex) {
 			throw new ArrowheadException("EventHandler can't find subscription URI.");

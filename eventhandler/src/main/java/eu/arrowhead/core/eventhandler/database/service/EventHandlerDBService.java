@@ -165,7 +165,7 @@ public class EventHandlerDBService {
 		final EventType validEventType = validateEventType(request.getEventType());
 		
 		final Subscription subscription = new Subscription();
-		subscription.setConsumerSystem(validSubscriberSystem);
+		subscription.setSubscriberSystem(validSubscriberSystem);
 		subscription.setEventType(validEventType);
 		subscription.setNotifyUri(request.getNotifyUri());
 		subscription.setFilterMetaData(Utilities.map2Text(request.getFilterMetaData()));
