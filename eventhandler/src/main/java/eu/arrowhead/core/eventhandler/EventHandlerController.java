@@ -7,6 +7,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -91,7 +92,8 @@ public class EventHandlerController {
 	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future then the tolerated time difference";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past then the tolerated time difference";;
 
-	private static final long TOLERANCE = Long.getLong(CommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD);
+	@Value(CommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
+	private long timeStampTolerance;
 	
 	private final Logger logger = LogManager.getLogger(EventHandlerController.class);
 	
@@ -405,46 +407,17 @@ public class EventHandlerController {
 				throw new BadPayloadException("Request.TimeStamp" + WRONG_FORMAT_ERROR_MESSAGE + ex, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (timeStamp.isAfter(now.plusSeconds(TOLERANCE))) {
+			if (timeStamp.isAfter(now.plusSeconds( timeStampTolerance ))) {
 				
 				throw new BadPayloadException("Request.TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (timeStamp.isBefore(now.minusSeconds(TOLERANCE))) {
+			if (timeStamp.isBefore(now.minusSeconds( timeStampTolerance ))) {
 				
 				throw new BadPayloadException("Request.TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 
 		}
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkIdIdListDTO(final IdIdListDTO request, final String origin) {
-		logger.debug("checkIdIdListDTO started ...");
-		
-		if (request == null) {
-			throw new BadPayloadException("Request" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}	
-		
-		if (request.getId() == null) {
-			throw new BadPayloadException("Request.Id" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}	
-		
-		if (request.getId() < 1) {
-			throw new BadPayloadException("Request.Id" + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		if (request.getIdList() != null && !request.getIdList().isEmpty()) {
-		
-			for ( final  Long id: request.getIdList()) {
-				
-				if (id != null && id < 1) {
-					throw new BadPayloadException("Request.IdList.Id" + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-				}
-			}
-		}
-		
-	}
-
 
 }
