@@ -9,12 +9,14 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -48,6 +50,7 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.authorization.service.AuthorizationDriver;
 
 @Service
 public class AuthorizationDBService {
@@ -78,6 +81,12 @@ public class AuthorizationDBService {
 	
 	@Autowired
 	private AuthorizationInterCloudInterfaceConnectionRepository authorizationInterCloudInterfaceConnectionRepository;
+	
+	@Autowired
+	private AuthorizationDriver authorizationDriver;
+	
+	@Value(CommonConstants.$AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD)
+	private boolean eventhandlerIsPresent;
 	
 	private final Logger logger = LogManager.getLogger(AuthorizationDBService.class);
 
@@ -150,6 +159,15 @@ public class AuthorizationDBService {
 		try {
 			if (!authorizationIntraCloudRepository.existsById(id)) {
 				throw new InvalidParameterException("AuthorizationIntraCloud with id of '" + id + "' not exists");
+			}
+			
+			if ( eventhandlerIsPresent)  {
+				final Optional<AuthorizationIntraCloud> authOptional = authorizationIntraCloudRepository.findById( id );
+				if ( authOptional.isPresent() ) {
+					Assert.notNull(authOptional.get().getConsumerSystem(), "ConsumerSystem is null");
+					
+					authorizationDriver.publishAuthUpdate(authOptional.get().getConsumerSystem().getId());
+				}
 			}
 			
 			authorizationIntraCloudRepository.deleteById(id);
@@ -630,6 +648,11 @@ public class AuthorizationDBService {
 			final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
 			authorizationIntraCloudRepository.flush();
 			
+			if ( eventhandlerIsPresent)  {
+				
+				authorizationDriver.publishAuthUpdate( consumer.getId() );				
+			}
+			
 			return savedAuthIntraEntries;
 		} else {
 			throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
@@ -673,6 +696,11 @@ public class AuthorizationDBService {
 		
 		final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
 		authorizationIntraCloudRepository.flush();
+		
+		if ( eventhandlerIsPresent)  {
+			
+			authorizationDriver.publishAuthUpdate( consumer.getId() );				
+		}
 		
 		return savedAuthIntraEntries;
 	}
