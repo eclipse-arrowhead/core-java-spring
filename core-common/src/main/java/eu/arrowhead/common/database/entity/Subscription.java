@@ -37,7 +37,7 @@ public class Subscription {
 	private EventType eventType;
 	
 	@ManyToOne( fetch = FetchType.EAGER)
-	@JoinColumn( name = "subscriberSystemId", referencedColumnName = "id", nullable = false)
+	@JoinColumn( name = "systemId", referencedColumnName = "id", nullable = false)
 	private System subscriberSystem;
 	
 	@Column(nullable = true, columnDefinition = "TEXT")

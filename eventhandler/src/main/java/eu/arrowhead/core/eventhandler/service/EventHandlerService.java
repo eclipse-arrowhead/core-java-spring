@@ -1,5 +1,6 @@
 package eu.arrowhead.core.eventhandler.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.DTOConverter;
@@ -33,8 +35,10 @@ public class EventHandlerService {
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
 	private static final String MORE_THAN_ONE_ERROR_MESSAGE= " must not have more than one element.";
+	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerService.class);
+	
 	
 	@Autowired
 	private EventHandlerDriver eventHandlerDriver;
@@ -84,6 +88,22 @@ public class EventHandlerService {
 		return new EventPublishResponseDTO(); //always return empty response
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public void publishSubscriberAuthorizationUpdateRequest(final EventPublishRequestDTO request) {
+		logger.debug("publishSubscriberAuthorizationUpdateRequest started ...");
+		
+		validateAuthorizationUpdateEventType( request.getEventType() );
+		final Long subscriberSystemId = validateAuthorizationUpdatePayload( request.getPayload() );
+		
+		final List<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( subscriberSystemId );
+				
+		final SystemRequestDTO subscriber = DTOConverter.convertSystemToSystemRequestDTO( involvedSubscriptions.get(0).getSubscriberSystem() );		
+		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
+		
+		eventHandlerDBService.updateSubscriberAuthorization( involvedSubscriptions, authorizedPublishers );
+		
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -112,5 +132,33 @@ public class EventHandlerService {
 			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateAuthorizationUpdateEventType(final String eventType) {
+		logger.debug("validateAuthorizationUpdateEventType started...");
+		
+		if (Utilities.isEmpty( eventType )) {
+			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (!eventType.equalsIgnoreCase( CommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE)) {
+			throw new InvalidParameterException("EventType" + INVALID_TYPE_ERROR_MESSAGE);
+		}
+		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private Long validateAuthorizationUpdatePayload(final String payload) {
+		logger.debug("validateAuthorizationUpdatePayload started...");
+		
+		try {
+			final Long id = Long.parseLong(payload);
+			
+			return id;
+		} catch (NumberFormatException ex) {
+			
+			throw new InvalidParameterException("Payload" + INVALID_TYPE_ERROR_MESSAGE);
+		}
+	}
 
 }

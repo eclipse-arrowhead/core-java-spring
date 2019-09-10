@@ -278,14 +278,16 @@ public class EventHandlerController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_EVENTHANDLER_PUBLISH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void publishSubscriberAuthorizationUpdate(@RequestBody final IdIdListDTO request) {
+	@ResponseBody public void publishSubscriberAuthorizationUpdate(@RequestBody final EventPublishRequestDTO request) {
 		logger.debug("publishSubscriberAuthorizationUpdate started ...");
 		
 		final String origin = CommonConstants.EVENTHANDLER_URI + CommonConstants.OP_EVENTHANDLER_PUBLISH;
 
-		checkIdIdListDTO( request , origin );
+		checkEventPublishRequestDTO(request, origin);
 		
-	    eventHandlerDBService.publishSubscriberAuthorizationUpdateRequest(request);
+		validateTimeStamp(request, origin);
+		
+	    eventHandlerService.publishSubscriberAuthorizationUpdateRequest(request);
 	}
 	
 	//=================================================================================================

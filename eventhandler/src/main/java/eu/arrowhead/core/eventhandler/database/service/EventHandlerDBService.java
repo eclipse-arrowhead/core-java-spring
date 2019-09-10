@@ -1,6 +1,7 @@
 package eu.arrowhead.core.eventhandler.database.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -141,16 +142,30 @@ public class EventHandlerDBService {
 		
 	}
 	
-	public void publishSubscriberAuthorizationUpdateRequest(final IdIdListDTO request) {
-		logger.debug("publishSubscriberAuthorizationUpdateRequest started ...");
+	//-------------------------------------------------------------------------------------------------
+	public List<Subscription> getInvolvedSubscriptionsBySubscriberSystemId(final Long subscriberSystemId) {
+		logger.debug("getInvolvedSubscriptionsBySubscriberSystemId started ...");
 		
-		//TODO implement method logic here
+		final Optional<System> subscriberSystemOptional = systemRepository.findById(subscriberSystemId);
+		if ( subscriberSystemOptional.isEmpty() ) {
+			
+			throw new InvalidParameterException("SubscriberSystem" + NOT_IN_DB_ERROR_MESSAGE);
+		}
 		
-		//get involved subscriptions by id
-		//get involved subscriptions filtered by onlyPreRequestedPublishers
-		//for onlyPre... get connections and if publisher in idList update it to true if not in list update to false
-		//for not onlyPre ... update or create connection for all publishers in idList  to true 
-		//final Set<Subscription> involvedSubscriptions = subscriptionRepository.findAllBySubscriberSystemId();
+		final List<Subscription> involvedSubscriptions = subscriptionRepository.findAllBySubscriberSystem( subscriberSystemOptional.get() );
+		
+		return involvedSubscriptions;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void updateSubscriberAuthorization(final List<Subscription> involvedSubscriptions,
+			final Set<SystemResponseDTO> authorizedPublishers) {
+		logger.debug("updateSubscriberAuthorization started ...");
+		
+		for (final Subscription subscriptionEntry : involvedSubscriptions) {
+			
+			updateSubscriptionEntryPublisherConnections(subscriptionEntry, authorizedPublishers);
+		}
 		
 	}
 	
@@ -262,7 +277,59 @@ public class EventHandlerDBService {
 			}
 		}
 		subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
+		subscriptionPublisherConnectionRepository.flush();
 	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void updateSubscriptionEntryPublisherConnections(final Subscription subscriptionEntry, final Set<SystemResponseDTO> authorizedPublishers) {
+		logger.debug("updateSubscriptionEntryPublisherConnections started...");
+		
+		if (subscriptionEntry.isOnlyPredefinedPublishers()) {
+			
+			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscription(subscriptionEntry);
+			
+			for (final SubscriptionPublisherConnection conn  : involvedPublisherSystems) {
+				final System system = conn.getSystem();
+				
+				for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
+					
+					if (DTOUtilities.equalsSystemInResponseAndRequest(systemResponseDTO, DTOConverter.convertSystemToSystemRequestDTO(system))) {
+						
+						conn.setAuthorized( true );
+					
+					} else {
+						
+						conn.setAuthorized( false );
+					}
+				}
+				
+				subscriptionPublisherConnectionRepository.saveAll( involvedPublisherSystems );
+				subscriptionPublisherConnectionRepository.flush();
+			}
+			
+		} else {
+			
+			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscription(subscriptionEntry);
+			subscriptionPublisherConnectionRepository.deleteAll(involvedPublisherSystems);
+			
+			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
+				
+				final System system = new System(
+						systemResponseDTO.getSystemName(), 
+						systemResponseDTO.getAddress(), 
+						systemResponseDTO.getPort(), 
+						systemResponseDTO.getAuthenticationInfo());
+				system.setId(systemResponseDTO.getId());
+						
+				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);
+				conn.setAuthorized(true);
+				
+				subscriptionEntry.getPublisherConnections().add(conn);
+			}
+		}
+		subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
+		subscriptionPublisherConnectionRepository.flush();
 	}
 
 	//-------------------------------------------------------------------------------------------------
