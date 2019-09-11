@@ -45,6 +45,8 @@ public class Defaults {
 	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CommonConstants.SORT_ORDER_ASCENDING;
 	
+	public static final boolean DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT = false;
+	
 	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
 	
 	public static final int DEFAULT_RELAY_CHECK_INTERVAL = 9;

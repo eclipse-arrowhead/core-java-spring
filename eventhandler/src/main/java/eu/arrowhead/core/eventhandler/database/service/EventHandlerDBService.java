@@ -287,7 +287,7 @@ public class EventHandlerDBService {
 		
 		if (subscriptionEntry.isOnlyPredefinedPublishers()) {
 			
-			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscription(subscriptionEntry);
+			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
 			
 			for (final SubscriptionPublisherConnection conn  : involvedPublisherSystems) {
 				final System system = conn.getSystem();
@@ -312,7 +312,7 @@ public class EventHandlerDBService {
 			
 		} else {
 			
-			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscription(subscriptionEntry);
+			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
 			subscriptionPublisherConnectionRepository.deleteAll(involvedPublisherSystems);
 			
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {

@@ -32,7 +32,7 @@ public class AuthorizationApplicationInitListener extends ApplicationInitListene
 		
 		if ( eventhandlerIsPresent ) {
 			
-			return List.of(CoreSystemService.EVENTHANDLER_PUBLISH_AUTH_UPDATE_SERVICE);
+			return List.of(CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE);
 		
 		} else {
 			

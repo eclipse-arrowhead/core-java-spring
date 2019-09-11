@@ -37,10 +37,11 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
-	public static final String CORE_SERVICE_EVENTHANDLER_SUBSCRIPTION = "eventhandler-subscription";
-	public static final String CORE_SERVICE_EVENTHANDLER_UNSUBSCRIPTION = "eventhandler-unsubscription";
-	public static final String CORE_SERVICE_EVENTHANDLER_PUBLISH = "eventhandler-publish";
-	public static final String CORE_SERVICE_EVENTHANDLER_PUBLISH_AUTH_UPDATE = "eventhandler-publish-auth-update";
+	
+	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH = "event-publish";
+	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
+	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
+	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -111,11 +112,11 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 	
-	public static final String EVENTHANDLER_URI = "/eventhandler";
-	public static final String OP_EVENTHANDLER_SUBSCRIPTION = "/subscription";
-	public static final String OP_EVENTHANDLER_UNSUBSCRIPTION = "/unsubscription";
-	public static final String OP_EVENTHANDLER_PUBLISH = "/publish";
-	public static final String OP_EVENTHANDLER_PUBLISH_AUTH_UPDATE = "/publish_auth_update";
+	public static final String EVENT_HANDLER_URI = "/event_handler";
+	public static final String OP_EVENT_HANDLER_PUBLISH = "/publish";
+	public static final String OP_EVENT_HANDLER_SUBSCRIBE = "/subscribe";
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
+	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish_auth_update";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -199,6 +200,9 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
+	
+    public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
+    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" +Defaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + Defaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";

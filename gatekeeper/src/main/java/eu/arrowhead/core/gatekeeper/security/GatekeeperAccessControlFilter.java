@@ -32,7 +32,7 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 		} else if (requestTarget.contains(CommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else {
+		} else if (requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_GSD_SERVICE) || requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_ICN_SERVICE)) {
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForChecks, requestTarget);
 		}
 	}

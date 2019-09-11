@@ -10,6 +10,6 @@ public interface SubscriptionPublisherConnectionRepository
 		extends RefreshableRepository<SubscriptionPublisherConnection, Long> {
 
 	public Set<Subscription> findAllBySystemAndAuthorized(final System validProviderSystem, final boolean authorized);
-	public Set<SubscriptionPublisherConnection> findBySubscription(final Subscription subscriptionEntry);
+	public Set<SubscriptionPublisherConnection> findBySubscriptionEntry(final Subscription subscriptionEntry);
 
 }
