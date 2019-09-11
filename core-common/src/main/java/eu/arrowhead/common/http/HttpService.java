@@ -1,12 +1,14 @@
 package eu.arrowhead.common.http;
 
 import java.io.IOException;
+import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,13 +17,17 @@ import javax.annotation.PostConstruct;
 import javax.el.MethodNotFoundException;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.security.auth.x500.X500Principal;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,7 +79,9 @@ public class HttpService {
 	
 	@Autowired
 	private SSLProperties sslProperties;
-	
+
+	private String clientName;
+
 	@Autowired
 	private ArrowheadHttpClientResponseErrorHandler errorHandler;
 	
@@ -181,7 +189,19 @@ public class HttpService {
 	//-------------------------------------------------------------------------------------------------
 	private RestTemplate createTemplate(final SSLContext sslContext) {
 		final HttpClient client = createClient(sslContext);
-		final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(client);
+		final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(client) {
+			// This modification is needed to reuse already established connections in subsequent HTTP calls.
+			
+			@Override
+			protected HttpContext createHttpContext(final HttpMethod httpMethod, final URI uri) {
+				final HttpContext context = new HttpClientContext(new BasicHttpContext());
+				if (!Utilities.isEmpty(clientName)) {
+					context.setAttribute(HttpClientContext.USER_TOKEN, new X500Principal(clientName));
+				}
+				
+				return context;
+			}
+		};
 		final RestTemplate restTemplate = new RestTemplate(factory);
 		restTemplate.setErrorHandler(errorHandler);
 		return restTemplate;
@@ -224,6 +244,10 @@ public class HttpService {
 		
 		final KeyStore keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
 		keystore.load(sslProperties.getKeyStore().getInputStream(), sslProperties.getKeyStorePassword().toCharArray());
+		
+		final X509Certificate certFromKeyStore = Utilities.getFirstCertFromKeyStore(keystore);
+		clientName = certFromKeyStore.getSubjectDN().getName();
+		
 		return new SSLContextBuilder().loadTrustMaterial(sslProperties.getTrustStore().getURL(), sslProperties.getTrustStorePassword().toCharArray())
 							   		  .loadKeyMaterial(keystore, sslProperties.getKeyPassword().toCharArray())
 							   		  .setKeyStoreType(sslProperties.getKeyStoreType())
