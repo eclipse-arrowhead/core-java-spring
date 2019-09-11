@@ -9,8 +9,9 @@ public class AuthorizationInterCloudCheckRequestDTO implements Serializable {
 	// members
 	
 	private static final long serialVersionUID = -263209252842507399L;
-	private Long cloudId;
-	private Long serviceDefinitionId;
+	
+	private CloudRequestDTO cloud;
+	private String serviceDefinition;
 	private List<IdIdListDTO> providerIdsWithInterfaceIds;
 	
 	//=================================================================================================
@@ -19,19 +20,20 @@ public class AuthorizationInterCloudCheckRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public AuthorizationInterCloudCheckRequestDTO() {}
 	
-	public AuthorizationInterCloudCheckRequestDTO(final Long cloudId, final Long serviceDefinitionId, final List<IdIdListDTO> providerIdsWithInterfaceIds) {
-		this.cloudId = cloudId;
-		this.serviceDefinitionId = serviceDefinitionId;
+	//-------------------------------------------------------------------------------------------------
+	public AuthorizationInterCloudCheckRequestDTO(final CloudRequestDTO cloud, final String serviceDefinition, final List<IdIdListDTO> providerIdsWithInterfaceIds) {
+		this.cloud = cloud;
+		this.serviceDefinition = serviceDefinition;
 		this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Long getCloudId() {return cloudId;}
-	public Long getServiceDefinitionId() {return serviceDefinitionId;}
-	public List<IdIdListDTO> getProviderIdsWithInterfaceIds() {return providerIdsWithInterfaceIds;}
+	public CloudRequestDTO getCloud() { return cloud; }
+	public String getServiceDefinition() { return serviceDefinition; }
+	public List<IdIdListDTO> getProviderIdsWithInterfaceIds() { return providerIdsWithInterfaceIds; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setCloudId(final Long cloudId) {this.cloudId = cloudId;}
-	public void setServiceDefinitionId(final Long serviceDefinitionId) {this.serviceDefinitionId = serviceDefinitionId;}
-	public void setProviderIdsWithInterfaceIds(final List<IdIdListDTO> providerIdsWithInterfaceIds) {this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds;}
+	public void setCloud(final CloudRequestDTO cloud) { this.cloud = cloud; }
+	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
+	public void setProviderIdsWithInterfaceIds(final List<IdIdListDTO> providerIdsWithInterfaceIds) { this.providerIdsWithInterfaceIds = providerIdsWithInterfaceIds; }
 }

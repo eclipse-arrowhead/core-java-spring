@@ -20,5 +20,5 @@ public interface ServiceRegistryRepository extends RefreshableRepository<Service
 	//-------------------------------------------------------------------------------------------------
 	public Optional<ServiceRegistry> findByServiceDefinitionAndSystem(final ServiceDefinition serviceDefinition, final System system);
 	public List<ServiceRegistry> findByServiceDefinition(final ServiceDefinition serviceDefinition);
-	public Page<ServiceRegistry> findAllByServiceDefinition(final ServiceDefinition serviceDefinition, Pageable page);
+	public Page<ServiceRegistry> findAllByServiceDefinition(final ServiceDefinition serviceDefinition, final Pageable page);
 }

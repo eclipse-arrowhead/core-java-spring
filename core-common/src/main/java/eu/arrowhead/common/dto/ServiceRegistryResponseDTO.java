@@ -43,6 +43,7 @@ public class ServiceRegistryResponseDTO implements Serializable {
 	public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 	
+	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setServiceDefinition(final ServiceDefinitionResponseDTO serviceDefinition) { this.serviceDefinition = serviceDefinition; }
 	public void setProvider(final SystemResponseDTO provider) { this.provider = provider; }

@@ -22,7 +22,6 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 	@Autowired
 	private CommonDBService commonDBService; 
 
-
 	//=================================================================================================
 	// assistant methods
 	
@@ -63,7 +62,7 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 				operator = serverFields[2];
 			}
 			
-			commonDBService.insertOwnCloudWithoutGatekeeper(operator, name, sslProperties.isSslEnabled());
+			commonDBService.insertOwnCloud(operator, name, sslProperties.isSslEnabled(), null);
 			logger.info("{}.{} own cloud is registered in {} mode.", name, operator, getModeString());
 		}
 	}

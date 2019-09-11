@@ -27,15 +27,17 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	//-------------------------------------------------------------------------------------------------
 	public OrchestrationFlags(final Map<String,Boolean> map) {
 		this();
-		for (final Entry<String,Boolean> entry : map.entrySet()) {
-			if (flagMap.containsKey(entry.getKey())) {
-				put(flagMap.get(entry.getKey()), entry.getValue());
+		if (map != null) {
+			for (final Entry<String,Boolean> entry : map.entrySet()) {
+				if (flagMap.containsKey(entry.getKey())) {
+					put(flagMap.get(entry.getKey()), entry.getValue());
+				}
 			}
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public boolean put(final Flag flag, final Boolean value) {
+	public Boolean put(final Flag flag, final Boolean value) {
 		final boolean validValue = (value == null ? false : value); 
 		return super.put(flag.getFlag(), validValue);
 	}
@@ -78,7 +80,7 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	// nested classes
 	
 	//-------------------------------------------------------------------------------------------------
-	public static enum Flag {
+	public enum Flag {
 		
 		//=================================================================================================
 		// elements
@@ -118,5 +120,4 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 			this.flag = flag;
 		}
 	}
-
 }

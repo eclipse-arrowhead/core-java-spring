@@ -3,7 +3,7 @@ package eu.arrowhead.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class IdIdListDTO implements Serializable{
+public class IdIdListDTO implements Serializable {
 	
 	//=================================================================================================
 	// members
@@ -19,6 +19,7 @@ public class IdIdListDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public IdIdListDTO() {}
 	
+	//-------------------------------------------------------------------------------------------------
 	public IdIdListDTO(final Long id, final List<Long> idList) {
 		this.id = id;
 		this.idList = idList;

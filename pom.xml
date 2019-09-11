@@ -48,6 +48,9 @@
 		<disruptor.version>3.3.6</disruptor.version>
 		<http.client.version>4.5.8</http.client.version>
   		<jose4j.version>0.6.5</jose4j.version>
+  		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
+  		<jms.api.version>2.0.1</jms.api.version>
+  		<activemq.client.version>5.15.9</activemq.client.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -110,6 +113,22 @@
 	    	<artifactId>jose4j</artifactId>
 	    	<version>${jose4j.version}</version>
 	    </dependency>
+	    <dependency>
+    		<groupId>org.apache.commons</groupId>
+    		<artifactId>commons-lang3</artifactId>
+    		<version>${apache.commons.lang3.version}</version>
+		</dependency>
+	    <dependency>
+    		<groupId>javax.jms</groupId>
+    		<artifactId>javax.jms-api</artifactId>
+    		<version>${jms.api.version}</version>
+		</dependency>
+	    <dependency>
+    		<groupId>org.apache.activemq</groupId>
+    		<artifactId>activemq-client</artifactId>
+    		<version>${activemq.client.version}</version>
+		</dependency>
+	    
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>

@@ -13,6 +13,8 @@ public class Defaults {
 	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
+	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
+	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
 	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
 	
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
@@ -44,6 +46,12 @@ public class Defaults {
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CommonConstants.SORT_ORDER_ASCENDING;
 	
 	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
+	
+	public static final int DEFAULT_RELAY_CHECK_INTERVAL = 9;
+	public static final int DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = 50;
+	
+	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT = false;
+	public static final boolean DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY = false;
 	
 	//=================================================================================================
 	// assistant methods

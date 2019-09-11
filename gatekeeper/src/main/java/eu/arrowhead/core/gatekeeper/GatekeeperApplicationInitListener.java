@@ -1,96 +1,103 @@
 package eu.arrowhead.core.gatekeeper;
 
-import java.util.Base64;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceConfigurationError;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.jms.Session;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.CloudGatekeeper;
-import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
+import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
+import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 
 @Component
 public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	
 	//=================================================================================================
 	// members
+
+	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
+	private long timeout;
 	
-	@Autowired
-	private CommonDBService commonDBservicre;
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	private boolean gatewayIsPresent;
+		
+	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	private boolean gatewayIsMandatory;
 	
-	@Autowired
-	private GatekeeperDBService gatekeeperDBService;
+	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
+	
+	private RelaySubscriberDataContainer relaySubscriberDataContainer; // initialization is on demand to avoid circular dependencies 
+	
+	//=================================================================================================
+	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CommonConstants.GATEKEEPER_MATCHMAKER)
+	public GatekeeperMatchmakingAlgorithm getGatekeeperMatchmakingAlgorithm() {
+		return new GetRandomAndDedicatedIfAnyGatekeeperMatchmaker();
+	}
 
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); // TODO: add all necessary services
+	}
 		
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customInit(final ContextRefreshedEvent event) {
 		logger.debug("customInit started...");
 
-		final Cloud ownCloud = commonDBservicre.getOwnCloud(sslProperties.isSslEnabled());
-			
-		final Cloud anotherOwnCloud = commonDBservicre.getOwnCloud(!sslProperties.isSslEnabled());
-		if (anotherOwnCloud.getGatekeeper() != null) {
-			gatekeeperDBService.removeGatekeeper(anotherOwnCloud.getGatekeeper().getId());				
+		if (!sslProperties.isSslEnabled()) {
+			throw new ServiceConfigurationError("Gatekeeper can only started in SECURE mode!");
 		}
 		
-		final String authorizationInfo = sslProperties.isSslEnabled() ? Base64.getEncoder().encodeToString(publicKey.getEncoded()) : null;
-		final CloudGatekeeper gatekeeper = checkIfGatekeeperRegistered(ownCloud);
-		if (gatekeeper == null) {
-			gatekeeperDBService.registerGatekeeper(ownCloud, coreSystemRegistrationProperties.getCoreSystemAddress()
-														   , coreSystemRegistrationProperties.getCoreSystemPort()
-														   , CommonConstants.GATEKEEPER_URI
-														   , authorizationInfo);
-			logger.info("Gatekeeper of own cloud has been registered.");
-		} else if (!checkIfRegisteredGatekeeperHasSameProperties(gatekeeper)) {
-			gatekeeperDBService.updateGatekeeper(gatekeeper, coreSystemRegistrationProperties.getCoreSystemAddress()
-														   , coreSystemRegistrationProperties.getCoreSystemPort()
-														   , CommonConstants.GATEKEEPER_URI
-														   , authorizationInfo);
-			logger.info("Gatekeeper of own cloud has been updated.");
-		} else {
-			logger.info("Gatekeeper of own cloud was already registered.");
+		if (gatewayIsMandatory && !gatewayIsPresent) {
+			throw new ServiceConfigurationError("Gatekeeper can't start with 'gateway_is_present=false' property when the 'gateway_is_mandatory' property is true!");
+		}
+		
+		initializeGatekeeperRelayClient(event.getApplicationContext());
+		relaySubscriberDataContainer = event.getApplicationContext().getBean(RelaySubscriberDataContainer.class);
+		relaySubscriberDataContainer.init();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	protected void customDestroy() {
+		// close connections using listening on advertisement topic
+		relaySubscriberDataContainer.close();
+		
+		// close connections used by web services and gatekeeper tasks
+		for (final Session session : gatekeeperRelayClientWithCache.getCachedSessions()) {
+			gatekeeperRelayClientWithCache.closeConnection(session);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private CloudGatekeeper checkIfGatekeeperRegistered(final Cloud ownCloud) {
-		try {
-			return gatekeeperDBService.getGatekeeperByCloud(ownCloud);			
-		} catch (final InvalidParameterException ex) {
-			return null;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private boolean checkIfRegisteredGatekeeperHasSameProperties(final CloudGatekeeper gatekeeper) {
-		if (publicKey == null) {
-			
-			return (gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
-					&& gatekeeper.getPort() == coreSystemRegistrationProperties.getCoreSystemPort()
-					&& gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
-					&& gatekeeper.getAuthenticationInfo() == null);
-			
-		} else if (gatekeeper.getAuthenticationInfo() == null) {
-			
-			return (gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
-					&& gatekeeper.getPort() == coreSystemRegistrationProperties.getCoreSystemPort()
-					&& gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
-					&& publicKey == null);
-			
-		} else {
-			
-			return (gatekeeper.getAddress().equalsIgnoreCase(coreSystemRegistrationProperties.getCoreSystemAddress().trim()) 
-					&& gatekeeper.getPort() == coreSystemRegistrationProperties.getCoreSystemPort()
-					&& gatekeeper.getServiceUri().equalsIgnoreCase(CommonConstants.GATEKEEPER_URI.trim())
-					&& gatekeeper.getAuthenticationInfo().equals(Base64.getEncoder().encodeToString(publicKey.getEncoded())));
-		}
+	private void initializeGatekeeperRelayClient(final ApplicationContext appContext) {
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		final String serverCN = (String) context.get(CommonConstants.SERVER_COMMON_NAME);
+		final PublicKey publicKey = (PublicKey) context.get(CommonConstants.SERVER_PUBLIC_KEY);
+		final PrivateKey privateKey = (PrivateKey) context.get(CommonConstants.SERVER_PRIVATE_KEY);
+
+		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
 	}
 }

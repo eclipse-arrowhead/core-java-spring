@@ -1,7 +1,5 @@
 package eu.arrowhead.common;
 
-import java.util.List;
-
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -37,6 +35,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
+	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH = "event-publish";
+	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -46,13 +46,25 @@ public class CommonConstants {
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
 	public static final String SERVER_STANDALONE_MODE = "server.standalone.mode";
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
+	public static final String SR_QUERY_BY_SYSTEM_ID_URI = "service.registry.query.by.system.id.uri";
+	public static final String SR_QUERY_BY_SYSTEM_DTO_URI = "service.registry.query.by.system.dto.uri";
+	public static final String REQUIRED_URI_LIST = "required.uri.list";
+	public static final String URI_SUFFIX = "-uri";
 	
 	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
 	public static final String JWT_CLAIM_SERVICE_ID = "sid";
 	public static final String JWT_CLAIM_INTERFACE_ID = "iid";
+	public static final String JWT_CLAIM_MESSAGE_TYPE = "mst";
+	public static final String JWT_CLAIM_SESSION_ID = "sid"; // can be the same as service id because we don't use service id and session id at the same time
+	public static final String JWT_CLAIM_PAYLOAD = "pld";  
 	public static final String JWE_KEY_MANAGEMENT_ALG = KeyManagementAlgorithmIdentifiers.RSA_OAEP_256;
 	public static final String JWE_ENCRYPTION_ALG = ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
 	public static final String JWS_SIGN_ALG = AlgorithmIdentifiers.RSA_USING_SHA512;
+	
+	public static final String RELAY_MESSAGE_TYPE_RAW = "raw";
+	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
+	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
+	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
 	
 	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
@@ -77,6 +89,8 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SERVICE_REGISTRY_QUERY_URI = "/query";
+	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 	
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
@@ -91,6 +105,10 @@ public class CommonConstants {
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
+	
+	public static final String EVENT_HANDLER_URI = "/event_handler";
+	public static final String OP_EVENT_HANDLER_PUBLISH = "/publish";
+	public static final String OP_EVENT_HANDLER_SUBSCRIBE = "/subscribe";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -132,6 +150,10 @@ public class CommonConstants {
 	public static final String $LOG_ALL_REQUEST_AND_RESPONSE_WD = "${" + LOG_ALL_REQUEST_AND_RESPONSE + ":" + Defaults.DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE + "}";
 	public static final String USE_STRICT_SERVICE_INTF_NAME_VERIFIER = "use_strict_service_intf_name_verifier";
 	public static final String $USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD = "${" + USE_STRICT_SERVICE_INTF_NAME_VERIFIER + ":" + Defaults.DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER + "}";
+	public static final String URI_CRAWLER_INTERVAL = "uri_crawler_interval"; // in seconds
+	public static final String $URI_CRAWLER_INTERVAL_WD = "${" + URI_CRAWLER_INTERVAL + ":" + Defaults.DEFAULT_URI_CRAWLER_INTERVAL + "}";
+	public static final String AUTH_TOKEN_TTL_IN_MINUTES = "auth_token_ttl_in_minutes";
+	public static final String $AUTH_TOKEN_TTL_IN_MINUTES_WD = "${" + AUTH_TOKEN_TTL_IN_MINUTES + ":" + Defaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES + "}";
 
 	public static final String REQUEST_PARAM_PAGE = "page";
 	public static final String REQUEST_PARAM_ITEM_PER_PAGE = "item_per_page";
@@ -148,6 +170,8 @@ public class CommonConstants {
 
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";
+	
+	public static final String SORT_FIELD_PRIORITY = "priority";
 
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
@@ -170,7 +194,7 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
 	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
-	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + Defaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT+ "}";
+	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + Defaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
 	
 	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";
 	public static final String ORCHESTRATON_FLAG_METADATA_SEARCH = "metadataSearch";
@@ -181,8 +205,24 @@ public class CommonConstants {
 	public static final String ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
 	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
 	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
+
+	public static final String RELAY_CHECK_INTERVAL = "relay_check_interval"; // in seconds
+	public static final String $RELAY_CHECK_INTERVAL_WD = "${" + RELAY_CHECK_INTERVAL + ":" + Defaults.DEFAULT_RELAY_CHECK_INTERVAL + "}";
+	public static final String GATEKEEPER_IS_GATEWAY_PRESENT = "gateway_is_present";
+	public static final String $GATEKEEPER_IS_GATEWAY_PRESENT_WD = "${" + GATEKEEPER_IS_GATEWAY_PRESENT + ":" + Defaults.DEFAULT_GATEKEEPER_IS_GATEWAY_PRESENT + "}";
+	public static final String GATEKEEPER_IS_GATEWAY_MANDATORY = "gateway_is_mandatory";
+	public static final String $GATEKEEPER_IS_GATEWAY_MANDATORY_WD = "${" + GATEKEEPER_IS_GATEWAY_MANDATORY + ":" + Defaults.DEFAULT_GATEKEEPER_IS_GATEWAY_MANDATORY + "}";
+	
+	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
+	public static final String INTER_CLOUD_PROVIDER_MATCHMAKER = "interCloudProviderMatchmaker";
+	public static final String GATEKEEPER_MATCHMAKER = "gatekeeperMatchmaker";
+	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
+	
+	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
+	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
+																				 Defaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";
 
 	//=================================================================================================
 	// assistant methods

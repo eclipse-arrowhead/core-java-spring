@@ -20,7 +20,7 @@ dependency to use them)
 Verify that you have Java (```java -version```), Maven (```mvn -version```), MySQL installed properly!
 
 Pull this code and enter the directory. 
-```git pull https://github.com/arrowhead-f/core-java-spring.git```
+```git clone https://github.com/arrowhead-f/core-java-spring.git```
 
 Run the MySQL script which is in the ```scripts``` folder. If you won't run this script first, the project won't build. 
 
@@ -40,5 +40,7 @@ Wait until servers start...
 Service Registry will be available on ```localhost:8443``` <br />
 Authorization will be available on ```localhost:8445``` <br />
 Ochestrator will be available on ```localhost:8441``` <br />
+
+Swagger with API documentation is available in the root route.
 
 Enjoy! ;)

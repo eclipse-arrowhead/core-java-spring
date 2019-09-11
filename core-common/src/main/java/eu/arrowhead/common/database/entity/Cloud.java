@@ -2,6 +2,7 @@ package eu.arrowhead.common.database.entity;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -11,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -23,44 +23,53 @@ import org.hibernate.annotations.OnDeleteAction;
 import eu.arrowhead.common.Defaults;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"operator", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"operator", "name"}))
 public class Cloud {
 	
 	//=================================================================================================
 	// members
 	
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "operator", "name", "updatedAt", "createdAt"); //NOSONAR
+	
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String operator;
 	
-	@Column (nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
 	private String name;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean secure = false;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean neighbor = false;
 	
-	@Column (nullable = false)
+	@Column(nullable = false)
 	private boolean ownCloud = false;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	private String authenticationInfo;
+	
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
 	
-	@Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToOne(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true, optional = true)
+	@OneToMany(mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private CloudGatekeeper gatekeeper;
-	
-	@OneToMany (mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
+	
+	@OneToMany(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Set<CloudGatekeeperRelay> gatekeeperRelays = new HashSet<>();
+	
+	@OneToMany(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Set<CloudGatewayRelay> gatewayRelays = new HashSet<>();
 	
 	//=================================================================================================
 	// methods
@@ -69,12 +78,13 @@ public class Cloud {
 	public Cloud() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public Cloud(final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud) {
+	public Cloud(final String operator, final String name, final boolean secure, final boolean neighbor, final boolean ownCloud, final String authenticationInfo) {
 		this.operator = operator;
 		this.name = name;
 		this.secure = secure;
 		this.neighbor = neighbor;
 		this.ownCloud = ownCloud;
+		this.authenticationInfo = authenticationInfo;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -97,11 +107,13 @@ public class Cloud {
 	public boolean getSecure() { return secure; }
 	public boolean getNeighbor() { return neighbor; }
 	public boolean getOwnCloud() { return ownCloud; }
+	public String getAuthenticationInfo() { return authenticationInfo; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
-	public CloudGatekeeper getGatekeeper() { return gatekeeper; }
 	public Set<AuthorizationInterCloud> getAuthorizationInterClouds() { return authorizationInterClouds; }
-
+	public Set<CloudGatekeeperRelay> getGatekeeperRelays() { return gatekeeperRelays; }
+	public Set<CloudGatewayRelay> getGatewayRelays() { return gatewayRelays; }
+	
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setOperator(final String operator) { this.operator = operator; }
@@ -109,14 +121,43 @@ public class Cloud {
 	public void setSecure(final boolean secure) { this.secure = secure; }
 	public void setNeighbor(final boolean neighbor) { this.neighbor = neighbor; }
 	public void setOwnCloud(final boolean ownCloud) { this.ownCloud = ownCloud; }
+	public void setAuthenticationInfo (final String authenticationInfo) { this.authenticationInfo = authenticationInfo; } 
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setGatekeeper(final CloudGatekeeper gatekeeper) { this.gatekeeper = gatekeeper; }
 	public void setAuthorizationInterClouds(final Set<AuthorizationInterCloud> authorizationInterClouds) { this.authorizationInterClouds = authorizationInterClouds; }
-
+	public void setGatekeeperRelays(final Set<CloudGatekeeperRelay> gatekeeperRelays) { this.gatekeeperRelays = gatekeeperRelays; }
+	public void setGatewayRelays(final Set<CloudGatewayRelay> gatewayRelays) { this.gatewayRelays = gatewayRelays; }
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public String toString() {
 		return "Cloud [id = " + id + ", operator = " + operator + ", name = " + name + "]";
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}	
+		if (obj == null) {
+			return false;
+		}	
+		if (getClass() != obj.getClass()) {		
+			return false;
+		}
+		
+		final Cloud other = (Cloud) obj;
+		
+		return id == other.id;
+	}	
 }

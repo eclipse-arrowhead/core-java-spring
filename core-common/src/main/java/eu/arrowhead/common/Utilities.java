@@ -47,9 +47,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -156,16 +158,38 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static ValidatedPageParams validatePageParameters(final Integer page, final Integer size, final String direction, final String origin) {
+		int validatedPage;
+		int validatedSize;
+
+		if (page == null && size == null) {
+			validatedPage = -1;
+			validatedSize = -1;
+		} else {
+			if (page == null || size == null) {
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", org.apache.http.HttpStatus.SC_BAD_REQUEST, origin);
+			} else {
+				validatedPage = page;
+				validatedSize = size;
+			}
+		}
+
+		final Direction validatedDirection = calculateDirection(direction, origin);
+		
+		return new ValidatedPageParams(validatedPage, validatedSize, validatedDirection);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String toPrettyJson(final String jsonString) {
 		try {
 			if (jsonString != null) {
 				final String jsonString_ = jsonString.trim();
 				if (jsonString_.startsWith("{")) {
-					Object tempObj = mapper.readValue(jsonString_, Object.class);
+					final Object tempObj = mapper.readValue(jsonString_, Object.class);
 					return mapper.writeValueAsString(tempObj);
 				} else {
-					Object[] tempObj = mapper.readValue(jsonString_, Object[].class);
+					final Object[] tempObj = mapper.readValue(jsonString_, Object[].class);
 					return mapper.writeValueAsString(tempObj);
 				}
 			}
@@ -178,6 +202,20 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Nullable
+	public static String toJson(final Object object) {
+		if (object == null) {
+			return null;
+		}
+		
+		try {
+			return mapper.writeValueAsString(object);
+		} catch (final JsonProcessingException ex) {
+			throw new ArrowheadException("The specified object cannot be converted to text.", ex);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Nullable
 	public static <T> T fromJson(final String json, final Class<T> parsedClass) {
 		if (json == null || parsedClass == null) {
 			return null;
@@ -185,8 +223,8 @@ public class Utilities {
 		
 	    try {
 	    	return mapper.readValue(json, parsedClass);
-	    } catch (final IOException e) {
-	      throw new ArrowheadException("The specified string cannot be converted to a(n) " + parsedClass.getSimpleName() + " object.", e);
+	    } catch (final IOException ex) {
+	      throw new ArrowheadException("The specified string cannot be converted to a(n) " + parsedClass.getSimpleName() + " object.", ex);
 	    }
 	}
 	
@@ -280,6 +318,7 @@ public class Utilities {
 	        	status = HttpStatus.NOT_FOUND;
 	        	break;
 	        case UNAVAILABLE:
+	        case TIMEOUT:
 	        	status = HttpStatus.GATEWAY_TIMEOUT;
 	        	break;
 	        default:
@@ -291,6 +330,19 @@ public class Utilities {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static RelayType convertStringToRelayType(final String str) {
+		if (isEmpty(str)) {
+			return RelayType.GENERAL_RELAY;
+		}
+				
+		try {
+			return RelayType.valueOf(str.toUpperCase().trim());			
+		} catch (final IllegalArgumentException ex) {
+			return null;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	public static String getCertCNFromSubject(final String subjectName) {
 		if (subjectName == null) {
@@ -299,7 +351,7 @@ public class Utilities {
 		
 	    try {
 	    	// Subject is in LDAP format, we can use the LdapName object for parsing
-	    	LdapName ldapname = new LdapName(subjectName);
+	    	final LdapName ldapname = new LdapName(subjectName);
 	    	for (final Rdn rdn : ldapname.getRdns()) {
 	    		// Find the data after the CN field
 	    		if (CommonConstants.COMMON_NAME_FIELD_NAME.equalsIgnoreCase(rdn.getType())) {
@@ -312,6 +364,14 @@ public class Utilities {
 	    }
 
 	    return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static String getCloudCommonName(final String cloudOperator, final String cloudName) {
+		Assert.isTrue(!isEmpty(cloudOperator), "Cloud operator is null or blank.");
+		Assert.isTrue(!isEmpty(cloudName), "Cloud name is null or blank.");
+		
+		return (cloudName.trim() + "." + cloudOperator.trim() + ".arrowhead.eu").toLowerCase();  
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -425,5 +485,34 @@ public class Utilities {
 		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
 		      throw new AuthException("Public key decoding failed due wrong input key", ex);
 		}
+	}
+	
+	//=================================================================================================
+	// nested classed
+	
+	//-------------------------------------------------------------------------------------------------
+	public static class ValidatedPageParams {
+		
+		//=================================================================================================
+		// members
+		
+		private final int validatedPage;
+		private final int validatedSize;
+		private final Direction validatedDirecion;
+		
+		//=================================================================================================
+		// methods
+		
+		//-------------------------------------------------------------------------------------------------
+		public ValidatedPageParams(final int validatedPage, final int validatedSize, final Direction validatedDirection) {
+			this.validatedPage = validatedPage;
+			this.validatedSize = validatedSize;
+			this.validatedDirecion = validatedDirection;
+		}
+
+		//-------------------------------------------------------------------------------------------------
+		public int getValidatedPage() { return validatedPage; }
+		public int getValidatedSize() { return validatedSize; }
+		public Direction getValidatedDirecion() { return validatedDirecion; } 
 	}
 }

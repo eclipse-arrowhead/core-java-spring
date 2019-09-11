@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -44,13 +43,15 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
-@RunWith (SpringRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrchestratorMain.class)
-@ContextConfiguration (classes = { OrchestratorStoreDBServiceTestContext.class })
+@ContextConfiguration(classes = { OrchestratorServiceTestContext.class })
 public class OrchestratorStoreControllerTest {
 
 	//=================================================================================================
 	// members
+
+	private static final String ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_by_consumer";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -72,418 +73,365 @@ public class OrchestratorStoreControllerTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of getOrchestratorStoreById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoreByIdOkTest() throws Exception {
-		
-		OrchestratorStoreResponseDTO dto = getOrchestratorStoreResponseDTOForTest();
+		final OrchestratorStoreResponseDTO dto = getOrchestratorStoreResponseDTOForTest();
 		when(orchestratorStoreDBService.getOrchestratorStoreByIdResponse(anyLong())).thenReturn(dto);
 		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoreByIdWithInvalidIdTest() throws Exception {
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of getOrchestratorStores
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresOkTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresInvalidDirectionParamTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullPageParamTest() throws Exception {
-		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullItemPerPageParamTest() throws Exception {
-
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullItemPerPageParamAndNullPageParamTest() throws Exception {
-
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of getAllTopPriorityOrchestratorStores
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresOkTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresInvalidDirectionParamTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullPageParamTest() throws Exception {
-		
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-				.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamTest() throws Exception {
-
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-				.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamAndNullPageParamTest() throws Exception {
-
 		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of getOrchestratorStoresByConsumer
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerOkTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andReturn();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerInvalidDirectionParamTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullPageParamTest() throws Exception {
-		
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullItemPerPageParamTest() throws Exception {
-
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getOrchestratorStoresByConsumerNullItemPerPageParamAndNullPageParamTest() throws Exception {
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
+		
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getOrchestratorStoresByConsumerNullIRequestTest() throws Exception {
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
+		
+		final OrchestratorStoreRequestDTO request = null;
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes(request))
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void getOrchestratorStoresByConsumerNullItemPerPageParamAndNullPageParamTest() throws Exception {
-
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
-		
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getLocalOrchestratorStoreRequestDTOForTest()))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void getOrchestratorStoresByConsumerNullIRequestTest() throws Exception {
-
-		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
-		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
-		
-		final OrchestratorStoreRequestDTO request = null;
-	
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
 	public void getOrchestratorStoresByConsumerNullConsumerSystemIdTest() throws Exception {
-
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
-		final Long id = null;
-		request.setConsumerSystemId(id);
+		request.setConsumerSystemId(null);
 	
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresByConsumerNullerviceDefinitionIdTest() throws Exception {
-
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		final OrchestratorStoreRequestDTO request = getLocalOrchestratorStoreRequestDTOForTest();
 		request.setServiceDefinitionName(null);
 	
-		this.mockMvc.perform(put(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of addOrchestratorStoreEntries
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesOkTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getLocalOrchestratorStoreRequestDTOListForTest(3);
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesNullRequestTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  null;
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesNullPiorityTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getLocalOrchestratorStoreRequestDTOListForNullPriorityTest(3);
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesNullServiceIntrfaceTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForNullServiceInterfaceIdTest(3);
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addOrchestratorStoreEntriesListElementsNullTest() throws Exception {
-		
-		OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
+		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForListElementsNullTest(3);
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of removeOrchestratorStore
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeOrchestratorStoreOkTest() throws Exception {
-	
 		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeOrchestratorStoreInvalidIdTest() throws Exception {
-	
 		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Test of modifyPriorities
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void modifyPrioritiesOkTest() throws Exception {
-		
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTO(3);
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void modifyPrioritiesNullRequestTest() throws Exception {
-		
 		final OrchestratorStoreModifyPriorityRequestDTO request = null;
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void modifyPrioritiesEmptyMapTest() throws Exception {
-		
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTOWithEmptyMap();
-	
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//=================================================================================================
@@ -491,89 +439,31 @@ public class OrchestratorStoreControllerTest {
 
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreRequestDTO getLocalOrchestratorStoreRequestDTOForTest() {
-		
 		final String serviceDefinitionName = "serviceDefinitionNameForTest";
 		final Long consumerSystemId = 1L;
 		final SystemRequestDTO providerSystemDTO = getProviderSystemRequestDTOForTest();
 		final CloudRequestDTO cloudDTO = getLocalProviderCloudRequestDTOForTest();
 		final String serviceInterfaceName = "serviceIntrfaceNameForTest";
 		final Integer priority = 1;	
-		final Map<String,String> attribute = new HashMap<String, String>();
+		final Map<String,String> attribute = new HashMap<>();
 		
-		return new OrchestratorStoreRequestDTO(
-				serviceDefinitionName, 
-				consumerSystemId, 
-				providerSystemDTO, 
-				cloudDTO, 
-				serviceInterfaceName, 
-				priority, 
-				attribute);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOForTest() {
-		
-		final String serviceDefinitionName = "serviceDefinitionNameForTest";
-		final Long consumerSystemId = 1L;
-		final SystemRequestDTO providerSystemDTO = getProviderSystemRequestDTOForTest();
-		final CloudRequestDTO cloudDTO = getForeignProviderCloudRequestDTOForTest();
-		final String serviceInterfaceName = "serviceIntrfaceNameForTest";
-		final Integer priority = 1;	
-		final Map<String,String> attribute = new HashMap<String, String>();
-		
-		return new OrchestratorStoreRequestDTO(
-				serviceDefinitionName, 
-				consumerSystemId, 
-				providerSystemDTO, 
-				cloudDTO, 
-				serviceInterfaceName, 
-				priority, 
-				attribute);
+		return new OrchestratorStoreRequestDTO(serviceDefinitionName, consumerSystemId,	providerSystemDTO, cloudDTO, serviceInterfaceName, priority, attribute);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private CloudRequestDTO getLocalProviderCloudRequestDTOForTest() {
-		
 		final String operator = "operatorForTest";
 		final String name = "cloudName";
-		final String address = "localhost";
-		final Integer port = 12345;
-		final Boolean ownCloud = true;	
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
-		
 		cloudRequestDTO.setOperator(operator);
 		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
-		cloudRequestDTO.setOwnCloud(ownCloud);
 		
 		return cloudRequestDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private CloudRequestDTO getForeignProviderCloudRequestDTOForTest() {
-		
-		final String operator = "operatorForTest";
-		final String name = "cloudName";
-		final String address = "localhost";
-		final Integer port = 12345;
-		final Boolean ownCloud = false;	
-		
-		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
-		
-		cloudRequestDTO.setOperator(operator);
-		cloudRequestDTO.setName(name);
-		cloudRequestDTO.setAddress(address);
-		cloudRequestDTO.setPort(port);
-		cloudRequestDTO.setOwnCloud(ownCloud);
-		
-		return cloudRequestDTO;
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	private SystemRequestDTO getProviderSystemRequestDTOForTest() {
-		
 		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
 		systemRequestDTO.setAddress("localhost");
 		systemRequestDTO.setSystemName("systemNameForTest");
@@ -584,73 +474,46 @@ public class OrchestratorStoreControllerTest {
 
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreRequestDTO> getLocalOrchestratorStoreRequestDTOListForTest(final int listSize) {
-		
-		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
-		
-		for (int i = 0; i < listSize; i++) {
-			
+		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<>(listSize);
+		for (int i = 0; i < listSize; ++i) {
 			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getLocalOrchestratorStoreRequestDTOForTest();
 			orchestratorStoreRequestDTO.setProviderSystemDTO(getProviderSystemRequestDTOForTest());
 			orchestratorStoreRequestDTO.setPriority(i + 1);
 			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
 		}
-		return orchestratorStoreRequestDTOList;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private List<OrchestratorStoreRequestDTO> getForeignOrchestratorStoreRequestDTOListForTest(final int listSize) {
 		
-		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
-		
-		for (int i = 0; i < listSize; i++) {
-			
-			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
-			orchestratorStoreRequestDTO.setProviderSystemDTO(getProviderSystemRequestDTOForTest());
-			orchestratorStoreRequestDTO.setPriority(i + 1);
-			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
-		}
 		return orchestratorStoreRequestDTOList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreRequestDTO> getLocalOrchestratorStoreRequestDTOListForNullPriorityTest(final int listSize) {
-		
 		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
-		
-		for (int i = 0; i < listSize; i++) {
-			
+		for (int i = 0; i < listSize; ++i) {
 			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getLocalOrchestratorStoreRequestDTOForTest();
-			
 			orchestratorStoreRequestDTO.setPriority(null);
 			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
 		}
+		
 		return orchestratorStoreRequestDTOList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreRequestDTO> getOrchestratorStoreRequestDTOListForNullServiceInterfaceIdTest(final int listSize) {
-		
 		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
-		
-		for (int i = 0; i < listSize; i++) {
-			
+		for (int i = 0; i < listSize; ++i) {
 			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getLocalOrchestratorStoreRequestDTOForTest();
-			
 			orchestratorStoreRequestDTO.setServiceInterfaceName(null);
 			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
 		}
+		
 		return orchestratorStoreRequestDTOList;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreRequestDTO> getOrchestratorStoreRequestDTOListForListElementsNullTest(final int listSize) {
-		
 		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<OrchestratorStoreRequestDTO>(listSize);
-		
-		for (int i = 0; i < listSize; i++) {
-			
-			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = null;
-			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
+		for (int i = 0; i < listSize; ++i) {
+			orchestratorStoreRequestDTOList.add(null);
 		}
 		
 		return orchestratorStoreRequestDTOList;
@@ -658,43 +521,20 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreResponseDTO getOrchestratorStoreResponseDTOForTest() {
-		
-		return new OrchestratorStoreResponseDTO(
-				getIdForTest(),
-				getServiceDefinitionResponseDTOForTest(),
-				getConsumerSystemResponseDTOForTest(),
-				getForeignForTest(),
-				getSystemResponseDTOForTest(),
-				getCloudResponseDTOForTest(),
-				getServiceInterfaceResponseDTO(),
-				getPriorityForTest(),
-				getAttributeForTest(),
-				getCreatedAtForTest(),
-				getUpdatedAtForTest());
+		return new OrchestratorStoreResponseDTO(getIdForTest(), getServiceDefinitionResponseDTOForTest(), getConsumerSystemResponseDTOForTest(), false, getSystemResponseDTOForTest(),
+												getCloudResponseDTOForTest(), getServiceInterfaceResponseDTO(), getPriorityForTest(), getAttributeForTest(), getCreatedAtForTest(),
+												getUpdatedAtForTest());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private ServiceInterfaceResponseDTO getServiceInterfaceResponseDTO() {
-		
-		return new ServiceInterfaceResponseDTO(
-				getIdForTest(),
-				"interfaceNameForTest",
-				getCreatedAtForTest(),
-				getUpdatedAtForTest());
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private boolean getForeignForTest() {
-		
-		return false;
+		return new ServiceInterfaceResponseDTO(getIdForTest(), "interfaceNameForTest", getCreatedAtForTest(), getUpdatedAtForTest());
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreResponseDTO> getOrchestratorStoreResponseDTOListForTest(final int size) {
-		
 		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList<>(size);
-		
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < size; ++i) {
 			final OrchestratorStoreResponseDTO orchestratorStoreResponseDTO = getOrchestratorStoreResponseDTOForTest();
 			orchestratorStoreResponseDTO.setId(i + 1L);
 			orchestratorStoreResponseDTO.getProviderSystem();
@@ -708,7 +548,6 @@ public class OrchestratorStoreControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreListResponseDTO getOrchestratorStoreListResponseDTOForTest(final int size) {
-		
 		final int count = size;
 		final List<OrchestratorStoreResponseDTO> data = getOrchestratorStoreResponseDTOListForTest(size);
 		
@@ -719,10 +558,11 @@ public class OrchestratorStoreControllerTest {
 	private OrchestratorStoreModifyPriorityRequestDTO getOrchestratorStoreModifyPriorityRequestDTO(final int size) {
 		final OrchestratorStoreModifyPriorityRequestDTO request = new OrchestratorStoreModifyPriorityRequestDTO();
 		
-		final Map<Long, Integer> priorityMap = new HashMap<Long, Integer>(size); 
-		for (int i = 0; i < size; i++) {
+		final Map<Long,Integer> priorityMap = new HashMap<>(size); 
+		for (int i = 0; i < size; ++i) {
 			priorityMap.put(i + 1L, i + 1);
 		}		
+		
 		request.setPriorityMap(priorityMap);
 		
 		return request;
@@ -731,98 +571,46 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	private OrchestratorStoreModifyPriorityRequestDTO getOrchestratorStoreModifyPriorityRequestDTOWithEmptyMap() {
 		final OrchestratorStoreModifyPriorityRequestDTO request = new OrchestratorStoreModifyPriorityRequestDTO();
-		
-		final Map<Long, Integer> priorityMap = new HashMap<Long, Integer>(0); 
-		
-		request.setPriorityMap(priorityMap);
+		request.setPriorityMap(Map.of());
 		
 		return request;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private String getUpdatedAtForTest() {
-			
-		return "2019-07-04 14:43:19";
-	}
+	private String getUpdatedAtForTest() { return "2019-07-04 14:43:19"; }
 	
 	//-------------------------------------------------------------------------------------------------
-	private String getCreatedAtForTest() {
-			
-		return "2019-07-04 14:43:19";
-	}
+	private String getCreatedAtForTest() { return "2019-07-04 14:43:19"; } 
 	
 	//-------------------------------------------------------------------------------------------------
 	private Map<String,String> getAttributeForTest() {
-			
-		return new HashMap<String, String>();
+		return new HashMap<>();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Integer getPriorityForTest() {
-			
-		return 1;
-	}
+	private Integer getPriorityForTest() { return 1; }
 	
 	//-------------------------------------------------------------------------------------------------
 	private CloudResponseDTO getCloudResponseDTOForTest() {
-			
-		return new CloudResponseDTO(
-				getIdForTest(), 
-				"operator", 
-				"name", 
-				"address", 
-				12345, 
-				"gateKeeperServiceUri", 
-				true, 
-				true, 
-				true, 
-				"2019-07-04 14:43:19", 
-				"2019-07-04 14:43:19");
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private CloudResponseDTO getProviderCloudResponseDTOForTest() {
-			
-		return getCloudResponseDTOForTest();
+		return new CloudResponseDTO(getIdForTest(), "operator", "name", true,	true, false, null, "2019-07-04 14:43:19", "2019-07-04 14:43:19");
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private SystemResponseDTO getSystemResponseDTOForTest() {
-		return new SystemResponseDTO(
-				getIdForTest(), 
-				"systemName", 
-				"address", 
-				12345, 
-				"authenticationInfo", 
-				"2019-07-04 14:43:19", 
-				"2019-07-04 14:43:19");
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private SystemResponseDTO getProviderSystemResponseDTOForTest() {
-
-		return getSystemResponseDTOForTest();
+		return new SystemResponseDTO(getIdForTest(), "systemName", "address", 12345, "authenticationInfo", "2019-07-04 14:43:19", "2019-07-04 14:43:19");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private SystemResponseDTO getConsumerSystemResponseDTOForTest() {
-			
-			return getSystemResponseDTOForTest();
-		}
+		return getSystemResponseDTOForTest();
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private ServiceDefinitionResponseDTO getServiceDefinitionResponseDTOForTest() {
-			
-		return new ServiceDefinitionResponseDTO(
-				getIdForTest(),
-				"serviceDefinition",
-				"2019-07-04 14:43:19",
-				"2019-07-04 14:43:19");
+		return new ServiceDefinitionResponseDTO(getIdForTest(), "serviceDefinition", "2019-07-04 14:43:19", "2019-07-04 14:43:19");
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private long getIdForTest() {
-		
-		return 1L;
-	}
+	private long getIdForTest() { return 1L; }
 }
