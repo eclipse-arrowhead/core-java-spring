@@ -55,6 +55,7 @@ public class AuthorizationDriver {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("rawtypes")
 	public void publishAuthUpdate(final long updatedConsumerSystemId) {
 		logger.debug("publishAuthUpdate started...");
 		

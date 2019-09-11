@@ -871,6 +871,13 @@ public class AuthorizationDBService {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authIntraOpt.size());
 		
+		if ( authIntraOpt.isEmpty() ) {
+			
+			return authorizedPublishers; 
+		}
+		
+		
+		
 		for (final AuthorizationIntraCloud authorizationIntraCloud : authIntraOpt) {
 			final SystemResponseDTO authorizedPublisher = DTOConverter.convertSystemToSystemResponseDTO(authorizationIntraCloud.getProviderSystem());
 			
@@ -884,8 +891,12 @@ public class AuthorizationDBService {
 					}
 				}
 			}else {
+
+				if (!authorizedPublishers.contains(authorizedPublisher)) {
+					
+					authorizedPublishers.add(authorizedPublisher);
+				}
 				
-				authorizedPublishers.add(authorizedPublisher);
 			}
 		}
 		
