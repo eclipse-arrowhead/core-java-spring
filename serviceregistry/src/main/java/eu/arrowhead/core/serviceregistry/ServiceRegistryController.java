@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.ServiceDefinitionRequestDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
@@ -337,6 +339,12 @@ public class ServiceRegistryController {
 			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
 		}
 		
+		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
+			if (coreSystemService.getServiceDefinition().equalsIgnoreCase(serviceDefinition.trim())) {
+				throw new BadPayloadException("serviceDefinition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
+			}
+		}
+		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
 		logger.debug("{} service definition successfully registered.", serviceDefinition);
 		
@@ -363,6 +371,12 @@ public class ServiceRegistryController {
 		
 		if (Utilities.isEmpty(serviceDefinition)) {
 			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
+		}
+		
+		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
+			if (coreSystemService.getServiceDefinition().equalsIgnoreCase(serviceDefinition.trim())) {
+				throw new BadPayloadException("serviceDefinition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
+			}
 		}
 		
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = serviceRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
@@ -559,7 +573,7 @@ public class ServiceRegistryController {
 	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ServiceRegistryResponseDTO registerService(@RequestBody final ServiceRegistryRequestDTO request) {
 		logger.debug("New service registration request recieved");
-		checkServiceRegistryRequest(request);
+		checkServiceRegistryRequest(request, false);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
 		logger.debug("{} successfully registers its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
@@ -579,7 +593,7 @@ public class ServiceRegistryController {
 	@PostMapping(path = CommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody ServiceRegistryResponseDTO addServiceRegistry(@RequestBody final ServiceRegistryRequestDTO request) {
 		logger.debug("New service registration request recieved");
-		checkServiceRegistryRequest(request, CommonConstants.MGMT_URI);
+		checkServiceRegistryRequest(request, CommonConstants.MGMT_URI, true);
 		
 		final ServiceRegistryResponseDTO response = serviceRegistryDBService.registerServiceResponse(request);
 		logger.debug("{}'s service {} is successfully registered", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
@@ -704,7 +718,7 @@ public class ServiceRegistryController {
 	@ResponseBody public SystemResponseDTO queryRegistryBySystemDTO(@RequestBody final SystemRequestDTO request) {
 		logger.debug("Service query by systemRequestDTO request received");
 
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
@@ -723,7 +737,7 @@ public class ServiceRegistryController {
 	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request) {
 		logger.debug("callCreateSystem started...");
 		
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI, true);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
@@ -774,8 +788,14 @@ public class ServiceRegistryController {
 			needChange = true;
 		}
 		
+		
 		if (!Utilities.isEmpty(request.getSystemName())) {
 			needChange = true;
+			for (final CoreSystem coreSysteam : CoreSystem.values()) {
+				if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
+					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+				}
+			}
 		}
 		
 		if (request.getPort() != null) {
@@ -805,15 +825,23 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI, true);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkSystemRequest(final SystemRequestDTO request, final String origin) {
+	private void checkSystemRequest(final SystemRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkSystemRequest started...");
 		
 		if (Utilities.isEmpty(request.getSystemName())) {
 			throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (checkReservedCoreSystemNames) {
+			for (final CoreSystem coreSysteam : CoreSystem.values()) {
+				if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
+					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, origin);
+				}
+			}			
 		}
 		
 		if (Utilities.isEmpty(request.getAddress())) {
@@ -831,23 +859,23 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request) {
+	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkServiceRegistryRequest started...");
 
 		final String origin = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 
-		checkServiceRegistryRequest(request, origin);
+		checkServiceRegistryRequest(request, origin, checkReservedCoreSystemNames);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final String origin) {
+	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkServiceRegistryRequest started...");
 	
 		if (Utilities.isEmpty(request.getServiceDefinition())) {
 			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	
-		checkSystemRequest(request.getProviderSystem(), origin);
+		checkSystemRequest(request.getProviderSystem(), origin, checkReservedCoreSystemNames);
 		
 		if (!Utilities.isEmpty(request.getEndOfValidity())) {
 			try {
@@ -905,7 +933,7 @@ public class ServiceRegistryController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		checkServiceRegistryRequest(request, origin);
+		checkServiceRegistryRequest(request, origin, true);
 		
 	}
 	
