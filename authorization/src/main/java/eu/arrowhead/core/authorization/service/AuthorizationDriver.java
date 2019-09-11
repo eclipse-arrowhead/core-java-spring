@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -38,16 +39,16 @@ public class AuthorizationDriver {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Resource(name = CommonConstants.$SERVER_ADDRESS)
+	@Value(CommonConstants.$SERVER_ADDRESS)
 	private String address;
 	
-	@Resource(name = CommonConstants.$SERVER_PORT)
+	@Value(CommonConstants.$SERVER_PORT)
 	private int port;
 	
-	@Resource(name = CommonConstants.$CORE_SYSTEM_NAME)
+	@Value(CommonConstants.$CORE_SYSTEM_NAME)
 	private String systemName;
 	
-	@Resource(name = CommonConstants.$SERVER_SSL_ENABLED_WD)
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	
 	//=================================================================================================
