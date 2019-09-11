@@ -259,27 +259,28 @@ CREATE TABLE `event_handler_event` (
 DROP TABLE IF EXISTS `event_type`;
   CREATE TABLE `event_type` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `eventtype_name` varchar(255) DEFAULT NULL,
+  `event_type_name` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `eventtype` (`eventtype_name`)
+  UNIQUE KEY `eventtype` (`event_type_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `subscription`;
 CREATE TABLE `subscription` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `consumer_system_id` bigint(20) NOT NULL,
+  `system_id` bigint(20) NOT NULL,
   `event_type_id` bigint(20) NOT NULL,
-  `match_metadata` int(1) NOT NULL DEFAULT 0,
+  `filter_meta_data` text,
+  `match_meta_data` int(1) NOT NULL DEFAULT 0,
+  `only_predefined_publishers` int(1) NOT NULL DEFAULT 0,
   `notify_uri` text,
-  `metadata` text,
   `start_date` timestamp ,
   `end_date` timestamp ,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  CONSTRAINT `consumer_system` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `subscriber_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
   CONSTRAINT `event_type` FOREIGN KEY (`event_type_id`) REFERENCES `event_type` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -296,6 +297,7 @@ CREATE TABLE `subscription_publisher_connection` (
   CONSTRAINT `subscription_constraint` FOREIGN KEY (`subscription_id`) REFERENCES `subscription` (`id`) ON DELETE CASCADE,
   CONSTRAINT `system_constraint` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 DROP TABLE IF EXISTS `event_handler_event_subscriber`;
 CREATE TABLE `event_handler_event_subscriber` (
