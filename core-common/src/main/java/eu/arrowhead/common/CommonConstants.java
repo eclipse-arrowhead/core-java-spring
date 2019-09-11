@@ -112,11 +112,11 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 	
-	public static final String EVENT_HANDLER_URI = "/event_handler";
+	public static final String EVENT_HANDLER_URI = "/eventhandler";
 	public static final String OP_EVENT_HANDLER_PUBLISH = "/publish";
 	public static final String OP_EVENT_HANDLER_SUBSCRIBE = "/subscribe";
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
-	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish_auth_update";
+	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
