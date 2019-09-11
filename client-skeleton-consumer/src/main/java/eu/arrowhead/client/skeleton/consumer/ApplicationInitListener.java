@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.client.skeleton.common.ArrowheadService;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.UnavailableServerException;
 
 @Component
@@ -29,7 +30,7 @@ public class ApplicationInitListener {
 	@Autowired
 	private ArrowheadService arrowheadService;
 	
-	protected final Logger logger = LogManager.getLogger(ApplicationInitListener.class);
+	private final Logger logger = LogManager.getLogger(ApplicationInitListener.class);
 	
 	//=================================================================================================
 	// methods
@@ -40,18 +41,11 @@ public class ApplicationInitListener {
 	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InterruptedException {
 		
 		//Checking the availability of Service Registry Core System
-		if (checkServiceRegistryIsAlive()) {
-			logger.info("Service Registry is available.");
-		} else {
-			logger.info("Service Registry is NOT available.");
-		}
 		
-		//Checking the availability of Orchestrator Core System
-		if (checkOrchestratorIsAlive()) {
-			logger.info("Orchestrator is available.");
-		} else {
-			logger.info("Orchestrator is NOT available.");
-		}
+		
+		//Updating core service properties
+		arrowheadService.updateCoreServiceProperties(CoreSystem.ORCHESTRATOR);
+		arrowheadService.updateCoreServiceProperties(CoreSystem.AUTHORIZATION);
 
 		//TODO: implement here any custom behavior on application start up
 	}
@@ -66,22 +60,4 @@ public class ApplicationInitListener {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean checkServiceRegistryIsAlive() {
-		try {
-			final ResponseEntity<String> response = arrowheadService.echoServiceRegistry();
-			return response.getStatusCode() == HttpStatus.OK;			
-		} catch (final UnavailableServerException ex) {
-			return false;
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private boolean checkOrchestratorIsAlive() {
-		try {
-			final ResponseEntity<String> response = arrowheadService.echoOrchestrator();
-			return response.getStatusCode() == HttpStatus.OK;			
-		} catch (final UnavailableServerException ex) {
-			return false;
-		}
-	}
 }

@@ -3,24 +3,31 @@ package eu.arrowhead.client.skeleton.common;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 
+import eu.arrowhead.client.skeleton.common.context.ClientCommonConstants;
+import eu.arrowhead.client.skeleton.common.context.CoreServiceProperties;
+import eu.arrowhead.client.skeleton.common.context.CoreServiceUrl;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -46,17 +53,44 @@ public class ArrowheadService {
 	private int serviceRegistryPort;
 	
 	@Autowired
-	protected SSLProperties sslProperties;
+	private CoreServiceProperties coreServiceProperties;
+	
+	@Autowired
+	private SSLProperties sslProperties;
 	
 	@Autowired
 	private HttpService httpService;
+	
+	private final Logger logger = LogManager.getLogger(ArrowheadService.class);
 	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> echoServiceRegistry() {
-		return httpService.sendRequest(Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.ECHO_URI), HttpMethod.GET, String.class);
+	public ResponseEntity<String> echoCoreSystem(final CoreSystem coreSystem) {		
+		String address = null;
+		Integer port = null;
+		String coreUri = null;
+		
+		if (coreSystem == CoreSystem.SERVICE_REGISTRY) {
+			address = serviceReqistryAddress;
+			port = serviceRegistryPort;
+			coreUri = CommonConstants.SERVICE_REGISTRY_URI;
+			
+		} else {
+			final ResponseEntity<ServiceQueryResultDTO> srResponse = queryServiceReqistryByCoreService(coreSystem.getServices().get(0));
+			
+			if (srResponse.getStatusCode() != HttpStatus.OK || srResponse.getBody().getServiceQueryData().isEmpty()) {
+				logger.debug("'{}' core system not known by Service Registry", coreSystem.name());
+				return null;
+			} else {
+				address = srResponse.getBody().getServiceQueryData().get(0).getProvider().getAddress();
+				port = srResponse.getBody().getServiceQueryData().get(0).getProvider().getPort();
+				coreUri = coreSystem.getServices().get(0).getServiceUri().split("/")[1];
+			}
+		}
+		
+		return httpService.sendRequest(Utilities.createURI(getUriScheme(), address, port, coreUri + CommonConstants.ECHO_URI), HttpMethod.GET, String.class);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -94,20 +128,41 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ResponseEntity<String> echoOrchestrator() {
-		final ServiceQueryFormDTO request = new ServiceQueryFormDTO();
-		request.setServiceDefinitionRequirement(CommonConstants.CORE_SERVICE_ORCH_PROCESS);
-		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort,
-								CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI), HttpMethod.GET, ServiceQueryResultDTO.class, request);
-		
-		final SystemResponseDTO orchestrator = response.getBody().getServiceQueryData().get(0).getProvider();
-		
-		return httpService.sendRequest(Utilities.createURI(getUriScheme(), orchestrator.getAddress(), orchestrator.getPort(), CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI), HttpMethod.GET, String.class);
+	public void updateCoreServiceProperties(final CoreSystem coreSystem) {
+		for (final CoreSystemService coreService : coreSystem.getServices()) {
+			
+			try {	
+				final ResponseEntity<ServiceQueryResultDTO> response = queryServiceReqistryByCoreService(coreService);
+				
+				if (response.getStatusCode() == HttpStatus.OK) {
+					final ServiceRegistryResponseDTO serviceRegistryResponseDTO = response.getBody().getServiceQueryData().get(0);
+					coreServiceProperties.put(coreService.getServiceDefinition(), new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
+																									 serviceRegistryResponseDTO.getProvider().getPort(),
+																									 serviceRegistryResponseDTO.getServiceUri()));
+				} else {
+					logger.info("'{}' core service couldn't be retrieved due to the following reason: service registry response status {}", coreService.getServiceDefinition(), response.getStatusCode().name());
+					coreServiceProperties.put(coreService.getServiceDefinition(), null);
+				}
+				
+			} catch (final ArrowheadException ex) {
+				logger.info("'{}' core service couldn't be retrieved due to the following reason: {}", coreService.getServiceDefinition(), ex.getMessage());
+				coreServiceProperties.put(coreService.getServiceDefinition(), null);
+			}			
+		}
 	}
 	
 	//=================================================================================================
 	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
+	private ResponseEntity<ServiceQueryResultDTO> queryServiceReqistryByCoreService(final CoreSystemService coreService) {
+		final ServiceQueryFormDTO request = new ServiceQueryFormDTO();
+		request.setServiceDefinitionRequirement(coreService.getServiceDefinition());
+		
+		return httpService.sendRequest(Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI),
+									   HttpMethod.POST, ServiceQueryResultDTO.class, request);
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	private String getUriScheme() {
 		return sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;

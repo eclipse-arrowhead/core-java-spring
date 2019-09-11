@@ -38,14 +38,9 @@ public class ApplicationInitListener {
 	@EventListener
 	@Order(10)
 	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InterruptedException {
-		
-		//Checking the availability of Service Registry Core System
-		if (checkServiceRegistryIsAlive()) {
-			logger.info("Service Registry is available.");
-		} else {
-			logger.info("Service Registry is NOT available.");
-		}
 
+		//Checking the availability of Service Registry Core System
+		
 		//TODO: implement here any custom behavior on application start up
 	}
 	
@@ -59,12 +54,5 @@ public class ApplicationInitListener {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean checkServiceRegistryIsAlive() {
-		try {
-			final ResponseEntity<String> response = arrowheadService.echoServiceRegistry();
-			return response.getStatusCode() == HttpStatus.OK;			
-		} catch (final UnavailableServerException ex) {
-			return false;
-		}
-	}
+	
 }
