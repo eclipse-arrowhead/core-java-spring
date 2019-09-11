@@ -1,8 +1,12 @@
 package eu.arrowhead.common;
 
+import java.util.List;
+
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jws.AlgorithmIdentifiers;
+
+import eu.arrowhead.common.core.CoreSystemService;
 
 public class CommonConstants {
 	
@@ -37,6 +41,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH = "event-publish";
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
+	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
+			 															   			  CoreSystemService.EVENT_PUBLISH, CoreSystemService.EVENT_SUBSCRIBE);
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	

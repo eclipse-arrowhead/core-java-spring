@@ -1,6 +1,7 @@
 package eu.arrowhead.client.skeleton.common;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +28,9 @@ import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.http.HttpService;
 
 @Component
@@ -67,6 +69,20 @@ public class ArrowheadService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	public CoreServiceUrl getCoreServiceUrl(final CoreSystemService coreSystemService) {
+		if (!CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES.contains(coreSystemService)) {
+			logger.debug("'{}' core service is not a public service.", coreSystemService);
+			return null;
+		} else if (!coreServiceProperties.containsKey(coreSystemService)) {
+			logger.debug("'{}' core service is not contained by CoreServiceProperties component.", coreSystemService);
+			return null;
+		} else {
+			return coreServiceProperties.get(coreSystemService);
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public ResponseEntity<String> echoCoreSystem(final CoreSystem coreSystem) {		
 		String address = null;
 		Integer port = null;
@@ -77,17 +93,24 @@ public class ArrowheadService {
 			port = serviceRegistryPort;
 			coreUri = CommonConstants.SERVICE_REGISTRY_URI;
 			
-		} else {
-			final ResponseEntity<ServiceQueryResultDTO> srResponse = queryServiceReqistryByCoreService(coreSystem.getServices().get(0));
-			
-			if (srResponse.getStatusCode() != HttpStatus.OK || srResponse.getBody().getServiceQueryData().isEmpty()) {
-				logger.debug("'{}' core system not known by Service Registry", coreSystem.name());
+		} else {			
+			final List<CoreSystemService> publicServices = getPublicServicesOfCoreSystem(coreSystem);			
+			if (publicServices.isEmpty()) {
+				logger.debug("'{}' core system has no public service.", coreSystem.name());
 				return null;
-			} else {
-				address = srResponse.getBody().getServiceQueryData().get(0).getProvider().getAddress();
-				port = srResponse.getBody().getServiceQueryData().get(0).getProvider().getPort();
-				coreUri = coreSystem.getServices().get(0).getServiceUri().split("/")[1];
-			}
+				
+			} else {				
+				final ResponseEntity<ServiceQueryResultDTO> srResponse = queryServiceReqistryByCoreService(publicServices.get(0));
+				
+				if (srResponse.getStatusCode() != HttpStatus.OK || srResponse.getBody().getServiceQueryData().isEmpty()) {
+					logger.debug("'{}' core system not known by Service Registry", coreSystem.name());
+					return null;
+				} else {
+					address = srResponse.getBody().getServiceQueryData().get(0).getProvider().getAddress();
+					port = srResponse.getBody().getServiceQueryData().get(0).getProvider().getPort();
+					coreUri = publicServices.get(0).getServiceUri().split("/")[1];
+				}				
+			}			
 		}
 		
 		return httpService.sendRequest(Utilities.createURI(getUriScheme(), address, port, coreUri + CommonConstants.ECHO_URI), HttpMethod.GET, String.class);
@@ -129,24 +152,32 @@ public class ArrowheadService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void updateCoreServiceProperties(final CoreSystem coreSystem) {
-		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			
+		final List<CoreSystemService> publicServices = getPublicServicesOfCoreSystem(coreSystem);
+		if (publicServices.isEmpty()) {
+			logger.info("'{}' core system has no public service.", coreSystem.name());
+			return;
+		}
+		
+		for (final CoreSystemService coreService : publicServices) {			
 			try {	
 				final ResponseEntity<ServiceQueryResultDTO> response = queryServiceReqistryByCoreService(coreService);
 				
-				if (response.getStatusCode() == HttpStatus.OK) {
-					final ServiceRegistryResponseDTO serviceRegistryResponseDTO = response.getBody().getServiceQueryData().get(0);
-					coreServiceProperties.put(coreService.getServiceDefinition(), new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
-																									 serviceRegistryResponseDTO.getProvider().getPort(),
-																									 serviceRegistryResponseDTO.getServiceUri()));
-				} else {
+				if (response.getStatusCode() != HttpStatus.OK) {
 					logger.info("'{}' core service couldn't be retrieved due to the following reason: service registry response status {}", coreService.getServiceDefinition(), response.getStatusCode().name());
-					coreServiceProperties.put(coreService.getServiceDefinition(), null);
+					coreServiceProperties.remove(coreService);
+					
+				} else if (response.getBody().getServiceQueryData().isEmpty()) {
+					logger.info("'{}' core service couldn't be retrieved due to the following reason: not registered by Serivce Registry", coreService.getServiceDefinition());
+					coreServiceProperties.remove(coreService);
+					
+				} else {
+					final ServiceRegistryResponseDTO serviceRegistryResponseDTO = response.getBody().getServiceQueryData().get(0);
+					coreServiceProperties.put(coreService, new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
+											  serviceRegistryResponseDTO.getProvider().getPort(), serviceRegistryResponseDTO.getServiceUri()));					
 				}
 				
-			} catch (final ArrowheadException ex) {
+			} catch (final  UnavailableServerException | AuthException ex) {
 				logger.info("'{}' core service couldn't be retrieved due to the following reason: {}", coreService.getServiceDefinition(), ex.getMessage());
-				coreServiceProperties.put(coreService.getServiceDefinition(), null);
 			}			
 		}
 	}
@@ -166,5 +197,18 @@ public class ArrowheadService {
 	//-------------------------------------------------------------------------------------------------
 	private String getUriScheme() {
 		return sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private List<CoreSystemService> getPublicServicesOfCoreSystem(final CoreSystem coreSystem) {
+		final List<CoreSystemService> publicServices = new ArrayList<>();
+		for (final CoreSystemService coreSystemService : coreSystem.getServices()) {
+			for (final CoreSystemService publicCoreService : CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES) {
+				if (coreSystemService == publicCoreService) {
+					publicServices.add(coreSystemService);
+				}
+			}			
+		}
+		return publicServices;
 	}
 }

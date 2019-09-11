@@ -25,8 +25,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
-	private static final CoreSystemService[] publicCoreSystemServices = {CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
-																		 CoreSystemService.EVENT_PUBLISH, CoreSystemService.EVENT_SUBSCRIBE};
+	
 	
 	//=================================================================================================
 	// assistant methods
@@ -102,7 +101,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private void checkIfRequestedServiceIsAPublicCoreSystemService(final String requestJSON) {
 		final ServiceQueryFormDTO requestBody = Utilities.fromJson(requestJSON, ServiceQueryFormDTO.class);
 		
-		for (final CoreSystemService service : publicCoreSystemServices) {
+		for (final CoreSystemService service : CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES) {
 			if (service.getServiceDefinition().equalsIgnoreCase(requestBody.getServiceDefinitionRequirement().trim())) {
 				return;
 			}
