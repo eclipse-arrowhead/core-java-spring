@@ -21,7 +21,6 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
@@ -125,7 +124,7 @@ public class GatekeeperService {
 		}
 		
 		if (successfulResponses.isEmpty() && !errorMessageResponses.isEmpty()) {
-			DTOUtilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
+			Utilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
 		}
 		
 		return new GSDQueryResultDTO(successfulResponses, unsuccessfulRequests);
