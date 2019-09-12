@@ -3,5 +3,5 @@ services:
   serviceregistry:
     image: "serviceregistry:$BUILD_TAG"
     build:
-      context: ..
-      dockerfile: ../Dockerfile_SR
+      context: .
+      dockerfile: Dockerfile_SR
