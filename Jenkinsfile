@@ -20,7 +20,7 @@ pipeline
 				{
 					sh  '''
 					    ./jenkins/build/maven.sh mvn -B -DskipTests clean package
-					    # ./jenkins/build/build.sh
+					    ./jenkins/build/build.sh
 					    '''
 
 				}
