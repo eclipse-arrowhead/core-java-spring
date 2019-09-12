@@ -166,7 +166,14 @@ public class AuthorizationDBService {
 				if ( authOptional.isPresent() ) {
 					Assert.notNull(authOptional.get().getConsumerSystem(), "ConsumerSystem is null");
 					
-					authorizationDriver.publishAuthUpdate(authOptional.get().getConsumerSystem().getId());
+					try {
+						
+						authorizationDriver.publishAuthUpdate(authOptional.get().getConsumerSystem().getId());
+					
+					} catch (Exception ex) {
+						
+						logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
+					}
 				}
 			}
 			
@@ -650,7 +657,15 @@ public class AuthorizationDBService {
 			
 			if ( eventhandlerIsPresent)  {
 				
-				authorizationDriver.publishAuthUpdate( consumer.getId() );				
+				try {
+					
+					authorizationDriver.publishAuthUpdate( consumer.getId() );
+				
+				} catch (Exception ex) {
+					
+					logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
+				}	
+		
 			}
 			
 			return savedAuthIntraEntries;
@@ -699,7 +714,14 @@ public class AuthorizationDBService {
 		
 		if ( eventhandlerIsPresent)  {
 			
-			authorizationDriver.publishAuthUpdate( consumer.getId() );				
+			try {
+				
+				authorizationDriver.publishAuthUpdate( consumer.getId() );
+			
+			} catch (Exception ex) {
+				
+				logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
+			}
 		}
 		
 		return savedAuthIntraEntries;
@@ -887,7 +909,11 @@ public class AuthorizationDBService {
 					
 					if (DTOUtilities.equalsSystemInResponseAndRequest(authorizedPublisher, systemRequestDTO)) {
 						
-						authorizedPublishers.add(authorizedPublisher);
+						if (!authorizedPublishers.contains(authorizedPublisher)) {
+							
+							authorizedPublishers.add(authorizedPublisher);
+							break;
+						}
 					}
 				}
 			}else {
