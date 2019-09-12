@@ -1,10 +1,12 @@
 #!/bin/bash
 
 #Copy the SR jar to the build location
-cp -f serviceregistry/target/*.jar jenkins/build/
+mkdir jenkins/build/serviceregistry
+cp -f serviceregistry/target/*.jar jenkins/build/serviceregistry
+cp -f serviceregistry/target/*.properties jenkins/build/serviceregistry
 
 echo "****************************"
-echo "*** Building Docker Image **"
+echo "** Building Docker Images **"
 echo "****************************"
 
-cd jenkins/build/ && docker-compose -f docker-compose-build.yml
+cd /build/ && docker-compose -f docker-compose-build.yml --no-cache
