@@ -7,6 +7,7 @@ import java.security.PublicKey;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -47,7 +48,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private final PublicKey providerGatewayPublicKey;
 	private final String queueId;
 	private final int timeout;
-	private final ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	private final ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	private final ConcurrentLinkedQueue<Integer> availablePorts;
 	private final SSLProperties sslProperties;
 

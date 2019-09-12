@@ -1,5 +1,7 @@
 package eu.arrowhead.core.gateway;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +15,9 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
+import eu.arrowhead.core.gateway.service.GatewayService;
 
 @Component
 public class GatewayApplicationInitListener extends ApplicationInitListener {
@@ -26,8 +30,7 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 	
 	@Value(CommonConstants.$GATEWAY_MAX_PORT_WD)
 	private int maxPort;
-
-
+	
 	//=================================================================================================
 	// methods
 	
@@ -67,6 +70,30 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 			throw new ServiceConfigurationError("Available port interval is invalid: [" + minPort + " - " + maxPort + "]");
 		}
 	}
-
-	//TODO: maybe in customDestroy close all active sessions
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	protected void customDestroy() {
+		logger.debug("customDestroy started...");
+		
+		if (!standaloneMode) {
+			@SuppressWarnings("unchecked")
+			final ConcurrentMap<String,ActiveSessionDTO> activeSessions = applicationContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentMap.class);
+			
+			final List<ActiveSessionDTO> sessionsToClose = new ArrayList<ActiveSessionDTO>(activeSessions.values());
+			
+			if (!sessionsToClose.isEmpty()) {
+				final GatewayService gatewayService = applicationContext.getBean(GatewayService.class);
+				for (final ActiveSessionDTO session : sessionsToClose) {
+					try {
+						gatewayService.closeSession(session);
+						System.out.println("Session closed: " + session.getQueueId());
+					} catch (final ArrowheadException ex) {
+						logger.debug("Error while trying to close active session {}: {}", session.getQueueId(), ex.getMessage());
+						logger.debug("Exception:", ex);
+					}
+				}
+			}
+		}
+	}
 }

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.security.PublicKey;
 import java.util.ServiceConfigurationError;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -45,7 +46,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	private final GatewayProviderConnectionRequestDTO connectionRequest;
 	private final PublicKey consumerGatewayPublicKey;
 	private final int timeout;
-	private final ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	private final ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	private final SSLProperties sslProperties;
 	
 	private String queueId;

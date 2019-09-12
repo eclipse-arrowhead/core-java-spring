@@ -5,8 +5,8 @@ import java.security.PublicKey;
 import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.Resource;
 import javax.jms.JMSException;
@@ -56,7 +56,7 @@ public class GatewayService {
 	private Map<String,Object> arrowheadContext;
 	
 	@Resource(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
-	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
+	private ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	
 	@Resource(name = CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
 	private ConcurrentLinkedQueue<Integer> availablePorts;
@@ -188,6 +188,7 @@ public class GatewayService {
 			final ControlRelayInfo controlRelayInfo = relayClient.initializeControlRelay(session, sessionDTO.getPeerName(), sessionDTO.getQueueId());
 			relayClient.sendCloseControlMessage(session, controlRelayInfo.getControlRequestMessageSender(), sessionDTO.getQueueId());
 			relayClient.sendCloseControlMessage(session, controlRelayInfo.getControlResponseMessageSender(), sessionDTO.getQueueId());
+			activeSessions.remove(sessionDTO.getQueueId());
 		} catch (final JMSException ex) {
 			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
 		} finally {

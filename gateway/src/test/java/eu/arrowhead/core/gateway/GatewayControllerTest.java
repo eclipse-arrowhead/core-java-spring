@@ -1719,7 +1719,6 @@ public class GatewayControllerTest {
 		final GatewayProviderConnectionRequestDTO request = new GatewayProviderConnectionRequestDTO();
 		request.setServiceDefinition("test-service");
 		request.setConsumerGWPublicKey("test-key");
-		final RelayRequestDTO relay = new RelayRequestDTO();
 		request.setRelay(null);
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setSystemName("test-system");
