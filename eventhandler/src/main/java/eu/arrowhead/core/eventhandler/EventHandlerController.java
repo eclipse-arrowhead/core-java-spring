@@ -290,10 +290,9 @@ public class EventHandlerController {
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
 
+		checkEventPublishRequestDTO(request, origin);
 		
-		//checkEventPublishRequestDTO(request, origin);
-		
-		//validateTimeStamp(request, origin);
+		validateTimeStamp(request, origin);
 		
 	    eventHandlerService.publishSubscriberAuthorizationUpdateRequest(request);
 	}
@@ -378,11 +377,8 @@ public class EventHandlerController {
 		
 		if ( Utilities.isEmpty( request.getPayload() )) {
 			throw new BadPayloadException("Request.Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}		
+		}	
 		
-		if ( Utilities.isEmpty( request.getDeliveryCompleteUri() )) {
-			throw new BadPayloadException("Request.DeliveryCompleteUri" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}
 		// TODO implement additional method logic here
 		
 	}
