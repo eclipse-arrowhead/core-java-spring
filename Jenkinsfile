@@ -25,5 +25,22 @@ pipeline
 
 				}
 			}
+
+			stage('Test')
+			{
+			    agent { label "master" }
+                steps
+                {
+                    sh './jenkins/test/maven.sh mvn test'
+                }
+
+                post
+                {
+                    always
+                    {
+                        junit 'java-app/target/surefire-reports/*.xml'
+                    }
+                }
+            }
 	}
 }
