@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +43,8 @@ import io.swagger.annotations.ApiResponses;
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
-@RestController(CommonConstants.EVENT_HANDLER_URI)
+@RestController
+@RequestMapping(CommonConstants.EVENT_HANDLER_URI)
 public class EventHandlerController {
 	
 	//=================================================================================================
@@ -288,9 +290,10 @@ public class EventHandlerController {
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
 
-		checkEventPublishRequestDTO(request, origin);
 		
-		validateTimeStamp(request, origin);
+		//checkEventPublishRequestDTO(request, origin);
+		
+		//validateTimeStamp(request, origin);
 		
 	    eventHandlerService.publishSubscriberAuthorizationUpdateRequest(request);
 	}
