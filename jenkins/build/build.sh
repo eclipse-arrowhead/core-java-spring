@@ -6,6 +6,8 @@ mkdir jenkins/build/serviceregistry
 cp -f serviceregistry/target/*.jar jenkins/build/serviceregistry
 cp -f serviceregistry/target/*.properties jenkins/build/serviceregistry
 
+# TODO Other core systems and add them to docker-compose!
+
 echo "****************************"
 echo "** Building Docker Images **"
 echo "****************************"
