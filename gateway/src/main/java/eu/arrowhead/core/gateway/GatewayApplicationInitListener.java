@@ -80,14 +80,14 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 			@SuppressWarnings("unchecked")
 			final ConcurrentMap<String,ActiveSessionDTO> activeSessions = applicationContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentMap.class);
 			
-			final List<ActiveSessionDTO> sessionsToClose = new ArrayList<ActiveSessionDTO>(activeSessions.values());
+			final List<ActiveSessionDTO> sessionsToClose = new ArrayList<>(activeSessions.values());
 			
 			if (!sessionsToClose.isEmpty()) {
 				final GatewayService gatewayService = applicationContext.getBean(GatewayService.class);
 				for (final ActiveSessionDTO session : sessionsToClose) {
 					try {
 						gatewayService.closeSession(session);
-						System.out.println("Session closed: " + session.getQueueId());
+						logger.debug("Session closed: {}", session.getQueueId());
 					} catch (final ArrowheadException ex) {
 						logger.debug("Error while trying to close active session {}: {}", session.getQueueId(), ex.getMessage());
 						logger.debug("Exception:", ex);
