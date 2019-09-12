@@ -3,6 +3,8 @@ package eu.arrowhead.core.eventhandler.service;
 import java.util.List;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,7 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional
 	public SubscriptionResponseDTO subscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("subscriptionRequest started ...");
 		
@@ -68,6 +71,7 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional
 	public void unSubscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("unSubscriptionRequest started ...");
 		
@@ -76,6 +80,7 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@Transactional
 	public EventPublishResponseDTO publishRequest(final EventPublishRequestDTO request) {
 		logger.debug("publishRequest started ...");
 		
@@ -89,6 +94,7 @@ public class EventHandlerService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Transactional
 	public void publishSubscriberAuthorizationUpdateRequest(final EventPublishRequestDTO request) {
 		logger.debug("publishSubscriberAuthorizationUpdateRequest started ...");
 		
@@ -96,7 +102,11 @@ public class EventHandlerService {
 		final Long subscriberSystemId = validateAuthorizationUpdatePayload( request.getPayload() );
 		
 		final List<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( subscriberSystemId );
-				
+		if ( involvedSubscriptions.isEmpty() ) {
+			
+			return;
+		}		
+
 		final SystemRequestDTO subscriber = DTOConverter.convertSystemToSystemRequestDTO( involvedSubscriptions.get(0).getSubscriberSystem() );		
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
