@@ -2,15 +2,6 @@ package eu.arrowhead.common.dto;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.util.Assert;
-
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.AuthException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.exception.TimeoutException;
-import eu.arrowhead.common.exception.UnavailableServerException;
 
 public class DTOUtilities {
 	
@@ -24,6 +15,8 @@ public class DTOUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static boolean equalsSystemInResponseAndRequest(final SystemResponseDTO response, final SystemRequestDTO request) {
+		logger.debug("equalsSystemInResponseAndRequest started...");
+		
 		if (response == null) {
 			return request == null;
 		}
@@ -43,6 +36,8 @@ public class DTOUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static boolean equalsCloudInResponseAndRequest(final CloudResponseDTO response, final CloudRequestDTO request) {
+		logger.debug("equalsCloudInResponseAndRequest started...");
+		
 		if (response == null) {
 			return request == null;
 		}
@@ -60,34 +55,6 @@ public class DTOUtilities {
 		return converted.equals(requestCopy);
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
-		Assert.notNull(dto, "Error message object is null.");
-		Assert.notNull(dto.getExceptionType(), "Exception type is null.");
-		
-		switch (dto.getExceptionType()) {
-	    case ARROWHEAD:
-	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    case AUTH:
-	        throw new AuthException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    case BAD_PAYLOAD:
-	        throw new BadPayloadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    case INVALID_PARAMETER:
-	    	throw new InvalidParameterException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        case DATA_NOT_FOUND:
-            throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        case GENERIC:
-            throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        case TIMEOUT:
-        	throw new TimeoutException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        case UNAVAILABLE:
-	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-	    default:
-	    	logger.error("Unknown exception type: {}", dto.getExceptionType());
-	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
-        }
-	}
-	
 	//=================================================================================================
 	// assistant methods
 	
@@ -98,6 +65,8 @@ public class DTOUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static SystemRequestDTO copySystemRequestDTO(final SystemRequestDTO orig) {
+		logger.debug("copySystemRequestDTO started...");
+
 		if (orig == null) {
 			return null;
 		}
@@ -113,6 +82,8 @@ public class DTOUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static void normalizeSystemRequestDTO(final SystemRequestDTO dto) {
+		logger.debug("normalizeSystemRequestDTO started...");
+		
 		final String systemName = dto.getSystemName();
 		if (systemName != null) {
 			dto.setSystemName(systemName.toLowerCase().trim());
@@ -126,6 +97,8 @@ public class DTOUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static CloudRequestDTO copyCloudRequestDTO(final CloudRequestDTO orig) {
+		logger.debug("copyCloudRequestDTO started...");
+		
 		if (orig == null) {
 			return null;
 		}
@@ -142,6 +115,8 @@ public class DTOUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static void normalizeCloudRequestDTO(final CloudRequestDTO dto) {
+		logger.debug("normalizeCloudRequestDTO started...");
+		
 		final String cloudName = dto.getName();
 		if (cloudName != null) {
 			dto.setName(cloudName.toLowerCase().trim());

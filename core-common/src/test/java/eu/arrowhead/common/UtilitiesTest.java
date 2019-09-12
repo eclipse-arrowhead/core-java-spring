@@ -28,7 +28,12 @@ import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 
 @RunWith(SpringRunner.class)
 public class UtilitiesTest {
@@ -477,5 +482,73 @@ public class UtilitiesTest {
 		Assert.assertEquals(ldt.getHour(), result.getHour());
 		Assert.assertEquals(ldt.getMinute(), result.getMinute());
 		Assert.assertEquals(ldt.getSecond(), result.getSecond());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateExceptionFromErrorMessageDTOParamNull() {
+		Utilities.createExceptionFromErrorMessageDTO(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateExceptionFromErrorMessageDTOExceptionTypeNull() {
+		Utilities.createExceptionFromErrorMessageDTO(new ErrorMessageDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreateExceptionFromErrorMessageDTOArrowheadException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.ARROWHEAD, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testCreateExceptionFromErrorMessageDTOAuthException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.AUTH, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testCreateExceptionFromErrorMessageDTOBadPayloadException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.BAD_PAYLOAD, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreateExceptionFromErrorMessageDTOInvalidParameterException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.INVALID_PARAMETER, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = DataNotFoundException.class)
+	public void testCreateExceptionFromErrorMessageDTODataNotFoundException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.DATA_NOT_FOUND, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreateExceptionFromErrorMessageDTOGenericException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.GENERIC, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = TimeoutException.class)
+	public void testCreateExceptionFromErrorMessageDTOTimeoutException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.TIMEOUT, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = UnavailableServerException.class)
+	public void testCreateExceptionFromErrorMessageDTOUnavailableServerException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.UNAVAILABLE, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
 	}
 }

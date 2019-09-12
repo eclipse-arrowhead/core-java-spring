@@ -50,9 +50,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.RelayType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 
 public class Utilities {
 	
@@ -425,6 +431,34 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static String getDatetimePattern() { return dateTimePattern; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
+		Assert.notNull(dto, "Error message object is null.");
+		Assert.notNull(dto.getExceptionType(), "Exception type is null.");
+		
+		switch (dto.getExceptionType()) {
+	    case ARROWHEAD:
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case AUTH:
+	        throw new AuthException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case BAD_PAYLOAD:
+	        throw new BadPayloadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case INVALID_PARAMETER:
+	    	throw new InvalidParameterException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case DATA_NOT_FOUND:
+            throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case GENERIC:
+            throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case TIMEOUT:
+        	throw new TimeoutException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case UNAVAILABLE:
+	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    default:
+	    	logger.error("Unknown exception type: {}", dto.getExceptionType());
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        }
+	}
 	
 	//=================================================================================================
 	// assistant methods
