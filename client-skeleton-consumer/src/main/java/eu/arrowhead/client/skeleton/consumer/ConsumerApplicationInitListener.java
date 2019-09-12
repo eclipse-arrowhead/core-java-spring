@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import eu.arrowhead.client.skeleton.common.ApplicationInitListener;
 import eu.arrowhead.client.skeleton.common.ArrowheadService;
+import eu.arrowhead.client.skeleton.common.config.ApplicationInitListener;
 import eu.arrowhead.common.core.CoreSystem;
 
 @Component
@@ -39,6 +39,7 @@ public class ConsumerApplicationInitListener extends ApplicationInitListener {
 		arrowheadService.updateCoreServiceUrlsInArrowheadContext(CoreSystem.AUTHORIZATION);
 
 		//TODO: implement here any custom behavior on application start up
+		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

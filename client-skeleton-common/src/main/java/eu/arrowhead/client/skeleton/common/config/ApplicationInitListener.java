@@ -1,4 +1,4 @@
-package eu.arrowhead.client.skeleton.common;
+package eu.arrowhead.client.skeleton.common.config;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.client.skeleton.common.ArrowheadService;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
@@ -62,7 +63,7 @@ public abstract class ApplicationInitListener {
 	@EventListener
 	@Order(10)
 	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InterruptedException {
-		logger.info("Server mode: {}", getModeString());
+		logger.info("Security mode: {}", getModeString());
 		
 		if (sslProperties.isSslEnabled()) {
 			final KeyStore keyStore = initializeKeyStore();
@@ -130,10 +131,10 @@ public abstract class ApplicationInitListener {
 		final X509Certificate serverCertificate = Utilities.getFirstCertFromKeyStore(keyStore);
 		final String serverCN = Utilities.getCertCNFromSubject(serverCertificate.getSubjectDN().getName());
 		if (!Utilities.isKeyStoreCNArrowheadValid(serverCN)) {
-			logger.info("Server CN ({}) is not compliant with the Arrowhead certificate structure, since it does not have 5 parts, or does not end with \"arrowhead.eu\".", serverCN);
+			logger.info("Client CN ({}) is not compliant with the Arrowhead certificate structure, since it does not have 5 parts, or does not end with \"arrowhead.eu\".", serverCN);
 			throw new AuthException("Server CN (" + serverCN + ") is not compliant with the Arrowhead certificate structure, since it does not have 5 parts, or does not end with \"arrowhead.eu\".");
 		}
-		logger.info("Server CN: {}", serverCN);
+		logger.info("Client CN: {}", serverCN);
 		
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);

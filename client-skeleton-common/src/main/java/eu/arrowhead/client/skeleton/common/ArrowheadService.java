@@ -19,8 +19,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 
-import eu.arrowhead.client.skeleton.common.context.ClientCommonConstants;
-import eu.arrowhead.client.skeleton.common.context.CoreServiceUrl;
+import eu.arrowhead.client.skeleton.common.utile.ClientCommonConstants;
+import eu.arrowhead.client.skeleton.common.utile.CoreServiceUrl;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
@@ -44,10 +44,10 @@ public class ArrowheadService {
 	@Value(ClientCommonConstants.$CLIENT_SYSTEM_NAME)
 	private String clientSystemName;
 	
-	@Value(CommonConstants.$SERVER_ADDRESS)
+	@Value(ClientCommonConstants.$CLIENT_SERVER_ADDRESS_WD)
 	private String clientSystemAddress;
 	
-	@Value(CommonConstants.$SERVER_PORT)
+	@Value(ClientCommonConstants.$CLIENT_SERVER_PORT_WD)
 	private int clientSystemPort;
 	
 	@Value(CommonConstants.$SERVICE_REGISTRY_ADDRESS_WD)

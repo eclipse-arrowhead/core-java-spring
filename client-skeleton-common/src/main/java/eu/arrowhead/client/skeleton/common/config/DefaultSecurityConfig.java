@@ -1,4 +1,4 @@
-package eu.arrowhead.client.skeleton.common.security;
+package eu.arrowhead.client.skeleton.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

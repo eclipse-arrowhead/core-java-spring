@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import eu.arrowhead.client.skeleton.common.ApplicationInitListener;
+import eu.arrowhead.client.skeleton.common.config.ApplicationInitListener;
 import eu.arrowhead.common.core.CoreSystem;
 
 @Component
