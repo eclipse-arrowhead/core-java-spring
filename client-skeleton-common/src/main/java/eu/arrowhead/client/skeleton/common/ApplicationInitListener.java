@@ -18,20 +18,28 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 
 public abstract class ApplicationInitListener {
 
 	//=================================================================================================
 	// members
+	
+	@Autowired
+	private ArrowheadService arrowheadService;
 	
 	@Autowired
 	protected SSLProperties sslProperties;
@@ -44,9 +52,18 @@ public abstract class ApplicationInitListener {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
+	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
+	@DependsOn("ArrowheadService")
+	public Map<String,Object> getArrowheadContext() {
+		return new ConcurrentHashMap<>();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@EventListener
 	@Order(10)
 	public void onApplicationEvent(final ContextRefreshedEvent event) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InterruptedException {
+		logger.info("Server mode: {}", getModeString());
+		
 		if (sslProperties.isSslEnabled()) {
 			final KeyStore keyStore = initializeKeyStore();
 			checkServerCertificate(keyStore, event.getApplicationContext());
@@ -60,13 +77,7 @@ public abstract class ApplicationInitListener {
 	@PreDestroy
 	public void destroy() throws InterruptedException {
 		customDestroy();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.ARROWHEAD_CONTEXT)
-	public Map<String,Object> getArrowheadContext() {
-		return new ConcurrentHashMap<>();
-	}
+	}	
 
 	//=================================================================================================
 	// assistant methods
@@ -76,6 +87,26 @@ public abstract class ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	protected void customDestroy() {}
+	
+	//-------------------------------------------------------------------------------------------------
+	protected String getModeString() {
+		return sslProperties.isSslEnabled() ? "SECURED" : "NOT SECURED";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	protected void checkCoreSystemReachability(final CoreSystem coreSystem) {
+		try {			
+			final ResponseEntity<String> response = arrowheadService.echoCoreSystem(coreSystem);
+			
+			if (response != null && response.getStatusCode() == HttpStatus.OK) {
+				logger.info("'{}' core system is reachable.", coreSystem.name());
+			} else {
+				logger.info("'{}' core system is NOT reachable.", coreSystem.name());
+			}
+		} catch (final  UnavailableServerException | AuthException ex) {
+			logger.info("'{}' core system is NOT reachable.", coreSystem.name());
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private KeyStore initializeKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {

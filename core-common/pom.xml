@@ -55,6 +55,8 @@
 										<include>eu/arrowhead/common/dto/*.*</include>
 										<include>eu/arrowhead/common/exception/*.*</include>
 										<include>eu/arrowhead/common/http/*.*</include>
+										<include>eu/arrowhead/common/filter/ArrowheadFilter.class</include>
+										<include>eu/arrowhead/common/security/AccessControlFilter.class</include>
 									</includes>
 								</filter>
 							</filters>

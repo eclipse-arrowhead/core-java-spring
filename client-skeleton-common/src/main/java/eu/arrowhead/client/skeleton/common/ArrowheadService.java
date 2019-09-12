@@ -35,7 +35,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.http.HttpService;
 
-@Component
+@Component("ArrowheadService")
 public class ArrowheadService {
 	
 	//=================================================================================================
