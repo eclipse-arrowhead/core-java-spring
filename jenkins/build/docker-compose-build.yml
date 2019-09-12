@@ -1,0 +1,7 @@
+version: '3'
+services:
+  serviceregistry:
+    image: "serviceregistry:$BUILD_TAG"
+    build:
+      context: ..
+      dockerfile: ../Dockerfile_SR
