@@ -3,14 +3,27 @@ package eu.arrowhead.core.eventhandler.security;
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.SubscriptionRequestDTO;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.AccessControlFilter;
+import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
-public class EHAccessControlFilter extends AccessControlFilter {
+public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
+	
+	//=================================================================================================
+	// members
+	
+	private static final CoreSystem[] allowedCoreSystemsForPublishAuthUpdate = { CoreSystem.AUTHORIZATION };
+
 	
 	//=================================================================================================
 	// assistant methods
@@ -19,6 +32,40 @@ public class EHAccessControlFilter extends AccessControlFilter {
 	@Override
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
-		//TODO: implement event handler specific logic here
+		
+		final String cloudCN = getServerCloudCN();
+		if ( requestTarget.contains( CommonConstants.MGMT_URI ) ) {
+			// Only the local System Operator can use these methods
+			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
+		
+		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE ) ) {
+			// Only the specified core systems can use these methods
+			checkIfClientIsAnAllowedCoreSystem( clientCN, cloudCN, allowedCoreSystemsForPublishAuthUpdate, requestTarget );
+		
+		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE ) ){
+			
+			final SubscriptionRequestDTO subscriptionRequestDTO = Utilities.fromJson( requestJSON, SubscriptionRequestDTO.class );
+			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(subscriptionRequestDTO.getSubscriberSystem().getSystemName(), clientCN);				
+			
+		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_PUBLISH ) ){
+			
+			final EventPublishRequestDTO eventPublishRequestDTO = Utilities.fromJson( requestJSON, EventPublishRequestDTO.class );
+			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(eventPublishRequestDTO.getSource().getSystemName(), clientCN);				
+			
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void checkIfRequesterSystemNameisEqualsWithClientNameFromCN(final String requesterSystemName, final String clientCN) {
+		final String clientNameFromCN = getClientNameFromCN(clientCN);
+		if(!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
+			log.debug("Requester system name and client name from certificate do not match!");
+			throw new AuthException("Requester system name(" + requesterSystemName + ") and client name from certificate (" + clientNameFromCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String getClientNameFromCN(final String clientCN) {
+		return clientCN.split("\\.", 2)[0];
 	}
 }
