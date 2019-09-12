@@ -3,6 +3,9 @@ package eu.arrowhead.client.skeleton.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +20,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.client.skeleton.common.context.ClientCommonConstants;
-import eu.arrowhead.client.skeleton.common.context.CoreServiceProperties;
 import eu.arrowhead.client.skeleton.common.context.CoreServiceUrl;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
@@ -54,8 +56,8 @@ public class ArrowheadService {
 	@Value(CommonConstants.$SERVICE_REGISTRY_PORT_WD)
 	private int serviceRegistryPort;
 	
-	@Autowired
-	private CoreServiceProperties coreServiceProperties;
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
 	
 	@Autowired
 	private SSLProperties sslProperties;
@@ -73,11 +75,11 @@ public class ArrowheadService {
 		if (!CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES.contains(coreSystemService)) {
 			logger.debug("'{}' core service is not a public service.", coreSystemService);
 			return null;
-		} else if (!coreServiceProperties.containsKey(coreSystemService)) {
-			logger.debug("'{}' core service is not contained by CoreServiceProperties component.", coreSystemService);
+		} else if (!arrowheadContext.containsKey(coreSystemService.getServiceDefinition())) {
+			logger.debug("'{}' core service is not contained by Arrowhead Context.", coreSystemService);
 			return null;
 		} else {
-			return coreServiceProperties.get(coreSystemService);
+			return (CoreServiceUrl) arrowheadContext.get(coreSystemService.getServiceDefinition());
 		}
 		
 	}
@@ -151,7 +153,7 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void updateCoreServiceProperties(final CoreSystem coreSystem) {
+	public void updateCoreServiceUrlsInArrowheadContext(final CoreSystem coreSystem) {
 		final List<CoreSystemService> publicServices = getPublicServicesOfCoreSystem(coreSystem);
 		if (publicServices.isEmpty()) {
 			logger.info("'{}' core system has no public service.", coreSystem.name());
@@ -164,15 +166,15 @@ public class ArrowheadService {
 				
 				if (response.getStatusCode() != HttpStatus.OK) {
 					logger.info("'{}' core service couldn't be retrieved due to the following reason: service registry response status {}", coreService.getServiceDefinition(), response.getStatusCode().name());
-					coreServiceProperties.remove(coreService);
+					arrowheadContext.remove(coreService.getServiceDefinition());
 					
 				} else if (response.getBody().getServiceQueryData().isEmpty()) {
 					logger.info("'{}' core service couldn't be retrieved due to the following reason: not registered by Serivce Registry", coreService.getServiceDefinition());
-					coreServiceProperties.remove(coreService);
+					arrowheadContext.remove(coreService.getServiceDefinition());
 					
 				} else {
 					final ServiceRegistryResponseDTO serviceRegistryResponseDTO = response.getBody().getServiceQueryData().get(0);
-					coreServiceProperties.put(coreService, new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
+					arrowheadContext.put(coreService.getServiceDefinition(), new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
 											  serviceRegistryResponseDTO.getProvider().getPort(), serviceRegistryResponseDTO.getServiceUri()));					
 				}
 				
