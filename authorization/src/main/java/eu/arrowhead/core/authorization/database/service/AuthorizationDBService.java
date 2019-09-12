@@ -51,6 +51,7 @@ import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.authorization.service.AuthorizationDriver;
+import eu.arrowhead.core.authorization.service.PublishAuthUpdateTask;
 
 @Service
 public class AuthorizationDBService {
@@ -168,7 +169,9 @@ public class AuthorizationDBService {
 					
 					try {
 						
-						authorizationDriver.publishAuthUpdate(authOptional.get().getConsumerSystem().getId());
+						final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, authOptional.get().getConsumerSystem().getId());
+						final Thread publishingThread = new Thread(publishAuthUpdateTask);
+						publishingThread.start();
 					
 					} catch (Exception ex) {
 						
@@ -659,7 +662,9 @@ public class AuthorizationDBService {
 				
 				try {
 					
-					authorizationDriver.publishAuthUpdate( consumer.getId() );
+					final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
+					final Thread publishingThread = new Thread(publishAuthUpdateTask);
+					publishingThread.start();
 				
 				} catch (Exception ex) {
 					
@@ -716,7 +721,9 @@ public class AuthorizationDBService {
 			
 			try {
 				
-				authorizationDriver.publishAuthUpdate( consumer.getId() );
+				final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
+				final Thread publishingThread = new Thread(publishAuthUpdateTask);
+				publishingThread.start();
 			
 			} catch (Exception ex) {
 				
