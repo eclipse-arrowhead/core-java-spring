@@ -313,7 +313,9 @@ public class EventHandlerDBService {
 		} else {
 			
 			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
-			subscriptionPublisherConnectionRepository.deleteAll(involvedPublisherSystems);
+			
+			subscriptionPublisherConnectionRepository.deleteInBatch(involvedPublisherSystems);
+			subscriptionRepository.refresh(subscriptionEntry);			
 			
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
 				
