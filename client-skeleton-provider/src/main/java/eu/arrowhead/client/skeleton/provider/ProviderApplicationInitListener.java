@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.client.skeleton.common.ArrowheadService;
 import eu.arrowhead.client.skeleton.common.config.ApplicationInitListener;
-import eu.arrowhead.client.skeleton.common.utile.ClientCommonConstants;
+import eu.arrowhead.client.skeleton.common.util.ClientCommonConstants;
 import eu.arrowhead.client.skeleton.provider.security.ProviderSecurityConfig;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;

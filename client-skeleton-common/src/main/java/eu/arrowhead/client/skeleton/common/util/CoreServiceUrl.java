@@ -1,4 +1,4 @@
-package eu.arrowhead.client.skeleton.common.utile;
+package eu.arrowhead.client.skeleton.common.util;
 
 import org.springframework.util.Assert;
 

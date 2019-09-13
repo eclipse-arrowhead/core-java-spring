@@ -19,8 +19,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 
-import eu.arrowhead.client.skeleton.common.utile.ClientCommonConstants;
-import eu.arrowhead.client.skeleton.common.utile.CoreServiceUrl;
+import eu.arrowhead.client.skeleton.common.util.ClientCommonConstants;
+import eu.arrowhead.client.skeleton.common.util.CoreServiceUrl;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
