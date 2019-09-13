@@ -44,7 +44,7 @@ public class RandomIntraCloudProviderMatchmaker implements IntraCloudProviderMat
 		}
 		
 		for (final ServiceRegistryResponseDTO srResult : srList) {
-			for (PreferredProviderDataDTO provider : params.getPreferredLocalProviders()) {
+			for (final PreferredProviderDataDTO provider : params.getPreferredLocalProviders()) {
 				if (DTOUtilities.equalsSystemInResponseAndRequest(srResult.getProvider(), provider.getProviderSystem())) {
 					logger.debug("The first preferred provider found in SR is selected.");
 					return srResult;

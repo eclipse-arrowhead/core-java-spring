@@ -12,7 +12,7 @@ import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.RelayType;
 
-public class GetRandomAndDedicatedIfAnyGatekeeperMatchmaker implements GatekeeperMatchmakingAlgorithm {
+public class GetRandomAndDedicatedIfAnyGatekeeperMatchmaker implements RelayMatchmakingAlgorithm {
 	
 	//=================================================================================================
 	// members
@@ -29,10 +29,10 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmaker implements Gatekeepe
 	 * This algorithm returns a random Gatekeeper Relay with the type of GATEKEEPER_RELAY if there is any available. If not than return a random GENERAL_RELAY type.
 	 */
 	@Override
-	public Relay doMatchmaking(final GatekeeperMatchmakingParameters parameters) {
+	public Relay doMatchmaking(final RelayMatchmakingParameters parameters) {
 		logger.debug("GetRandomAndDedicatedIfAnyGatekeeperMatchmaker.doMatchmaking started...");
 		
-		Assert.notNull(parameters, "GatekeeperMatchmakingParameters is null");
+		Assert.notNull(parameters, "RelayMatchmakingParameters is null");
 		Assert.notNull(parameters.getCloud(), "Cloud is null");
 		Assert.isTrue(parameters.getCloud().getGatekeeperRelays() != null && !parameters.getCloud().getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList is null or empty.");
 		

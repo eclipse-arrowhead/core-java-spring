@@ -317,7 +317,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testRegisterBulkCloudsWithRelaysWithInvalidGatekeeperRelayid() {
+	public void testRegisterBulkCloudsWithRelaysWithInvalidGatekeeperRelayId() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -446,6 +446,33 @@ public class GatekeeperDBServiceCloudTest {
 		relayGatekeeper.setId(1);
 		
 		final Relay relayGateway = new Relay("2.2.2.2", 20000, true, false, RelayType.GATEKEEPER_RELAY);
+		relayGateway.setId(2);
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("operator");
+		cloudRequestDTO.setName("name");
+		cloudRequestDTO.setSecure(true);
+		cloudRequestDTO.setNeighbor(true);
+		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
+		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
+		cloudRequestDTO.setGatewayRelayIds(List.of(2L));
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
+		
+		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
+		when(relayRepository.existsById(anyLong())).thenReturn(true);
+		when(relayRepository.findAllById(List.of(1L))).thenReturn(List.of(relayGatekeeper));
+		when(relayRepository.findAllById(List.of(2L))).thenReturn(List.of(relayGateway));
+					
+		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRegisterBulkCloudsWithRelaysWithNonExclusiveGatewayRelayInGatewayIdList() {
+		final Relay relayGatekeeper = new Relay("1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
+		relayGatekeeper.setId(1);
+		
+		final Relay relayGateway = new Relay("2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY);
 		relayGateway.setId(2);
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();

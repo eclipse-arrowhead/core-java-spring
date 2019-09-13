@@ -117,6 +117,10 @@ public class DTOUtilities {
 	private static void normalizeCloudRequestDTO(final CloudRequestDTO dto) {
 		logger.debug("normalizeCloudRequestDTO started...");
 		
+		if (dto == null) {
+			return;
+		}
+		
 		final String cloudName = dto.getName();
 		if (cloudName != null) {
 			dto.setName(cloudName.toLowerCase().trim());

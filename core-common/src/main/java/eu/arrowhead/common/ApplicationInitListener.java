@@ -59,6 +59,9 @@ public abstract class ApplicationInitListener {
 	@Autowired
 	protected HttpService httpService;
 	
+	@Autowired
+	protected ApplicationContext applicationContext;
+	
 	protected PublicKey publicKey;
 	
 	protected boolean standaloneMode = false;
