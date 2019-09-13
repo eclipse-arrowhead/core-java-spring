@@ -58,6 +58,14 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 	//-------------------------------------------------------------------------------------------------
 	private void checkIfRequesterSystemNameisEqualsWithClientNameFromCN(final String requesterSystemName, final String clientCN) {
 		final String clientNameFromCN = getClientNameFromCN(clientCN);
+		
+		if (Utilities.isEmpty(requesterSystemName) || Utilities.isEmpty(clientNameFromCN)) {
+			
+			log.debug("Requester system name and client name from certificate do not match!");
+			throw new AuthException("Requester system name or client name from certificate is null or blank!", HttpStatus.UNAUTHORIZED.value());
+		
+		}
+		
 		if(!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
 			log.debug("Requester system name and client name from certificate do not match!");
 			throw new AuthException("Requester system name(" + requesterSystemName + ") and client name from certificate (" + clientNameFromCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
