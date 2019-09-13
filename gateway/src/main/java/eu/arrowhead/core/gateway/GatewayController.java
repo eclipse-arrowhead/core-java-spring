@@ -30,9 +30,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.Utilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
@@ -129,7 +130,7 @@ public class GatewayController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size) {
 		logger.debug("getActiveSessions started...");
 		
-		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, "ASC", CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, "ASC", CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
 		if (activeSessions.isEmpty()) {
 			return new ActiveSessionListDTO(List.of(), 0);
 		}

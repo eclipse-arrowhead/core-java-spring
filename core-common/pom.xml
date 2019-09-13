@@ -57,6 +57,7 @@
 										<include>eu/arrowhead/common/http/*.*</include>
 										<include>eu/arrowhead/common/filter/ArrowheadFilter.class</include>
 										<include>eu/arrowhead/common/security/AccessControlFilter.class</include>
+										<include>eu/arrowhead/common/token/*.*</include>
 									</includes>
 								</filter>
 							</filters>
