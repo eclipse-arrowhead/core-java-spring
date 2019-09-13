@@ -35,8 +35,8 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
 	@Autowired
 	private ProviderSecurityConfig providerSecurityConfig;
 	
-	@Value(ClientCommonConstants.$TOKEN_SECURITY_FILTER_ENABELD_WD)
-	private boolean tokenSecurityFilterEnabeld;
+	@Value(ClientCommonConstants.$TOKEN_SECURITY_FILTER_ENABLED_WD)
+	private boolean tokenSecurityFilterEnabled;
 	
 	private final Logger logger = LogManager.getLogger(ProviderApplicationInitListener.class);
 	
@@ -52,7 +52,7 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
 		checkCoreSystemReachability(CoreSystem.AUTHORIZATION);
 		
 		//Initialize Arrowhead Context
-		arrowheadService.updateCoreServiceUrlsInArrowheadContext(CoreSystem.AUTHORIZATION);
+		arrowheadService.updateCoreServiceURIs(CoreSystem.AUTHORIZATION);
 		setTokenSecurityFilter();
 		
 		//TODO: implement here any custom behavior on application start up
@@ -60,7 +60,7 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public void destroy() throws InterruptedException {
+	public void customDestroy() {
 		//TODO: implement here any custom behavior on application shout down
 	}
 	
@@ -69,12 +69,12 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
 
 	//-------------------------------------------------------------------------------------------------
 	private void setTokenSecurityFilter() {
-		if(!tokenSecurityFilterEnabeld) {
+		if(!tokenSecurityFilterEnabled) {
 			logger.info("TokenSecurityFilter in not active");
 		} else {
-			final String authorizationPublicKeyStr = arrowheadService.queryAndUpdateAuthorizationPublicKeyInArrowheadContext();
-			if (Utilities.isEmpty(authorizationPublicKeyStr)) {
-				throw new ArrowheadException("Authorization public key is null or blank");
+			final PublicKey authorizationPublicKey = arrowheadService.queryAuthorizationPublicKey();
+			if (authorizationPublicKey == null) {
+				throw new ArrowheadException("Authorization public key is null");
 			}
 			
 			KeyStore keystore;
@@ -83,10 +83,8 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
 				keystore.load(sslProperties.getKeyStore().getInputStream(), sslProperties.getKeyStorePassword().toCharArray());
 			} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ex) {
 				throw new ArrowheadException(ex.getMessage());
-			}
-			
+			}			
 			final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, sslProperties.getKeyPassword());
-			final PublicKey authorizationPublicKey = Utilities.getPublicKeyFromBase64EncodedString(authorizationPublicKeyStr);
 
 			providerSecurityConfig.getTokenSecurityFilter().setAuthorizationPublicKey(authorizationPublicKey);
 			providerSecurityConfig.getTokenSecurityFilter().setMyPrivateKey(providerPrivateKey);

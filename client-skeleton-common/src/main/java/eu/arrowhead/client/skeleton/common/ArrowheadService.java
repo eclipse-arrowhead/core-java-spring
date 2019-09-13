@@ -1,6 +1,7 @@
 package eu.arrowhead.client.skeleton.common;
 
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.client.skeleton.common.util.ClientCommonConstants;
-import eu.arrowhead.client.skeleton.common.util.CoreServiceUrl;
+import eu.arrowhead.client.skeleton.common.util.CoreServiceUri;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
@@ -71,20 +72,20 @@ public class ArrowheadService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public CoreServiceUrl getCoreServiceUrl(final CoreSystemService coreSystemService) {
+	public CoreServiceUri getCoreServiceUri(final CoreSystemService coreSystemService) {
 		if (!CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES.contains(coreSystemService)) {
 			logger.debug("'{}' core service is not a public service.", coreSystemService);
 			return null;
-		} else if (!arrowheadContext.containsKey(coreSystemService.getServiceDefinition())) {
+		} else if (!arrowheadContext.containsKey(coreSystemService.getServiceDefinition() + ClientCommonConstants.CORE_SERVICE_DEFINITION_SUFFIX)) {
 			logger.debug("'{}' core service is not contained by Arrowhead Context.", coreSystemService);
 			return null;
 		} else {
-			return (CoreServiceUrl) arrowheadContext.get(coreSystemService.getServiceDefinition());
+			return (CoreServiceUri) arrowheadContext.get(coreSystemService.getServiceDefinition() + ClientCommonConstants.CORE_SERVICE_DEFINITION_SUFFIX);
 		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void updateCoreServiceUrlsInArrowheadContext(final CoreSystem coreSystem) {
+	public void updateCoreServiceURIs(final CoreSystem coreSystem) {
 		final List<CoreSystemService> publicServices = getPublicServicesOfCoreSystem(coreSystem);
 		if (publicServices.isEmpty()) {
 			logger.info("'{}' core system has no public service.", coreSystem.name());
@@ -97,15 +98,15 @@ public class ArrowheadService {
 				
 				if (response.getStatusCode() != HttpStatus.OK) {
 					logger.info("'{}' core service couldn't be retrieved due to the following reason: service registry response status {}", coreService.getServiceDefinition(), response.getStatusCode().name());
-					arrowheadContext.remove(coreService.getServiceDefinition());
+					arrowheadContext.remove(coreService.getServiceDefinition() + ClientCommonConstants.CORE_SERVICE_DEFINITION_SUFFIX);
 					
 				} else if (response.getBody().getServiceQueryData().isEmpty()) {
 					logger.info("'{}' core service couldn't be retrieved due to the following reason: not registered by Serivce Registry", coreService.getServiceDefinition());
-					arrowheadContext.remove(coreService.getServiceDefinition());
+					arrowheadContext.remove(coreService.getServiceDefinition() + ClientCommonConstants.CORE_SERVICE_DEFINITION_SUFFIX);
 					
 				} else {
 					final ServiceRegistryResponseDTO serviceRegistryResponseDTO = response.getBody().getServiceQueryData().get(0);
-					arrowheadContext.put(coreService.getServiceDefinition(), new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
+					arrowheadContext.put(coreService.getServiceDefinition() + ClientCommonConstants.CORE_SERVICE_DEFINITION_SUFFIX, new CoreServiceUri(serviceRegistryResponseDTO.getProvider().getAddress(),
 							serviceRegistryResponseDTO.getProvider().getPort(), serviceRegistryResponseDTO.getServiceUri()));					
 				}
 				
@@ -184,20 +185,21 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public String queryAndUpdateAuthorizationPublicKeyInArrowheadContext() {
-		final CoreServiceUrl url = getCoreServiceUrl(CoreSystemService.AUTH_PUBLIC_KEY_SERVICE);
-		if (url == null) {
+	public PublicKey queryAuthorizationPublicKey() {
+		final CoreServiceUri uri = getCoreServiceUri(CoreSystemService.AUTH_PUBLIC_KEY_SERVICE);
+		if (uri == null) {
 			logger.debug("Authorization Public Key couldn't be retrieved due to the following reason: " +  CoreSystemService.AUTH_PUBLIC_KEY_SERVICE.name() + " not known by Arrowhead Context");
 			return null;
 		}
 		
-		final ResponseEntity<String> response = httpService.sendRequest(Utilities.createURI(getUriScheme(), url.getAddress(), url.getPort(), url.getUri()), HttpMethod.GET, String.class);
+		final ResponseEntity<String> response = httpService.sendRequest(Utilities.createURI(getUriScheme(), uri.getAddress(), uri.getPort(), uri.getPath()), HttpMethod.GET, String.class);
 		if (response.getStatusCode() != HttpStatus.OK) {
 			logger.debug("Authorization Public Key couldn't be retrieved due to the following reason: service registry response status {}", response.getStatusCode().name());
 			return null;
-		}		
-		arrowheadContext.put(CommonConstants.CORE_SERVICE_AUTH_PUBLIC_KEY, response.getBody());
-		return response.getBody();
+		}
+		
+		
+		return Utilities.getPublicKeyFromBase64EncodedString(response.getBody());
 	}
 	
 	//=================================================================================================

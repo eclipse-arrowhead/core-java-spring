@@ -11,8 +11,9 @@ public class ClientCommonConstants {
 	public static final String $CLIENT_SERVER_ADDRESS_WD = "${" + CLIENT_SERVER_ADDRESS + ": localhost" + "}";
 	public static final String CLIENT_SERVER_PORT = "server.port";
 	public static final String $CLIENT_SERVER_PORT_WD = "${" + CLIENT_SERVER_PORT + ": 8080" + "}";
-	public static final String TOKEN_SECURITY_FILTER_ENABELD = "token.security.filter.enabeld";
-	public static final String $TOKEN_SECURITY_FILTER_ENABELD_WD = "${" + TOKEN_SECURITY_FILTER_ENABELD + ": true" + "}";
+	public static final String TOKEN_SECURITY_FILTER_ENABLED = "token.security.filter.enabled";
+	public static final String $TOKEN_SECURITY_FILTER_ENABLED_WD = "${" + TOKEN_SECURITY_FILTER_ENABLED + ": true" + "}";
+	public static final String CORE_SERVICE_DEFINITION_SUFFIX = "-ah.core";
 	
 	//=================================================================================================
 	// assistant methods

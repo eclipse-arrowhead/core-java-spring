@@ -16,8 +16,8 @@ public class ProviderSecurityConfig extends DefaultSecurityConfig {
 	//=================================================================================================
 	// members
 	
-	@Value(ClientCommonConstants.$TOKEN_SECURITY_FILTER_ENABELD_WD)
-	private boolean tokenSecurityFilterEnabeld;
+	@Value(ClientCommonConstants.$TOKEN_SECURITY_FILTER_ENABLED_WD)
+	private boolean tokenSecurityFilterEnabled;
 	
 	private ProviderTokenSecurityFilter tokenSecurityFilter;
 	
@@ -28,7 +28,7 @@ public class ProviderSecurityConfig extends DefaultSecurityConfig {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
-		if (tokenSecurityFilterEnabeld) {
+		if (tokenSecurityFilterEnabled) {
 			tokenSecurityFilter = new ProviderTokenSecurityFilter();
 			http.addFilterAfter(tokenSecurityFilter, SecurityContextHolderAwareRequestFilter.class);			
 		}

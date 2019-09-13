@@ -34,7 +34,7 @@ public class ConsumerApplicationInitListener extends ApplicationInitListener {
 		
 		
 		//Initialize Arrowhead Context
-		arrowheadService.updateCoreServiceUrlsInArrowheadContext(CoreSystem.ORCHESTRATOR);
+		arrowheadService.updateCoreServiceURIs(CoreSystem.ORCHESTRATOR);
 
 		//TODO: implement here any custom behavior on application start up
 		
@@ -42,7 +42,7 @@ public class ConsumerApplicationInitListener extends ApplicationInitListener {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public void destroy() throws InterruptedException {
+	public void customDestroy() {
 		//TODO: implement here any custom behavior on application shout down
 	}
 }

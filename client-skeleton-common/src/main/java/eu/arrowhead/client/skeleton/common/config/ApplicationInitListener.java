@@ -5,7 +5,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -44,8 +43,6 @@ public abstract class ApplicationInitListener {
 	
 	@Autowired
 	protected SSLProperties sslProperties;
-	
-	protected PublicKey publicKey;
 	
 	protected final Logger logger = LogManager.getLogger(ApplicationInitListener.class);
 	
@@ -147,8 +144,7 @@ public abstract class ApplicationInitListener {
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
 		
-		publicKey = Utilities.getFirstCertFromKeyStore(keyStore).getPublicKey();
-		context.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
+		context.put(CommonConstants.SERVER_PUBLIC_KEY, Utilities.getFirstCertFromKeyStore(keyStore).getPublicKey());
 		
 		final PrivateKey privateKey = Utilities.getPrivateKey(keyStore, sslProperties.getKeyPassword());
 		context.put(CommonConstants.SERVER_PRIVATE_KEY, privateKey);
