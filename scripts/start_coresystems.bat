@@ -17,7 +17,7 @@ START "" /B "cmd /c javaw -jar arrowhead-authorization-4.1.3.jar > sout_auth.log
 echo Authorization started
 
 REM cd ..\..\gateway\target
-REM START "" /B "cmd /c javaw arrowhead-gateway-4.1.3.jar > sout_gateway.log 2>&1"
+REM START "" /B "cmd /c javaw -jar arrowhead-gateway-4.1.3.jar > sout_gateway.log 2>&1"
 REM echo Gateway started
 
 REM cd ..\..\eventhandler\target
