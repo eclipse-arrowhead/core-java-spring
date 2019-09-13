@@ -49,7 +49,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI)) {
 			if (isClientACoreSystem(clientCN, cloudCN)) {
 				// Only dedicated core systems can use this service without limitation but every core system can query info about its own services
-				checkIfClientAnAllowedCoreSystemOrQueryingOwnSystems(clientCN, cloudCN, requestJSON, requestTarget); //TODO: tests
+				checkIfClientAnAllowedCoreSystemOrQueryingOwnSystems(clientCN, cloudCN, requestJSON, requestTarget); 
 			} else {
 				// Public core system services are allowed to query directly by the local systems
 				checkIfRequestedServiceIsAPublicCoreSystemService(requestJSON);
@@ -99,6 +99,10 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private void checkIfRequestedServiceIsAPublicCoreSystemService(final String requestJSON) {
 		final ServiceQueryFormDTO requestBody = Utilities.fromJson(requestJSON, ServiceQueryFormDTO.class);
 		
+		if (Utilities.isEmpty(requestBody.getServiceDefinitionRequirement())) {
+			throw new AuthException("Service is not defined.", HttpStatus.UNAUTHORIZED.value());
+		}
+		
 		for (final CoreSystemService service : publicCoreSystemServices) {
 			if (service.getServiceDefinition().equalsIgnoreCase(requestBody.getServiceDefinitionRequirement().trim())) {
 				return;
@@ -129,6 +133,10 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			
 			if (coreSystem != null) {
 				final ServiceQueryFormDTO requestBody = Utilities.fromJson(requestJSON, ServiceQueryFormDTO.class);
+				
+				if (Utilities.isEmpty(requestBody.getServiceDefinitionRequirement())) {
+					throw new AuthException("Service is not defined.", HttpStatus.UNAUTHORIZED.value());
+				}
 				
 				for (final CoreSystemService service : coreSystem.getServices()) {
 					if (service.getServiceDefinition().equalsIgnoreCase(requestBody.getServiceDefinitionRequirement().trim())) {
