@@ -239,6 +239,7 @@ public class CommonConstants {
 	public static final String $TIME_STAMP_TOLERANCE_SECONDS_WD = "${" + TIME_STAMP_TOLERANCE_SECONDS + ":" + Defaults.DEFAULT_TIME_STAMP_TOLERANCE_SECONDS + "}";
 
 	public static final String EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE = "SUBSCRIBER_AUTH_UPDATE";
+	public static final String EVENT_METADATA_FILTER = "metadataFilter";
 	
 	//=================================================================================================
 	// assistant methods

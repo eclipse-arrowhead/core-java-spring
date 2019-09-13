@@ -1,13 +1,18 @@
 package eu.arrowhead.core.eventhandler.service;
 
+import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.transaction.Transactional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -26,6 +31,8 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
+import eu.arrowhead.core.eventhandler.metadatafiltering.MetadataFilteringAlgorithm;
+import eu.arrowhead.core.eventhandler.metadatafiltering.MetadataFilteringParameters;
 
 @Service
 public class EventHandlerService {
@@ -41,6 +48,11 @@ public class EventHandlerService {
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerService.class);
 	
+	@Value(CommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
+	private long timeStampTolerance;
+	
+	@Resource(name = CommonConstants.EVENT_METADATA_FILTER)
+	private MetadataFilteringAlgorithm metadataFilter;
 	
 	@Autowired
 	private EventHandlerDriver eventHandlerDriver;
@@ -88,11 +100,13 @@ public class EventHandlerService {
 		
 		final Set<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptions(request);
 		
+		filterInvolvedSubscriptionsBySubscriptionParameters(involvedSubscriptions, request);
+		
 		eventHandlerDriver.publishEvent(request, involvedSubscriptions);
 		
 		return new EventPublishResponseDTO(); //always return empty response
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional
 	public void publishSubscriberAuthorizationUpdateRequest(final EventPublishRequestDTO request) {
@@ -165,10 +179,105 @@ public class EventHandlerService {
 			final Long id = Long.parseLong(payload);
 			
 			return id;
-		} catch (NumberFormatException ex) {
+		} catch (final NumberFormatException ex) {
 			
 			throw new InvalidParameterException("Payload" + INVALID_TYPE_ERROR_MESSAGE);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of - Set<Subscription> involvedSubscriptions
+	private void filterInvolvedSubscriptionsBySubscriptionParameters(final Set<Subscription> involvedSubscriptions, final EventPublishRequestDTO request) {
+		logger.debug("filterInvolvedSubscriptionsBySubscriptionParameters started...");
+		
+		filterInvolvedSubscriptionsByStartDate( involvedSubscriptions, request );
+		filterInvolvedSubscriptionsByEndDate( involvedSubscriptions, request );
+		filterInvolvedSubscriptionsByMetaData( involvedSubscriptions, request );
+		
+	}
 
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of - Set<Subscription> involvedSubscriptions
+	private void filterInvolvedSubscriptionsByMetaData(final Set<Subscription> involvedSubscriptions, final EventPublishRequestDTO request) {
+		logger.debug("filterInvolvedSubscriptionsByMetaData started...");
+		
+		final Map<String, String> requestMetadata = request.getMetaData();
+		
+		final Set<Subscription> subscriptionsToRemove = new HashSet<>();
+		for (final Subscription subscription : involvedSubscriptions) {
+			
+			if ( subscription.isMatchMetaData() ) {
+				
+				if ( !callMetaDataFilter(subscription.getFilterMetaData(), requestMetadata) ) {
+					
+					subscriptionsToRemove.add( subscription );
+				}				
+			}
+		}
+		
+		involvedSubscriptions.removeAll( subscriptionsToRemove );
+		
+		return;
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of - Set<Subscription> involvedSubscriptions
+	private void filterInvolvedSubscriptionsByEndDate(final Set<Subscription> involvedSubscriptions, final EventPublishRequestDTO request) {
+		logger.debug("filterInvolvedSubscriptionsByEndDate started...");
+		
+		final ZonedDateTime timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimeStamp());
+		
+		final Set<Subscription> subscriptionsToRemove = new HashSet<>();
+		for (final Subscription subscription : involvedSubscriptions) {
+			
+			if ( subscription.getEndDate() != null ) {
+				
+				if ( timeStamp.isAfter( subscription.getEndDate().plusSeconds( timeStampTolerance ))) {
+					
+					subscriptionsToRemove.add( subscription );
+				}				
+			}
+		}
+		
+		involvedSubscriptions.removeAll( subscriptionsToRemove );
+		
+		return;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// This method may CHANGE the content of - Set<Subscription> involvedSubscriptions
+	private void filterInvolvedSubscriptionsByStartDate(final Set<Subscription> involvedSubscriptions, final EventPublishRequestDTO request) {
+		logger.debug("filterInvolvedSubscriptionsByStartDate started...");
+		
+		final ZonedDateTime timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimeStamp());
+		
+		final Set<Subscription> subscriptionsToRemove = new HashSet<>();
+		for (final Subscription subscription : involvedSubscriptions) {
+			
+			if ( subscription.getStartDate() != null ) {
+				
+				if ( timeStamp.isBefore( subscription.getStartDate().minusSeconds( timeStampTolerance ))) {
+					
+					subscriptionsToRemove.add( subscription );
+				}				
+			}
+		}
+		
+		involvedSubscriptions.removeAll( subscriptionsToRemove );
+		
+		return;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean callMetaDataFilter(final String filterMetaData,
+			final Map<String, String> eventMetadata) {
+		logger.debug("callMetaDataFilter started...");
+		
+		final Map<String, String> metaDataFilterMap = Utilities.text2Map(filterMetaData);
+		
+		final MetadataFilteringParameters filterParameters = new MetadataFilteringParameters(metaDataFilterMap, eventMetadata);
+		
+		return metadataFilter.doFiltering( filterParameters );
+	}
 }
