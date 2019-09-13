@@ -31,12 +31,10 @@ public class ConsumerApplicationInitListener extends ApplicationInitListener {
 		//Checking the availability of necessary core systems
 		checkCoreSystemReachability(CoreSystem.SERVICE_REGISTRY);
 		checkCoreSystemReachability(CoreSystem.ORCHESTRATOR);
-		checkCoreSystemReachability(CoreSystem.AUTHORIZATION);
 		
 		
-		//Update and store core service URLs in CoreServiceProperties component
+		//Initialize Arrowhead Context
 		arrowheadService.updateCoreServiceUrlsInArrowheadContext(CoreSystem.ORCHESTRATOR);
-		arrowheadService.updateCoreServiceUrlsInArrowheadContext(CoreSystem.AUTHORIZATION);
 
 		//TODO: implement here any custom behavior on application start up
 		

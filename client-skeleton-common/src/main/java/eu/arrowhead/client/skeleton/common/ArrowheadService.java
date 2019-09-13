@@ -80,8 +80,39 @@ public class ArrowheadService {
 			return null;
 		} else {
 			return (CoreServiceUrl) arrowheadContext.get(coreSystemService.getServiceDefinition());
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void updateCoreServiceUrlsInArrowheadContext(final CoreSystem coreSystem) {
+		final List<CoreSystemService> publicServices = getPublicServicesOfCoreSystem(coreSystem);
+		if (publicServices.isEmpty()) {
+			logger.info("'{}' core system has no public service.", coreSystem.name());
+			return;
 		}
 		
+		for (final CoreSystemService coreService : publicServices) {			
+			try {	
+				final ResponseEntity<ServiceQueryResultDTO> response = queryServiceReqistryByCoreService(coreService);
+				
+				if (response.getStatusCode() != HttpStatus.OK) {
+					logger.info("'{}' core service couldn't be retrieved due to the following reason: service registry response status {}", coreService.getServiceDefinition(), response.getStatusCode().name());
+					arrowheadContext.remove(coreService.getServiceDefinition());
+					
+				} else if (response.getBody().getServiceQueryData().isEmpty()) {
+					logger.info("'{}' core service couldn't be retrieved due to the following reason: not registered by Serivce Registry", coreService.getServiceDefinition());
+					arrowheadContext.remove(coreService.getServiceDefinition());
+					
+				} else {
+					final ServiceRegistryResponseDTO serviceRegistryResponseDTO = response.getBody().getServiceQueryData().get(0);
+					arrowheadContext.put(coreService.getServiceDefinition(), new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
+							serviceRegistryResponseDTO.getProvider().getPort(), serviceRegistryResponseDTO.getServiceUri()));					
+				}
+				
+			} catch (final  UnavailableServerException | AuthException ex) {
+				logger.info("'{}' core service couldn't be retrieved due to the following reason: {}", coreService.getServiceDefinition(), ex.getMessage());
+			}			
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -153,35 +184,20 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void updateCoreServiceUrlsInArrowheadContext(final CoreSystem coreSystem) {
-		final List<CoreSystemService> publicServices = getPublicServicesOfCoreSystem(coreSystem);
-		if (publicServices.isEmpty()) {
-			logger.info("'{}' core system has no public service.", coreSystem.name());
-			return;
+	public String queryAndUpdateAuthorizationPublicKeyInArrowheadContext() {
+		final CoreServiceUrl url = getCoreServiceUrl(CoreSystemService.AUTH_PUBLIC_KEY_SERVICE);
+		if (url == null) {
+			logger.debug("Authorization Public Key couldn't be retrieved due to the following reason: " +  CoreSystemService.AUTH_PUBLIC_KEY_SERVICE.name() + " not known by Arrowhead Context");
+			return null;
 		}
 		
-		for (final CoreSystemService coreService : publicServices) {			
-			try {	
-				final ResponseEntity<ServiceQueryResultDTO> response = queryServiceReqistryByCoreService(coreService);
-				
-				if (response.getStatusCode() != HttpStatus.OK) {
-					logger.info("'{}' core service couldn't be retrieved due to the following reason: service registry response status {}", coreService.getServiceDefinition(), response.getStatusCode().name());
-					arrowheadContext.remove(coreService.getServiceDefinition());
-					
-				} else if (response.getBody().getServiceQueryData().isEmpty()) {
-					logger.info("'{}' core service couldn't be retrieved due to the following reason: not registered by Serivce Registry", coreService.getServiceDefinition());
-					arrowheadContext.remove(coreService.getServiceDefinition());
-					
-				} else {
-					final ServiceRegistryResponseDTO serviceRegistryResponseDTO = response.getBody().getServiceQueryData().get(0);
-					arrowheadContext.put(coreService.getServiceDefinition(), new CoreServiceUrl(serviceRegistryResponseDTO.getProvider().getAddress(),
-											  serviceRegistryResponseDTO.getProvider().getPort(), serviceRegistryResponseDTO.getServiceUri()));					
-				}
-				
-			} catch (final  UnavailableServerException | AuthException ex) {
-				logger.info("'{}' core service couldn't be retrieved due to the following reason: {}", coreService.getServiceDefinition(), ex.getMessage());
-			}			
-		}
+		final ResponseEntity<String> response = httpService.sendRequest(Utilities.createURI(getUriScheme(), url.getAddress(), url.getPort(), url.getUri()), HttpMethod.GET, String.class);
+		if (response.getStatusCode() != HttpStatus.OK) {
+			logger.debug("Authorization Public Key couldn't be retrieved due to the following reason: service registry response status {}", response.getStatusCode().name());
+			return null;
+		}		
+		arrowheadContext.put(CommonConstants.CORE_SERVICE_AUTH_PUBLIC_KEY, response.getBody());
+		return response.getBody();
 	}
 	
 	//=================================================================================================
