@@ -62,9 +62,14 @@ public class EventHandlerDriver {
 	public void publishEvent(final EventPublishRequestDTO request, final Set<Subscription> involvedSubscriptions) {
 		logger.debug("publishEvent started...");
 		
-		final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);
-		
-		publishRequestExecutor.execute();
+		try {
+			final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);
+			
+			publishRequestExecutor.execute();
+		} catch (Exception ex) {
+			
+			logger.debug("publishEvent finished with exception : " + ex);
+		}
 	}
 	
 	//=================================================================================================
