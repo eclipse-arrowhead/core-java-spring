@@ -3,6 +3,7 @@ package eu.arrowhead.client.skeleton.common;
 
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -27,10 +28,14 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.OrchestrationFormRequestDTO.Builder;
+import eu.arrowhead.common.dto.OrchestrationResponseDTO;
 import eu.arrowhead.common.dto.ServiceQueryFormDTO;
 import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
@@ -200,6 +205,31 @@ public class ArrowheadService {
 		
 		
 		return Utilities.getPublicKeyFromBase64EncodedString(response.getBody());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Builder getOrchestrationFormBuilder() {
+		final SystemRequestDTO thisSystem = new SystemRequestDTO();
+		thisSystem.setSystemName(clientSystemName);
+		thisSystem.setAddress(clientSystemAddress);
+		thisSystem.setPort(clientSystemPort);
+		if (sslProperties.isSslEnabled()) {
+			final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+			thisSystem.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+		}
+		
+		return new OrchestrationFormRequestDTO.Builder(thisSystem);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ResponseEntity<OrchestrationResponseDTO> proceedOrchestration(final OrchestrationFormRequestDTO request) {
+		final CoreServiceUri uri = getCoreServiceUri(CoreSystemService.ORCHESTRATION_SERVICE);
+		if (uri == null) {
+			logger.debug("Orchestration couldn't be proceeded due to the following reason: " +  CoreSystemService.ORCHESTRATION_SERVICE.name() + " not known by Arrowhead Context");
+			return null;
+		}
+		
+		return httpService.sendRequest(Utilities.createURI(getUriScheme(), uri.getAddress(), uri.getPort(), uri.getPath()), HttpMethod.POST, OrchestrationResponseDTO.class, request);
 	}
 	
 	//=================================================================================================
