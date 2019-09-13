@@ -40,12 +40,12 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 		
 		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE ) ) {
 			// Only the specified core systems can use these methods
-			checkIfClientIsAnAllowedCoreSystem( clientCN, cloudCN, allowedCoreSystemsForPublishAuthUpdate, requestTarget );
+			//checkIfClientIsAnAllowedCoreSystem( clientCN, cloudCN, allowedCoreSystemsForPublishAuthUpdate, requestTarget );
 		
 		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE ) ){
 			
 			final SubscriptionRequestDTO subscriptionRequestDTO = Utilities.fromJson( requestJSON, SubscriptionRequestDTO.class );
-			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(subscriptionRequestDTO.getSubscriberSystem().getSystemName(), clientCN);				
+			//checkIfRequesterSystemNameisEqualsWithClientNameFromCN(subscriptionRequestDTO.getSubscriberSystem().getSystemName(), clientCN);				
 			
 		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_PUBLISH ) ){
 			

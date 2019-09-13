@@ -203,48 +203,6 @@ public class EventHandlerDBService {
 		
 		return;
 	}
-
-	//-------------------------------------------------------------------------------------------------
-	public Subscription getSubscriptionWithUpdatedFields(final long id, final SubscriptionRequestDTO request) {
-		logger.debug("getSubscriptionWithUpdatedFields started ...");
-		
-		final Subscription subscriptionToUpdate = getSubscriptionById( id );
-		
-		final EventType eventTypeForUpdate = validateEventType( request.getEventType() );
-		final System subscriberSystemForUpdate = validateSystemRequestDTO( request.getSubscriberSystem() );
-		final String filterMetadataForUpdate = Utilities.map2Text(request.getFilterMetaData());
-		final boolean matchMetaDataForUpdate = request.getMatchMetaData() == null ? false : request.getMatchMetaData();
-		final String notifyUriForUpdate = request.getNotifyUri();
-		final boolean onlyPredifindProvidersForUpdate = request.getSources() != null && !request.getSources().isEmpty();
-		final ZonedDateTime startDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
-		final ZonedDateTime endDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
-
-		subscriptionToUpdate.setEventType(eventTypeForUpdate);
-		subscriptionToUpdate.setSubscriberSystem(subscriberSystemForUpdate);
-		subscriptionToUpdate.setFilterMetaData(filterMetadataForUpdate);
-		subscriptionToUpdate.setMatchMetaData(matchMetaDataForUpdate);
-		subscriptionToUpdate.setNotifyUri(notifyUriForUpdate);
-		subscriptionToUpdate.setOnlyPredefinedPublishers(onlyPredifindProvidersForUpdate);
-		subscriptionToUpdate.setStartDate(startDateForUpdate);
-		subscriptionToUpdate.setEndDate(endDateForUpdate);
-
-		checkSubscriptionUniqueConstrains(subscriptionToUpdate);
-		
-		try {
-			
-			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry( subscriptionToUpdate );
-			
-			subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
-			subscriptionRepository.refresh( subscriptionToUpdate );			
-							
-		}catch (final Exception ex) {
-			
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-		
-		return subscriptionToUpdate;
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional
@@ -276,23 +234,51 @@ public class EventHandlerDBService {
 			final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("updateSubscription started ...");
 		
-		final Subscription subscriptionToUpdate = getSubscriptionWithUpdatedFields( id, request );
-		
 		try {
+
+			final Subscription subscriptionToUpdate = getSubscriptionById( id );
+			final long originalEventTypeId = subscriptionToUpdate.getEventType().getId();
+			final long originalSubscriberSystemId = subscriptionToUpdate.getSubscriberSystem().getId();
 			
-			final Subscription subscriptionEntry = subscriptionRepository.save( subscriptionToUpdate );
-			addAndSaveSubscriptionEntryPublisherConnections(subscriptionEntry, request, authorizedPublishers);
+			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry( subscriptionToUpdate );
 			
-			return subscriptionRepository.saveAndFlush(subscriptionEntry);
+			final EventType eventTypeForUpdate = validateEventType( request.getEventType() );
+			final System subscriberSystemForUpdate = validateSystemRequestDTO( request.getSubscriberSystem() );
+			final String filterMetadataForUpdate = Utilities.map2Text(request.getFilterMetaData());
+			final boolean matchMetaDataForUpdate = request.getMatchMetaData() == null ? false : request.getMatchMetaData();
+			final String notifyUriForUpdate = request.getNotifyUri();
+			final boolean onlyPredifindProvidersForUpdate = request.getSources() != null && !request.getSources().isEmpty();
+			final ZonedDateTime startDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
+			final ZonedDateTime endDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
+
+			if ( originalEventTypeId != eventTypeForUpdate.getId() ||
+					originalSubscriberSystemId != subscriberSystemForUpdate.getId()) {
+				
+				checkSubscriptionUpdateUniqueConstrains(eventTypeForUpdate, subscriberSystemForUpdate);
+			}		
 			
+			subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
+			subscriptionRepository.refresh( subscriptionToUpdate );		
 			
+			subscriptionToUpdate.setEventType(eventTypeForUpdate);
+			subscriptionToUpdate.setSubscriberSystem(subscriberSystemForUpdate);
+			subscriptionToUpdate.setFilterMetaData(filterMetadataForUpdate);
+			subscriptionToUpdate.setMatchMetaData(matchMetaDataForUpdate);
+			subscriptionToUpdate.setNotifyUri(notifyUriForUpdate);
+			subscriptionToUpdate.setOnlyPredefinedPublishers(onlyPredifindProvidersForUpdate);
+			subscriptionToUpdate.setStartDate(startDateForUpdate);
+			subscriptionToUpdate.setEndDate(endDateForUpdate);
+						
+			addAndSaveSubscriptionEntryPublisherConnections(subscriptionToUpdate, request, authorizedPublishers);
+			
+			return subscriptionRepository.saveAndFlush(subscriptionToUpdate);
+					
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
-	
 
 	//-------------------------------------------------------------------------------------------------
 	public Set<Subscription> getInvolvedSubscriptions(final EventPublishRequestDTO request) {
@@ -608,6 +594,28 @@ public class EventHandlerDBService {
 		try {
 			
 			subcriptionOptional = subscriptionRepository.findByEventTypeAndSubscriberSystem( subscription.getEventType(), subscription.getSubscriberSystem() );
+			
+		} catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+		if ( subcriptionOptional.isPresent()) {
+			
+			throw new InvalidParameterException("Subscription" + VIOLATES_UNIQUE_CONSTRAINT );
+			
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkSubscriptionUpdateUniqueConstrains(final EventType eventTypeForUpdate, final System subscriberSystemForUpdate) {
+		logger.debug("checkSubscriptionUpdateUniqueConstrains started...");
+		
+		final Optional<Subscription> subcriptionOptional;
+		try {
+			
+			subcriptionOptional = subscriptionRepository.findByEventTypeAndSubscriberSystem( eventTypeForUpdate, subscriberSystemForUpdate );
 			
 		} catch (final Exception ex) {
 			
