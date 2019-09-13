@@ -344,11 +344,19 @@ public class EventHandlerDBService {
 			final System validProviderSystem) {
 		logger.debug("filterInvolvedSubscriptionsByAuthorizedProviders started...");
 		
-		final Set<Subscription> involvedConnections = subscriptionPublisherConnectionRepository.findAllBySystemAndAuthorized(validProviderSystem, true);
-
-		involvedConnections.retainAll(involvedSubscriptions);
+		final List<SubscriptionPublisherConnection> involvedConnections = subscriptionPublisherConnectionRepository.findAllBySystemAndAuthorized(validProviderSystem, true);
+		final Set<Subscription> involvedSubscriptionsFromConnections = new HashSet<>();
 		
-		return involvedConnections;
+		for ( final SubscriptionPublisherConnection spConnection : involvedConnections ) {
+			
+			final Subscription subscription = spConnection.getSubscriptionEntry();
+			if ( involvedSubscriptions.contains( subscription )  && !involvedSubscriptionsFromConnections.contains( subscription ) ) {
+				
+				involvedSubscriptionsFromConnections.add( subscription );
+			}
+		}
+		
+		return involvedSubscriptionsFromConnections;
 	}
 
 }
