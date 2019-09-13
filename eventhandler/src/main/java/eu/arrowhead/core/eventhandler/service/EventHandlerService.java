@@ -69,12 +69,11 @@ public class EventHandlerService {
 			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		checkSystemRequestDTO(request.getSubscriberSystem(), true);
+		checkSystemRequestDTO(request.getSubscriberSystem(), false);
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();
 		
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
-		//final AuthorizationSubscriptionCheckResponseDTO 
 		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(eventHandlerDBService.registerSubscription(request, authorizedPublishers));
 	}
 
@@ -83,7 +82,15 @@ public class EventHandlerService {
 	public void unSubscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("unSubscriptionRequest started ...");
 		
-		// TODO Implement additional method logic here 
+		if (request == null) {
+			
+			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}		
+		
+		final Subscription subscription = eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		eventHandlerDBService.deleteSubscriptionRequest( subscription.getId() );
+		
 		return ;
 	}
 
@@ -123,6 +130,41 @@ public class EventHandlerService {
 		eventHandlerDBService.updateSubscriberAuthorization( involvedSubscriptions, authorizedPublishers );
 		
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional
+	public SubscriptionResponseDTO updateSubscriptionRequest(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
+		logger.debug("updateSubscriptionRequest started ...");
+		
+		final Subscription updatedSubscription = updateSubscription( id, subscriptionRequestDTO );
+		
+		if ( updatedSubscription == null || Utilities.isEmpty(updatedSubscription.getNotifyUri())) {
+			
+			return new SubscriptionResponseDTO(); // return empty SubscriptionResponseDTO
+		}
+		
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(updatedSubscription);
+
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional
+	public Subscription updateSubscription(final long id, final SubscriptionRequestDTO request) {
+		logger.debug("updateSubscription started ...");
+		
+		if (request == null) {
+			
+			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		checkSystemRequestDTO(request.getSubscriberSystem(), false);
+		
+		final SystemRequestDTO subscriber = request.getSubscriberSystem();	
+		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
+
+		return eventHandlerDBService.updateSubscription(id, request, authorizedPublishers);
+	}
+	
 
 	//=================================================================================================
 	// assistant methods
@@ -276,4 +318,5 @@ public class EventHandlerService {
 		
 		return metadataFilter.doFiltering( filterParameters );
 	}
+	
 }

@@ -1,23 +1,29 @@
 package eu.arrowhead.core.eventhandler.database.service;
 
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.EventTypeRepository;
 import eu.arrowhead.common.database.repository.SubscriptionPublisherConnectionRepository;
 import eu.arrowhead.common.database.repository.SubscriptionRepository;
@@ -25,8 +31,6 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.EventPublishResponseDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
@@ -46,7 +50,7 @@ public class EventHandlerDBService {
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String NULL_ERROR_MESSAGE = " is null";
 	private static final String NOT_VALID_ERROR_MESSAGE = " is not valid.";
-	private static final String NOT_FOREIGN_ERROR_MESSAGE = " is not foreign";
+	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerDBService.class);
 	
@@ -69,45 +73,190 @@ public class EventHandlerDBService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionListResponseDTO getSubscriptionsRequest(final int validatedPage, final int validatedSize,
-			final Direction validatedDirecion, final String sortField) {
-		logger.debug("getEventHandlersRequest started ...");
+	public SubscriptionListResponseDTO getSubscriptionsRequest(final int page, final int size,
+			final Direction direction, final String sortField) {
+		logger.debug("getSubscriptionsRequest started ...");
 		
-		// TODO implement additional method logic
-		return null;
+		final Page<Subscription> entries = getSubscriptions(page, size, direction, sortField);
+
+		return DTOConverter.convertSubscriptionPageToSubscriptionListResponseDTO( entries );
+		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public Page<Subscription> getSubscriptions(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getSubscriptions started ...");
+		
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		
+		if (!Subscription.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException(validatedSortField + NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE);
+		}
+		
+		try {
+			
+			return subscriptionRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		
+		} catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public SubscriptionResponseDTO getSubscriptionByIdRequest(final long id) {
 		logger.debug("getSubscriptionByIdRequest started ...");
 		
-		// TODO implement additional method logic
-		return null;
+		final Subscription subscription = getSubscriptionById( id );
+		if ( subscription == null || Utilities.isEmpty( subscription.getNotifyUri() )) {
+			
+			return new SubscriptionResponseDTO(); //return empty subscriptionResponseDTO
+		}
+		
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( subscription );
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public Subscription getSubscriptionById(final long id) {
+		logger.debug("getSubscriptionById started ...");
+		
+		if ( id < 1) {
+			
+			throw new InvalidParameterException("SubscriberSystemId" + LESS_THAN_ONE_ERROR_MESSAGE );
+		}
+		
+		try {
+			
+			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findById( id );
+			if ( subcriptionOptional.isPresent() ) {
+				
+				return subcriptionOptional.get();
+				
+			}
+			
+		} catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+		return new Subscription();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Subscription getSubscriptionBySubscriptionRequestDTO(final SubscriptionRequestDTO subscriptionRequestDTO) {
+		logger.debug("getSubscriptionBySubscriptionRequestDTO started ...");
+
+		final Subscription subscription = validateSubscriptionRequestDTO( subscriptionRequestDTO );
+
+		try {
+			
+			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findByEventTypeAndSubscriberSystem( subscription.getEventType(), subscription.getSubscriberSystem() );
+			if ( subcriptionOptional.isPresent()) {
+				
+				return  subcriptionOptional.get();
+			}
+			
+		} catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+		return new Subscription(); //return empty subscription
+	}
+	//-------------------------------------------------------------------------------------------------
+	@Transactional
 	public void deleteSubscriptionRequest(final long id) {
 		logger.debug("deleteSubscriptionRequest started ...");
 		
-		// TODO implement additional method logic
+		if ( id < 1) {
+			
+			throw new InvalidParameterException("SubscriberSystemId" + LESS_THAN_ONE_ERROR_MESSAGE );
+		}
+		
+		try {
+			
+			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findById( id );
+			if ( subcriptionOptional.isPresent() ) {
+				final Subscription subscriptionEntry = subcriptionOptional.get();
+				final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
+				
+				subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
+				subscriptionRepository.refresh( subscriptionEntry );			
+				
+				subscriptionRepository.delete( subscriptionEntry );
+				
+				return;
+			}
+			
+		} catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
 		return;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionResponseDTO updateSubscriptionRequest(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
-		logger.debug("updateSubscriptionRequest started ...");
+	public Subscription getSubscriptionWithUpdatedFields(final long id, final SubscriptionRequestDTO request) {
+		logger.debug("getSubscriptionWithUpdatedFields started ...");
 		
-		// TODO implement additional method logic
-		return null;
-	}	
+		final Subscription subscriptionToUpdate = getSubscriptionById( id );
+		
+		final EventType eventTypeForUpdate = validateEventType( request.getEventType() );
+		final System subscriberSystemForUpdate = validateSystemRequestDTO( request.getSubscriberSystem() );
+		final String filterMetadataForUpdate = Utilities.map2Text(request.getFilterMetaData());
+		final boolean matchMetaDataForUpdate = request.getMatchMetaData() == null ? false : request.getMatchMetaData();
+		final String notifyUriForUpdate = request.getNotifyUri();
+		final boolean onlyPredifindProvidersForUpdate = request.getSources() != null && !request.getSources().isEmpty();
+		final ZonedDateTime startDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
+		final ZonedDateTime endDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
+
+		subscriptionToUpdate.setEventType(eventTypeForUpdate);
+		subscriptionToUpdate.setSubscriberSystem(subscriberSystemForUpdate);
+		subscriptionToUpdate.setFilterMetaData(filterMetadataForUpdate);
+		subscriptionToUpdate.setMatchMetaData(matchMetaDataForUpdate);
+		subscriptionToUpdate.setNotifyUri(notifyUriForUpdate);
+		subscriptionToUpdate.setOnlyPredefinedPublishers(onlyPredifindProvidersForUpdate);
+		subscriptionToUpdate.setStartDate(startDateForUpdate);
+		subscriptionToUpdate.setEndDate(endDateForUpdate);
+
+		checkSubscriptionUniqueConstrains(subscriptionToUpdate);
+		
+		try {
+			
+			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry( subscriptionToUpdate );
+			
+			subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
+			subscriptionRepository.refresh( subscriptionToUpdate );			
+							
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+		return subscriptionToUpdate;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Transactional
 	public Subscription registerSubscription(final SubscriptionRequestDTO request,
 			final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("registerSubscription started ...");
 		
 		final Subscription subscription = validateSubscriptionRequestDTO(request);
+		checkSubscriptionUniqueConstrains( subscription );
+		
 		try {
+			
 			final Subscription subscriptionEntry = subscriptionRepository.save(subscription);
 			addAndSaveSubscriptionEntryPublisherConnections(subscriptionEntry, request, authorizedPublishers);
 			
@@ -122,6 +271,30 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Transactional
+	public Subscription updateSubscription( final long id, final SubscriptionRequestDTO request,
+			final Set<SystemResponseDTO> authorizedPublishers) {
+		logger.debug("updateSubscription started ...");
+		
+		final Subscription subscriptionToUpdate = getSubscriptionWithUpdatedFields( id, request );
+		
+		try {
+			
+			final Subscription subscriptionEntry = subscriptionRepository.save( subscriptionToUpdate );
+			addAndSaveSubscriptionEntryPublisherConnections(subscriptionEntry, request, authorizedPublishers);
+			
+			return subscriptionRepository.saveAndFlush(subscriptionEntry);
+			
+			
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
 	public Set<Subscription> getInvolvedSubscriptions(final EventPublishRequestDTO request) {
 		logger.debug("getInvolvedSubscriptions started ...");
 		
@@ -133,28 +306,41 @@ public class EventHandlerDBService {
 			
 		}
 		
-		
-		//TODO maybe handle this in separte method ...
-		final Set<Subscription> involvedSubscriptions = subscriptionRepository.findAllByEventType(validEventType);
-		final System validProviderSystem = validateSystemRequestDTO(request.getSource());
-		
-		return filterInvolvedSubscriptionsByAuthorizedProviders(involvedSubscriptions, validProviderSystem);
-		
+		try {
+			
+			final Set<Subscription> involvedSubscriptions = subscriptionRepository.findAllByEventType(validEventType);
+			final System validProviderSystem = validateSystemRequestDTO(request.getSource());
+			
+			return filterInvolvedSubscriptionsByAuthorizedProviders(involvedSubscriptions, validProviderSystem);
+			
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<Subscription> getInvolvedSubscriptionsBySubscriberSystemId(final Long subscriberSystemId) {
 		logger.debug("getInvolvedSubscriptionsBySubscriberSystemId started ...");
 		
-		final Optional<System> subscriberSystemOptional = systemRepository.findById(subscriberSystemId);
-		if ( subscriberSystemOptional.isEmpty() ) {
+		try {
 			
-			throw new InvalidParameterException("SubscriberSystem" + NOT_IN_DB_ERROR_MESSAGE);
+			final Optional<System> subscriberSystemOptional = systemRepository.findById(subscriberSystemId);
+			if ( subscriberSystemOptional.isEmpty() ) {
+				
+				throw new InvalidParameterException("SubscriberSystem" + NOT_IN_DB_ERROR_MESSAGE);
+			}
+			
+			final List<Subscription> involvedSubscriptions = subscriptionRepository.findAllBySubscriberSystem( subscriberSystemOptional.get() );
+			
+			return involvedSubscriptions;
+			
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
-		final List<Subscription> involvedSubscriptions = subscriptionRepository.findAllBySubscriberSystem( subscriberSystemOptional.get() );
-		
-		return involvedSubscriptions;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -201,7 +387,17 @@ public class EventHandlerDBService {
 		final String systemName = systemRequestDTO.getSystemName().trim().toLowerCase();
 		final int port = systemRequestDTO.getPort();
 		
-		final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
+		final Optional<System> systemOptional;
+		try {
+			
+			systemOptional = systemRepository.findBySystemNameAndAddressAndPort(systemName, address, port);
+					
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
 		if (systemOptional.isEmpty()) {
 			throw new InvalidParameterException("System by systemName: " + systemName + ", address: " + address + ", port: " + port + NOT_IN_DB_ERROR_MESSAGE);
 		}
@@ -213,14 +409,23 @@ public class EventHandlerDBService {
 	private EventType validateEventType(final String eventType) {
 		logger.debug("validateEventType started...");
 		
-		final String validEventTypeName = eventType.toUpperCase().trim();//TODO create normalizer in Utilities
-		final Optional<EventType> eventTypeOptional = eventTypeRepository.findByEventTypeName( validEventTypeName );
-		if ( eventTypeOptional.isEmpty() ) {
+		try {
 			
-			return eventTypeRepository.saveAndFlush(new EventType( validEventTypeName ));
+			final String validEventTypeName = eventType.toUpperCase().trim();//TODO create normalizer in Utilities
+			final Optional<EventType> eventTypeOptional = eventTypeRepository.findByEventTypeName( validEventTypeName );
+			if ( eventTypeOptional.isEmpty() ) {
+				
+				return eventTypeRepository.saveAndFlush(new EventType( validEventTypeName ));
+			}
+			
+			return eventTypeOptional.get();		
+			
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
-		return eventTypeOptional.get();
 	}	
 
 	//-------------------------------------------------------------------------------------------------
@@ -276,8 +481,19 @@ public class EventHandlerDBService {
 				subscriptionEntry.getPublisherConnections().add(conn);
 			}
 		}
-		subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
-		subscriptionPublisherConnectionRepository.flush();
+
+		try {
+			
+			subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
+			subscriptionPublisherConnectionRepository.flush();
+			
+			return;
+			
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	
 	}
 	
@@ -305,17 +521,34 @@ public class EventHandlerDBService {
 				}
 			}
 			
-			subscriptionPublisherConnectionRepository.saveAll( involvedPublisherSystems );
-			subscriptionPublisherConnectionRepository.flush();
-			
-			return;
+			try {
+				
+				subscriptionPublisherConnectionRepository.saveAll( involvedPublisherSystems );
+				subscriptionPublisherConnectionRepository.flush();
+				
+				return;
+				
+			}catch (final Exception ex) {
+				
+				logger.debug(ex.getMessage(), ex);
+				throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			}
 			
 		} else {
 			
-			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
-			
-			subscriptionPublisherConnectionRepository.deleteInBatch(involvedPublisherSystems);
-			subscriptionRepository.refresh(subscriptionEntry);			
+
+			try {
+				
+				final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
+				
+				subscriptionPublisherConnectionRepository.deleteInBatch(involvedPublisherSystems);
+				subscriptionRepository.refresh(subscriptionEntry);			
+								
+			}catch (final Exception ex) {
+				
+				logger.debug(ex.getMessage(), ex);
+				throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			}
 			
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
 				
@@ -332,10 +565,18 @@ public class EventHandlerDBService {
 				subscriptionEntry.getPublisherConnections().add(conn);
 			}
 			
-			subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
-			subscriptionPublisherConnectionRepository.flush();
-			
-			return;
+			try {
+				
+				subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
+				subscriptionPublisherConnectionRepository.flush();
+				
+				return;
+				
+			}catch (final Exception ex) {
+				
+				logger.debug(ex.getMessage(), ex);
+				throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			}
 		}
 	}
 
@@ -357,6 +598,28 @@ public class EventHandlerDBService {
 		}
 		
 		return involvedSubscriptionsFromConnections;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkSubscriptionUniqueConstrains(final Subscription subscription) {
+		logger.debug("checkSubscriptionUniqueConstrains started...");
+		
+		final Optional<Subscription> subcriptionOptional;
+		try {
+			
+			subcriptionOptional = subscriptionRepository.findByEventTypeAndSubscriberSystem( subscription.getEventType(), subscription.getSubscriberSystem() );
+			
+		} catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+		if ( subcriptionOptional.isPresent()) {
+			
+			throw new InvalidParameterException("Subscription" + VIOLATES_UNIQUE_CONSTRAINT );
+			
+		}
 	}
 
 }

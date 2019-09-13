@@ -1,6 +1,7 @@
 package eu.arrowhead.common.database.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Repository;
@@ -14,5 +15,6 @@ public interface SubscriptionRepository extends RefreshableRepository<Subscripti
 
 	public Set<Subscription> findAllByEventType(final EventType validEventType);
 	public List<Subscription> findAllBySubscriberSystem(final System system);
+	public Optional<Subscription> findByEventTypeAndSubscriberSystem(final EventType eventType, final System subscriberSystem);
 
 }

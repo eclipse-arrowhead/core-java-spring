@@ -558,6 +558,21 @@ public class DTOConverter {
 				);
 	}
 	
+
+	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionListResponseDTO convertSubscriptionPageToSubscriptionListResponseDTO(final Page<Subscription> entries) {
+		Assert.notNull(entries, "SubscriptionPage is null" );
+		
+		final List<SubscriptionResponseDTO> subscriptionEntries = new ArrayList<>(entries.getNumberOfElements());
+		for ( final Subscription entry : entries ) {
+			
+			subscriptionEntries.add( convertSubscriptionToSubscriptionResponseDTO( entry ) );
+		}
+		
+		return new SubscriptionListResponseDTO( subscriptionEntries, entries.getTotalElements() );
+		
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -641,4 +656,5 @@ public class DTOConverter {
 		
 		return result;
 	}
+
 }

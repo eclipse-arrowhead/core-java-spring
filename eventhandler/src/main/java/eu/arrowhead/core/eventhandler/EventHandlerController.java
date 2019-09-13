@@ -26,12 +26,11 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.Utilities.ValidatedPageParams;
+import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.EventPublishResponseDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
@@ -213,7 +212,7 @@ public class EventHandlerController {
 		
 		checkSubscriptionRequestDTO(request, origin);
 		
-		final SubscriptionResponseDTO response = eventHandlerDBService.updateSubscriptionRequest(id, request);
+		final SubscriptionResponseDTO response = eventHandlerService.updateSubscriptionRequest(id, request);
 		
 		logger.debug("Subscription entry with id: {} successfully updated", id);
 		
