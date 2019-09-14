@@ -30,5 +30,3 @@ cp -f /var/core_system_config/gateway.properties $WORKSPACE/gateway/src/main/res
 # Event Handler
 rm -f $WORKSPACE/eventhandler/src/main/resources/application.properties
 cp -f /var/core_system_config/eventhandler.properties $WORKSPACE/eventhandler/src/main/resources/application.properties
-
-cat $WORKSPACE/serviceregistry/src/main/resources/application.properties

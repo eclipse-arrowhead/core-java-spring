@@ -1,0 +1,6 @@
+FROM openjdk:11-jre-slim
+
+COPY gatekeeper/*.jar /gatekeeper/arrowhead-gatekeeper.jar
+COPY gatekeeper/*.properties /gatekeeper/application.properties
+
+CMD java -jar /gatekeeper/arrowhead-gatekeeper.jar

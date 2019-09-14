@@ -31,6 +31,7 @@ pipeline
 				steps
 				{
 					sh  '''
+					    ./jenkins/copy/copy.sh
 					    ./jenkins/build/maven.sh mvn -B -DskipTests clean package
 					    ./jenkins/build/build.sh
 					    '''

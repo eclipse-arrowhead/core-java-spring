@@ -1,0 +1,6 @@
+FROM openjdk:11-jre-slim
+
+COPY authorization/*.jar /authorization/arrowhead-authorization.jar
+COPY authorization/*.properties /authorization/application.properties
+
+CMD java -jar /authorization/arrowhead-authorization.jar
