@@ -13,21 +13,15 @@ pipeline
 				}
 			}
 
-        stage( "Copy Config" )
-			{
-			    agent { label "master" }
-			    steps
-			    {
-			        sh './jenkins/copy/copy.sh'
-			    }
-			}
-
 		stage( "Test" )
             {
                 agent { label "master" }
                 steps
                 {
-                    sh './jenkins/test/maven.sh cat serviceregistry/src/main/resources/application.properties'
+                    sh '''
+                       ./jenkins/copy/copy.sh'
+                       ./jenkins/test/maven.sh cat serviceregistry/src/main/resources/application.properties
+                       '''
                 }
             }
 
