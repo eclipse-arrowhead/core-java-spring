@@ -4,7 +4,7 @@ pipeline
 
 	stages
 	{
-		stage("Create Maven Cache")
+		stage( "Create Maven Cache" )
 			{
 				agent{ label "master" }
 				steps
@@ -22,7 +22,7 @@ pipeline
 			    }
 			}
 
-		stage('Test')
+		stage( "Test" )
             {
                 agent { label "master" }
                 steps
