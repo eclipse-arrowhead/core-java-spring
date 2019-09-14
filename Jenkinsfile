@@ -20,7 +20,7 @@ pipeline
                 {
                     sh '''
                        ./jenkins/copy/copy.sh
-                       ./jenkins/test/maven.sh cat serviceregistry/src/main/resources/application.properties
+                       ./jenkins/test/maven.sh mvn test
                        '''
                 }
             }
