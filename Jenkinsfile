@@ -27,7 +27,7 @@ pipeline
                 agent { label "master" }
                 steps
                 {
-                    sh './jenkins/test/maven.sh mvn test'
+                    sh './jenkins/test/maven.sh "pwd && cat serviceregistry/src/main/resources/application.properties && mvn test"'
                 }
             }
 
