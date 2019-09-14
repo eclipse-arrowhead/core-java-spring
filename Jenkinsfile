@@ -2,6 +2,12 @@ pipeline
 {
 	agent any
 
+    environment
+    {
+        URL = {env.DOCKER_REPO}
+        NAMESPACE = {env.DOCKER_BUILD_NAMESPACE}
+    }
+
 	stages
 	{
 		stage( "Create Maven Cache" )
@@ -38,5 +44,23 @@ pipeline
 
 				}
 			}
+		stage( "Push" )
+        	{
+        		agent { label "master" }
+        	    steps
+        		{
+        		    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'portus-push', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                      sh './jenkins/push/push.sh $USERNAME $PASSWORD'
+                    }
+        		}
+        	}
+        stage( "Deploy" )
+            {
+            	agent { label "master" }
+                steps
+           		{
+                    sh 'echo Deploy'
+               	}
+           	}
 	}
 }
