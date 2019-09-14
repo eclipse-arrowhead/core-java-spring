@@ -13,6 +13,24 @@ pipeline
 				}
 			}
 
+			stage( "Copy Config" )
+			{
+			    agent { label "master" }
+			    steps
+			    {
+			        sh './jenkins/copy/copy.sh'
+			    }
+			}
+
+			stage('Test')
+            {
+                agent { label "master" }
+                steps
+                {
+                    sh './jenkins/test/maven.sh mvn test'
+                }
+            }
+
 			stage( "Build" )
 			{
 				agent { label "master" }
