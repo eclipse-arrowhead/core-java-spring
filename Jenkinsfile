@@ -4,7 +4,7 @@ pipeline
 
     environment
     {
-        URL = {env.DOCKER_REPO}
+        DOCKER_REPO_URL = {env.DOCKER_REPO}
         NAMESPACE = {env.DOCKER_BUILD_NAMESPACE}
     }
 
