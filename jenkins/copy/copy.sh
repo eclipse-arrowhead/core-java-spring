@@ -1,5 +1,9 @@
 #!/bin/bash
 
+ echo "****************************"
+ echo "** Copying property files **"
+ echo "****************************"
+
 # Copy the preconfigured core system property files to their location
 WORKSPACE=/var/jenkins_home/workspace/Arrowhead/Arrowhead_Core_Spring
 
@@ -26,3 +30,5 @@ cp -f /var/core_system_config/gateway.properties $WORKSPACE/gateway/src/main/res
 # Event Handler
 rm -f $WORKSPACE/eventhandler/src/main/resources/application.properties
 cp -f /var/core_system_config/eventhandler.properties $WORKSPACE/eventhandler/src/main/resources/application.properties
+
+cat $WORKSPACE/serviceregistry/src/main/resources/application.properties
