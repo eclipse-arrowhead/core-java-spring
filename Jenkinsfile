@@ -13,7 +13,7 @@ pipeline
 				}
 			}
 
-			stage( "Copy Config" )
+        stage( "Copy Config" )
 			{
 			    agent { label "master" }
 			    steps
@@ -22,7 +22,7 @@ pipeline
 			    }
 			}
 
-			stage('Test')
+		stage('Test')
             {
                 agent { label "master" }
                 steps
@@ -31,7 +31,7 @@ pipeline
                 }
             }
 
-			stage( "Build" )
+		stage( "Build" )
 			{
 				agent { label "master" }
 				steps
