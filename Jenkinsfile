@@ -6,6 +6,8 @@ pipeline
     {
         DOCKER_REPO_URL = "${env.DOCKER_REPO}"
         NAMESPACE = "${env.DOCKER_BUILD_NAMESPACE}"
+        DOCKER_USER = "${env.DOCKER_USER_NAMESPACE}"
+        DOCKER_PASS = credentials('portus-push-password')
     }
 
 	stages
@@ -49,9 +51,7 @@ pipeline
         		agent { label "master" }
         	    steps
         		{
-        		    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'portus-push', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                      sh './jenkins/push/push.sh $USERNAME $PASSWORD'
-                    }
+                    sh './jenkins/push/push.sh'
         		}
         	}
         stage( "Deploy" )

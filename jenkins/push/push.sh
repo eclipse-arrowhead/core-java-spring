@@ -4,7 +4,7 @@ echo "****************************"
 echo "******** Logging in ********"
 echo "****************************"
 
-docker login $DOCKER_REPO_URL -u $1 -p $P2
+docker login $DOCKER_REPO_URL -u $DOCKER_USER -p $DOCKER_PASS
 
 echo "****************************"
 echo "****** Tagging images ******"
