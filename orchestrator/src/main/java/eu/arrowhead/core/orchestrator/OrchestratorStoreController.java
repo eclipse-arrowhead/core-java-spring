@@ -33,10 +33,12 @@ import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
 import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+@Api(tags = { CommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
@@ -81,7 +83,7 @@ public class OrchestratorStoreController {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -93,7 +95,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return OrchestratorStore entry by id", response = OrchestratorStoreResponseDTO.class)
+	@ApiOperation(value = "Return OrchestratorStore entry by id", response = OrchestratorStoreResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_400_MESSAGE),
@@ -112,7 +114,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested OrchestratorStore entries by the given parameters", response = OrchestratorStoreListResponseDTO.class)
+	@ApiOperation(value = "Return requested OrchestratorStore entries by the given parameters", response = OrchestratorStoreListResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE),
@@ -137,7 +139,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested OrchestratorStore entries by the given parameters", response = OrchestratorStoreListResponseDTO.class)
+	@ApiOperation(value = "Return requested OrchestratorStore entries by the given parameters", response = OrchestratorStoreListResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_TOP_PRIORITY_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_TOP_PRIORITY_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE),
@@ -162,7 +164,8 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested OrchestratorStore entries specified by the consumer (and the service).", response = OrchestratorStoreListResponseDTO.class)
+	@ApiOperation(value = "Return requested OrchestratorStore entries specified by the consumer (and the service).", response = OrchestratorStoreListResponseDTO.class,
+				  tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE),
@@ -192,7 +195,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Create requested OrchestratorStore entries.", response = OrchestratorStoreListResponseDTO.class)
+	@ApiOperation(value = "Create requested OrchestratorStore entries.", response = OrchestratorStoreListResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE),
@@ -211,7 +214,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove OrchestratorStore")
+	@ApiOperation(value = "Remove OrchestratorStore", tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_ORCHESTRATOR_STORE_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_ORCHESTRATOR_STORE_MGMT_HTTP_400_MESSAGE),
@@ -231,7 +234,7 @@ public class OrchestratorStoreController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Modify priorities of OrchestratorStore entries.")
+	@ApiOperation(value = "Modify priorities of OrchestratorStore entries.", tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_ORCHESTRATOR_STORE_MGMT_MODIFY_HTTP_400_MESSAGE),

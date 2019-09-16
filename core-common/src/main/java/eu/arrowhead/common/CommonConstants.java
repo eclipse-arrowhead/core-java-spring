@@ -126,6 +126,11 @@ public class CommonConstants {
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 	
+	public static final String SWAGGER_TAG_MGMT = "Management";
+	public static final String SWAGGER_TAG_CLIENT = "Client";
+	public static final String SWAGGER_TAG_PRIVATE = "Private";
+	public static final String SWAGGER_TAG_ALL = "All";
+	
 	public static final String SERVER_SSL_ENABLED = "server.ssl.enabled";
 	public static final String $SERVER_SSL_ENABLED_WD = "${" + SERVER_SSL_ENABLED + ":" + Defaults.DEFAULT_SSL_SERVER_ENABLED + "}";
 	public static final String KEYSTORE_TYPE = "server.ssl.key-store-type";
