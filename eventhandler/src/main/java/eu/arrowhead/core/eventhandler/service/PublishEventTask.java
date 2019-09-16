@@ -78,7 +78,7 @@ public class PublishEventTask implements Runnable{
 	//Assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents getSubscriptionUri(Subscription subscription ) {
+	private UriComponents getSubscriptionUri(final Subscription subscription ) {
 		logger.debug("getSubscriptionUri started...");
 		
 		final String scheme = Utilities.isEmpty( subscription.getSubscriberSystem().getAuthenticationInfo() ) ? CommonConstants.HTTP : CommonConstants.HTTPS;
