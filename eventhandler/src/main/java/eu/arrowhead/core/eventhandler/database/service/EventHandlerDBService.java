@@ -316,9 +316,7 @@ public class EventHandlerDBService {
 				throw new InvalidParameterException("SubscriberSystem" + NOT_IN_DB_ERROR_MESSAGE);
 			}
 			
-			final List<Subscription> involvedSubscriptions = subscriptionRepository.findAllBySubscriberSystem( subscriberSystemOptional.get() );
-			
-			return involvedSubscriptions;
+			return subscriptionRepository.findAllBySubscriberSystem( subscriberSystemOptional.get() );
 			
 		}catch (final Exception ex) {
 			
