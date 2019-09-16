@@ -78,13 +78,13 @@ public class EventHandlerController {
 	private static final String PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
 	private static final String PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
 	
-	private static final String POST_EVENT_HANDLER_PUBLISH_DESCRIPTION = "Publish event"; //TODO add meaningful description
-	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; //TODO add meaningful description
-	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; //TODO add meaningful description
+	private static final String POST_EVENT_HANDLER_PUBLISH_DESCRIPTION = "Publish event"; 
+	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; 
+	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; 
 
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_DESCRIPTION = "Publish authorization change event "; //TODO add meaningful description
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_200_MESSAGE = "Publish event success"; //TODO add meaningful description
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_400_MESSAGE = "Publish event not success"; //TODO add meaningful description
+	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_DESCRIPTION = "Publish authorization change event "; 
+	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_200_MESSAGE = "Publish authorization change event success"; 
+	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_400_MESSAGE = "Publish authorization change event not success"; 
 	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
@@ -238,14 +238,14 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = PUT_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION, response = SubscriptionResponseDTO.class)
+	@ApiOperation(value = PUT_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION)
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(path = CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void unSubscription(@RequestBody final SubscriptionRequestDTO request) {
 		logger.debug("unSubscription started ...");
 		
@@ -283,7 +283,7 @@ public class EventHandlerController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public void publishSubscriberAuthorizationUpdate(@RequestBody final EventPublishRequestDTO request) {
 		logger.debug("publishSubscriberAuthorizationUpdate started ...");
 		
