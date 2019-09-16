@@ -102,7 +102,7 @@ public class AuthorizationDriver {
 				logger.debug(" Authorization Update publishing was unsuccessful : " + response.getStatusCode());
 			}
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 						
 			logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
 		}
