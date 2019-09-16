@@ -370,15 +370,15 @@ public class EventHandlerDBService {
 
 		
 		if (Utilities.isEmpty(systemRequestDTO.getSystemName())) {
-			throw new InvalidParameterException("System name is null or empty");
+			throw new InvalidParameterException("System name" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
 		if (Utilities.isEmpty(systemRequestDTO.getAddress())) {
-			throw new InvalidParameterException("System address is null or empty");
+			throw new InvalidParameterException("System address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}		
 		
 		if (systemRequestDTO.getPort() == null) {
-			throw new InvalidParameterException("System port is null");
+			throw new InvalidParameterException("System port" + NULL_ERROR_MESSAGE);
 		}
 		
 		final String address = systemRequestDTO.getAddress().trim().toLowerCase();
