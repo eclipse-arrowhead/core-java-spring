@@ -2,6 +2,9 @@ package eu.arrowhead.common.swagger;
 
 import java.util.Collections;
 
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 import com.google.common.base.Predicates;
 
 import eu.arrowhead.common.CommonConstants;
@@ -9,10 +12,11 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
+import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-public class DefaultSwaggerConfig {
+public class DefaultSwaggerConfig implements WebMvcConfigurer {
 	
 	//=================================================================================================
 	// members
@@ -29,16 +33,27 @@ public class DefaultSwaggerConfig {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Docket configureSwaggerForCoreSystem(final String coreSystemSwaggerPackage) {
-		return new Docket(DocumentationType.SWAGGER_2).select()                                  
+		return new Docket(DocumentationType.SWAGGER_2).select() 
 		          									  .apis(RequestHandlerSelectors.any())
 		          									  .apis(Predicates.not(RequestHandlerSelectors.basePackage(coreSystemSwaggerPackage)))
 		          									  .apis(Predicates.not(RequestHandlerSelectors.basePackage(CommonConstants.SWAGGER_COMMON_PACKAGE)))
 		          									  .paths(PathSelectors.any())
 		          									  .paths(Predicates.not(PathSelectors.regex(CommonConstants.SERVER_ERROR_URI)))
 		          									  .build()
+		          									  .tags(new Tag(CommonConstants.SWAGGER_TAG_ALL, ""),
+		          											new Tag(CommonConstants.SWAGGER_TAG_CLIENT, ""),
+		          											new Tag(CommonConstants.SWAGGER_TAG_MGMT, ""),
+		          											new Tag(CommonConstants.SWAGGER_TAG_PRIVATE, ""))
 		          									  .useDefaultResponseMessages(false)
 		          									  .apiInfo(apiInfo());
 	}
+	
+	@Override
+    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
+    	registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/swagger/");
+    	
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
 	
 	//=================================================================================================
 	// assistant methods
