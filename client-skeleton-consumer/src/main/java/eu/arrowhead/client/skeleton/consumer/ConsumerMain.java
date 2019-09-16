@@ -33,7 +33,7 @@ public class ConsumerMain implements ApplicationRunner {
  	//-------------------------------------------------------------------------------------------------
     @Override
 	public void run(final ApplicationArguments args) throws Exception {
-		//EXAMPLE OF INITIATING AN ORCHESTRATION
+		//SIMPLE EXAMPLE OF INITIATING AN ORCHESTRATION
     	
     	final Builder orchestrationFormBuilder = arrowheadService.getOrchestrationFormBuilder();
     	
