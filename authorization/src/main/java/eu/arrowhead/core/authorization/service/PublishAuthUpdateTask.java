@@ -3,8 +3,6 @@ package eu.arrowhead.core.authorization.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import eu.arrowhead.common.exception.InvalidParameterException;
-
 public class PublishAuthUpdateTask implements Runnable {
 
 	//=================================================================================================
