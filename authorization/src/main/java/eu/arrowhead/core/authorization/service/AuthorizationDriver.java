@@ -23,6 +23,7 @@ import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
 
 @Component
@@ -85,15 +86,27 @@ public class AuthorizationDriver {
 		eventPublishRequestDTO.setSource( systemRequestDTO );
 		
 		final UriComponents eventHandlerAuthUpdateUri = getEventHandlerAuthUpdateUri();
-		final ResponseEntity response = httpService.sendRequest( eventHandlerAuthUpdateUri , HttpMethod.POST, ResponseEntity.class, eventPublishRequestDTO);
+		final ResponseEntity response;
 		
-		
-		if ( !response.getStatusCode().is2xxSuccessful() ) {
+		try {
 			
-			//TODO handel publish error here
-			logger.debug(" Authorization Update publishing was unsuccessful : " + response.getStatusCode());
+			response = httpService.sendRequest( eventHandlerAuthUpdateUri , HttpMethod.POST, ResponseEntity.class, eventPublishRequestDTO);
+		
+			if ( response == null ) {
+				
+				throw new TimeoutException(" PublishAuthUpdateEventRequest timeout");
+			}
+			
+			if ( !response.getStatusCode().is2xxSuccessful() ) {
+				
+				logger.debug(" Authorization Update publishing was unsuccessful : " + response.getStatusCode());
+			}
+			
+		} catch (Exception ex) {
+						
+			logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
 		}
-		return;
+
 	}
 	
 	//=================================================================================================
