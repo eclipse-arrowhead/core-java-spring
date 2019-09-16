@@ -48,7 +48,6 @@ public class EventHandlerDBService {
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String NULL_ERROR_MESSAGE = " is null";
-	private static final String NOT_VALID_ERROR_MESSAGE = " is not valid.";
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerDBService.class);
