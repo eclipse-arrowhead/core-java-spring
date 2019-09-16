@@ -631,7 +631,7 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
-		final Set<SystemResponseDTO> result = new HashSet<SystemResponseDTO>(connections.size());
+		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
 		
 		for (final SubscriptionPublisherConnection conn : connections) {
 			
@@ -644,7 +644,7 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectAuthorizedPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
-		final Set<SystemResponseDTO> result = new HashSet<SystemResponseDTO>(connections.size());
+		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
 		
 		for (final SubscriptionPublisherConnection conn : connections) {
 			
