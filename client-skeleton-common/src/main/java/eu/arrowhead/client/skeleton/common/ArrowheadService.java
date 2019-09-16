@@ -3,6 +3,7 @@ package eu.arrowhead.client.skeleton.common;
 
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -230,6 +231,41 @@ public class ArrowheadService {
 		}
 		
 		return httpService.sendRequest(Utilities.createURI(getUriScheme(), uri.getAddress(), uri.getPort(), uri.getPath()), HttpMethod.POST, OrchestrationResponseDTO.class, request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ResponseEntity<Object> consumeServiceHTTP(final HttpMethod httpMethod, final String address, final int port, final String serviceUri, final String interfaceName, final String token,
+													 final Object payload, final String... queryParams) {
+		if (httpMethod == null) {
+			throw new InvalidParameterException("httpMethod cannot be null.");
+		}
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("address cannot be null or blank.");
+		}
+		if (Utilities.isEmpty(serviceUri)) {
+			throw new InvalidParameterException("serviceUri cannot be null or blank.");
+		}
+		if (Utilities.isEmpty(interfaceName)) {
+			throw new InvalidParameterException("interfaceName cannot be null or blank.");
+		}
+		
+		final String protocolStr = interfaceName.split("-")[0];
+		if (!protocolStr.equalsIgnoreCase(CommonConstants.HTTP) && !protocolStr.equalsIgnoreCase(CommonConstants.HTTPS)) {
+			throw new InvalidParameterException("Invalid interfaceName: protocol should be 'http' or 'https'.");
+		}
+		
+		UriComponents uri;
+		if(!Utilities.isEmpty(token)) {
+			final List<String> query = new ArrayList<>();
+			query.addAll(Arrays.asList(queryParams));
+			query.add(CommonConstants.REQUEST_PARAM_TOKEN);
+			query.add(token);
+			uri = Utilities.createURI(protocolStr, address, port, serviceUri, query.toArray(new String[query.size()]));
+		} else {
+			uri = Utilities.createURI(protocolStr, address, port, serviceUri, queryParams);
+		}
+		
+		return httpService.sendRequest(uri, httpMethod, Object.class, payload);
 	}
 	
 	//=================================================================================================

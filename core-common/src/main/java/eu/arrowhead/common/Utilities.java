@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -260,7 +262,30 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static UriComponents createURI(final String scheme, final String host, final int port, final String path) {
-		return createURI(scheme, host, port, null, path);
+		return createURI(scheme, host, port, null, path, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static UriComponents createURI(final String scheme, final String host, final int port, final String path, final String... queryParams) {
+		if (queryParams.length % 2 != 0) {
+			throw new InvalidParameterException("queryParams variable arguments conatins a key without value");
+		}
+		
+		LinkedMultiValueMap<String, String> query = new LinkedMultiValueMap<>();		
+		
+		int count = 1;
+		String key = "";
+		for (String vararg : queryParams) {
+			if (count % 2 != 0) {
+				query.putIfAbsent(vararg, new ArrayList<>());	
+				key = vararg;
+			} else {
+				query.get(key).add(vararg);				
+			}
+			count++;
+		}
+		
+		return createURI(scheme, host, port, query, path);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
