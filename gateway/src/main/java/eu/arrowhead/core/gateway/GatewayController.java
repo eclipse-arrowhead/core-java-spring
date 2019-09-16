@@ -46,12 +46,14 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.service.ActiveSessionListDTO;
 import eu.arrowhead.core.gateway.service.GatewayService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+@Api(tags = { CommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
-allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.GATEWAY_URI)
@@ -91,7 +93,7 @@ public class GatewayController {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -103,7 +105,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Returns the public key of the Gateway core service as a Base64 encoded text", response = String.class)
+	@ApiOperation(value = "Returns the public key of the Gateway core service as a Base64 encoded text", response = String.class, tags = { CommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_PUBLIC_KEY_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -117,7 +119,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return active Gateway sessions", response = ActiveSessionListDTO.class)
+	@ApiOperation(value = "Return active Gateway sessions", response = ActiveSessionListDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ACTIVE_SESSIONS_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_ACTIVE_SESSIONS_HTTP_400_MESSAGE),
@@ -157,7 +159,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Closing the requested active gateway session")
+	@ApiOperation(value = "Closing the requested active gateway session", tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_CLOSE_SESSION_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CLOSE_SESSION_400_MESSAGE),
@@ -175,7 +177,8 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Creates a Socket and Message queue between the given Relay and Provider and return the necesarry connection informations", response = GatewayProviderConnectionResponseDTO.class)
+	@ApiOperation(value = "Creates a Socket and Message queue between the given Relay and Provider and return the necesarry connection informations",
+				  response = GatewayProviderConnectionResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
@@ -196,7 +199,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Creates a ServerSocket between the given Relay and Consumer and return the ServerSocket port", response = Integer.class)
+	@ApiOperation(value = "Creates a ServerSocket between the given Relay and Consumer and return the ServerSocket port", response = Integer.class, tags = { CommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
