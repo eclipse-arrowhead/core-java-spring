@@ -2,7 +2,6 @@ package eu.arrowhead.core.eventhandler.service;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -66,7 +65,7 @@ public class EventHandlerDriver {
 			final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);
 			
 			publishRequestExecutor.execute();
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			logger.debug("publishEvent finished with exception : " + ex);
 		}
