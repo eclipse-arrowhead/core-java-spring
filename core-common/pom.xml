@@ -48,6 +48,7 @@
 									<artifact>eu.arrowhead:arrowhead-core-common</artifact>
 									<includes>
 										<include>eu/arrowhead/common/Utilities.class</include>
+										<include>eu/arrowhead/common/Utilities$1.class</include>
 										<include>eu/arrowhead/common/CommonConstants.class</include>
 										<include>eu/arrowhead/common/Defaults.class</include>
 										<include>eu/arrowhead/common/SSLProperties.class</include>
