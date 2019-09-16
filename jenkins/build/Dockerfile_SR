@@ -1,0 +1,6 @@
+FROM openjdk:11-jre-slim
+
+COPY serviceregistry/*.jar /serviceregistry/arrowhead-serviceregistry.jar
+COPY serviceregistry/*.properties /serviceregistry/application.properties
+
+CMD java -jar /serviceregistry/arrowhead-serviceregistry.jar

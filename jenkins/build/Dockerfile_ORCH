@@ -1,0 +1,6 @@
+FROM openjdk:11-jre-slim
+
+COPY orchestrator/*.jar /orchestrator/arrowhead-orchestrator.jar
+COPY orchestrator/*.properties /orchestrator/application.properties
+
+CMD java -jar /orchestrator/arrowhead-orchestrator.jar

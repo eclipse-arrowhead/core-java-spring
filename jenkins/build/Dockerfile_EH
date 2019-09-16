@@ -1,0 +1,6 @@
+FROM openjdk:11-jre-slim
+
+COPY eventhandler/*.jar /eventhandler/arrowhead-eventhandler.jar
+COPY eventhandler/*.properties /eventhandler/application.properties
+
+CMD java -jar /eventhandler/arrowhead-eventhandler.jar

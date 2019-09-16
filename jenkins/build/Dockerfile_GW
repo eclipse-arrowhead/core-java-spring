@@ -1,0 +1,6 @@
+FROM openjdk:11-jre-slim
+
+COPY gateway/*.jar /gateway/arrowhead-gateway.jar
+COPY gateway/*.properties /gateway/application.properties
+
+CMD java -jar /gateway/arrowhead-gateway.jar
