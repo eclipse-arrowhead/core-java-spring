@@ -9,6 +9,7 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
+import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
@@ -36,6 +37,10 @@ public class DefaultSwaggerConfig {
 		          									  .paths(PathSelectors.any())
 		          									  .paths(Predicates.not(PathSelectors.regex(CommonConstants.SERVER_ERROR_URI)))
 		          									  .build()
+		          									  .tags(new Tag(CommonConstants.SWAGGER_TAG_ALL, ""),
+		          											new Tag(CommonConstants.SWAGGER_TAG_CLIENT, ""),
+		          											new Tag(CommonConstants.SWAGGER_TAG_MGMT, ""),
+		          											new Tag(CommonConstants.SWAGGER_TAG_PRIVATE, ""))
 		          									  .useDefaultResponseMessages(false)
 		          									  .apiInfo(apiInfo());
 	}

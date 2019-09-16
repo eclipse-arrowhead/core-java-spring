@@ -54,10 +54,12 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 import eu.arrowhead.core.authorization.token.TokenGenerationService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+@Api(tags = { CommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
@@ -123,7 +125,7 @@ public class AuthorizationController {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -135,7 +137,8 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested AuthorizationIntraCloud entries by the given parameters", response = AuthorizationIntraCloudListResponseDTO.class)
+	@ApiOperation(value = "Return requested AuthorizationIntraCloud entries by the given parameters", response = AuthorizationIntraCloudListResponseDTO.class,
+				  tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_400_MESSAGE),
@@ -174,7 +177,7 @@ public class AuthorizationController {
 	}
 		
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested AuthorizationIntraCloud entry", response = AuthorizationIntraCloudResponseDTO.class)
+	@ApiOperation(value = "Return requested AuthorizationIntraCloud entry", response = AuthorizationIntraCloudResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_400_MESSAGE),
@@ -196,7 +199,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove the requested AuthorizationIntraCloud entry")
+	@ApiOperation(value = "Remove the requested AuthorizationIntraCloud entry", tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_400_MESSAGE),
@@ -216,7 +219,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Create the requested AuthorizationIntraCloud entries", response = AuthorizationIntraCloudListResponseDTO.class)
+	@ApiOperation(value = "Create the requested AuthorizationIntraCloud entries", response = AuthorizationIntraCloudListResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_AUTHORIZATION_INTRA_CLOUD_MGMT_HTTP_400_MESSAGE),
@@ -287,7 +290,8 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested AuthorizationInterCloud entries by the given parameters", response = AuthorizationInterCloudListResponseDTO.class)
+	@ApiOperation(value = "Return requested AuthorizationInterCloud entries by the given parameters", response = AuthorizationInterCloudListResponseDTO.class,
+				  tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_AUTHORIZATION_INTER_CLOUD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_AUTHORIZATION_INTER_CLOUD_HTTP_400_MESSAGE),
@@ -326,7 +330,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested AuthorizationInterCloud entry", response = AuthorizationInterCloudResponseDTO.class)
+	@ApiOperation(value = "Return requested AuthorizationInterCloud entry", response = AuthorizationInterCloudResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_AUTHORIZATION_INTER_CLOUD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_AUTHORIZATION_INTER_CLOUD_HTTP_400_MESSAGE),
@@ -348,7 +352,7 @@ public class AuthorizationController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Create the requested AuthorizationInterCloud entries")
+	@ApiOperation(value = "Create the requested AuthorizationInterCloud entries", response = AuthorizationInterCloudListResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_AUTHORIZATION_INTER_CLOUD_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_AUTHORIZATION_INTER_CLOUD_MGMT_HTTP_400_MESSAGE),
@@ -420,7 +424,7 @@ public class AuthorizationController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove the requested AuthorizationInterCloud entry")
+	@ApiOperation(value = "Remove the requested AuthorizationInterCloud entry", tags = { CommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_AUTHORIZATION_INTER_CLOUD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_AUTHORIZATION_INTER_CLOUD_HTTP_400_MESSAGE),
@@ -440,7 +444,8 @@ public class AuthorizationController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Checks whether the consumer System can use a Service from a list of provider Systems", response = AuthorizationIntraCloudCheckResponseDTO.class)
+	@ApiOperation(value = "Checks whether the consumer System can use a Service from a list of provider Systems", response = AuthorizationIntraCloudCheckResponseDTO.class,
+				  tags = { CommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_AUTHORIZATION_INTRA_CLOUD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_AUTHORIZATION_INTRA_CLOUD_HTTP_400_MESSAGE),
@@ -503,7 +508,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Checks whether a Cloud is authorized to use a Service", response = AuthorizationInterCloudCheckResponseDTO.class)
+	@ApiOperation(value = "Checks whether a Cloud is authorized to use a Service", response = AuthorizationInterCloudCheckResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_AUTHORIZATION_INTER_CLOUD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_AUTHORIZATION_INTER_CLOUD_HTTP_400_MESSAGE),
@@ -538,7 +543,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = TOKEN_DESCRIPTION, response = TokenGenerationResponseDTO.class)
+	@ApiOperation(value = TOKEN_DESCRIPTION, response = TokenGenerationResponseDTO.class, tags = { CommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = TOKEN_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = TOKEN_HTTP_400_MESSAGE),
@@ -561,7 +566,7 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = PUBLIC_KEY_DESCRIPTION, response = String.class)
+	@ApiOperation(value = PUBLIC_KEY_DESCRIPTION, response = String.class, tags = { CommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = PUBLIC_KEY_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
