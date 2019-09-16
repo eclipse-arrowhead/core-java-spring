@@ -3,7 +3,6 @@ package eu.arrowhead.core.eventhandler.database.service;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -369,6 +368,19 @@ public class EventHandlerDBService {
 	private System validateSystemRequestDTO(final SystemRequestDTO systemRequestDTO) {
 		logger.debug("validateSystemRequestDTO started...");
 
+		
+		if (Utilities.isEmpty(systemRequestDTO.getSystemName())) {
+			throw new InvalidParameterException("System name is null or empty");
+		}
+		
+		if (Utilities.isEmpty(systemRequestDTO.getAddress())) {
+			throw new InvalidParameterException("System address is null or empty");
+		}		
+		
+		if (systemRequestDTO.getPort() == null) {
+			throw new InvalidParameterException("System port is null");
+		}
+		
 		final String address = systemRequestDTO.getAddress().trim().toLowerCase();
 		final String systemName = systemRequestDTO.getSystemName().trim().toLowerCase();
 		final int port = systemRequestDTO.getPort();
