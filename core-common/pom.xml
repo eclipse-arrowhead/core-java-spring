@@ -47,17 +47,17 @@
 								<filter>
 									<artifact>eu.arrowhead:arrowhead-core-common</artifact>
 									<includes>
-										<include>eu/arrowhead/common/Utilities.class</include>
-										<include>eu/arrowhead/common/Utilities$1.class</include>
-										<include>eu/arrowhead/common/CommonConstants.class</include>
-										<include>eu/arrowhead/common/Defaults.class</include>
-										<include>eu/arrowhead/common/SSLProperties.class</include>
+										<include>eu/arrowhead/common/Utilities.*</include>
+										<include>eu/arrowhead/common/Utilities$1.*</include>
+										<include>eu/arrowhead/common/CommonConstants.*</include>
+										<include>eu/arrowhead/common/Defaults.*</include>
+										<include>eu/arrowhead/common/SSLProperties.*</include>
 										<include>eu/arrowhead/common/core/*.*</include>
 										<include>eu/arrowhead/common/dto/*.*</include>
 										<include>eu/arrowhead/common/exception/*.*</include>
 										<include>eu/arrowhead/common/http/*.*</include>
-										<include>eu/arrowhead/common/filter/ArrowheadFilter.class</include>
-										<include>eu/arrowhead/common/security/AccessControlFilter.class</include>
+										<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>
+										<include>eu/arrowhead/common/security/AccessControlFilter.*</include>
 										<include>eu/arrowhead/common/token/*.*</include>
 									</includes>
 								</filter>
@@ -65,6 +65,39 @@
 						</configuration>	
 	  				</execution>
 	  			</executions>
+  			</plugin>
+  			
+  			<plugin>
+  				<groupId>org.apache.maven.plugins</groupId>
+  				<artifactId>maven-source-plugin</artifactId>
+  				<executions>
+  					<execution>
+  						<phase>package</phase>
+  						<goals>
+  							<goal>jar</goal>
+  						</goals>
+		  				<configuration>
+		  					<forceCreation>true</forceCreation>
+		  					<outputDirectory>../client-skeleton-common/repo/eu/arrowhead/core-client/skeleton</outputDirectory>
+             				<finalName>core-client-skeleton</finalName>
+		  					<includes>
+		  						<include>eu/arrowhead/common/Utilities.java</include>
+									<include>eu/arrowhead/common/Utilities.*</include>
+									<include>eu/arrowhead/common/Utilities$1.*</include>
+									<include>eu/arrowhead/common/CommonConstants.*</include>
+									<include>eu/arrowhead/common/Defaults.*</include>
+									<include>eu/arrowhead/common/SSLProperties.*</include>
+									<include>eu/arrowhead/common/core/*.*</include>
+									<include>eu/arrowhead/common/dto/*.*</include>
+									<include>eu/arrowhead/common/exception/*.*</include>
+									<include>eu/arrowhead/common/http/*.*</include>
+									<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>
+									<include>eu/arrowhead/common/security/AccessControlFilter.*</include>
+									<include>eu/arrowhead/common/token/*.*</include>
+		  					</includes>
+		  				</configuration>  					
+  					</execution>
+  				</executions>
   			</plugin>
   			
 	 	</plugins>
