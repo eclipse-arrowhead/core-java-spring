@@ -165,7 +165,6 @@ public class AuthorizationDBService {
 			if ( eventhandlerIsPresent)  {
 				final Optional<AuthorizationIntraCloud> authOptional = authorizationIntraCloudRepository.findById( id );
 				if ( authOptional.isPresent() ) {
-					Assert.notNull(authOptional.get().getConsumerSystem(), "ConsumerSystem is null");
 					
 					try {
 						
