@@ -36,8 +36,6 @@ mkdir jenkins/build/eventhandler
 cp -f eventhandler/target/*.jar jenkins/build/eventhandler
 cp -f eventhandler/target/*.properties jenkins/build/eventhandler
 
-# TODO Other core systems and add them to docker-compose!
-
 echo "****************************"
 echo "** Building Docker Images **"
 echo "****************************"
