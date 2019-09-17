@@ -58,7 +58,6 @@ public class AuthorizationDriver {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("rawtypes")
 	public void publishAuthUpdate(final long updatedConsumerSystemId) {
 		logger.debug("publishAuthUpdate started...");
 		
@@ -74,28 +73,16 @@ public class AuthorizationDriver {
 		final EventPublishRequestDTO eventPublishRequestDTO = new EventPublishRequestDTO();
 		eventPublishRequestDTO.setEventType( CommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE );
 		eventPublishRequestDTO.setPayload( String.valueOf( updatedConsumerSystemId ) );
-		eventPublishRequestDTO.setTimeStamp( Utilities.convertZonedDateTimeToUTCString( timeStamp ) );
-		
+		eventPublishRequestDTO.setTimeStamp( Utilities.convertZonedDateTimeToUTCString( timeStamp ) );	
 		
 		eventPublishRequestDTO.setSource( systemRequestDTO );
 		
 		final UriComponents eventHandlerAuthUpdateUri = getEventHandlerAuthUpdateUri();
-		final ResponseEntity response;
 		
 		try {
 			
-			response = httpService.sendRequest( eventHandlerAuthUpdateUri , HttpMethod.POST, ResponseEntity.class, eventPublishRequestDTO);
+			httpService.sendRequest( eventHandlerAuthUpdateUri , HttpMethod.POST, ResponseEntity.class, eventPublishRequestDTO);
 		
-			if ( response == null ) {
-				
-				throw new TimeoutException(" PublishAuthUpdateEventRequest timeout");
-			}
-			
-			if ( !response.getStatusCode().is2xxSuccessful() ) {
-				
-				logger.debug(" Authorization Update publishing was unsuccessful : " + response.getStatusCode());
-			}
-			
 		} catch (final Exception ex) {
 						
 			logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
