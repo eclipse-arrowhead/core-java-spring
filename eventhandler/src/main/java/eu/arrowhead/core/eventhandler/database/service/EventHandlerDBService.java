@@ -201,8 +201,7 @@ public class EventHandlerDBService {
 				subscriptionRepository.refresh( subscriptionEntry );			
 				
 				subscriptionRepository.delete( subscriptionEntry );
-				
-				return;
+
 			}
 			
 		} catch (final Exception ex) {
@@ -210,8 +209,6 @@ public class EventHandlerDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
-		return;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -494,8 +491,6 @@ public class EventHandlerDBService {
 			subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
 			subscriptionPublisherConnectionRepository.flush();
 			
-			return;
-			
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
@@ -532,9 +527,7 @@ public class EventHandlerDBService {
 				
 				subscriptionPublisherConnectionRepository.saveAll( involvedPublisherSystems );
 				subscriptionPublisherConnectionRepository.flush();
-				
-				return;
-				
+
 			}catch (final Exception ex) {
 				
 				logger.debug(ex.getMessage(), ex);
@@ -576,8 +569,6 @@ public class EventHandlerDBService {
 				
 				subscriptionPublisherConnectionRepository.saveAll(subscriptionEntry.getPublisherConnections());
 				subscriptionPublisherConnectionRepository.flush();
-				
-				return;
 				
 			}catch (final Exception ex) {
 				
