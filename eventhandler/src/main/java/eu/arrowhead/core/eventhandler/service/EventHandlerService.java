@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
-import javax.transaction.Transactional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,7 +57,6 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
 	public SubscriptionResponseDTO subscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("subscriptionRequest started ...");
 		
@@ -76,7 +74,6 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
 	public void unSubscriptionRequest( final SubscriptionRequestDTO request) {
 		logger.debug("unSubscriptionRequest started ...");
 		
@@ -93,7 +90,6 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
 	public EventPublishResponseDTO publishRequest(final EventPublishRequestDTO request) {
 		logger.debug("publishRequest started ...");
 		
@@ -109,7 +105,6 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
 	public void publishSubscriberAuthorizationUpdateRequest(final EventPublishRequestDTO request) {
 		logger.debug("publishSubscriberAuthorizationUpdateRequest started ...");
 		
@@ -130,7 +125,6 @@ public class EventHandlerService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
 	public SubscriptionResponseDTO updateSubscriptionRequest(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
 		logger.debug("updateSubscriptionRequest started ...");
 		
@@ -146,7 +140,6 @@ public class EventHandlerService {
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
 	public Subscription updateSubscription(final long id, final SubscriptionRequestDTO request) {
 		logger.debug("updateSubscription started ...");
 		
