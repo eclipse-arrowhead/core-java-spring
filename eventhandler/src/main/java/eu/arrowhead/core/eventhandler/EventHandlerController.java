@@ -24,11 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
@@ -36,10 +35,10 @@ import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Api;
 
 @Api(tags = { CommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
@@ -259,15 +258,15 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = POST_EVENT_HANDLER_PUBLISH_DESCRIPTION, response = EventPublishResponseDTO.class,  tags = { CommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = POST_EVENT_HANDLER_PUBLISH_DESCRIPTION, tags = { CommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_EVENT_HANDLER_PUBLISH_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_EVENT_HANDLER_PUBLISH_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_EVENT_HANDLER_PUBLISH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public EventPublishResponseDTO publish(@RequestBody final EventPublishRequestDTO request) {
+	@PostMapping(path = CommonConstants.OP_EVENT_HANDLER_PUBLISH, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public void publish(@RequestBody final EventPublishRequestDTO request) {
 		logger.debug("publish started ...");
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH;
@@ -275,7 +274,7 @@ public class EventHandlerController {
 		
 		validateTimeStamp(request, origin);
 		
-	    return eventHandlerService.publishRequest(request);
+	    eventHandlerService.publishRequest(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

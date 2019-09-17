@@ -19,7 +19,6 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
@@ -89,7 +88,7 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventPublishResponseDTO publishRequest(final EventPublishRequestDTO request) {
+	public void publishRequest(final EventPublishRequestDTO request) {
 		logger.debug("publishRequest started ...");
 		
 		checkSystemRequestDTO(request.getSource(), false);
@@ -99,8 +98,7 @@ public class EventHandlerService {
 		filterInvolvedSubscriptionsBySubscriptionParameters(involvedSubscriptions, request);
 		
 		eventHandlerDriver.publishEvent(request, involvedSubscriptions);
-		
-		return new EventPublishResponseDTO(); //always return empty response
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
