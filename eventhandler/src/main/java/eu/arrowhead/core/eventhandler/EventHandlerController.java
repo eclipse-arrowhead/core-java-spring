@@ -248,7 +248,7 @@ public class EventHandlerController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(path = CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void unSubscribe(@RequestBody final SubscriptionRequestDTO request) {
+	@ResponseBody public void unsubscribe(@RequestBody final SubscriptionRequestDTO request) {
 		logger.debug("unSubscription started ...");
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
