@@ -92,8 +92,8 @@ public class EventHandlerController {
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	private static final String WRONG_FORMAT_ERROR_MESSAGE = " is in wrong format. ";
-	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future then the tolerated time difference";
-	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past then the tolerated time difference";;
+	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";;
 
 	@Value(CommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
 	private long timeStampTolerance;
