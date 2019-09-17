@@ -13,7 +13,7 @@ import eu.arrowhead.common.database.entity.System;
 @Repository
 public interface SubscriptionRepository extends RefreshableRepository<Subscription, Long> {
 
-	public Set<Subscription> findAllByEventType(final EventType validEventType);
+	public Set<Subscription> findAllByEventType(final EventType eventType);
 	public List<Subscription> findAllBySubscriberSystem(final System system);
 	public Optional<Subscription> findByEventTypeAndSubscriberSystem(final EventType eventType, final System subscriberSystem);
 

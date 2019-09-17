@@ -10,7 +10,7 @@ import eu.arrowhead.common.database.entity.System;
 public interface SubscriptionPublisherConnectionRepository
 		extends RefreshableRepository<SubscriptionPublisherConnection, Long> {
 
-	public List<SubscriptionPublisherConnection> findAllBySystemAndAuthorized(final System validProviderSystem, final boolean authorized);
+	public List<SubscriptionPublisherConnection> findAllBySystemAndAuthorized(final System providerSystem, final boolean authorized);
 	public Set<SubscriptionPublisherConnection> findBySubscriptionEntry(final Subscription subscriptionEntry);
 
 }
