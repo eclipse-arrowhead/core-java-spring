@@ -29,16 +29,16 @@ echo "****************************"
 echo "** Pushing images to Repo **"
 echo "****************************"
 
-docker push $NAMESPACE/$DOCKER_USER/serviceregistry:$BUILD_TAG
-docker push $NAMESPACE/$DOCKER_USER/authorization:$BUILD_TAG
-docker push $NAMESPACE/$DOCKER_USER/orchestrator:$BUILD_TAG
-docker push $NAMESPACE/$DOCKER_USER/gatekeeper:$BUILD_TAG
-docker push $NAMESPACE/$DOCKER_USER/gateway:$BUILD_TAG
-docker push $NAMESPACE/$DOCKER_USER/eventhandler:$BUILD_TAG
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/serviceregistry:$BUILD_TAG
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/authorization:$BUILD_TAG
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/orchestrator:$BUILD_TAG
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/gatekeeper:$BUILD_TAG
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/gateway:$BUILD_TAG
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/eventhandler:$BUILD_TAG
 
-docker push $NAMESPACE/$DOCKER_USER/serviceregistry:latest
-docker push $NAMESPACE/$DOCKER_USER/authorization:latest
-docker push $NAMESPACE/$DOCKER_USER/orchestrator:latest
-docker push $NAMESPACE/$DOCKER_USER/gatekeeper:latest
-docker push $NAMESPACE/$DOCKER_USER/gateway:latest
-docker push $NAMESPACE/$DOCKER_USER/eventhandler:latest
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/serviceregistry:latest
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/authorization:latest
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/orchestrator:latest
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/gatekeeper:latest
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/gateway:latest
+docker push $NAMESPACE/DOCKER_USER_NAMESPACE/eventhandler:latest
