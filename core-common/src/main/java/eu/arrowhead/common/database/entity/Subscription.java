@@ -55,10 +55,10 @@ public class Subscription {
 	@Column( nullable = false)
 	private boolean onlyPredefinedPublishers;
 	
-	@Column(nullable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	@Column(nullable = true)
 	private ZonedDateTime startDate;
 	
-	@Column(nullable = true, columnDefinition = "TIMESTAMP")
+	@Column(nullable = true)
 	private ZonedDateTime endDate;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
