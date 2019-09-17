@@ -23,7 +23,6 @@ import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
 
 @Component
