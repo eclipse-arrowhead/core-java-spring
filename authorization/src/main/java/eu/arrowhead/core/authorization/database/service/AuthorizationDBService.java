@@ -876,18 +876,16 @@ public class AuthorizationDBService {
 	private Set<SystemResponseDTO> getAuthorizedPublishers(final System consumer, final Set<SystemRequestDTO> publishers) {
 		logger.debug("getAuthorizedProviders started...");
 		
-		final List<AuthorizationIntraCloud> authIntraOpt = authorizationIntraCloudRepository.findAllByConsumerSystem(consumer);
+		final List<AuthorizationIntraCloud> authorizationIntraCloudList = authorizationIntraCloudRepository.findAllByConsumerSystem(consumer);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authIntraOpt.size());
+		final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authorizationIntraCloudList.size());
 		
-		if ( authIntraOpt.isEmpty() ) {
+		if ( authorizationIntraCloudList.isEmpty() ) {
 			
 			return authorizedPublishers; 
-		}
-		
-		
-		
-		for (final AuthorizationIntraCloud authorizationIntraCloud : authIntraOpt) {
+		}		
+				
+		for (final AuthorizationIntraCloud authorizationIntraCloud : authorizationIntraCloudList) {
 			final SystemResponseDTO authorizedPublisher = DTOConverter.convertSystemToSystemResponseDTO(authorizationIntraCloud.getProviderSystem());
 			
 			if (publishers != null && !publishers.isEmpty()) {
