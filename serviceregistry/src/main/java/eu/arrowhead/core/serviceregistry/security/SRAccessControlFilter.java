@@ -26,7 +26,6 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
 	
-	
 	//=================================================================================================
 	// assistant methods
 
@@ -103,7 +102,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			throw new AuthException("Service is not defined.", HttpStatus.UNAUTHORIZED.value());
 		}
 		
-		for (final CoreSystemService service : publicCoreSystemServices) {
+		for (final CoreSystemService service : CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES) {
 			if (service.getServiceDefinition().equalsIgnoreCase(requestBody.getServiceDefinitionRequirement().trim())) {
 				return;
 			}
