@@ -360,7 +360,7 @@ public class EventHandlerDBService {
 		subscription.setEventType(validEventType);
 		subscription.setNotifyUri(request.getNotifyUri());
 		subscription.setFilterMetaData(Utilities.map2Text(request.getFilterMetaData()));
-		subscription.setOnlyPredefinedPublishers(request.getSources() != null && !request.getSources().isEmpty()); //TODO orginize to method
+		subscription.setOnlyPredefinedPublishers(request.getSources() != null && !request.getSources().isEmpty());
 		subscription.setMatchMetaData(request.getMatchMetaData());
 		subscription.setStartDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getStartDate()));
 		subscription.setEndDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getEndDate()));
