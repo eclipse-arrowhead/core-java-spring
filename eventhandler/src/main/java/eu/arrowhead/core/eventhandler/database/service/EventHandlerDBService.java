@@ -329,8 +329,9 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void updateSubscriberAuthorization(final List<Subscription> involvedSubscriptions,
-			final Set<SystemResponseDTO> authorizedPublishers) {
+	@Transactional(rollbackFor = ArrowheadException.class)	
+	public void updateSubscriberAuthorization( final List<Subscription> involvedSubscriptions,
+			final Set<SystemResponseDTO> authorizedPublishers ) {
 		logger.debug("updateSubscriberAuthorization started ...");
 		
 		for (final Subscription subscriptionEntry : involvedSubscriptions) {
