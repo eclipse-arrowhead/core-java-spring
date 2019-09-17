@@ -29,7 +29,7 @@ pipeline
                 {
                     sh '''
                        ./jenkins/copy/copy.sh
-                       ./jenkins/test/maven.sh mvn test
+                       #./jenkins/test/maven.sh mvn test
                        '''
                 }
             }
@@ -41,7 +41,7 @@ pipeline
 				{
 					sh  '''
 					    ./jenkins/copy/copy.sh
-					    #./jenkins/build/maven.sh mvn -B -DskipTests clean package
+					    ./jenkins/build/maven.sh mvn -B -DskipTests clean package
 					    ./jenkins/build/build.sh
 					    '''
 
