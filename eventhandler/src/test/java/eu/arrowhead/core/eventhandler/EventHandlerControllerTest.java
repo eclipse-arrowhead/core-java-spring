@@ -31,13 +31,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.SubscriptionRequestDTO;
-import eu.arrowhead.common.dto.SubscriptionResponseDTO;
-import eu.arrowhead.common.dto.SubscriptionResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.EventTypeResponseDTO;
+import eu.arrowhead.common.dto.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.dto.SystemResponseDTO;
 import eu.arrowhead.core.eventhandler.service.EventHandlerService;
@@ -86,7 +84,7 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionTest() throws Exception {
 		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +100,7 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithNullEventTypeTest() throws Exception {
 		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +117,7 @@ public class EventHandlerControllerTest {
 	@Test
 	public void subscriptionWithEmptyEventTypeTest() throws Exception {
 		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -140,7 +138,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSubscriberSystem( null );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +159,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( null );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -183,7 +181,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( "   " );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -205,7 +203,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( null );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -227,7 +225,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( "   " );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -249,7 +247,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setPort( null );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -271,7 +269,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setPort( -1 );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -293,7 +291,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setNotifyUri( null );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -315,7 +313,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setNotifyUri( "   " );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -336,7 +334,7 @@ public class EventHandlerControllerTest {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestWithNullMetaDataDTOForTest();
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -359,7 +357,7 @@ public class EventHandlerControllerTest {
 		request.setMatchMetaData( true );
 		request.setFilterMetaData( null );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -382,7 +380,7 @@ public class EventHandlerControllerTest {
 		request.setMatchMetaData( true );
 		request.setFilterMetaData( new HashMap<String, String>( 0 ) );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -404,7 +402,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( null );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -425,7 +423,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( Set.of() );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -446,7 +444,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( Set.of( getSystemRequestDTO() ) );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -470,7 +468,7 @@ public class EventHandlerControllerTest {
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSources( Set.of( invalidSource ) );
 		
-		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
+		when(eventHandlerService.subscribe(any())).thenReturn(dto);
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -489,7 +487,7 @@ public class EventHandlerControllerTest {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		
-		doNothing().when(eventHandlerService).unSubscriptionRequest(any());
+		doNothing().when(eventHandlerService).unsubscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
 				.contentType(MediaType.APPLICATION_JSON)

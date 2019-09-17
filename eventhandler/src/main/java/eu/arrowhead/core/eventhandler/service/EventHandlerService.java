@@ -57,8 +57,8 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionResponseDTO subscriptionRequest( final SubscriptionRequestDTO request) {
-		logger.debug("subscriptionRequest started ...");
+	public SubscriptionResponseDTO subscribe( final SubscriptionRequestDTO request) {
+		logger.debug("subscribe started ...");
 		
 		if (request == null) {
 			
@@ -74,8 +74,8 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void unSubscriptionRequest( final SubscriptionRequestDTO request) {
-		logger.debug("unSubscriptionRequest started ...");
+	public void unsubscribe( final SubscriptionRequestDTO request) {
+		logger.debug("unsubscribe started ...");
 		
 		if (request == null) {
 			

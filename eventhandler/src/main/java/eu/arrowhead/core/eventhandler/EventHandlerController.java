@@ -235,9 +235,9 @@ public class EventHandlerController {
 		logger.debug("subscription started ...");
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
-		checkSubscriptionRequestDTO(request, origin);
+		checkSubscriptionRequestDTO( request, origin );
 		
-	    return eventHandlerService.subscriptionRequest(request);
+	    return eventHandlerService.subscribe( request );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -255,7 +255,7 @@ public class EventHandlerController {
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
 		checkSubscriptionRequestDTO(request, origin);
 		
-	    eventHandlerService.unSubscriptionRequest(request);
+	    eventHandlerService.unsubscribe( request );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
