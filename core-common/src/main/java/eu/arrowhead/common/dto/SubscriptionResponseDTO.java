@@ -33,7 +33,7 @@ public class SubscriptionResponseDTO implements Serializable{
 	public SubscriptionResponseDTO( final long id, final EventTypeResponseDTO eventType, final SystemResponseDTO subscriberSystem,
 			final Map<String, String> filterMetaData, final String notifyUri, final boolean matchMetaData, final String startDate,
 			final String endDate, final Set<SystemResponseDTO> sources, final String createdAt, final String updatedAt ) {
-		super();
+
 		this.id = id;
 		this.eventType = eventType;
 		this.subscriberSystem = subscriberSystem;
