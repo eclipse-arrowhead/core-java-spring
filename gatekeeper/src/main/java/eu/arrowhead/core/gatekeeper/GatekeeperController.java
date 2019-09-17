@@ -22,9 +22,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.Utilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
@@ -140,7 +141,7 @@ public class GatekeeperController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getClouds get request recieved with page: {} and item_per page: {}", page, size);
 				
-		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI);
 		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																									validParameters.getValidatedDirecion(), sortField);
 		
@@ -307,7 +308,7 @@ public class GatekeeperController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getRelays get request recieved with page: {} and item_per page: {}", page, size);
 		
-		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI);
 		final RelayListResponseDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
 																					      validParameters.getValidatedDirecion(), sortField);
 		

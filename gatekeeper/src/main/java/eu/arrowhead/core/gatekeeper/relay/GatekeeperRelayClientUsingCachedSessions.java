@@ -36,7 +36,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		Assert.notNull(publicKey, "Public key is null.");
 		Assert.notNull(privateKey, "Private key is null.");
 		
-		this.client = RelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, false);
+		this.client = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, false);
 	}
 
 	//-------------------------------------------------------------------------------------------------

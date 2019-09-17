@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
@@ -167,7 +168,7 @@ public class AuthorizationController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTRA_CLOUD_MGMT_URI);
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTRA_CLOUD_MGMT_URI);
 		
 		final AuthorizationIntraCloudListResponseDTO authorizationIntraCloudEntriesResponse = authorizationDBService.getAuthorizationIntraCloudEntriesResponse(validatedPage, validatedSize,
 																																							   validatedDirection, sortField);
@@ -320,7 +321,7 @@ public class AuthorizationController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTER_CLOUD_MGMT_URI);
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTER_CLOUD_MGMT_URI);
 		
 		final AuthorizationInterCloudListResponseDTO authorizationInterCloudEntriesResponse = authorizationDBService.getAuthorizationInterCloudEntriesResponse(validatedPage, validatedSize,
 																																							   validatedDirection, sortField);

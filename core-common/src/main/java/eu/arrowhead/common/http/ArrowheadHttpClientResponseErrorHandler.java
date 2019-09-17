@@ -13,7 +13,7 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.dto.DTOUtilities;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 
@@ -50,6 +50,6 @@ public class ArrowheadHttpClientResponseErrorHandler extends DefaultResponseErro
 		
 		logger.debug("Error occured at {}. Returned with {}", url, response.getRawStatusCode());
 		logger.error("Request returned with {}: {}", dto.getExceptionType(), dto.getErrorMessage());
-		DTOUtilities.createExceptionFromErrorMessageDTO(dto);
+		Utilities.createExceptionFromErrorMessageDTO(dto);
 	}
 }

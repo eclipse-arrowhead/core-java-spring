@@ -5,7 +5,7 @@ import java.security.PublicKey;
 
 import eu.arrowhead.core.gatekeeper.relay.activemq.ActiveMQGatekeeperRelayClient;
 
-public class RelayClientFactory {
+public class GatekeeperRelayClientFactory {
 	
 	//=================================================================================================
 	// methods
@@ -26,7 +26,7 @@ public class RelayClientFactory {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private RelayClientFactory() {
+	private GatekeeperRelayClientFactory() {
 		throw new UnsupportedOperationException();
 	}
 }

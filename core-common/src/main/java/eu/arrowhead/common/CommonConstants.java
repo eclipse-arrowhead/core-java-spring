@@ -29,12 +29,16 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
-	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "public-key";
+	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
+	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
+	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
+	public static final String CORE_SERVICE_GATEWAY_CONNECT_PROVIDER = "gw-connect-provider";
+
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH = "event-publish";
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	
@@ -105,10 +109,16 @@ public class CommonConstants {
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
+		
+	public static final String GATEWAY_URI = "/gateway";
+	public static final String OP_GATEWAY_KEY_URI = "/publickey";
+	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
+	public static final String OP_GATEWAY_CONNECT_CONSUMER_URI = "/connect_consumer";
 	
 	public static final String EVENT_HANDLER_URI = "/event_handler";
 	public static final String OP_EVENT_HANDLER_PUBLISH = "/publish";
 	public static final String OP_EVENT_HANDLER_SUBSCRIBE = "/subscribe";
+
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -220,7 +230,9 @@ public class CommonConstants {
 	
 	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
 	public static final String INTER_CLOUD_PROVIDER_MATCHMAKER = "interCloudProviderMatchmaker";
+	public static final String ICN_PROVIDER_MATCHMAKER = "icnProviderMatchmaker";
 	public static final String GATEKEEPER_MATCHMAKER = "gatekeeperMatchmaker";
+	public static final String GATEWAY_MATCHMAKER = "gatewayMatchmaker";
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
@@ -228,6 +240,16 @@ public class CommonConstants {
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
 																				 Defaults.DEFAULT_NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + "}";
+	
+	public static final String GATEWAY_SOCKET_TIMEOUT = "gateway_socket_timeout";
+	public static final String $GATEWAY_SOCKET_TIMEOUT_WD = "${" + GATEWAY_SOCKET_TIMEOUT + ":" + Defaults.DEFAULT_GATEWAY_SOCKET_TIMEOUT + "}";
+	public static final String GATEWAY_MIN_PORT = "min_port";
+	public static final String $GATEWAY_MIN_PORT_WD = "${" + GATEWAY_MIN_PORT + ":" + Defaults.DEFAULT_GATEWAY_MIN_PORT + "}";
+	public static final String GATEWAY_MAX_PORT = "max_port";
+	public static final String $GATEWAY_MAX_PORT_WD = "${" + GATEWAY_MAX_PORT + ":" + Defaults.DEFAULT_GATEWAY_MAX_PORT + "}";
+	
+	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
+	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
 
 	//=================================================================================================
 	// assistant methods

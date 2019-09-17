@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,19 +17,22 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.CloudRequestDTO;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
 import eu.arrowhead.common.dto.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.ICNRequestFormDTO;
@@ -35,6 +40,7 @@ import eu.arrowhead.common.dto.ICNResultDTO;
 import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.RelayRequestDTO;
 import eu.arrowhead.common.dto.RelayType;
@@ -44,7 +50,12 @@ import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingParameters;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
 @Service
 public class GatekeeperService {
@@ -68,6 +79,12 @@ public class GatekeeperService {
 	
 	@Autowired
 	private GatekeeperDriver gatekeeperDriver;
+	
+	@Resource(name = CommonConstants.ICN_PROVIDER_MATCHMAKER)
+	private ICNProviderMatchmakingAlgorithm icnProviderMatchmaker;
+	
+	@Resource(name = CommonConstants.GATEWAY_MATCHMAKER)
+	private RelayMatchmakingAlgorithm gatewayMatchmaker;
 
 	//=================================================================================================
 	// methods
@@ -100,7 +117,7 @@ public class GatekeeperService {
 			}
 		}
 		
-		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getRequesterCloud(), gatewayIsPresent);
+		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent);
 		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
 		final List<GSDPollResponseDTO> successfulResponses = new ArrayList<>();
@@ -125,7 +142,7 @@ public class GatekeeperService {
 		}
 		
 		if (successfulResponses.isEmpty() && !errorMessageResponses.isEmpty()) {
-			DTOUtilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
+			Utilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
 		}
 		
 		return new GSDQueryResultDTO(successfulResponses, unsuccessfulRequests);
@@ -181,21 +198,53 @@ public class GatekeeperService {
 		validateICNForm(form);
 		
 		final Cloud targetCloud = gatekeeperDBService.getCloudById(form.getTargetCloudId());
-		final CloudRequestDTO requesterCloud = getRequesterCloud();
+		final CloudRequestDTO requesterCloud = getOwnCloud();
 		final List<RelayRequestDTO> preferredRelays = getPreferredRelays(targetCloud);
+		final List<RelayRequestDTO> knownRelays = getKnownRelays();
 		final ICNProposalRequestDTO proposal = new ICNProposalRequestDTO(form.getRequestedService(), requesterCloud, form.getRequesterSystem(), form.getPreferredSystems(), preferredRelays,
-																		 form.getNegotiationFlags(), gatewayIsPresent);
+																		 knownRelays, form.getNegotiationFlags(), gatewayIsPresent);
+		String consumerGWPublicKey = null;
+		if (gatewayIsPresent) {
+			consumerGWPublicKey = gatekeeperDriver.queryGatewayPublicKey();
+			proposal.setConsumerGatewayPublicKey(consumerGWPublicKey);
+		}
 		
 		final ICNProposalResponseDTO icnResponse = gatekeeperDriver.sendICNProposal(targetCloud, proposal);
 		
+		if (icnResponse.getResponse().isEmpty()) {
+			return new ICNResultDTO();
+		}
+ 		
 		if (!icnResponse.isUseGateway()) {
 			// just send back the response
 			return new ICNResultDTO(icnResponse.getResponse());
 		}
 		
-		//TODO: gateway-related code
-		
-		return null;
+		// initializing gateway connection
+		final OrchestrationResultDTO result = icnResponse.getResponse().get(0); // in gateway mode there is only one result in the response object
+		final GatewayConsumerConnectionRequestDTO connectionRequest = new GatewayConsumerConnectionRequestDTO(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(icnResponse.getRelay()),
+																											  icnResponse.getConnectionInfo().getQueueId(), 
+																											  icnResponse.getConnectionInfo().getPeerName(),
+																											  icnResponse.getConnectionInfo().getProviderGWPublicKey(), form.getRequesterSystem(),
+																											  DTOConverter.convertSystemResponseDTOToSystemRequestDTO(result.getProvider()) ,
+																											  requesterCloud, getCloudRequestDTO(targetCloud),
+																											  form.getRequestedService().getServiceDefinitionRequirement());
+		try {
+			final int serverPort = gatekeeperDriver.connectConsumer(connectionRequest);
+			
+			// change provider in result to make sure consumer will connect via the gateway
+			result.getProvider().setSystemName(CoreSystem.GATEWAY.name().toLowerCase());
+			result.getProvider().setAddress(gatekeeperDriver.getGatewayHost());
+			result.getProvider().setPort(serverPort);
+			result.getProvider().setAuthenticationInfo(consumerGWPublicKey);
+			
+			return new ICNResultDTO(List.of(result));
+		} catch (final UnavailableServerException ex) {
+			logger.error("Error while connect to consumer via gateway: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			
+			return new ICNResultDTO();
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -213,7 +262,8 @@ public class GatekeeperService {
 																							 .preferredProviders(preferredProviders)
 																							 .build();
 		if (gatewayIsMandatory) {
-			//TODO: we have to change the requesterSystem name  
+			// changing the requesterSystem for the sake of proper token generation
+			orchestrationForm.getRequesterSystem().setSystemName(CoreSystem.GATEWAY.name().toLowerCase());
 		}
 		
 		OrchestrationResponseDTO orchestrationResponse = gatekeeperDriver.queryOrchestrator(orchestrationForm);
@@ -227,12 +277,26 @@ public class GatekeeperService {
 		}
 
 		if (!gatewayIsMandatory) {
-			return new ICNProposalResponseDTO(orchestrationResponse.getResponse(), false);
+			return new ICNProposalResponseDTO(orchestrationResponse.getResponse());
 		} 
+
+		// gateway is used so we need a relay
+		final Relay selectedRelay = selectRelay(request);
+		if (selectedRelay == null) {
+			throw new AuthException("No common communication relay was found.");
+		}
 		
-		//TODO: implement gateway-related code
+		// in gateway mode we have to select one provider even if matchmaking is not enabled because we have to build an expensive connection between the consumer and the provider
+		final OrchestrationResultDTO selectedResult = icnProviderMatchmaker.doMatchmaking(orchestrationResponse.getResponse(), new ICNProviderMatchmakingParameters(request.getPreferredSystems()));
 		
-		return null;
+		final SystemRequestDTO providerSystem = DTOConverter.convertSystemResponseDTOToSystemRequestDTO(selectedResult.getProvider());
+		final GatewayProviderConnectionRequestDTO connectionRequest	= new GatewayProviderConnectionRequestDTO(DTOConverter.convertRelayToRelayRequestDTO(selectedRelay), request.getRequesterSystem(),
+																											  providerSystem, request.getRequesterCloud(), getOwnCloud(),
+																											  request.getRequestedService().getServiceDefinitionRequirement(), 
+																											  request.getConsumerGatewayPublicKey());
+		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
+		
+		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
 	}
 	
 	//=================================================================================================
@@ -328,12 +392,16 @@ public class GatekeeperService {
 			throw new AuthException("Services are only available via gateway."); 
 		}
 		
+		if (gatewayIsMandatory && request.getPreferredGatewayRelays().isEmpty() && request.getKnownGatewayRelays().isEmpty()) {
+			throw new AuthException("Services are only available via relay.");
+		}
+		
 		if (request.getRequestedService() == null) {
-			throw new InvalidParameterException("Requested service is null");
+			throw new InvalidParameterException("Requested service is null.");
 		}
 		
 		if (Utilities.isEmpty(request.getRequestedService().getServiceDefinitionRequirement())) {
-			throw new InvalidParameterException("Requested service definition is null or blank");
+			throw new InvalidParameterException("Requested service definition is null or blank.");
 		}
 		
 		validateSystemRequest(request.getRequesterSystem());
@@ -345,6 +413,14 @@ public class GatekeeperService {
 		
 		for (final RelayRequestDTO preferredRelay : request.getPreferredGatewayRelays()) {
 			validateRelayRequest(preferredRelay);
+		}
+		
+		for (final RelayRequestDTO knownRelay : request.getKnownGatewayRelays()) {
+			validateRelayRequest(knownRelay);
+		}
+		
+		if (gatewayIsMandatory && Utilities.isEmpty(request.getConsumerGatewayPublicKey())) {
+			throw new InvalidParameterException("Consumer gateway public key is null or blank.");
 		}
 	}
 
@@ -413,24 +489,32 @@ public class GatekeeperService {
 		}
 		
 		if (Utilities.isEmpty(relay.getType())) {
-			throw new InvalidParameterException("Realy type is null or blank");
+			throw new InvalidParameterException("Relay type is null or blank");
 		}
 		
 		final RelayType type = Utilities.convertStringToRelayType(relay.getType());
 		if (type == null || type == RelayType.GATEKEEPER_RELAY) {
-			throw new InvalidParameterException("Realy type is invalid");
+			throw new InvalidParameterException("Relay type is invalid");
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private CloudRequestDTO getRequesterCloud() {
-		logger.debug("getRequesterCloud started...");
+	private CloudRequestDTO getOwnCloud() {
+		logger.debug("getOwnCloud started...");
 		
 		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
+		return getCloudRequestDTO(ownCloud);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getCloudRequestDTO(final Cloud cloud) {
+		logger.debug("getCloudRequestDTO started...");
+		Assert.notNull(cloud, "cloud is null.");
+		
 		final CloudRequestDTO result = new CloudRequestDTO();
-		result.setOperator(ownCloud.getOperator());
-		result.setName(ownCloud.getName());
-		result.setAuthenticationInfo(ownCloud.getAuthenticationInfo());
+		result.setOperator(cloud.getOperator());
+		result.setName(cloud.getName());
+		result.setAuthenticationInfo(cloud.getAuthenticationInfo());
 		
 		return result;
 	}
@@ -451,6 +535,13 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private List<RelayRequestDTO> getKnownRelays() {
+		logger.debug("getKnownRelays started...");
+		
+		return DTOConverter.convertRelayListToRelayRequestDTOList(gatekeeperDBService.getPublicGatewayRelays());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private PreferredProviderDataDTO[] getPreferredProviders(final List<SystemRequestDTO> preferredSystems) {
 		logger.debug("getPreferredProviders started...");
 		
@@ -462,4 +553,15 @@ public class GatekeeperService {
 		
 		return result;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Relay selectRelay(final ICNProposalRequestDTO request) {
+		final Cloud requesterCloud = gatekeeperDBService.getCloudByOperatorAndName(request.getRequesterCloud().getOperator(), request.getRequesterCloud().getName());
+		final RelayMatchmakingParameters relayMMParams = new RelayMatchmakingParameters(requesterCloud);
+		relayMMParams.setPreferredGatewayRelays(request.getPreferredGatewayRelays());
+		relayMMParams.setKnownGatewayRelays(request.getKnownGatewayRelays());
+		
+		return gatewayMatchmaker.doMatchmaking(relayMMParams);
+	}
+
 }
