@@ -48,7 +48,9 @@ public class EventHandlerDBService {
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String NULL_ERROR_MESSAGE = " is null";
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
-	
+	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";;
+
 	private static final Logger logger = LogManager.getLogger(EventHandlerDBService.class);
 	
 	@Autowired
@@ -66,6 +68,9 @@ public class EventHandlerDBService {
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
 
+	@Value(CommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
+	private long timeStampTolerance;
+	
 	//=================================================================================================
 	// methods
 
@@ -358,13 +363,50 @@ public class EventHandlerDBService {
 		subscription.setFilterMetaData(Utilities.map2Text(request.getFilterMetaData()));
 		subscription.setOnlyPredefinedPublishers(request.getSources() != null && !request.getSources().isEmpty()); //TODO orginize to method
 		subscription.setMatchMetaData(request.getMatchMetaData());
-		//TODO validate dates by comparing to currentTime and threshold
 		subscription.setStartDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getStartDate()));
 		subscription.setEndDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getEndDate()));
+		
+		validateDateLimits(subscription);
 		
 		return subscription;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private void validateDateLimits(Subscription subscription) {
+		logger.debug("validateDateLimits started...");
+		
+		final ZonedDateTime now  = ZonedDateTime.now();
+		
+		final ZonedDateTime start = subscription.getStartDate();
+		final ZonedDateTime end = subscription.getEndDate();
+		
+		if ( start != null ) {
+			
+			if ( !start.isAfter( now.minusSeconds( timeStampTolerance )) ) {
+				
+				throw new InvalidParameterException("Start Date" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
+			}
+		}
+		
+		if ( end != null ) {
+			
+			if ( !end.isAfter( now.minusSeconds( timeStampTolerance )) ) {
+				
+				throw new InvalidParameterException("End Date" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
+			}
+		}
+		
+		if ( start != null && end != null ) {
+			
+			if ( end.isBefore( start ) || !end.isAfter( start ) ) {
+				
+				throw new InvalidParameterException("Start Date sould be before End Date");
+
+			}			
+		}
+		
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private System validateSystemRequestDTO(final SystemRequestDTO systemRequestDTO) {
 		logger.debug("validateSystemRequestDTO started...");
