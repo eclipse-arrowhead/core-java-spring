@@ -80,7 +80,7 @@ public class Subscription {
 	
 	//-------------------------------------------------------------------------------------------------
 	public Subscription(final EventType eventType, final System subscriberSystem, final String filterMetaData,
-			final String notifyUri, final boolean matchMetaData, final boolean onlyPredefinedPublishers, final ZonedDateTime startDate, final ZonedDateTime endDate, final String sources) {
+			final String notifyUri, final boolean matchMetaData, final boolean onlyPredefinedPublishers, final ZonedDateTime startDate, final ZonedDateTime endDate) {
 
 		this.eventType = eventType;
 		this.subscriberSystem = subscriberSystem;
