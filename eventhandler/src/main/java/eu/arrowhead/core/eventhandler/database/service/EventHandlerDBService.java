@@ -71,9 +71,9 @@ public class EventHandlerDBService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionListResponseDTO getSubscriptionsRequest(final int page, final int size,
+	public SubscriptionListResponseDTO getSubscriptionsResponse(final int page, final int size,
 			final Direction direction, final String sortField) {
-		logger.debug("getSubscriptionsRequest started ...");
+		logger.debug("getSubscriptionsResponse started ...");
 		
 		final Page<Subscription> entries = getSubscriptions(page, size, direction, sortField);
 
@@ -107,8 +107,8 @@ public class EventHandlerDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionResponseDTO getSubscriptionByIdRequest(final long id) {
-		logger.debug("getSubscriptionByIdRequest started ...");
+	public SubscriptionResponseDTO getSubscriptionByIdResponse(final long id) {
+		logger.debug("getSubscriptionByIdResponse started ...");
 		
 		final Subscription subscription = getSubscriptionById( id );
 		if ( subscription == null || Utilities.isEmpty( subscription.getNotifyUri() )) {
@@ -170,8 +170,8 @@ public class EventHandlerDBService {
 	}
 	//-------------------------------------------------------------------------------------------------
 	@Transactional
-	public void deleteSubscriptionRequest(final long id) {
-		logger.debug("deleteSubscriptionRequest started ...");
+	public void deleteSubscriptionResponse(final long id) {
+		logger.debug("deleteSubscriptionResponse started ...");
 		
 		if ( id < 1) {
 			

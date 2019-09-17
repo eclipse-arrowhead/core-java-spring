@@ -139,7 +139,7 @@ public class EventHandlerController {
 		logger.debug("New getSubscriptions get request recieved with page: {} and item_per page: {}", page, size);
 				
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters( page, size, direction, CommonConstants.EVENT_HANDLER_URI + EVENT_HANDLER_MGMT_URI );
-		final SubscriptionListResponseDTO subscriptionsResponse = eventHandlerDBService.getSubscriptionsRequest( validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+		final SubscriptionListResponseDTO subscriptionsResponse = eventHandlerDBService.getSubscriptionsResponse( validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																									validParameters.getValidatedDirecion(), sortField );
 		
 		logger.debug("Subscriptions  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -163,7 +163,7 @@ public class EventHandlerController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final SubscriptionResponseDTO subscriptionResponse = eventHandlerDBService.getSubscriptionByIdRequest( id );
+		final SubscriptionResponseDTO subscriptionResponse = eventHandlerDBService.getSubscriptionByIdResponse( id );
 		
 		logger.debug("Subscription entry with id: {} successfully retrieved", id);
 		
@@ -187,7 +187,7 @@ public class EventHandlerController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		eventHandlerDBService.deleteSubscriptionRequest(id);
+		eventHandlerDBService.deleteSubscriptionResponse(id);
 		
 		logger.debug("Subscription entry with id: {} successfully deleted", id);
 		

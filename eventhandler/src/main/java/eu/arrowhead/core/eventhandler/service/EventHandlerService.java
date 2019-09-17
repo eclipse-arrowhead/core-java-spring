@@ -87,7 +87,7 @@ public class EventHandlerService {
 		
 		final Subscription subscription = eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
 		
-		eventHandlerDBService.deleteSubscriptionRequest( subscription.getId() );
+		eventHandlerDBService.deleteSubscriptionResponse( subscription.getId() );
 		
 		return ;
 	}
