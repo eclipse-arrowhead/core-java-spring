@@ -50,10 +50,10 @@ public class Subscription {
 	private String notifyUri;
 	
 	@Column( nullable = false)
-	private boolean matchMetaData;
+	private boolean matchMetaData = false;
 	
 	@Column( nullable = false)
-	private boolean onlyPredefinedPublishers;
+	private boolean onlyPredefinedPublishers = false;
 	
 	@Column(nullable = true)
 	private ZonedDateTime startDate;

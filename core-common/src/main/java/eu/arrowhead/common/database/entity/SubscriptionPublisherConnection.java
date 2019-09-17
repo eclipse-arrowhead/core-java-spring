@@ -34,7 +34,7 @@ public class SubscriptionPublisherConnection {
 	private System system;
 	
 	@Column(nullable = false )
-	private boolean authorized;
+	private boolean authorized = false;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
