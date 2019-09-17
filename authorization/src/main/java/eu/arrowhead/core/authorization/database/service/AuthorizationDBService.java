@@ -166,16 +166,10 @@ public class AuthorizationDBService {
 				final Optional<AuthorizationIntraCloud> authOptional = authorizationIntraCloudRepository.findById( id );
 				if ( authOptional.isPresent() ) {
 					
-					try {
-						
-						final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, authOptional.get().getConsumerSystem().getId());
-						final Thread publishingThread = new Thread(publishAuthUpdateTask);
-						publishingThread.start();
-					
-					} catch (Exception ex) {
-						
-						logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
-					}
+					final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, authOptional.get().getConsumerSystem().getId());
+					final Thread publishingThread = new Thread(publishAuthUpdateTask);
+					publishingThread.start();
+
 				}
 			}
 			
