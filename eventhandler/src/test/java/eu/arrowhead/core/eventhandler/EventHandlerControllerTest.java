@@ -334,8 +334,7 @@ public class EventHandlerControllerTest {
 		
 		final SubscriptionResponseDTO dto = getSubscriptionResponseDTOForTest();
 		
-		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setMatchMetaData( null );
+		final SubscriptionRequestDTO request = getSubscriptionRequestWithNullMetaDataDTOForTest();
 		
 		when(eventHandlerService.subscriptionRequest(any())).thenReturn(dto);
 		
@@ -343,11 +342,11 @@ public class EventHandlerControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes( request ))
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
+				.andExpect(status().isOk())
 				.andReturn();
 		
 		Assert.assertNotNull( result );
-		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.MatchMetaData is null."));
+		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -720,6 +719,20 @@ public class EventHandlerControllerTest {
 				null, //filterMetaData
 				"notifyUri", 
 				false, //matchMetaData
+				null, //startDate
+				null, //endDate, 
+				null); //sources)
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	private SubscriptionRequestDTO getSubscriptionRequestWithNullMetaDataDTOForTest() {
+		
+		return new SubscriptionRequestDTO(
+				"eventType", 
+				getSystemRequestDTO(), 
+				null, //filterMetaData
+				"notifyUri", 
+				null, //matchMetaData
 				null, //startDate
 				null, //endDate, 
 				null); //sources)

@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 
 @Component
 public class RelaySubscriberDataContainer {
@@ -60,8 +60,8 @@ public class RelaySubscriberDataContainer {
 		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 
-		this.gatekeeperRelayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, false);
-		this.gatekeeperRelayClientWithCache = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
+		this.gatekeeperRelayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, false);
+		this.gatekeeperRelayClientWithCache = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
 
 		initialized = true;
 	}

@@ -57,6 +57,10 @@ public class Defaults {
 	
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
 	
+	public static final int DEFAULT_GATEWAY_SOCKET_TIMEOUT = 30000;
+	public static final int DEFAULT_GATEWAY_MIN_PORT = 8000;
+	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
+	
 	//=================================================================================================
 	// assistant methods
 	

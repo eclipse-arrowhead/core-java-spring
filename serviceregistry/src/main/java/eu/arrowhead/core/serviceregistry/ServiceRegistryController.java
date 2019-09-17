@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
@@ -199,7 +200,7 @@ public class ServiceRegistryController {
 			}			
 		}
 		
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
 		
 		return serviceRegistryDBService.getSystemEntries(validatedPage, validatedSize, validatedDirection, sortField);			
 	}
@@ -294,7 +295,7 @@ public class ServiceRegistryController {
 			}
 		}
 
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
 		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = serviceRegistryDBService.getServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
 		logger.debug("Service definition  with page: {} and item_per page: {} successfully retrieved", page, size);
 		
@@ -453,7 +454,7 @@ public class ServiceRegistryController {
 			}
 		}
 		
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI);
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI);
 		final ServiceRegistryListResponseDTO serviceRegistryEntriesResponse = serviceRegistryDBService.getServiceRegistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);		
 		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 		
@@ -518,7 +519,7 @@ public class ServiceRegistryController {
 			}
 		}
 		
-		final Direction validatedDirection = Utilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
 		final ServiceRegistryListResponseDTO serviceRegistryEntries = serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinitionResponse(serviceDefinition, validatedPage, validatedSize,
 																																					validatedDirection, sortField);
 		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);

@@ -109,6 +109,9 @@ public class TokenSecurityFilterTest {
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/provider.p12"), "123456".toCharArray());
 		final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, "123456");
 
-		return new TokenSecurityFilter(providerPrivateKey, authPublicKey) {};
+		return new TokenSecurityFilter() {
+			protected PrivateKey getMyPrivateKey() { return providerPrivateKey;	}
+			protected PublicKey getAuthorizationPublicKey() { return authPublicKey; }
+		};
 	}
 }

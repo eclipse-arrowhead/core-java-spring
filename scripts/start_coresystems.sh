@@ -16,9 +16,9 @@ cd ../../authorization/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-authorization-\*.jar | sort | tail -n1) &> sout_auth.log &
 echo Authorization started
 
-#cd ../../gateway/target
-#nohup java -jar $(find . -maxdepth 1 -name arrowhead-gateway-\*.jar | sort | tail -n1) &> sout_gateway.log &
-#echo Gateway started
+cd ../../gateway/target
+nohup java -jar $(find . -maxdepth 1 -name arrowhead-gateway-\*.jar | sort | tail -n1) &> sout_gateway.log &
+echo Gateway started
 
 #cd ../../eventhandler/target
 #nohup java -jar $(find . -maxdepth 1 -name arrowhead-eventhandler-\*.jar | sort | tail -n1) &> sout_eventhandler.log &

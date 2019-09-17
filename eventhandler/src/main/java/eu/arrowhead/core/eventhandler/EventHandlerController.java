@@ -23,9 +23,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.Utilities.ValidatedPageParams;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.EventPublishResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
@@ -137,12 +138,12 @@ public class EventHandlerController {
 			@RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getSubscriptions get request recieved with page: {} and item_per page: {}", page, size);
 				
-		final ValidatedPageParams validParameters = Utilities.validatePageParameters(page, size, direction, CommonConstants.EVENT_HANDLER_URI + EVENT_HANDLER_MGMT_URI);
-		final SubscriptionListResponseDTO SubscriptionsResponse = eventHandlerDBService.getSubscriptionsRequest(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																									validParameters.getValidatedDirecion(), sortField);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters( page, size, direction, CommonConstants.EVENT_HANDLER_URI + EVENT_HANDLER_MGMT_URI );
+		final SubscriptionListResponseDTO subscriptionsResponse = eventHandlerDBService.getSubscriptionsRequest( validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+																									validParameters.getValidatedDirecion(), sortField );
 		
 		logger.debug("Subscriptions  with page: {} and item_per page: {} retrieved successfully", page, size);
-		return SubscriptionsResponse;
+		return subscriptionsResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -162,11 +163,11 @@ public class EventHandlerController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final SubscriptionResponseDTO SubscriptionResponse = eventHandlerDBService.getSubscriptionByIdRequest(id);
+		final SubscriptionResponseDTO subscriptionResponse = eventHandlerDBService.getSubscriptionByIdRequest( id );
 		
 		logger.debug("Subscription entry with id: {} successfully retrieved", id);
 		
-		return SubscriptionResponse;
+		return subscriptionResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

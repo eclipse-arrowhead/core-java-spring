@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.DecryptedMessageDTO;
 import eu.arrowhead.common.dto.ErrorMessageDTO;
 import eu.arrowhead.common.dto.GSDPollRequestDTO;
@@ -487,7 +486,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		}
 		
 		logger.error("Request returned with {}: {}", dto.getExceptionType(), dto.getErrorMessage());
-		DTOUtilities.createExceptionFromErrorMessageDTO(dto);
+		Utilities.createExceptionFromErrorMessageDTO(dto);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
