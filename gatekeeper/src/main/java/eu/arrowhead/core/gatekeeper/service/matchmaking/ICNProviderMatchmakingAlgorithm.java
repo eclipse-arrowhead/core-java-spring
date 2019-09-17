@@ -1,12 +1,14 @@
 package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
-import eu.arrowhead.common.database.entity.Relay;
+import java.util.List;
 
-public interface GatekeeperMatchmakingAlgorithm {
+import eu.arrowhead.common.dto.OrchestrationResultDTO;
+
+public interface ICNProviderMatchmakingAlgorithm {
 
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Relay doMatchmaking(final GatekeeperMatchmakingParameters parameters);
+	public OrchestrationResultDTO doMatchmaking(final List<OrchestrationResultDTO> orList, final ICNProviderMatchmakingParameters params);
 }

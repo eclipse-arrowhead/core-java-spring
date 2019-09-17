@@ -16,6 +16,9 @@ public class GSDQueryResultDTO implements Serializable {
 	//=================================================================================================
 	// methods
 	
+	//-------------------------------------------------------------------------------------------------
+	public GSDQueryResultDTO() {}
+	
 	//-------------------------------------------------------------------------------------------------	
 	public GSDQueryResultDTO(final List<GSDPollResponseDTO> results, final int unsuccessfulRequests) {
 		this.results = results;

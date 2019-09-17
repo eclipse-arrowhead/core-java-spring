@@ -295,6 +295,25 @@ public class DTOConverter {
 									Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static List<RelayRequestDTO> convertRelayListToRelayRequestDTOList(final List<Relay> relays) {
+		Assert.notNull(relays, "Relay list is null.");
+		
+		final List<RelayRequestDTO> result = new ArrayList<>(relays.size());
+		for (final Relay relay : relays) {
+			result.add(convertRelayToRelayRequestDTO(relay));
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayRequestDTO convertRelayToRelayRequestDTO(final Relay relay) {
+		Assert.notNull(relay, "relay is null.");
+		
+		return new RelayRequestDTO(relay.getAddress(), relay.getPort(), relay.getSecure(), relay.getExclusive(), relay.getType().name());
+	}
+	
 	//-------------------------------------------------------------------------------------------------	
 	public static CloudWithRelaysListResponseDTO convertCloudToCloudWithRelaysListResponseDTO(final Page<Cloud> entries) {
 		Assert.notNull(entries, "Cloud list is null" );
@@ -467,6 +486,13 @@ public class DTOConverter {
 		cloudRequestDTO.setAuthenticationInfo(cloudResponseDTO.getAuthenticationInfo());
 		
 		return cloudRequestDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static RelayRequestDTO convertRelayResponseDTOToRelayRequestDTO(final RelayResponseDTO response) {
+		Assert.notNull(response, "Relay response is null.");
+		
+		return new RelayRequestDTO(response.getAddress(), response.getPort(), response.isSecure(), response.isExclusive(), response.getType().name());
 	}
 	
 	//=================================================================================================
