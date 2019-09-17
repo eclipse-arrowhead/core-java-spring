@@ -86,7 +86,6 @@ public class EventHandlerService {
 		
 		eventHandlerDBService.deleteSubscriptionResponse( subscription.getId() );
 		
-		return ;
 	}
 
 	//-------------------------------------------------------------------------------------------------
