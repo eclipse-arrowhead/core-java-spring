@@ -52,6 +52,9 @@ public class AuthorizationDriver {
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	
+	@Value(CommonConstants.$AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD)
+	private boolean eventhandlerIsPresent;
+	
 	private SystemRequestDTO systemRequestDTO;
 	
 	//=================================================================================================
@@ -60,6 +63,12 @@ public class AuthorizationDriver {
 	//-------------------------------------------------------------------------------------------------
 	public void publishAuthUpdate(final long updatedConsumerSystemId) {
 		logger.debug("publishAuthUpdate started...");
+		
+		if ( !eventhandlerIsPresent ) {
+			
+			return;
+			
+		}
 		
 		if ( systemRequestDTO == null ) {
 			
