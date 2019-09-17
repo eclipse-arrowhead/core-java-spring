@@ -317,11 +317,7 @@ public class EventHandlerController {
 		
 		if ( Utilities.isEmpty( request.getNotifyUri() )) {
 			throw new BadPayloadException("Request.NotifyUri" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);	
-		}
-		
-		if (request.getMatchMetaData() == null) {
-			throw new BadPayloadException("Request.MatchMetaData" + NULL_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
-		}
+		}		
 		
 		if ( request.getMatchMetaData() && ( request.getFilterMetaData() == null || request.getFilterMetaData().isEmpty() )) {
 			

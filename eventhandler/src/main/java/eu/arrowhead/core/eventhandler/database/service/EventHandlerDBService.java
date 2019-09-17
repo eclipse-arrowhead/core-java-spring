@@ -243,7 +243,7 @@ public class EventHandlerDBService {
 			final EventType eventTypeForUpdate = validateEventType( request.getEventType() );
 			final System subscriberSystemForUpdate = validateSystemRequestDTO( request.getSubscriberSystem() );
 			final String filterMetadataForUpdate = Utilities.map2Text(request.getFilterMetaData());
-			final boolean matchMetaDataForUpdate = request.getMatchMetaData() == null ? false : request.getMatchMetaData();
+			final boolean matchMetaDataForUpdate = request.getMatchMetaData();
 			final String notifyUriForUpdate = request.getNotifyUri();
 			final boolean onlyPredifindProvidersForUpdate = request.getSources() != null && !request.getSources().isEmpty();
 			final ZonedDateTime startDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
