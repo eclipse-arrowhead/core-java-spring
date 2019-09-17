@@ -37,6 +37,7 @@ import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
@@ -206,6 +207,15 @@ public class ArrowheadService {
 		
 		
 		return Utilities.getPublicKeyFromBase64EncodedString(response.getBody());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public PublicKey getMyPublicKey() {
+		if (sslProperties.isSslEnabled()) {
+			return (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		} else {
+			throw new ArrowheadException("SSL is not enabled.");
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
