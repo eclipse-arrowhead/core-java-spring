@@ -548,11 +548,11 @@ public class EventHandlerDBService {
 			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
 			
 			for (final SubscriptionPublisherConnection conn  : involvedPublisherSystems) {
-				final System system = conn.getSystem();
+				final SystemResponseDTO allowedPublisher = DTOConverter.convertSystemToSystemResponseDTO( conn.getSystem() );
 				
-				for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
+				for (final SystemResponseDTO authorizedPublisher : authorizedPublishers) {
 					
-					if (DTOUtilities.equalsSystemInResponseAndRequest(systemResponseDTO, DTOConverter.convertSystemToSystemRequestDTO(system))) {
+					if ( authorizedPublisher.equals( allowedPublisher )  ) {
 						
 						conn.setAuthorized( true );
 					
