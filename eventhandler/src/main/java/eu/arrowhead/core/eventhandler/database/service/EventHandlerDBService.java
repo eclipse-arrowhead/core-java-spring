@@ -266,7 +266,7 @@ public class EventHandlerDBService {
 			if ( originalEventTypeId != eventTypeForUpdate.getId() ||
 					originalSubscriberSystemId != subscriberSystemForUpdate.getId()) {
 				
-				checkSubscriptionUpdateUniqueConstrains(eventTypeForUpdate, subscriberSystemForUpdate);
+				checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber(eventTypeForUpdate, subscriberSystemForUpdate);
 			}		
 			
 			subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
@@ -636,30 +636,16 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkSubscriptionUniqueConstrains(final Subscription subscription) {
+	private void checkSubscriptionUniqueConstrains( final Subscription subscription ) {
 		logger.debug("checkSubscriptionUniqueConstrains started...");
 		
-		final Optional<Subscription> subcriptionOptional;
-		try {
-			
-			subcriptionOptional = subscriptionRepository.findByEventTypeAndSubscriberSystem( subscription.getEventType(), subscription.getSubscriberSystem() );
-			
-		} catch (final Exception ex) {
-			
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-		
-		if ( subcriptionOptional.isPresent()) {
-			
-			throw new InvalidParameterException("Subscription" + VIOLATES_UNIQUE_CONSTRAINT );
-			
-		}
+		checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber( subscription.getEventType(), subscription.getSubscriberSystem());
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkSubscriptionUpdateUniqueConstrains(final EventType eventTypeForUpdate, final System subscriberSystemForUpdate) {
-		logger.debug("checkSubscriptionUpdateUniqueConstrains started...");
+	private void checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber( final EventType eventTypeForUpdate, final System subscriberSystemForUpdate ) {
+		logger.debug("checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber started...");
 		
 		final Optional<Subscription> subcriptionOptional;
 		try {
