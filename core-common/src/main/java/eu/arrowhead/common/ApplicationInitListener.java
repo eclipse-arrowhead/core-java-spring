@@ -24,6 +24,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -31,6 +32,8 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.ServiceSecurityType;
@@ -104,7 +107,7 @@ public abstract class ApplicationInitListener {
 		
 		int count = coreSystem.getServices().size();
 		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService);
+			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, coreSystemRegistrationProperties.getCoreSystemAddress(), coreSystemRegistrationProperties.getCoreSystemPort());
 			try {
 				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
 			} catch (final InvalidParameterException ex) {
@@ -204,17 +207,21 @@ public abstract class ApplicationInitListener {
 		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 		checkServiceRegistryConnection(scheme, MAX_NUMBER_OF_SERVICE_REGISTRY_CONNECTION_RETRIES, WAITING_PERIOD_BETWEEN_RETRIES_IN_SECONDS);
 		
+		final UriComponents queryUri = createQueryUri(scheme);
+		final UriComponents registerUri = createRegisterUri(scheme);
+		
 		final SystemRequestDTO coreSystemDTO = getCoreSystemRequestDTO();
 		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			final UriComponents registerUri = createRegisterUri(scheme);
-			final ServiceRegistryRequestDTO request = getCoreSystemServiceRegistryRequestDTO(coreSystemDTO, coreService);
-			try {
-				httpService.sendRequest(registerUri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
-			} catch (final InvalidParameterException ex) { // means service already registered => delete the old and register again
-				final UriComponents unregisterUri = createUnregisterUri(scheme, coreService);
+			
+			final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder(coreService.getServiceDefinition()).build();
+			final ResponseEntity<ServiceQueryResultDTO> queryResponse = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
+			for (final ServiceRegistryResponseDTO result : queryResponse.getBody().getServiceQueryData()) { // stucked entries
+				final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, result.getProvider().getAddress(), result.getProvider().getPort());
 				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
-				httpService.sendRequest(registerUri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
-			} 
+			}
+			
+			final ServiceRegistryRequestDTO request = getCoreSystemServiceRegistryRequestDTO(coreSystemDTO, coreService);
+			httpService.sendRequest(registerUri, HttpMethod.POST, ServiceRegistryResponseDTO.class, request);
 		}
 		
 		logger.info("Core system {} published {} service(s).", coreSystem.name(), coreSystem.getServices().size());
@@ -296,14 +303,14 @@ public abstract class ApplicationInitListener {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents createUnregisterUri(final String scheme, final CoreSystemService coreSystemService) {
+	private UriComponents createUnregisterUri(final String scheme, final CoreSystemService coreSystemService, final String address, final int port) {
 		logger.debug("createUnregisterUri started...");
 		
 		final String unregisterUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 		final MultiValueMap<String,String> queryMap = new LinkedMultiValueMap<>(4);
 		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME, List.of(coreSystemRegistrationProperties.getCoreSystem().name().toLowerCase()));
-		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS, List.of(coreSystemRegistrationProperties.getCoreSystemAddress()));
-		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT, List.of(String.valueOf(coreSystemRegistrationProperties.getCoreSystemPort())));
+		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS, List.of(address));
+		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT, List.of(String.valueOf(port)));
 		queryMap.put(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION, List.of(coreSystemService.getServiceDefinition()));
 		
 		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), queryMap, unregisterUriStr);

@@ -229,8 +229,32 @@ public class SRAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
-	public void testQueryNotAllowedCoreSystemClient() throws Exception {
+	public void testQueryNotAllowedCoreSystemClientBecauseOfNotSpecifiedService() throws Exception {
 		postQuery(new ServiceQueryFormDTO(), "certificates/authorization.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryNotAllowedCoreSystemClientBecauseOfNotOwnService() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder("test-service").build();
+		postQuery(form, "certificates/authorization.pem", status().isUnauthorized());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryAllowedCoreSystemClientBecauseOfOwnService() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder(CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition()).build();
+		when(serviceRegistryDBService.queryRegistry(any())).thenReturn(new ServiceQueryResultDTO());
+		postQuery(form, "certificates/authorization.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryByNonCoreSystemWithoutServiceSpecified() throws Exception {
+		postQuery(new ServiceQueryFormDTO(), "certificates/provider.pem", status().isUnauthorized());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
