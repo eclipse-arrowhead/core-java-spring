@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -39,6 +38,7 @@ import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
+import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
 import eu.arrowhead.common.http.HttpService;
@@ -78,7 +78,11 @@ public class ArrowheadService {
 	//=================================================================================================
 	// methods
 
-	//-------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------
+	/**
+	 * @param coreSystemService CoreSystemService enum which represents an Arrowhead Core System Service
+	 * @return the URI details of the Arrowhead Core System or null when the specified coreSystemService is not a public one or ArrowhedContext component not contains the the given core service.
+	 */
 	public CoreServiceUri getCoreServiceUri(final CoreSystemService coreSystemService) {
 		if (!CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES.contains(coreSystemService)) {
 			logger.debug("'{}' core service is not a public service.", coreSystemService);
@@ -92,6 +96,12 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Queries and stores the public service URIs of the given Arrowhead Core System in the ArrowheadContext component. 
+	 * If the specified Core System has no public service or the server is not available, then ArrowheadContext won't contain the core service and a log info message will be triggered.
+	 * 
+	 * @param coreSystem CoreSystem enum which represents an Arrowhead Core System
+	 */
 	public void updateCoreServiceURIs(final CoreSystem coreSystem) {
 		final List<CoreSystemService> publicServices = getPublicServicesOfCoreSystem(coreSystem);
 		if (publicServices.isEmpty()) {
@@ -103,11 +113,7 @@ public class ArrowheadService {
 			try {	
 				final ResponseEntity<ServiceQueryResultDTO> response = queryServiceReqistryByCoreService(coreService);
 				
-				if (response.getStatusCode() != HttpStatus.OK) {
-					logger.info("'{}' core service couldn't be retrieved due to the following reason: service registry response status {}", coreService.getServiceDefinition(), response.getStatusCode().name());
-					arrowheadContext.remove(coreService.getServiceDefinition() + ClientCommonConstants.CORE_SERVICE_DEFINITION_SUFFIX);
-					
-				} else if (response.getBody().getServiceQueryData().isEmpty()) {
+				if (response.getBody().getServiceQueryData().isEmpty()) {
 					logger.info("'{}' core service couldn't be retrieved due to the following reason: not registered by Serivce Registry", coreService.getServiceDefinition());
 					arrowheadContext.remove(coreService.getServiceDefinition() + ClientCommonConstants.CORE_SERVICE_DEFINITION_SUFFIX);
 					
@@ -117,13 +123,21 @@ public class ArrowheadService {
 							serviceRegistryResponseDTO.getProvider().getPort(), serviceRegistryResponseDTO.getServiceUri()));					
 				}
 				
-			} catch (final  UnavailableServerException | AuthException ex) {
+			} catch (final  ArrowheadException ex) {
 				logger.info("'{}' core service couldn't be retrieved due to the following reason: {}", coreService.getServiceDefinition(), ex.getMessage());
 			}			
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Sends a http(s) request to the 'echo' end point of the given Arrowhead Core System.
+	 * 
+	 * @param coreSystem CoreSystem enum which represents an Arrowhead Core System
+	 * @return the response received from core system server or null when the specified core system has no public service or it is not known by Service Registry Core System
+	 * @throws ArrowheadException when internal server error happened at Service Registry or at the given core system
+	 * @throws UnavailableServerException when Service Registry Core System or the given core system is not available
+	 */
 	public ResponseEntity<String> echoCoreSystem(final CoreSystem coreSystem) {		
 		String address = null;
 		Integer port = null;
@@ -143,7 +157,7 @@ public class ArrowheadService {
 			} else {				
 				final ResponseEntity<ServiceQueryResultDTO> srResponse = queryServiceReqistryByCoreService(publicServices.get(0));
 				
-				if (srResponse.getStatusCode() != HttpStatus.OK || srResponse.getBody().getServiceQueryData().isEmpty()) {
+				if (srResponse.getBody().getServiceQueryData().isEmpty()) {
 					logger.debug("'{}' core system not known by Service Registry", coreSystem.name());
 					return null;
 				} else {
@@ -158,6 +172,17 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Sends a http(s) 'register' request to Service Registry Core System.
+	 * 
+	 * @param request ServiceRegistryRequestDTO which represents the required payload of the http(s) request
+	 * @return the response received from Service Registry Core System
+	 * @throws AuthException when you are not authorized by Service Registry Core System
+	 * @throws BadPayloadException when the payload couldn't be validated by Service Registry Core System 
+	 * @throws InvalidParameterException when the payload content couldn't be validated by Service Registry Core System
+	 * @throws ArrowheadException when internal server error happened at Service Registry Core System
+	 * @throws UnavailableServerException when Service Registry Core System is not available
+	 */
 	public ResponseEntity<ServiceRegistryResponseDTO> registerServiceToServiceRegistry(final ServiceRegistryRequestDTO request) {
 		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 		final UriComponents registerUri = Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort, registerUriStr);
@@ -166,6 +191,17 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Sends a http(s) 'register' request to Service Registry Core System. In the case of service already registered, then the old service registry entry will be overwritten.  
+	 * 
+	 * @param request ServiceRegistryRequestDTO which represents the required payload of the http(s) request
+	 * @return the response received from Service Registry Core System
+	 * @throws AuthException when you are not authorized by Service Registry Core System
+	 * @throws BadPayloadException when the payload couldn't be validated by Service Registry Core System 
+	 * @throws InvalidParameterException when the payload content couldn't be validated by Service Registry Core System
+	 * @throws ArrowheadException when internal server error happened at Service Registry Core System
+	 * @throws UnavailableServerException when Service Registry Core System is not available
+	 */
 	public ResponseEntity<ServiceRegistryResponseDTO> forceRegisterServiceToServiceRegistry(final ServiceRegistryRequestDTO request) {
 		final String registerUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 		final UriComponents registerUri = Utilities.createURI(getUriScheme(), serviceReqistryAddress, serviceRegistryPort, registerUriStr);
@@ -179,6 +215,17 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Sends a http(s) 'unregister' request to Service Registry Core System.
+	 * 
+	 * @param serviceDefinition String value which represents the service being deleted from service registry
+	 * @return the response received from Service Registry Core System
+	 * @throws AuthException when you are not authorized by Service Registry Core System
+	 * @throws BadPayloadException when the payload couldn't be validated by Service Registry Core System 
+	 * @throws InvalidParameterException when the payload content couldn't be validated by Service Registry Core System
+	 * @throws ArrowheadException when internal server error happened at Service Registry Core System
+	 * @throws UnavailableServerException when Service Registry Core System is not available
+	 */
 	public ResponseEntity<Void> unregisterServiceFromServiceRegistry(final String serviceDefinition) {
 		final String unregisterUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 		final MultiValueMap<String,String> queryMap = new LinkedMultiValueMap<>(4);
@@ -192,6 +239,14 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Queries its public key from Authorization Core System. 
+	 * 
+	 * @return the public key of Authorization Core System or null when the public key core service URI is not known by ArrowheadContext component.
+	 * @throws AuthException when you are not authorized by Authorization Core System
+	 * @throws ArrowheadException when internal server error happened at Authorization Core System
+	 * @throws UnavailableServerException when Authorization Core System is not available
+	 */
 	public PublicKey queryAuthorizationPublicKey() {
 		final CoreServiceUri uri = getCoreServiceUri(CoreSystemService.AUTH_PUBLIC_KEY_SERVICE);
 		if (uri == null) {
@@ -200,25 +255,26 @@ public class ArrowheadService {
 		}
 		
 		final ResponseEntity<String> response = httpService.sendRequest(Utilities.createURI(getUriScheme(), uri.getAddress(), uri.getPort(), uri.getPath()), HttpMethod.GET, String.class);
-		if (response.getStatusCode() != HttpStatus.OK) {
-			logger.debug("Authorization Public Key couldn't be retrieved due to the following reason: service registry response status {}", response.getStatusCode().name());
-			return null;
-		}
-		
-		
+				
 		return Utilities.getPublicKeyFromBase64EncodedString(response.getBody());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/** 
+	 * @return your public key or null when https mode is not enabled
+	 */
 	public PublicKey getMyPublicKey() {
 		if (sslProperties.isSslEnabled()) {
 			return (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 		} else {
-			throw new ArrowheadException("SSL is not enabled.");
+			return null;
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * @return an Orchestration form builder prefilled with your system properties
+	 */
 	public Builder getOrchestrationFormBuilder() {
 		final SystemRequestDTO thisSystem = new SystemRequestDTO();
 		thisSystem.setSystemName(clientSystemName);
@@ -233,6 +289,17 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Sends a http(s) 'orchestration' request to Orchestrator Core System.
+	 * 
+	 * @param request OrchestrationFormRequestDTO which represents the required payload of the http(s) request
+	 * @return the response received from Orchestrator Core System
+	 * @throws AuthException when you are not authorized by Orchestrator Core System
+	 * @throws BadPayloadException when the payload couldn't be validated by Orchestrator Core System 
+	 * @throws InvalidParameterException when the payload content couldn't be validated by Orchestrator Core System
+	 * @throws ArrowheadException when internal server error happened at one of the core system involved in orchestration process 
+	 * @throws UnavailableServerException when one of the core system involved in orchestration process is not available 
+	 */
 	public ResponseEntity<OrchestrationResponseDTO> proceedOrchestration(final OrchestrationFormRequestDTO request) {
 		final CoreServiceUri uri = getCoreServiceUri(CoreSystemService.ORCHESTRATION_SERVICE);
 		if (uri == null) {
@@ -244,6 +311,24 @@ public class ArrowheadService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	/**
+	 * Sends a http(s) request with the specified service reachability details.
+	 * 
+	 * @param httpMethod HttpMethod enum which represents the method how the service is available.
+	 * @param address String value which represents the host where the service is available.
+	 * @param port int value which represents the port where the service is available
+	 * @param serviceUri String value which represents the URI where the service is available.
+	 * @param interfaceName String value which represents the name of the interface used for the communication. Usable interfaces could be received in orchestration response.
+	 * @param token (nullable) String value which represents the token for being authorized at the provider side if necessary. Token could be received in orchestration response per interface type.  
+	 * @param payload (nullable) Object type which represents the required payload of the http(s) request if any necessary.
+	 * @param queryParams (nullable) String... variable arguments which represent the additional key-value http(s) query parameters if any necessary. E.g.: "k1", "v1", "k2", "v2".  
+	 * @return the response received from the provider 
+	 * 
+	 * @throws InvalidParameterException when service URL can't be assembled.
+	 * @throws AuthException when ssl context or access control related issue happened.
+	 * @throws ArrowheadException when the communication is managed via Gateway Core System and internal server error happened.
+	 * @throws UnavailableServerException when the specified server is not available.
+	 */
 	public ResponseEntity<Object> consumeServiceHTTP(final HttpMethod httpMethod, final String address, final int port, final String serviceUri, final String interfaceName, final String token,
 													 final Object payload, final String... queryParams) {
 		if (httpMethod == null) {

@@ -41,10 +41,10 @@ public class ConsumerMain implements ApplicationRunner {
     	requestedService.setServiceDefinitionRequirement("test-service");
     	
     	orchestrationFormBuilder.requestedService(requestedService)
-    							.flag(Flag.MATCHMAKING, false) //When this flag is false or not specified, than the orchestration response cloud contain more proper provider. Otherwise only one will be chosen if there is any proper.
-    							.flag(Flag.EXTERNAL_SERVICE_REQUEST, false) //When this flag is false or not specified, than the orchestration will look for proper providers only within the local cloud. Otherwise orchestration will look for providers only in the neighbor clouds.
-    							.flag(Flag.OVERRIDE_STORE, true) //When this flag is false or not specified, than a Store Orchestration will be proceeded. Otherwise a Dynamic Orchestration will be proceeded.
-    							.flag(Flag.TRIGGER_INTER_CLOUD, false); //When this flag is false or not specified, than orchestration will not look for providers in the neighbor clouds, when there is no proper provider in the local cloud. Otherwise it will. 
+    							.flag(Flag.MATCHMAKING, false) //When this flag is false or not specified, then the orchestration response cloud contain more proper provider. Otherwise only one will be chosen if there is any proper.
+    							.flag(Flag.EXTERNAL_SERVICE_REQUEST, false) //When this flag is false or not specified, then the orchestration will look for proper providers only within the local cloud. Otherwise orchestration will look for providers only in the neighbor clouds.
+    							.flag(Flag.OVERRIDE_STORE, true) //When this flag is false or not specified, then a Store Orchestration will be proceeded. Otherwise a Dynamic Orchestration will be proceeded.
+    							.flag(Flag.TRIGGER_INTER_CLOUD, false); //When this flag is false or not specified, then orchestration will not look for providers in the neighbor clouds, when there is no proper provider in the local cloud. Otherwise it will. 
     	
     	final OrchestrationFormRequestDTO orchestrationRequest = orchestrationFormBuilder.build();
     	
@@ -58,7 +58,7 @@ public class ConsumerMain implements ApplicationRunner {
     	//EXAMPLE OF CONSUMING THE SERVICE FROM A CHOSEN PROVIDER
     	
     	if (response.getResponse().isEmpty()) {
-    		//If no proper providers found during the orchestration process, than the response list will be empty. Handle the case as you wish!
+    		//If no proper providers found during the orchestration process, then the response list will be empty. Handle the case as you wish!
     	}
     	
     	final OrchestrationResultDTO result = response.getResponse().get(0); //Simplest way of choosing a provider.
