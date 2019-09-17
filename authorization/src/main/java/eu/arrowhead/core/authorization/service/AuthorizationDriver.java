@@ -60,7 +60,7 @@ public class AuthorizationDriver {
 	public void publishAuthUpdate(final long updatedConsumerSystemId) {
 		logger.debug("publishAuthUpdate started...");
 		
-		Assert.isTrue(updatedConsumerSystemId > 0, "ConsumerSystemId could not be less then one.");
+		Assert.isTrue(updatedConsumerSystemId > 0, "ConsumerSystemId could not be less than one.");
 		
 		final ZonedDateTime timeStamp = ZonedDateTime.now();
 
