@@ -48,8 +48,8 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			checkProviderAccessToDeregister(clientCN, queryParams, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI)) {
 			if (isClientACoreSystem(clientCN, cloudCN)) {
-				// Only dedicated core systems can use this service
-				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQuery, requestTarget);				
+				// Only dedicated core systems can use this service without limitation but every core system can query info about its own services
+				checkIfClientAnAllowedCoreSystemOrQueryingOwnSystems(clientCN, cloudCN, requestJSON, requestTarget); 
 			} else {
 				// Public core system services are allowed to query directly by the local systems
 				checkIfRequestedServiceIsAPublicCoreSystemService(requestJSON);
@@ -99,17 +99,22 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	private void checkIfRequestedServiceIsAPublicCoreSystemService(final String requestJSON) {
 		final ServiceQueryFormDTO requestBody = Utilities.fromJson(requestJSON, ServiceQueryFormDTO.class);
 		
-		for (final CoreSystemService service : CommonConstants.PUBLIC_CORE_SYSTEM_SERVICES) {
+		if (Utilities.isEmpty(requestBody.getServiceDefinitionRequirement())) {
+			throw new AuthException("Service is not defined.", HttpStatus.UNAUTHORIZED.value());
+		}
+		
+		for (final CoreSystemService service : publicCoreSystemServices) {
 			if (service.getServiceDefinition().equalsIgnoreCase(requestBody.getServiceDefinitionRequirement().trim())) {
 				return;
 			}
 		}
 		
-		throw new AuthException("Only public core system services are allowed to query directly. Requested service(" + requestBody.getServiceDefinitionRequirement() + ") is not!", HttpStatus.UNAUTHORIZED.value());
+		throw new AuthException("Only public core system services are allowed to query directly. Requested service (" + requestBody.getServiceDefinitionRequirement() + ") is not!",
+								HttpStatus.UNAUTHORIZED.value());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	protected boolean  isClientACoreSystem(final String clientCN, final String cloudCN) {
+	private boolean isClientACoreSystem(final String clientCN, final String cloudCN) {
 		for (final CoreSystem coreSystem : CoreSystem.values()) {
 			final String coreSystemCN = coreSystem.name().toLowerCase() + "." + cloudCN;
 			if (clientCN.equalsIgnoreCase(coreSystemCN)) {
@@ -117,6 +122,43 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 			}
 		}		
 		return false;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkIfClientAnAllowedCoreSystemOrQueryingOwnSystems(final String clientCN, final String cloudCN, final String requestJSON, final String requestTarget) {
+		final boolean firstCheck = checkIfClientIsAnAllowedCoreSystemNoException(clientCN, cloudCN, allowedCoreSystemsForQuery, requestTarget);
+		
+		if (!firstCheck) { // no privileged core system
+			final CoreSystem coreSystem = getClientCoreSystem(clientCN, cloudCN);
+			
+			if (coreSystem != null) {
+				final ServiceQueryFormDTO requestBody = Utilities.fromJson(requestJSON, ServiceQueryFormDTO.class);
+				
+				if (Utilities.isEmpty(requestBody.getServiceDefinitionRequirement())) {
+					throw new AuthException("Service is not defined.", HttpStatus.UNAUTHORIZED.value());
+				}
+				
+				for (final CoreSystemService service : coreSystem.getServices()) {
+					if (service.getServiceDefinition().equalsIgnoreCase(requestBody.getServiceDefinitionRequirement().trim())) {
+						return;
+					}
+				}
+			}
+			
+			throw new AuthException("This core system only query data about its own services.", HttpStatus.UNAUTHORIZED.value());
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CoreSystem getClientCoreSystem(final String clientCN, final String cloudCN) {
+		for (final CoreSystem coreSystem : CoreSystem.values()) {
+			final String coreSystemCN = coreSystem.name().toLowerCase() + "." + cloudCN;
+			if (clientCN.equalsIgnoreCase(coreSystemCN)) {
+				return coreSystem;
+			}
+		}		
+		
+		return null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
