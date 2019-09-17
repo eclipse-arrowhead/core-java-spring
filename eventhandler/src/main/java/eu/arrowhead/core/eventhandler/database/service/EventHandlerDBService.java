@@ -470,17 +470,17 @@ public class EventHandlerDBService {
 	}	
 
 	//-------------------------------------------------------------------------------------------------
-	private Set<System> getPreferredPublisherSystems(final Set<SystemRequestDTO> sources) {
-		logger.debug("getPreferredPublisherSystems started...");
+	private Set<System> getAllowedPublisherSystems(final Set<SystemRequestDTO> sources) {
+		logger.debug("getAllowedPublisherSystems started...");
 		
-		final Set<System> preferredSystems = new HashSet<>();
+		final Set<System> allowedSystems = new HashSet<>();
 		
 		for (final SystemRequestDTO source : sources) {
 			
-			preferredSystems.add(validateSystemRequestDTO(source));
+			allowedSystems.add(validateSystemRequestDTO(source));
 		}
 		
-		return preferredSystems;
+		return allowedSystems;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -490,9 +490,9 @@ public class EventHandlerDBService {
 		
 		if (subscriptionEntry.isOnlyPredefinedPublishers()) {
 			
-			final Set<System> preferredPublisherSystems = getPreferredPublisherSystems( request.getSources());
+			final Set<System> allowedPublisherSystems = getAllowedPublisherSystems( request.getSources());
 			
-			for (final System system : preferredPublisherSystems) {
+			for (final System system : allowedPublisherSystems) {
 				final SubscriptionPublisherConnection conn = new SubscriptionPublisherConnection(subscriptionEntry, system);
 				conn.setAuthorized(false);
 				for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
