@@ -376,8 +376,6 @@ public class EventHandlerController {
 			throw new BadPayloadException("Request.Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}	
 		
-		// TODO implement additional method logic here
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
