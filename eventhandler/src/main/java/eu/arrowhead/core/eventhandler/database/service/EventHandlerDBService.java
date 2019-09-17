@@ -135,15 +135,21 @@ public class EventHandlerDBService {
 				
 				return subcriptionOptional.get();
 				
+			} else {
+				
+				throw new InvalidParameterException("Subscription with id of '" + id + "' not exists");
 			}
 			
+		} catch (final InvalidParameterException ex) {
+			
+			throw ex;
+		
 		} catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
-		return new Subscription();
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -158,16 +164,23 @@ public class EventHandlerDBService {
 			if ( subcriptionOptional.isPresent()) {
 				
 				return  subcriptionOptional.get();
+			
+			} else {
+				
+				throw new InvalidParameterException("Subscription with name  '" + subscription.getSubscriberSystem().getSystemName() + "' and eventType '" + subscription.getEventType().getEventTypeName() + "' not exists");
 			}
 			
+		} catch (final InvalidParameterException ex) {
+			
+			throw ex;
+		
 		} catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
-		return new Subscription(); //return empty subscription
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional
 	public void deleteSubscriptionResponse(final long id) {
