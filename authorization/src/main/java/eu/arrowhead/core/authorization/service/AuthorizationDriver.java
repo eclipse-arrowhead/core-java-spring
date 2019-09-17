@@ -66,7 +66,7 @@ public class AuthorizationDriver {
 
 		final EventPublishRequestDTO eventPublishRequestDTO = new EventPublishRequestDTO();
 		eventPublishRequestDTO.setEventType( CommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE );
-		eventPublishRequestDTO.setPayload( Long.toString( updatedConsumerSystemId ) );
+		eventPublishRequestDTO.setPayload( String.valueOf( updatedConsumerSystemId ) );
 		eventPublishRequestDTO.setTimeStamp( Utilities.convertZonedDateTimeToUTCString( timeStamp ) );
 		
 		
