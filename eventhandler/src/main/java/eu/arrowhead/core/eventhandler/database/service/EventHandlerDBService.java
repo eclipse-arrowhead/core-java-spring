@@ -293,12 +293,6 @@ public class EventHandlerDBService {
 		
 		final EventType validEventType = validateEventType(request.getEventType());
 		
-		if (!secure) {
-			
-			return subscriptionRepository.findAllByEventType(validEventType);
-			
-		}
-		
 		try {
 			
 			final Set<Subscription> involvedSubscriptions = subscriptionRepository.findAllByEventType(validEventType);
