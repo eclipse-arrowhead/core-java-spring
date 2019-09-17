@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -182,7 +181,7 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public void deleteSubscriptionResponse(final long id) {
 		logger.debug("deleteSubscriptionResponse started ...");
 		
@@ -216,7 +215,7 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public Subscription registerSubscription(final SubscriptionRequestDTO request,
 			final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("registerSubscription started ...");
@@ -240,7 +239,7 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Transactional
+	@Transactional(rollbackFor = ArrowheadException.class)
 	public Subscription updateSubscription( final long id, final SubscriptionRequestDTO request,
 			final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("updateSubscription started ...");
