@@ -79,4 +79,17 @@ public class DefaultMetadataFilterTest {
 
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testDoFilteringMapsSameKeysDifferentValuesNotOk() {
+		
+		final Map<String, String> map0 = Map.of("a", "a1", "b", "b1", "c", "c1");
+		final Map<String, String> map1 = Map.of("a", "b1", "b", "a1", "c", "c1");
+		final MetadataFilteringParameters params = new MetadataFilteringParameters( map0, map1 );
+		
+		final boolean result = algorithm.doFiltering(params);
+		
+		assertTrue( !result );
+		
+	}
 }
