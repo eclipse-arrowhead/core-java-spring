@@ -1,6 +1,9 @@
 package eu.arrowhead.core.eventhandler.metadatafiltering;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
@@ -27,16 +30,23 @@ public class DefaultMetadataFilter implements MetadataFilteringAlgorithm {
 		final Map<String, String> metaDataFilterMap = params.getMetaDataFilterMap();
 		final Map<String, String> eventMetadata = params.getEventMetadata();
 		
-		if ( metaDataFilterMap.keySet().containsAll( eventMetadata.keySet() ) ) {
+		final Set<String> filterKeys = metaDataFilterMap.keySet();
+		final Set<String> eventKeys = eventMetadata.keySet();
+		
+		if ( filterKeys.size() != eventKeys.size() ) {
 			
-			if (metaDataFilterMap.values().containsAll( eventMetadata.values())) {
-				
-				return true;
-			}
-			
+			return false;
 		}
 		
-		return false;
+		for (final String filterKey : filterKeys) {
+			
+			if( !metaDataFilterMap.get( filterKey ).equalsIgnoreCase( eventMetadata.get( filterKey ) ) ) {
+				
+				return false;
+			}			
+		}
+		
+		return true;
 	}
 
 }
