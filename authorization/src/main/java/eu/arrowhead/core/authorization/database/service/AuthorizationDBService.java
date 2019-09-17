@@ -653,17 +653,10 @@ public class AuthorizationDBService {
 			
 			if ( eventhandlerIsPresent)  {
 				
-				try {
-					
-					final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
-					final Thread publishingThread = new Thread(publishAuthUpdateTask);
-					publishingThread.start();
-				
-				} catch (Exception ex) {
-					
-					logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
-				}	
-		
+				final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
+				final Thread publishingThread = new Thread(publishAuthUpdateTask);
+				publishingThread.start();			
+
 			}
 			
 			return savedAuthIntraEntries;
@@ -712,16 +705,10 @@ public class AuthorizationDBService {
 		
 		if ( eventhandlerIsPresent)  {
 			
-			try {
-				
-				final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
-				final Thread publishingThread = new Thread(publishAuthUpdateTask);
-				publishingThread.start();
+			final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
+			final Thread publishingThread = new Thread(publishAuthUpdateTask);
+			publishingThread.start();
 			
-			} catch (Exception ex) {
-				
-				logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
-			}
 		}
 		
 		return savedAuthIntraEntries;
