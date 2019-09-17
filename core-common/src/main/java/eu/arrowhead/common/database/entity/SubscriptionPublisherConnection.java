@@ -71,7 +71,7 @@ public class SubscriptionPublisherConnection {
 	public long getId() { return id; }
 	public Subscription getSubscriptionEntry() { return subscriptionEntry; }
 	public System getSystem() { return system; }
-	public boolean isAuhtorized() { return authorized; }
+	public boolean isAuthorized() { return authorized; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 

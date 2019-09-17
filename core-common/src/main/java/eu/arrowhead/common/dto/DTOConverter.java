@@ -648,7 +648,7 @@ public class DTOConverter {
 		
 		for (final SubscriptionPublisherConnection conn : connections) {
 			
-			if (conn.isAuhtorized()) {
+			if (conn.isAuthorized()) {
 				result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
 			}
 						
