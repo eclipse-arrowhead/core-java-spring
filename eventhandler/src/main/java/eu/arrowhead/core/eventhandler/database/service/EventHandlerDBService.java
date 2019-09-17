@@ -452,7 +452,7 @@ public class EventHandlerDBService {
 		
 		try {
 			
-			final String validEventTypeName = eventType.toUpperCase().trim();//TODO create normalizer in Utilities
+			final String validEventTypeName = eventType.toUpperCase().trim();
 			final Optional<EventType> eventTypeOptional = eventTypeRepository.findByEventTypeName( validEventTypeName );
 			if ( eventTypeOptional.isEmpty() ) {
 				
