@@ -52,6 +52,8 @@ public class AuthorizationDriver {
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	
+	private SystemRequestDTO systemRequestDTO;
+	
 	//=================================================================================================
 	// methods
 	
@@ -59,6 +61,11 @@ public class AuthorizationDriver {
 	@SuppressWarnings("rawtypes")
 	public void publishAuthUpdate(final long updatedConsumerSystemId) {
 		logger.debug("publishAuthUpdate started...");
+		
+		if ( systemRequestDTO == null ) {
+			
+			initializeSystemRequestDTO();
+		}
 		
 		Assert.isTrue(updatedConsumerSystemId > 0, "ConsumerSystemId could not be less than one.");
 		
@@ -69,19 +76,6 @@ public class AuthorizationDriver {
 		eventPublishRequestDTO.setPayload( String.valueOf( updatedConsumerSystemId ) );
 		eventPublishRequestDTO.setTimeStamp( Utilities.convertZonedDateTimeToUTCString( timeStamp ) );
 		
-		
-		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
-		systemRequestDTO.setAddress( address );
-		systemRequestDTO.setPort( port );
-		systemRequestDTO.setSystemName( systemName );
-		
-		if ( sslEnabled ) {
-			
-			final PublicKey publicKey = (PublicKey) arrowheadContext.get( CommonConstants.SERVER_PUBLIC_KEY );
-			final String authInfo = Base64.getEncoder().encodeToString(publicKey.getEncoded());
-			
-			systemRequestDTO.setAuthenticationInfo( authInfo );
-		}
 		
 		eventPublishRequestDTO.setSource( systemRequestDTO );
 		
@@ -112,6 +106,24 @@ public class AuthorizationDriver {
 	//=================================================================================================
 	// assistant methods
 	
+	//-------------------------------------------------------------------------------------------------
+	private void initializeSystemRequestDTO() {
+		logger.debug("initializeSystemRequestDTO started...");
+		
+		systemRequestDTO.setAddress( address );
+		systemRequestDTO.setPort( port );
+		systemRequestDTO.setSystemName( systemName );
+		
+		if ( sslEnabled ) {
+			
+			final PublicKey publicKey = (PublicKey) arrowheadContext.get( CommonConstants.SERVER_PUBLIC_KEY );
+			final String authInfo = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+			
+			systemRequestDTO.setAuthenticationInfo( authInfo );
+		}
+		
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getEventHandlerAuthUpdateUri() {
 		logger.debug("getGatekeeperGSDUri started...");
