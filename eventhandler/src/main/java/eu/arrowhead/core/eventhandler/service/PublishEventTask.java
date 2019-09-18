@@ -10,9 +10,6 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.DTOConverter;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 
 public class PublishEventTask implements Runnable{
