@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.lmax.disruptor.util.Util;
+
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Subscription;
@@ -342,6 +344,11 @@ public class EventHandlerService {
 	private boolean callMetaDataFilter(final String filterMetaData,
 			final Map<String, String> eventMetadata) {
 		logger.debug("callMetaDataFilter started...");
+		
+		if ( Utilities.isEmpty( filterMetaData ) || eventMetadata == null || eventMetadata.isEmpty() ) {
+			
+			return false;
+		}
 		
 		final Map<String, String> metaDataFilterMap = Utilities.text2Map(filterMetaData);
 		
