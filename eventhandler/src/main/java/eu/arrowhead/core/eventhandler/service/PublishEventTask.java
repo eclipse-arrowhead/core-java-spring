@@ -68,13 +68,8 @@ public class PublishEventTask implements Runnable{
 		logger.debug("getSubscriptionUri started...");
 		
 		final String scheme = Utilities.isEmpty( subscription.getSubscriberSystem().getAuthenticationInfo() ) ? CommonConstants.HTTP : CommonConstants.HTTPS;
-		try {
-			
-			return Utilities.createURI(scheme, subscription.getSubscriberSystem().getAddress(), subscription.getSubscriberSystem().getPort(), subscription.getNotifyUri());
-		
-		} catch (final ClassCastException ex) {
-			throw new ArrowheadException("EventHandler can't find subscription URI.");
-		}
+
+		return Utilities.createURI(scheme, subscription.getSubscriberSystem().getAddress(), subscription.getSubscriberSystem().getPort(), subscription.getNotifyUri());
 		
 	}
 
