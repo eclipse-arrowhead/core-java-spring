@@ -53,11 +53,7 @@ public class PublishEventTask implements Runnable{
 			final UriComponents subscriptionUri = getSubscriptionUri( subscription );
 
 			httpService.sendRequest( subscriptionUri, HttpMethod.POST, Void.class, DTOConverter.convertEventPublishRequestDTOToEventDTO( publishRequestDTO ));			
-			
-		} catch (final InvalidParameterException | BadPayloadException ex) {	
-			
-			logger.debug("Exception:", ex.getMessage());
-			
+				
 		} catch (final Throwable ex) {			
 			
 			logger.debug("Exception:", ex.getMessage());			
