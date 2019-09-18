@@ -654,44 +654,6 @@ public class EventHandlerControllerTest {
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.Payload is null or blank."));	
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void publishNullDeliveryCompleteUriTest() throws Exception {
-
-		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setDeliveryCompleteUri( null );
-		
-		doNothing().when(eventHandlerService).publishRequest(any());
-		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void publishEmptyDeliveryCompleteUriTest() throws Exception {
-		
-		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setDeliveryCompleteUri( "   " );
-		
-		doNothing().when(eventHandlerService).publishRequest(any());
-		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
-	}
-	
 	//=================================================================================================
 	//Assistant methods
 
@@ -808,7 +770,6 @@ public class EventHandlerControllerTest {
 				"eventType", 
 				getSystemRequestDTO(), //source, 
 				null, //metaData, 
-				"deliveryCompleteUri", 
 				"payload", 
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 	}
