@@ -2,7 +2,7 @@ package eu.arrowhead.core.gatekeeper.service.matchmaking;
 
 import java.util.List;
 
-import eu.arrowhead.common.dto.internal.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 
 public interface ICNProviderMatchmakingAlgorithm {
 

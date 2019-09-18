@@ -3,6 +3,8 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.List;
 
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+
 public class AuthorizationIntraCloudCheckResponseDTO implements Serializable {
 	
 	//=================================================================================================

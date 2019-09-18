@@ -6,6 +6,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
+
 public class GSDPollResponseDTO implements Serializable, ErrorWrapperDTO {
 
 	//=================================================================================================

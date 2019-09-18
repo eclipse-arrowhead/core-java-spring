@@ -42,8 +42,8 @@ import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
-import eu.arrowhead.common.dto.internal.SystemRequestDTO;
-import eu.arrowhead.common.dto.internal.SystemResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 
 @RunWith(SpringRunner.class)

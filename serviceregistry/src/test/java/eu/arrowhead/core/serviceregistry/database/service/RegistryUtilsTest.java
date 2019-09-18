@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
-import eu.arrowhead.common.dto.internal.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 
 @RunWith(SpringRunner.class)
 public class RegistryUtilsTest {

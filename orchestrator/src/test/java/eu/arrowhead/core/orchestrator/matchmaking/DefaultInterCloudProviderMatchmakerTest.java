@@ -8,11 +8,11 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
-import eu.arrowhead.common.dto.internal.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.internal.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.internal.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.internal.SystemRequestDTO;
-import eu.arrowhead.common.dto.internal.SystemResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 @RunWith(SpringRunner.class)
 public class DefaultInterCloudProviderMatchmakerTest {

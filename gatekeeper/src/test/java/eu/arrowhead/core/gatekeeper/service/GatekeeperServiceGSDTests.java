@@ -20,19 +20,19 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.dto.internal.CloudRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.internal.ErrorMessageDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
-import eu.arrowhead.common.dto.internal.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.internal.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.internal.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.internal.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.internal.SystemResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 

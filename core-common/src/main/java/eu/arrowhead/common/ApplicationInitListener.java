@@ -32,12 +32,12 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.internal.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.internal.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.internal.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.internal.ServiceSecurityType;
-import eu.arrowhead.common.dto.internal.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;

@@ -6,6 +6,10 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.dto.shared.OrchestrationFlags;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+
 public class ICNRequestFormDTO implements Serializable {
 	
 	//=================================================================================================

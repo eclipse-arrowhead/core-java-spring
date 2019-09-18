@@ -1,6 +1,9 @@
-package eu.arrowhead.common.dto;
+package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
+
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 public class GatewayConsumerConnectionRequestDTO implements Serializable {
 

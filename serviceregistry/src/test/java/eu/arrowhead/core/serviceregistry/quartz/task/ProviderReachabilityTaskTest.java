@@ -25,7 +25,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.internal.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith (SpringRunner.class)

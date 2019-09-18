@@ -8,8 +8,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.internal.DTOUtilities;
-import eu.arrowhead.common.dto.internal.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.internal.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public class RandomIntraCloudProviderMatchmaker implements IntraCloudProviderMatchmakingAlgorithm {
 	

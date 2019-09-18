@@ -53,7 +53,7 @@
 										<include>eu/arrowhead/common/Defaults.*</include>
 										<include>eu/arrowhead/common/SSLProperties.*</include>
 										<include>eu/arrowhead/common/core/*.*</include>
-										<include>eu/arrowhead/common/dto/*.*</include>
+										<include>eu/arrowhead/common/dto/shared/*.*</include>
 										<include>eu/arrowhead/common/exception/*.*</include>
 										<include>eu/arrowhead/common/http/*.*</include>
 										<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>
@@ -88,7 +88,7 @@
 									<include>eu/arrowhead/common/Defaults.*</include>
 									<include>eu/arrowhead/common/SSLProperties.*</include>
 									<include>eu/arrowhead/common/core/*.*</include>
-									<include>eu/arrowhead/common/dto/*.*</include>
+									<include>eu/arrowhead/common/dto/shared*.*</include>
 									<include>eu/arrowhead/common/exception/*.*</include>
 									<include>eu/arrowhead/common/http/*.*</include>
 									<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>

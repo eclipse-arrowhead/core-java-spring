@@ -1,4 +1,4 @@
-package eu.arrowhead.common.dto.internal;
+package eu.arrowhead.common.dto.shared;
 
 public interface ErrorWrapperDTO {
 

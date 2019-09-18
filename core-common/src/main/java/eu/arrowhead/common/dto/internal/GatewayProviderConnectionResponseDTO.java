@@ -1,4 +1,4 @@
-package eu.arrowhead.common.dto;
+package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 

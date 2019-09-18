@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 public class TokenGenerationRequestDTO implements Serializable {
 

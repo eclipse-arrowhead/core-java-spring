@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+
 public class TokenGenerationProviderDTO implements Serializable {
 	
 	//=================================================================================================

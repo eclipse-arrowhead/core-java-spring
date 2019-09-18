@@ -7,8 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.dto.internal.DTOUtilities;
-import eu.arrowhead.common.dto.internal.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.internal.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 public class DefaultICNProviderMatchmaker implements ICNProviderMatchmakingAlgorithm {
 	

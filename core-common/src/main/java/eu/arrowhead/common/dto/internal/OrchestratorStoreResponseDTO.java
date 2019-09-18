@@ -3,6 +3,10 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.util.Map;
 
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+
 public class OrchestratorStoreResponseDTO implements Serializable {
 	
 	//=================================================================================================

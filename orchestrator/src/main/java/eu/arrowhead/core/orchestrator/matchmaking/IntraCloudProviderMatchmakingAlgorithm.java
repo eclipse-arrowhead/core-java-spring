@@ -2,7 +2,7 @@ package eu.arrowhead.core.orchestrator.matchmaking;
 
 import java.util.List;
 
-import eu.arrowhead.common.dto.internal.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public interface IntraCloudProviderMatchmakingAlgorithm {
 

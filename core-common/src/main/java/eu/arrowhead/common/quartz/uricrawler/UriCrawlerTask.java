@@ -23,10 +23,10 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.internal.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.internal.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.internal.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 

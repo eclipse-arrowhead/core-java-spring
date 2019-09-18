@@ -29,15 +29,15 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.internal.CloudRequestDTO;
-import eu.arrowhead.common.dto.internal.ErrorMessageDTO;
-import eu.arrowhead.common.dto.internal.OrchestrationFlags;
-import eu.arrowhead.common.dto.internal.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.internal.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.internal.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.internal.SystemRequestDTO;
-import eu.arrowhead.common.dto.internal.OrchestrationFlags.Flag;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.orchestrator.service.OrchestratorService;
 
