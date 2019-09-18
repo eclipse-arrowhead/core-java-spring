@@ -263,7 +263,7 @@ CREATE TABLE `subscription` (
   `filter_meta_data` text,
   `match_meta_data` int(1) NOT NULL DEFAULT 0,
   `only_predefined_publishers` int(1) NOT NULL DEFAULT 0,
-  `notify_uri` text, NOT NULL,
+  `notify_uri` text NOT NULL,
   `start_date` timestamp ,
   `end_date` timestamp ,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
