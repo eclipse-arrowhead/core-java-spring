@@ -32,7 +32,7 @@ public class EventFilterEndOfValidityCheckTaskConfig {
 	@Value(CommonConstants.$EVENT_HANDLER_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
-	private static final int SCHEDULER_DELAY = 1;
+	private static final int SCHEDULER_DELAY = 17;
 	
 	private static final String NAME_OF_TRIGGER = "Event_Filter_End_OF_Validity_Check_Task_Trigger";
 	private static final String NAME_OF_TASK = "Event_Filter_End_OF_Validity_Check_Task_Detail";	
