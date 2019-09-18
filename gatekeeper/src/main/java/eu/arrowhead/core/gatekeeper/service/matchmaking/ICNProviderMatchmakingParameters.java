@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
 
 public class ICNProviderMatchmakingParameters {
 	

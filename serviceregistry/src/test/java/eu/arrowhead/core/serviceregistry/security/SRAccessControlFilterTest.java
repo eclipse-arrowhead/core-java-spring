@@ -31,10 +31,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 /**

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.internal.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 
 @Component

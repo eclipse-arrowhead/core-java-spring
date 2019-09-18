@@ -33,12 +33,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudRequestDTO;
+import eu.arrowhead.common.dto.internal.ErrorMessageDTO;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.service.ActiveSessionListDTO;

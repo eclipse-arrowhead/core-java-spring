@@ -36,12 +36,12 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.CloudRelaysAssignmentRequestDTO;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
-import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBServiceTestContext;
 

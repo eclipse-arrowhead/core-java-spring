@@ -42,10 +42,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.ErrorWrapperDTO;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.ErrorWrapperDTO;
+import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 
 @RunWith(SpringRunner.class)

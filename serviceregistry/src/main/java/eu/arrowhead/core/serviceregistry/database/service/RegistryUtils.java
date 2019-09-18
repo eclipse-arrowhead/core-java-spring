@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
-import eu.arrowhead.common.dto.ServiceSecurityType;
+import eu.arrowhead.common.dto.internal.ServiceSecurityType;
 
 public class RegistryUtils {
 	

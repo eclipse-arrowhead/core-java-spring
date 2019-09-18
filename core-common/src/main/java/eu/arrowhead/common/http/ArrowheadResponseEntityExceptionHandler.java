@@ -12,7 +12,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.internal.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 
 @ControllerAdvice

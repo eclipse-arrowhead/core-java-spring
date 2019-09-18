@@ -36,11 +36,11 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.internal.ServiceSecurityType;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 

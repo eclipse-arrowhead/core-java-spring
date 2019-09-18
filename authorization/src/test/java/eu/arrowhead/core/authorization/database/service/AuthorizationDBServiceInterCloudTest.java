@@ -37,8 +37,8 @@ import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)

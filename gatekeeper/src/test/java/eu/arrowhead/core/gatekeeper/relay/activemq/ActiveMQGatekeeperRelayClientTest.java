@@ -41,11 +41,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
-import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.internal.ErrorMessageDTO;
+import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.DataNotFoundException;

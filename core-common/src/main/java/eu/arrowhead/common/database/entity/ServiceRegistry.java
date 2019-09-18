@@ -26,7 +26,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.ServiceSecurityType;
+import eu.arrowhead.common.dto.internal.ServiceSecurityType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"serviceId", "systemId"}))

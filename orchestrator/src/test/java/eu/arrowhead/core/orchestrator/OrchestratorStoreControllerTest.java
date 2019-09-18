@@ -31,16 +31,16 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudResponseDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreListResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreModifyPriorityRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.SystemResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
 @RunWith(SpringRunner.class)

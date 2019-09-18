@@ -10,8 +10,8 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 

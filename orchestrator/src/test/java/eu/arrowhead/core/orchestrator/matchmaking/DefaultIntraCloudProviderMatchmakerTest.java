@@ -7,10 +7,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.SystemResponseDTO;
 
 @RunWith(SpringRunner.class)
 public class DefaultIntraCloudProviderMatchmakerTest {

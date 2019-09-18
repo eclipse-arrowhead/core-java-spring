@@ -2,8 +2,8 @@ package eu.arrowhead.core.orchestrator.matchmaking;
 
 import java.util.List;
 
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.internal.CloudRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 
 public class CloudMatchmakingParameters {
 	

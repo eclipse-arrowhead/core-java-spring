@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.internal.PreferredProviderDataDTO;
 
 public class IntraCloudProviderMatchmakingParameters {
 	

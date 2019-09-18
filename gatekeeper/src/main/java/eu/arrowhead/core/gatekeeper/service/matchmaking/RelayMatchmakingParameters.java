@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 
 public class RelayMatchmakingParameters {
 

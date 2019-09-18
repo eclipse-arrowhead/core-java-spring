@@ -26,7 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 
 /**
  * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 

@@ -27,11 +27,11 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.GSDQueryFormDTO;
-import eu.arrowhead.common.dto.ICNRequestFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
+import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
 
 /**
 * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 

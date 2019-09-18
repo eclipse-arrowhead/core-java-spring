@@ -24,7 +24,7 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;

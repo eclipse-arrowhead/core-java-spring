@@ -19,9 +19,9 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.ErrorWrapperDTO;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.ErrorWrapperDTO;
+import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 
 public class GSDPollRequestExecutor {

@@ -29,15 +29,15 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.OrchestrationFlags;
-import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudRequestDTO;
+import eu.arrowhead.common.dto.internal.ErrorMessageDTO;
+import eu.arrowhead.common.dto.internal.OrchestrationFlags;
+import eu.arrowhead.common.dto.internal.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.internal.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestrationFlags.Flag;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.orchestrator.service.OrchestratorService;
 

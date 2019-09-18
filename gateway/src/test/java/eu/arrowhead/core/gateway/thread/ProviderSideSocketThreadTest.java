@@ -51,11 +51,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayType;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.internal.SystemRequestDTO;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)

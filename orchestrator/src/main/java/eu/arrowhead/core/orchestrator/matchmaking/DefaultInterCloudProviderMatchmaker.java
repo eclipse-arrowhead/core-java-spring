@@ -6,11 +6,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.DTOUtilities;
-import eu.arrowhead.common.dto.ICNResultDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.internal.DTOUtilities;
+import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.internal.PreferredProviderDataDTO;
 
 public class DefaultInterCloudProviderMatchmaker implements InterCloudProviderMatchmakingAlgorithm {
 
