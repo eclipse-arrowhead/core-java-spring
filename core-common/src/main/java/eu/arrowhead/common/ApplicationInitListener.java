@@ -200,7 +200,7 @@ public abstract class ApplicationInitListener {
 		
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-		standaloneMode = context.containsKey(CommonConstants.SERVER_STANDALONE_MODE);
+		standaloneMode = context.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
 		
 		final CoreSystem coreSystem = coreSystemRegistrationProperties.getCoreSystem();
 		if (skipSROperations(coreSystem)) {
@@ -252,7 +252,7 @@ public abstract class ApplicationInitListener {
 					throw ex;
 				} else {
 					logger.info("Service Registry is unavailable at the moment, retrying in {} seconds...", period);
-					Thread.sleep(period * CommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
+					Thread.sleep(period * CoreCommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
 				}
 			}
 		}
@@ -332,9 +332,9 @@ public abstract class ApplicationInitListener {
 		
 		final String scheme = sslProperties.isSslEnabled() ? CommonConstants.HTTPS : CommonConstants.HTTP;
 		final UriComponents queryUri = createQueryUri(scheme);
-		context.put(CommonConstants.SR_QUERY_URI, queryUri);
+		context.put(CoreCommonConstants.SR_QUERY_URI, queryUri);
 		
-		context.put(CommonConstants.REQUIRED_URI_LIST, getRequiredCoreSystemServiceUris());
+		context.put(CoreCommonConstants.REQUIRED_URI_LIST, getRequiredCoreSystemServiceUris());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

@@ -38,7 +38,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -590,7 +590,7 @@ public class ServiceRegistryControllerSystemTest {
 		
 		final String systemName = MOCKED_SYSTEM_NAME;
 		final String address = MOCKED_SYSTEM_ADDRESS;
-		final Integer port = CommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
+		final Integer port = CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
 		final String authenticationInfo = MOCKED_SYSTEM_AUTHENTICATION_INFO;
 		
 		systemRequestDTO.setSystemName(systemName);
@@ -607,7 +607,7 @@ public class ServiceRegistryControllerSystemTest {
 		
 		final String systemName = MOCKED_SYSTEM_NAME;
 		final String address = MOCKED_SYSTEM_ADDRESS;
-		final Integer port = CommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
+		final Integer port = CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
 		final String authenticationInfo = MOCKED_SYSTEM_AUTHENTICATION_INFO;
 		
 		systemRequestDTO.setSystemName(systemName);

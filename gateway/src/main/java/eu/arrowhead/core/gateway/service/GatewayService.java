@@ -24,6 +24,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
@@ -49,16 +50,16 @@ public class GatewayService {
 	//=================================================================================================
 	// members
 	
-	@Value(CommonConstants.$GATEWAY_SOCKET_TIMEOUT_WD)
+	@Value(CoreCommonConstants.$GATEWAY_SOCKET_TIMEOUT_WD)
 	private int gatewaySocketTimeout;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Resource(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
+	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	private ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	
-	@Resource(name = CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
+	@Resource(name = CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
 	private ConcurrentLinkedQueue<Integer> availablePorts;
 	
 	@Autowired
@@ -289,8 +290,8 @@ public class GatewayService {
 		}
 		
 		final int validatedPort = relay.getPort().intValue();
-		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 		
 		if (Utilities.isEmpty(relay.getType())) {
@@ -324,8 +325,8 @@ public class GatewayService {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}
 	

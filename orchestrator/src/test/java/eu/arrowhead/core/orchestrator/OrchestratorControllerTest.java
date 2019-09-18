@@ -28,7 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
@@ -49,7 +49,7 @@ public class OrchestratorControllerTest {
 	//=================================================================================================
 	// members
 	
-	private static final String ORCHESTRATION_PROCESS_URI = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS; 
+	private static final String ORCHESTRATION_PROCESS_URI = CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.OP_ORCH_PROCESS; 
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -218,7 +218,7 @@ public class OrchestratorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ public class OrchestratorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -521,7 +521,7 @@ public class OrchestratorControllerTest {
 		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/1")
+		this.mockMvc.perform(get(CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.OP_ORCH_PROCESS + "/1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -532,14 +532,14 @@ public class OrchestratorControllerTest {
 		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
-		final MvcResult result = this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/-1")
+		final MvcResult result = this.mockMvc.perform(get(CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.OP_ORCH_PROCESS + "/-1")
 											 .accept(MediaType.APPLICATION_JSON))
 											 .andExpect(status().isBadRequest())
 											 .andReturn();
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/{" + CommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.OP_ORCH_PROCESS + "/{" + CoreCommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
 		Assert.assertEquals("Consumer system :  Id must be greater than 0. ", error.getErrorMessage());
 	}
 	

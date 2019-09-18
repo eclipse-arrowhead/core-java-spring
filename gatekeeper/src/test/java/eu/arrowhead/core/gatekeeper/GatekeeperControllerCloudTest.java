@@ -31,7 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
@@ -53,7 +53,7 @@ public class GatekeeperControllerCloudTest {
 	//=================================================================================================
 	// members
 	
-	private static final String CLOUDS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.MGMT_URI + "/clouds";
+	private static final String CLOUDS_MGMT_URI = CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/clouds";
 	
 	@Autowired
 	private WebApplicationContext wac;

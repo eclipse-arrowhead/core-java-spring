@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
@@ -75,16 +75,16 @@ public class OrchestratorService {
 	@Autowired
 	private OrchestratorStoreDBService orchestratorStoreDBService;
 	
-	@Resource(name = CommonConstants.INTRA_CLOUD_PROVIDER_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.INTRA_CLOUD_PROVIDER_MATCHMAKER)
 	private IntraCloudProviderMatchmakingAlgorithm intraCloudProviderMatchmaker;
 	
-	@Resource(name = CommonConstants.INTER_CLOUD_PROVIDER_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.INTER_CLOUD_PROVIDER_MATCHMAKER)
 	private InterCloudProviderMatchmakingAlgorithm interCloudProviderMatchmaker;
 	
-	@Resource(name = CommonConstants.CLOUD_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.CLOUD_MATCHMAKER)
 	private CloudMatchmakingAlgorithm cloudMatchmaker;
 	
-	@Value(CommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
+	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
 	
 	//=================================================================================================
@@ -354,8 +354,8 @@ public class OrchestratorService {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (portRangeCheck && (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
-			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (portRangeCheck && (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX)) {
+			throw new InvalidParameterException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}
 

@@ -12,7 +12,7 @@ import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
@@ -26,10 +26,10 @@ public class ProvidersReachabilityTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value(CommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
+	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_SCHEDULED_WD)
 	private boolean pingScheduled;
 	
-	@Value(CommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
+	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_INTERVAL_WD)
 	private int pingInterval;
 	
 	private static final int SCHEDULER_DELAY = 10;
@@ -65,7 +65,7 @@ public class ProvidersReachabilityTaskConfig {
     public SimpleTriggerFactoryBean providersReachabilityTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(providersReachabilityTaskDetail().getObject());
-        trigger.setRepeatInterval(pingInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
+        trigger.setRepeatInterval(pingInterval * CoreCommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
         

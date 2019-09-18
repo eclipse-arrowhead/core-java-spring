@@ -21,7 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
@@ -54,7 +54,7 @@ public class ProviderReachabilityTaskTest {
 		sreviceRegistryEntries.add(new ServiceRegistry(serviceDefinition, testSystem, "testUri", ZonedDateTime.now(), ServiceSecurityType.TOKEN, "", 1));
 			
 		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(sreviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceRegistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
+		when(serviceRegistryDBService.getServiceRegistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CoreCommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
 		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
 	

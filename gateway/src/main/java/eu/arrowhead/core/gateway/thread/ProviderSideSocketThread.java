@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
@@ -76,7 +76,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		this.connectionRequest = connectionRequest;
 		this.timeout = timeout;
 		this.consumerGatewayPublicKey = Utilities.getPublicKeyFromBase64EncodedString(this.connectionRequest.getConsumerGWPublicKey());
-		this.activeSessions = appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
+		this.activeSessions = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
 		this.sslProperties = appContext.getBean(SSLProperties.class);
 		
 		setName(connectionRequest.getProvider().getSystemName() + "." + connectionRequest.getServiceDefinition());
@@ -196,7 +196,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		Assert.isTrue(!Utilities.isEmpty(connectionRequest.getProvider().getAddress()), "provider address is null or blank.");
 		Assert.notNull(connectionRequest.getProvider().getPort(), "provider port is null.");
 		final int port = connectionRequest.getProvider().getPort().intValue();
-		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "provider port is invalid.");
+		Assert.isTrue(port > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && port < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "provider port is invalid.");
 		Assert.isTrue(!Utilities.isEmpty(connectionRequest.getProvider().getAuthenticationInfo()), "provider authentication info is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(connectionRequest.getServiceDefinition()), "Service definition is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(connectionRequest.getConsumerGWPublicKey()), "Consumer gateway public key is null or blank.");

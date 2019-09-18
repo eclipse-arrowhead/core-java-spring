@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
@@ -214,8 +215,8 @@ public class OrchestratorDriverTest {
 	@Test
 	public void testQueryServiceRegistryBySystemIdOk() {
 		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	 CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
-		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(Map.of(CommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(1)));
+																	 CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(Map.of(CoreCommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(1)));
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
 		
@@ -255,7 +256,7 @@ public class OrchestratorDriverTest {
 	@Test
 	public void testQueryServiceRegistryBySystemRequestDTOOk() {
 		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	  CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+																	  CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
 		final SystemRequestDTO requestDTO = new SystemRequestDTO();
@@ -300,7 +301,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testDoGlobalServiceDiscoveryOk() {
-		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.OP_GATEKEEPER_GSD_SERVICE);
 		
 		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
 		final GSDQueryFormDTO requestDTO = new GSDQueryFormDTO();
@@ -345,7 +346,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testDoInterCloudNegotiationsOk() {
-		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.OP_GATEKEEPER_ICN_SERVICE);
 		
 		final ICNResultDTO responseDTO = new ICNResultDTO();
 		final ICNRequestFormDTO requestDTO = new ICNRequestFormDTO();

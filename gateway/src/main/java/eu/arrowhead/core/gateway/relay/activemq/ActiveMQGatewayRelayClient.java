@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.AuthException;
@@ -68,7 +68,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		logger.debug("createConnection started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
-		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
+		Assert.isTrue(port > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && port < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
 		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
 		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
@@ -225,7 +225,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		if (msg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) msg;
 			final DecryptedMessageDTO decryptedMessage = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
-			if (!CommonConstants.RELAY_MESSAGE_TYPE_RAW.equals(decryptedMessage.getMessageType())) {
+			if (!CoreCommonConstants.RELAY_MESSAGE_TYPE_RAW.equals(decryptedMessage.getMessageType())) {
 				throw new AuthException("Unauthorized message on queue.");
 			}
 			

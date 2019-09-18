@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
@@ -51,10 +52,10 @@ public class OrchestratorDriver {
 	//=================================================================================================
 	// members
 	
-	private static final String AUTH_TOKEN_GENERATION_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String AUTH_TOKEN_GENERATION_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorDriver.class);
 	
@@ -64,7 +65,7 @@ public class OrchestratorDriver {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Value(CommonConstants.$AUTH_TOKEN_TTL_IN_MINUTES_WD)
+	@Value(CoreCommonConstants.$AUTH_TOKEN_TTL_IN_MINUTES_WD)
 	private int tokenDuration;
 	
 	//=================================================================================================
@@ -93,7 +94,7 @@ public class OrchestratorDriver {
 		logger.debug("queryByIdServiceRegistry started...");
 		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less than 1.");
 		
-		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri().expand(Map.of(CommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(consumerSystemId)));
+		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri().expand(Map.of(CoreCommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(consumerSystemId)));
 		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemIdUri, HttpMethod.GET, SystemResponseDTO.class);
 		
 		return response.getBody();
@@ -184,9 +185,9 @@ public class OrchestratorDriver {
 	private UriComponents getQueryUri() {
 		logger.debug("getQueryUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_URI)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_URI);
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_URI);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find Service Registry Query URI.");
 			}
@@ -199,9 +200,9 @@ public class OrchestratorDriver {
 	private UriComponents getQueryBySystemIdUri() {
 		logger.debug("getQueryByIdUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_BY_SYSTEM_ID_URI)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_BY_SYSTEM_ID_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_BY_SYSTEM_ID_URI);
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_BY_SYSTEM_ID_URI);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find Service Registry Query By Id URI.");
 			}
@@ -214,9 +215,9 @@ public class OrchestratorDriver {
 	private UriComponents getQueryBySystemDTOUri() {
 		logger.debug("getQueryBySystemDTOUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI);
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find Service Registry Query By DTO URI.");
 			}

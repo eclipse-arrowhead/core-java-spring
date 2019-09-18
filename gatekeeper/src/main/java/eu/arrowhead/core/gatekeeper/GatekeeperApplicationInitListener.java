@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
@@ -35,10 +36,10 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
 	
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
 	private boolean gatewayIsPresent;
 		
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
 	private boolean gatewayIsMandatory;
 	
 	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
@@ -49,19 +50,19 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.GATEKEEPER_MATCHMAKER)
+	@Bean(CoreCommonConstants.GATEKEEPER_MATCHMAKER)
 	public RelayMatchmakingAlgorithm getGatekeeperRelayMatchmakingAlgorithm() {
 		return new GetRandomAndDedicatedIfAnyGatekeeperMatchmaker();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.GATEWAY_MATCHMAKER)
+	@Bean(CoreCommonConstants.GATEWAY_MATCHMAKER)
 	public RelayMatchmakingAlgorithm getGatewayRelayMatchmakingAlgorithm() {
 		return new GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.ICN_PROVIDER_MATCHMAKER)
+	@Bean(CoreCommonConstants.ICN_PROVIDER_MATCHMAKER)
 	public ICNProviderMatchmakingAlgorithm getICNProviderMatchmaker() {
 		return new RandomICNProviderMatchmaker();
 	}

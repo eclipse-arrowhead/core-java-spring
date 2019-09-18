@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
@@ -58,7 +59,7 @@ public class UriCrawlerTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {  
 		logger.debug("STARTED: URI crawler task");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SERVER_STANDALONE_MODE)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
 			cancelJob();
 			return;
 		}
@@ -106,9 +107,9 @@ public class UriCrawlerTask implements Job {
 	private List<CoreSystemService> getRequiredServices() throws JobExecutionException {
 		logger.debug("getRequiredServices started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.REQUIRED_URI_LIST)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.REQUIRED_URI_LIST)) {
 			try {
-				return (List<CoreSystemService>) arrowheadContext.get(CommonConstants.REQUIRED_URI_LIST);
+				return (List<CoreSystemService>) arrowheadContext.get(CoreCommonConstants.REQUIRED_URI_LIST);
 			} catch (final ClassCastException ex) {
 				throw new JobExecutionException("URI crawler task can't find required services list.");
 			}
@@ -121,9 +122,9 @@ public class UriCrawlerTask implements Job {
 	private UriComponents getQueryUri() throws JobExecutionException {
 		logger.debug("getQueryUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_URI)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_URI);
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_URI);
 			} catch (final ClassCastException ex) {
 				throw new JobExecutionException("URI crawler task can't find Service Registry Query URI.");
 			}
@@ -157,7 +158,7 @@ public class UriCrawlerTask implements Job {
 	private boolean findCoreSystemServiceUri(final CoreSystemService coreSystemService, final UriComponents queryUri) {
 		logger.debug("findCoreSystemServiceUri started...");
 		
-		final String key = coreSystemService.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		if (isAlreadyFound(key)) {
 			return true;
 		}

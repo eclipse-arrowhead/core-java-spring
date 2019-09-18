@@ -28,6 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -44,9 +45,9 @@ public class OrchestratorAccessControlFilterTest {
 	//=================================================================================================
 	// members
 	
-	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_MGMT_STORE_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS;
+	private static final String ORCH_ECHO = CoreCommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
+	private static final String ORCH_MGMT_STORE_ECHO = CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
+	private static final String ORCH_ORCHESTRATION = CoreCommonConstants.ORCHESTRATOR_URI +CoreCommonConstants.OP_ORCH_PROCESS;
 	
 	@Autowired
 	private ApplicationContext appContext;

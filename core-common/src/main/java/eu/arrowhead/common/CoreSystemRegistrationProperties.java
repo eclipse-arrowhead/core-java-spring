@@ -19,7 +19,7 @@ public class CoreSystemRegistrationProperties {
 	
 	private final Logger logger = LogManager.getLogger(CoreSystemRegistrationProperties.class);
 
-	@Value(CommonConstants.$CORE_SYSTEM_NAME)
+	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
 	private String coreSystemName;
 	
 	private CoreSystem coreSystem;
@@ -30,10 +30,10 @@ public class CoreSystemRegistrationProperties {
 	@Value(CommonConstants.$SERVICE_REGISTRY_PORT_WD)
 	private int serviceRegistryPort;
 
-	@Value(CommonConstants.$SERVER_ADDRESS)
+	@Value(CoreCommonConstants.$SERVER_ADDRESS)
 	private String coreSystemAddress;
 	
-	@Value(CommonConstants.$SERVER_PORT)
+	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int coreSystemPort;
 
 	//=================================================================================================
@@ -63,7 +63,7 @@ public class CoreSystemRegistrationProperties {
 	
 	//-------------------------------------------------------------------------------------------------
 	public String getCoreSystemAddress() { 
-		return Utilities.isEmpty(coreSystemAddress) ? CommonConstants.LOCALHOST : coreSystemAddress;
+		return Utilities.isEmpty(coreSystemAddress) ? CoreCommonConstants.LOCALHOST : coreSystemAddress;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

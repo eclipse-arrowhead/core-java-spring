@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -65,10 +65,10 @@ public class GatekeeperService {
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperService.class);
 	
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
 	private boolean gatewayIsPresent;
 		
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
 	private boolean gatewayIsMandatory;
 	
 	@Autowired
@@ -80,10 +80,10 @@ public class GatekeeperService {
 	@Autowired
 	private GatekeeperDriver gatekeeperDriver;
 	
-	@Resource(name = CommonConstants.ICN_PROVIDER_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.ICN_PROVIDER_MATCHMAKER)
 	private ICNProviderMatchmakingAlgorithm icnProviderMatchmaker;
 	
-	@Resource(name = CommonConstants.GATEWAY_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.GATEWAY_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatewayMatchmaker;
 
 	//=================================================================================================
@@ -445,8 +445,8 @@ public class GatekeeperService {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}
 	
@@ -484,8 +484,8 @@ public class GatekeeperService {
 		}
 		
 		final int validatedPort = relay.getPort().intValue();
-		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 		
 		if (Utilities.isEmpty(relay.getType())) {

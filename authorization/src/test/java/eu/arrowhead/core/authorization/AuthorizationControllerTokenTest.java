@@ -34,6 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -51,8 +52,8 @@ public class AuthorizationControllerTokenTest {
 	//=================================================================================================
 	// members
 	
-	private static final String AUTH_TOKEN_GENERATION_URI = CommonConstants.AUTHORIZATION_URI + "/token";
-	private static final String AUTH_PUBLIC_KEY_URI = CommonConstants.AUTHORIZATION_URI + "/publickey";
+	private static final String AUTH_TOKEN_GENERATION_URI = CoreCommonConstants.AUTHORIZATION_URI + "/token";
+	private static final String AUTH_PUBLIC_KEY_URI = CoreCommonConstants.AUTHORIZATION_URI + "/publickey";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -167,7 +168,7 @@ public class AuthorizationControllerTokenTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -180,7 +181,7 @@ public class AuthorizationControllerTokenTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -336,7 +337,7 @@ public class AuthorizationControllerTokenTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -349,7 +350,7 @@ public class AuthorizationControllerTokenTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(AUTH_TOKEN_GENERATION_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

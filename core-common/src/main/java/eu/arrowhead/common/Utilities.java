@@ -242,8 +242,8 @@ public class Utilities {
 	public static UriComponents createURI(final String scheme, final String host, final int port, final MultiValueMap<String, String> queryParams, final String path, final String... pathSegments) {
 		final UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		builder.scheme(scheme == null ? CommonConstants.HTTP : scheme)
-			   .host(host == null ? CommonConstants.LOCALHOST : host)
-			   .port(port <= 0 ? CommonConstants.HTTP_PORT : port);
+			   .host(host == null ? CoreCommonConstants.LOCALHOST : host)
+			   .port(port <= 0 ? CoreCommonConstants.HTTP_PORT : port);
 		
 		if (queryParams != null) {
 			builder.queryParams(queryParams);
@@ -342,7 +342,7 @@ public class Utilities {
 	    	final LdapName ldapname = new LdapName(subjectName);
 	    	for (final Rdn rdn : ldapname.getRdns()) {
 	    		// Find the data after the CN field
-	    		if (CommonConstants.COMMON_NAME_FIELD_NAME.equalsIgnoreCase(rdn.getType())) {
+	    		if (CoreCommonConstants.COMMON_NAME_FIELD_NAME.equalsIgnoreCase(rdn.getType())) {
 	    			return (String) rdn.getValue();
 	    		}
 	    	}

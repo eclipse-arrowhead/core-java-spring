@@ -26,7 +26,7 @@ import org.springframework.web.util.UriComponents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
@@ -89,7 +89,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		logger.debug("createConnection started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
-		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
+		Assert.isTrue(port > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && port < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
 		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
 		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
@@ -184,7 +184,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			final Queue responseQueue = session.createQueue(RESPONSE_QUEUE_PREFIX + serverCommonName + "-" + gaMsg.getSessionId());
 			messageProducer = session.createProducer(responseQueue);
 			
-			final String encodedMessage = cryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_ACK, gaMsg.getSessionId(), null, peerPublicKey); // no payload
+			final String encodedMessage = cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_ACK, gaMsg.getSessionId(), null, peerPublicKey); // no payload
 			final TextMessage ackMsg = session.createTextMessage(encodedMessage);
 			messageProducer.send(ackMsg);
 			
@@ -397,9 +397,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		logger.debug("getMessageDTOClass started...");
 		
 		switch (messageType) {
-		case CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 			return request ? GSDPollRequestDTO.class : GSDPollResponseDTO.class;
-		case CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 			return request ? ICNProposalRequestDTO.class : ICNProposalResponseDTO.class;
 		default:
 			throw new ArrowheadException("Invalid message type: " + messageType);
@@ -411,11 +411,11 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		logger.debug("getMessageType started...");
 		
 		if (requestPayload instanceof GSDPollRequestDTO) {
-			return CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL;
+			return CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL;
 		}
 		
 		if (requestPayload instanceof ICNProposalRequestDTO) {
-			return CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL;
+			return CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL;
 		}
 		
 		throw new ArrowheadException("Invalid message DTO: " + requestPayload.getClass().getSimpleName());
@@ -435,7 +435,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private void validateRequest(final String sessionId, final DecryptedMessageDTO msg) {
 		logger.debug("validateRequest started...");
 		
-		if (!CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL.equalsIgnoreCase(msg.getMessageType()) && !CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL.equalsIgnoreCase(msg.getMessageType())) {
+		if (!CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL.equalsIgnoreCase(msg.getMessageType()) && !CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL.equalsIgnoreCase(msg.getMessageType())) {
 			throw new AuthException("Unauthorized message on queue.");
 		}
 		
@@ -446,7 +446,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private void validateAcknowledgement(final String sessionId, final DecryptedMessageDTO msg) {
 		logger.debug("validateAcknowledgement started...");
 
-		validateResponse(sessionId, CommonConstants.RELAY_MESSAGE_TYPE_ACK, msg);
+		validateResponse(sessionId, CoreCommonConstants.RELAY_MESSAGE_TYPE_ACK, msg);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

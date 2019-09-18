@@ -3,7 +3,7 @@ package eu.arrowhead.common.swagger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 
 @Controller
 public class DefaultSwaggerController {
@@ -17,6 +17,6 @@ public class DefaultSwaggerController {
 	 */
 	@GetMapping(path = "/")
 	public String redirectDefaultSwaggerUI() {
-		return "redirect:" + CommonConstants.SWAGGER_UI_URI;
+		return "redirect:" + CoreCommonConstants.SWAGGER_UI_URI;
 	}
 }

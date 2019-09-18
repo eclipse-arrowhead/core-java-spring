@@ -27,6 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -46,10 +47,10 @@ public class GatekeeperAccessControlFilterTest {
 	//=================================================================================================
 	// members
 	
-	private static final String GATEKEEPER_ECHO_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.ECHO_URI;
-	private static final String GATEKEEPER_MGMT_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.MGMT_URI + "/clouds";
-	private static final String GATEKEEPER_INIT_GSD_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE;
-	private static final String GATEKEEPER_INIT_ICN_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE;
+	private static final String GATEKEEPER_ECHO_URI = CoreCommonConstants.GATEKEEPER_URI + CommonConstants.ECHO_URI;
+	private static final String GATEKEEPER_MGMT_CLOUDS_URI = CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/clouds";
+	private static final String GATEKEEPER_INIT_GSD_URI = CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.OP_GATEKEEPER_GSD_SERVICE;
+	private static final String GATEKEEPER_INIT_ICN_URI = CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.OP_GATEKEEPER_ICN_SERVICE;
 	
 	@Autowired
 	private ApplicationContext appContext;

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 
 @Component
@@ -32,7 +33,7 @@ public class ServiceInterfaceNameVerifier {
 	
 	private final Logger logger = LogManager.getLogger(ServiceInterfaceNameVerifier.class);
 	
-	@Value(CommonConstants.$USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD)
+	@Value(CoreCommonConstants.$USE_STRICT_SERVICE_INTF_NAME_VERIFIER_WD)
 	private boolean strictMode;
 	
 	//=================================================================================================

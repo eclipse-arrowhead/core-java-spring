@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -298,7 +298,7 @@ public class ActiveMQGatewayRelayClientTest {
 	@Test(expected = AuthException.class)
 	public void testGetBytesFromMessageInvalidMessageType() throws JMSException {
 		final RelayCryptographer cryptographer = new RelayCryptographer(otherPrivateKey);
-		final String encoded = cryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_ACK, "abc", null, myPublicKey);
+		final String encoded = cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_ACK, "abc", null, myPublicKey);
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText(encoded);
 		

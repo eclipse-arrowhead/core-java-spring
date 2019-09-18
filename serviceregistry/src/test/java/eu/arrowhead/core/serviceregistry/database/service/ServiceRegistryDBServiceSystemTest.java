@@ -19,7 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -63,7 +63,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int validatedPage = 1;
 		final int validatedSize = 1;
 		final Direction validatedDirection = Direction.ASC;
-		final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		final String validatedSortField = CoreCommonConstants.COMMON_FIELD_NAME_ID;
 		
 		final String nullSortField = null;
 		
@@ -92,7 +92,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int validatedPage = 1;
 		final int validatedSize = 1;
 		final Direction validatedDirection = Direction.ASC;
-		final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		final String validatedSortField = CoreCommonConstants.COMMON_FIELD_NAME_ID;
 		
 		final String invalidSortField = "";
 		
@@ -196,7 +196,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void updateSystemByIdBelowValidPortTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
@@ -208,7 +208,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void updateSystemByIdAboveValidPortTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
@@ -220,7 +220,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void updateSystemByIdNullSystemNameTest() {
 		final String systemName0 = null;
 		final String address0 = "testAddress0";
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
@@ -244,7 +244,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void updateSystemByIdNullAddressTest() {
 		final String systemName0 = "testSystem0";
 		final String address0 = null;
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
@@ -280,7 +280,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void mergeSystemByIdBelowValidPortTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
@@ -292,7 +292,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void mergeSystemByIdAboveValidPortTest() {
 		final String systemName0 = "testSystemName0";
 		final String address0 = "testAddress0";
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
@@ -325,7 +325,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void mergeSystemByIdNullSystemNameTest() {
 		final String systemName0 = null;
 		final String address0 = "testAddress0";
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		
@@ -367,7 +367,7 @@ public class ServiceRegistryDBServiceSystemTest {
 	public void mergeSystemByIdNullAddressTest() {
 		final String systemName0 = "testSystem0";
 		final String address0 = null;
-		final int port0 = CommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
+		final int port0 = CoreCommonConstants.SYSTEM_PORT_RANGE_MAX - 1;
 		final long testId0 = 1;
 		final String authenticationInfo0 = null;
 		

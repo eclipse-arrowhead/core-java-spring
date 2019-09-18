@@ -3,7 +3,7 @@ package eu.arrowhead.core.serviceregistry.swagger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.swagger.DefaultSwaggerConfig;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -17,7 +17,7 @@ public class SRSwaggerConfig extends DefaultSwaggerConfig {
 	
 	//-------------------------------------------------------------------------------------------------
 	public SRSwaggerConfig() {
-		super(CommonConstants.CORE_SYSTEM_SERVICE_REGISTRY);
+		super(CoreCommonConstants.CORE_SYSTEM_SERVICE_REGISTRY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

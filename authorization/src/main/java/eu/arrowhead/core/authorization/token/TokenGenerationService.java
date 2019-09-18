@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
@@ -263,7 +264,7 @@ public class TokenGenerationService {
 		
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 		jws.setKey(privateKey);
-		jws.setAlgorithmHeaderValue(CommonConstants.JWS_SIGN_ALG);
+		jws.setAlgorithmHeaderValue(CoreCommonConstants.JWS_SIGN_ALG);
 		
 		return jws.getCompactSerialization();
 	}
@@ -272,15 +273,15 @@ public class TokenGenerationService {
 	private JwtClaims generateTokenPayload(final String consumerInfo, final String service, final String intf, final Integer duration) {
 		final JwtClaims claims = new JwtClaims();
 		claims.setGeneratedJwtId();
-		claims.setIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION);
+		claims.setIssuer(CoreCommonConstants.CORE_SYSTEM_AUTHORIZATION);
 		claims.setIssuedAtToNow();
 		claims.setNotBeforeMinutesInThePast(1);
 		if (duration != null) {
 			claims.setExpirationTimeMinutesInTheFuture(duration.floatValue());
 		}
-		claims.setStringClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
-		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());
-		claims.setStringClaim(CommonConstants.JWT_CLAIM_INTERFACE_ID, intf);
+		claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
+		claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());
+		claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_INTERFACE_ID, intf);
 
 		return claims;
 	}
@@ -288,8 +289,8 @@ public class TokenGenerationService {
 	//-------------------------------------------------------------------------------------------------
 	private String encryptSignedJWT(final String signedJWT, final PublicKey providerKey) throws JoseException {
 		final JsonWebEncryption jwe = new JsonWebEncryption();
-		jwe.setAlgorithmHeaderValue(CommonConstants.JWE_KEY_MANAGEMENT_ALG);
-		jwe.setEncryptionMethodHeaderParameter(CommonConstants.JWE_ENCRYPTION_ALG);
+		jwe.setAlgorithmHeaderValue(CoreCommonConstants.JWE_KEY_MANAGEMENT_ALG);
+		jwe.setEncryptionMethodHeaderParameter(CoreCommonConstants.JWE_ENCRYPTION_ALG);
 		jwe.setKey(providerKey);
 		jwe.setContentTypeHeaderValue(JWT_CONTENT_TYPE);
 		jwe.setPayload(signedJWT);

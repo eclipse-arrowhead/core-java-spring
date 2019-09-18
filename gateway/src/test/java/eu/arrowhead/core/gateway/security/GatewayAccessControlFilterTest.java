@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -44,10 +45,10 @@ public class GatewayAccessControlFilterTest {
 	//=================================================================================================
 	// members
 	
-	private static final String GATEWAY_ECHO_URI = CommonConstants.GATEWAY_URI + CommonConstants.ECHO_URI;
-	private static final String GATEWAY_ACTIVE_SESSIONS_MGMT_URI = CommonConstants.GATEWAY_URI + CommonConstants.MGMT_URI + "/sessions";
-	private static final String GATEWAY_CONNECT_PROVIDER_URI = CommonConstants.GATEWAY_URI + "/connect_provider";
-	private static final String GATEWAY_CONNECT_CONSUMER_URI = CommonConstants.GATEWAY_URI + "/connect_consumer";
+	private static final String GATEWAY_ECHO_URI = CoreCommonConstants.GATEWAY_URI + CommonConstants.ECHO_URI;
+	private static final String GATEWAY_ACTIVE_SESSIONS_MGMT_URI = CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.MGMT_URI + "/sessions";
+	private static final String GATEWAY_CONNECT_PROVIDER_URI = CoreCommonConstants.GATEWAY_URI + "/connect_provider";
+	private static final String GATEWAY_CONNECT_CONSUMER_URI = CoreCommonConstants.GATEWAY_URI + "/connect_consumer";
 	
 	
 	@Autowired

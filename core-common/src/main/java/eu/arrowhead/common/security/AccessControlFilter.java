@@ -15,6 +15,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
@@ -89,7 +90,7 @@ public abstract class AccessControlFilter extends ArrowheadFilter {
 	//-------------------------------------------------------------------------------------------------
 	@Nullable
 	private String getCertificateCNFromRequest(final HttpServletRequest request) {
-		final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
+		final X509Certificate[] certificates = (X509Certificate[]) request.getAttribute(CoreCommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
 		if (certificates != null && certificates.length != 0) {
 			final X509Certificate cert = certificates[0];
 			return Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());

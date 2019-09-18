@@ -15,7 +15,7 @@ public class Defaults {
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
-	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
+	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CoreCommonConstants.LOCALHOST;
 	
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
 	public static final int DEFAULT_AUTHORIZATION_PORT = 8445;
@@ -43,7 +43,7 @@ public class Defaults {
 	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
 	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
 	
-	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CommonConstants.SORT_ORDER_ASCENDING;
+	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CoreCommonConstants.SORT_ORDER_ASCENDING;
 	
 	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
 	

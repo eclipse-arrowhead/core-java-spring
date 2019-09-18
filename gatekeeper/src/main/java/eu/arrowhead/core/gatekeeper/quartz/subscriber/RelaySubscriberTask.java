@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
@@ -42,7 +43,7 @@ public class RelaySubscriberTask implements Job {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Value(CommonConstants.$NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD)
+	@Value(CoreCommonConstants.$NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD)
 	private int noWorkers;
 	
 	@Autowired
@@ -59,7 +60,7 @@ public class RelaySubscriberTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: Relay Subscriber task");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SERVER_STANDALONE_MODE)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
 			dataContainer.cancelJob();
 			return;
 		}

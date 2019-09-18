@@ -16,7 +16,7 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -49,7 +49,7 @@ public abstract class ArrowheadFilter extends GenericFilterBean {
 	//-------------------------------------------------------------------------------------------------
 	protected void handleException(final ArrowheadException ex, final ServletResponse response) throws IOException {
 		final HttpStatus status = Utilities.calculateHttpStatusFromArrowheadException(ex);
-		final String origin = ex.getOrigin() == null ? CommonConstants.UNKNOWN_ORIGIN : ex.getOrigin();
+		final String origin = ex.getOrigin() == null ? CoreCommonConstants.UNKNOWN_ORIGIN : ex.getOrigin();
 		log.debug("{} at {}: {}", ex.getClass().getName(), origin, ex.getMessage());
 		log.debug("Exception", ex);
 		final ErrorMessageDTO dto = new ErrorMessageDTO(ex);

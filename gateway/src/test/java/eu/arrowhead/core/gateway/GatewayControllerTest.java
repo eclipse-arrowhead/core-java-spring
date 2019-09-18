@@ -32,6 +32,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
@@ -50,11 +51,11 @@ public class GatewayControllerTest {
 	//=================================================================================================
 	// members
 	
-	private static final String GATEWAY_PUBLIC_KEY_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_KEY_URI;
-	private static final String GATEWAY_ACTIVE_SESSIONS_URI = CommonConstants.GATEWAY_URI + CommonConstants.MGMT_URI + "/sessions";
+	private static final String GATEWAY_PUBLIC_KEY_URI = CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.OP_GATEWAY_KEY_URI;
+	private static final String GATEWAY_ACTIVE_SESSIONS_URI = CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.MGMT_URI + "/sessions";
 	private static final String GATEWAY_CLOSE_SESSIONS_URI = GATEWAY_ACTIVE_SESSIONS_URI + "/close";
-	private static final String GATEWAY_CONNECT_PROVIDER_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI;
-	private static final String GATEWAY_CONNECT_CONSUMER_URI = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI;
+	private static final String GATEWAY_CONNECT_PROVIDER_URI = CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI;
+	private static final String GATEWAY_CONNECT_CONSUMER_URI = CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI;
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -67,7 +68,7 @@ public class GatewayControllerTest {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Resource(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
+	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	private ConcurrentHashMap<String,ActiveSessionDTO> activeSessions;
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
@@ -1002,7 +1003,7 @@ public class GatewayControllerTest {
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setSystemName("test-system");
 		system.setAddress("test-system-address");
-		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		system.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
 		request.setConsumer(system);
 		request.setProvider(system);
 		final CloudRequestDTO cloud = new CloudRequestDTO();
@@ -1027,7 +1028,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1039,7 +1040,7 @@ public class GatewayControllerTest {
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setSystemName("test-system");
 		system.setAddress("test-system-address");
-		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		system.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
 		request.setConsumer(system);
 		request.setProvider(system);
 		final CloudRequestDTO cloud = new CloudRequestDTO();
@@ -1064,7 +1065,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	// we skip the provider check tests because it uses the same method than consumer check
@@ -1424,7 +1425,7 @@ public class GatewayControllerTest {
 		request.setServiceDefinition("test-service");
 		final RelayRequestDTO relay = new RelayRequestDTO();
 		relay.setAddress("test-address");
-		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		relay.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
 		relay.setType("GATEWAY_RELAY");
 		request.setRelay(relay);
 		request.setRequestQueue("test-request-queue");
@@ -1438,7 +1439,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
-		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1461,7 +1462,7 @@ public class GatewayControllerTest {
 		request.setServiceDefinition("test-service");
 		final RelayRequestDTO relay = new RelayRequestDTO();
 		relay.setAddress("test-address");
-		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		relay.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
 		relay.setType("GATEWAY_RELAY");
 		request.setRelay(relay);
 		request.setRequestQueue("test-request-queue");
@@ -1475,7 +1476,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CLOSE_SESSIONS_URI, error.getOrigin());
-		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1841,7 +1842,7 @@ public class GatewayControllerTest {
 		request.setConsumerGWPublicKey("test-key");
 		final RelayRequestDTO relay = new RelayRequestDTO();
 		relay.setAddress("test-address");
-		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		relay.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
 		relay.setType("GATEWAY_RELAY");
 		request.setRelay(relay);
 		final SystemRequestDTO system = new SystemRequestDTO();
@@ -1861,7 +1862,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_PROVIDER_URI, error.getOrigin());
-		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
+		Assert.assertEquals("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1872,7 +1873,7 @@ public class GatewayControllerTest {
 		request.setConsumerGWPublicKey("test-key");
 		final RelayRequestDTO relay = new RelayRequestDTO();
 		relay.setAddress("test-address");
-		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		relay.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
 		relay.setType("GATEWAY_RELAY");
 		request.setRelay(relay);
 		final SystemRequestDTO system = new SystemRequestDTO();
@@ -1892,7 +1893,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_PROVIDER_URI, error.getOrigin());
-		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
+		Assert.assertEquals("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -2184,7 +2185,7 @@ public class GatewayControllerTest {
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setSystemName("test-system");
 		system.setAddress("test-system-address");
-		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		system.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
 		request.setConsumer(system);
 		request.setProvider(system);
 		final CloudRequestDTO cloud = new CloudRequestDTO();
@@ -2198,7 +2199,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_PROVIDER_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -2215,7 +2216,7 @@ public class GatewayControllerTest {
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setSystemName("test-system");
 		system.setAddress("test-system-address");
-		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		system.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
 		request.setConsumer(system);
 		request.setProvider(system);
 		final CloudRequestDTO cloud = new CloudRequestDTO();
@@ -2229,7 +2230,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_PROVIDER_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -2786,7 +2787,7 @@ public class GatewayControllerTest {
 		request.setProviderGWPublicKey("test-key");
 		final RelayRequestDTO relay = new RelayRequestDTO();
 		relay.setAddress("test-address");
-		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		relay.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
 		relay.setType("GATEWAY_RELAY");
 		request.setRelay(relay);
 		final SystemRequestDTO system = new SystemRequestDTO();
@@ -2806,7 +2807,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
-		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
+		Assert.assertEquals("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -2819,7 +2820,7 @@ public class GatewayControllerTest {
 		request.setProviderGWPublicKey("test-key");
 		final RelayRequestDTO relay = new RelayRequestDTO();
 		relay.setAddress("test-address");
-		relay.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		relay.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
 		relay.setType("GATEWAY_RELAY");
 		request.setRelay(relay);
 		final SystemRequestDTO system = new SystemRequestDTO();
@@ -2839,7 +2840,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
-		Assert.assertEquals("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -3152,7 +3153,7 @@ public class GatewayControllerTest {
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setSystemName("test-system");
 		system.setAddress("test-system-address");
-		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		system.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
 		request.setConsumer(system);
 		request.setProvider(system);
 		final CloudRequestDTO cloud = new CloudRequestDTO();
@@ -3166,7 +3167,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -3185,7 +3186,7 @@ public class GatewayControllerTest {
 		final SystemRequestDTO system = new SystemRequestDTO();
 		system.setSystemName("test-system");
 		system.setAddress("test-system-address");
-		system.setPort(CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		system.setPort(CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
 		request.setConsumer(system);
 		request.setProvider(system);
 		final CloudRequestDTO cloud = new CloudRequestDTO();
@@ -3199,7 +3200,7 @@ public class GatewayControllerTest {
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(GATEWAY_CONNECT_CONSUMER_URI, error.getOrigin());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

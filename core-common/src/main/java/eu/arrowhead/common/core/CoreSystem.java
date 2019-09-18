@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 
 public enum CoreSystem {
@@ -40,7 +40,7 @@ public enum CoreSystem {
 
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystem(final int defaultPort, final List<CoreSystemService> services) {
-		Assert.isTrue(defaultPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && defaultPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Default port is invalid.");
+		Assert.isTrue(defaultPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && defaultPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "Default port is invalid.");
 		this.services = services != null ? Collections.unmodifiableList(services) : List.of();
 		this.defaultPort = defaultPort;
 	}

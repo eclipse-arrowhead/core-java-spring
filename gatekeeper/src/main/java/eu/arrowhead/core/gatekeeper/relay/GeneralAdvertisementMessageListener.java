@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 
 public class GeneralAdvertisementMessageListener implements Closeable, MessageListener {
@@ -44,7 +44,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 		
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.isTrue(!Utilities.isEmpty(relayHost), "relayHost is null or blank.");
-		Assert.isTrue(relayPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && relayPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "relayPort is invalid.");
+		Assert.isTrue(relayPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && relayPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "relayPort is invalid.");
 		Assert.notNull(relayClient, "Gatekeeper relay client is null.");
 		Assert.isTrue(threadPoolSize > 0, "threadPoolSize must be a positive number.");
 		

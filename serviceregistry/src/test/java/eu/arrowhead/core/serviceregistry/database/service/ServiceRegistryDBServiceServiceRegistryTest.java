@@ -24,7 +24,7 @@ import org.mockito.Spy;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -122,7 +122,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithNotValidServiceDefinition() {
 		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.ofNullable(null));
-		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinition("serviceNotExists", 0, 10, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinition("serviceNotExists", 0, 10, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 	}
 			
 	//=================================================================================================

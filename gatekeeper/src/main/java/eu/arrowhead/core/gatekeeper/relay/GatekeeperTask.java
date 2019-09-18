@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -41,7 +41,7 @@ public class GatekeeperTask implements Runnable {
 		
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.isTrue(!Utilities.isEmpty(relayHost), "relayHost is null or blank.");
-		Assert.isTrue(relayPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && relayPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "relayPort is invalid.");
+		Assert.isTrue(relayPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && relayPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "relayPort is invalid.");
 		Assert.notNull(relayClient, "relayClient is null.");
 		Assert.notNull(msg, "Message is null");
 		
@@ -95,9 +95,9 @@ public class GatekeeperTask implements Runnable {
 		logger.debug("handleRequest started...");
 		try {
 			switch (request.getMessageType()) {
-			case CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 				return gatekeeperService.doGSDPoll(request.getGSDPollRequest());
-			case CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 				return gatekeeperService.doICN(request.getICNProposalRequest());
 			default:
 				throw new BadPayloadException("Invalid message type: " + request.getMessageType());

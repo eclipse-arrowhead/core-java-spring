@@ -26,7 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -45,7 +45,7 @@ public class GatekeeperControllerICNTest {
 	//=================================================================================================
 	// members
 	
-	private static final String INIT_ICN_URI = CommonConstants.GATEKEEPER_URI + "/init_icn";
+	private static final String INIT_ICN_URI = CoreCommonConstants.GATEKEEPER_URI + "/init_icn";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -266,7 +266,7 @@ public class GatekeeperControllerICNTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, error.getErrorCode());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -287,7 +287,7 @@ public class GatekeeperControllerICNTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(HttpStatus.SC_BAD_REQUEST, error.getErrorCode());
-		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	// we skip tests about preferred system validation because it uses the same method as requester system validation

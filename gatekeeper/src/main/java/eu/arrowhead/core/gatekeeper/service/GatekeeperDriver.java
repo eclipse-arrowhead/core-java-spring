@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -71,13 +72,13 @@ public class GatekeeperDriver {
 	//=================================================================================================
 	// members
 	
-	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String GATEWAY_PUBLIC_KEY_URI_KEY = CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String GATEWAY_CONNECT_PROVIDER_URI_KEY = CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String GATEWAY_CONNECT_CONSUMER_URI_KEY = CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_PUBLIC_KEY_URI_KEY = CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_CONNECT_PROVIDER_URI_KEY = CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_CONNECT_CONSUMER_URI_KEY = CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
-	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.GATEKEEPER_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
@@ -324,9 +325,9 @@ public class GatekeeperDriver {
 	private UriComponents getServiceRegistryQueryUri() {
 		logger.debug("getServiceRegistryQueryUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_URI)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_URI);
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_URI);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
 			}
@@ -503,8 +504,8 @@ public class GatekeeperDriver {
 	private void validateSystemPortRange(final int port) {
 		logger.debug("validateSystemPortRange started...");
 		
-		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new IllegalArgumentException("port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new IllegalArgumentException("port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}
 }

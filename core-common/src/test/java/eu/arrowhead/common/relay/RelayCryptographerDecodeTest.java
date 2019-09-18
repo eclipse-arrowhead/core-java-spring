@@ -16,7 +16,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -118,7 +118,7 @@ public class RelayCryptographerDecodeTest {
 	@Test
 	public void decodeMessage2EverythingOKWithByteArray() throws JsonParseException, JsonMappingException, IOException {
 		final DecryptedMessageDTO result = testingObject.decodeMessage(ENCRYPTED_MESSAGE_BYTES, senderPublicKey);
-		Assert.assertEquals(CommonConstants.RELAY_MESSAGE_TYPE_RAW, result.getMessageType());
+		Assert.assertEquals(CoreCommonConstants.RELAY_MESSAGE_TYPE_RAW, result.getMessageType());
 		Assert.assertEquals("AQIDBAU=", result.getPayload());
 	}
 
