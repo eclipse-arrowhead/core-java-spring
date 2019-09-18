@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -711,7 +712,7 @@ public class GatekeeperDBService {
 		if (port == null) {
 			throw new InvalidParameterException("Port is null");
 		} else if (isPortOutOfValidRange(port)) {
-			throw new InvalidParameterException("Port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX);
+			throw new InvalidParameterException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX);
 		}
 		
 		exclusive = exclusive == null ? false : exclusive;
@@ -747,7 +748,7 @@ public class GatekeeperDBService {
 	private boolean isPortOutOfValidRange(final int port) {
 		logger.debug("isPortOutOfValidRange started...");
 		
-		return port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX;
+		return port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

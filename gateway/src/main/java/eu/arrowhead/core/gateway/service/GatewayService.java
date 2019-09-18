@@ -290,8 +290,8 @@ public class GatewayService {
 		}
 		
 		final int validatedPort = relay.getPort().intValue();
-		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 		
 		if (Utilities.isEmpty(relay.getType())) {
@@ -325,8 +325,8 @@ public class GatewayService {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}
 	

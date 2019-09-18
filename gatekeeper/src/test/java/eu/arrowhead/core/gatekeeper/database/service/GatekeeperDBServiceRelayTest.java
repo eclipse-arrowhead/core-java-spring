@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
@@ -97,13 +97,13 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testGetRelayByAddressAndPortWithInvalidPortMin() {
-		gatekeeperDBService.getRelayByAddressAndPort("1.1.1.1", CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
+		gatekeeperDBService.getRelayByAddressAndPort("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testGetRelayByAddressAndPortWithInvalidPortMax() {
-		gatekeeperDBService.getRelayByAddressAndPort("1.1.1.1", CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
+		gatekeeperDBService.getRelayByAddressAndPort("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayInvalidPortMin() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -166,7 +166,7 @@ public class GatekeeperDBServiceRelayTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRegisterBulkRelaysWithRelayInvalidPortMax() {
-		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, "GENERAL_RELAY"));
+		final List<RelayRequestDTO> dtoList = List.of(new RelayRequestDTO("1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, "GENERAL_RELAY"));
 				
 		gatekeeperDBService.registerBulkRelays(dtoList);
 	}
@@ -269,7 +269,7 @@ public class GatekeeperDBServiceRelayTest {
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -280,7 +280,7 @@ public class GatekeeperDBServiceRelayTest {
 		
 		when(relayRepository.findById(anyLong())).thenReturn(Optional.of(relay));
 		
-		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, RelayType.GATEKEEPER_RELAY);
+		gatekeeperDBService.updateRelayById(1, "1.1.1.1", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, false, RelayType.GATEKEEPER_RELAY);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

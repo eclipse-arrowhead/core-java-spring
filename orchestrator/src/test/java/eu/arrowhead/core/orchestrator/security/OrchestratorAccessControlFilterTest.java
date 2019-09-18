@@ -45,9 +45,9 @@ public class OrchestratorAccessControlFilterTest {
 	//=================================================================================================
 	// members
 	
-	private static final String ORCH_ECHO = CoreCommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_MGMT_STORE_ECHO = CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_ORCHESTRATION = CoreCommonConstants.ORCHESTRATOR_URI +CoreCommonConstants.OP_ORCH_PROCESS;
+	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
+	private static final String ORCH_MGMT_STORE_ECHO = CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
+	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS;
 	
 	@Autowired
 	private ApplicationContext appContext;

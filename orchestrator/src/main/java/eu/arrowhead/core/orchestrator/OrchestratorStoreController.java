@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
@@ -44,7 +45,7 @@ import io.swagger.annotations.ApiResponses;
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CoreCommonConstants.ORCHESTRATOR_URI)
+@RequestMapping(CommonConstants.ORCHESTRATOR_URI)
 public class OrchestratorStoreController {
 
 	//=================================================================================================
@@ -126,12 +127,12 @@ public class OrchestratorStoreController {
 	@ResponseBody public OrchestratorStoreListResponseDTO getOrchestratorStores(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("getOrchestratorStores started ...");
 		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
 		
-		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
+		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI);
 		final OrchestratorStoreListResponseDTO orchestratorStoreListResponse = orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(), 
 																																			  vpp.getValidatedDirecion(), sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -151,12 +152,12 @@ public class OrchestratorStoreController {
 	@ResponseBody public OrchestratorStoreListResponseDTO getAllTopPriorityOrchestratorStores(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("getAllTopPriorityOrchestratorStores started ...");
 		logger.debug("New OrchestratorStore get request recieved with page: {} and item_per page: {}", page, size);
 		
-		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CoreCommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY);
+		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_TOP_PRIORITY);
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
 																																					    vpp.getValidatedDirecion(), sortField);
 		logger.debug("OrchestratorStores  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -177,13 +178,13 @@ public class OrchestratorStoreController {
 	@ResponseBody public OrchestratorStoreListResponseDTO getOrchestratorStoresByConsumer(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField,
 			@RequestBody final OrchestratorStoreRequestDTO request) {
 		logger.debug("getOrchestratorStoresByConsumer started ...");
 		
-		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CoreCommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
-		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CoreCommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
+		final ValidatedPageParams vpp = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
+		checkOrchestratorStoreRequestDTOForConsumerIdAndServiceDefinitionName(request, CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER);
 		final OrchestratorStoreListResponseDTO orchestratorStoreResponse = orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(vpp.getValidatedPage(), vpp.getValidatedSize(),
 																																			  vpp.getValidatedDirecion(), sortField,
 																																			  request.getConsumerSystemId(),
@@ -330,9 +331,9 @@ public class OrchestratorStoreController {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Port "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || 
-				orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-				throw new BadPayloadException("Port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
+			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || 
+				orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
 											  origin);
 			}
 			

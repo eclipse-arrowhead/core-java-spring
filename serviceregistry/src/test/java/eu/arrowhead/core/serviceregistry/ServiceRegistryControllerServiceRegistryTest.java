@@ -510,7 +510,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -521,7 +521,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_UNREGISTER_URI, error.getOrigin());
-		Assert.assertEquals("Port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
+		Assert.assertEquals("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

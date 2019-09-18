@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
@@ -41,7 +42,7 @@ public class GatekeeperTask implements Runnable {
 		
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.isTrue(!Utilities.isEmpty(relayHost), "relayHost is null or blank.");
-		Assert.isTrue(relayPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && relayPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "relayPort is invalid.");
+		Assert.isTrue(relayPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && relayPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "relayPort is invalid.");
 		Assert.notNull(relayClient, "relayClient is null.");
 		Assert.notNull(msg, "Message is null");
 		

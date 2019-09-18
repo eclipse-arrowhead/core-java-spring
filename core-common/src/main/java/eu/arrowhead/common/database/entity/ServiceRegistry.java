@@ -25,7 +25,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 
 @Entity
@@ -49,13 +49,13 @@ public class ServiceRegistry {
 	@JoinColumn(name = "systemId", referencedColumnName = "id", nullable = false)
 	private System system;
 	
-	@Column(nullable = true, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = true, length = CoreDefaults.VARCHAR_BASIC)
 	private String serviceUri;
 	
 	@Column(nullable = true)
 	private ZonedDateTime endOfValidity;
 	
-	@Column(nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'NOT_SECURE'")
+	@Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ") DEFAULT 'NOT_SECURE'")
 	@Enumerated(EnumType.STRING)
 	private ServiceSecurityType secure = ServiceSecurityType.NOT_SECURE;
 	

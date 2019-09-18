@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -50,8 +50,8 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 		logger.debug("registerOwnCloud started...");
 		
 		if (!standaloneMode) {
-			String name = Defaults.DEFAULT_OWN_CLOUD_NAME;
-			String operator = Defaults.DEFAULT_OWN_CLOUD_OPERATOR;
+			String name = CoreDefaults.DEFAULT_OWN_CLOUD_NAME;
+			String operator = CoreDefaults.DEFAULT_OWN_CLOUD_OPERATOR;
 			
 			if (sslProperties.isSslEnabled()) {
 				@SuppressWarnings("unchecked")

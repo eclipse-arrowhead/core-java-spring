@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
@@ -354,8 +355,8 @@ public class OrchestratorService {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (portRangeCheck && (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX)) {
-			throw new InvalidParameterException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (portRangeCheck && (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
+			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}
 

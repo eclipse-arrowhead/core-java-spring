@@ -25,7 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
@@ -42,7 +42,7 @@ public class GatekeeperControllerGSDTests {
 	//=================================================================================================
 	// members
 	
-	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = CoreCommonConstants.GATEKEEPER_URI + "/init_gsd";
+	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = CommonConstants.GATEKEEPER_URI + "/init_gsd";
 	
 	@Autowired
 	private WebApplicationContext wac;

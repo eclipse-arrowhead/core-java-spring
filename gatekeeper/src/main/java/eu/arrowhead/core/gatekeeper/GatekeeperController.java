@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
@@ -54,7 +55,7 @@ import io.swagger.annotations.ApiResponses;
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CoreCommonConstants.GATEKEEPER_URI)
+@RequestMapping(CommonConstants.GATEKEEPER_URI)
 public class GatekeeperController {
 	
 	//=================================================================================================
@@ -138,11 +139,11 @@ public class GatekeeperController {
 	@ResponseBody public CloudWithRelaysListResponseDTO getClouds(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getClouds get request recieved with page: {} and item_per page: {}", page, size);
 				
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CoreCommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI);
 		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																									validParameters.getValidatedDirecion(), sortField);
 		
@@ -161,7 +162,7 @@ public class GatekeeperController {
 	@GetMapping(path = CLOUDS_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public CloudWithRelaysResponseDTO getCloudById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New getCloudById get request recieved with id: {}", id);
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + CLOUDS_BY_ID_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + CLOUDS_BY_ID_MGMT_URI;
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -185,7 +186,7 @@ public class GatekeeperController {
 	@PostMapping(path = CLOUDS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public CloudWithRelaysListResponseDTO registerClouds(@RequestBody final List<CloudRequestDTO> dtoList) {
 		logger.debug("New registerClouds post request recieved");
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + CLOUDS_MGMT_URI;
 		
 		if (dtoList == null || dtoList.isEmpty()) {
 			throw new BadPayloadException("List of CloudRequestDTO is empty", HttpStatus.SC_BAD_REQUEST, origin);
@@ -212,7 +213,7 @@ public class GatekeeperController {
 	@PutMapping(path = CLOUDS_BY_ID_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public CloudWithRelaysResponseDTO updateCloudById(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final CloudRequestDTO dto) {
 		logger.debug("New updateCloudById put request recieved with id: {}", id);
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + CLOUDS_BY_ID_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + CLOUDS_BY_ID_MGMT_URI;
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -236,7 +237,7 @@ public class GatekeeperController {
 	@PostMapping(path = CLOUDS_ASSIGN_RELAYS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public CloudWithRelaysResponseDTO assignRelaysToCloud(@RequestBody final CloudRelaysAssignmentRequestDTO dto) {
 		logger.debug("New assignRelaysToCloud post request recieved");
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + CLOUDS_ASSIGN_RELAYS_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + CLOUDS_ASSIGN_RELAYS_MGMT_URI;
 		
 		if (dto == null) {
 			throw new BadPayloadException("CloudRelaysAssignmentRequestDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
@@ -286,7 +287,7 @@ public class GatekeeperController {
 		logger.debug("New removeCloudById delete request recieved with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CoreCommonConstants.GATEKEEPER_URI + CLOUDS_BY_ID_MGMT_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.GATEKEEPER_URI + CLOUDS_BY_ID_MGMT_URI);
 		}
 		
 		gatekeeperDBService.removeCloudById(id);
@@ -305,11 +306,11 @@ public class GatekeeperController {
 	@ResponseBody public RelayListResponseDTO getRelays(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getRelays get request recieved with page: {} and item_per page: {}", page, size);
 		
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CoreCommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI);
 		final RelayListResponseDTO relaysResponse = gatekeeperDBService.getRelaysResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
 																					      validParameters.getValidatedDirecion(), sortField);
 		
@@ -328,7 +329,7 @@ public class GatekeeperController {
 	@GetMapping(path = RELAYS_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public RelayResponseDTO getRelayById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New getRelayById get request recieved with id: {}", id);
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI;
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -351,14 +352,14 @@ public class GatekeeperController {
 	@GetMapping(path = RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public RelayResponseDTO getRelayByAddressAndPort(@PathVariable(value = PATH_VARIABLE_ADDRESS) final String address, @PathVariable(value = PATH_VARIABLE_PORT) final int port) {
 		logger.debug("New getRelayByAddressAndPort get request recieved with address: '{}', and port: '{}'", address, port);
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_BY_ADDRESS_AND_PORT_MGMT_URI;
 		
 		if (Utilities.isEmpty(address)) {
 			throw new BadPayloadException("Address is empty", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (isPortOutOfValidRange(port)) {
-			throw new BadPayloadException("Port should be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX,
+			throw new BadPayloadException("Port should be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX,
 										  HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
@@ -381,7 +382,7 @@ public class GatekeeperController {
 	@PostMapping(path = RELAYS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public RelayListResponseDTO registerRelays(@RequestBody final List<RelayRequestDTO> dtoList) {
 		logger.debug("New registerRelays post request recieved");
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_MGMT_URI;
 		
 		if (dtoList == null || dtoList.isEmpty()) {
 			throw new BadPayloadException("List of RelayRequestDTO is empty", HttpStatus.SC_BAD_REQUEST, origin);
@@ -408,7 +409,7 @@ public class GatekeeperController {
 	@PutMapping(path = RELAYS_BY_ID_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public RelayResponseDTO updateRelayById(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final RelayRequestDTO dto) {
 		logger.debug("New updateRelayById put request recieved with id: {}", id);
-		final String origin = CoreCommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI;
+		final String origin = CommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI;
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -435,7 +436,7 @@ public class GatekeeperController {
 		logger.debug("New removeRelayById delete request recieved with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CoreCommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.GATEKEEPER_URI + RELAYS_BY_ID_MGMT_URI);
 		}
 		
 		gatekeeperDBService.removeRelayById(id);
@@ -454,7 +455,7 @@ public class GatekeeperController {
 	@ResponseBody public GSDQueryResultDTO initiateGlobalServiceDiscovery(@RequestBody final GSDQueryFormDTO gsdForm) throws InterruptedException {
 		logger.debug("New initiateGlobalServiceDiscovery post request received");
 		
-		validateGSDQueryFormDTO(gsdForm, CoreCommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
+		validateGSDQueryFormDTO(gsdForm, CommonConstants.GATEKEEPER_URI + INIT_GLOBAL_SERVICE_DISCOVERY_URI);
 		final GSDQueryResultDTO gsdQueryResultDTO = gatekeeperService.initGSDPoll(gsdForm);
 		
 		logger.debug("initiateGlobalServiceDiscovery has been finished");
@@ -474,7 +475,7 @@ public class GatekeeperController {
 	@ResponseBody public ICNResultDTO initiateInterCloudNegotiation(@RequestBody final ICNRequestFormDTO icnForm) {
 		logger.debug("New initiateInterCloudNegotiation request received");
 		
-		validateICNRequestFormDTO(icnForm, CoreCommonConstants.GATEKEEPER_URI + INIT_INTER_CLOUD_NEGOTIATION_URI);
+		validateICNRequestFormDTO(icnForm, CommonConstants.GATEKEEPER_URI + INIT_INTER_CLOUD_NEGOTIATION_URI);
 		final ICNResultDTO result = gatekeeperService.initICN(icnForm);
 		
 		logger.debug("Inter cloud negotiation has been finished.");
@@ -487,7 +488,7 @@ public class GatekeeperController {
 	//-------------------------------------------------------------------------------------------------	
 	private boolean isPortOutOfValidRange(final int port) {
 		logger.debug("isPortOutOfValidRange started...");
-		return port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX;
+		return port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -507,7 +508,7 @@ public class GatekeeperController {
 		if (isAddressInvalid || isPortInvalid || isTypeInvalid || isGatekeeperRelayAndExclusive || isGeneralRelayAndExclusive) {
 			String exceptionMsg = "RelayRequestDTO is invalid due to the following reasons:";
 			exceptionMsg = isAddressInvalid ? exceptionMsg + " address is empty, " : exceptionMsg;
-			exceptionMsg = isPortInvalid ? exceptionMsg + " port is null or should be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX  + "," :
+			exceptionMsg = isPortInvalid ? exceptionMsg + " port is null or should be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX  + "," :
 										   exceptionMsg;
 			exceptionMsg = isTypeInvalid ? exceptionMsg + " type '" + dto.getType() + "' is not valid," : exceptionMsg;
 			exceptionMsg = isGatekeeperRelayAndExclusive ? exceptionMsg + " GATEKEEPER_REALY type couldn't be exclusive," : exceptionMsg;
@@ -649,8 +650,8 @@ public class GatekeeperController {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".",
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".",
 										  HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}

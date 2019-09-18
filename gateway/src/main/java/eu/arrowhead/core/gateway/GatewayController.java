@@ -57,7 +57,7 @@ import io.swagger.annotations.ApiResponses;
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CoreCommonConstants.GATEWAY_URI)
+@RequestMapping(CommonConstants.GATEWAY_URI)
 public class GatewayController {
 	
 	//=================================================================================================
@@ -112,7 +112,7 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = CoreCommonConstants.OP_GATEWAY_KEY_URI)
+	@GetMapping(path = CommonConstants.OP_GATEWAY_KEY_URI)
 	public String getPublicKey() {
 		logger.debug("New public key GET request received...");
 		
@@ -133,7 +133,7 @@ public class GatewayController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size) {
 		logger.debug("getActiveSessions started...");
 		
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, "ASC", CoreCommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, "ASC", CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
 		if (activeSessions.isEmpty()) {
 			return new ActiveSessionListDTO(List.of(), 0);
 		}
@@ -151,7 +151,7 @@ public class GatewayController {
 			// Do nothing
 		} else {
 			throw new BadPayloadException("Page parameter has to be equals or greater than zero and size parameter has to be equals or greater than one.",
-					HttpStatus.SC_BAD_REQUEST, CoreCommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);			
+					HttpStatus.SC_BAD_REQUEST, CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);			
 		}
 		
 		logger.debug("getActiveSessions finished...");
@@ -171,7 +171,7 @@ public class GatewayController {
 	public void closeActiveSession(@RequestBody final ActiveSessionDTO request) {
 		logger.debug("closeSession started...");
 		
-		validateActiveSessionDTO(request, CoreCommonConstants.GATEWAY_URI + CLOSE_SESSION_MGMT_URI);		
+		validateActiveSessionDTO(request, CommonConstants.GATEWAY_URI + CLOSE_SESSION_MGMT_URI);		
 		gatewayService.closeSession(request);
 		
 		logger.debug("closeSession finished...");
@@ -187,11 +187,11 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@PostMapping(path = CoreCommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public GatewayProviderConnectionResponseDTO connectProvider(@RequestBody final GatewayProviderConnectionRequestDTO request) {
 		logger.debug("connectProvider started...");
 		
-		validateProviderConnectionRequest(request, CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI);
+		validateProviderConnectionRequest(request, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI);
 		
 		final GatewayProviderConnectionResponseDTO response = gatewayService.connectProvider(request);
 		
@@ -208,11 +208,11 @@ public class GatewayController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@PostMapping(path = CoreCommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Integer connectConsumer(@RequestBody final GatewayConsumerConnectionRequestDTO request) {
 		logger.debug("connectConsumer started...");
 
-		validateConsumerConnectionRequest(request, CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI);
+		validateConsumerConnectionRequest(request, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI);
 
 		final int serverPort = gatewayService.connectConsumer(request);
 		
@@ -227,7 +227,7 @@ public class GatewayController {
 	private String acquireAndConvertPublicKey() {
 		logger.debug("acquireAndConvertPublicKey started...");
 		
-		final String origin = CoreCommonConstants.GATEWAY_URI + CoreCommonConstants.OP_GATEWAY_KEY_URI;
+		final String origin = CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_KEY_URI;
 		
 		if (!secure) {
 			throw new ArrowheadException("Gateway core service runs in insecure mode.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
@@ -360,8 +360,8 @@ public class GatewayController {
 		}
 		
 		final int validatedPort = relay.getPort().intValue();
-		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Relay port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (Utilities.isEmpty(relay.getType())) {
@@ -395,8 +395,8 @@ public class GatewayController {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
 	

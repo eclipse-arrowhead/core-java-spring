@@ -14,7 +14,7 @@ import javax.jms.Session;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
 
@@ -43,7 +43,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	@Override
 	public Session createConnection(final String host, final int port) throws JMSException {
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
-		Assert.isTrue(port > CoreCommonConstants.SYSTEM_PORT_RANGE_MIN && port < CoreCommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
+		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
 		synchronized (sessionCache) {
 			Session session = createSessionIfNecessary(host, port);

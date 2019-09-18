@@ -38,14 +38,14 @@ import io.swagger.annotations.ApiResponses;
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CoreCommonConstants.ORCHESTRATOR_URI)
+@RequestMapping(CommonConstants.ORCHESTRATOR_URI)
 public class OrchestratorController {
 
 	//=================================================================================================
 	// members
 	
 	private static final String PATH_VARIABLE_ID = "id";
-	private static final String OP_ORCH_PROCESS_BY_ID = CoreCommonConstants.OP_ORCH_PROCESS + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String OP_ORCH_PROCESS_BY_ID = CommonConstants.OP_ORCH_PROCESS + "/{" + PATH_VARIABLE_ID + "}";
 	
 	private static final String GET_ORCHESTRATOR_HTTP_200_MESSAGE = "Orchestration by consumer system id returned";
 	private static final String GET_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not orchestrate by requested consumer system id";
@@ -89,11 +89,11 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CoreCommonConstants.OP_ORCH_PROCESS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_ORCH_PROCESS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public OrchestrationResponseDTO orchestrationProcess(@RequestBody final OrchestrationFormRequestDTO request) {
 		logger.debug("orchestrationProcess started ...");
 		
-		final String origin = CoreCommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.OP_ORCH_PROCESS;
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS;
 		checkOrchestratorFormRequestDTO(request, origin);
 		
 	    if (request.getOrchestrationFlags().getOrDefault(Flag.EXTERNAL_SERVICE_REQUEST, false)) {
@@ -127,7 +127,7 @@ public class OrchestratorController {
 	@ResponseBody public OrchestrationResponseDTO storeOrchestrationProcess(@PathVariable(value = PATH_VARIABLE_ID) final long systemId) {
 		logger.debug("storeOrchestrationProcess started ...");
 		
-		final String origin = CoreCommonConstants.ORCHESTRATOR_URI + OP_ORCH_PROCESS_BY_ID;
+		final String origin = CommonConstants.ORCHESTRATOR_URI + OP_ORCH_PROCESS_BY_ID;
 		
     	if (systemId < 1) {
     		throw new BadPayloadException("Consumer system : " + ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
@@ -192,8 +192,8 @@ public class OrchestratorController {
 		}
 		
 		final int validatedPort = system.getPort().intValue();
-		if (validatedPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("System port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".",
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".",
 										  HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}

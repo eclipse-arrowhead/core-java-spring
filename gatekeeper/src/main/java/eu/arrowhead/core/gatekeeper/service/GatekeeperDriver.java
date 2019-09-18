@@ -504,8 +504,8 @@ public class GatekeeperDriver {
 	private void validateSystemPortRange(final int port) {
 		logger.debug("validateSystemPortRange started...");
 		
-		if (port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new IllegalArgumentException("port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new IllegalArgumentException("port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}
 }

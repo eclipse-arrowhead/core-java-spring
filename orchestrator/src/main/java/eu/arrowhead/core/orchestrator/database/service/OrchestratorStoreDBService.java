@@ -18,6 +18,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -579,7 +580,7 @@ public class OrchestratorStoreDBService {
 		}
 
 		final int validPort = providerSystemRequestDTO.getPort();
-		if (validPort < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || validPort > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+		if (validPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException("ProviderSystemRequestDTO.Port " + NOT_VALID_ERROR_MESSAGE);
 		}		
 	}

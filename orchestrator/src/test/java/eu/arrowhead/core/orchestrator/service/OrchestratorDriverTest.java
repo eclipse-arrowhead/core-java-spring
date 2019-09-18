@@ -301,7 +301,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testDoGlobalServiceDiscoveryOk() {
-		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.OP_GATEKEEPER_GSD_SERVICE);
+		final UriComponents queryGSDUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE);
 		
 		final GSDQueryResultDTO responseDTO = new GSDQueryResultDTO(List.of(new GSDPollResponseDTO()), 1);
 		final GSDQueryFormDTO requestDTO = new GSDQueryFormDTO();
@@ -346,7 +346,7 @@ public class OrchestratorDriverTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testDoInterCloudNegotiationsOk() {
-		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CoreCommonConstants.GATEKEEPER_URI + CoreCommonConstants.OP_GATEKEEPER_ICN_SERVICE);
+		final UriComponents queryICNUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8449, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE);
 		
 		final ICNResultDTO responseDTO = new ICNResultDTO();
 		final ICNRequestFormDTO requestDTO = new ICNRequestFormDTO();

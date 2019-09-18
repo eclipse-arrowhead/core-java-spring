@@ -28,13 +28,13 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 		
 		final String cloudCN = getServerCloudCN();
-		if (requestTarget.endsWith(CoreCommonConstants.OP_AUTH_KEY_URI) || requestTarget.endsWith(CommonConstants.ECHO_URI)) {
+		if (requestTarget.endsWith(CommonConstants.OP_AUTH_KEY_URI) || requestTarget.endsWith(CommonConstants.ECHO_URI)) {
 			// Everybody in the local cloud can get the Authorization public key (because it is PUBLIC) or test the server => no further check is necessary
 		} else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else if (requestTarget.endsWith(CoreCommonConstants.OP_AUTH_TOKEN_URI) || requestTarget.endsWith(CoreCommonConstants.OP_AUTH_INTRA_CHECK_URI) ||
-				   requestTarget.endsWith(CoreCommonConstants.OP_AUTH_INTER_CHECK_URI)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_URI) || requestTarget.endsWith(CommonConstants.OP_AUTH_INTRA_CHECK_URI) ||
+				   requestTarget.endsWith(CommonConstants.OP_AUTH_INTER_CHECK_URI)) {
 			// Only the specified core systems can use all the other methods
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForChecks, requestTarget);
 		}

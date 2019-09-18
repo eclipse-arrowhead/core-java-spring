@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
@@ -795,8 +796,8 @@ public class AuthorizationDBService {
 			throw new InvalidParameterException("Consumer address is null or blank");
 		}
 		
-		if (port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new InvalidParameterException("Consumer port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new InvalidParameterException("Consumer port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 		
 		final String validatedName = name.toLowerCase().trim();

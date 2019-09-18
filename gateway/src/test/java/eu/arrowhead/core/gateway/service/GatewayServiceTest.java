@@ -45,7 +45,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
@@ -703,7 +702,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", CoreCommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, true, "GATEWAY_RELAY"));
 		testingObject.closeSession(request);
 	}
 	
@@ -713,7 +712,7 @@ public class GatewayServiceTest {
 		final ActiveSessionDTO request = new ActiveSessionDTO();
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
-		request.setRelay(new RelayRequestDTO("test-address", CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, true, "GATEWAY_RELAY"));
+		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, true, "GATEWAY_RELAY"));
 		testingObject.closeSession(request);
 	}
 	

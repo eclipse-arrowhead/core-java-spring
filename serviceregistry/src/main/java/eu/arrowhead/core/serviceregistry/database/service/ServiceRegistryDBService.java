@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
@@ -82,7 +83,7 @@ public class ServiceRegistryDBService {
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
 	
 	private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
-	private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CoreCommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CoreCommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
+	private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
 	
 	//=================================================================================================
 	// methods
@@ -945,7 +946,7 @@ public class ServiceRegistryDBService {
 			throw new InvalidParameterException("System address is null or empty");
 		}
 		
-		if (port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
 		}
 		
@@ -973,7 +974,7 @@ public class ServiceRegistryDBService {
 	private int validateSystemPort(final int port) {
 		logger.debug("validateSystemPort started...");
 		
-		if (port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX) {
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 			throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
 		}
 		
@@ -995,7 +996,7 @@ public class ServiceRegistryDBService {
 	private Integer validateAllowNullSystemPort(final Integer port) {
 		logger.debug("validateAllowNullSystemPort started...");
 		
-		if (port != null && (port < CoreCommonConstants.SYSTEM_PORT_RANGE_MIN || port > CoreCommonConstants.SYSTEM_PORT_RANGE_MAX)) {
+		if (port != null && (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
 			throw new IllegalArgumentException(PORT_RANGE_ERROR_MESSAGE);
 		}
 		
