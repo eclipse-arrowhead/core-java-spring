@@ -16,12 +16,12 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
-public class EventFilterEndOfValidityCheckTaskConfig {
+public class SubscriptionEndOfValidityCheckTaskConfig {
 
 	//=================================================================================================
 	// members
 
-	protected Logger logger = LogManager.getLogger(EventFilterEndOfValidityCheckTaskConfig.class);
+	protected Logger logger = LogManager.getLogger(SubscriptionEndOfValidityCheckTaskConfig.class);
 	
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
@@ -34,8 +34,8 @@ public class EventFilterEndOfValidityCheckTaskConfig {
 	
 	private static final int SCHEDULER_DELAY = 17;
 	
-	private static final String NAME_OF_TRIGGER = "Event_Filter_End_OF_Validity_Check_Task_Trigger";
-	private static final String NAME_OF_TASK = "Event_Filter_End_OF_Validity_Check_Task_Detail";	
+	private static final String NAME_OF_TRIGGER = "Subscription_End_OF_Validity_Check_Task_Trigger";
+	private static final String NAME_OF_TASK = "Subscription_End_OF_Validity_Check_Task_Detail";	
 	
 	//=================================================================================================
 	// methods
@@ -43,17 +43,23 @@ public class EventFilterEndOfValidityCheckTaskConfig {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public SchedulerFactoryBean servicesEndOfValidityCheckSheduler() {
+		
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
+		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
 		if (ttlScheduled) {			
-	        schedulerFactory.setJobFactory(jobFactory);
+	        
+			schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(eventFilterEndOfValidityCheckTaskDetail().getObject());
 	        schedulerFactory.setTriggers(eventFilterEndOfValidityCheckTaskTrigger().getObject());
 	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-	        logger.info("EventFilter end of validity task adjusted with ttl interval: {} minutes", ttlInterval);
+	        logger.info("Subscription end of validity task adjusted with ttl interval: {} minutes", ttlInterval);
+		
 		} else {
-			logger.info("EventFilter end of validity task is not adjusted");
+			
+			logger.info("Subscription end of validity task is not adjusted");
+		
 		}
 		
 		return schedulerFactory;        
@@ -62,7 +68,9 @@ public class EventFilterEndOfValidityCheckTaskConfig {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
     public SimpleTriggerFactoryBean eventFilterEndOfValidityCheckTaskTrigger() {
+		
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
+		
 		trigger.setJobDetail(eventFilterEndOfValidityCheckTaskDetail().getObject());
         trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
@@ -74,8 +82,10 @@ public class EventFilterEndOfValidityCheckTaskConfig {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
     public JobDetailFactoryBean eventFilterEndOfValidityCheckTaskDetail() {
-        final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-        jobDetailFactory.setJobClass(EventFilterEndOfValidityCheckTask.class);
+        
+		final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
+        
+		jobDetailFactory.setJobClass(SubscriptionEndOfValidityCheckTask.class);
         jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);
         

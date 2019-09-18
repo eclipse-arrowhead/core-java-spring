@@ -21,12 +21,12 @@ import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
 
 @Component
 @DisallowConcurrentExecution
-public class EventFilterEndOfValidityCheckTask implements Job{
+public class SubscriptionEndOfValidityCheckTask implements Job{
 
 	//=================================================================================================
 	// members
 
-	protected Logger logger = LogManager.getLogger(EventFilterEndOfValidityCheckTask.class);
+	protected Logger logger = LogManager.getLogger(SubscriptionEndOfValidityCheckTask.class);
 	private static final int PAGE_SIZE = 1000;
 	
 	@Autowired
@@ -47,24 +47,34 @@ public class EventFilterEndOfValidityCheckTask implements Job{
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<Subscription> checkSubscriptionEndOfValidity() {
+		logger.debug( "SubscriptionEndOfValidityCheckTask.checkSubscriptionEndOfValidity started..." );
+		
 		final List<Subscription> removedSubscriptionEntries = new ArrayList<>();
 		int pageIndexCounter = 0;
 		try {
-			Page<Subscription> pageOfSubscriptionEntries = eventHandlerDBService.getSubscriptions(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-			if (pageOfSubscriptionEntries.isEmpty()) {
-				logger.debug("Subscription database is empty");
+			
+			Page<Subscription> pageOfSubscriptionEntries = eventHandlerDBService.getSubscriptions( pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID );
+			
+			if ( pageOfSubscriptionEntries.isEmpty() ) {
+				
+				logger.debug( "Subscription database is empty" );
+				
 			} else {
+				
 				final int totalPages = pageOfSubscriptionEntries.getTotalPages();
-				removedSubscriptionEntries.addAll(removeSubscriptionsWithInvalidTTL(pageOfSubscriptionEntries));
+				removedSubscriptionEntries.addAll( removeSubscriptionsWithInvalidTTL( pageOfSubscriptionEntries ) );
 				pageIndexCounter++;
-				while (pageIndexCounter < totalPages) {
-					pageOfSubscriptionEntries = eventHandlerDBService.getSubscriptions(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
-					removedSubscriptionEntries.addAll(removeSubscriptionsWithInvalidTTL(pageOfSubscriptionEntries));
+				
+				while ( pageIndexCounter < totalPages ) {
+					
+					pageOfSubscriptionEntries = eventHandlerDBService.getSubscriptions( pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID );
+					removedSubscriptionEntries.addAll( removeSubscriptionsWithInvalidTTL( pageOfSubscriptionEntries ) );
 					pageIndexCounter++;
 				}
 			}
-		} catch (final IllegalArgumentException exception) {
-			logger.debug(exception.getMessage());
+		} catch ( final IllegalArgumentException exception ) {
+			
+			logger.debug( exception.getMessage() );
 		}
 		
 		return removedSubscriptionEntries;
@@ -76,22 +86,22 @@ public class EventFilterEndOfValidityCheckTask implements Job{
 
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean isTTLValid(final ZonedDateTime endOfValidity) {
-		logger.debug( "EventFilterEndOfValidityCheckTask.isTTLValid started..." );
+	private boolean isTTLValid( final ZonedDateTime endOfValidity ) {
+		logger.debug( "SubscriptionEndOfValidityCheckTask.isTTLValid started..." );
 		
-		return endOfValidity.isAfter(ZonedDateTime.now());
+		return endOfValidity.isAfter( ZonedDateTime.now() );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private List<Subscription> removeSubscriptionsWithInvalidTTL(final Page<Subscription> pageOfSubscriptionEntries) {
-		logger.debug( "EventFilterEndOfValidityCheckTask.removeSubscriptionsWithInvalidTTL started..." );
+	private List<Subscription> removeSubscriptionsWithInvalidTTL( final Page<Subscription> pageOfSubscriptionEntries ) {
+		logger.debug( "SubscriptionEndOfValidityCheckTask.removeSubscriptionsWithInvalidTTL started..." );
 		
 		final List<Subscription> toBeRemoved = new ArrayList<>();
 		for (final Subscription subscriptionEntry : pageOfSubscriptionEntries) {
 			
 			final ZonedDateTime endOfValidity = subscriptionEntry.getEndDate();
-			if (endOfValidity != null && ! isTTLValid(endOfValidity)) {
-				toBeRemoved.add(subscriptionEntry);
+			if ( endOfValidity != null && ! isTTLValid( endOfValidity )) {
+				toBeRemoved.add( subscriptionEntry );
 				logger.debug("REMOVED: {}", subscriptionEntry);
 			}
 		}
