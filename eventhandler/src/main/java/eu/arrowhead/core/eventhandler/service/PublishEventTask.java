@@ -3,7 +3,6 @@ package eu.arrowhead.core.eventhandler.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
@@ -14,7 +13,6 @@ import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
 
 public class PublishEventTask implements Runnable{
@@ -54,15 +52,7 @@ public class PublishEventTask implements Runnable{
 			
 			final UriComponents subscriptionUri = getSubscriptionUri( subscription );
 
-			final ResponseEntity response = httpService.sendRequest( subscriptionUri, HttpMethod.POST, ResponseEntity.class, DTOConverter.convertEventPublishRequestDTOToEventDTO( publishRequestDTO ));		
-			
-			if (response == null) {
-				throw new TimeoutException(subscription.getSubscriberSystem().getSystemName() + " subscriber: SendEventRequest timeout");
-			}
-			
-			if ( !response.getStatusCode().is2xxSuccessful()) {
-				throw new ArrowheadException(subscription.getSubscriberSystem().getSystemName() + " subscriber: SendEventRequest unsuccessful: " + response.getStatusCode());
-			}		
+			httpService.sendRequest( subscriptionUri, HttpMethod.POST, Void.class, DTOConverter.convertEventPublishRequestDTOToEventDTO( publishRequestDTO ));			
 			
 		} catch (final InvalidParameterException | BadPayloadException ex) {	
 			
