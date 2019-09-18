@@ -50,6 +50,20 @@ public class DefaultMetadataFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testDoFilteringMapsMoreEntriesInEventMetaDataThanInFilterOk() {
+		
+		final Map<String, String> map0 = Map.of("a", "a1");
+		final Map<String, String> map1 = Map.of("a", "a1", "b", "b1", "c", "c1");
+		final MetadataFilteringParameters params = new MetadataFilteringParameters( map0, map1 );
+		
+		final boolean result = algorithm.doFiltering(params);
+		
+		assertTrue( result );
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testDoFilteringMapsDifferentCaseInKeysNotOk() {
 		
 		final Map<String, String> map0 = Map.of("a", "a1", "b", "b1", "c", "c1");
@@ -64,12 +78,14 @@ public class DefaultMetadataFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testDoFilteringMapsDifferentSizeNotOk() {
+	public void testDoFilteringMapsNoEventMetadataEntryForFilterKeyNotOk() {
 		
 		final Map<String, String> map0 = Map.of("a", "a1", "b", "b1", "c", "c1");
 		final Map<String, String> map1 = Map.of("a", "a1", "b", "b1" );
+		final Map<String, String> map2 = Map.of("a", "a1", "b", "b1", "d", "c1");
+		
 		final MetadataFilteringParameters params0 = new MetadataFilteringParameters( map0, map1 );
-		final MetadataFilteringParameters params1 = new MetadataFilteringParameters( map1, map0 );
+		final MetadataFilteringParameters params1 = new MetadataFilteringParameters( map0, map2 );
 		
 		final boolean result0 = algorithm.doFiltering(params0);
 		final boolean result1 = algorithm.doFiltering(params1);
