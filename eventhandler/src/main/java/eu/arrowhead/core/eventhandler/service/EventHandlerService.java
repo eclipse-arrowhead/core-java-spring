@@ -1,6 +1,7 @@
 package eu.arrowhead.core.eventhandler.service;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class EventHandlerService {
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
+	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerService.class);
@@ -85,7 +87,7 @@ public class EventHandlerService {
 	public void publishRequest(final EventPublishRequestDTO request) {
 		logger.debug("publishRequest started ...");
 		
-		checkSystemRequestDTO(request.getSource(), false);
+		checkPublishRequestDTO( request );
 		
 		final Set<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptions(request);
 		
@@ -138,6 +140,61 @@ public class EventHandlerService {
 
 	//=================================================================================================
 	// assistant methods
+
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkPublishRequestDTO( final EventPublishRequestDTO request ) {
+		logger.debug("checkPublishRequestDTO started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("EventPublishRequestDTO" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(request.getEventType())) {
+			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(request.getPayload())) {
+			throw new InvalidParameterException("Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		ckeckTimeStamp( request.getTimeStamp() );	
+		checkSystemRequestDTO( request.getSource(), false );
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void ckeckTimeStamp( final String timeStampString ) {
+		logger.debug("ckeckTimeStamp started...");
+		
+		if (Utilities.isEmpty(timeStampString)) {
+			throw new InvalidParameterException("TimeStamp" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		
+		final ZonedDateTime now = ZonedDateTime.now();
+		final ZonedDateTime timeStamp;
+
+		try {
+			
+			timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(timeStampString);
+		
+		} catch (final DateTimeParseException ex) {
+			
+			throw new InvalidParameterException("TimeStamp" + INVALID_TYPE_ERROR_MESSAGE);
+		}
+		
+		if (timeStamp.isAfter(now.plusSeconds( timeStampTolerance ))) {
+			
+			throw new InvalidParameterException("TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE);
+		}
+		
+		if (timeStamp.isBefore(now.minusSeconds( timeStampTolerance ))) {
+			
+			throw new InvalidParameterException("TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
+		}
+		
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkSubscriptionRequestDTO(final SubscriptionRequestDTO request) {
