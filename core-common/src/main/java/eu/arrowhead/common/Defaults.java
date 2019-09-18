@@ -11,9 +11,8 @@ public class Defaults {
 	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = false;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
-	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
-	
-	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
+
+	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;	
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
 	public static final int DEFAULT_AUTHORIZATION_PORT = 8445;
 	public static final int DEFAULT_ORCHESTRATOR_PORT = 8441;
@@ -30,9 +29,6 @@ public class Defaults {
 	// CORS defaults
 	public static final long CORS_MAX_AGE = 600;
 	public static final String CORS_ALLOW_CREDENTIALS = "true";
-	
-	public static final boolean DEFAULT_SSL_SERVER_ENABLED = true;
-	public static final boolean DEFAULT_DISABLE_HOSTNAME_VERIFIER = false;
 	
 	//-------------------------------------------------------------------------------------------------
 	private Defaults() {
