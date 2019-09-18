@@ -214,7 +214,7 @@ public class EventHandlerController {
 		
 		checkSubscriptionRequestDTO(request, origin);
 		
-		final SubscriptionResponseDTO response = eventHandlerService.updateSubscriptionRequest(id, request);
+		final SubscriptionResponseDTO response = eventHandlerService.updateSubscriptionResponse(id, request);
 		
 		logger.debug("Subscription entry with id: {} successfully updated", id);
 		
@@ -274,7 +274,7 @@ public class EventHandlerController {
 		
 		validateTimeStamp(request, origin);
 		
-	    eventHandlerService.publishRequest(request);
+	    eventHandlerService.publishResponse(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ public class EventHandlerController {
 		
 		validateTimeStamp(request, origin);
 		
-	    eventHandlerService.publishSubscriberAuthorizationUpdateRequest(request);
+	    eventHandlerService.publishSubscriberAuthorizationUpdateResponse(request);
 	}
 	
 	//=================================================================================================

@@ -503,7 +503,7 @@ public class EventHandlerControllerTest {
 		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -522,7 +522,7 @@ public class EventHandlerControllerTest {
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setEventType( null );
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -542,7 +542,7 @@ public class EventHandlerControllerTest {
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setEventType( "   " );
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -562,7 +562,7 @@ public class EventHandlerControllerTest {
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setTimeStamp( null );
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -579,7 +579,7 @@ public class EventHandlerControllerTest {
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setTimeStamp( "   " );
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -601,7 +601,7 @@ public class EventHandlerControllerTest {
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setSource( systemRequestDTO );
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -621,7 +621,7 @@ public class EventHandlerControllerTest {
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setPayload( null );
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -641,7 +641,7 @@ public class EventHandlerControllerTest {
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setPayload( "   " );
 		
-		doNothing().when(eventHandlerService).publishRequest(any());
+		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)

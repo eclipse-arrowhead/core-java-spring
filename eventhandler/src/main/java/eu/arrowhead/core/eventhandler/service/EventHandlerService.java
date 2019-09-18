@@ -84,8 +84,8 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void publishRequest(final EventPublishRequestDTO request) {
-		logger.debug("publishRequest started ...");
+	public void publishResponse(final EventPublishRequestDTO request) {
+		logger.debug("publishResponse started ...");
 		
 		checkPublishRequestDTO( request );
 		
@@ -98,8 +98,8 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void publishSubscriberAuthorizationUpdateRequest(final EventPublishRequestDTO request) {
-		logger.debug("publishSubscriberAuthorizationUpdateRequest started ...");
+	public void publishSubscriberAuthorizationUpdateResponse(final EventPublishRequestDTO request) {
+		logger.debug("publishSubscriberAuthorizationUpdateResponse started ...");
 		
 		validateAuthorizationUpdateEventType( request.getEventType() );
 		final Long subscriberSystemId = validateAuthorizationUpdatePayload( request.getPayload() );
@@ -118,8 +118,8 @@ public class EventHandlerService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionResponseDTO updateSubscriptionRequest(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
-		logger.debug("updateSubscriptionRequest started ...");
+	public SubscriptionResponseDTO updateSubscriptionResponse(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
+		logger.debug("updateSubscriptionResponse started ...");
 		
 		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( updateSubscription( id, subscriptionRequestDTO ) );
 
