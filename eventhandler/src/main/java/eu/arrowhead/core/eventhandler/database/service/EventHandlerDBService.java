@@ -27,7 +27,6 @@ import eu.arrowhead.common.database.repository.SubscriptionPublisherConnectionRe
 import eu.arrowhead.common.database.repository.SubscriptionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.DTOUtilities;
 import eu.arrowhead.common.dto.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.SubscriptionRequestDTO;
