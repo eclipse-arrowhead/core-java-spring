@@ -30,9 +30,6 @@
 	    <module>eventhandler</module>
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
-   		<module>client-skeleton-common</module>
-	    <module>client-skeleton-provider</module>
-  		<module>client-skeleton-consumer</module>
   	</modules>
   	
 	<properties>
