@@ -332,14 +332,6 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void removeSubscriptionEntries( final List<Subscription> toBeRemoved ) {
-		logger.debug("removeSubscriptionEntries started...");
-		
-		
-		//TODO Implement method logic here 
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)	
 	public void updateSubscriberAuthorization( final List<Subscription> involvedSubscriptions,
 			final Set<SystemResponseDTO> authorizedPublishers ) {
@@ -350,6 +342,22 @@ public class EventHandlerDBService {
 			updateSubscriptionEntryPublisherConnections(subscriptionEntry, authorizedPublishers);
 		}
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional( rollbackFor = ArrowheadException.class )	
+	public void removeSubscriptionEntries( final List<Subscription> toBeRemoved ) {
+		logger.debug( "removeSubscriptionEntries started..." );
+		
+		try {
+			
+			subscriptionRepository.deleteInBatch( toBeRemoved );
+			subscriptionRepository.flush();
+			
+		} catch ( final Exception ex ) {
+			logger.debug( ex.getMessage(), ex );
+			throw new ArrowheadException( CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG );
+		}
 	}
 	
 	//=================================================================================================
