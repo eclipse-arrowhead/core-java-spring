@@ -332,6 +332,14 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public void removeSubscriptionEntries( final List<Subscription> toBeRemoved ) {
+		logger.debug("removeSubscriptionEntries started...");
+		
+		
+		//TODO Implement method logic here 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)	
 	public void updateSubscriberAuthorization( final List<Subscription> involvedSubscriptions,
 			final Set<SystemResponseDTO> authorizedPublishers ) {
@@ -371,7 +379,7 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void validateDateLimits(Subscription subscription) {
+	private void validateDateLimits(final Subscription subscription) {
 		logger.debug("validateDateLimits started...");
 		
 		final ZonedDateTime now  = ZonedDateTime.now();
@@ -680,6 +688,5 @@ public class EventHandlerDBService {
 		
 		return notifyUri;
 	}
-
 
 }
