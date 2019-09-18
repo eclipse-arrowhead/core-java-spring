@@ -38,11 +38,11 @@ public class EventFilterEndOfValidityCheckTask implements Job{
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		logger.debug("STARTED: EventFilter end of validity check task");
+		logger.debug("STARTED: Subscription end of validity check task");
 		
-		//TODO implement method logic here
+		final List<Subscription> removedSubscriptions = checkSubscriptionEndOfValidity();
 				
-		//logger.debug("FINISHED: EventFilter end of validity check task. Number of removed service registry entry: {}", removedEventFilters.size());
+		logger.debug("FINISHED: Subscription end of validity check task. Number of removed service registry entry: {}", removedSubscriptions.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
