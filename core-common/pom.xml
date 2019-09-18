@@ -83,19 +83,17 @@
 		  					<forceCreation>true</forceCreation>
              				<finalName>${client.skeleton}</finalName>
 		  					<includes>
-		  						<include>eu/arrowhead/common/Utilities.java</include>
-									<include>eu/arrowhead/common/Utilities.*</include>
-									<include>eu/arrowhead/common/Utilities$1.*</include>
-									<include>eu/arrowhead/common/CommonConstants.*</include>
-									<include>eu/arrowhead/common/Defaults.*</include>
-									<include>eu/arrowhead/common/SSLProperties.*</include>
-									<include>eu/arrowhead/common/core/*.*</include>
-									<include>eu/arrowhead/common/dto/shared*.*</include>
-									<include>eu/arrowhead/common/exception/*.*</include>
-									<include>eu/arrowhead/common/http/*.*</include>
-									<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>
-									<include>eu/arrowhead/common/security/AccessControlFilter.*</include>
-									<include>eu/arrowhead/common/token/*.*</include>
+		  						<include>eu/arrowhead/common/Utilities.*</include>
+								<include>eu/arrowhead/common/CommonConstants.*</include>
+								<include>eu/arrowhead/common/Defaults.*</include>
+								<include>eu/arrowhead/common/SSLProperties.*</include>
+								<include>eu/arrowhead/common/core/*.*</include>
+								<include>eu/arrowhead/common/dto/shared*.*</include>
+								<include>eu/arrowhead/common/exception/*.*</include>
+								<include>eu/arrowhead/common/http/*.*</include>
+								<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>
+								<include>eu/arrowhead/common/security/AccessControlFilter.*</include>
+								<include>eu/arrowhead/common/token/*.*</include>
 		  					</includes>
 		  				</configuration>  					
   					</execution>

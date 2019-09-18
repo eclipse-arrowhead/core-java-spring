@@ -15,6 +15,7 @@ import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
@@ -27,9 +28,9 @@ public class TokenUtilities {
 
 	private static final Logger logger = LogManager.getLogger(TokenUtilities.class);
 	
-	private static final AlgorithmConstraints JWS_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWS_SIGN_ALG);
-	private static final AlgorithmConstraints JWE_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_KEY_MANAGEMENT_ALG);
-	private static final AlgorithmConstraints JWE_ENCRYPTION_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_ENCRYPTION_ALG);
+	private static final AlgorithmConstraints JWS_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG);
+	private static final AlgorithmConstraints JWE_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_KEY_MANAGEMENT_ALG);
+	private static final AlgorithmConstraints JWE_ENCRYPTION_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_ENCRYPTION_ALG);
 
 	//=================================================================================================
 	// methods
@@ -81,12 +82,12 @@ public class TokenUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static String extractConsumerName(final JwtClaims claims) throws InvalidJwtException {
-		if (!claims.hasClaim(CoreCommonConstants.JWT_CLAIM_CONSUMER_ID)) {
+		if (!claims.hasClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID)) {
 			throw new InvalidJwtException("Missing consumer information.", null, null, null);
 		}
 		
 		try {
-			final String consumerId = claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_CONSUMER_ID);
+			final String consumerId = claims.getStringClaimValue(CommonConstants.JWT_CLAIM_CONSUMER_ID);
 			final String[] parts = consumerId.split("\\.");
 
 			return parts[0];
@@ -97,12 +98,12 @@ public class TokenUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static String extractService(final JwtClaims claims) throws InvalidJwtException {
-		if (!claims.hasClaim(CoreCommonConstants.JWT_CLAIM_SERVICE_ID)) {
+		if (!claims.hasClaim(CommonConstants.JWT_CLAIM_SERVICE_ID)) {
 			throw new InvalidJwtException("Missing service information.", null, null, null);
 		}
 		
 		try {
-			return claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_SERVICE_ID);
+			return claims.getStringClaimValue(CommonConstants.JWT_CLAIM_SERVICE_ID);
 		} catch (final MalformedClaimException ex) {
 			throw new InvalidJwtException("Invalid service information.", null, ex, null);
 		}
@@ -110,12 +111,12 @@ public class TokenUtilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	private static String extractInterfaceName(final JwtClaims claims) throws InvalidJwtException {
-		if (!claims.hasClaim(CoreCommonConstants.JWT_CLAIM_INTERFACE_ID)) {
+		if (!claims.hasClaim(CommonConstants.JWT_CLAIM_INTERFACE_ID)) {
 			throw new InvalidJwtException("Missing interface information.", null, null, null);
 		}
 		
 		try {
-			return claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_INTERFACE_ID);
+			return claims.getStringClaimValue(CommonConstants.JWT_CLAIM_INTERFACE_ID);
 		} catch (final MalformedClaimException ex) {
 			throw new InvalidJwtException("Invalid interface information.", null, ex, null);
 		}

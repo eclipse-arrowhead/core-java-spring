@@ -63,7 +63,7 @@ public class CoreSystemRegistrationProperties {
 	
 	//-------------------------------------------------------------------------------------------------
 	public String getCoreSystemAddress() { 
-		return Utilities.isEmpty(coreSystemAddress) ? CoreCommonConstants.LOCALHOST : coreSystemAddress;
+		return Utilities.isEmpty(coreSystemAddress) ? CommonConstants.LOCALHOST : coreSystemAddress;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

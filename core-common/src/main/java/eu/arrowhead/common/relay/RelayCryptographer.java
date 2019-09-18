@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
@@ -35,9 +36,9 @@ public class RelayCryptographer {
 	// members
 	
 	private static final String JWT_CONTENT_TYPE = "JWT";
-	private static final AlgorithmConstraints JWS_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWS_SIGN_ALG);
-	private static final AlgorithmConstraints JWE_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_KEY_MANAGEMENT_ALG);
-	private static final AlgorithmConstraints JWE_ENCRYPTION_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_ENCRYPTION_ALG);
+	private static final AlgorithmConstraints JWS_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG);
+	private static final AlgorithmConstraints JWE_ALG_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_KEY_MANAGEMENT_ALG);
+	private static final AlgorithmConstraints JWE_ENCRYPTION_CONSTRAINTS = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_ENCRYPTION_ALG);
 	
 	private final Logger logger = LogManager.getLogger(RelayCryptographer.class);
 
@@ -166,7 +167,7 @@ public class RelayCryptographer {
 		final JsonWebSignature jws = new JsonWebSignature();
 		jws.setPayload(claims.toJson());
 		jws.setKey(privateKey);
-		jws.setAlgorithmHeaderValue(CoreCommonConstants.JWS_SIGN_ALG);
+		jws.setAlgorithmHeaderValue(CommonConstants.JWS_SIGN_ALG);
 		
 		return jws.getCompactSerialization();
 	}
@@ -178,15 +179,15 @@ public class RelayCryptographer {
 		claims.setIssuedAtToNow();
 
 		if (messageType != null) {
-			claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_MESSAGE_TYPE, messageType.trim());
+			claims.setStringClaim(CommonConstants.JWT_CLAIM_MESSAGE_TYPE, messageType.trim());
 		}
 		
 		if (sessionId != null) {
-			claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_SESSION_ID, sessionId.trim());
+			claims.setStringClaim(CommonConstants.JWT_CLAIM_SESSION_ID, sessionId.trim());
 		}
 		
 		if (payload != null) {
-			claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_PAYLOAD, convertPayloadToString(payload));
+			claims.setStringClaim(CommonConstants.JWT_CLAIM_PAYLOAD, convertPayloadToString(payload));
 		}
 
 		return claims;
@@ -204,8 +205,8 @@ public class RelayCryptographer {
 	//-------------------------------------------------------------------------------------------------
 	private String encryptSignedJWT(final String signedJWT, final PublicKey recipientPublicKey) throws JoseException {
 		final JsonWebEncryption jwe = new JsonWebEncryption();
-		jwe.setAlgorithmHeaderValue(CoreCommonConstants.JWE_KEY_MANAGEMENT_ALG);
-		jwe.setEncryptionMethodHeaderParameter(CoreCommonConstants.JWE_ENCRYPTION_ALG);
+		jwe.setAlgorithmHeaderValue(CommonConstants.JWE_KEY_MANAGEMENT_ALG);
+		jwe.setEncryptionMethodHeaderParameter(CommonConstants.JWE_ENCRYPTION_ALG);
 		jwe.setKey(recipientPublicKey);
 		jwe.setContentTypeHeaderValue(JWT_CONTENT_TYPE);
 		jwe.setPayload(signedJWT);
@@ -243,16 +244,16 @@ public class RelayCryptographer {
 		try {
 			final DecryptedMessageDTO result = new DecryptedMessageDTO();
 			
-			if (claims.hasClaim(CoreCommonConstants.JWT_CLAIM_MESSAGE_TYPE)) {
-				result.setMessageType(claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_MESSAGE_TYPE));
+			if (claims.hasClaim(CommonConstants.JWT_CLAIM_MESSAGE_TYPE)) {
+				result.setMessageType(claims.getStringClaimValue(CommonConstants.JWT_CLAIM_MESSAGE_TYPE));
 			}
 			
-			if (claims.hasClaim(CoreCommonConstants.JWT_CLAIM_SESSION_ID)) {
-				result.setSessionId(claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_SESSION_ID));
+			if (claims.hasClaim(CommonConstants.JWT_CLAIM_SESSION_ID)) {
+				result.setSessionId(claims.getStringClaimValue(CommonConstants.JWT_CLAIM_SESSION_ID));
 			}
 			
-			if (claims.hasClaim(CoreCommonConstants.JWT_CLAIM_PAYLOAD)) {
-				result.setPayload(claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_PAYLOAD));
+			if (claims.hasClaim(CommonConstants.JWT_CLAIM_PAYLOAD)) {
+				result.setPayload(claims.getStringClaimValue(CommonConstants.JWT_CLAIM_PAYLOAD));
 			}
 			
 			return result;

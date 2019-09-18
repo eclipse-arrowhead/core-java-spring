@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -114,7 +115,7 @@ public class RelayCryptographerEncodeTest {
 	public void encodeSessionId2EverythingOK() throws InvalidJwtException, MalformedClaimException {
 		final String result = testingObject.encodeSessionId("sessionId", recipientPublicKey);
 		final JwtClaims claims = validateAndDecodeMessage(result);
-		Assert.assertEquals("sessionId", claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_SESSION_ID));
+		Assert.assertEquals("sessionId", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_SESSION_ID));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -161,9 +162,9 @@ public class RelayCryptographerEncodeTest {
 		
 		final String result = testingObject.encodeRelayMessage("gsd_poll", "sessionId", dto, recipientPublicKey);
 		final JwtClaims claims = validateAndDecodeMessage(result);
-		Assert.assertEquals("gsd_poll", claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_MESSAGE_TYPE));
-		Assert.assertEquals("sessionId", claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_SESSION_ID));
-		Assert.assertEquals(dtoJSON, Utilities.toPrettyJson(claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_PAYLOAD)));
+		Assert.assertEquals("gsd_poll", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_MESSAGE_TYPE));
+		Assert.assertEquals("sessionId", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_SESSION_ID));
+		Assert.assertEquals(dtoJSON, Utilities.toPrettyJson(claims.getStringClaimValue(CommonConstants.JWT_CLAIM_PAYLOAD)));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -174,9 +175,9 @@ public class RelayCryptographerEncodeTest {
 		
 		final String result = testingObject.encodeRelayMessage("gsd_poll", "sessionId", bytes, recipientPublicKey);
 		final JwtClaims claims = validateAndDecodeMessage(result);
-		Assert.assertEquals("gsd_poll", claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_MESSAGE_TYPE));
-		Assert.assertEquals("sessionId", claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_SESSION_ID));
-		Assert.assertEquals(expected, claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_PAYLOAD));
+		Assert.assertEquals("gsd_poll", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_MESSAGE_TYPE));
+		Assert.assertEquals("sessionId", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_SESSION_ID));
+		Assert.assertEquals(expected, claims.getStringClaimValue(CommonConstants.JWT_CLAIM_PAYLOAD));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -205,8 +206,8 @@ public class RelayCryptographerEncodeTest {
 		
 		final String result = testingObject.encodeBytes(bytes, recipientPublicKey);
 		final JwtClaims claims = validateAndDecodeMessage(result);
-		Assert.assertEquals(CoreCommonConstants.RELAY_MESSAGE_TYPE_RAW, claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_MESSAGE_TYPE));
-		Assert.assertEquals(expected, claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_PAYLOAD));
+		Assert.assertEquals(CoreCommonConstants.RELAY_MESSAGE_TYPE_RAW, claims.getStringClaimValue(CommonConstants.JWT_CLAIM_MESSAGE_TYPE));
+		Assert.assertEquals(expected, claims.getStringClaimValue(CommonConstants.JWT_CLAIM_PAYLOAD));
 	}
 	
 	//=================================================================================================
@@ -239,9 +240,9 @@ public class RelayCryptographerEncodeTest {
 																.setEnableRequireIntegrity()
 																.setDecryptionKey(recipientPrivateKey)
 																.setVerificationKey(senderPublicKey)
-																.setJwsAlgorithmConstraints(new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWS_SIGN_ALG))
-																.setJweAlgorithmConstraints(new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_KEY_MANAGEMENT_ALG))
-																.setJweContentEncryptionAlgorithmConstraints(new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_ENCRYPTION_ALG))
+																.setJwsAlgorithmConstraints(new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG))
+																.setJweAlgorithmConstraints(new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_KEY_MANAGEMENT_ALG))
+																.setJweContentEncryptionAlgorithmConstraints(new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_ENCRYPTION_ALG))
 																.build();
 
 		return jwtConsumer.processToClaims(encryptedMessage);

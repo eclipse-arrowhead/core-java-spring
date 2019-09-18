@@ -8,8 +8,14 @@ public class Defaults {
 	//=================================================================================================
 	// assistant methods
 	
-	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CoreCommonConstants.LOCALHOST;
+	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
+	public static final int DEFAULT_AUTHORIZATION_PORT = 8445;
+	public static final int DEFAULT_ORCHESTRATOR_PORT = 8441;
+	public static final int DEFAULT_GATEKEEPER_PORT = 8449;
+	public static final int DEFAULT_GATEWAY_PORT = 8453;
+	public static final int DEFAULT_EVENT_HANDLER_PORT = 8455;
+	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8459;
 	
 	// HTTP client defaults
 	public static final int DEFAULT_CONNECTION_TIMEOUT = 30000;

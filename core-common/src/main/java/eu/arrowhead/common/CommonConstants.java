@@ -2,6 +2,10 @@ package eu.arrowhead.common;
 
 import java.util.List;
 
+import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
+import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
+import org.jose4j.jws.AlgorithmIdentifiers;
+
 import eu.arrowhead.common.core.CoreSystemService;
 
 public class CommonConstants {
@@ -22,6 +26,7 @@ public class CommonConstants {
 	public static final String XML = "XML";
 	public static final String HTTP_SECURE_JSON = HTTP + "-SECURE-" + JSON; 
 	public static final String HTTP_INSECURE_JSON = HTTP + "-INSECURE-" + JSON;
+	public static final String UNKNOWN_ORIGIN = "<unknown>";
 	
 	public static final String SERVICE_REGISTRY_ADDRESS = "sr_address";
 	public static final String $SERVICE_REGISTRY_ADDRESS_WD = "${" + SERVICE_REGISTRY_ADDRESS + ":" + Defaults.DEFAULT_SERVICE_REGISTRY_ADDRESS + "}";
@@ -95,6 +100,9 @@ public class CommonConstants {
 	public static final String HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT = "http.client.connection.manager.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_MANAGER_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_MANAGER_TIMEOUT + "}";
 	
+	public static final String COMMON_NAME_FIELD_NAME = "CN";
+	public static final String ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE = "javax.servlet.request.X509Certificate";
+	
 	public static final String SERVER_SSL_ENABLED = "server.ssl.enabled";
 	public static final String $SERVER_SSL_ENABLED_WD = "${" + SERVER_SSL_ENABLED + ":" + Defaults.DEFAULT_SSL_SERVER_ENABLED + "}";
 	public static final String KEYSTORE_TYPE = "server.ssl.key-store-type";
@@ -112,8 +120,21 @@ public class CommonConstants {
 	public static final String DISABLE_HOSTNAME_VERIFIER = "disable.hostname.verifier";
 	public static final String $DISABLE_HOSTNAME_VERIFIER_WD = "${" + DISABLE_HOSTNAME_VERIFIER + ":" + Defaults.DEFAULT_DISABLE_HOSTNAME_VERIFIER + "}";
 	
+	public static final String JWT_CLAIM_CONSUMER_ID = "cid";
+	public static final String JWT_CLAIM_SERVICE_ID = "sid";
+	public static final String JWT_CLAIM_INTERFACE_ID = "iid";
+	public static final String JWT_CLAIM_MESSAGE_TYPE = "mst";
+	public static final String JWT_CLAIM_SESSION_ID = "sid"; // can be the same as service id because we don't use service id and session id at the same time
+	public static final String JWT_CLAIM_PAYLOAD = "pld"; 
+	public static final String JWE_KEY_MANAGEMENT_ALG = KeyManagementAlgorithmIdentifiers.RSA_OAEP_256;
+	public static final String JWE_ENCRYPTION_ALG = ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
+	public static final String JWS_SIGN_ALG = AlgorithmIdentifiers.RSA_USING_SHA512;
+	
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
+	
+	public static final String LOCALHOST = "localhost";
+	public static final int HTTP_PORT = 8080;
 	
 	//=================================================================================================
 	// assistant methods

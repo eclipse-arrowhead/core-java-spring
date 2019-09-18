@@ -264,7 +264,7 @@ public class TokenGenerationService {
 		
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 		jws.setKey(privateKey);
-		jws.setAlgorithmHeaderValue(CoreCommonConstants.JWS_SIGN_ALG);
+		jws.setAlgorithmHeaderValue(CommonConstants.JWS_SIGN_ALG);
 		
 		return jws.getCompactSerialization();
 	}
@@ -279,9 +279,9 @@ public class TokenGenerationService {
 		if (duration != null) {
 			claims.setExpirationTimeMinutesInTheFuture(duration.floatValue());
 		}
-		claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
-		claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());
-		claims.setStringClaim(CoreCommonConstants.JWT_CLAIM_INTERFACE_ID, intf);
+		claims.setStringClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
+		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());
+		claims.setStringClaim(CommonConstants.JWT_CLAIM_INTERFACE_ID, intf);
 
 		return claims;
 	}
@@ -289,8 +289,8 @@ public class TokenGenerationService {
 	//-------------------------------------------------------------------------------------------------
 	private String encryptSignedJWT(final String signedJWT, final PublicKey providerKey) throws JoseException {
 		final JsonWebEncryption jwe = new JsonWebEncryption();
-		jwe.setAlgorithmHeaderValue(CoreCommonConstants.JWE_KEY_MANAGEMENT_ALG);
-		jwe.setEncryptionMethodHeaderParameter(CoreCommonConstants.JWE_ENCRYPTION_ALG);
+		jwe.setAlgorithmHeaderValue(CommonConstants.JWE_KEY_MANAGEMENT_ALG);
+		jwe.setEncryptionMethodHeaderParameter(CommonConstants.JWE_ENCRYPTION_ALG);
 		jwe.setKey(providerKey);
 		jwe.setContentTypeHeaderValue(JWT_CONTENT_TYPE);
 		jwe.setPayload(signedJWT);

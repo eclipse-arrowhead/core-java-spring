@@ -14,13 +14,6 @@ public class CoreDefaults {
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
 	
-	public static final int DEFAULT_AUTHORIZATION_PORT = 8445;
-	public static final int DEFAULT_ORCHESTRATOR_PORT = 8441;
-	public static final int DEFAULT_GATEKEEPER_PORT = 8449;
-	public static final int DEFAULT_GATEWAY_PORT = 8453;
-	public static final int DEFAULT_EVENT_HANDLER_PORT = 8455;
-	public static final int DEFAULT_CERTIFICATE_AUTHORITY_PORT = 8459;
-
 	public static final boolean DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES = 60;
 	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILISECONDS = 5000;

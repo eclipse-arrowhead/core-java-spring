@@ -386,9 +386,9 @@ public class TokenGenerationServiceTest {
 		final String encryptedToken = tokens.get("HTTP-SECURE-JSON");
 		Assert.assertTrue(!Utilities.isEmpty(encryptedToken));
 		
-		final AlgorithmConstraints jwsAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWS_SIGN_ALG);
-		final AlgorithmConstraints jweAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_KEY_MANAGEMENT_ALG);
-		final AlgorithmConstraints jweEncConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CoreCommonConstants.JWE_ENCRYPTION_ALG);
+		final AlgorithmConstraints jwsAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWS_SIGN_ALG);
+		final AlgorithmConstraints jweAlgConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_KEY_MANAGEMENT_ALG);
+		final AlgorithmConstraints jweEncConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, CommonConstants.JWE_ENCRYPTION_ALG);
 
 		final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.pub");
 		final PublicKey authPublicKey = Utilities.getPublicKeyFromPEMFile(is);
@@ -410,10 +410,10 @@ public class TokenGenerationServiceTest {
 																.build();
 		
 		final JwtClaims claims = jwtConsumer.processToClaims(encryptedToken);
-		Assert.assertTrue(claims.isClaimValueString(CoreCommonConstants.JWT_CLAIM_CONSUMER_ID));
-		Assert.assertEquals("consumer.testcloud2.aitia", claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_CONSUMER_ID));
-		Assert.assertTrue(claims.isClaimValueString(CoreCommonConstants.JWT_CLAIM_SERVICE_ID));
-		Assert.assertEquals("testservice", claims.getStringClaimValue(CoreCommonConstants.JWT_CLAIM_SERVICE_ID));
+		Assert.assertTrue(claims.isClaimValueString(CommonConstants.JWT_CLAIM_CONSUMER_ID));
+		Assert.assertEquals("consumer.testcloud2.aitia", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_CONSUMER_ID));
+		Assert.assertTrue(claims.isClaimValueString(CommonConstants.JWT_CLAIM_SERVICE_ID));
+		Assert.assertEquals("testservice", claims.getStringClaimValue(CommonConstants.JWT_CLAIM_SERVICE_ID));
 		Assert.assertTrue(System.currentTimeMillis() < claims.getExpirationTime().getValueInMillis());
 	}
 	
