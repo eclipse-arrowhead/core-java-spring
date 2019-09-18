@@ -89,7 +89,7 @@ public class AuthorizationDriver {
 		
 		try {
 			
-			httpService.sendRequest( eventHandlerAuthUpdateUri , HttpMethod.POST, ResponseEntity.class, eventPublishRequestDTO);
+			httpService.sendRequest( eventHandlerAuthUpdateUri , HttpMethod.POST, Void.class, eventPublishRequestDTO);
 		
 		} catch (final Exception ex) {
 						
