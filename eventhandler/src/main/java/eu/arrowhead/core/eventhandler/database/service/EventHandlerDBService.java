@@ -257,7 +257,7 @@ public class EventHandlerDBService {
 			final System subscriberSystemForUpdate = validateSystemRequestDTO( request.getSubscriberSystem() );
 			final String filterMetadataForUpdate = Utilities.map2Text(request.getFilterMetaData());
 			final boolean matchMetaDataForUpdate = request.getMatchMetaData();
-			final String notifyUriForUpdate = request.getNotifyUri();
+			final String notifyUriForUpdate = validateNotifyUri( request.getNotifyUri() );
 			final boolean onlyPredifindProvidersForUpdate = request.getSources() != null && !request.getSources().isEmpty();
 			final ZonedDateTime startDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
 			final ZonedDateTime endDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
@@ -349,23 +349,24 @@ public class EventHandlerDBService {
 	//Assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private Subscription validateSubscriptionRequestDTO(final SubscriptionRequestDTO request) {
+	private Subscription validateSubscriptionRequestDTO( final SubscriptionRequestDTO request ) {
 		logger.debug("validatesubscriptionRequestDTO started ...");
 		
-		final System validSubscriberSystem = validateSystemRequestDTO(request.getSubscriberSystem());
-		final EventType validEventType = validateEventType(request.getEventType());
+		final System validSubscriberSystem = validateSystemRequestDTO( request.getSubscriberSystem() );
+		final EventType validEventType = validateEventType( request.getEventType() );
+		final String validNotifyUri = validateNotifyUri( request.getNotifyUri() );
 		
 		final Subscription subscription = new Subscription();
-		subscription.setSubscriberSystem(validSubscriberSystem);
-		subscription.setEventType(validEventType);
-		subscription.setNotifyUri(request.getNotifyUri());
-		subscription.setFilterMetaData(Utilities.map2Text(request.getFilterMetaData()));
-		subscription.setOnlyPredefinedPublishers(request.getSources() != null && !request.getSources().isEmpty());
-		subscription.setMatchMetaData(request.getMatchMetaData());
-		subscription.setStartDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getStartDate()));
-		subscription.setEndDate(Utilities.parseUTCStringToLocalZonedDateTime(request.getEndDate()));
+		subscription.setSubscriberSystem( validSubscriberSystem );
+		subscription.setEventType( validEventType );
+		subscription.setNotifyUri( validNotifyUri );
+		subscription.setFilterMetaData( Utilities.map2Text( request.getFilterMetaData() ) );
+		subscription.setOnlyPredefinedPublishers( request.getSources() != null && !request.getSources().isEmpty() );
+		subscription.setMatchMetaData( request.getMatchMetaData() );
+		subscription.setStartDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() ) );
+		subscription.setEndDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() ) );
 		
-		validateDateLimits(subscription);
+		validateDateLimits( subscription );
 		
 		return subscription;
 	}
@@ -667,5 +668,19 @@ public class EventHandlerDBService {
 			
 		}
 	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	private String validateNotifyUri( final String notifyUri ) {
+		logger.debug("validateNotifyUri started...");
+		
+		if ( Utilities.isEmpty( notifyUri ) ) {
+			
+			throw new InvalidParameterException("NotifyUri" + EMPTY_OR_NULL_ERROR_MESSAGE );
+		}
+		
+		return notifyUri;
+	}
+
 
 }
