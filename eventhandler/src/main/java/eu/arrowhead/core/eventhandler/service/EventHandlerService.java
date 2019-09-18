@@ -287,8 +287,6 @@ public class EventHandlerService {
 		}
 		
 		involvedSubscriptions.removeAll( subscriptionsToRemove );
-		
-		return;
 
 	}
 
@@ -312,8 +310,7 @@ public class EventHandlerService {
 		}
 		
 		involvedSubscriptions.removeAll( subscriptionsToRemove );
-		
-		return;
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -336,8 +333,7 @@ public class EventHandlerService {
 		}
 		
 		involvedSubscriptions.removeAll( subscriptionsToRemove );
-		
-		return;
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
