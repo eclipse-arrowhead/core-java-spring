@@ -41,6 +41,7 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
@@ -359,6 +360,7 @@ public class ProviderSideSocketThreadTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Ignore
 	@Test
 	public void testRunWhenOtherSideCloseTheConnectionAfterSendingSomeBytes() throws JMSException {
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
