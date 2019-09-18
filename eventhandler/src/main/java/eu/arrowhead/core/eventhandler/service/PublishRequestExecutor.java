@@ -74,5 +74,6 @@ public class PublishRequestExecutor {
 		Assert.notNull(this.threadPool, "threadPool is null");
 		Assert.notNull(this.publishRequestDTO, "publishRequestDTO is null");
 		Assert.notNull(this.involvedSubscriptions, "involvedSubscriptions is null");
+		Assert.notNull(this.httpService, "httpService is null");
 	}
 }
