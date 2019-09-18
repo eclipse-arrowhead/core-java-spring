@@ -37,6 +37,7 @@ public class EventHandlerService {
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerService.class);
 	
@@ -59,12 +60,8 @@ public class EventHandlerService {
 	public SubscriptionResponseDTO subscribe( final SubscriptionRequestDTO request) {
 		logger.debug("subscribe started ...");
 		
-		if (request == null) {
-			
-			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
-		}
+		checkSubscriptionRequestDTO( request );
 		
-		checkSystemRequestDTO(request.getSubscriberSystem(), false);
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();
 		
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
@@ -76,10 +73,7 @@ public class EventHandlerService {
 	public void unsubscribe( final SubscriptionRequestDTO request) {
 		logger.debug("unsubscribe started ...");
 		
-		if (request == null) {
-			
-			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
-		}		
+		checkSubscriptionRequestDTO( request );		
 		
 		final Subscription subscription = eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
 		
@@ -125,14 +119,7 @@ public class EventHandlerService {
 	public SubscriptionResponseDTO updateSubscriptionRequest(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
 		logger.debug("updateSubscriptionRequest started ...");
 		
-		final Subscription updatedSubscription = updateSubscription( id, subscriptionRequestDTO );
-		
-		if ( updatedSubscription == null || Utilities.isEmpty(updatedSubscription.getNotifyUri())) {
-			
-			return new SubscriptionResponseDTO(); // return empty SubscriptionResponseDTO
-		}
-		
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(updatedSubscription);
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( updateSubscription( id, subscriptionRequestDTO ) );
 
 	}	
 	
@@ -140,12 +127,7 @@ public class EventHandlerService {
 	public Subscription updateSubscription(final long id, final SubscriptionRequestDTO request) {
 		logger.debug("updateSubscription started ...");
 		
-		if (request == null) {
-			
-			throw new InvalidParameterException("Request" + NULL_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		checkSystemRequestDTO(request.getSubscriberSystem(), false);
+		checkSubscriptionRequestDTO( request );
 		
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();	
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
@@ -157,6 +139,31 @@ public class EventHandlerService {
 	//=================================================================================================
 	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
+	private void checkSubscriptionRequestDTO(final SubscriptionRequestDTO request) {
+		logger.debug("checkSubscriptionRequestDTO started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("SubscriptionRequestDTO" + NULL_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(request.getEventType())) {
+			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(request.getNotifyUri())) {
+			throw new InvalidParameterException("NotifyUri" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (request.getFilterMetaData() == null && request.getMatchMetaData()) {
+			throw new InvalidParameterException("FilterMetaData should not be null if MatchMetaData is true");
+		}
+		
+		checkSystemRequestDTO( request.getSubscriberSystem(), false );
+		validateDateLimits( request );
+
+	}	
+	
 	//-------------------------------------------------------------------------------------------------
 	private void checkSystemRequestDTO(final SystemRequestDTO system, final boolean portRangeCheck) {
 		logger.debug("checkSystemRequestDTO started...");
@@ -182,6 +189,42 @@ public class EventHandlerService {
 			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
 		}
 	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateDateLimits( SubscriptionRequestDTO request ) {
+		logger.debug("validateDateLimits started...");
+		
+		final ZonedDateTime now  = ZonedDateTime.now();
+		
+		final ZonedDateTime start = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
+		final ZonedDateTime end = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
+		
+		if ( start != null ) {
+			
+			if ( !start.isAfter( now.minusSeconds( timeStampTolerance )) ) {
+				
+				throw new InvalidParameterException("Start Date" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
+			}
+		}
+		
+		if ( end != null ) {
+			
+			if ( !end.isAfter( now.minusSeconds( timeStampTolerance )) ) {
+				
+				throw new InvalidParameterException("End Date" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
+			}
+		}
+		
+		if ( start != null && end != null ) {
+			
+			if ( end.isBefore( start ) || !end.isAfter( start ) ) {
+				
+				throw new InvalidParameterException("Start Date sould be before End Date");
+
+			}			
+		}
+		
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private void validateAuthorizationUpdateEventType(final String eventType) {
