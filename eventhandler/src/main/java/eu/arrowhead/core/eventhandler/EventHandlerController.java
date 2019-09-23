@@ -78,9 +78,9 @@ public class EventHandlerController {
 	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
 	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
 	
-	private static final String PUT_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION = "Unsubcribtion from the events specified in requested Subscription ";
-	private static final String PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
-	private static final String PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
+	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION = "Unsubcribtion from the events specified in requested Subscription ";
+	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
+	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
 	
 	private static final String POST_EVENT_HANDLER_PUBLISH_DESCRIPTION = "Publish event"; 
 	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; 
@@ -95,7 +95,7 @@ public class EventHandlerController {
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	private static final String WRONG_FORMAT_ERROR_MESSAGE = " is in wrong format. ";
 	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
-	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";;
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
 
 	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
 	private long timeStampTolerance;
@@ -242,21 +242,25 @@ public class EventHandlerController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = PUT_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION,  tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = DELETE_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION,  tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(path = CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void unsubscribe(@RequestBody final SubscriptionRequestDTO request) {
+	@DeleteMapping(path = CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE)
+	@ResponseBody public void unsubscribe(
+			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE) final String eventType,
+			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME) final String subscriberName,
+			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS) final String subscriberAddress,
+			@RequestParam(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT) final int subscriberPort) {
 		logger.debug("unSubscription started ...");
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
-		checkSubscriptionRequestDTO(request, origin);
+		checkUnsubscribeParameters(eventType, subscriberName, subscriberAddress, subscriberPort, origin);
 		
-	    eventHandlerService.unsubscribe( request );
+	    eventHandlerService.unsubscribe( eventType, subscriberName, subscriberAddress, subscriberPort );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -414,6 +418,24 @@ public class EventHandlerController {
 			}
 
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkUnsubscribeParameters( final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort, final String origin) {
+		logger.debug("checkUnsubscribeParameters started...");
+		
+		if (Utilities.isEmpty( eventType )) {
+			throw new BadPayloadException("Event Type is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(subscriberName)) {
+			throw new BadPayloadException("Name of the subscriber system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(subscriberAddress)) {
+			throw new BadPayloadException("Address of the subscriber system is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 	}
 
 }

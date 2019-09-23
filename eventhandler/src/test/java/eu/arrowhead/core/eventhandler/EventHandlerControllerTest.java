@@ -1,7 +1,9 @@
 package eu.arrowhead.core.eventhandler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -446,20 +449,13 @@ public class EventHandlerControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void unSubscriptionTest() throws Exception {
+	public void unSubscriptionIsOkTest() throws Exception {
 		
-		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		
-		doNothing().when(eventHandlerService).unsubscribe(any());
-		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
+		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+
+		deleteUnregisterSubscription( queryStr, status().isOk() );
+
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -698,6 +694,38 @@ public class EventHandlerControllerTest {
 				null, //metaData, 
 				"payload", 
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String createQueryStringForUnregister(final String eventType, final String subscriberName, final String subscriberAddress, final Integer subscriberPort) {
+		final StringBuilder sb = new StringBuilder();
+		
+		if ( eventType != null) {
+			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE).append("=").append( eventType ).append("&");
+		}                               
+		                                
+		if ( subscriberName != null) {      
+			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME).append("=").append( subscriberName ).append("&");
+		}                                
+		                                 
+		if ( subscriberAddress != null) {   
+			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS).append("=").append( subscriberAddress ).append("&");
+		}                                
+		                                 
+		if ( subscriberPort != null) {      
+			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT).append("=").append( subscriberPort.intValue()).append("&");
+		}
+		
+		return sb.length() > 0 ? sb.substring(0, sb.length() - 1) : "";
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult deleteUnregisterSubscription(final String queryStr, final ResultMatcher matcher) throws Exception {
+		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
+		return this.mockMvc.perform(delete(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE + validatedQueryStr)
+						   .accept(MediaType.APPLICATION_JSON))
+						   .andExpect(matcher)
+						   .andReturn();
 	}
 
 }

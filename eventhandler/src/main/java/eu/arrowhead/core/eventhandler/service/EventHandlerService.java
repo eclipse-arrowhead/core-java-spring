@@ -73,14 +73,17 @@ public class EventHandlerService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void unsubscribe( final SubscriptionRequestDTO request) {
+	public void unsubscribe( final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort) {
 		logger.debug("unsubscribe started ...");
+			
+		checkUnsubscribeParameters(eventType, subscriberName, subscriberAddress, subscriberPort);
 		
-		checkSubscriptionRequestDTO( request );		
+		final SystemRequestDTO subscriberSystem = new SystemRequestDTO();
+		subscriberSystem.setSystemName( subscriberName );
+		subscriberSystem.setAddress( subscriberAddress );
+		subscriberSystem.setPort(  subscriberPort );
 		
-		final Subscription subscription = eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
-		
-		eventHandlerDBService.deleteSubscriptionResponse( subscription.getId() );
+		eventHandlerDBService.deleteSubscription( eventType, subscriberSystem );
 		
 	}
 
@@ -409,4 +412,21 @@ public class EventHandlerService {
 		return metadataFilter.doFiltering( filterParameters );
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private void checkUnsubscribeParameters( final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort) {
+		logger.debug("checkUnsubscribeParameters started...");
+		
+		if (Utilities.isEmpty( eventType )) {
+			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(subscriberName)) {
+			throw new InvalidParameterException("SubscriberName" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(subscriberAddress)) {
+			throw new InvalidParameterException("SubscriberAddress" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+		
+	}
 }

@@ -180,6 +180,11 @@ public class CommonConstants {
 
 	public static final String LOCALHOST = "localhost";
 	public static final int HTTP_PORT = 8080;
+
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE = "event_type";
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME = "system_name";
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS = "address";
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT = "port";
 	
 	//=================================================================================================
 	// assistant methods

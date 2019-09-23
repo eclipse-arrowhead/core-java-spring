@@ -217,7 +217,37 @@ public class EventHandlerDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public void registerSubscription(final SubscriptionRequestDTO request,
+	public void deleteSubscription(final String eventType, final SystemRequestDTO subscriberSystem) {
+		logger.debug("deleteSubscriptionResponse started ...");
+		
+
+		final EventType validEventType = validateEventType( eventType );
+		final System validSubscriber = validateSystemRequestDTO( subscriberSystem ); 
+		
+		try {
+			
+			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findByEventTypeAndSubscriberSystem( validEventType, validSubscriber );
+			if ( subcriptionOptional.isPresent() ) {
+				final Subscription subscriptionEntry = subcriptionOptional.get();
+				final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry(subscriptionEntry);
+				
+				subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
+				subscriptionRepository.refresh( subscriptionEntry );			
+				
+				subscriptionRepository.delete( subscriptionEntry );
+
+			}
+			
+		} catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional(rollbackFor = ArrowheadException.class)
+	public Subscription registerSubscription(final SubscriptionRequestDTO request,
 			final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("registerSubscription started ...");
 		
@@ -229,7 +259,7 @@ public class EventHandlerDBService {
 			final Subscription subscriptionEntry = subscriptionRepository.save(subscription);
 			addAndSaveSubscriptionEntryPublisherConnections(subscriptionEntry, request, authorizedPublishers);
 			
-			subscriptionRepository.saveAndFlush(subscriptionEntry);
+			return subscriptionRepository.saveAndFlush(subscriptionEntry);
 			
 			
 		}catch (final Exception ex) {
