@@ -9,6 +9,7 @@ import org.springframework.security.web.authentication.preauth.x509.X509Authenti
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.filter.InboundDebugFilter;
 import eu.arrowhead.common.filter.OutboundDebugFilter;
 import eu.arrowhead.common.filter.PayloadSizeFilter;
@@ -21,7 +22,7 @@ public class DefaultSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	
-	@Value(CommonConstants.$LOG_ALL_REQUEST_AND_RESPONSE_WD)
+	@Value(CoreCommonConstants.$LOG_ALL_REQUEST_AND_RESPONSE_WD)
 	private boolean debugMode;
 	
 	//=================================================================================================

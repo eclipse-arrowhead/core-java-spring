@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.Subscription;
@@ -26,13 +27,13 @@ import eu.arrowhead.common.database.repository.EventTypeRepository;
 import eu.arrowhead.common.database.repository.SubscriptionPublisherConnectionRepository;
 import eu.arrowhead.common.database.repository.SubscriptionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.SubscriptionListResponseDTO;
-import eu.arrowhead.common.dto.SubscriptionRequestDTO;
-import eu.arrowhead.common.dto.SubscriptionResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -66,7 +67,7 @@ public class EventHandlerDBService {
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
 
-	@Value(CommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
+	@Value(CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
 	private long timeStampTolerance;
 	
 	//=================================================================================================
@@ -103,7 +104,7 @@ public class EventHandlerDBService {
 		} catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 
 	}
@@ -149,7 +150,7 @@ public class EventHandlerDBService {
 		} catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 
 	}
@@ -179,7 +180,7 @@ public class EventHandlerDBService {
 		} catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -210,7 +211,7 @@ public class EventHandlerDBService {
 		} catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -234,7 +235,7 @@ public class EventHandlerDBService {
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -286,7 +287,7 @@ public class EventHandlerDBService {
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -306,7 +307,7 @@ public class EventHandlerDBService {
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -327,7 +328,7 @@ public class EventHandlerDBService {
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -356,7 +357,7 @@ public class EventHandlerDBService {
 			
 		} catch ( final Exception ex ) {
 			logger.debug( ex.getMessage(), ex );
-			throw new ArrowheadException( CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG );
+			throw new ArrowheadException( CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG );
 		}
 	}
 	
@@ -451,7 +452,7 @@ public class EventHandlerDBService {
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
 		if (systemOptional.isEmpty()) {
@@ -479,7 +480,7 @@ public class EventHandlerDBService {
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
 	}	
@@ -550,7 +551,7 @@ public class EventHandlerDBService {
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	
 	}
@@ -587,7 +588,7 @@ public class EventHandlerDBService {
 			}catch (final Exception ex) {
 				
 				logger.debug(ex.getMessage(), ex);
-				throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+				throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 			}
 			
 		} else {
@@ -603,7 +604,7 @@ public class EventHandlerDBService {
 			}catch (final Exception ex) {
 				
 				logger.debug(ex.getMessage(), ex);
-				throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+				throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 			}
 			
 			for (final SystemResponseDTO systemResponseDTO : authorizedPublishers) {
@@ -629,7 +630,7 @@ public class EventHandlerDBService {
 			}catch (final Exception ex) {
 				
 				logger.debug(ex.getMessage(), ex);
-				throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+				throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 			}
 		}
 	}
@@ -674,7 +675,7 @@ public class EventHandlerDBService {
 		} catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
 		if ( subcriptionOptional.isPresent()) {

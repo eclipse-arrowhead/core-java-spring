@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 
 public class PublishRequestExecutor {

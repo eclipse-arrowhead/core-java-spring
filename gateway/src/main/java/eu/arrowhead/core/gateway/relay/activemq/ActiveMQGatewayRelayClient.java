@@ -23,8 +23,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.relay.RelayCryptographer;
@@ -225,7 +226,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		if (msg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) msg;
 			final DecryptedMessageDTO decryptedMessage = cryptographer.decodeMessage(tmsg.getText(), peerPublicKey);
-			if (!CommonConstants.RELAY_MESSAGE_TYPE_RAW.equals(decryptedMessage.getMessageType())) {
+			if (!CoreCommonConstants.RELAY_MESSAGE_TYPE_RAW.equals(decryptedMessage.getMessageType())) {
 				throw new AuthException("Unauthorized message on queue.");
 			}
 			

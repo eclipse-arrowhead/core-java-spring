@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 
@@ -30,7 +31,7 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 		final String cloudCN = getServerCloudCN();
 		if (requestTarget.endsWith(CommonConstants.OP_AUTH_KEY_URI) || requestTarget.endsWith(CommonConstants.ECHO_URI)) {
 			// Everybody in the local cloud can get the Authorization public key (because it is PUBLIC) or test the server => no further check is necessary
-		} else if (requestTarget.contains(CommonConstants.MGMT_URI)) {
+		} else if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_AUTH_TOKEN_URI) || requestTarget.endsWith(CommonConstants.OP_AUTH_INTRA_CHECK_URI) ||

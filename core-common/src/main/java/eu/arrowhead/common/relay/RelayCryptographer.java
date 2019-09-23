@@ -24,8 +24,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 
@@ -121,7 +122,7 @@ public class RelayCryptographer {
 		Assert.notNull(recipientPublicKey, "Recipient public key is null.");
 		
 		try {
-			return generateJWTString(CommonConstants.RELAY_MESSAGE_TYPE_RAW, null, bytes, recipientPublicKey);
+			return generateJWTString(CoreCommonConstants.RELAY_MESSAGE_TYPE_RAW, null, bytes, recipientPublicKey);
 		} catch (final JsonProcessingException ex) {
 			// never happens because we do not use ObjectMapper to convert byte array to string 
 			throw new AssertionError(ex);		

@@ -15,13 +15,14 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationSubscriptionCheckResponseDTO;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckResponseDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -31,7 +32,7 @@ public class EventHandlerDriver {
 	//=================================================================================================
 	// members
 	
-	private static final String AUTH_SUBSCRIPTION_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String AUTH_SUBSCRIPTION_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerDriver.class);
 	

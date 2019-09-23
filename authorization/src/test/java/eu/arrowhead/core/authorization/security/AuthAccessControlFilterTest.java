@@ -26,7 +26,8 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 
 /**
  * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
@@ -43,7 +44,7 @@ public class AuthAccessControlFilterTest {
 	
 	private static final String AUTH_ECHO = CommonConstants.AUTHORIZATION_URI + CommonConstants.ECHO_URI;
 	private static final String AUTH_PUBLIC_KEY = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_KEY_URI; 
-	private static final String AUTH_MGMT_INTRACLOUD = CommonConstants.AUTHORIZATION_URI + CommonConstants.MGMT_URI + "/intracloud";
+	private static final String AUTH_MGMT_INTRACLOUD = CommonConstants.AUTHORIZATION_URI + CoreCommonConstants.MGMT_URI + "/intracloud";
 	private static final String AUTH_TOKEN_GENERATION = CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_TOKEN_URI;
 	
 	@Autowired

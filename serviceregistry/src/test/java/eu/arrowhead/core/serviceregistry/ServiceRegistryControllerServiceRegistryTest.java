@@ -42,27 +42,28 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.AutoCompleteDataResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.IdValueDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryGroupedResponseDTO;
-import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServicesGroupedBySystemsResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.AutoCompleteDataResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.IdValueDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO;
+import eu.arrowhead.common.dto.internal.ServicesGroupedBySystemsResponseDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -78,9 +79,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	private static final String SERVICE_REGISTRY_UNREGISTER_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 	private static final String SERVICE_REGISTRY_QUERY_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
 
-	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI;
-	private static final String SERVICE_REGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/servicedef";
-	private static final String SERVICE_REGISTRY_MGMT_GROUPED_URI = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/grouped";
+	private static final String SERVICE_REGISTRY_MGMT_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI;
+	private static final String SERVICE_REGISTRY_MGMT_SERVICEDEF_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/servicedef";
+	private static final String SERVICE_REGISTRY_MGMT_GROUPED_URI = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/grouped";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -576,7 +577,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = addServiceRegistry(new ServiceRegistryRequestDTO(), status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
 	}
 	
@@ -589,7 +590,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
 	}
 	
@@ -607,7 +608,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
 	}
 	
@@ -623,7 +624,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
 	}
 	
@@ -638,7 +639,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -654,7 +655,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -672,7 +673,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Specified interface name is not valid: " + intf, error.getErrorMessage());
 	}
 	
@@ -704,7 +705,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistryWithInValidId(new ServiceRegistryRequestDTO(), status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Id must be greater than 0. ", error.getErrorMessage());
 	}
 	
@@ -713,7 +714,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistry(new ServiceRegistryRequestDTO(), status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
 	}
 	
@@ -726,7 +727,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Service definition is null or blank", error.getErrorMessage());
 	}
 	
@@ -744,7 +745,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", error.getErrorMessage());
 	}
 	
@@ -760,7 +761,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
 	}
 	
@@ -775,7 +776,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -791,7 +792,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Interfaces list is null or empty.", error.getErrorMessage());
 	}
 	
@@ -809,7 +810,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Specified interface name is not valid: " + intf, error.getErrorMessage());
 	}
 	
@@ -841,7 +842,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = mergeServiceRegistryWithInValidId(new ServiceRegistryRequestDTO(), status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Id must be greater than 0. ", error.getErrorMessage());
 	}
 	
@@ -864,7 +865,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final MvcResult result = mergeServiceRegistry(new ServiceRegistryRequestDTO(), status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.MGMT_URI, error.getOrigin());
+		Assert.assertEquals(CoreCommonConstants.MGMT_URI, error.getOrigin());
 		Assert.assertEquals("Patch request is empty.", error.getErrorMessage());
 	}
 	

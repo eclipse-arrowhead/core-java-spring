@@ -10,7 +10,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.RelayType;
 
 public class GetRandomAndDedicatedIfAnyGatekeeperMatchmaker implements RelayMatchmakingAlgorithm {
 	

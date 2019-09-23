@@ -24,14 +24,15 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayType;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
@@ -49,16 +50,16 @@ public class GatewayService {
 	//=================================================================================================
 	// members
 	
-	@Value(CommonConstants.$GATEWAY_SOCKET_TIMEOUT_WD)
+	@Value(CoreCommonConstants.$GATEWAY_SOCKET_TIMEOUT_WD)
 	private int gatewaySocketTimeout;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Resource(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
+	@Resource(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	private ConcurrentMap<String,ActiveSessionDTO> activeSessions;
 	
-	@Resource(name = CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
+	@Resource(name = CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
 	private ConcurrentLinkedQueue<Integer> availablePorts;
 	
 	@Autowired

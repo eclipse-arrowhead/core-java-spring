@@ -17,10 +17,11 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -28,7 +29,7 @@ import eu.arrowhead.common.http.HttpService;
 public class AuthorizationDriver {
 	//=================================================================================================
 	// members
-	private static final String EVENT_HANDLER_AUTH_UPDATE_URI_KEY = CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String EVENT_HANDLER_AUTH_UPDATE_URI_KEY = CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	private static final Logger logger = LogManager.getLogger(AuthorizationDriver.class);
 	
@@ -38,19 +39,19 @@ public class AuthorizationDriver {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Value(CommonConstants.$SERVER_ADDRESS)
+	@Value(CoreCommonConstants.$SERVER_ADDRESS)
 	private String address;
 	
-	@Value(CommonConstants.$SERVER_PORT)
+	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int port;
 	
-	@Value(CommonConstants.$CORE_SYSTEM_NAME)
+	@Value(CoreCommonConstants.$CORE_SYSTEM_NAME)
 	private String systemName;
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean sslEnabled;
 	
-	@Value(CommonConstants.$AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD)
+	@Value(CoreCommonConstants.$AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD)
 	private boolean eventhandlerIsPresent;
 	
 	private SystemRequestDTO systemRequestDTO;
@@ -78,7 +79,7 @@ public class AuthorizationDriver {
 		final ZonedDateTime timeStamp = ZonedDateTime.now();
 
 		final EventPublishRequestDTO eventPublishRequestDTO = new EventPublishRequestDTO();
-		eventPublishRequestDTO.setEventType( CommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE );
+		eventPublishRequestDTO.setEventType( CoreCommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE );
 		eventPublishRequestDTO.setPayload( String.valueOf( updatedConsumerSystemId ) );
 		eventPublishRequestDTO.setTimeStamp( Utilities.convertZonedDateTimeToUTCString( timeStamp ) );	
 		

@@ -13,6 +13,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
@@ -26,10 +27,10 @@ public class SubscriptionEndOfValidityCheckTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value(CommonConstants.$EVENT_HANDLER_TTL_SCHEDULED_WD)
+	@Value( CoreCommonConstants.$EVENT_HANDLER_TTL_SCHEDULED_WD )
 	private boolean ttlScheduled;
 	
-	@Value(CommonConstants.$EVENT_HANDLER_TTL_INTERVAL_WD)
+	@Value( CoreCommonConstants.$EVENT_HANDLER_TTL_INTERVAL_WD )
 	private int ttlInterval;
 	
 	private static final int SCHEDULER_DELAY = 17;

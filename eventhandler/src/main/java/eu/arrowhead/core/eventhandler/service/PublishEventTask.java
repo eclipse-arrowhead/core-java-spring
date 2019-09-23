@@ -8,8 +8,8 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 
 public class PublishEventTask implements Runnable{

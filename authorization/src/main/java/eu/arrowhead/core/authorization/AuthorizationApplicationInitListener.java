@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 
 @Component
@@ -15,7 +15,7 @@ public class AuthorizationApplicationInitListener extends ApplicationInitListene
 	//=================================================================================================
 	// members
 	
-	@Value(CommonConstants.$AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD)
+	@Value(CoreCommonConstants.$AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD)
 	private boolean eventhandlerIsPresent;
 	
 	//=================================================================================================

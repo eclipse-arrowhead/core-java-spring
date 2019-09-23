@@ -7,10 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
-import eu.arrowhead.common.dto.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.SubscriptionRequestDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 
@@ -37,7 +38,7 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
 			// Everybody in the local cloud can test the server => no further check is necessary
 		
-		} else if ( requestTarget.contains( CommonConstants.MGMT_URI ) ) {
+		} else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		
