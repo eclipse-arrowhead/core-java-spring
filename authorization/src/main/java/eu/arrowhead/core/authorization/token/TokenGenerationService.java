@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
@@ -273,7 +272,7 @@ public class TokenGenerationService {
 	private JwtClaims generateTokenPayload(final String consumerInfo, final String service, final String intf, final Integer duration) {
 		final JwtClaims claims = new JwtClaims();
 		claims.setGeneratedJwtId();
-		claims.setIssuer(CoreCommonConstants.CORE_SYSTEM_AUTHORIZATION);
+		claims.setIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION);
 		claims.setIssuedAtToNow();
 		claims.setNotBeforeMinutesInThePast(1);
 		if (duration != null) {

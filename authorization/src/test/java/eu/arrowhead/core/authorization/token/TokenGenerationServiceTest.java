@@ -26,7 +26,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
@@ -401,7 +400,7 @@ public class TokenGenerationServiceTest {
 																.setRequireNotBefore()
 																.setEnableRequireEncryption()
 																.setEnableRequireIntegrity()
-																.setExpectedIssuer(CoreCommonConstants.CORE_SYSTEM_AUTHORIZATION)
+																.setExpectedIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION)
 																.setDecryptionKey(providerPrivateKey)
 																.setVerificationKey(authPublicKey)
 																.setJwsAlgorithmConstraints(jwsAlgConstraints)

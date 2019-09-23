@@ -1,9 +1,5 @@
 package eu.arrowhead.common;
 
-import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
-import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
-import org.jose4j.jws.AlgorithmIdentifiers;
-
 public class CoreCommonConstants {
 	
 	//=================================================================================================
@@ -18,13 +14,6 @@ public class CoreCommonConstants {
 	public static final String DATABASE_ENTITY_PACKAGE = "eu.arrowhead.common.database.entity";
 	public static final String DATABASE_REPOSITORY_PACKAGE = "eu.arrowhead.common.database.repository";
 	public static final String DATABASE_OPERATION_EXCEPTION_MSG = "Database operation exception";
-	
-	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
-	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
-	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
-	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
-	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
-	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 		
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	

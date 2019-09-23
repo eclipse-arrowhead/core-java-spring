@@ -16,7 +16,6 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -49,7 +48,7 @@ public class TokenUtilities {
 																.setRequireNotBefore()
 																.setEnableRequireEncryption()
 																.setEnableRequireIntegrity()
-																.setExpectedIssuer(CoreCommonConstants.CORE_SYSTEM_AUTHORIZATION)
+																.setExpectedIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION)
 																.setDecryptionKey(privateKey)
 																.setVerificationKey(authorizationPublicKey)
 																.setJwsAlgorithmConstraints(JWS_ALG_CONSTRAINTS)

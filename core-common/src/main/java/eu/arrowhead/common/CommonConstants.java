@@ -15,6 +15,13 @@ public class CommonConstants {
 	
 	public static final String BASE_PACKAGE = "eu.arrowhead";
 	
+	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
+	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
+	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
+	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
+	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
+	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
+	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
