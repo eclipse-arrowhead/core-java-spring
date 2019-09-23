@@ -60,7 +60,7 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public SubscriptionResponseDTO subscribe( final SubscriptionRequestDTO request) {
+	public void subscribe( final SubscriptionRequestDTO request) {
 		logger.debug("subscribe started ...");
 		
 		checkSubscriptionRequestDTO( request );
@@ -69,7 +69,7 @@ public class EventHandlerService {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(eventHandlerDBService.registerSubscription(request, authorizedPublishers));
+		eventHandlerDBService.registerSubscription(request, authorizedPublishers);
 	}
 
 	//-------------------------------------------------------------------------------------------------

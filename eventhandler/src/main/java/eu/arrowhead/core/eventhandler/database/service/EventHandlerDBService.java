@@ -217,7 +217,7 @@ public class EventHandlerDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Subscription registerSubscription(final SubscriptionRequestDTO request,
+	public void registerSubscription(final SubscriptionRequestDTO request,
 			final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("registerSubscription started ...");
 		
@@ -229,7 +229,7 @@ public class EventHandlerDBService {
 			final Subscription subscriptionEntry = subscriptionRepository.save(subscription);
 			addAndSaveSubscriptionEntryPublisherConnections(subscriptionEntry, request, authorizedPublishers);
 			
-			return subscriptionRepository.saveAndFlush(subscriptionEntry);
+			subscriptionRepository.saveAndFlush(subscriptionEntry);
 			
 			
 		}catch (final Exception ex) {
