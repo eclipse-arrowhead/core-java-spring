@@ -266,7 +266,7 @@ public class CommonConstants {
 	public static final String EVENT_HANDLER_TTL_INTERVAL = "event_handler_ttl_interval";
 	public static final String $EVENT_HANDLER_TTL_INTERVAL_WD = "${" + EVENT_HANDLER_TTL_INTERVAL + ":" + Defaults.DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES + "}";
 
-	public static final String TIME_STAMP_TOLERANCE_SECONDS = "time_stamp_tolerance";
+	public static final String TIME_STAMP_TOLERANCE_SECONDS = "time_stamp_tolerance_seconds";
 	public static final String $TIME_STAMP_TOLERANCE_SECONDS_WD = "${" + TIME_STAMP_TOLERANCE_SECONDS + ":" + Defaults.DEFAULT_TIME_STAMP_TOLERANCE_SECONDS + "}";
 
 	public static final String EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE = "SUBSCRIBER_AUTH_UPDATE";
