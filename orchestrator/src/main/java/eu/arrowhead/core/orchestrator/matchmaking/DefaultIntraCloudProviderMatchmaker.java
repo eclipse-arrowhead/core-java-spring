@@ -6,9 +6,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.DTOUtilities;
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOUtilities;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public class DefaultIntraCloudProviderMatchmaker implements IntraCloudProviderMatchmakingAlgorithm {
 	

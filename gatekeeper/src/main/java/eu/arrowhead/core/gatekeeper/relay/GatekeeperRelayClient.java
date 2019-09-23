@@ -5,7 +5,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
-import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
 import eu.arrowhead.common.relay.RelayClient;
 
 public interface GatekeeperRelayClient extends RelayClient {

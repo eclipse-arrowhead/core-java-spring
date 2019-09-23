@@ -14,7 +14,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
 import eu.arrowhead.core.gateway.service.GatewayService;
@@ -25,23 +25,23 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 	//=================================================================================================
 	// members
 	
-	@Value(CommonConstants.$GATEWAY_MIN_PORT_WD)
+	@Value(CoreCommonConstants.$GATEWAY_MIN_PORT_WD)
 	private int minPort;
 	
-	@Value(CommonConstants.$GATEWAY_MAX_PORT_WD)
+	@Value(CoreCommonConstants.$GATEWAY_MAX_PORT_WD)
 	private int maxPort;
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean(name = CommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
+	@Bean(name = CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP)
 	public ConcurrentMap<String,ActiveSessionDTO> getActiveSessions() {
 		return new ConcurrentHashMap<>();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean(name = CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
+	@Bean(name = CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE)
 	public Queue<Integer> getAvailablePorts() {
 		final ConcurrentLinkedQueue<Integer> queue = new ConcurrentLinkedQueue<>();
 		if (minPort <= maxPort) {
@@ -78,7 +78,7 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 		
 		if (!standaloneMode) {
 			@SuppressWarnings("unchecked")
-			final ConcurrentMap<String,ActiveSessionDTO> activeSessions = applicationContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentMap.class);
+			final ConcurrentMap<String,ActiveSessionDTO> activeSessions = applicationContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentMap.class);
 			
 			final List<ActiveSessionDTO> sessionsToClose = new ArrayList<>(activeSessions.values());
 			

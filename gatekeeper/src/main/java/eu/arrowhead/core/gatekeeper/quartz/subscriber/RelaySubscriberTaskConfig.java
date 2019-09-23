@@ -12,7 +12,7 @@ import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.quartz.AutoWiringSpringBeanQuartzTaskFactory;
 
 @Configuration
@@ -26,7 +26,7 @@ public class RelaySubscriberTaskConfig {
 	@Autowired
 	private ApplicationContext applicationContext;
 
-	@Value(CommonConstants.$RELAY_CHECK_INTERVAL_WD)
+	@Value(CoreCommonConstants.$RELAY_CHECK_INTERVAL_WD)
 	private int schedulerInterval;
 	
 	private static final int SCHEDULER_DELAY = 2;
@@ -58,7 +58,7 @@ public class RelaySubscriberTaskConfig {
     public SimpleTriggerFactoryBean relaySubscriberTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(relaySubscriberTaskDetail().getObject());
-        trigger.setRepeatInterval(schedulerInterval * CommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
+        trigger.setRepeatInterval(schedulerInterval * CoreCommonConstants.CONVERSION_MILLISECOND_TO_SECOND);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         trigger.setName(NAME_OF_TRIGGER);
         

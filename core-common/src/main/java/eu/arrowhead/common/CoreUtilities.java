@@ -22,10 +22,10 @@ public class CoreUtilities {
 		final String directionStr = direction != null ? direction.toUpperCase().trim() : "";
 		Direction validatedDirection;
 		switch (directionStr) {
-			case CommonConstants.SORT_ORDER_ASCENDING:
+			case CoreCommonConstants.SORT_ORDER_ASCENDING:
 				validatedDirection = Direction.ASC;
 				break;
-			case CommonConstants.SORT_ORDER_DESCENDING:
+			case CoreCommonConstants.SORT_ORDER_DESCENDING:
 				validatedDirection = Direction.DESC;
 				break;
 			default:

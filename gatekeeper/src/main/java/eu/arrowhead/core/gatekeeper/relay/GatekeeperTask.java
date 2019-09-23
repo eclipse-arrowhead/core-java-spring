@@ -11,9 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.gatekeeper.service.GatekeeperService;
@@ -95,9 +96,9 @@ public class GatekeeperTask implements Runnable {
 		logger.debug("handleRequest started...");
 		try {
 			switch (request.getMessageType()) {
-			case CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 				return gatekeeperService.doGSDPoll(request.getGSDPollRequest());
-			case CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 				return gatekeeperService.doICN(request.getICNProposalRequest());
 			default:
 				throw new BadPayloadException("Invalid message type: " + request.getMessageType());

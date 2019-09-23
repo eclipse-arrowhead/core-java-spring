@@ -45,28 +45,29 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalResponseDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayType;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
@@ -166,7 +167,7 @@ public class GatekeeperDriverICNTest {
 		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(gaResult);
-		final GatekeeperRelayResponse response = new GatekeeperRelayResponse("1234", CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, new ICNProposalResponseDTO());
+		final GatekeeperRelayResponse response = new GatekeeperRelayResponse("1234", CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, new ICNProposalResponseDTO());
 		when(relayClient.sendRequestAndReturnResponse(any(Session.class), any(GeneralAdvertisementResult.class), any())).thenReturn(response);
 		
 		final Cloud targetCloud = new Cloud("aitia", "testcloud2", true, true, false, "abcd");
@@ -183,14 +184,14 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testQueryOrchestratorURINotFound() {
-		when(arrowheadContext.containsKey(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testQueryOrchestratorURIWrongType() {
-		final String key = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn("abcd");
 		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
@@ -218,14 +219,14 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseURINotFound() {
-		when(arrowheadContext.containsKey(CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseURIWrongType() {
-		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn("1234");
 		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
@@ -234,7 +235,7 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test 
 	public void testQueryAuthorizationBasedOnOchestrationResponseNoAccess() {
-		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
 		
@@ -249,7 +250,7 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test 
 	public void testQueryAuthorizationBasedOnOchestrationResponseFiltered() {
-		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
 		
@@ -269,15 +270,15 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testQueryGatewayPublicKeyURINotFound() {
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		testingObject.queryGatewayPublicKey();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testQueryGatewayPublicKeyURIWrongType() {
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(true);
-		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn("not an URI");
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not an URI");
 		testingObject.queryGatewayPublicKey();
 	}
 	
@@ -521,7 +522,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectProviderURINotFound() {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		
 		testingObject.connectProvider(request);
 	}
@@ -530,8 +531,8 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectProviderURIWrongType() {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(true);
-		when(arrowheadContext.get(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn("not a valid URI");
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not a valid URI");
 		
 		testingObject.connectProvider(request);
 	}
@@ -624,7 +625,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectConsumerURINotFound() {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		
 		testingObject.connectConsumer(request);
 	}
@@ -633,8 +634,8 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectConsumerURIWrongType() {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(true);
-		when(arrowheadContext.get(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn("not URI");
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not URI");
 		
 		testingObject.connectConsumer(request);
 	}
@@ -642,15 +643,15 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testGetGatewayHostURINotFound() {
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		testingObject.getGatewayHost();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testGetGatewayHostURIWrongType() {
-		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(true);
-		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn("not an URI");
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not an URI");
 		testingObject.getGatewayHost();
 	}
 	

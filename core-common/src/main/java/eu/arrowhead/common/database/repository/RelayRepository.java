@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.RelayType;
 
 @Repository
 public interface RelayRepository extends RefreshableRepository<Relay,Long> {

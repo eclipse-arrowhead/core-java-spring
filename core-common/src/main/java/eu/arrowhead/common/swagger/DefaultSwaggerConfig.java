@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.google.common.base.Predicates;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -36,14 +36,14 @@ public class DefaultSwaggerConfig implements WebMvcConfigurer {
 		return new Docket(DocumentationType.SWAGGER_2).select() 
 		          									  .apis(RequestHandlerSelectors.any())
 		          									  .apis(Predicates.not(RequestHandlerSelectors.basePackage(coreSystemSwaggerPackage)))
-		          									  .apis(Predicates.not(RequestHandlerSelectors.basePackage(CommonConstants.SWAGGER_COMMON_PACKAGE)))
+		          									  .apis(Predicates.not(RequestHandlerSelectors.basePackage(CoreCommonConstants.SWAGGER_COMMON_PACKAGE)))
 		          									  .paths(PathSelectors.any())
-		          									  .paths(Predicates.not(PathSelectors.regex(CommonConstants.SERVER_ERROR_URI)))
+		          									  .paths(Predicates.not(PathSelectors.regex(CoreCommonConstants.SERVER_ERROR_URI)))
 		          									  .build()
-		          									  .tags(new Tag(CommonConstants.SWAGGER_TAG_ALL, ""),
-		          											new Tag(CommonConstants.SWAGGER_TAG_CLIENT, ""),
-		          											new Tag(CommonConstants.SWAGGER_TAG_MGMT, ""),
-		          											new Tag(CommonConstants.SWAGGER_TAG_PRIVATE, ""))
+		          									  .tags(new Tag(CoreCommonConstants.SWAGGER_TAG_ALL, ""),
+		          											new Tag(CoreCommonConstants.SWAGGER_TAG_CLIENT, ""),
+		          											new Tag(CoreCommonConstants.SWAGGER_TAG_MGMT, ""),
+		          											new Tag(CoreCommonConstants.SWAGGER_TAG_PRIVATE, ""))
 		          									  .useDefaultResponseMessages(false)
 		          									  .apiInfo(apiInfo());
 	}

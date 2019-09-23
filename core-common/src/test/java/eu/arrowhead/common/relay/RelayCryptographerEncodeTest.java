@@ -19,8 +19,9 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.ExceptionType;
@@ -205,7 +206,7 @@ public class RelayCryptographerEncodeTest {
 		
 		final String result = testingObject.encodeBytes(bytes, recipientPublicKey);
 		final JwtClaims claims = validateAndDecodeMessage(result);
-		Assert.assertEquals(CommonConstants.RELAY_MESSAGE_TYPE_RAW, claims.getStringClaimValue(CommonConstants.JWT_CLAIM_MESSAGE_TYPE));
+		Assert.assertEquals(CoreCommonConstants.RELAY_MESSAGE_TYPE_RAW, claims.getStringClaimValue(CommonConstants.JWT_CLAIM_MESSAGE_TYPE));
 		Assert.assertEquals(expected, claims.getStringClaimValue(CommonConstants.JWT_CLAIM_PAYLOAD));
 	}
 	

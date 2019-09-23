@@ -15,7 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
@@ -50,7 +50,7 @@ public class ServiceEndOfValidityCheckTask implements Job {
 		final List<ServiceRegistry> removedServiceRegistryEntries = new ArrayList<>();
 		int pageIndexCounter = 0;
 		try {
-			Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+			Page<ServiceRegistry> pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 			if (pageOfServiceEntries.isEmpty()) {
 				logger.debug("Servise Registry database is empty");
 			} else {
@@ -58,7 +58,7 @@ public class ServiceEndOfValidityCheckTask implements Job {
 				removedServiceRegistryEntries.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
 				pageIndexCounter++;
 				while (pageIndexCounter < totalPages) {
-					pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+					pageOfServiceEntries = serviceRegistryDBService.getServiceRegistryEntries(pageIndexCounter, PAGE_SIZE, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 					removedServiceRegistryEntries.addAll(removeRegisteredServicesWithInvalidTTL(pageOfServiceEntries));
 					pageIndexCounter++;
 				}
