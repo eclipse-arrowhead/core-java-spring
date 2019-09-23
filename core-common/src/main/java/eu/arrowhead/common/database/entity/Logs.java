@@ -6,7 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
 public class Logs {
@@ -15,16 +15,16 @@ public class Logs {
 	// members
 	
 	@Id
-	@Column(length = Defaults.VARCHAR_LOG)
+	@Column(length = CoreDefaults.VARCHAR_LOG)
 	private String logId;
 	
 	@Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime entryDate;
 	
-	@Column(nullable = true, length = Defaults.VARCHAR_LOG)
+	@Column(nullable = true, length = CoreDefaults.VARCHAR_LOG)
 	private String logger;
 	
-	@Column(nullable = true, length = Defaults.VARCHAR_LOG)
+	@Column(nullable = true, length = CoreDefaults.VARCHAR_LOG)
 	private String logLevel;
 	
 	@Column(nullable = true, columnDefinition = "TEXT")

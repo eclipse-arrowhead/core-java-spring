@@ -21,8 +21,8 @@ import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
 import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)

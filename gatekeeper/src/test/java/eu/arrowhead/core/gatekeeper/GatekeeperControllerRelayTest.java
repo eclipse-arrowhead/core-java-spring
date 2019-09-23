@@ -33,13 +33,14 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.RelayListResponseDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayResponseDTO;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.RelayListResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBServiceTestContext;
 
@@ -51,7 +52,7 @@ public class GatekeeperControllerRelayTest {
 	//=================================================================================================
 	// members
 	
-	private static final String RELAYS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.MGMT_URI + "/relays";
+	private static final String RELAYS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/relays";
 	
 	@Autowired
 	private WebApplicationContext wac;

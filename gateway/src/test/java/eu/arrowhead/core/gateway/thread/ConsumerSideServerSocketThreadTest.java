@@ -50,7 +50,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 
@@ -75,8 +75,8 @@ public class ConsumerSideServerSocketThreadTest {
 		appContext = mock(ApplicationContext.class, "appContext");
 		
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-		when(appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
-		when(appContext.getBean(CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE, ConcurrentLinkedQueue.class)).thenReturn(new ConcurrentLinkedQueue<>());
+		when(appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
+		when(appContext.getBean(CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE, ConcurrentLinkedQueue.class)).thenReturn(new ConcurrentLinkedQueue<>());
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
 		
 		initTestingObject();

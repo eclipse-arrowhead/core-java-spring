@@ -26,7 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -82,8 +82,8 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 		this.queueId = queueId;
 		this.timeout = timeout;
 		this.providerGatewayPublicKey = Utilities.getPublicKeyFromBase64EncodedString(providerGatewayPublicKey);
-		this.activeSessions = appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
-		this.availablePorts = appContext.getBean(CommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE, ConcurrentLinkedQueue.class);
+		this.activeSessions = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
+		this.availablePorts = appContext.getBean(CoreCommonConstants.GATEWAY_AVAILABLE_PORTS_QUEUE, ConcurrentLinkedQueue.class);
 		this.sslProperties = appContext.getBean(SSLProperties.class);
 		
 		setName(consumerName + "." + serviceDefinition);

@@ -37,9 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith(SpringRunner.class)

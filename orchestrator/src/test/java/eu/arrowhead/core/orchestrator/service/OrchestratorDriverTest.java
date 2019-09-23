@@ -20,28 +20,29 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
-import eu.arrowhead.common.dto.GSDQueryFormDTO;
-import eu.arrowhead.common.dto.GSDQueryResultDTO;
-import eu.arrowhead.common.dto.ICNRequestFormDTO;
-import eu.arrowhead.common.dto.ICNResultDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
-import eu.arrowhead.common.dto.TokenDataDTO;
-import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
-import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.TokenDataDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -214,8 +215,8 @@ public class OrchestratorDriverTest {
 	@Test
 	public void testQueryServiceRegistryBySystemIdOk() {
 		final UriComponents queryBySystemIdUriBeforeExpand = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	 CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
-		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(Map.of(CommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(1)));
+																	 CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+		final UriComponents queryBySystemIdUriForTestRequest = queryBySystemIdUriBeforeExpand.expand(Map.of(CoreCommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(1)));
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
 		
@@ -255,7 +256,7 @@ public class OrchestratorDriverTest {
 	@Test
 	public void testQueryServiceRegistryBySystemRequestDTOOk() {
 		final UriComponents queryBySystemDTOUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8443, CommonConstants.SERVICE_REGISTRY_URI +
-																	  CommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
+																	  CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI);
 		
 		final SystemResponseDTO responseDTO = new SystemResponseDTO();
 		final SystemRequestDTO requestDTO = new SystemRequestDTO();

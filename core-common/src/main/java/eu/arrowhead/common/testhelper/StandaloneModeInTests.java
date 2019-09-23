@@ -11,6 +11,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 
 public abstract class StandaloneModeInTests {
 	
@@ -30,6 +31,6 @@ public abstract class StandaloneModeInTests {
 	@Order(5)
 	public void onApplicationEvent(final ContextRefreshedEvent event)  {
 		logger.info("STANDALONE mode is set...");
-		arrowheadContext.put(CommonConstants.SERVER_STANDALONE_MODE, true);
+		arrowheadContext.put(CoreCommonConstants.SERVER_STANDALONE_MODE, true);
 	}
 }

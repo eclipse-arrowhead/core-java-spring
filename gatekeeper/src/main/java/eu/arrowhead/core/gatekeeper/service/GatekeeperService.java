@@ -16,38 +16,39 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.ErrorWrapperDTO;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
-import eu.arrowhead.common.dto.GSDQueryFormDTO;
-import eu.arrowhead.common.dto.GSDQueryResultDTO;
-import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionResponseDTO;
-import eu.arrowhead.common.dto.ICNProposalRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalResponseDTO;
-import eu.arrowhead.common.dto.ICNRequestFormDTO;
-import eu.arrowhead.common.dto.ICNResultDTO;
-import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayType;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
@@ -65,10 +66,10 @@ public class GatekeeperService {
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperService.class);
 	
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
 	private boolean gatewayIsPresent;
 		
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
 	private boolean gatewayIsMandatory;
 	
 	@Autowired
@@ -80,10 +81,10 @@ public class GatekeeperService {
 	@Autowired
 	private GatekeeperDriver gatekeeperDriver;
 	
-	@Resource(name = CommonConstants.ICN_PROVIDER_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.ICN_PROVIDER_MATCHMAKER)
 	private ICNProviderMatchmakingAlgorithm icnProviderMatchmaker;
 	
-	@Resource(name = CommonConstants.GATEWAY_MATCHMAKER)
+	@Resource(name = CoreCommonConstants.GATEWAY_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatewayMatchmaker;
 
 	//=================================================================================================

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
@@ -33,18 +34,18 @@ import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryInterfaceConnectionRepository;
 import eu.arrowhead.common.database.repository.ServiceRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryGroupedResponseDTO;
-import eu.arrowhead.common.dto.ServiceRegistryListResponseDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.SystemListResponseDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
@@ -76,7 +77,7 @@ public class ServiceRegistryDBService {
 	@Autowired
 	private SSLProperties sslProperties;
 	
-	@Value(CommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
+	@Value(CoreCommonConstants.$SERVICE_REGISTRY_PING_TIMEOUT_WD)
 	private int pingTimeout;
 	
 	private final Logger logger = LogManager.getLogger(ServiceRegistryDBService.class);
@@ -102,7 +103,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -113,7 +114,7 @@ public class ServiceRegistryDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!System.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
@@ -123,7 +124,7 @@ public class ServiceRegistryDBService {
 			return DTOConverter.convertSystemEntryListToSystemListResponseDTO(systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -138,7 +139,7 @@ public class ServiceRegistryDBService {
 			return systemRepository.saveAndFlush(system);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -192,7 +193,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -212,7 +213,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -270,7 +271,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -289,7 +290,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -308,7 +309,7 @@ public class ServiceRegistryDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!ServiceDefinition.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
@@ -318,7 +319,7 @@ public class ServiceRegistryDBService {
 			return serviceDefinitionRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 		
@@ -346,7 +347,7 @@ public class ServiceRegistryDBService {
 			return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -387,7 +388,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -417,7 +418,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -436,7 +437,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -454,7 +455,7 @@ public class ServiceRegistryDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = sortField == null ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		if (!ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
 		}
@@ -463,7 +464,7 @@ public class ServiceRegistryDBService {
 			return serviceRegistryRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -480,7 +481,7 @@ public class ServiceRegistryDBService {
 	public ServiceRegistryGroupedResponseDTO getServiceRegistryEntriesForServiceRegistryGroupedResponse() {
 		logger.debug("getServiceRegistryEntriesForServiceRegistryGroupedResponse started...");
 		
-		final Page<ServiceRegistry> serviceRegistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID);
+		final Page<ServiceRegistry> serviceRegistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 		
 		return DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
 	}
@@ -493,7 +494,7 @@ public class ServiceRegistryDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = sortField == null ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = sortField == null ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		if (!ServiceRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
 		}
@@ -509,7 +510,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -552,7 +553,7 @@ public class ServiceRegistryDBService {
 			throw ex;	
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -594,7 +595,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -670,7 +671,7 @@ public class ServiceRegistryDBService {
 			throw new InvalidParameterException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.", ex);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -700,7 +701,7 @@ public class ServiceRegistryDBService {
 			return serviceRegistryRepository.saveAndFlush(srEntry);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -760,7 +761,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -829,7 +830,7 @@ public class ServiceRegistryDBService {
 			throw new InvalidParameterException("Invalid keys in the metadata requirements (whitespace only differences)");
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -849,7 +850,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -863,7 +864,7 @@ public class ServiceRegistryDBService {
 			serviceRegistryRepository.flush();
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -886,7 +887,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	//=================================================================================================
@@ -929,7 +930,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -1026,7 +1027,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -1078,7 +1079,7 @@ public class ServiceRegistryDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -1171,7 +1172,7 @@ public class ServiceRegistryDBService {
 			return serviceRegistryRepository.saveAndFlush(srEntry);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 }
