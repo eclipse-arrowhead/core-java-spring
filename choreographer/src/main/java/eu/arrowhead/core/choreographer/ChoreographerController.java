@@ -1,6 +1,6 @@
 package eu.arrowhead.core.choreographer;
 
-import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestWithExistingActionDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
-import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.Defaults;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +41,7 @@ public class ChoreographerController {
     private static final String PATH_VARIABLE_ID = "id";
     private static final String ID_NOT_VALID_ERROR_MESSAGE = "ID must be greater than 0.";
 
-    private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_URI = CommonConstants.MGMT_URI + "/actionplan";
+    private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/actionplan";
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
     private static final String CHOREOGRAPHER_ACTION_PLAN_WITH_ACTIONS_MGMT_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/withactions";
 
@@ -61,9 +59,9 @@ public class ChoreographerController {
 
     @ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CommonConstants.SWAGGER_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CommonConstants.ECHO_URI)
     public String echoService() {
@@ -76,8 +74,8 @@ public class ChoreographerController {
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
@@ -92,8 +90,8 @@ public class ChoreographerController {
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_WITH_ACTIONS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
@@ -107,8 +105,8 @@ public class ChoreographerController {
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI)
     public void removeActionPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
@@ -126,8 +124,8 @@ public class ChoreographerController {
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody public ChoreographerActionPlanResponseDTO getActionPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
@@ -147,18 +145,18 @@ public class ChoreographerController {
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody public List<ChoreographerActionPlanResponseDTO> getChoreographerActionPlans(
-            @RequestParam(name = CommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
-            @RequestParam(name = CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-            @RequestParam(name = CommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = Defaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-            @RequestParam(name = CommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New ChoreographerActionPlan get request received with page: {} and item_per page: {}.", page, size);
 
-        Utilities.ValidatedPageParams validatedPageParams = Utilities.validatePageParameters(page, size, direction, sortField);
+        CoreUtilities.ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
 
         List<ChoreographerActionPlanResponseDTO> choreographerActionPlanEntriesResponse = choreographerDBService.getChoreographerActionPlanEntriesResponse(validatedPageParams.getValidatedPage(), validatedPageParams.getValidatedSize(),
                 validatedPageParams.getValidatedDirecion(), sortField);

@@ -1,6 +1,6 @@
 package eu.arrowhead.core.choreographer.database.service;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerActionActionStepConnection;
@@ -19,7 +19,7 @@ import eu.arrowhead.common.database.repository.ChoreographerNextActionStepReposi
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerActionPlanRepository;
 
-import eu.arrowhead.common.dto.DTOConverter;
+import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.choreographer.*;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -85,7 +85,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         List<ServiceDefinition> usedServices = new ArrayList<>(usedServiceNames.size());
@@ -106,7 +106,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         ChoreographerActionStep stepEntry = choreographerActionStepRepository.save(new ChoreographerActionStep(stepName));
@@ -132,7 +132,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         ChoreographerActionStep stepEntry;
@@ -147,7 +147,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         List<ChoreographerActionStep> nextActionSteps = new ArrayList<>(nextActionStepNames.size());
@@ -164,7 +164,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         for(ChoreographerActionStep actionStep : nextActionSteps) {
@@ -194,7 +194,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         ChoreographerAction action = new ChoreographerAction();
@@ -234,7 +234,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByActionName(actionName);
@@ -251,7 +251,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         Optional<ChoreographerAction> nextActionOpt = choreographerActionRepository.findByActionName(nextActionName);
@@ -265,7 +265,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         return choreographerActionRepository.saveAndFlush(choreographerAction);
@@ -289,7 +289,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         ChoreographerActionPlan actionPlan = new ChoreographerActionPlan(actionPlanName);
@@ -315,7 +315,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         choreographerActionPlanActionConnectionRepository.flush();
@@ -336,7 +336,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         ChoreographerActionPlan actionPlan = new ChoreographerActionPlan(actionPlanName);
@@ -368,7 +368,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
 
         for (ChoreographerAction action : choreographerActions) {
@@ -386,7 +386,7 @@ public class ChoreographerDBService {
         int validatedPage = page < 0 ? 0 : page;
         int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
         Direction validatedDirection = direction == null ? Direction.ASC : direction;
-        String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+        String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
         try {
             if (!ChoreographerActionPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
@@ -397,7 +397,7 @@ public class ChoreographerDBService {
             return choreographerActionPlanRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
@@ -428,7 +428,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
@@ -452,7 +452,7 @@ public class ChoreographerDBService {
             throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 }

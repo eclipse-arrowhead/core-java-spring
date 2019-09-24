@@ -22,8 +22,6 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
-<<<<<<< HEAD:core-common/src/main/java/eu/arrowhead/common/dto/DTOConverter.java
-=======
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
@@ -37,7 +35,6 @@ import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
->>>>>>> d2764a28fe9c3230504d70af98d13857b29e788e:core-common/src/main/java/eu/arrowhead/common/dto/internal/DTOConverter.java
 
 public class DTOConverter {
 	
@@ -429,14 +426,6 @@ public class DTOConverter {
 
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
-		Assert.notNull(foreignSystem, "ForeignSystem is null");
-		
-		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
-										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
@@ -560,7 +549,6 @@ public class DTOConverter {
 		
 		return result;
 	}
-<<<<<<< HEAD:core-common/src/main/java/eu/arrowhead/common/dto/DTOConverter.java
 
 	//-------------------------------------------------------------------------------------------------
 	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
@@ -598,7 +586,8 @@ public class DTOConverter {
 	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep actionStep) {
 	    Assert.notNull(actionStep, "ChoreographerActionStep is null.");
 
-		return new ChoreographerActionStepResponseDTO(actionStep.getId(),
+		return new ChoreographerActionStepResponseDTO(
+				actionStep.getId(),
 				actionStep.getName(),
 				collectServiceDefinitionsFromChoreographerActionStep(actionStep.getActionStepServiceDefinitionConnections()),
 				collectChoreographerNextActionStepsFromChoreographerActionStep(actionStep.getNextActionSteps()),
@@ -659,6 +648,4 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
-=======
->>>>>>> d2764a28fe9c3230504d70af98d13857b29e788e:core-common/src/main/java/eu/arrowhead/common/dto/internal/DTOConverter.java
 }

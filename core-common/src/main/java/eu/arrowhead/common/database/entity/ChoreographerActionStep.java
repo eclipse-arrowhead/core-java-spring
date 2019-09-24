@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.entity;
 
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.Defaults;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -16,7 +17,7 @@ public class ChoreographerActionStep {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
+    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
     private String name;
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
