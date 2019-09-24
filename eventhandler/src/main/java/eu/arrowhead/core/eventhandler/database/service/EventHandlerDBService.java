@@ -221,7 +221,7 @@ public class EventHandlerDBService {
 		logger.debug("deleteSubscriptionResponse started ...");
 		
 
-		final EventType validEventType = validateEventType( eventType );
+		final EventType validEventType = validateEventTypeIsInDB( eventType );
 		final System validSubscriber = validateSystemRequestDTO( subscriberSystem ); 
 		
 		try {
@@ -513,7 +513,30 @@ public class EventHandlerDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private EventType validateEventTypeIsInDB(final String eventType) {
+		logger.debug("validateEventType started...");
+		
+		try {
+			
+			final String validEventTypeName = eventType.toUpperCase().trim();
+			final Optional<EventType> eventTypeOptional = eventTypeRepository.findByEventTypeName( validEventTypeName );
+			if ( eventTypeOptional.isEmpty() ) {
+			
+				throw new InvalidParameterException( "EventType" + NOT_IN_DB_ERROR_MESSAGE );
+			}
+			
+			return eventTypeOptional.get();		
+			
+		}catch (final Exception ex) {
+			
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private Set<System> getAllowedPublisherSystems(final Set<SystemRequestDTO> sources) {
