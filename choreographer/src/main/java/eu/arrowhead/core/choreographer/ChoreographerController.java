@@ -1,11 +1,17 @@
 package eu.arrowhead.core.choreographer;
 
+import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestWithExistingActionDTO;
 import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -28,11 +34,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
+@Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
-allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+    allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.CHOREOGRAPHER_URI)
@@ -57,7 +63,9 @@ public class ChoreographerController {
     @Autowired
     private ChoreographerDBService choreographerDBService;
 
-    @ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class)
+    @ApiOperation(value = "Return an echo message with the purpose of testing the core service availability",
+            response = String.class,
+            tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -69,8 +77,8 @@ public class ChoreographerController {
     }
 
     @ApiOperation(value = "Register one or more ActionPlans.",
-            notes = "Please note that creating ActionPlans this way means that Actions included in the ActionPlan(s) can't be already existing Actions." +
-                    "If you want to create an ActionPlan with already existing Actions please use the corresponding endpoint!")
+            notes = "Please note that creating ActionPlans this way means that Actions included in the ActionPlan(s) can't be already existing Actions.",
+            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
@@ -86,22 +94,8 @@ public class ChoreographerController {
         }
     }
 
-    @ApiOperation(value = "Register one or more ActionPlans using already existing Action chains only. Do NOT use until further update!")
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_WITH_ACTIONS_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public void registerActionPlansWithExistingActions(@RequestBody final List<ChoreographerActionPlanRequestWithExistingActionDTO> requests) {
-        for (ChoreographerActionPlanRequestWithExistingActionDTO request : requests) {
-            choreographerDBService.createChoreographerActionPlanWithExistingActions(request.getActionPlanName(), request.getActions());
-        }
-    }
-
-    @ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.")
+    @ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.",
+            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_400_MESSAGE),
@@ -120,7 +114,8 @@ public class ChoreographerController {
         logger.debug("ChoreographerActionStep with id: " + id + " successfully deleted!");
     }
 
-    @ApiOperation(value = "Return the requested ChoreographerActionPlan entry.")
+    @ApiOperation(value = "Return the requested ChoreographerActionPlan entry.",
+            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE),
@@ -141,7 +136,8 @@ public class ChoreographerController {
         return  choreographerActionPlanEntryByIdResponse;
     }
 
-    @ApiOperation(value = "Return requested ChoreographerActionPlan entries by the given parameters.")
+    @ApiOperation(value = "Return requested ChoreographerActionPlan entries by the given parameters.",
+            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE),
