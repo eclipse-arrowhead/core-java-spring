@@ -517,7 +517,7 @@ public class EventHandlerDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private EventType validateEventTypeIsInDB(final String eventType) {
-		logger.debug("validateEventType started...");
+		logger.debug("validateEventTypeIsInDB started...");
 		
 		try {
 			
@@ -529,6 +529,10 @@ public class EventHandlerDBService {
 			}
 			
 			return eventTypeOptional.get();		
+			
+		} catch (final InvalidParameterException ex) {
+			
+			throw ex;
 			
 		}catch (final Exception ex) {
 			
