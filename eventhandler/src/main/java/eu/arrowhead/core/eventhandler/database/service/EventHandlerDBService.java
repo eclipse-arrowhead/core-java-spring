@@ -252,7 +252,7 @@ public class EventHandlerDBService {
 		logger.debug("registerSubscription started ...");
 		
 		final Subscription subscription = validateSubscriptionRequestDTO(request);
-		checkSubscriptionUniqueConstrains( subscription );
+		checkSubscriptionUniqueConstraints( subscription );
 		
 		try {
 			
@@ -295,7 +295,7 @@ public class EventHandlerDBService {
 			if ( originalEventTypeId != eventTypeForUpdate.getId() ||
 					originalSubscriberSystemId != subscriberSystemForUpdate.getId()) {
 				
-				checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber(eventTypeForUpdate, subscriberSystemForUpdate);
+				checkSubscriptionUniqueConstraintsByEventTypeAndSubscriber(eventTypeForUpdate, subscriberSystemForUpdate);
 			}		
 			
 			subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
@@ -713,15 +713,15 @@ public class EventHandlerDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkSubscriptionUniqueConstrains( final Subscription subscription ) {
+	private void checkSubscriptionUniqueConstraints( final Subscription subscription ) {
 		logger.debug("checkSubscriptionUniqueConstrains started...");
 		
-		checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber( subscription.getEventType(), subscription.getSubscriberSystem());
+		checkSubscriptionUniqueConstraintsByEventTypeAndSubscriber( subscription.getEventType(), subscription.getSubscriberSystem());
 
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber( final EventType eventTypeForUpdate, final System subscriberSystemForUpdate ) {
+	private void checkSubscriptionUniqueConstraintsByEventTypeAndSubscriber( final EventType eventTypeForUpdate, final System subscriberSystemForUpdate ) {
 		logger.debug("checkSubscriptionUniqueConstrainsByEventTypeAndSubscriber started...");
 		
 		final Optional<Subscription> subcriptionOptional;
