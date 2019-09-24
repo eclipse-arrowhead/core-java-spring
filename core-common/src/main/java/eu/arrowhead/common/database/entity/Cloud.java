@@ -20,7 +20,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"operator", "name"}))
@@ -29,16 +29,16 @@ public class Cloud {
 	//=================================================================================================
 	// members
 	
-	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "updatedAt", "createdAt"); //NOSONAR
+	public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "operator", "name", "updatedAt", "createdAt"); //NOSONAR
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String operator;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String name;
 	
 	@Column(nullable = false)
@@ -50,7 +50,7 @@ public class Cloud {
 	@Column(nullable = false)
 	private boolean ownCloud = false;
 	
-	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	@Column(nullable = true, length = CoreDefaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -60,15 +60,15 @@ public class Cloud {
 	private ZonedDateTime updatedAt;
 	
 	@OneToMany(mappedBy = "cloud", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
 	
-	@OneToMany (mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<CloudGatekeeperRelay> gatekeeperRelays = new HashSet<>();
 	
-	@OneToMany (mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
+	@OneToMany(mappedBy = "cloud", fetch = FetchType.EAGER, orphanRemoval = true)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<CloudGatewayRelay> gatewayRelays = new HashSet<>();
 	
 	//=================================================================================================
@@ -133,4 +133,31 @@ public class Cloud {
 	public String toString() {
 		return "Cloud [id = " + id + ", operator = " + operator + ", name = " + name + "]";
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}	
+		if (obj == null) {
+			return false;
+		}	
+		if (getClass() != obj.getClass()) {		
+			return false;
+		}
+		
+		final Cloud other = (Cloud) obj;
+		
+		return id == other.id;
+	}	
 }

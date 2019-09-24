@@ -1,6 +1,8 @@
 package eu.arrowhead.core.serviceregistry.security;
 
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,9 +30,13 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 /**
  * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
@@ -45,7 +52,7 @@ public class SRAccessControlFilterTest {
 	// members
 
 	private static final String SERVICE_REGISTRY_ECHO = CommonConstants.SERVICE_REGISTRY_URI + "/echo";
-	private static final String SERVICE_REGISTRY_MGMT_SYSTEMS = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/systems";
+	private static final String SERVICE_REGISTRY_MGMT_SYSTEMS = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/systems";
 	private static final String SERVICE_REGISTRY_REGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 	private static final String SERVICE_REGISTRY_UNREGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 	private static final String SERVICE_REGISTRY_QUERY = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
@@ -61,9 +68,12 @@ public class SRAccessControlFilterTest {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@MockBean(name = "mockServiceRegistryDBService")
+	private ServiceRegistryDBService serviceRegistryDBService;
 	
 	private MockMvc mockMvc;
-	
+
 	//=================================================================================================
 	// methods
 	
@@ -220,14 +230,47 @@ public class SRAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
-	public void testQueryNotAllowedClient() throws Exception {
+	public void testQueryNotAllowedCoreSystemClientBecauseOfNotSpecifiedService() throws Exception {
+		postQuery(new ServiceQueryFormDTO(), "certificates/authorization.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryNotAllowedCoreSystemClientBecauseOfNotOwnService() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder("test-service").build();
+		postQuery(form, "certificates/authorization.pem", status().isUnauthorized());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryAllowedCoreSystemClientBecauseOfOwnService() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder(CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition()).build();
+		when(serviceRegistryDBService.queryRegistry(any())).thenReturn(new ServiceQueryResultDTO());
+		postQuery(form, "certificates/authorization.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryByNonCoreSystemWithoutServiceSpecified() throws Exception {
 		postQuery(new ServiceQueryFormDTO(), "certificates/provider.pem", status().isUnauthorized());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
-	public void testQueryOrchestratorAllowed() throws Exception {
+	public void testQueryNotPublicCoreSystemService() throws Exception {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		postQuery(serviceQueryFormDTO, "certificates/provider.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryOrchestratorAllowedCoreSystemClient() throws Exception {
 		// Filter enables the access but we use ill-formed input to make sure DB operation is never happened (without mocking it)
 		postQuery(new ServiceQueryFormDTO(), "certificates/orchestrator.pem", status().isBadRequest());
 	}
@@ -238,6 +281,17 @@ public class SRAccessControlFilterTest {
 	public void testQueryGateKeeperAllowed() throws Exception {
 		// Filter enables the access but we use ill-formed input to make sure DB operation is never happened (without mocking it)
 		postQuery(new ServiceQueryFormDTO(), "certificates/gatekeeper.pem", status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryPublicCoreSystemService() throws Exception {
+		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
+		serviceQueryFormDTO.setServiceDefinitionRequirement(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition());
+		when(serviceRegistryDBService.queryRegistry(any())).thenReturn(new ServiceQueryResultDTO());
+		
+		postQuery(serviceQueryFormDTO, "certificates/provider.pem", status().isOk());
 	}
 	
 	//=================================================================================================

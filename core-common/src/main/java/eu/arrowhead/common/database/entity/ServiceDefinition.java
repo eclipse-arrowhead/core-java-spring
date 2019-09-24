@@ -23,11 +23,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
+import eu.arrowhead.common.CoreDefaults;
+
 @Entity
 @NamedEntityGraph(name = "serviceDefinitionWithServiceRegistryEntries",
-	attributeNodes = {
-			@NamedAttributeNode(value = "serviceRegistryEntries")
-	})
+				  attributeNodes = {
+						  @NamedAttributeNode (value = "serviceRegistryEntries")
+})
 public class ServiceDefinition {
 
 	//=================================================================================================
@@ -39,7 +41,7 @@ public class ServiceDefinition {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column(nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
 	private String serviceDefinition; //NOSONAR
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

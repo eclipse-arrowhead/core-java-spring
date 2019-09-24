@@ -12,7 +12,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -23,12 +22,6 @@ import eu.arrowhead.common.token.TokenUtilities.TokenInfo;
 
 public abstract class TokenSecurityFilter extends ArrowheadFilter {
 
-	//=================================================================================================
-	// members
-
-	private PublicKey authorizationPublicKey;
-	private PrivateKey myPrivateKey;
-	
 	//=================================================================================================
 	// methods
 	
@@ -65,19 +58,18 @@ public abstract class TokenSecurityFilter extends ArrowheadFilter {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	protected TokenSecurityFilter(final PrivateKey myPrivateKey, final PublicKey authorizationPublicKey) {
-		super();
-		Assert.notNull(myPrivateKey, "My private key is null.");
-		Assert.notNull(authorizationPublicKey, "Authorization public key is null.");
-		
-		this.myPrivateKey = myPrivateKey;
-		this.authorizationPublicKey = authorizationPublicKey;
-	}
+	protected abstract PrivateKey getMyPrivateKey();
+	
+	//-------------------------------------------------------------------------------------------------
+	protected abstract PublicKey getAuthorizationPublicKey();
+	
+	//-------------------------------------------------------------------------------------------------
+	protected TokenSecurityFilter() {}
 	
 	//-------------------------------------------------------------------------------------------------
 	protected TokenInfo checkToken(final String clientCN, final String token, final String requestTarget) {
 		final String clientName = clientCN.split("\\.")[0];
-		final TokenInfo tokenInfo = TokenUtilities.validateTokenAndExtractTokenInfo(token, authorizationPublicKey, myPrivateKey); // expiration (if set) is already checked in this method
+		final TokenInfo tokenInfo = TokenUtilities.validateTokenAndExtractTokenInfo(token, getAuthorizationPublicKey(), getMyPrivateKey()); // expiration (if set) is already checked in this method
 		if (!clientName.equalsIgnoreCase(tokenInfo.getConsumerName())) {
 			log.error("Client CN ({}) and token information ({}) is mismatched at: {}", clientCN, tokenInfo.getConsumerName(), requestTarget);
 			throw new AuthException("Unauthorized accesss: " + requestTarget + ", invalid token.");

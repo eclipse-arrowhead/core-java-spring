@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 
 public class IntraCloudProviderMatchmakingParameters {
 	
@@ -22,7 +22,7 @@ public class IntraCloudProviderMatchmakingParameters {
 	
 	//-------------------------------------------------------------------------------------------------
 	public IntraCloudProviderMatchmakingParameters(final List<PreferredProviderDataDTO> preferredLocalProviders) {
-		Assert.notNull(preferredLocalProviders, "preferredLocalProviders set is null.");
+		Assert.notNull(preferredLocalProviders, "preferredLocalProviders list is null.");
 		this.preferredLocalProviders = preferredLocalProviders;
 	}
 

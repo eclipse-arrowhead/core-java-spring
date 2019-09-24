@@ -35,10 +35,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.ServiceDefinitionsListResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith(SpringRunner.class)
@@ -203,6 +204,18 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 					.andExpect(status().isBadRequest());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void addServiceDefinitionTestWithCoreSystemServiceDefinition() throws Exception {
+		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
+			this.mockMvc.perform(post("/serviceregistry/mgmt/services")
+					.content("{\"serviceDefinition\": \"" + coreSystemService.getServiceDefinition() + "\"}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());			
+		}
+	}
+	
 	//=================================================================================================
 	//Tests of putUpdateServiceDefinition
 	
@@ -243,6 +256,18 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 					.contentType(MediaType.APPLICATION_JSON)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void putUpdateServiceDefinitionTestWithCoreSystemServiceDefinition() throws Exception {
+		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
+			this.mockMvc.perform(put("/serviceregistry/mgmt/services/5")
+					.content("{\"serviceDefinition\": \"" + coreSystemService.getServiceDefinition() + "\"}")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());			
+		}
 	}
 	
 	//=================================================================================================

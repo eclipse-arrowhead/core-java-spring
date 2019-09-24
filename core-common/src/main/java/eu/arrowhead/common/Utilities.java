@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -39,10 +40,10 @@ import javax.naming.ldap.Rdn;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -51,10 +52,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 
 public class Utilities {
 	
@@ -136,47 +142,6 @@ public class Utilities {
 														
 		final ZoneOffset offset = OffsetDateTime.now().getOffset();
 		return ZonedDateTime.ofInstant(parsedDateTime.toInstant(), offset);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public static Direction calculateDirection(final String direction, final String origin) {
-		logger.debug("calculateDirection started ...");
-		final String directionStr = direction != null ? direction.toUpperCase().trim() : "";
-		Direction validatedDirection;
-		switch (directionStr) {
-			case CommonConstants.SORT_ORDER_ASCENDING:
-				validatedDirection = Direction.ASC;
-				break;
-			case CommonConstants.SORT_ORDER_DESCENDING:
-				validatedDirection = Direction.DESC;
-				break;
-			default:
-				throw new BadPayloadException("Invalid sort direction flag", org.apache.http.HttpStatus.SC_BAD_REQUEST, origin);
-		}
-		
-		return validatedDirection;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public static ValidatedPageParams validatePageParameters(final Integer page, final Integer size, final String direction, final String origin) {
-		int validatedPage;
-		int validatedSize;
-
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", org.apache.http.HttpStatus.SC_BAD_REQUEST, origin);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}
-		}
-
-		final Direction validatedDirection = calculateDirection(direction, origin);
-		
-		return new ValidatedPageParams(validatedPage, validatedSize, validatedDirection);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -297,7 +262,30 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static UriComponents createURI(final String scheme, final String host, final int port, final String path) {
-		return createURI(scheme, host, port, null, path);
+		return createURI(scheme, host, port, null, path, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static UriComponents createURI(final String scheme, final String host, final int port, final String path, final String... queryParams) {
+		if (queryParams.length % 2 != 0) {
+			throw new InvalidParameterException("queryParams variable arguments conatins a key without value");
+		}
+		
+		final LinkedMultiValueMap<String, String> query = new LinkedMultiValueMap<>();		
+		
+		int count = 1;
+		String key = "";
+		for (final String vararg : queryParams) {
+			if (count % 2 != 0) {
+				query.putIfAbsent(vararg, new ArrayList<>());	
+				key = vararg;
+			} else {
+				query.get(key).add(vararg);				
+			}
+			count++;
+		}
+		
+		return createURI(scheme, host, port, query, path);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -318,6 +306,7 @@ public class Utilities {
 	        	status = HttpStatus.NOT_FOUND;
 	        	break;
 	        case UNAVAILABLE:
+	        case TIMEOUT:
 	        	status = HttpStatus.GATEWAY_TIMEOUT;
 	        	break;
 	        default:
@@ -363,6 +352,14 @@ public class Utilities {
 	    }
 
 	    return null;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static String getCloudCommonName(final String cloudOperator, final String cloudName) {
+		Assert.isTrue(!isEmpty(cloudOperator), "Cloud operator is null or blank.");
+		Assert.isTrue(!isEmpty(cloudName), "Cloud name is null or blank.");
+		
+		return (cloudName.trim() + "." + cloudOperator.trim() + ".arrowhead.eu").toLowerCase();  
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -460,6 +457,34 @@ public class Utilities {
 	//-------------------------------------------------------------------------------------------------
 	public static String getDatetimePattern() { return dateTimePattern; }
 	
+	//-------------------------------------------------------------------------------------------------
+	public static void createExceptionFromErrorMessageDTO(final ErrorMessageDTO dto) {
+		Assert.notNull(dto, "Error message object is null.");
+		Assert.notNull(dto.getExceptionType(), "Exception type is null.");
+		
+		switch (dto.getExceptionType()) {
+	    case ARROWHEAD:
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case AUTH:
+	        throw new AuthException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case BAD_PAYLOAD:
+	        throw new BadPayloadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    case INVALID_PARAMETER:
+	    	throw new InvalidParameterException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case DATA_NOT_FOUND:
+            throw new DataNotFoundException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case GENERIC:
+            throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case TIMEOUT:
+        	throw new TimeoutException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        case UNAVAILABLE:
+	        throw new UnavailableServerException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+	    default:
+	    	logger.error("Unknown exception type: {}", dto.getExceptionType());
+	    	throw new ArrowheadException(dto.getErrorMessage(), dto.getErrorCode(), dto.getOrigin());
+        }
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -476,34 +501,5 @@ public class Utilities {
 		      logger.error("getPublicKey: X509 keyspec could not be created from the decoded bytes.");
 		      throw new AuthException("Public key decoding failed due wrong input key", ex);
 		}
-	}
-	
-	//=================================================================================================
-	// nested classed
-	
-	//-------------------------------------------------------------------------------------------------
-	public static class ValidatedPageParams {
-		
-		//=================================================================================================
-		// members
-		
-		private final int validatedPage;
-		private final int validatedSize;
-		private final Direction validatedDirecion;
-		
-		//=================================================================================================
-		// methods
-		
-		//-------------------------------------------------------------------------------------------------
-		public ValidatedPageParams(final int validatedPage, final int validatedSize, final Direction validatedDirection) {
-			this.validatedPage = validatedPage;
-			this.validatedSize = validatedSize;
-			this.validatedDirecion = validatedDirection;
-		}
-
-		//-------------------------------------------------------------------------------------------------
-		public int getValidatedPage() { return validatedPage; }
-		public int getValidatedSize() { return validatedSize; }
-		public Direction getValidatedDirecion() { return validatedDirecion; } 
 	}
 }

@@ -32,28 +32,29 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.CloudRelaysAssignmentRequestDTO;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
-import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBServiceTestContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = GatekeeperMain.class)
-@ContextConfiguration (classes = { GatekeeperDBServiceTestContext.class })
+@ContextConfiguration(classes = { GatekeeperDBServiceTestContext.class })
 public class GatekeeperControllerCloudTest {
 
 	//=================================================================================================
 	// members
 	
-	private static final String CLOUDS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.MGMT_URI + "/clouds";
+	private static final String CLOUDS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/clouds";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -75,12 +76,12 @@ public class GatekeeperControllerCloudTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of getClouds
+	//=================================================================================================
+	// Tests of getClouds
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetCloudsWithoutParameterWithoutParameter( ) throws Exception {
+	public void testGetCloudsWithoutParameterWithoutParameter() throws Exception {
 		final int amountOfClouds = 5;
 		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		
@@ -99,7 +100,7 @@ public class GatekeeperControllerCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetCloudsWithPageAndSizeParameter( ) throws Exception {
+	public void testGetCloudsWithPageAndSizeParameter() throws Exception {
 		final int amountOfClouds = 5;
 		final CloudWithRelaysListResponseDTO dto = createCloudWithRelaysListResponseDTOForDBMocking(amountOfClouds, RelayType.GATEKEEPER_RELAY, RelayType.GATEWAY_RELAY, false);
 		
@@ -145,8 +146,8 @@ public class GatekeeperControllerCloudTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of getCloudById
+	//=================================================================================================
+	// Tests of getCloudById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -174,8 +175,8 @@ public class GatekeeperControllerCloudTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of registerClouds
+	//=================================================================================================
+	// Tests of registerClouds
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -311,8 +312,8 @@ public class GatekeeperControllerCloudTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of updateCloudById
+	//=================================================================================================
+	// Tests of updateCloudById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -438,8 +439,8 @@ public class GatekeeperControllerCloudTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of assignRelaysToCloud
+	//=================================================================================================
+	// Tests of assignRelaysToCloud
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -450,10 +451,10 @@ public class GatekeeperControllerCloudTest {
 		dto.setGatewayRelayIds(List.of(1L));
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI + "/assign")
-				.content(objectMapper.writeValueAsBytes(dto))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+					.content(objectMapper.writeValueAsBytes(dto))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -465,10 +466,10 @@ public class GatekeeperControllerCloudTest {
 		dto.setGatewayRelayIds(List.of(1L));
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI + "/assign")
-				.content(objectMapper.writeValueAsBytes(dto))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(dto))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -480,10 +481,10 @@ public class GatekeeperControllerCloudTest {
 		dto.setGatewayRelayIds(List.of(1L));
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI + "/assign")
-				.content(objectMapper.writeValueAsBytes(dto))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(dto))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -495,14 +496,14 @@ public class GatekeeperControllerCloudTest {
 		dto.setGatewayRelayIds(List.of(-1L));
 		
 		this.mockMvc.perform(post(CLOUDS_MGMT_URI + "/assign")
-				.content(objectMapper.writeValueAsBytes(dto))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsBytes(dto))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of removeCloudById
+	//=================================================================================================
+	// Tests of removeCloudById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -524,7 +525,8 @@ public class GatekeeperControllerCloudTest {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private CloudWithRelaysListResponseDTO createCloudWithRelaysListResponseDTOForDBMocking(final int amountOfClouds, final RelayType gatekeeperRelayType, final RelayType gatewayRelayType, final boolean gatewayRelayExclusive) {
+	private CloudWithRelaysListResponseDTO createCloudWithRelaysListResponseDTOForDBMocking(final int amountOfClouds, final RelayType gatekeeperRelayType, final RelayType gatewayRelayType, 
+																							final boolean gatewayRelayExclusive) {
 		final List<CloudWithRelaysResponseDTO> cloudDTOList = new ArrayList<>();
 		
 		for (int i = 1; i <= amountOfClouds; ++i) {

@@ -21,11 +21,11 @@ import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
 import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
-@RunWith (SpringRunner.class)
+@RunWith(SpringRunner.class)
 public class GatekeeperDBServiceCloudTest {
 
 	//=================================================================================================
@@ -49,7 +49,7 @@ public class GatekeeperDBServiceCloudTest {
 	//=================================================================================================
 	// methods
 		
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of getClouds
 	
 	//-------------------------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ public class GatekeeperDBServiceCloudTest {
 		gatekeeperDBService.getClouds(1, 1, Direction.ASC, "invalid");
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of getCloudById
 	
 	//-------------------------------------------------------------------------------------------------
@@ -75,7 +75,42 @@ public class GatekeeperDBServiceCloudTest {
 		gatekeeperDBService.getCloudById(5);
 	}
 	
+	//=================================================================================================
+	// Tests of getCloudByOperatorAndName
+	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithNullOperator() {
+		gatekeeperDBService.getCloudByOperatorAndName(null, "test-name");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithBlankOperator() {
+		gatekeeperDBService.getCloudByOperatorAndName("   ", "test-name");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithNullName() {
+		gatekeeperDBService.getCloudByOperatorAndName("test-operator", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithBlankName() {
+		gatekeeperDBService.getCloudByOperatorAndName("test-operator", "   ");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetCloudByOperatorAndNameWithNotExistingCloud() {
+		when(cloudRepository.findByOperatorAndName(any(), any())).thenReturn(Optional.ofNullable(null)); 
+		
+		gatekeeperDBService.getCloudByOperatorAndName("test-operator", "test-name");
+	}
+	
+	//=================================================================================================
 	// Tests of registerBulkCloudsWithRelays
 	
 	//-------------------------------------------------------------------------------------------------
@@ -282,7 +317,7 @@ public class GatekeeperDBServiceCloudTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testRegisterBulkCloudsWithRelaysWithInvalidGatekeeperRelayid() {
+	public void testRegisterBulkCloudsWithRelaysWithInvalidGatekeeperRelayId() {
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator("operator");
 		cloudRequestDTO.setName("name");
@@ -432,6 +467,33 @@ public class GatekeeperDBServiceCloudTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testRegisterBulkCloudsWithRelaysWithNonExclusiveGatewayRelayInGatewayIdList() {
+		final Relay relayGatekeeper = new Relay("1.1.1.1", 10000, true, false, RelayType.GATEKEEPER_RELAY);
+		relayGatekeeper.setId(1);
+		
+		final Relay relayGateway = new Relay("2.2.2.2", 20000, true, false, RelayType.GATEWAY_RELAY);
+		relayGateway.setId(2);
+		
+		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
+		cloudRequestDTO.setOperator("operator");
+		cloudRequestDTO.setName("name");
+		cloudRequestDTO.setSecure(true);
+		cloudRequestDTO.setNeighbor(true);
+		cloudRequestDTO.setAuthenticationInfo("yfbgfbngfs");
+		cloudRequestDTO.setGatekeeperRelayIds(List.of(1L));
+		cloudRequestDTO.setGatewayRelayIds(List.of(2L));
+		final List<CloudRequestDTO> dtoList = List.of(cloudRequestDTO);
+		
+		when(cloudRepository.existsByOperatorAndName(any(), any())).thenReturn(false);
+		when(relayRepository.existsById(anyLong())).thenReturn(true);
+		when(relayRepository.findAllById(List.of(1L))).thenReturn(List.of(relayGatekeeper));
+		when(relayRepository.findAllById(List.of(2L))).thenReturn(List.of(relayGateway));
+					
+		gatekeeperDBService.registerBulkCloudsWithRelays(dtoList);
+	}
+	
+	//=================================================================================================
 	// Tests of updateCloudByIdWithRelays
 	
 	//-------------------------------------------------------------------------------------------------
@@ -793,8 +855,7 @@ public class GatekeeperDBServiceCloudTest {
 		gatekeeperDBService.updateCloudByIdWithRelays(1, cloudRequestDTO);
 	}
 	
-	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of assignRelaysToCloud
 	
 	//-------------------------------------------------------------------------------------------------
@@ -878,7 +939,7 @@ public class GatekeeperDBServiceCloudTest {
 		gatekeeperDBService.assignRelaysToCloud(1L, null, List.of(1L));
 	}
 	
-	//-------------------------------------------------------------------------------------------------
+	//=================================================================================================
 	// Tests of removeCloudById
 	
 	//-------------------------------------------------------------------------------------------------

@@ -39,11 +39,12 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.SystemListResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @RunWith (SpringRunner.class)
@@ -250,7 +251,22 @@ public class ServiceRegistryControllerSystemTest {
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void addSystemTestWithCoreSytemNames() throws Exception {
+		final SystemRequestDTO request = createValidSystemRequestDTO();
+		
+		for (final CoreSystem coreSystem : CoreSystem.values()) {
+			request.setSystemName(coreSystem.name());
+			this.mockMvc.perform(post(SYSTEMS_URL)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Test
@@ -311,7 +327,22 @@ public class ServiceRegistryControllerSystemTest {
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());	
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void updateSystemByIdTestWithCoreSytemNames() throws Exception {
+		final SystemRequestDTO request = createValidSystemRequestDTO();
+		
+		for (final CoreSystem coreSystem : CoreSystem.values()) {
+			request.setSystemName(coreSystem.name());
+			this.mockMvc.perform(put(SYSTEMS_URL + 1)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -418,7 +449,22 @@ public class ServiceRegistryControllerSystemTest {
 
 		final SystemResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemResponseDTO.class);
 		assertNotNull(responseBody.getSystemName());
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	@Test
+	public void mergeSystemTestWithCoreSytemNames() throws Exception {
+		final SystemRequestDTO request = createValidSystemRequestDTO();
+		
+		for (final CoreSystem coreSystem : CoreSystem.values()) {
+			request.setSystemName(coreSystem.name());
+			this.mockMvc.perform(patch(SYSTEMS_URL + 1)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	@Test

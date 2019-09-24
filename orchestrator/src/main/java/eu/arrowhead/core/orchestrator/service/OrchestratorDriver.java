@@ -20,24 +20,29 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.IdIdListDTO;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
-import eu.arrowhead.common.dto.TokenDataDTO;
-import eu.arrowhead.common.dto.TokenGenerationProviderDTO;
-import eu.arrowhead.common.dto.TokenGenerationRequestDTO;
-import eu.arrowhead.common.dto.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
+import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
+import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.TokenDataDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
+import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -47,9 +52,11 @@ public class OrchestratorDriver {
 	//=================================================================================================
 	// members
 	
-	private static final String AUTH_TOKEN_GENERATION_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-
+	private static final String AUTH_TOKEN_GENERATION_URI_KEY = CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	
 	private static final Logger logger = LogManager.getLogger(OrchestratorDriver.class);
 	
 	@Autowired
@@ -58,7 +65,7 @@ public class OrchestratorDriver {
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
-	@Value(CommonConstants.$AUTH_TOKEN_TTL_IN_MINUTES_WD)
+	@Value(CoreCommonConstants.$AUTH_TOKEN_TTL_IN_MINUTES_WD)
 	private int tokenDuration;
 	
 	//=================================================================================================
@@ -82,6 +89,27 @@ public class OrchestratorDriver {
 		return response.getBody();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public SystemResponseDTO queryServiceRegistryBySystemId(final long consumerSystemId) {
+		logger.debug("queryByIdServiceRegistry started...");
+		Assert.isTrue(consumerSystemId > 0, "ConsumerSystemId is less than 1.");
+		
+		final UriComponents queryBySystemIdUri = getQueryBySystemIdUri().expand(Map.of(CoreCommonConstants.COMMON_FIELD_NAME_ID, String.valueOf(consumerSystemId)));
+		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemIdUri, HttpMethod.GET, SystemResponseDTO.class);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public SystemResponseDTO queryServiceRegistryBySystemRequestDTO(final SystemRequestDTO consumerSystemRequestDTO) {
+		logger.debug("queryServiceRegistryBySystemRequestDTO started...");
+		Assert.notNull(consumerSystemRequestDTO, "ConsumerSystemRequestDTO is null.");
+
+		final UriComponents queryBySystemDTOUri = getQueryBySystemDTOUri();
+		final ResponseEntity<SystemResponseDTO> response = httpService.sendRequest(queryBySystemDTOUri, HttpMethod.POST, SystemResponseDTO.class, consumerSystemRequestDTO);
+		
+		return response.getBody();
+	}
 	//-------------------------------------------------------------------------------------------------
 	public List<OrchestrationResultDTO> generateAuthTokens(final OrchestrationFormRequestDTO request, final List<OrchestrationResultDTO> orList) {
 		logger.debug("generateAuthTokens started...");
@@ -126,7 +154,30 @@ public class OrchestratorDriver {
 		
 		return providers;
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ICNResultDTO doInterCloudNegotiation(final ICNRequestFormDTO icnForm) {
+		logger.debug("doInterCloudNegotiation started...");
+		Assert.notNull(icnForm, "ICNResultDTO is null.");
+		
+		final UriComponents icnUri = getGatekeeperICNUri();
+		final ResponseEntity<ICNResultDTO> response = httpService.sendRequest(icnUri, HttpMethod.POST, ICNResultDTO.class, icnForm);
+		
+		return response.getBody();
+	}
 
+	
+	//-------------------------------------------------------------------------------------------------
+	public GSDQueryResultDTO doGlobalServiceDiscovery(final GSDQueryFormDTO gsdForm ) {
+		logger.debug("doGlobalServiceDiscovery started...");
+		Assert.notNull(gsdForm, "GSDPollRequestDTO is null.");
+		
+		final UriComponents gsdUri = getGatekeeperGSDUri();
+		final ResponseEntity<GSDQueryResultDTO> response = httpService.sendRequest(gsdUri, HttpMethod.POST, GSDQueryResultDTO.class, gsdForm);
+		
+		return response.getBody();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -134,9 +185,9 @@ public class OrchestratorDriver {
 	private UriComponents getQueryUri() {
 		logger.debug("getQueryUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_URI)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_URI);
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_URI);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Orchestrator can't find Service Registry Query URI.");
 			}
@@ -145,6 +196,36 @@ public class OrchestratorDriver {
 		throw new ArrowheadException("Orchestrator can't find Service Registry Query URI.");
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQueryBySystemIdUri() {
+		logger.debug("getQueryByIdUri started...");
+		
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_BY_SYSTEM_ID_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_BY_SYSTEM_ID_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find Service Registry Query By Id URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find Service Registry Query By Id URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQueryBySystemDTOUri() {
+		logger.debug("getQueryBySystemDTOUri started...");
+		
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_BY_SYSTEM_DTO_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find Service Registry Query By DTO URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find Service Registry Query By DTO URI.");
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getAuthTokenGenerationUri() {
 		logger.debug("getAuthTokenGenerationUri started...");
@@ -162,7 +243,7 @@ public class OrchestratorDriver {
 	
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getAuthIntraCheckUri() {
-		logger.debug("getAuthTokenGenerationUri started...");
+		logger.debug("getAuthIntraCheckUri started...");
 		
 		if (arrowheadContext.containsKey(AUTH_INTRA_CHECK_URI_KEY)) {
 			try {
@@ -173,6 +254,36 @@ public class OrchestratorDriver {
 		}
 		
 		throw new ArrowheadException("Orchestrator can't find authorization check URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatekeeperGSDUri() {
+		logger.debug("getGatekeeperGSDUri started...");
+		
+		if (arrowheadContext.containsKey(GATEKEEPER_INIT_GSD_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_INIT_GSD_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find gatekeeper init_gsd URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find gatekeeper init_gsd URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatekeeperICNUri() {
+		logger.debug("getGatekeeperICNUri started...");
+		
+		if (arrowheadContext.containsKey(GATEKEEPER_INIT_ICN_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_INIT_ICN_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find gatekeeper init_icn URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find gatekeeper init_icn URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -237,9 +348,7 @@ public class OrchestratorDriver {
 	
 	//-------------------------------------------------------------------------------------------------
 	private boolean systemEquals(final SystemResponseDTO system, final String systemName, final String systemAddress, final int systemPort) {
-		return system.getSystemName().equals(systemName) &&
-			   system.getAddress().equals(systemAddress) &&
-			   system.getPort() == systemPort;
+		return system.getSystemName().equals(systemName) && system.getAddress().equals(systemAddress) && system.getPort() == systemPort;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -290,7 +399,7 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private Map<Long,List<Long>> convertAuthorizationResultsToMap(List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
+	private Map<Long,List<Long>> convertAuthorizationResultsToMap(final List<IdIdListDTO> authorizedProviderIdsWithInterfaceIds) {
 		logger.debug("convertAuthorizationResultsToMap started...");
 
 		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
@@ -320,7 +429,5 @@ public class OrchestratorDriver {
 		//-------------------------------------------------------------------------------------------------
 		public String getService() { return service; }
 		public List<TokenGenerationProviderDTO> getProviders() { return providers; 	}
-		
-		
 	}
 }

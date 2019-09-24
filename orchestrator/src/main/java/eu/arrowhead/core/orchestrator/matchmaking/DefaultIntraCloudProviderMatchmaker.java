@@ -6,9 +6,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.dto.DTOUtilities;
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOUtilities;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 public class DefaultIntraCloudProviderMatchmaker implements IntraCloudProviderMatchmakingAlgorithm {
 	
@@ -37,7 +37,7 @@ public class DefaultIntraCloudProviderMatchmaker implements IntraCloudProviderMa
 		}
 		
 		for (final ServiceRegistryResponseDTO srResult : srList) {
-			for (PreferredProviderDataDTO provider : params.getPreferredLocalProviders()) {
+			for (final PreferredProviderDataDTO provider : params.getPreferredLocalProviders()) {
 				if (DTOUtilities.equalsSystemInResponseAndRequest(srResult.getProvider(), provider.getProviderSystem())) {
 					logger.debug("The first preferred provider found in SR is selected.");
 					return srResult;

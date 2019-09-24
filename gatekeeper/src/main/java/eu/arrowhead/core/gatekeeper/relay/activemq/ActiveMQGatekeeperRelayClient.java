@@ -17,6 +17,7 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQSession;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,15 +27,15 @@ import org.springframework.web.util.UriComponents;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.DTOUtilities;
-import eu.arrowhead.common.dto.DecryptedMessageDTO;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
-import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
-import eu.arrowhead.common.dto.ICNProposalRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
+import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -116,9 +117,19 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 				session.close();
 			} catch (final JMSException ex) {
 				logger.debug(ex.getMessage());
-				logger.trace(ex);
+				logger.trace("Stacktrace:", ex);
 			}
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public boolean isConnectionClosed(final Session session) {
+		if (session instanceof ActiveMQSession) {
+			return ((ActiveMQSession) session).isClosed();
+		}
+		
+		return true;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -174,7 +185,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			final Queue responseQueue = session.createQueue(RESPONSE_QUEUE_PREFIX + serverCommonName + "-" + gaMsg.getSessionId());
 			messageProducer = session.createProducer(responseQueue);
 			
-			final String encodedMessage = cryptographer.encodeRelayMessage(CommonConstants.RELAY_MESSAGE_TYPE_ACK, gaMsg.getSessionId(), null, peerPublicKey); // no payload
+			final String encodedMessage = cryptographer.encodeRelayMessage(CoreCommonConstants.RELAY_MESSAGE_TYPE_ACK, gaMsg.getSessionId(), null, peerPublicKey); // no payload
 			final TextMessage ackMsg = session.createTextMessage(encodedMessage);
 			messageProducer.send(ackMsg);
 			
@@ -387,9 +398,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		logger.debug("getMessageDTOClass started...");
 		
 		switch (messageType) {
-		case CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL: 
 			return request ? GSDPollRequestDTO.class : GSDPollResponseDTO.class;
-		case CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 			return request ? ICNProposalRequestDTO.class : ICNProposalResponseDTO.class;
 		default:
 			throw new ArrowheadException("Invalid message type: " + messageType);
@@ -401,11 +412,11 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		logger.debug("getMessageType started...");
 		
 		if (requestPayload instanceof GSDPollRequestDTO) {
-			return CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL;
+			return CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL;
 		}
 		
 		if (requestPayload instanceof ICNProposalRequestDTO) {
-			return CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL;
+			return CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL;
 		}
 		
 		throw new ArrowheadException("Invalid message DTO: " + requestPayload.getClass().getSimpleName());
@@ -425,7 +436,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private void validateRequest(final String sessionId, final DecryptedMessageDTO msg) {
 		logger.debug("validateRequest started...");
 		
-		if (!CommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL.equalsIgnoreCase(msg.getMessageType()) && !CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL.equalsIgnoreCase(msg.getMessageType())) {
+		if (!CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL.equalsIgnoreCase(msg.getMessageType()) && !CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL.equalsIgnoreCase(msg.getMessageType())) {
 			throw new AuthException("Unauthorized message on queue.");
 		}
 		
@@ -436,7 +447,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private void validateAcknowledgement(final String sessionId, final DecryptedMessageDTO msg) {
 		logger.debug("validateAcknowledgement started...");
 
-		validateResponse(sessionId, CommonConstants.RELAY_MESSAGE_TYPE_ACK, msg);
+		validateResponse(sessionId, CoreCommonConstants.RELAY_MESSAGE_TYPE_ACK, msg);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -476,7 +487,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		}
 		
 		logger.error("Request returned with {}: {}", dto.getExceptionType(), dto.getErrorMessage());
-		DTOUtilities.createExceptionFromErrorMessageDTO(dto);
+		Utilities.createExceptionFromErrorMessageDTO(dto);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

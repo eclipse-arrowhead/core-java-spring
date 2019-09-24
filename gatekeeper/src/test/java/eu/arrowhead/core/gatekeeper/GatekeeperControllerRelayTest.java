@@ -33,25 +33,26 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.RelayListResponseDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayResponseDTO;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.RelayListResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBServiceTestContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = GatekeeperMain.class)
-@ContextConfiguration (classes = { GatekeeperDBServiceTestContext.class })
+@ContextConfiguration(classes = { GatekeeperDBServiceTestContext.class })
 public class GatekeeperControllerRelayTest {
 
 	//=================================================================================================
 	// members
 	
-	private static final String RELAYS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.MGMT_URI + "/relays";
+	private static final String RELAYS_MGMT_URI = CommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/relays";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -73,12 +74,12 @@ public class GatekeeperControllerRelayTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of getRelays
+	//=================================================================================================
+	// Tests of getRelays
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetRelaysWithoutParameterWithoutParameter( ) throws Exception {
+	public void testGetRelaysWithoutParameterWithoutParameter() throws Exception {
 		final int amountOfRelays = 5;
 		final RelayListResponseDTO relayListResponseDTO = createRelayListResponseDTOForDBMocking(amountOfRelays);
 		
@@ -95,7 +96,7 @@ public class GatekeeperControllerRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testGetRelaysWithPageAndSizeParameter( ) throws Exception {
+	public void testGetRelaysWithPageAndSizeParameter() throws Exception {
 		final int amountOfRelays = 5;
 		final RelayListResponseDTO relayListResponseDTO = createRelayListResponseDTOForDBMocking(amountOfRelays);
 		
@@ -139,8 +140,8 @@ public class GatekeeperControllerRelayTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of getRelayById
+	//=================================================================================================
+	// Tests of getRelayById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -151,9 +152,9 @@ public class GatekeeperControllerRelayTest {
 		when(gatekeeperDBService.getRelayByIdResponse(anyLong())).thenReturn(relayResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get(RELAYS_MGMT_URI + "/" + requestedId)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isOk())
-				   .andReturn();
+				   							   .accept(MediaType.APPLICATION_JSON))
+				   							   .andExpect(status().isOk())
+				   							   .andReturn();
 		
 		final RelayResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), RelayResponseDTO.class);
 		assertEquals(requestedId, responseBody.getId());
@@ -167,8 +168,8 @@ public class GatekeeperControllerRelayTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of getRelayByAddressAndPort
+	//=================================================================================================
+	// Tests of getRelayByAddressAndPort
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -213,8 +214,8 @@ public class GatekeeperControllerRelayTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of registerRelays
+	//=================================================================================================
+	// Tests of registerRelays
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -226,15 +227,16 @@ public class GatekeeperControllerRelayTest {
 		final String testType = "GENERAL_RELAY";
 		
 		final List<RelayRequestDTO> requestDTOList = List.of(new RelayRequestDTO(testAddress, testPort, testSecure, testExclusive, testType));
-		final RelayListResponseDTO responseDTOList = new RelayListResponseDTO(List.of(new RelayResponseDTO(1, testAddress, testPort, testSecure, testExclusive, Utilities.convertStringToRelayType(testType), "", "")), 1);
+		final RelayListResponseDTO responseDTOList = new RelayListResponseDTO(List.of(new RelayResponseDTO(1, testAddress, testPort, testSecure, testExclusive,
+																					  Utilities.convertStringToRelayType(testType), "", "")), 1);
 		when(gatekeeperDBService.registerBulkRelaysResponse(any())).thenReturn(responseDTOList); 
 		
 		final MvcResult response = this.mockMvc.perform(post(RELAYS_MGMT_URI)
-											  .content(objectMapper.writeValueAsBytes(requestDTOList))
-											  .contentType(MediaType.APPLICATION_JSON)
-											  .accept(MediaType.APPLICATION_JSON))
-											  .andExpect(status().isCreated())
-											  .andReturn();
+											   .content(objectMapper.writeValueAsBytes(requestDTOList))
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+											  	.andExpect(status().isCreated())
+											  	.andReturn();
 		
 		final RelayListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), RelayListResponseDTO.class);
 		assertEquals(testAddress, responseBody.getData().get(0).getAddress());
@@ -360,8 +362,8 @@ public class GatekeeperControllerRelayTest {
 					.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of updateRelayById
+	//=================================================================================================
+	// Tests of updateRelayById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -378,11 +380,11 @@ public class GatekeeperControllerRelayTest {
 		when(gatekeeperDBService.updateRelayByIdResponse(anyLong(), any(), anyInt(), anyBoolean(), anyBoolean(), any())).thenReturn(responseDTO); 
 		
 		final MvcResult response = this.mockMvc.perform(put(RELAYS_MGMT_URI + "/" + testId)
-											  .content(objectMapper.writeValueAsBytes(requestDTO))
-											  .contentType(MediaType.APPLICATION_JSON)
-											  .accept(MediaType.APPLICATION_JSON))
-											  .andExpect(status().isOk())
-											  .andReturn();
+											   .content(objectMapper.writeValueAsBytes(requestDTO))
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
 		
 		final RelayResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), RelayResponseDTO.class);
 		assertEquals(testAddress, responseBody.getAddress());
@@ -461,8 +463,8 @@ public class GatekeeperControllerRelayTest {
 				.andExpect(status().isBadRequest());
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	//Tests of updateRelayById
+	//=================================================================================================
+	// Tests of updateRelayById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test

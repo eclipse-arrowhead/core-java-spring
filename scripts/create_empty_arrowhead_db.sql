@@ -92,6 +92,9 @@ CREATE TABLE `service_interface` (
   UNIQUE KEY `interface` (`interface_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+INSERT INTO `service_interface` (interface_name) VALUES ("HTTP-SECURE-JSON");
+INSERT INTO `service_interface` (interface_name) VALUES ("HTTP-INSECURE-JSON");
+
 -- Service Registry
 
 DROP TABLE IF EXISTS `service_registry`;

@@ -5,16 +5,13 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
-import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.relay.RelayClient;
 
-public interface GatekeeperRelayClient {
+public interface GatekeeperRelayClient extends RelayClient {
 
 	//=================================================================================================
 	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	public Session createConnection(final String host, final int port) throws JMSException;
-	public void closeConnection(final Session session);
 	
 	//-------------------------------------------------------------------------------------------------
 	public MessageConsumer subscribeGeneralAdvertisementTopic(final Session session) throws JMSException;

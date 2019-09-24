@@ -3,8 +3,8 @@ package eu.arrowhead.core.gatekeeper.relay;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.GSDPollResponseDTO;
-import eu.arrowhead.common.dto.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
 public class GatekeeperRelayResponse {

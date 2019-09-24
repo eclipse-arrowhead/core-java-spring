@@ -1,7 +1,9 @@
 package eu.arrowhead.core.orchestrator;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,15 +29,16 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.OrchestrationFlags;
-import eu.arrowhead.common.dto.OrchestrationFlags.Flag;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags;
+import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.orchestrator.service.OrchestratorService;
 
@@ -513,6 +516,34 @@ public class OrchestratorControllerTest {
 		Assert.assertEquals(3, response.getResponse().size());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getStoreOchestrationProcessResponseOkTest() throws Exception {
+		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
+		
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/1")
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getStoreOchestrationProcessResponseByInvalidIdTest() throws Exception {
+		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
+		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
+		
+		final MvcResult result = this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/-1")
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/{" + CoreCommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
+		Assert.assertEquals("Consumer system :  Id must be greater than 0. ", error.getErrorMessage());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -525,4 +556,4 @@ public class OrchestratorControllerTest {
 						   .andExpect(matcher)
 						   .andReturn();
 	}
-}
+};

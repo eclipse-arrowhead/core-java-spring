@@ -31,16 +31,17 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudResponseDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreListResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreModifyPriorityRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService;
 
 @RunWith(SpringRunner.class)
@@ -51,7 +52,7 @@ public class OrchestratorStoreControllerTest {
 	//=================================================================================================
 	// members
 
-	private static final String ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER = CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_by_consumer";
+	private static final String ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER = CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_by_consumer";
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -82,7 +83,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreResponseDTO dto = getOrchestratorStoreResponseDTOForTest();
 		when(orchestratorStoreDBService.getOrchestratorStoreByIdResponse(anyLong())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -90,7 +91,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoreByIdWithInvalidIdTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -104,7 +105,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -115,8 +116,8 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+					.param(CoreCommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -124,8 +125,8 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullPageParamTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+					.param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -133,8 +134,8 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullItemPerPageParamTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
-					.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+					.param(CoreCommonConstants.REQUEST_PARAM_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -142,7 +143,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getOrchestratorStoresNullItemPerPageParamAndNullPageParamTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -156,7 +157,7 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -167,8 +168,8 @@ public class OrchestratorStoreControllerTest {
 		final OrchestratorStoreListResponseDTO dto = getOrchestratorStoreListResponseDTOForTest(3);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesResponse(anyInt(), anyInt(), any(), anyString())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
+					.param(CoreCommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -176,8 +177,8 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullPageParamTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
+					.param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -185,8 +186,8 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
-					.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
+					.param(CoreCommonConstants.REQUEST_PARAM_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -194,7 +195,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getAllTopPriorityOrchestratorStoresNullItemPerPageParamAndNullPageParamTest() throws Exception {
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/all_top_priority")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -224,7 +225,7 @@ public class OrchestratorStoreControllerTest {
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerResponse(anyInt(), anyInt(), any(), anyString(), anyLong(), any(), any())).thenReturn(dto);
 		
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
-					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+					.param(CoreCommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -233,7 +234,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void getOrchestratorStoresByConsumerNullPageParamTest() throws Exception {
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
-					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
+					.param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -242,7 +243,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void getOrchestratorStoresByConsumerNullItemPerPageParamTest() throws Exception {
 		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + ORCHESTRATOR_STORE_MGMT_ALL_BY_CONSUMER)
-					.param(CommonConstants.REQUEST_PARAM_PAGE, "1")
+					.param(CoreCommonConstants.REQUEST_PARAM_PAGE, "1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -316,7 +317,7 @@ public class OrchestratorStoreControllerTest {
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getLocalOrchestratorStoreRequestDTOListForTest(3);
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -330,7 +331,7 @@ public class OrchestratorStoreControllerTest {
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  null;
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -344,7 +345,7 @@ public class OrchestratorStoreControllerTest {
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getLocalOrchestratorStoreRequestDTOListForNullPriorityTest(3);
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -358,7 +359,7 @@ public class OrchestratorStoreControllerTest {
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForNullServiceInterfaceIdTest(3);
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -372,7 +373,7 @@ public class OrchestratorStoreControllerTest {
 		when(orchestratorStoreDBService.createOrchestratorStoresResponse(any())).thenReturn(dto);
 		
 		final List<OrchestratorStoreRequestDTO> request =  getOrchestratorStoreRequestDTOListForListElementsNullTest(3);
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI)
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -385,7 +386,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeOrchestratorStoreOkTest() throws Exception {
-		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
+		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -393,7 +394,7 @@ public class OrchestratorStoreControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void removeOrchestratorStoreInvalidIdTest() throws Exception {
-		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
+		this.mockMvc.perform(delete(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -405,7 +406,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void modifyPrioritiesOkTest() throws Exception {
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTO(3);
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -416,7 +417,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void modifyPrioritiesNullRequestTest() throws Exception {
 		final OrchestratorStoreModifyPriorityRequestDTO request = null;
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -427,7 +428,7 @@ public class OrchestratorStoreControllerTest {
 	@Test
 	public void modifyPrioritiesEmptyMapTest() throws Exception {
 		final OrchestratorStoreModifyPriorityRequestDTO request = getOrchestratorStoreModifyPriorityRequestDTOWithEmptyMap();
-		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
+		this.mockMvc.perform(post(CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + "/modify_priorities")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(request))
 					.accept(MediaType.APPLICATION_JSON))
@@ -454,7 +455,6 @@ public class OrchestratorStoreControllerTest {
 	private CloudRequestDTO getLocalProviderCloudRequestDTOForTest() {
 		final String operator = "operatorForTest";
 		final String name = "cloudName";
-		final boolean ownCloud = true;	
 		
 		final CloudRequestDTO cloudRequestDTO = new CloudRequestDTO();
 		cloudRequestDTO.setOperator(operator);

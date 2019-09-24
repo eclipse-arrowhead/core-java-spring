@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.ForeignSystem;
@@ -32,15 +33,15 @@ import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreListResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreModifyPriorityRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
@@ -60,6 +61,7 @@ public class OrchestratorStoreDBService {
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	private static final String MODIFY_PRIORITY_MAP_EXCEPTION_MESSAGE = "The given PriorityMap has different size than the size of consumer-serviceDeffinition pars in DB";
 	private static final String NOT_VALID_ERROR_MESSAGE = " is not valid.";
+	private static final String NOT_FOREIGN_ERROR_MESSAGE = " is not foreign";
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorStoreDBService.class);
 	
@@ -92,7 +94,6 @@ public class OrchestratorStoreDBService {
 		logger.debug("getOrchestratorStoreById started...");
 		
 		final OrchestratorStore orchestratorStore = getOrchestratorStoreById(orchestratorStoreId);
-		
 		if (orchestratorStore.isForeign()) {
 			return getForeignResponseDTO(orchestratorStore);
 		} else {
@@ -120,7 +121,7 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -141,7 +142,7 @@ public class OrchestratorStoreDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE + validatedSortField);
@@ -151,7 +152,7 @@ public class OrchestratorStoreDBService {
 			return orchestratorStoreRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -172,17 +173,17 @@ public class OrchestratorStoreDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE + validatedSortField);
 		}
 		
 		try {
-			return orchestratorStoreRepository.findAllByPriority(CommonConstants.TOP_PRIORITY, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+			return orchestratorStoreRepository.findAllByPriority(CoreCommonConstants.TOP_PRIORITY, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -206,7 +207,7 @@ public class OrchestratorStoreDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE + validatedSortField);
@@ -225,7 +226,7 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
-		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName);
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
 		if (serviceDefinitionOption.isEmpty()) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
 		}
@@ -233,7 +234,7 @@ public class OrchestratorStoreDBService {
 		final ServiceInterface validServiceInterface; 
 		if (serviceInterfaceName != null) {
 			if (interfaceNameVerifier.isValid(serviceInterfaceName)) {
-				final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName);
+				final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName.toUpperCase().trim());
 				if (serviceInterfaceOptional.isEmpty())  {
 					throw new InvalidParameterException("ServiceInterfaceName " + NOT_IN_DB_ERROR_MESSAGE);
 				}
@@ -256,7 +257,91 @@ public class OrchestratorStoreDBService {
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStore> getOrchestratorStoresByConsumerIdAndServiceDefinition(final long consumerSystemId,
+			final String serviceDefinitionName) {
+		logger.debug("getOrchestratorStoresByConsumerIdAndServiceDefinition started...");
+		
+		if ( consumerSystemId < 1) {
+			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		
+		if ( Utilities.isEmpty(serviceDefinitionName)) {
+			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
+		if ( consumerOption.isEmpty() ) {
+			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
+		if ( serviceDefinitionOption.isEmpty() ) {
+			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		try {		
+			
+			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
+					consumerOption.get(), 
+					serviceDefinitionOption.get(),
+					Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY)
+					);			
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStore> getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(final long consumerSystemId,
+			final String serviceDefinitionName, final String serviceInterfaceName) {
+		logger.debug("getOrchestratorStoresByConsumerIdAndServiceDefinition started...");
+		
+		if ( consumerSystemId < 1) {
+			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		
+		if ( Utilities.isEmpty(serviceDefinitionName)) {
+			throw new InvalidParameterException("ServiceDefinitionName " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		if ( Utilities.isEmpty(serviceInterfaceName)) {
+			throw new InvalidParameterException("ServiceInterface " + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
+		if ( consumerOption.isEmpty() ) {
+			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
+		if ( serviceDefinitionOption.isEmpty() ) {
+			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		final Optional<ServiceInterface> serviceInterfaceOption = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName);
+		if ( serviceInterfaceOption.isEmpty() ) {
+			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		try {		
+			
+			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
+					consumerOption.get(), 
+					serviceDefinitionOption.get(),
+					serviceInterfaceOption.get(),
+					Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY)
+					);			
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -273,7 +358,7 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -298,7 +383,7 @@ public class OrchestratorStoreDBService {
 			return savedOrchestratorStoreEntries;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -348,7 +433,7 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -374,8 +459,50 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<OrchestratorStore> getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(final long consumerSystemId) {
+		logger.debug("getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId started...");
+		
+		if (consumerSystemId < 1) {
+			throw new InvalidParameterException( "ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		
+		try {
+			return orchestratorStoreRepository.findAllByPriorityAndSystemId(CoreCommonConstants.TOP_PRIORITY, consumerSystemId);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S3655")
+	public OrchestratorStoreResponseDTO getForeignResponseDTO(final OrchestratorStore orchestratorStore) {
+		logger.debug("getForeignResponseDTO started...");
+		
+		if (orchestratorStore == null) {
+			throw new InvalidParameterException("OrchestratorStore " + NULL_ERROR_MESSAGE);
+		}
+		
+		if (!orchestratorStore.isForeign()) {
+			throw new InvalidParameterException("OrchestratorStore " + NOT_FOREIGN_ERROR_MESSAGE);
+		}
+		
+		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findById(orchestratorStore.getProviderSystemId());
+		if (foreignSystemOptional.isEmpty()) {
+			throw new InvalidParameterException("ForeignSystemOptional by id: " + orchestratorStore.getProviderSystemId() + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		final ForeignSystem foreignSystem = foreignSystemOptional.get();
+		
+		final SystemResponseDTO providerSystem = DTOConverter.convertForeignSystemToSystemResponseDTO(foreignSystem);		
+		final CloudResponseDTO providerCloud = DTOConverter.convertCloudToCloudResponseDTO(foreignSystem.getProviderCloud());
+		
+		return DTOConverter.convertOrchestratorStoreToOrchestratorStoreResponseDTO(orchestratorStore, providerSystem, providerCloud);
 	}
 	
 	//=================================================================================================
@@ -405,7 +532,7 @@ public class OrchestratorStoreDBService {
 			throw new InvalidParameterException("ServiceInterfaceName " + NOT_VALID_ERROR_MESSAGE);
 		}
 		
-		final String validServiceInterfaceName = serviceInterfaceName;
+		final String validServiceInterfaceName = serviceInterfaceName.toUpperCase().trim();
 		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
 		if (serviceInterfaceOptional.isEmpty()) {
 			throw new InvalidParameterException("ServiceInterface by serviceDefinitionName " + validServiceInterfaceName + NOT_IN_DB_ERROR_MESSAGE);
@@ -642,7 +769,7 @@ public class OrchestratorStoreDBService {
 		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(consumerSystem, serviceDefinition,
 																																					     serviceInterface);
 		if (orchestratorStoreList.isEmpty()) {
-			orchestratorStore.setPriority(CommonConstants.TOP_PRIORITY);
+			orchestratorStore.setPriority(CoreCommonConstants.TOP_PRIORITY);
 			
 			return orchestratorStoreRepository.saveAndFlush(orchestratorStore);
 		} else {
@@ -704,6 +831,7 @@ public class OrchestratorStoreDBService {
 		for (final OrchestratorStore orchestratorStoreToUpdate : updatedOrchestratorStoreEntryList) {
 			orchestratorStoreRepository.save(orchestratorStoreToUpdate);
 		}
+		
 		orchestratorStoreRepository.flush();
 	}
 	
@@ -754,7 +882,7 @@ public class OrchestratorStoreDBService {
 		if (!interfaceNameVerifier.isValid(serviceInterfaceName)) {
 			throw new InvalidParameterException("ServiceInterfaceName " + NOT_VALID_ERROR_MESSAGE);
 		}
-		final String validServiceInterfaceName = serviceInterfaceName;
+		final String validServiceInterfaceName = serviceInterfaceName.toUpperCase().trim();
 		
 		final Optional<ServiceInterface> serviceInterfaceOptional = serviceInterfaceRepository.findByInterfaceName(validServiceInterfaceName);
 		if (serviceInterfaceOptional.isEmpty()) {
@@ -814,21 +942,6 @@ public class OrchestratorStoreDBService {
 		
 		return DTOConverter.convertOrchestratorStoreToOrchestratorStoreResponseDTO(orchestratorStore, providerSystem, null);
 	}
-
-	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("squid:S3655")
-	private OrchestratorStoreResponseDTO getForeignResponseDTO(final OrchestratorStore orchestratorStore) {
-		final Optional<ForeignSystem> foreignSystemOptional = foreignSystemRepository.findById(orchestratorStore.getProviderSystemId());
-		if (foreignSystemOptional.isEmpty()) {
-			throw new InvalidParameterException("ForeignSystemOptional by id: " + orchestratorStore.getProviderSystemId() + NOT_IN_DB_ERROR_MESSAGE);
-		}
-		final ForeignSystem foreignSystem = foreignSystemOptional.get();
-		
-		final SystemResponseDTO providerSystem = DTOConverter.convertForeignSystemToSystemResponseDTO(foreignSystem);		
-		final CloudResponseDTO providerCloud = DTOConverter.convertCloudToCloudResponseDTO(foreignSystem.getProviderCloud());
-		
-		return DTOConverter.convertOrchestratorStoreToOrchestratorStoreResponseDTO(orchestratorStore, providerSystem, providerCloud);
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreResponseDTO> getOrchestratorDTOListFromPage(final Page<OrchestratorStore> orchestratorStorePage) {
@@ -868,5 +981,4 @@ public class OrchestratorStoreDBService {
 			return null;
 		}
 	}
-
 }

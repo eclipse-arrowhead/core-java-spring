@@ -21,17 +21,19 @@ import java.util.ServiceConfigurationError;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.Utilities.ValidatedPageParams;
-import eu.arrowhead.common.dto.ErrorMessageDTO;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.ExceptionType;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.common.exception.TimeoutException;
+import eu.arrowhead.common.exception.UnavailableServerException;
 
 @RunWith(SpringRunner.class)
 public class UtilitiesTest {
@@ -44,66 +46,6 @@ public class UtilitiesTest {
 	
 	//=================================================================================================
 	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = BadPayloadException.class)
-	public void testCalculateDirectionDirectionNull() {
-		Utilities.calculateDirection(null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = BadPayloadException.class)
-	public void testCalculateDirectionDirectionEmpty() {
-		Utilities.calculateDirection(" ", null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = BadPayloadException.class)
-	public void testCalculateDirectionDirectionInvalid() {
-		Utilities.calculateDirection("invalid", null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testCalculateDirectionDirectionAsc() {
-		final Direction direction = Utilities.calculateDirection(" ASC ", null);
-		Assert.assertEquals(Direction.ASC, direction);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testCalculateDirectionDirectionDesc() {
-		final Direction direction = Utilities.calculateDirection("desc", null);
-		Assert.assertEquals(Direction.DESC, direction);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testValidatePageParametersPageAndSizeNull() {
-		final ValidatedPageParams vpp = Utilities.validatePageParameters(null, null, "ASC", "origin");
-		Assert.assertEquals(-1, vpp.getValidatedPage());
-		Assert.assertEquals(-1, vpp.getValidatedSize());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = BadPayloadException.class)
-	public void testValidatePageParametersPageNullAndSizeNotNull() {
-		Utilities.validatePageParameters(null, 10, "ASC", "origin");
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = BadPayloadException.class)
-	public void testValidatePageParametersPageNotNullAndSizeNull() {
-		Utilities.validatePageParameters(0, null, "ASC", "origin");
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testValidatePageParametersPageAndSizeNotNull() {
-		final ValidatedPageParams vpp = Utilities.validatePageParameters(1, 15, "ASC", "origin");
-		Assert.assertEquals(1, vpp.getValidatedPage());
-		Assert.assertEquals(15, vpp.getValidatedSize());
-	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -540,5 +482,73 @@ public class UtilitiesTest {
 		Assert.assertEquals(ldt.getHour(), result.getHour());
 		Assert.assertEquals(ldt.getMinute(), result.getMinute());
 		Assert.assertEquals(ldt.getSecond(), result.getSecond());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateExceptionFromErrorMessageDTOParamNull() {
+		Utilities.createExceptionFromErrorMessageDTO(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateExceptionFromErrorMessageDTOExceptionTypeNull() {
+		Utilities.createExceptionFromErrorMessageDTO(new ErrorMessageDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreateExceptionFromErrorMessageDTOArrowheadException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.ARROWHEAD, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testCreateExceptionFromErrorMessageDTOAuthException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.AUTH, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = BadPayloadException.class)
+	public void testCreateExceptionFromErrorMessageDTOBadPayloadException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.BAD_PAYLOAD, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreateExceptionFromErrorMessageDTOInvalidParameterException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.INVALID_PARAMETER, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = DataNotFoundException.class)
+	public void testCreateExceptionFromErrorMessageDTODataNotFoundException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.DATA_NOT_FOUND, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreateExceptionFromErrorMessageDTOGenericException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.GENERIC, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = TimeoutException.class)
+	public void testCreateExceptionFromErrorMessageDTOTimeoutException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.TIMEOUT, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = UnavailableServerException.class)
+	public void testCreateExceptionFromErrorMessageDTOUnavailableServerException() {
+		final ErrorMessageDTO error = new ErrorMessageDTO("error", 0, ExceptionType.UNAVAILABLE, "origin");
+		Utilities.createExceptionFromErrorMessageDTO(error);
 	}
 }

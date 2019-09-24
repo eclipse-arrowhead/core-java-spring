@@ -33,21 +33,21 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudListResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudResponseDTO;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudListResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.core.authorization.database.service.AuthorizationDBService;
 
 @RunWith(SpringRunner.class)
@@ -110,8 +110,8 @@ public class AuthorizationControllerInterCloudTest {
 		when(authorizationDBService.getAuthorizationInterCloudEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(AUTHORIZATION_INTER_CLOUD_MGMT_URI)
-											   .param(CommonConstants.REQUEST_PARAM_PAGE, "0")
-											   .param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(numOfEntries))
+											   .param(CoreCommonConstants.REQUEST_PARAM_PAGE, "0")
+											   .param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(numOfEntries))
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
@@ -126,7 +126,7 @@ public class AuthorizationControllerInterCloudTest {
 	@Test
 	public void testGetAuthorizationInterCloudsWithNullPageButDefinedSizeParameter() throws Exception {
 		this.mockMvc.perform(get(AUTHORIZATION_INTER_CLOUD_MGMT_URI)
-					.param(CommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(5))
+					.param(CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, String.valueOf(5))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -136,7 +136,7 @@ public class AuthorizationControllerInterCloudTest {
 	@Test
 	public void testGetAuthorizationInterCloudsWithDefinedPageButNullSizeParameter() throws Exception {
 		this.mockMvc.perform(get(AUTHORIZATION_INTER_CLOUD_MGMT_URI)
-					.param(CommonConstants.REQUEST_PARAM_PAGE, "0")
+					.param(CoreCommonConstants.REQUEST_PARAM_PAGE, "0")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}
@@ -146,7 +146,7 @@ public class AuthorizationControllerInterCloudTest {
 	@Test
 	public void testGetAuthorizationInterCloudsWithInvalidSortDirectionFlagParameter() throws Exception {
 		this.mockMvc.perform(get(AUTHORIZATION_INTER_CLOUD_MGMT_URI)
-					.param(CommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
+					.param(CoreCommonConstants.REQUEST_PARAM_DIRECTION, "invalid")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isBadRequest());
 	}

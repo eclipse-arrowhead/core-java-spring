@@ -25,14 +25,14 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.dto.internal.RelayType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
 @NamedEntityGraph(name = "relayWithCloudGatekeeperRelayEntries",
-attributeNodes = {
-		  @NamedAttributeNode(value = "cloudGatekeepers")
+				  attributeNodes = {
+						  @NamedAttributeNode(value = "cloudGatekeepers")
 })
 public class Relay {
 	
@@ -45,7 +45,7 @@ public class Relay {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String address;
 	
 	@Column(nullable = false)
@@ -57,7 +57,7 @@ public class Relay {
 	@Column(nullable = false)
 	private boolean exclusive = false;
 	
-	@Column(nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'GENERAL_RELAY'")
+	@Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ") DEFAULT 'GENERAL_RELAY'")
 	@Enumerated(EnumType.STRING)
 	private RelayType type = RelayType.GENERAL_RELAY;
 	
@@ -73,7 +73,7 @@ public class Relay {
 	
 	@OneToMany(mappedBy = "relay", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Set<CloudGatekeeperRelay> cloudGateways = new HashSet<>();
+	private Set<CloudGatewayRelay> cloudGateways = new HashSet<>();
 
 	//=================================================================================================
 	// methods
@@ -113,7 +113,7 @@ public class Relay {
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 	public Set<CloudGatekeeperRelay> getCloudGatekeepers() { return cloudGatekeepers; }
-	public Set<CloudGatekeeperRelay> getCloudGateways() { return cloudGateways; }
+	public Set<CloudGatewayRelay> getCloudGateways() { return cloudGateways; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
@@ -125,7 +125,7 @@ public class Relay {
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 	public void setCloudGatekeepers(final Set<CloudGatekeeperRelay> cloudGatekeepers) { this.cloudGatekeepers = cloudGatekeepers; }
-	public void setCloudGateways(final Set<CloudGatekeeperRelay> cloudGateways) { this.cloudGateways = cloudGateways; }
+	public void setCloudGateways(final Set<CloudGatewayRelay> cloudGateways) { this.cloudGateways = cloudGateways; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -152,6 +152,7 @@ public class Relay {
 			return false;
 		}
 		final Relay other = (Relay) obj;
+		
 		return id == other.id;
 	}
 }

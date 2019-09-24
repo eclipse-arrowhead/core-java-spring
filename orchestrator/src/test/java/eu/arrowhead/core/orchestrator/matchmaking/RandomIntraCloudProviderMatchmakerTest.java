@@ -8,10 +8,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.dto.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 @RunWith(SpringRunner.class)
 public class RandomIntraCloudProviderMatchmakerTest {
@@ -114,5 +114,4 @@ public class RandomIntraCloudProviderMatchmakerTest {
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(List.of(dto1, dto2), new IntraCloudProviderMatchmakingParameters(List.of(ppDTO)));
 		Assert.assertEquals(2, selected.getId());
 	}
-
 }
