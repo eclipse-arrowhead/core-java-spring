@@ -231,7 +231,7 @@ public class SRAccessControlFilterTest {
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
 	public void testQueryNotAllowedCoreSystemClientBecauseOfNotSpecifiedService() throws Exception {
-		postQuery(new ServiceQueryFormDTO(), "certificates/authorization.pem", status().isUnauthorized());
+		postQuery(new ServiceQueryFormDTO(), "certificates/gateway.pem", status().isUnauthorized());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ public class SRAccessControlFilterTest {
 	@Test
 	public void testQueryNotAllowedCoreSystemClientBecauseOfNotOwnService() throws Exception {
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder("test-service").build();
-		postQuery(form, "certificates/authorization.pem", status().isUnauthorized());
+		postQuery(form, "certificates/gateway.pem", status().isUnauthorized());
 	}
 
 	//-------------------------------------------------------------------------------------------------
