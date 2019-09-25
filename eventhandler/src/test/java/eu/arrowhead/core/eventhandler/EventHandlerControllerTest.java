@@ -449,12 +449,78 @@ public class EventHandlerControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void unSubscriptionIsOkTest() throws Exception {
+	public void unsubscriptionIsOkTest() throws Exception {
 		
-		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
+		final String queryStr = createQueryStringForUnregister("eventType", "systemName", "address", 1);
 		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
 
 		deleteUnregisterSubscription( queryStr, status().isOk() );
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void unsubscriptionNullEventTypeTest() throws Exception {
+		
+		final String queryStr = createQueryStringForUnregister(null, "systemName", "address", 1);
+		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+
+		deleteUnregisterSubscription( queryStr, status().isBadRequest() );
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void unsubscriptionEmptyEventTypeTest() throws Exception {
+		
+		final String queryStr = createQueryStringForUnregister("   ", "systemName", "address", 1);
+		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+
+		deleteUnregisterSubscription( queryStr, status().isBadRequest() );
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void unsubscriptionNullSystemNameTest() throws Exception {
+		
+		final String queryStr = createQueryStringForUnregister("eventType", null, "address", 1);
+		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+
+		deleteUnregisterSubscription( queryStr, status().isBadRequest() );
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void unsubscriptionEmptySystemNameTest() throws Exception {
+		
+		final String queryStr = createQueryStringForUnregister("eventType", "   ", "address", 1);
+		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+
+		deleteUnregisterSubscription( queryStr, status().isBadRequest() );
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void unsubscriptionNullAddressTest() throws Exception {
+		
+		final String queryStr = createQueryStringForUnregister("eventType", "systemName", null, 1);
+		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+
+		deleteUnregisterSubscription( queryStr, status().isBadRequest() );
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void unsubscriptionEmptyAddressTest() throws Exception {
+		
+		final String queryStr = createQueryStringForUnregister("eventType", "systemName", "    ", 1);
+		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+
+		deleteUnregisterSubscription( queryStr, status().isBadRequest() );
 
 	}
 	
