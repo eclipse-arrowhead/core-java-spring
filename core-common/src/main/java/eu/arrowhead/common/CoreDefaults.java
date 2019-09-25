@@ -25,6 +25,8 @@ public class CoreDefaults {
 	
 	public static final String DEFAULT_REQUEST_PARAM_DIRECTION_VALUE = CoreCommonConstants.SORT_ORDER_ASCENDING;
 	
+	public static final boolean DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT = false;
+	
 	public static final boolean DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT = false;
 	
 	public static final int DEFAULT_RELAY_CHECK_INTERVAL = 9;
@@ -36,6 +38,11 @@ public class CoreDefaults {
 	public static final int DEFAULT_GATEWAY_SOCKET_TIMEOUT = 30000;
 	public static final int DEFAULT_GATEWAY_MIN_PORT = 8000;
 	public static final int DEFAULT_GATEWAY_MAX_PORT = 8100;
+	
+	public static final boolean DEFAULT_EVENT_HANDLER_TTL_SCHEDULED = false;
+	public static final int DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES = 17;
+	
+	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
 	
 	//=================================================================================================
 	// assistant methods
