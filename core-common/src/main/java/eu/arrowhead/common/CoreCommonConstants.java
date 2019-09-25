@@ -90,6 +90,9 @@ public class CoreCommonConstants {
 	public static final String SERVICE_REGISTRY_TTL_INTERVAL = "ttl_interval";
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
 	
+    public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
+    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" +CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
+	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
 
@@ -122,6 +125,17 @@ public class CoreCommonConstants {
 	
 	public static final String GATEWAY_ACTIVE_SESSION_MAP = "activeSessions";
 	public static final String GATEWAY_AVAILABLE_PORTS_QUEUE = "availableQueue";
+	
+	public static final String EVENT_HANDLER_TTL_SCHEDULED = "event_handler_ttl_scheduled";
+	public static final String $EVENT_HANDLER_TTL_SCHEDULED_WD = "${" + EVENT_HANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_TTL_SCHEDULED + "}";
+	public static final String EVENT_HANDLER_TTL_INTERVAL = "event_handler_ttl_interval";
+	public static final String $EVENT_HANDLER_TTL_INTERVAL_WD = "${" + EVENT_HANDLER_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES + "}";
+
+	public static final String TIME_STAMP_TOLERANCE_SECONDS = "time_stamp_tolerance_seconds";
+	public static final String $TIME_STAMP_TOLERANCE_SECONDS_WD = "${" + TIME_STAMP_TOLERANCE_SECONDS + ":" + CoreDefaults.DEFAULT_TIME_STAMP_TOLERANCE_SECONDS + "}";
+
+	public static final String EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE = "SUBSCRIBER_AUTH_UPDATE";
+
 
 	//=================================================================================================
 	// assistant methods

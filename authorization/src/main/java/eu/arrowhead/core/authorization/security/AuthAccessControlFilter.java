@@ -18,7 +18,8 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 	// members
 	
 	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER };
-
+	private static final CoreSystem[] allowedCoreSystemsForSubscriptionChecks = { CoreSystem.EVENT_HANDLER };
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -37,6 +38,9 @@ public class AuthAccessControlFilter extends CoreSystemAccessControlFilter {
 				   requestTarget.endsWith(CommonConstants.OP_AUTH_INTER_CHECK_URI)) {
 			// Only the specified core systems can use all the other methods
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForChecks, requestTarget);
+		}else if (requestTarget.endsWith(CommonConstants.OP_AUTH_SUBSCRIPTION_CHECK_URI)) {
+			// Only the specified core systems can use all the other methods
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForSubscriptionChecks, requestTarget);
 		}
 	}
 }
