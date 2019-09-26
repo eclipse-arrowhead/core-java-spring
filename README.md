@@ -13,14 +13,14 @@
  
 <a name="quickstart" />
 
-### Quick Start Guide
+## Quick Start Guide
 
-#### Docker
+### Docker
 
 Placeholder
 
-#### Compile source code and manually install MySQL and Maven.
-##### Requirements
+### Compile source code and manually install MySQL and Maven.
+#### Requirements
 
 The project has the following dependencies:
 * JRE/JDK 11 [Download from here](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html)
@@ -63,7 +63,7 @@ Enjoy! ;)
 
 <a name="migration" />
 
-### Migration Guide 4.1.2 -> 4.1.3
+## Migration Guide 4.1.2 -> 4.1.3
 
 4.1.3 is NOT backwards compatible with 4.1.2! The database and the endpoints were redesigned, it is more logical, easier to use.
 
@@ -71,44 +71,44 @@ You can migrate your existing database manually. See the [Quick Start Guide](#qu
 
 Major endpoint changes:<br />
 
-#### Service Registry:
+### Service Registry:
  * __/register__ - data structure changed
  * ~~/remove~~ - removed, use __/unregister__ instead 
  
-#### Authorization
+### Authorization
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
  
-#### Orchestration
+### Orchestration
  Store based orchestration is available for now.
  * __/mgmt/store__ - data structure changed
  
 
 <a name="howtocontribute" />
 
-### How to Contribute
+## How to Contribute
 
-#### Open Development
+### Open Development
 
 All work on Arrowhead repositories happens directly on GitHub. Both core team members and external contributors send pull requests which go through the same review process.
 
-#### Branch Organization
+### Branch Organization
 
-The latest version of the core systems are available in the ```master``` branch. The core for the next release is merged in the ```development``` branch. If you would like to contribute, please check out the ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. If accepted, your contribution will be in the next release. :)
+The latest version of the core systems are available in the ```master``` branch. The code for the next release is merged in the ```development``` branch. If you would like to contribute, please check out the ```development``` branch. Create a new branch from ```development```. Don't forget do write documentation, unit and integration tests. When finished, create a pull request back into ```development```. If accepted, your contribution will be in the next release. :)
 
-#### Bugs
+### Bugs
 
-##### Where To Find Known Issues
+#### Where To Find Known Issues
 We are using [GitHub Issues](https://github.com/arrowhead-f/core-java-spring/issues) for our public bugs. We keep a close eye on this and try to make it clear when we have an internal fix in progress. Before filing a new task, try to make sure your problem doesn’t already exist.
 
-##### Reporting New Issues
+#### Reporting New Issues
 The best way to get your bug fixed is to provide a reduced test case.
 
-##### How to Get in Touch
+#### How to Get in Touch
 Join our developer team on Slack. Write an email to: [szvetlin@aitia.ai](mailto:szvetlin@aitia.ai) for an invite. 
 
 <a name="documentation" />
 
-### Documentation 
+## Documentation 
  
  Placeholder
