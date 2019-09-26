@@ -1,13 +1,16 @@
 package eu.arrowhead.core.eventhandler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.ZonedDateTime;
@@ -693,7 +696,7 @@ public class EventHandlerControllerTest {
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
+		final MvcResult result = this.mockMvc.perform( post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsBytes( request ))
 				.accept(MediaType.APPLICATION_JSON))
@@ -716,7 +719,7 @@ public class EventHandlerControllerTest {
 		
 		when( eventHandlerDBService.getSubscriptionsResponse(anyInt(), anyInt(), any(), any()) ).thenReturn( result );
 		
-		final MvcResult response = this.mockMvc.perform(get(EVENT_HANDLER_MGMT_URI)
+		final MvcResult response = this.mockMvc.perform( get(EVENT_HANDLER_MGMT_URI)
 				   .accept(MediaType.APPLICATION_JSON))
 				   .andExpect(status().isOk())
 				   .andReturn();
@@ -725,6 +728,580 @@ public class EventHandlerControllerTest {
 
 		final SubscriptionListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), SubscriptionListResponseDTO.class);
 		assertEquals( resultSize, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getSubscriptionWithPageAndSizeParameterOkTest() throws Exception {
+
+		final int resultSize = 3;
+		final SubscriptionListResponseDTO result = createSubscriptionListResponseForDBMock( resultSize );
+		
+		when( eventHandlerDBService.getSubscriptionsResponse(anyInt(), anyInt(), any(), any()) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( get(EVENT_HANDLER_MGMT_URI)
+				   .param("page", "0")
+				   .param("item_per_page", String.valueOf( resultSize ))
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect(status().isOk())
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+
+		final SubscriptionListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), SubscriptionListResponseDTO.class);
+		assertEquals( resultSize, responseBody.getCount());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getSubscriptionWithNullPageButDefinedSizeParameterTest() throws Exception {
+
+		final MvcResult response = this.mockMvc.perform( get(EVENT_HANDLER_MGMT_URI)
+				   .param("item_per_page", "1" )
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect(status().isBadRequest())
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains( "Defined page or size could not be with undefined size or page." ));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getSubscriptionWithDefinedPageButNullSizeParameterTest() throws Exception {
+
+		final MvcResult response = this.mockMvc.perform( get(EVENT_HANDLER_MGMT_URI)
+				   .param("page", "0" )
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect(status().isBadRequest())
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains( "Defined page or size could not be with undefined size or page." ));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getSubscriptionWithInvalidSortDirectionFlagParameterTest() throws Exception {
+
+		final MvcResult response = this.mockMvc.perform( get(EVENT_HANDLER_MGMT_URI)
+				   .param("direction", "invalid" )
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect(status().isBadRequest())
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains( "Invalid sort direction flag" ));	
+	}
+	
+	//=================================================================================================
+	// Test of getSubscriptionById
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getSubscriptionByIdOkTest() throws Exception {
+
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerDBService.getSubscriptionByIdResponse( anyLong() ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( get(EVENT_HANDLER_MGMT_URI + "/1")
+				   .accept( MediaType.APPLICATION_JSON ))
+				   .andExpect( status().isOk() )
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+
+		final SubscriptionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), SubscriptionResponseDTO.class);
+		assertEquals( 1, responseBody.getId() );
+		assertTrue( "testSubscriberSystemName".equalsIgnoreCase( responseBody.getSubscriberSystem().getSystemName() ) );
+		assertTrue( "testEventType".equalsIgnoreCase( responseBody.getEventType().getEventTypeName() ) );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void getSubscriptionByIdInvalidIdTest() throws Exception {
+
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerDBService.getSubscriptionByIdResponse( anyLong() ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( get(EVENT_HANDLER_MGMT_URI + "/-1")
+				   .accept( MediaType.APPLICATION_JSON) )
+				   .andExpect( status().isBadRequest() )
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains( "Id must be greater than 0." ));	
+	}
+	
+	//=================================================================================================
+	// Test of getSubscriptionById
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void deleteSubscriptionOkTest() throws Exception {
+
+		doNothing().when(eventHandlerDBService).deleteSubscriptionResponse( anyLong() );
+		
+		final MvcResult response = this.mockMvc.perform( delete(EVENT_HANDLER_MGMT_URI + "/1")
+				   .accept( MediaType.APPLICATION_JSON ))
+				   .andExpect( status().isOk() )
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void deleteSubscriptionInvalidIdTest() throws Exception {
+
+		doNothing().when(eventHandlerDBService).deleteSubscriptionResponse( anyLong() );
+		
+		final MvcResult response = this.mockMvc.perform( delete(EVENT_HANDLER_MGMT_URI + "/-1")
+				   .accept( MediaType.APPLICATION_JSON) )
+				   .andExpect( status().isBadRequest() )
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains( "Id must be greater than 0." ));	
+	}
+	
+	//=================================================================================================
+	// Test of updateSubscription
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionOkTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				   .contentType(MediaType.APPLICATION_JSON)
+				   .content(objectMapper.writeValueAsBytes(request))
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect( status().isOk() )
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+
+		final SubscriptionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsByteArray(), SubscriptionResponseDTO.class);
+		assertEquals( 1, responseBody.getId() );
+		assertTrue( "testSubscriberSystemName".equalsIgnoreCase( responseBody.getSubscriberSystem().getSystemName() ) );
+		assertTrue( "testEventType".equalsIgnoreCase( responseBody.getEventType().getEventTypeName() ) );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionInvalidIdTest() throws Exception {
+
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/-1")
+				   .contentType(MediaType.APPLICATION_JSON)
+				   .content(objectMapper.writeValueAsBytes(request))
+				   .accept(MediaType.APPLICATION_JSON))
+				   .andExpect( status().isBadRequest() )
+				   .andReturn();
+		
+		Assert.assertNotNull( response );
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains( "Id must be greater than 0." ));	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullEventTypeTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithNullEventTypeForTest();
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("Request.EventType"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithEmptyEventTypeTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("Request.EventType"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullSubscriberSystemTest() throws Exception {
+
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		request.setSubscriberSystem( null );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System is null."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullSubscriberSystemNameTest() throws Exception {
+
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		request.getSubscriberSystem().setSystemName( null );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System name is null or blank."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithEmptySubscriberSystemNameTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		request.getSubscriberSystem().setSystemName( "   " );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System name is null or blank."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullSubscriberSystemAddressTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		request.getSubscriberSystem().setAddress( null );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System address is null or blank."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithEmptySubscriberSystemAddressTest() throws Exception {
+			
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		request.getSubscriberSystem().setAddress( "   " );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System address is null or blank."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullSubscriberSystemPortTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		request.getSubscriberSystem().setPort( null );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System port is null."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithInvalidSubscriberSystemPortTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOWithEmptyEventTypeForTest();
+		request.getSubscriberSystem().setPort( -1 );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System port must be between"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullNotifyUriTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();request.setNotifyUri( null );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("Request.NotifyUri is null or blank."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithEmptyNotifyUriTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setNotifyUri( "   " );
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("Request.NotifyUri"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullMatchMetaDataTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestWithNullMetaDataDTOForTest();
+		
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithMetaDataTrueButNullFilterMetaDataTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setMatchMetaData( true );
+		request.setFilterMetaData( null );
+		
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("Request.MatchMetaData is true but Request.FilterMetaData is null or blank."));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithMetaDataTrueButEmptyFilterMetaDataTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setMatchMetaData( true );
+		request.setFilterMetaData( new HashMap<String, String>( 0 ) );
+		
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("Request.MatchMetaData is true but Request.FilterMetaData is null or blank."));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithNullSourcesTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( null );
+		
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithEmptySourcesTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of() );
+		
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithSourcesWithValidSourceTest() throws Exception {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of( getSystemRequestDTO() ) );
+		
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void updateSubscriptionWithSourcesWithInValidSourceTest() throws Exception {
+		
+		final SystemRequestDTO invalidSource = getSystemRequestDTO();
+		invalidSource.setSystemName( null );
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of( invalidSource ) );
+		
+		final SubscriptionResponseDTO result = createSubscriptionResponseForDBMock(  );
+		
+		when( eventHandlerService.updateSubscriptionResponse( anyLong(), any(SubscriptionRequestDTO.class) ) ).thenReturn( result );
+		
+		final MvcResult response = this.mockMvc.perform( put(EVENT_HANDLER_MGMT_URI + "/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsBytes( request ))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+		
+		Assert.assertNotNull( response );
+		Assert.assertTrue(response.getResolvedException().getMessage().contains("System name is null or blank."));
 	}
 	
 	//=================================================================================================
@@ -744,6 +1321,17 @@ public class EventHandlerControllerTest {
 		
 	}
 
+	//-------------------------------------------------------------------------------------------------	
+	private SubscriptionResponseDTO createSubscriptionResponseForDBMock( ) {
+		
+		//return createSubscriptionResponseForDBMock( "testEventType", "testSubscriberSystemName");
+		final SubscriptionResponseDTO response = createSubscriptionResponseForDBMock( "testEventType", "testSubscriberSystemName");
+		response.setSources(Set.of());
+		
+		return response;
+		
+	}
+	
 	//-------------------------------------------------------------------------------------------------	
 	private SubscriptionResponseDTO createSubscriptionResponseForDBMock( final String eventType, final String subscriberName ) {
 		
