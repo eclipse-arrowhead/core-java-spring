@@ -19,6 +19,7 @@ import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConne
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
+import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.Relay;
@@ -26,13 +27,20 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.EventTypeResponseDTO;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
@@ -497,6 +505,106 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription){
+		Assert.notNull(subscription, "subscription is null");
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
+		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
+		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
+		Assert.notNull(subscription.getUpdatedAt(), "subscription.UpdatedAt is null");
+		
+		final String startDate = subscription.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getStartDate());
+		final String endDate = subscription.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getEndDate());
+		
+		final Set<SystemResponseDTO> sources = collectPublishersFromSubscription(subscription.getPublisherConnections());
+		
+		return new SubscriptionResponseDTO(
+				subscription.getId(), 
+				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
+				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
+				Utilities.text2Map(subscription.getFilterMetaData()), 
+				subscription.getNotifyUri(), 
+				subscription.isMatchMetaData(), 
+				startDate, 
+				endDate, 
+				sources, 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionResponseDTO convertSubscriptionToOnlyAuthorizedSourcesSubscriptionResponseDTO(final Subscription subscription){
+		Assert.notNull(subscription, "subscription is null");
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
+		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
+		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
+		Assert.notNull(subscription.getUpdatedAt(), "subscription.UpdatedAt is null");
+		
+		final String startDate = subscription.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getStartDate());
+		final String endDate = subscription.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getEndDate());
+		
+		final Set<SystemResponseDTO> sources = collectAuthorizedPublishersFromSubscription(subscription.getPublisherConnections());
+		
+		return new SubscriptionResponseDTO(
+				subscription.getId(), 
+				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
+				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
+				Utilities.text2Map(subscription.getFilterMetaData()), 
+				subscription.getNotifyUri(), 
+				subscription.isMatchMetaData(), 
+				startDate, 
+				endDate, 
+				sources, 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static EventTypeResponseDTO convertEventTypeToEventTypeResponseDTO(final EventType eventType){
+		Assert.notNull(eventType, "eventType is null");
+		Assert.notNull(eventType.getEventTypeName(), "eventType.EvenTypeName is null" );
+
+		return new EventTypeResponseDTO(
+				eventType.getId(), 
+				eventType.getEventTypeName(),
+				Utilities.convertZonedDateTimeToUTCString(eventType.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(eventType.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static EventDTO convertEventPublishRequestDTOToEventDTO(final EventPublishRequestDTO eventPublishRequestDTO){
+		Assert.notNull(eventPublishRequestDTO, "eventPublishRequestDTO is null");
+		Assert.notNull(eventPublishRequestDTO.getEventType(), "eventPublishRequestDTO.EvenType is null" );
+		Assert.notNull(eventPublishRequestDTO.getPayload(), "eventPublishRequestDTO.Payload is null" );
+		Assert.notNull(eventPublishRequestDTO.getTimeStamp(), "eventPublishRequestDTO.TimeStamp is null" );
+		
+		return new EventDTO(
+				eventPublishRequestDTO.getEventType(), 
+				eventPublishRequestDTO.getMetaData(),
+				eventPublishRequestDTO.getPayload(),
+				eventPublishRequestDTO.getTimeStamp()
+				);
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionListResponseDTO convertSubscriptionPageToSubscriptionListResponseDTO(final Page<Subscription> entries) {
+		Assert.notNull(entries, "SubscriptionPage is null" );
+		
+		final List<SubscriptionResponseDTO> subscriptionEntries = new ArrayList<>(entries.getNumberOfElements());
+		for ( final Subscription entry : entries ) {
+			
+			subscriptionEntries.add( convertSubscriptionToSubscriptionResponseDTO( entry ) );
+		}
+		
+		return new SubscriptionListResponseDTO( subscriptionEntries, entries.getTotalElements() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static RelayRequestDTO convertRelayResponseDTOToRelayRequestDTO(final RelayResponseDTO response) {
 		Assert.notNull(response, "Relay response is null.");
 		
@@ -505,7 +613,7 @@ public class DTOConverter {
 	
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private DTOConverter() {
 		throw new UnsupportedOperationException();
@@ -557,4 +665,34 @@ public class DTOConverter {
 		
 		return result;
 	}
+	
+	
+	//-------------------------------------------------------------------------------------------------
+	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
+		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
+		
+		for (final SubscriptionPublisherConnection conn : connections) {
+			
+			result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
+			
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static Set<SystemResponseDTO> collectAuthorizedPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
+		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
+		
+		for (final SubscriptionPublisherConnection conn : connections) {
+			
+			if (conn.isAuthorized()) {
+				result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
+			}
+						
+		}
+		
+		return result;
+	}
+
 }

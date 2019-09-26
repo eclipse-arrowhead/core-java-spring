@@ -22,6 +22,27 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
 	
+	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
+	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
+	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
+	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
+	public static final String CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION = "authorization-control-subscription";
+	
+	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
+	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
+	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
+	
+	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
+	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
+	public static final String CORE_SERVICE_GATEWAY_CONNECT_PROVIDER = "gw-connect-provider";
+
+	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH = "event-publish";
+	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
+	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
+	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
+	
+	public static final String COMMON_FIELD_NAME_ID = "id";
+	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
@@ -54,6 +75,7 @@ public class CommonConstants {
 	public static final String OP_AUTH_KEY_URI = "/publickey";
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
+	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
 	
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
@@ -76,29 +98,26 @@ public class CommonConstants {
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
 	public static final String OP_GATEWAY_CONNECT_CONSUMER_URI = "/connect_consumer";
 	
-	public static final String EVENT_HANDLER_URI = "/event_handler";
+	public static final String EVENT_HANDLER_URI = "/eventhandler";
 	public static final String OP_EVENT_HANDLER_PUBLISH = "/publish";
 	public static final String OP_EVENT_HANDLER_SUBSCRIBE = "/subscribe";
-	
-	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
-	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
-	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
-	public static final String CORE_SERVICE_AUTH_CONTROL_INTER = "authorization-control-inter";
-	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
-	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
-	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
-	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
-	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
-	public static final String CORE_SERVICE_GATEWAY_CONNECT_PROVIDER = "gw-connect-provider";
-	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH = "event-publish";
-	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
-	
+
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
+	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
+
+
+	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
+	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
+	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
+	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
+	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
+
 	public static final String REQUEST_PARAM_TOKEN = "token";
 	
 	public static final String ECHO_URI = "/echo";
 	
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
-			 															   			  CoreSystemService.EVENT_PUBLISH, CoreSystemService.EVENT_SUBSCRIBE);
+			 															   			  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE);
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";
@@ -140,8 +159,32 @@ public class CommonConstants {
 	public static final int SYSTEM_PORT_RANGE_MIN = 0;
 	public static final int SYSTEM_PORT_RANGE_MAX = 65535;
 	
+	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
+	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
+
+	public static final String SORT_ORDER_ASCENDING = "ASC";
+	public static final String SORT_ORDER_DESCENDING = "DESC";
+	
+	public static final String SORT_FIELD_PRIORITY = "priority";
+		
+	public static final String INTRA_CLOUD_PROVIDER_MATCHMAKER = "intraCloudProviderMatchmaker";
+	public static final String INTER_CLOUD_PROVIDER_MATCHMAKER = "interCloudProviderMatchmaker";
+	public static final String ICN_PROVIDER_MATCHMAKER = "icnProviderMatchmaker";
+	public static final String GATEKEEPER_MATCHMAKER = "gatekeeperMatchmaker";
+	public static final String GATEWAY_MATCHMAKER = "gatewayMatchmaker";
+	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
+	
+	public static final int TOP_PRIORITY = 1;
+		
+	public static final String EVENT_METADATA_FILTER = "metadataFilter";
+
 	public static final String LOCALHOST = "localhost";
 	public static final int HTTP_PORT = 8080;
+
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE = "event_type";
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME = "system_name";
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS = "address";
+	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT = "port";
 	
 	//=================================================================================================
 	// assistant methods
