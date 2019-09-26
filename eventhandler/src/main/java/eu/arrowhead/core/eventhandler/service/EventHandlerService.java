@@ -220,6 +220,10 @@ public class EventHandlerService {
 			throw new InvalidParameterException("FilterMetaData should not be null if MatchMetaData is true");
 		}
 		
+		if (request.getFilterMetaData() != null && request.getFilterMetaData().isEmpty() && request.getMatchMetaData()) {
+			throw new InvalidParameterException("FilterMetaData should not be empty if MatchMetaData is true");
+		}
+		
 		checkSystemRequestDTO( request.getSubscriberSystem(), false );
 		validateDateLimits( request );
 
