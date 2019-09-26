@@ -1461,6 +1461,7 @@ public class EventHandlerControllerTest {
 		
 		return system;
 	}
+	
 	//-------------------------------------------------------------------------------------------------		
 	private EventPublishRequestDTO getEventPublishRequestDTOForTest() {
 		
