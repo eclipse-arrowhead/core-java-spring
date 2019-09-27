@@ -388,7 +388,7 @@ public class EventHandlerService {
 			
 			if ( subscription.getStartDate() != null ) {
 				
-				if ( timeStamp.isBefore( subscription.getStartDate().minusSeconds( timeStampTolerance ))) {
+				if ( subscription.getStartDate().isBefore( timeStamp.minusSeconds( timeStampTolerance ))) {
 					
 					subscriptionsToRemove.add( subscription );
 				}				
