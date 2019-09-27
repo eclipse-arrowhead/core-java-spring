@@ -95,8 +95,16 @@ public class EventHandlerService {
 		checkPublishRequestDTO( request );
 		
 		final Set<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptions(request);
+		if ( involvedSubscriptions.isEmpty() ) {
+			
+			return;
+		}
 		
 		filterInvolvedSubscriptionsBySubscriptionParameters(involvedSubscriptions, request);
+		if ( involvedSubscriptions.isEmpty() ) {
+			
+			return;
+		}
 		
 		eventHandlerDriver.publishEvent(request, involvedSubscriptions);
 
