@@ -41,6 +41,7 @@ public class EventHandlerService {
 	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
+	private static final String LESS_THAN_ONE_ERROR_MESSAGE = " is less than one.";
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerService.class);
 	
@@ -163,7 +164,7 @@ public class EventHandlerService {
 		}
 		
 		ckeckTimeStamp( request.getTimeStamp() );	
-		checkSystemRequestDTO( request.getSource(), false );
+		checkSystemRequestDTO( request.getSource() );
 		
 	}
 	
@@ -224,13 +225,13 @@ public class EventHandlerService {
 			throw new InvalidParameterException("FilterMetaData should not be empty if MatchMetaData is true");
 		}
 		
-		checkSystemRequestDTO( request.getSubscriberSystem(), false );
+		checkSystemRequestDTO( request.getSubscriberSystem());
 		validateDateLimits( request );
 
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkSystemRequestDTO(final SystemRequestDTO system, final boolean portRangeCheck) {
+	private void checkSystemRequestDTO(final SystemRequestDTO system) {
 		logger.debug("checkSystemRequestDTO started...");
 		
 		if (system == null) {
@@ -249,9 +250,8 @@ public class EventHandlerService {
 			throw new InvalidParameterException("System port" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		final int validatedPort = system.getPort().intValue();
-		if (portRangeCheck && (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
-			throw new InvalidParameterException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		if (system.getPort() < 1) {
+			throw new InvalidParameterException("System port" + LESS_THAN_ONE_ERROR_MESSAGE );
 		}
 	}	
 	
@@ -420,16 +420,20 @@ public class EventHandlerService {
 	private void checkUnsubscribeParameters( final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort) {
 		logger.debug("checkUnsubscribeParameters started...");
 		
-		if (Utilities.isEmpty( eventType )) {
-			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		if ( Utilities.isEmpty( eventType ) ) {
+			throw new InvalidParameterException( "EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE );
 		}
 		
-		if (Utilities.isEmpty(subscriberName)) {
-			throw new InvalidParameterException("SubscriberName" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		if ( Utilities.isEmpty( subscriberName ) ) {
+			throw new InvalidParameterException( "SubscriberName" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE );
 		}
 		
-		if (Utilities.isEmpty(subscriberAddress)) {
-			throw new InvalidParameterException("SubscriberAddress" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		if ( Utilities.isEmpty( subscriberAddress ) ) {
+			throw new InvalidParameterException( "SubscriberAddress" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE );
+		}
+		
+		if ( subscriberPort < 1) {
+			throw new InvalidParameterException( "System port" + LESS_THAN_ONE_ERROR_MESSAGE );
 		}
 		
 	}
