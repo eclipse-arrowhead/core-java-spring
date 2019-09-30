@@ -113,13 +113,7 @@ public class EventHandlerDBService {
 	public SubscriptionResponseDTO getSubscriptionByIdResponse(final long id) {
 		logger.debug("getSubscriptionByIdResponse started ...");
 		
-		final Subscription subscription = getSubscriptionById( id );
-		if ( subscription == null || Utilities.isEmpty( subscription.getNotifyUri() )) {
-			
-			return new SubscriptionResponseDTO(); //return empty subscriptionResponseDTO
-		}
-		
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( subscription );
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( getSubscriptionById( id ) );
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -247,7 +241,7 @@ public class EventHandlerDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-	public Subscription registerSubscription(final SubscriptionRequestDTO request,
+	public void registerSubscription(final SubscriptionRequestDTO request,
 			final Set<SystemResponseDTO> authorizedPublishers) {
 		logger.debug("registerSubscription started ...");
 		
@@ -259,7 +253,7 @@ public class EventHandlerDBService {
 			final Subscription subscriptionEntry = subscriptionRepository.save(subscription);
 			addAndSaveSubscriptionEntryPublisherConnections(subscriptionEntry, request, authorizedPublishers);
 			
-			return subscriptionRepository.saveAndFlush(subscriptionEntry);
+			subscriptionRepository.saveAndFlush(subscriptionEntry);
 			
 			
 		}catch (final Exception ex) {
