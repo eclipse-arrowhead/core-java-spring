@@ -113,13 +113,7 @@ public class EventHandlerDBService {
 	public SubscriptionResponseDTO getSubscriptionByIdResponse(final long id) {
 		logger.debug("getSubscriptionByIdResponse started ...");
 		
-		final Subscription subscription = getSubscriptionById( id );
-		if ( subscription == null || Utilities.isEmpty( subscription.getNotifyUri() )) {
-			
-			return new SubscriptionResponseDTO(); //return empty subscriptionResponseDTO
-		}
-		
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( subscription );
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( getSubscriptionById( id ) );
 	}
 
 	//-------------------------------------------------------------------------------------------------
