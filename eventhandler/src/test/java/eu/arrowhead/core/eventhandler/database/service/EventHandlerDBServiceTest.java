@@ -28,6 +28,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -84,9 +88,8 @@ public class EventHandlerDBServiceTest {
 	//=================================================================================================
 	// methods
 	
-
 	//=================================================================================================
-	//Tests of subscribe
+	//Tests of getSubscriptionByIdResponse
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -94,7 +97,7 @@ public class EventHandlerDBServiceTest {
 		
 		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ) ) );
 		
-		final Subscription response = eventHandlerDBService.getSubscriptionById( 1L );
+		final SubscriptionResponseDTO response = eventHandlerDBService.getSubscriptionByIdResponse( 1L );
 		
 		assertNotNull( response );
 		assertNotNull( response.getSubscriberSystem() );
@@ -108,7 +111,7 @@ public class EventHandlerDBServiceTest {
 		
 		try {
 			
-			eventHandlerDBService.getSubscriptionById( -1L );
+			eventHandlerDBService.getSubscriptionByIdResponse( -1L );
 		
 		} catch (Exception ex) {
 						
@@ -127,7 +130,7 @@ public class EventHandlerDBServiceTest {
 		
 		try {
 			
-			eventHandlerDBService.getSubscriptionById( 1L );
+			eventHandlerDBService.getSubscriptionByIdResponse( 1L );
 		
 		} catch (Exception ex) {
 						
@@ -145,6 +148,76 @@ public class EventHandlerDBServiceTest {
 		
 		try {
 			
+			eventHandlerDBService.getSubscriptionByIdResponse( 1L );
+		
+		} catch (Exception ex) {
+						
+			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
+			throw ex;
+		}
+		
+	}
+	
+	//=================================================================================================
+	//Tests of getSubscriptionById
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSubscriptionByIdOK() {
+		
+		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ) ) );
+		
+		final Subscription response = eventHandlerDBService.getSubscriptionById( 1L );
+		
+		assertNotNull( response );
+		assertNotNull( response.getSubscriberSystem() );
+		assertNotNull( response.getEventType() );
+		assertNotNull( response.getNotifyUri() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSubscriptionByIdInvalidParameterId() {
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionById( -1L );
+		
+		} catch (Exception ex) {
+						
+			Assert.assertTrue( ex.getMessage().contains( "SubscriberSystemId must be greater than zero." ));
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSubscriptionByIdInvalidParameterSubscriptionByIdNotInDB() {
+
+		final Subscription subscription =  null;
+		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.ofNullable( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionById( 1L );
+		
+		} catch (Exception ex) {
+						
+			Assert.assertTrue( ex.getMessage().contains( "not exists" ));
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = Exception.class)
+	public void testGetSubscriptionByIdExceptionInDBCall() {
+
+		when( subscriptionRepository.findById( anyLong() ) ).thenThrow( Exception.class );
+		
+		try {
+			
 			eventHandlerDBService.getSubscriptionById( 1L );
 		
 		} catch (Exception ex) {
@@ -155,6 +228,31 @@ public class EventHandlerDBServiceTest {
 		
 	}
 
+	//=================================================================================================
+	//Tests of getSubscriptionsResponse
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void testGetSubscriptionsResponseOK() {
+		
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = "id";
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final Page<Subscription> subscriptionPage = new PageImpl( List.of( subscription ) );
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenReturn( subscriptionPage );
+		
+		final SubscriptionListResponseDTO response = eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
+		
+		assertNotNull( response );
+		assertNotNull( response.getData() );
+		assertTrue( !response.getData().isEmpty() );
+	}
+	
 	//=================================================================================================
 	//Assistant methods
 
