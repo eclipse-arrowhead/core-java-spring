@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +89,7 @@ public class EventHandlerDBServiceTest {
 		
 		final SubscriptionResponseDTO response = eventHandlerDBService.getSubscriptionByIdResponse( 1L );
 		
+		verify( subscriptionRepository, times( 1 )).findById( anyLong() );
 		assertNotNull( response );
 		assertNotNull( response.getSubscriberSystem() );
 		assertNotNull( response.getEventType() );
@@ -158,6 +160,7 @@ public class EventHandlerDBServiceTest {
 		
 		final Subscription response = eventHandlerDBService.getSubscriptionById( 1L );
 		
+		verify( subscriptionRepository, times( 1 )).findById( anyLong() );
 		assertNotNull( response );
 		assertNotNull( response.getSubscriberSystem() );
 		assertNotNull( response.getEventType() );
@@ -236,6 +239,7 @@ public class EventHandlerDBServiceTest {
 		
 		final SubscriptionListResponseDTO response = eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
 		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
 		assertNotNull( response );
 		assertNotNull( response.getData() );
 		assertTrue( !response.getData().isEmpty() );
@@ -257,6 +261,7 @@ public class EventHandlerDBServiceTest {
 		
 		final SubscriptionListResponseDTO response = eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
 		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
 		assertNotNull( response );
 		assertNotNull( response.getData() );
 		assertTrue( !response.getData().isEmpty() );
@@ -278,6 +283,7 @@ public class EventHandlerDBServiceTest {
 		
 		final SubscriptionListResponseDTO response = eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
 		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
 		assertNotNull( response );
 		assertNotNull( response.getData() );
 		assertTrue( !response.getData().isEmpty() );
@@ -299,32 +305,10 @@ public class EventHandlerDBServiceTest {
 		
 		final SubscriptionListResponseDTO response = eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
 		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
 		assertNotNull( response );
 		assertNotNull( response.getData() );
 		assertTrue( !response.getData().isEmpty() );
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = Exception.class)
-	public void testGetSubscriptionsResponseExceptionInDBCall() {
-		
-		final int page = 0;
-		final int size = 0;
-		final Direction direction = Direction.ASC;
-		final String sortField = "invalidSortField";
-		
-		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenThrow( Exception.class );
-		
-		try {
-			
-			eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
-		
-		} catch (Exception ex) {
-						
-			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
-			throw ex;
-		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -336,20 +320,187 @@ public class EventHandlerDBServiceTest {
 		final Direction direction = Direction.ASC;
 		final String sortField = "invalidSortField";
 		
-		verify( subscriptionRepository, never()).findAll( any( PageRequest.class ) );
-		
 		try {
 			
 			eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
 		
 		} catch (Exception ex) {
-						
+			
+			verify( subscriptionRepository, never()).findAll( any( PageRequest.class ) );
+			
 			Assert.assertTrue( ex.getMessage().contains( " sortable field  is not available." ));
 			throw ex;
 		}
 		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = Exception.class)
+	public void testGetSubscriptionsResponseExceptionInDBCall() {
+		
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = "id";
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenThrow( Exception.class );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
+		
+		} catch (Exception ex) {
+			
+			verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
+	
+			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
+			throw ex;
+		}
+		
+	}
+	
+	//=================================================================================================
+	//Tests of getSubscriptions
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSubscriptionsOK() {
+		
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = "id";
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of( subscription ) );
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenReturn( subscriptionPage );
+		
+		final Page<Subscription> response = eventHandlerDBService.getSubscriptions( page, size, direction, sortField );
+		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
+		assertNotNull( response );
+		assertNotNull( response.getContent() );
+		assertTrue( !response.getContent().isEmpty() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSubscriptionsPageLessThanZeroOK() {
+		
+		final int page = -1;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = "id";
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of( subscription ) );
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenReturn( subscriptionPage );
+		
+		final Page<Subscription> response = eventHandlerDBService.getSubscriptions( page, size, direction, sortField );
+		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
+		assertNotNull( response );
+		assertNotNull( response.getContent() );
+		assertTrue( !response.getContent().isEmpty() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSubscriptionsSizeLessThanZeroOK() {
+		
+		final int page = 0;
+		final int size = -1;
+		final Direction direction = Direction.ASC;
+		final String sortField = "id";
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of( subscription ) );
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenReturn( subscriptionPage );
+		
+		final Page<Subscription> response = eventHandlerDBService.getSubscriptions( page, size, direction, sortField );
+		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
+		assertNotNull( response );
+		assertNotNull( response.getContent() );
+		assertTrue( !response.getContent().isEmpty() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSubscriptionsDirectionNullOK() {
+		
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = null;
+		final String sortField = "id";
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of( subscription ) );
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenReturn( subscriptionPage );
+		
+		final Page<Subscription> response = eventHandlerDBService.getSubscriptions( page, size, direction, sortField );
+		
+		verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
+		assertNotNull( response );
+		assertNotNull( response.getContent() );
+		assertTrue( !response.getContent().isEmpty() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSubscriptionsInvalidParameterSortField() {
+		
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = null;
+		final String sortField = "invalidSortField";
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of( subscription ) );
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenReturn( subscriptionPage );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptions( page, size, direction, sortField );
+		
+		} catch (Exception ex) {
+			
+			verify( subscriptionRepository, never() ).findAll( any( PageRequest.class ) );
+	
+			Assert.assertTrue( ex.getMessage().contains( " sortable field  is not available." ));
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = Exception.class)
+	public void testGetSubscriptionsExceptionInDBCall() {
+		
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = "id";
+		
+		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenThrow( Exception.class );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptions( page, size, direction, sortField );
+		
+		} catch (Exception ex) {
+			
+			verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
+	
+			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
+			throw ex;
+		}
+		
+	}
 	//=================================================================================================
 	//Assistant methods
 
