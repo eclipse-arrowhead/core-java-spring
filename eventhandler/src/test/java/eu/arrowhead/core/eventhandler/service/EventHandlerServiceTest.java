@@ -1171,6 +1171,8 @@ public class EventHandlerServiceTest {
 		
 		final SubscriptionResponseDTO response = eventHandlerService.updateSubscriptionResponse( 1L, request);
 		
+		verify( eventHandlerDriver, times( 1 ) ).getAuthorizedPublishers( any());
+		verify( eventHandlerDBService, times( 1 ) ).updateSubscription( anyLong(), any(), any() );
 		assertTrue( response != null);
 	}
 	
@@ -1189,6 +1191,8 @@ public class EventHandlerServiceTest {
 		
 		final Subscription response = eventHandlerService.updateSubscription( 1L, request );
 		
+		verify( eventHandlerDriver, times( 1 ) ).getAuthorizedPublishers( any());
+		verify( eventHandlerDBService, times( 1 ) ).updateSubscription( anyLong(), any(), any() );
 		assertTrue( response != null);
 	}
 	
