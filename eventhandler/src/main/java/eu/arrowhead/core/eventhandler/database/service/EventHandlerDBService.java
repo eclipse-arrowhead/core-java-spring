@@ -43,12 +43,12 @@ public class EventHandlerDBService {
 	// members
 	
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
-	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = "The following sortable field  is not available : ";
+	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field  is not available.";
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String NULL_ERROR_MESSAGE = " is null";
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
-	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";;
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
 
 	private static final Logger logger = LogManager.getLogger(EventHandlerDBService.class);
 	
