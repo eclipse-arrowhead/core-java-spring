@@ -123,14 +123,13 @@ Join our developer team on Slack. Write an email to [szvetlin@aitia.ai](mailto:s
 
 ## Documentation 
  
-### Service Registry
-
 <a name="serviceregistry" />
  
+### Service Registry 
+ 
+<a name="serviceregistry_sdd" />
  
 #### System Design Description Overview
-
-<a name="serviceregistry_sdd" />
 
 This System provides the database, which stores information related to the currently actively offered Services within the Local Cloud.
 
@@ -143,9 +142,9 @@ However, it is worth noting, that within this generation the lookup functionalit
 
 However, the lookup of other Application Systems and Services directly is not within the primary use, since access will not be given without the Authorization JWT (JSON Web Token). The use of the TokenGeneration is restricted to the Orchestrator for general System accountability reasons. 
 
-#### Services and Use Cases
-
 <a name="serviceregistry_usecases" />
+
+#### Services and Use Cases
 
 This System only provides one Core Service the __Service Discovery__
 
@@ -166,9 +165,9 @@ The returned listing contains service endpoints that have been fulfilling the qu
 
 There is another functionality that does not bound to any Services, just an internal part of the Service Registry. There are two optional cleanup tasks within the Service Registry, which can be used to remove old, inactive service offerings. The first task is based on pinging the service provider and if the provider does not respond to the ping, its offered services will be deleted. The second task is based on a feature, called “Time to Live”. Service providers upon registration can provide a timestamp called “end_of_validity” number, which specifies how long the service will be offered by the provider, making the service de-registrations unnecessary, if this task is active. The task is used to remove expired services. The third task is using a feature called "Heartbeat" (Not yet implemented), where the Service provider periodically signals to the Service Registry that it is still alive. When it misses it will be removed. All of these internal tasks can be configured in the application.properties file.
 
-#### Security
-
 <a name="serviceregistry_security" />
+
+#### Security
 
 This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
 -	Application System is properly bootstrapped into the Local Cloud
@@ -177,6 +176,6 @@ This System can be secured via the HTTPS protocol. If it is started in secure mo
 
 If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Application System as the Service Provider in the entry. 
 
-#### Abstract Information Model
-
 <a name="serviceregistry_abstract_information_model" />
+
+#### Abstract Information Model
