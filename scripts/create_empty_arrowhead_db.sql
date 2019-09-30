@@ -342,6 +342,18 @@ CREATE TABLE `choreographer_next_action_step` (
   CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `choreographer_workspace`;
+CREATE TABLE `choreographer_workspace` (
+    `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    `name` varchar(255) UNIQUE NOT NULL,
+    `relative_x_coordinate` DOUBLE(8, 5) NOT NULL,
+    `relative_y_coordinate` DOUBLE(8, 5) NOT NULL,
+    `relative_z_coordinate` DOUBLE(8, 5) NOT NULL,
+    `relative_r_coordinate` DOUBLE(8, 5),
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Set up privileges
 
 -- Service Registry
@@ -457,6 +469,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES On `arrowhead`.`choreographer_workspace` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'localhost';
 
 DROP USER IF EXISTS 'choreographer'@'%';
@@ -469,6 +482,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES On `arrowhead`.`choreographer_workspace` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'%';
 
 -- Gatekeeper

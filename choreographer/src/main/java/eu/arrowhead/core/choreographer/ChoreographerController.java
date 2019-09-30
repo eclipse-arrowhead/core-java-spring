@@ -49,7 +49,6 @@ public class ChoreographerController {
 
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/actionplan";
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-    private static final String CHOREOGRAPHER_ACTION_PLAN_WITH_ACTIONS_MGMT_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/withactions";
 
     private static final String GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE = "ChoreographerActionStep returned.";
     private static final String GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve ChoreographerActionStep.";
