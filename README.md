@@ -51,7 +51,7 @@ Wait until servers start...
 
 Service Registry will be available on ```localhost:8443``` <br />
 Authorization will be available on ```localhost:8445``` <br />
-Ochestrator will be available on ```localhost:8441``` <br />
+Orchestrator will be available on ```localhost:8441``` <br />
 Event Handler will be available on ```localhost:8455``` <br />
 Gatekeeper will be available on ```localhost:8449``` <br />
 Gateway will be available on ```localhost:8453``` <br />
@@ -105,7 +105,7 @@ We are using [GitHub Issues](https://github.com/arrowhead-f/core-java-spring/iss
 The best way to get your bug fixed is to provide a reduced test case.
 
 #### How to Get in Touch
-Join our developer team on Slack. Write an email to: [szvetlin@aitia.ai](mailto:szvetlin@aitia.ai) for an invite. 
+Join our developer team on Slack. Write an email to [szvetlin@aitia.ai](mailto:szvetlin@aitia.ai) for an invite. 
 
 <a name="documentation" />
 
