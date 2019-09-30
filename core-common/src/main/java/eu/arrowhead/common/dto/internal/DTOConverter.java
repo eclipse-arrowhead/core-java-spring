@@ -11,10 +11,7 @@ import java.util.Set;
 
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
+import eu.arrowhead.common.dto.choreographer.*;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
@@ -648,4 +645,18 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
+
+    public static ChoreographerWorkspaceResponseDTO convertChoreographerWorkspaceToChoreographerWorkspaceResponseDTO(ChoreographerWorkspace workspaceEntry) {
+		Assert.notNull(workspaceEntry, "Workspace entry is null.");
+
+		return new ChoreographerWorkspaceResponseDTO(
+				workspaceEntry.getId(),
+				workspaceEntry.getName(),
+				workspaceEntry.getRelativeXCoordinate(),
+				workspaceEntry.getRelativeYCoordinate(),
+				workspaceEntry.getRelativeZCoordinate(),
+				workspaceEntry.getRelativeRCoordinate(),
+				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getUpdatedAt()));
+    }
 }

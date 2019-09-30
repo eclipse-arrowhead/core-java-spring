@@ -4,8 +4,12 @@ import eu.arrowhead.common.CoreDefaults;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.List;
 
+@Entity
 public class ChoreographerWorkspace {
+
+    public static final List<String> SORTABLE_FIELDS_BY = List.of("id", "createdAt", "updatedAt");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,16 +18,16 @@ public class ChoreographerWorkspace {
     @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
     private String name;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "relative_x_coordinate", nullable = false, precision = 10, scale = 2)
     private double relativeXCoordinate;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "relative_y_coordinate", nullable = false, precision = 10, scale = 2)
     private double relativeYCoordinate;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "relative_z_coordinate", nullable = false, precision = 10, scale = 2)
     private double relativeZCoordinate;
 
-    @Column(nullable = true, precision = 10, scale = 2)
+    @Column(name = "relative_r_coordinate", nullable = true, precision = 10, scale = 2)
     private double relativeRCoordinate;
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
