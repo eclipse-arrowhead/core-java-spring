@@ -763,8 +763,6 @@ public class EventHandlerControllerTest {
 				   .andReturn();
 		
 		Assert.assertNotNull( response );
-
-		Assert.assertNotNull( response );
 		Assert.assertTrue(response.getResolvedException().getMessage().contains( "Defined page or size could not be with undefined size or page." ));	
 	}
 	

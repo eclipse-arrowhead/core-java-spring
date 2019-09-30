@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -74,12 +75,15 @@ public class EventHandlerServiceTest {
 		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
 	
 		eventHandlerService.subscribe( request );
+		
+		verify( eventHandlerDriver, times(1) ).getAuthorizedPublishers( any() );
+		verify( eventHandlerDBService, times(1) ).registerSubscription(  any(), any() );
 	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestNull() {
+	public void testSubscribeInvalidRequestNull() {
 		
 		final SubscriptionRequestDTO request = null;
 		
@@ -94,7 +98,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterNullEventType() {
+	public void testSubscribeInvalidRequestParameterNullEventType() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setEventType( null );
@@ -110,7 +114,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterEmptyEventType() {
+	public void testSubscribeInvalidRequestParameterEmptyEventType() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setEventType( "   " );
@@ -126,7 +130,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterNullNotifyUri() {
+	public void testSubscribeInvalidRequestParameterNullNotifyUri() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setNotifyUri( null );
@@ -142,7 +146,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterEmptyNotifyUri() {
+	public void testSubscribeInvalidRequestParameterEmptyNotifyUri() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setNotifyUri( "   " );
@@ -158,7 +162,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterMatchMetaDataTrueAndFilterMetaDataNull() {
+	public void testSubscribeInvalidRequestParameterMatchMetaDataTrueAndFilterMetaDataNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setMatchMetaData( true );
@@ -175,7 +179,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterMatchMetaDataTrueAndFilterMetaDataEmpty() {
+	public void testSubscribeInvalidRequestParameterMatchMetaDataTrueAndFilterMetaDataEmpty() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setMatchMetaData( true );
@@ -192,7 +196,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterStartDateInPast() {
+	public void testSubscribeInvalidRequestParameterStartDateInPast() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		final ZonedDateTime past = ZonedDateTime.now().minusMinutes( 10 );
@@ -209,7 +213,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterEndDateInPast() {
+	public void testSubscribeInvalidRequestParameterEndDateInPast() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		final ZonedDateTime past = ZonedDateTime.now().minusMinutes( 10 );
@@ -226,7 +230,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterEndDateIsBeforeStarDate() {
+	public void testSubscribeInvalidRequestParameterEndDateIsBeforeStarDate() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		final ZonedDateTime end = ZonedDateTime.now().plusMinutes( 5 );
@@ -252,7 +256,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterSubscriberSystemNull() {
+	public void testSubscribeInvalidRequestParameterSubscriberSystemNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setSubscriberSystem( null );
@@ -275,7 +279,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterSubscriberSystemSystemNameNull() {
+	public void testSubscribeInvalidRequestParameterSubscriberSystemSystemNameNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( null );
@@ -298,7 +302,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterSubscriberSystemSystemNameEmpty() {
+	public void testSubscribeInvalidRequestParameterSubscriberSystemSystemNameEmpty() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( "  " );
@@ -321,7 +325,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterSubscriberSystemAddressNull() {
+	public void testSubscribeInvalidRequestParameterSubscriberSystemAddressNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( null );
@@ -344,7 +348,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterSubscriberSystemAddressEmpty() {
+	public void testSubscribeInvalidRequestParameterSubscriberSystemAddressEmpty() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( "   " );
@@ -367,7 +371,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterSubscriberSystemPortNull() {
+	public void testSubscribeInvalidRequestParameterSubscriberSystemPortNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setPort( null );
@@ -390,7 +394,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testSubscribeInvalidReuestPrameterSubscriberSystemPortLessThenOne() {
+	public void testSubscribeInvalidRequestParameterSubscriberSystemPortLessThanOne() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setPort( -1 );
@@ -426,12 +430,14 @@ public class EventHandlerServiceTest {
 				request.getSubscriberSystem().getSystemName(),
 				request.getSubscriberSystem().getAddress(),
 				request.getSubscriberSystem().getPort());
+		
+		verify( eventHandlerDBService, times(1) ).deleteSubscription( any(), any());
 	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUnsubscribeInvalidReuestPrameterEventTypeNull() {
+	public void testUnsubscribeInvalidRequestParameterEventTypeNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setEventType( null );
@@ -456,7 +462,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUnsubscribeInvalidReuestPrameterEventTypeEmpty() {
+	public void testUnsubscribeInvalidRequestParameterEventTypeEmpty() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.setEventType( "   " );
@@ -481,7 +487,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUnsubscribeInvalidReuestPrameterSubscriberNameNull() {
+	public void testUnsubscribeInvalidRequestParameterSubscriberNameNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( null );
@@ -506,7 +512,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUnsubscribeInvalidReuestPrameterSubscriberNameEmpty() {
+	public void testUnsubscribeInvalidRequestParameterSubscriberNameEmpty() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setSystemName( "    " );
@@ -531,7 +537,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUnsubscribeInvalidReuestPrameterSubscriberAddressNull() {
+	public void testUnsubscribeInvalidRequestParameterSubscriberAddressNull() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( null );
@@ -556,7 +562,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUnsubscribeInvalidReuestPrameterSubscriberAddressEmpty() {
+	public void testUnsubscribeInvalidRequestParameterSubscriberAddressEmpty() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setAddress( "    " );
@@ -581,7 +587,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUnsubscribeInvalidReuestPrameterSubscriberPort() {
+	public void testUnsubscribeInvalidRequestParameterSubscriberPort() {
 		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
 		request.getSubscriberSystem().setPort( -1 );
@@ -621,12 +627,16 @@ public class EventHandlerServiceTest {
 		doNothing().when( eventHandlerDriver ).publishEvent( any(), any());
 		when( metadataFilter.doFiltering( any() ) ).thenReturn( true );
 		eventHandlerService.publishResponse( request );
+		
+		verify( eventHandlerDBService, times( 1 ) ).getInvolvedSubscriptions( any() );
+		verify( eventHandlerDriver, times( 1 )).publishEvent( any(), any() );
+		verify( metadataFilter, times( 0 ) ).doFiltering( any() );
 	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterRequestNull() {
+	public void testPublishResponseInvalidRequestParameterRequestNull() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		
@@ -651,7 +661,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterEventTypeNull() {
+	public void testPublishResponseInvalidRequestParameterEventTypeNull() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -675,7 +685,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterEventTypeEmpty() {
+	public void testPublishResponseInvalidRequestParameterEventTypeEmpty() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -699,7 +709,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterPayloadNull() {
+	public void testPublishResponseInvalidRequestParameterPayloadNull() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -723,7 +733,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterPayloadEmpty() {
+	public void testPublishResponseInvalidRequestParameterPayloadEmpty() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -747,7 +757,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterTimeStampNull() {
+	public void testPublishResponseInvalidRequestParameterTimeStampNull() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -771,7 +781,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterTimeStampEmpty() {
+	public void testPublishResponseInvalidRequestParameterTimeStampEmpty() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -795,7 +805,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterTimeStampWrongFormat() {
+	public void testPublishResponseInvalidRequestParameterTimeStampWrongFormat() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -819,7 +829,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterTimeStampInFuture() {
+	public void testPublishResponseInvalidRequestParameterTimeStampInFuture() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -843,7 +853,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishResponseInvalidReuestPrameterTimeStampInPast() {
+	public void testPublishResponseInvalidRequestParameterTimeStampInPast() {
 		
 		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
 		final Set<Subscription> involvedSubscriptions = getSubscriptionSet( 7 );
@@ -883,8 +893,8 @@ public class EventHandlerServiceTest {
 		
 		eventHandlerService.publishResponse( request );
 		
-		final Set<Subscription> filterednvolvedSubscriptions = valueCapture.getValue();
-		assertEquals( 1, filterednvolvedSubscriptions.size());
+		final Set<Subscription> filteredInvolvedSubscriptions = valueCapture.getValue();
+		assertEquals( 1, filteredInvolvedSubscriptions.size());
 
 	}
 	
@@ -921,10 +931,11 @@ public class EventHandlerServiceTest {
 		request.setMetaData( null );
 
 		when( eventHandlerDBService.getInvolvedSubscriptions( any())).thenReturn( involvedSubscriptions );
-		verify(eventHandlerDriver, never()).publishEvent( any(), any());
 		when( metadataFilter.doFiltering( any() ) ).thenReturn( true );
 		
 		eventHandlerService.publishResponse( request );
+		
+		verify(eventHandlerDriver, never()).publishEvent( any(), any());
 
 	}
 	
@@ -938,10 +949,11 @@ public class EventHandlerServiceTest {
 		request.setMetaData( Map.of() );
 		
 		when( eventHandlerDBService.getInvolvedSubscriptions( any())).thenReturn( involvedSubscriptions );
-		verify(eventHandlerDriver, never()).publishEvent( any(), any());
 		when( metadataFilter.doFiltering( any() ) ).thenReturn( true );
 		
 		eventHandlerService.publishResponse( request );
+		
+		verify(eventHandlerDriver, never()).publishEvent( any(), any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -954,10 +966,11 @@ public class EventHandlerServiceTest {
 		request.setMetaData( Map.of( "a", "1"));
 		
 		when( eventHandlerDBService.getInvolvedSubscriptions( any())).thenReturn( involvedSubscriptions );
-		verify(eventHandlerDriver, never()).publishEvent( any(), any());
 		when( metadataFilter.doFiltering( any() ) ).thenReturn( false );
 		
 		eventHandlerService.publishResponse( request );
+		
+		verify(eventHandlerDriver, never()).publishEvent( any(), any());
 		
 	}
 	
@@ -978,11 +991,14 @@ public class EventHandlerServiceTest {
 
 		eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
 	
+		verify( eventHandlerDBService, times( 1 ) ).getInvolvedSubscriptionsBySubscriberSystemId( any());
+		verify( eventHandlerDriver, times( 1 ) ).getAuthorizedPublishers( any() );
+		verify( eventHandlerDBService, times( 1 ) ).updateSubscriberAuthorization( any(), any() );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishSubscriberAuthorizationUpdateResponseInvalidReuestPrameterEventTypeNull() {
+	public void testPublishSubscriberAuthorizationUpdateResponseInvalidRequestParameterEventTypeNull() {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
 		final List<Subscription> involvedSubscriptions = List.copyOf( getSubscriptionSet( 7 ) );
@@ -1006,7 +1022,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishSubscriberAuthorizationUpdateResponseInvalidReuestPrameterEventTypeEmpty() {
+	public void testPublishSubscriberAuthorizationUpdateResponseInvalidRequestParameterEventTypeEmpty() {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
 		final List<Subscription> involvedSubscriptions = List.copyOf( getSubscriptionSet( 7 ) );
@@ -1030,7 +1046,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishSubscriberAuthorizationUpdateResponseInvalidReuestPrameterEventTypeNotValid() {
+	public void testPublishSubscriberAuthorizationUpdateResponseInvalidRequestParameterEventTypeNotValid() {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
 		final List<Subscription> involvedSubscriptions = List.copyOf( getSubscriptionSet( 7 ) );
@@ -1054,7 +1070,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishSubscriberAuthorizationUpdateResponseInvalidReuestPrameterPayloadNull() {
+	public void testPublishSubscriberAuthorizationUpdateResponseInvalidRequestParameterPayloadNull() {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
 		final List<Subscription> involvedSubscriptions = List.copyOf( getSubscriptionSet( 7 ) );
@@ -1078,7 +1094,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishSubscriberAuthorizationUpdateResponseInvalidReuestPrameterPayloadEmpty() {
+	public void testPublishSubscriberAuthorizationUpdateResponseInvalidRequestParameterPayloadEmpty() {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
 		final List<Subscription> involvedSubscriptions = List.copyOf( getSubscriptionSet( 7 ) );
@@ -1102,7 +1118,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testPublishSubscriberAuthorizationUpdateResponseInvalidReuestPrameterPayloadInvalid() {
+	public void testPublishSubscriberAuthorizationUpdateResponseInvalidRequestParameterPayloadInvalid() {
 		
 		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
 		final List<Subscription> involvedSubscriptions = List.copyOf( getSubscriptionSet( 7 ) );
@@ -1132,10 +1148,11 @@ public class EventHandlerServiceTest {
 		final EventPublishRequestDTO request = getSubscriberAuthorizationUpdateEventPublishRequestDTOForTest();	
 		
 		when( eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( any())).thenReturn( involvedSubscriptions );
-		verify(eventHandlerDriver, never()).getAuthorizedPublishers( any());
-		verify(eventHandlerDBService, never()).updateSubscriberAuthorization( any(), any());
 		
 		eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
+		
+		verify(eventHandlerDriver, never()).getAuthorizedPublishers( any());
+		verify(eventHandlerDBService, never()).updateSubscriberAuthorization( any(), any());
 
 	}
 	
@@ -1177,7 +1194,7 @@ public class EventHandlerServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void testUpdateSubscriptionInvalidReuestPrameterRequestNull() {
+	public void testUpdateSubscriptionInvalidRequestParameterRequestNull() {
 		
 		final SubscriptionRequestDTO request = null;
 		
@@ -1198,7 +1215,7 @@ public class EventHandlerServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	// skipped other testUpdateSubscriptionInvalidReuestPrameter - method using the same checkSubscriptionRequestDTO as tested at testSubcribe
+	// skipped other testUpdateSubscriptionInvalidRequestParameter - method using the same checkSubscriptionRequestDTO as tested at testSubcribe
 	
 	
 	

@@ -262,7 +262,7 @@ public class Utilities {
 	
 	//-------------------------------------------------------------------------------------------------
 	public static UriComponents createURI(final String scheme, final String host, final int port, final String path) {
-		return createURI(scheme, host, port, null, path, null);
+		return createURI(scheme, host, port, null, path, (String[]) null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
