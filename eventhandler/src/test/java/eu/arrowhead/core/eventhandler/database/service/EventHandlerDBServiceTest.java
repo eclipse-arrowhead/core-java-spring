@@ -2,10 +2,12 @@ package eu.arrowhead.core.eventhandler.database.service;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -89,8 +92,67 @@ public class EventHandlerDBServiceTest {
 	@Test
 	public void testGetSubscriptionByIdResponseOK() {
 		
-		assertTrue( true );
+		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ) ) );
+		
+		final Subscription response = eventHandlerDBService.getSubscriptionById( 1L );
+		
+		assertNotNull( response );
+		assertNotNull( response.getSubscriberSystem() );
+		assertNotNull( response.getEventType() );
+		assertNotNull( response.getNotifyUri() );
+	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSubscriptionByIdResponseInvalidParameterId() {
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionById( -1L );
+		
+		} catch (Exception ex) {
+						
+			Assert.assertTrue( ex.getMessage().contains( "SubscriberSystemId must be greater than zero." ));
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetSubscriptionByIdResponseInvalidParameterSubscriptionByIdNotInDB() {
+
+		final Subscription subscription =  null;
+		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.ofNullable( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionById( 1L );
+		
+		} catch (Exception ex) {
+						
+			Assert.assertTrue( ex.getMessage().contains( "not exists" ));
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = Exception.class)
+	public void testGetSubscriptionByIdResponseExceptionInDBCall() {
+
+		when( subscriptionRepository.findById( anyLong() ) ).thenThrow( Exception.class );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionById( 1L );
+		
+		} catch (Exception ex) {
+						
+			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
+			throw ex;
+		}
+		
 	}
 
 	//=================================================================================================
