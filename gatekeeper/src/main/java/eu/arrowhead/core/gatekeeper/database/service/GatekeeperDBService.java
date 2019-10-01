@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
@@ -28,14 +29,14 @@ import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
 import eu.arrowhead.common.database.repository.CloudGatewayRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudWithRelaysListResponseDTO;
-import eu.arrowhead.common.dto.CloudWithRelaysResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayResponseDTO;
-import eu.arrowhead.common.dto.RelayListResponseDTO;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.RelayListResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
@@ -80,7 +81,7 @@ public class GatekeeperDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!Cloud.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
@@ -90,7 +91,7 @@ public class GatekeeperDBService {
 			return cloudRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -102,7 +103,7 @@ public class GatekeeperDBService {
 			return cloudRepository.findByNeighbor(true);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -114,7 +115,7 @@ public class GatekeeperDBService {
 			return cloudRepository.findAllById(ids);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -147,7 +148,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -223,7 +224,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -287,7 +288,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -352,7 +353,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -371,7 +372,7 @@ public class GatekeeperDBService {
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -391,7 +392,7 @@ public class GatekeeperDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!Relay.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
@@ -401,7 +402,21 @@ public class GatekeeperDBService {
 			return relayRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------	
+	public List<Relay> getPublicGatewayRelays() {
+		logger.debug("getPublicRelaysByType started...");
+				
+		try {
+			
+			return relayRepository.findAllByExclusiveAndTypeIn(false, List.of(RelayType.GATEWAY_RELAY, RelayType.GENERAL_RELAY));
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -434,7 +449,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -468,7 +483,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -535,7 +550,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -591,7 +606,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -621,7 +636,7 @@ public class GatekeeperDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -767,9 +782,9 @@ public class GatekeeperDBService {
 			gatewayRelays = relayRepository.findAllById(gatekewayRelayIds);
 			
 			for (final Relay relay : gatewayRelays) {
-				if (relay.getType() != RelayType.GATEWAY_RELAY && relay.getType() != RelayType.GENERAL_RELAY) {
-					throw new InvalidParameterException("Relay with gateway purpose could be only " + RelayType.GATEWAY_RELAY + " or " + RelayType.GENERAL_RELAY + " type, but not " +
-														 relay.getType() + " type");
+				if (relay.getType() != RelayType.GATEWAY_RELAY || !relay.getExclusive()) {
+					final String exclusivity = relay.getExclusive() ? "exclusive" : "non-exclusive";
+					throw new InvalidParameterException("Gateway dedicated relay could be only exclusive" + RelayType.GATEWAY_RELAY + " type, but not " + exclusivity + relay.getType() + " type");
 				}
 			}
 		}
@@ -912,6 +927,6 @@ public class GatekeeperDBService {
 		final List<CloudGatewayRelay> entriesToDelete = cloudGatewayRelayRepository.findAllById(relaysConnToDelete);
 		cloudGatewayRelayRepository.deleteInBatch(entriesToDelete);
 		
-		return collectAndValidateGatekeeperRelays(relaysToAssign);
+		return collectAndValidateGatewayRelays(relaysToAssign);
 	}
 }

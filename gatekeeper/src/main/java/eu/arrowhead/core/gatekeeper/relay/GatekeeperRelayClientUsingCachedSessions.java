@@ -16,7 +16,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
 
 public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelayClient {
 	
@@ -36,7 +36,7 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 		Assert.notNull(publicKey, "Public key is null.");
 		Assert.notNull(privateKey, "Private key is null.");
 		
-		this.client = RelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, false);
+		this.client = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, false);
 	}
 
 	//-------------------------------------------------------------------------------------------------

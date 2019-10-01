@@ -45,32 +45,37 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalResponseDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.RelayType;
-import eu.arrowhead.common.dto.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServiceSecurityType;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingParameters;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDriverICNTest {
@@ -82,7 +87,7 @@ public class GatekeeperDriverICNTest {
 	private GatekeeperDriver testingObject;
 	
 	@Mock
-	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmaker;
+	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
 	
 	@Mock
 	private Map<String,Object> arrowheadContext;
@@ -118,7 +123,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testSendICNProposalRelayProblem() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 
 		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(JMSException.class);
 		
@@ -129,7 +134,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = TimeoutException.class)
 	public void testSendICNProposalNoAcknowledgement() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
 		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(null);
@@ -142,7 +147,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = TimeoutException.class)
 	public void testSendICNProposalNoResponse() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
 		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
@@ -157,12 +162,12 @@ public class GatekeeperDriverICNTest {
 	@Test
 	public void testSendICNProposalEverythingOK() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
-		when(gatekeeperMatchmaker.doMatchmaking(any(GatekeeperMatchmakingParameters.class))).thenReturn(relay);
+		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
 		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(gaResult);
-		final GatekeeperRelayResponse response = new GatekeeperRelayResponse("1234", CommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, new ICNProposalResponseDTO());
+		final GatekeeperRelayResponse response = new GatekeeperRelayResponse("1234", CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, new ICNProposalResponseDTO());
 		when(relayClient.sendRequestAndReturnResponse(any(Session.class), any(GeneralAdvertisementResult.class), any())).thenReturn(response);
 		
 		final Cloud targetCloud = new Cloud("aitia", "testcloud2", true, true, false, "abcd");
@@ -179,14 +184,14 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testQueryOrchestratorURINotFound() {
-		when(arrowheadContext.containsKey(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testQueryOrchestratorURIWrongType() {
-		final String key = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn("abcd");
 		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
@@ -214,14 +219,14 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseURINotFound() {
-		when(arrowheadContext.containsKey(CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
 		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseURIWrongType() {
-		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn("1234");
 		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
@@ -230,7 +235,7 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test 
 	public void testQueryAuthorizationBasedOnOchestrationResponseNoAccess() {
-		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
 		
@@ -245,7 +250,7 @@ public class GatekeeperDriverICNTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test 
 	public void testQueryAuthorizationBasedOnOchestrationResponseFiltered() {
-		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
 		
@@ -260,6 +265,394 @@ public class GatekeeperDriverICNTest {
 		Assert.assertEquals(2, authorizedResponse.getResponse().get(0).getProvider().getId());
 		Assert.assertEquals(1, authorizedResponse.getResponse().get(0).getInterfaces().size());
 		Assert.assertEquals(100, authorizedResponse.getResponse().get(0).getInterfaces().get(0).getId());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryGatewayPublicKeyURINotFound() {
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		testingObject.queryGatewayPublicKey();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryGatewayPublicKeyURIWrongType() {
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not an URI");
+		testingObject.queryGatewayPublicKey();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRequestNull() {
+		testingObject.connectProvider(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.setRelay(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayAddressNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setAddress(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayAddressEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setAddress(" ");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayPortNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setPort(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayPortTooLow() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setPort(-192);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayPortTooHigh() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setPort(192426);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayTypeNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setType(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayTypeEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setType("\r\t");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayTypeInvalid1() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setType("invalid");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderRelayTypeInvalid2() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getRelay().setType(RelayType.GATEKEEPER_RELAY.name());
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.setConsumer(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerNameNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumer().setSystemName(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerNameEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumer().setSystemName("");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerAddressNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumer().setAddress(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerAddressEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumer().setAddress(" ");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerPortNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumer().setPort(null);
+		
+		testingObject.connectProvider(request);
+	}
+
+	// we skip the port interval check tests because it uses the same method than relay check
+	// we skip the provider check tests because it uses the same method than consumer check
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerCloudNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.setConsumerCloud(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerCloudOperatorNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumerCloud().setOperator(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerCloudOperatorEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumerCloud().setOperator(" ");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerCloudNameNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumerCloud().setName(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerCloudNameEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.getConsumerCloud().setName("");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	// we skip the provider cloud check tests because it uses the same method than consumer cloud check
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderServiceDefinitionNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.setServiceDefinition(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderServiceDefinitionEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.setServiceDefinition("");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerGWPublicKeyNull() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.setConsumerGWPublicKey(null);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectProviderConsumerGWPublicKeyEmpty() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		request.setConsumerGWPublicKey("\n\t\r");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testConnectProviderURINotFound() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testConnectProviderURIWrongType() {
+		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not a valid URI");
+		
+		testingObject.connectProvider(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerRequestNull() {
+		testingObject.connectConsumer(null);
+	}
+
+	// we skip the relay check tests because it uses the same method than in connectProvider
+	// we skip the consumer check tests because it uses the same method than in connectProvider
+	// we skip the provider check tests because it uses the same method than in connectProvider
+	// we skip the consumer cloud check tests because it uses the same method than in connectProvider
+	// we skip the provider cloud check tests because it uses the same method than in connectProvider
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerServiceDefinitionNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerServiceDefinitionEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setServiceDefinition("          ");
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerProviderGWPublicKeyNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setProviderGWPublicKey(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerProviderGWPublicKeyEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setProviderGWPublicKey("");
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerQueueIdNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setQueueId(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerQueueIdEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setQueueId("");
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerPeerNameNull() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setPeerName(null);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConnectConsumerPeerNameEmpty() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		request.setPeerName("   ");
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testConnectConsumerURINotFound() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		
+		testingObject.connectConsumer(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testConnectConsumerURIWrongType() {
+		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not URI");
+		
+		testingObject.connectConsumer(request);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetGatewayHostURINotFound() {
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		testingObject.getGatewayHost();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetGatewayHostURIWrongType() {
+		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
+		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not an URI");
+		testingObject.getGatewayHost();
 	}
 	
 	//=================================================================================================
@@ -278,7 +671,7 @@ public class GatekeeperDriverICNTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Session getTestSession() {
+	private Session getTestSession() {
 		return new Session() {
 
 			//-------------------------------------------------------------------------------------------------
@@ -323,7 +716,7 @@ public class GatekeeperDriverICNTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public MessageConsumer getTestMessageConsumer() {
+	private MessageConsumer getTestMessageConsumer() {
 		return new MessageConsumer() {
 
 			//-------------------------------------------------------------------------------------------------
@@ -338,7 +731,7 @@ public class GatekeeperDriverICNTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestrationResultDTO> getTestOrchestrationResults() {
+	private List<OrchestrationResultDTO> getTestOrchestrationResults() {
 		final List<OrchestrationResultDTO> result = new ArrayList<>(2);
 		
 		final ServiceDefinitionResponseDTO service = new ServiceDefinitionResponseDTO(22, "test-service", null, null);
@@ -367,5 +760,51 @@ public class GatekeeperDriverICNTest {
 		result.setAuthorizedProviderIdsWithInterfaceIds(List.of(new IdIdListDTO(2L, List.of(100L))));
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private GatewayProviderConnectionRequestDTO getTestGatewayProviderConnectionRequestDTO() {
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("abc.de");
+		consumer.setPort(22001);
+		consumer.setAuthenticationInfo("consAuth");
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("fgh.de");
+		provider.setPort(22002);
+		provider.setAuthenticationInfo("provAuth");
+		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
+		consumerCloud.setName("testcloud1");
+		consumerCloud.setOperator("aitia");
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("testcloud2");
+		providerCloud.setOperator("elte");
+		
+		return new GatewayProviderConnectionRequestDTO(relay, consumer, provider, consumerCloud, providerCloud, "test-service", "consumerGWPublicKey");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private GatewayConsumerConnectionRequestDTO getTestGatewayConsumerConnectionRequestDTO() {
+		final RelayRequestDTO relay = new RelayRequestDTO("localhost", 1234, false, false, RelayType.GATEWAY_RELAY.name());
+		final SystemRequestDTO consumer = new SystemRequestDTO();
+		consumer.setSystemName("consumer");
+		consumer.setAddress("abc.de");
+		consumer.setPort(22001);
+		consumer.setAuthenticationInfo("consAuth");
+		final SystemRequestDTO provider = new SystemRequestDTO();
+		provider.setSystemName("provider");
+		provider.setAddress("fgh.de");
+		provider.setPort(22002);
+		provider.setAuthenticationInfo("provAuth");
+		final CloudRequestDTO consumerCloud = new CloudRequestDTO();
+		consumerCloud.setName("testcloud1");
+		consumerCloud.setOperator("aitia");
+		final CloudRequestDTO providerCloud = new CloudRequestDTO();
+		providerCloud.setName("testcloud2");
+		providerCloud.setOperator("elte");
+		
+		return new GatewayConsumerConnectionRequestDTO(relay, "queueId", "peerName", "providerGWPublicKey", consumer, provider, consumerCloud, providerCloud, "test-service");
 	}
 }

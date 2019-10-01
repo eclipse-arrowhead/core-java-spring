@@ -22,7 +22,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
 @Table(name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
@@ -41,16 +41,16 @@ public class System {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String systemName;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String address;
 	
 	@Column(nullable = false)
 	private int port;
 	
-	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	@Column(nullable = true, length = CoreDefaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

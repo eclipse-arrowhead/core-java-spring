@@ -30,34 +30,41 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckRequestDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.ErrorWrapperDTO;
-import eu.arrowhead.common.dto.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalResponseDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckRequestDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
 import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
-import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingParameters;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
 @Component
 public class GatekeeperDriver {
@@ -65,11 +72,14 @@ public class GatekeeperDriver {
 	//=================================================================================================
 	// members
 	
-	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
-	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CommonConstants.URI_SUFFIX;
+	private static final String AUTH_INTER_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String ORCHESTRATION_PROCESS_URI_KEY = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_PUBLIC_KEY_URI_KEY = CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_CONNECT_PROVIDER_URI_KEY = CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEWAY_CONNECT_CONSUMER_URI_KEY = CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
-	@Resource(name = CommonConstants.GATEKEEPER_MATCHMAKER)
-	private GatekeeperMatchmakingAlgorithm gatekeeperMatchmaker;
+	@Resource(name = CoreCommonConstants.GATEKEEPER_MATCHMAKER)
+	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -91,6 +101,8 @@ public class GatekeeperDriver {
 	@EventListener
 	@Order(15) // to make sure GatekeeperApplicationInitListener finished before this method is called (the common name and the keys are added to the context in the init listener)
 	public void onApplicationEvent(final ContextRefreshedEvent event) {
+		logger.debug("onApplicationEvent started...");
+		
 		if (!arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)) {
 			throw new ArrowheadException("Server's certificate not found.");
 		}
@@ -106,7 +118,7 @@ public class GatekeeperDriver {
 		}
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 	
-		relayClient = RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);	
+		relayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -180,7 +192,7 @@ public class GatekeeperDriver {
 		Assert.notNull(targetCloud, "Target cloud is null.");
 		Assert.notNull(request, "Request is null.");
 		
-		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new GatekeeperMatchmakingParameters(targetCloud));
+		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(targetCloud));
 		try {
 			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort());
 			final String recipientCommonName = getRecipientCommonName(targetCloud);
@@ -231,6 +243,63 @@ public class GatekeeperDriver {
 		return orchestrationResponse;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public String queryGatewayPublicKey() {
+		logger.debug("queryPublicKey started...");
+		
+		final UriComponents publicKeyUri = getGatewayPublicKeyUri();
+		final ResponseEntity<String> response = httpService.sendRequest(publicKeyUri, HttpMethod.GET, String.class);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GatewayProviderConnectionResponseDTO connectProvider(final GatewayProviderConnectionRequestDTO request) {
+		logger.debug("connectProvider started...");
+
+		Assert.notNull(request, "request is null.");
+		validateRelay(request.getRelay());
+		validateSystem(request.getConsumer());
+		validateSystem(request.getProvider());
+		validateCloud(request.getConsumerCloud());
+		validateCloud(request.getProviderCloud());
+		Assert.isTrue(!Utilities.isEmpty(request.getServiceDefinition()), "service definition is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getConsumerGWPublicKey()), "consumer gateway public key is null or blank.");
+		
+		final UriComponents connectProviderUri = getGatewayConnectProviderUri();
+		final ResponseEntity<GatewayProviderConnectionResponseDTO> response = httpService.sendRequest(connectProviderUri, HttpMethod.POST, GatewayProviderConnectionResponseDTO.class, request);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public int connectConsumer(final GatewayConsumerConnectionRequestDTO request) {
+		logger.debug("connectConsumer started...");
+
+		Assert.notNull(request, "request is null.");
+		validateRelay(request.getRelay());
+		validateSystem(request.getConsumer());
+		validateSystem(request.getProvider());
+		validateCloud(request.getConsumerCloud());
+		validateCloud(request.getProviderCloud());
+		Assert.isTrue(!Utilities.isEmpty(request.getServiceDefinition()), "service definition is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getProviderGWPublicKey()), "provider gateway public key is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getQueueId()), "queue id is null or blank.");
+		Assert.isTrue(!Utilities.isEmpty(request.getPeerName()), "peer name is null or blank.");
+		
+		final UriComponents connectConsumerUri = getGatewayConnectConsumerUri();
+		final ResponseEntity<Integer> response = httpService.sendRequest(connectConsumerUri, HttpMethod.POST, Integer.class, request);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public String getGatewayHost() {
+		logger.debug("getGatewayHost started...");
+		
+		return getGatewayPublicKeyUri().getHost();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -240,7 +309,7 @@ public class GatekeeperDriver {
 		
 		final Map<Cloud,Relay> realyPerCloud = new HashMap<>();
 		for (final Cloud cloud : clouds) {
-			final Relay relay = gatekeeperMatchmaker.doMatchmaking(new GatekeeperMatchmakingParameters(cloud));
+			final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(cloud));
 			realyPerCloud.put(cloud, relay);
 		}
 		
@@ -256,9 +325,9 @@ public class GatekeeperDriver {
 	private UriComponents getServiceRegistryQueryUri() {
 		logger.debug("getServiceRegistryQueryUri started...");
 		
-		if (arrowheadContext.containsKey(CommonConstants.SR_QUERY_URI)) {
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_URI)) {
 			try {
-				return (UriComponents) arrowheadContext.get(CommonConstants.SR_QUERY_URI);
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_URI);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
 			}
@@ -295,6 +364,51 @@ public class GatekeeperDriver {
 		}
 		
 		throw new ArrowheadException("Gatekeeper can't find orchestration process URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatewayPublicKeyUri() {
+		logger.debug("getGatewayPublicKeyUri started...");
+		
+		if (arrowheadContext.containsKey(GATEWAY_PUBLIC_KEY_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEWAY_PUBLIC_KEY_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find gateway public key URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find gateway public key URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatewayConnectProviderUri() {
+		logger.debug("getGatewayConnectProviderUri started...");
+		
+		if (arrowheadContext.containsKey(GATEWAY_CONNECT_PROVIDER_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEWAY_CONNECT_PROVIDER_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find gateway connect provider URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find gateway connect provider URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatewayConnectConsumerUri() {
+		logger.debug("getGatewayConnectConsumerUri started...");
+		
+		if (arrowheadContext.containsKey(GATEWAY_CONNECT_CONSUMER_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEWAY_CONNECT_CONSUMER_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find gateway connect consumer URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find gateway connect consumer URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -349,5 +463,49 @@ public class GatekeeperDriver {
 
 		return authorizedProviderIdsWithInterfaceIds.stream().collect(Collectors.toMap(e -> e.getId(), 
 																					   e -> e.getIdList()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateRelay(final RelayRequestDTO relay) {
+		logger.debug("validateRelay started...");
+		
+		Assert.notNull(relay, "relay is null.");
+		Assert.isTrue(!Utilities.isEmpty(relay.getAddress()), "relay address is null or blank");
+		Assert.notNull(relay.getPort(), "relay port is null");
+		validateSystemPortRange(relay.getPort());
+		Assert.isTrue(!Utilities.isEmpty(relay.getType()), "relay type is null or blank");
+		final RelayType relayType = Utilities.convertStringToRelayType(relay.getType());
+		if (relayType == null || relayType == RelayType.GATEKEEPER_RELAY) {
+			throw new IllegalArgumentException("Relay type is invalid");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateSystem(final SystemRequestDTO system) {
+		logger.debug("validateSystem started...");
+		
+		Assert.notNull(system, "system is null");
+		Assert.isTrue(!Utilities.isEmpty(system.getSystemName()), "system name is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(system.getAddress()), "system address is null or blank");
+		Assert.notNull(system.getPort(), "system port is null");
+		validateSystemPortRange(system.getPort());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloud(final CloudRequestDTO cloud) {
+		logger.debug("validateCloud started...");
+		
+		Assert.notNull(cloud, "Cloud is null");
+		Assert.isTrue(!Utilities.isEmpty(cloud.getOperator()), "cloud operator is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(cloud.getName()), "cloud name is null or blank");		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateSystemPortRange(final int port) {
+		logger.debug("validateSystemPortRange started...");
+		
+		if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new IllegalArgumentException("port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".");
+		}
 	}
 }

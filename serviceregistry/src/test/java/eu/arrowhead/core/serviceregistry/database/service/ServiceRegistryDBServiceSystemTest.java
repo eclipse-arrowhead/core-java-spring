@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -63,7 +64,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int validatedPage = 1;
 		final int validatedSize = 1;
 		final Direction validatedDirection = Direction.ASC;
-		final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		final String validatedSortField = CoreCommonConstants.COMMON_FIELD_NAME_ID;
 		
 		final String nullSortField = null;
 		
@@ -92,7 +93,7 @@ public class ServiceRegistryDBServiceSystemTest {
 		final int validatedPage = 1;
 		final int validatedSize = 1;
 		final Direction validatedDirection = Direction.ASC;
-		final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		final String validatedSortField = CoreCommonConstants.COMMON_FIELD_NAME_ID;
 		
 		final String invalidSortField = "";
 		

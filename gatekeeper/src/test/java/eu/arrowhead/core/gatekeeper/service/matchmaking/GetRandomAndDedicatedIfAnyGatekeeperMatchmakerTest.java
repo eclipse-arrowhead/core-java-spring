@@ -13,9 +13,9 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.RelayType;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingParameters;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 
 @RunWith(SpringRunner.class)
@@ -24,7 +24,7 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 	//=================================================================================================
 	// members
 	
-	private final GatekeeperMatchmakingAlgorithm algorithm = new GetRandomAndDedicatedIfAnyGatekeeperMatchmaker();
+	private final RelayMatchmakingAlgorithm algorithm = new GetRandomAndDedicatedIfAnyGatekeeperMatchmaker();
 	
 	//=================================================================================================
 	// methods
@@ -62,10 +62,10 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 		gatewayRelay.setAddress("3.3.3.3");
 		gatewayRelay.setPort(3000);
 		gatewayRelay.setSecure(true);
-		gatewayRelay.setExclusive(false);
+		gatewayRelay.setExclusive(true);
 		gatewayRelay.setType(RelayType.GATEWAY_RELAY);
 		
-		final GatekeeperMatchmakingParameters parameters = createGatekeeperMatchmakingParameters(cloud, List.of(gatekeeperRelay, generalRelay, gatewayRelay), System.currentTimeMillis());
+		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(gatekeeperRelay, generalRelay, gatewayRelay), System.currentTimeMillis());
 		
 		final Relay relayMatch = algorithm.doMatchmaking(parameters);
 		
@@ -97,10 +97,10 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 		gatewayRelay.setAddress("3.3.3.3");
 		gatewayRelay.setPort(3000);
 		gatewayRelay.setSecure(true);
-		gatewayRelay.setExclusive(false);
+		gatewayRelay.setExclusive(true);
 		gatewayRelay.setType(RelayType.GATEWAY_RELAY);
 		
-		final GatekeeperMatchmakingParameters parameters = createGatekeeperMatchmakingParameters(cloud, List.of(generalRelay, gatewayRelay), System.currentTimeMillis());
+		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(generalRelay, gatewayRelay), System.currentTimeMillis());
 		
 		final Relay relayMatch = algorithm.doMatchmaking(parameters);
 		
@@ -144,7 +144,7 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 		gatekeeperRelay3.setType(RelayType.GATEKEEPER_RELAY);
 		
 		final long seed = System.currentTimeMillis();		
-		final GatekeeperMatchmakingParameters parameters = createGatekeeperMatchmakingParameters(cloud, List.of(gatekeeperRelay1, gatekeeperRelay2, gatekeeperRelay3), seed);
+		final RelayMatchmakingParameters parameters = createRelayMatchmakingParameters(cloud, List.of(gatekeeperRelay1, gatekeeperRelay2, gatekeeperRelay3), seed);
 		final Random rng = new Random(seed);
 		
 		final Relay relayMatch = algorithm.doMatchmaking(parameters);
@@ -156,9 +156,9 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private GatekeeperMatchmakingParameters createGatekeeperMatchmakingParameters(final Cloud cloud, final List<Relay> gatekeeperRelays, final long randomSeed) {
+	private RelayMatchmakingParameters createRelayMatchmakingParameters(final Cloud cloud, final List<Relay> gatekeeperRelays, final long randomSeed) {
 		for (final Relay relay : gatekeeperRelays) {
-			if (relay.getType() == RelayType.GATEWAY_RELAY) {
+			if (relay.getType() == RelayType.GATEWAY_RELAY && relay.getExclusive()) {
 				final CloudGatewayRelay conn = new CloudGatewayRelay(cloud, relay);
 				cloud.getGatewayRelays().add(conn);
 				relay.getCloudGateways().add(conn);
@@ -169,7 +169,7 @@ public class GetRandomAndDedicatedIfAnyGatekeeperMatchmakerTest {
 			}
 		}
 	
-		final GatekeeperMatchmakingParameters parameters = new GatekeeperMatchmakingParameters(cloud);
+		final RelayMatchmakingParameters parameters = new RelayMatchmakingParameters(cloud);
 		parameters.setRandomSeed(randomSeed);
 		
 		return parameters;

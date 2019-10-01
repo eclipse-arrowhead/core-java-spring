@@ -30,11 +30,12 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 /**
@@ -51,7 +52,7 @@ public class SRAccessControlFilterTest {
 	// members
 
 	private static final String SERVICE_REGISTRY_ECHO = CommonConstants.SERVICE_REGISTRY_URI + "/echo";
-	private static final String SERVICE_REGISTRY_MGMT_SYSTEMS = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.MGMT_URI + "/systems";
+	private static final String SERVICE_REGISTRY_MGMT_SYSTEMS = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI + "/systems";
 	private static final String SERVICE_REGISTRY_REGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 	private static final String SERVICE_REGISTRY_UNREGISTER = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 	private static final String SERVICE_REGISTRY_QUERY = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI;
@@ -229,8 +230,32 @@ public class SRAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S2699") // because of false positive in sonar
 	@Test
-	public void testQueryNotAllowedCoreSystemClient() throws Exception {
-		postQuery(new ServiceQueryFormDTO(), "certificates/authorization.pem", status().isUnauthorized());
+	public void testQueryNotAllowedCoreSystemClientBecauseOfNotSpecifiedService() throws Exception {
+		postQuery(new ServiceQueryFormDTO(), "certificates/gateway.pem", status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryNotAllowedCoreSystemClientBecauseOfNotOwnService() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder("test-service").build();
+		postQuery(form, "certificates/gateway.pem", status().isUnauthorized());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryAllowedCoreSystemClientBecauseOfOwnService() throws Exception {
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder(CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition()).build();
+		when(serviceRegistryDBService.queryRegistry(any())).thenReturn(new ServiceQueryResultDTO());
+		postQuery(form, "certificates/authorization.pem", status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testQueryByNonCoreSystemWithoutServiceSpecified() throws Exception {
+		postQuery(new ServiceQueryFormDTO(), "certificates/provider.pem", status().isUnauthorized());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

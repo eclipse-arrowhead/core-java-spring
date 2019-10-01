@@ -16,12 +16,16 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
+import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
-import eu.arrowhead.core.gatekeeper.relay.RelayClientFactory;
-import eu.arrowhead.core.gatekeeper.service.matchmaking.GatekeeperMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RandomICNProviderMatchmaker;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 
 @Component
 public class GatekeeperApplicationInitListener extends ApplicationInitListener {
@@ -32,10 +36,10 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
 	
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_PRESENT_WD)
 	private boolean gatewayIsPresent;
 		
-	@Value(CommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
+	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
 	private boolean gatewayIsMandatory;
 	
 	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
@@ -46,9 +50,21 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean(CommonConstants.GATEKEEPER_MATCHMAKER)
-	public GatekeeperMatchmakingAlgorithm getGatekeeperMatchmakingAlgorithm() {
+	@Bean(CoreCommonConstants.GATEKEEPER_MATCHMAKER)
+	public RelayMatchmakingAlgorithm getGatekeeperRelayMatchmakingAlgorithm() {
 		return new GetRandomAndDedicatedIfAnyGatekeeperMatchmaker();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CoreCommonConstants.GATEWAY_MATCHMAKER)
+	public RelayMatchmakingAlgorithm getGatewayRelayMatchmakingAlgorithm() {
+		return new GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CoreCommonConstants.ICN_PROVIDER_MATCHMAKER)
+	public ICNProviderMatchmakingAlgorithm getICNProviderMatchmaker() {
+		return new RandomICNProviderMatchmaker();
 	}
 
 	//=================================================================================================
@@ -57,7 +73,12 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); // TODO: add all necessary services
+		if (gatewayIsPresent) {
+			return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE,
+						   CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE); 
+		}
+		
+		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); 
 	}
 		
 	//-------------------------------------------------------------------------------------------------
@@ -98,6 +119,6 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		final PublicKey publicKey = (PublicKey) context.get(CommonConstants.SERVER_PUBLIC_KEY);
 		final PrivateKey privateKey = (PrivateKey) context.get(CommonConstants.SERVER_PRIVATE_KEY);
 
-		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) RelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
+		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
 	}
 }

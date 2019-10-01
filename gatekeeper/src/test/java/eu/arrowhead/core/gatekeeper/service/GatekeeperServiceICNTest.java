@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -18,23 +19,34 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalRequestDTO;
-import eu.arrowhead.common.dto.ICNProposalResponseDTO;
-import eu.arrowhead.common.dto.ICNRequestFormDTO;
-import eu.arrowhead.common.dto.ICNResultDTO;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.OrchestrationResponseDTO;
-import eu.arrowhead.common.dto.OrchestrationResultDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.RelayType;
-import eu.arrowhead.common.dto.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
+import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResponseDTO;
+import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingParameters;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperServiceICNTest {
@@ -53,6 +65,12 @@ public class GatekeeperServiceICNTest {
 	
 	@Mock
 	private GatekeeperDBService gatekeeperDBService;
+	
+	@Mock
+	private RelayMatchmakingAlgorithm gatewayMatchmaker;
+	
+	@Mock
+	private ICNProviderMatchmakingAlgorithm icnProviderMatchmaker;
 	
 	//=================================================================================================
 	// methods
@@ -240,6 +258,31 @@ public class GatekeeperServiceICNTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
+	public void testInitICNEverythingOKButNoResult() {
+		final ICNRequestFormDTO form = new ICNRequestFormDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		form.setRequestedService(requestedService);
+		form.setTargetCloudId(1L);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		form.setRequesterSystem(system);
+		
+		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
+		targetCloud.setGatewayRelays(Set.of());
+		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
+		
+		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
+		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
+		
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO());
+		
+		final ICNResultDTO icnResult = testingObject.initICN(form);
+		Assert.assertEquals(0, icnResult.getResponse().size());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
 	public void testInitICNEverythingOKWithoutGateway() {
 		final ICNRequestFormDTO form = new ICNRequestFormDTO();
 		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
@@ -258,14 +301,48 @@ public class GatekeeperServiceICNTest {
 		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
 		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
-		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO(List.of(resultDTO), false));
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO(List.of(resultDTO)));
 		
 		final ICNResultDTO icnResult = testingObject.initICN(form);
 		Assert.assertEquals(1, icnResult.getResponse().size());
 		Assert.assertEquals(resultDTO, icnResult.getResponse().get(0));
 	}
 	
-	//TODO: additional test cases here (when using gateway)
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitICNEverythingOKWithGateway() {
+		final ICNRequestFormDTO form = new ICNRequestFormDTO();
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		form.setRequestedService(requestedService);
+		form.setTargetCloudId(1L);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		form.setRequesterSystem(system);
+		
+		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
+		targetCloud.setGatewayRelays(Set.of());
+		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
+		
+		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
+		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
+		
+		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
+		resultDTO.setProvider(new SystemResponseDTO());
+		RelayResponseDTO relay = new RelayResponseDTO();
+		relay.setType(RelayType.GATEWAY_RELAY);
+		final ICNProposalResponseDTO icnResponse = new ICNProposalResponseDTO(resultDTO, relay, new GatewayProviderConnectionResponseDTO());
+		
+		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(icnResponse);
+		when(gatekeeperDriver.connectConsumer(any(GatewayConsumerConnectionRequestDTO.class))).thenReturn(33333);
+		when(gatekeeperDriver.getGatewayHost()).thenReturn("127.0.0.1");
+		
+		final ICNResultDTO icnResult = testingObject.initICN(form);
+		Assert.assertEquals(1, icnResult.getResponse().size());
+		Assert.assertEquals(CoreSystem.GATEWAY.name().toLowerCase(), icnResponse.getResponse().get(0).getProvider().getSystemName());
+		Assert.assertEquals("127.0.0.1", icnResponse.getResponse().get(0).getProvider().getAddress());
+		Assert.assertEquals(33333, icnResponse.getResponse().get(0).getProvider().getPort());
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -284,6 +361,15 @@ public class GatekeeperServiceICNTest {
 	public void testDoICNRequestedCloudWantsToUseGatewayButRequesterCloudDoesNotSupportedGateways() {
 		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
 		testingObject.doICN(new ICNProposalRequestDTO());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testDoICNRequestedCloudWantsToUseGatewayButNoRelaysAreProvided() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
+		ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		request.setGatewayIsPresent(true);
+		testingObject.doICN(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -690,6 +776,51 @@ public class GatekeeperServiceICNTest {
 		testingObject.doICN(request);
 	}
 	
+	// we skip tests about known relay validation because it uses the same method as preferred relay validation
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNConsumerGWPublicKeyNull() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		request.setGatewayIsPresent(true);
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setType(RelayType.GATEWAY_RELAY.name());
+		request.setPreferredGatewayRelays(List.of(relay));
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testDoICNConsumerGWPublicKeyEmpty() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		request.setGatewayIsPresent(true);
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		relay.setType(RelayType.GATEWAY_RELAY.name());
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.setConsumerGatewayPublicKey(" ");
+		
+		testingObject.doICN(request);
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testDoICNOrchestratorEmptyResponse() {
@@ -713,7 +844,7 @@ public class GatekeeperServiceICNTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testDoICNOrchestratorNoAccess() {
+	public void testDoICNNoAccess() {
 		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
 		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
 		requestedService.setServiceDefinitionRequirement("test-service");
@@ -736,7 +867,7 @@ public class GatekeeperServiceICNTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testDoICNOrchestratorEverythingOK() {
+	public void testDoICNEverythingOKWithoutGateway() {
 		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
 		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
 		requestedService.setServiceDefinitionRequirement("test-service");
@@ -757,7 +888,79 @@ public class GatekeeperServiceICNTest {
 		Assert.assertEquals(1, response.getResponse().size());
 	}
 	
-	//TODO: additional test cases here (when using gateway)
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = AuthException.class)
+	public void testDoICNWithGatewayNoCommonRelay() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequesterSystem(new SystemRequestDTO());
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
+		
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO()));
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDBService.getCloudByOperatorAndName(any(String.class), any(String.class))).thenReturn(new Cloud());
+		when(gatewayMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(null);
+		
+		testingObject.doICN(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testDoICNEverythingOKWithGateway() {
+		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
+		final ICNProposalRequestDTO request = new ICNProposalRequestDTO();
+		request.setGatewayIsPresent(true);
+		request.setRequesterSystem(new SystemRequestDTO());
+		final ServiceQueryFormDTO requestedService = new ServiceQueryFormDTO();
+		requestedService.setServiceDefinitionRequirement("test-service");
+		request.setRequestedService(requestedService);
+		final SystemRequestDTO system = getTestSystemRequestDTO();
+		system.setPort(12345);
+		request.setRequesterSystem(system);
+		final CloudRequestDTO cloud = getTestCloudRequestDTO();
+		request.setRequesterCloud(cloud);
+		final RelayRequestDTO relay = getTestRelayDTO();
+		request.setPreferredGatewayRelays(List.of(relay));
+		request.setConsumerGatewayPublicKey("consumerGWPublicKey");
+		
+		final OrchestrationResultDTO selectedResult = new OrchestrationResultDTO();
+		selectedResult.setProvider(new SystemResponseDTO());
+		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(List.of(selectedResult, new OrchestrationResultDTO()));
+		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
+		when(gatekeeperDBService.getCloudByOperatorAndName(any(String.class), any(String.class))).thenReturn(new Cloud());
+		final Relay selectedRelay = new Relay("localhost", 1234, false, false, RelayType.GATEWAY_RELAY);
+		selectedRelay.setCreatedAt(ZonedDateTime.now());
+		selectedRelay.setUpdatedAt(ZonedDateTime.now());
+		when(gatewayMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(selectedRelay);
+		when(icnProviderMatchmaker.doMatchmaking(any(List.class), any(ICNProviderMatchmakingParameters.class))).thenReturn(selectedResult);
+		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(new Cloud());
+		final GatewayProviderConnectionResponseDTO connectionResponseDTO = new GatewayProviderConnectionResponseDTO("queueId", "peerName", "providerGWPublicKey");
+		when(gatekeeperDriver.connectProvider(any(GatewayProviderConnectionRequestDTO.class))).thenReturn(connectionResponseDTO);
+		
+		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		Assert.assertEquals(1, response.getResponse().size());
+		Assert.assertNotNull(response.getRelay());
+		Assert.assertEquals("localhost", response.getRelay().getAddress());
+		Assert.assertEquals(1234, response.getRelay().getPort());
+		Assert.assertNotNull(response.getConnectionInfo());
+		Assert.assertEquals("queueId", response.getConnectionInfo().getQueueId());
+		Assert.assertEquals("peerName", response.getConnectionInfo().getPeerName());
+		Assert.assertEquals("providerGWPublicKey", response.getConnectionInfo().getProviderGWPublicKey());
+	}
 
 	//=================================================================================================
 	// assistant methods

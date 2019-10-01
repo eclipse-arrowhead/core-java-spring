@@ -25,8 +25,8 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.dto.RelayType;
+import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.dto.internal.RelayType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"address", "port"}))
@@ -45,7 +45,7 @@ public class Relay {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String address;
 	
 	@Column(nullable = false)
@@ -57,7 +57,7 @@ public class Relay {
 	@Column(nullable = false)
 	private boolean exclusive = false;
 	
-	@Column(nullable = false, columnDefinition = "varchar(" + Defaults.VARCHAR_BASIC + ") DEFAULT 'GENERAL_RELAY'")
+	@Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ") DEFAULT 'GENERAL_RELAY'")
 	@Enumerated(EnumType.STRING)
 	private RelayType type = RelayType.GENERAL_RELAY;
 	
