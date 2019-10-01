@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -132,24 +133,6 @@ public class EventHandlerDBServiceTest {
 		
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = Exception.class)
-	public void testGetSubscriptionByIdResponseExceptionInDBCall() {
-
-		when( subscriptionRepository.findById( anyLong() ) ).thenThrow( Exception.class );
-		
-		try {
-			
-			eventHandlerDBService.getSubscriptionByIdResponse( 1L );
-		
-		} catch (Exception ex) {
-						
-			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
-			throw ex;
-		}
-		
-	}
-	
 	//=================================================================================================
 	//Tests of getSubscriptionById
 	
@@ -198,24 +181,6 @@ public class EventHandlerDBServiceTest {
 		} catch (Exception ex) {
 						
 			Assert.assertTrue( ex.getMessage().contains( "not exists" ));
-			throw ex;
-		}
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = Exception.class)
-	public void testGetSubscriptionByIdExceptionInDBCall() {
-
-		when( subscriptionRepository.findById( anyLong() ) ).thenThrow( Exception.class );
-		
-		try {
-			
-			eventHandlerDBService.getSubscriptionById( 1L );
-		
-		} catch (Exception ex) {
-						
-			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
 			throw ex;
 		}
 		
@@ -330,31 +295,6 @@ public class EventHandlerDBServiceTest {
 			verify( subscriptionRepository, never()).findAll( any( PageRequest.class ) );
 			
 			Assert.assertTrue( ex.getMessage().contains( " sortable field  is not available." ));
-			throw ex;
-		}
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = Exception.class)
-	public void testGetSubscriptionsResponseExceptionInDBCall() {
-		
-		final int page = 0;
-		final int size = 0;
-		final Direction direction = Direction.ASC;
-		final String sortField = "id";
-		
-		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenThrow( Exception.class );
-		
-		try {
-			
-			eventHandlerDBService.getSubscriptionsResponse( page, size, direction, sortField );
-		
-		} catch (Exception ex) {
-			
-			verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
-	
-			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
 			throw ex;
 		}
 		
@@ -478,31 +418,6 @@ public class EventHandlerDBServiceTest {
 		}
 	}
 	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = Exception.class)
-	public void testGetSubscriptionsExceptionInDBCall() {
-		
-		final int page = 0;
-		final int size = 0;
-		final Direction direction = Direction.ASC;
-		final String sortField = "id";
-		
-		when( subscriptionRepository.findAll( any( PageRequest.class ) ) ).thenThrow( Exception.class );
-		
-		try {
-			
-			eventHandlerDBService.getSubscriptions( page, size, direction, sortField );
-		
-		} catch (Exception ex) {
-			
-			verify( subscriptionRepository, times( 1 )).findAll( any( PageRequest.class ) );
-	
-			Assert.assertTrue( ex.getMessage().contains( "Database operation exception" ));
-			throw ex;
-		}
-		
-	}
-	
 	//=================================================================================================
 	//Tests of getSubscriptionBySubscriptionRequestDTO
 	
@@ -562,10 +477,9 @@ public class EventHandlerDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class )
-	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemNull() {
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterRequestNull() {
 		
-		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSubscriberSystem( null );
+		final SubscriptionRequestDTO request = null;
 		
 		final System system = createSystemForDBMock( "systemName" );
 		final EventType eventType = createEventTypeForDBMock( "eventType" );
@@ -597,9 +511,10 @@ public class EventHandlerDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class )
-	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterRequestNull() {
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemNull() {
 		
-		final SubscriptionRequestDTO request = null;
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSubscriberSystem( null );
 		
 		final System system = createSystemForDBMock( "systemName" );
 		final EventType eventType = createEventTypeForDBMock( "eventType" );
@@ -622,11 +537,685 @@ public class EventHandlerDBServiceTest {
 			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
 			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
 			
-			Assert.assertTrue( ex.getMessage().contains( "SubscriptionRequestDTO is null" ));
+			Assert.assertTrue( ex.getMessage().contains( "SystemRequestDTO is null" ));
 			
 			throw ex;
 		}
 		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemSystemNameNull() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.getSubscriberSystem().setSystemName( null );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "System name is empty or null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemSystemNameEmpty() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.getSubscriberSystem().setSystemName( "   " );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "System name is empty or null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemSystemAddressNull() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.getSubscriberSystem().setAddress( null );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "System address is empty or null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemSystemAddressEmpty() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.getSubscriberSystem().setAddress( "   " );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "System address is empty or null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemSystemPortNull() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.getSubscriberSystem().setPort( null );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "System port is null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemNotInDB() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.ofNullable( null ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( " is not available in database" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterEventTypeNull() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setEventType( null );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "EventType is empty or null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterEventTypeEmpty() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setEventType( "   " );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "EventType is empty or null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterNotifyUriNull() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setNotifyUri( null );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "NotifyUri is empty or null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterNotifyUriEmpty() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setNotifyUri( "   " );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "NotifyUri is empty or null" ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterWrongStartDateFormat() {
+			
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setStartDate( "....." );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "StartDate is not valid." ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterWrongEndDateFormat() {
+			
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setEndDate( "....." );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "EndDate is not valid." ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterStartDateInPast() {
+			
+		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setStartDate( "1019-09-27 09:40:34" );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "Start Date is further in the past than the tolerated time difference" ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterEndDateInPast() {
+			
+		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setEndDate( "1019-09-27 09:40:34" );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "End Date is further in the past than the tolerated time difference" ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterEndDateIsBeforeStartDate() {
+			
+		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setStartDate( "3019-09-27 09:40:35" );
+		request.setEndDate( "3019-09-27 09:40:34" );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "Start Date sould be before End Date" ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterStartDateIsNotBeforeEndDate() {
+			
+		ReflectionTestUtils.setField( eventHandlerService, "timeStampTolerance", 120);
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setStartDate( "3019-09-27 09:40:34" );
+		request.setEndDate( "3019-09-27 09:40:34" );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "Start Date sould be before End Date" ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterMatchMetaDataTrueButFilterMetaDataIsNull() {
+			
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setMatchMetaData( true );
+		request.setFilterMetaData( null );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "If MatchMetaData is true filterMetaData sould not be null or empty" ));
+			
+			throw ex;
+		}
+
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterMatchMetaDataTrueButFilterMetaDataIsEmpty() {
+			
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setMatchMetaData( true );
+		request.setFilterMetaData( Map.of() );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "If MatchMetaData is true filterMetaData sould not be null or empty" ));
+			
+			throw ex;
+		}
+		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriptionNotExsistInDB() {
+			
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = null;
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.ofNullable( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 1 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "' not exists" ));
+			
+			throw ex;
+		}
+
 	}
 	
 	//=================================================================================================
