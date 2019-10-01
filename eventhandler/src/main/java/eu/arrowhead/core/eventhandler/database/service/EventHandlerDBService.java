@@ -409,7 +409,7 @@ public class EventHandlerDBService {
 		subscription.setFilterMetaData( Utilities.map2Text( request.getFilterMetaData() ) );
 		subscription.setOnlyPredefinedPublishers( request.getSources() != null && !request.getSources().isEmpty() );
 		subscription.setMatchMetaData( request.getMatchMetaData() );
-		if ( subscription.isMatchMetaData() && subscription.getFilterMetaData() == null || subscription.getFilterMetaData().isEmpty()) {
+		if ( subscription.isMatchMetaData() && ( subscription.getFilterMetaData() == null || subscription.getFilterMetaData().isEmpty() ) ) {
 			
 			throw new InvalidParameterException("If MatchMetaData is true filterMetaData sould not be null or empty");
 		}
