@@ -392,7 +392,7 @@ public class EventHandlerDBService {
 	private Subscription validateSubscriptionRequestDTO( final SubscriptionRequestDTO request ) {
 		logger.debug("validatesubscriptionRequestDTO started ...");
 
-		if (request == null) {
+		if ( request == null ) {
 			
 			throw new InvalidParameterException("SubscriptionRequestDTO" + NULL_ERROR_MESSAGE);
 		}
