@@ -13,7 +13,6 @@
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
        * [Security](#serviceregistry_security)
-       * [Abstract Information Model](#serviceregistry_abstract_information_model)
        * [Endpoints](#serviceregistry_endpoints)
            * [Client](#serviceregistry_endpoints_client)
            * [Management](#serviceregistry_endpoints_mgmt)
@@ -77,15 +76,72 @@ Enjoy! ;)
 
 ## Migration Guide 4.1.2 -> 4.1.3
 
-4.1.3 is NOT backwards compatible with 4.1.2! The database and the endpoints were redesigned, it is more logical, easier to use.
+4.1.3 is NOT backwards compatible with 4.1.2! Earlier it was redundant and contained gaps. Now the database and the endpoints are redesigned, they are clean, more logical and easier to use.
 
 You can migrate your existing database manually. See the [Quick Start Guide](#quickstart), how to deploy the Core Systems.
 
 Major endpoint changes:<br />
 
 ### Service Registry:
+
+The following endpoints no longer exist, instead use the ones on the right:
+
+ * PUT /mgmt/services -> POST /serviceregistry/mgmt/services
+ * PUT /mgmt/systems -> POST /serviceregistry/mgmt/systems
+ * GET /serviceregistry/mgmt/systemId/{systemId} -> GET /serviceregistry/mgmt/systems/{id}
+ * GET /serviceregistry/mgmt/serviceId/{serviceId}/providers
+ * PUT /serviceregistry/mgmt/query -> POST /serviceregistry/query
+ * PUT /serviceregistry/mgmt/subscriptions/{id}
+ * PUT /serviceregistry/support/remove -> DELETE /serviceregistry/unregister
+ * DELETE /serviceregistry/mgmt/all
+ 
+ 
  * __/register__ - data structure changed
- * ~~/remove~~ - removed, use __/unregister__ instead 
+ 
+Old payload, which is no longer usable
+ ```json
+{
+  "providedService" : {
+    "serviceDefinition" : "IndoorTemperature",
+    "interfaces" : [ "JSON", "XML" ],
+    "serviceMetadata" : {
+      "unit" : "celsius"
+    }
+  },
+  "provider" : {
+    "systemName" : "InsecureTemperatureSensor",
+    "address" : "192.168.0.2",
+    "port" : 8080
+  },
+  "serviceURI" : "temperature",
+  "version" : 1,
+  "udp" : false,
+  "ttl" : 0
+} 
+ ```
+
+New payload  
+ ```json
+{
+  "serviceDefinition": "IndoorTemperature",
+  "providerSystem": {
+  "systemName": "InsecureTemperatureSensor",
+  "address": "192.168.0.2",
+  "port": 8080,
+  "authenticationInfo": "eyJhbGciOiJIUzI1Ni..."
+ },
+  "serviceUri": "temperature",
+  "endOfValidity": "2019-12-05T12:00:00",
+  "secure": "TOKEN",
+  "metadata": {
+    "unit": "celsius"
+ },
+  "version": 1,
+  "interfaces": [
+    "HTTP-SECURE-JSON"
+ ]
+}
+```
  
 ### Authorization
  * __/mgmt/intracloud__ - data structure changed
@@ -176,6 +232,48 @@ This System can be secured via the HTTPS protocol. If it is started in secure mo
 
 If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Application System as the Service Provider in the entry. 
 
-<a name="serviceregistry_abstract_information_model" />
+<a name="serviceregistry_endpoints />
 
-#### Abstract Information Model
+#### Endpoints
+
+The Service Registry offers three types of endpoints. Client, Management and Private.
+
+Swagger API documentation is available on: https://<host>:<port>
+The base URL for the requests: http://<host>:<port>/serviceregistry
+
+Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| Echo     | /echo       | GET    | -     | OK     |
+| Query    | /query      | POST   | ServiceQueryForm | ServiceQueryList |
+| Register | /register   | POST   | ServiceRegistryEntry | ServiceRegistryEntry |
+| Unregister | /unregister | POST | Address, Port, Service Definition, System Name in query parameters| - |
+
+Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| Query System | /query/system| POST | System | System |
+| Query System By ID | /query/system/{id} | GET | ID | System|
+
+Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| Get all entries | /mgmt/ | GET | - | ServiceRegistryEntryList |
+| Add an entry | /mgmt/ | POST | ServiceRegistryEntry | ServiceRegistryEntry |
+| Get an entry by ID | /mgmt/{id} | GET | ServiceID | ServiceRegistryEntry |
+| Replace an entry by ID | /mgmt/{id} | PUT | ServiceRegistryEntry | ServiceRegistryEntry |
+| Modify an entry by ID | /mgmt/{id} PATCH | Key value pairs of ServiceRegistryEntry | ServiceRegistryEntry |
+| Delete and entry by ID | /mgmt/{id} | DELETE | ServiceRegistryEntryID | - |
+| Get grouped view | /mgmt/grouped | GET | - | ServiceRegistryGrouped |
+| Get Service Registry Entries by Service Definition | /mgmt/servicedef/{serviceDefinition} | GET | ServiceDefinition | ServiceRegistryEntryList |
+| Get all services | /mgmt/services | GET | - | ServiceList |
+| Add a service | /mgmt/services | POST | Service | Service |
+| Get a service by ID | /mgmt/services/{id} | GET | ServiceID | Service |
+| Replace a service by ID | /mgmt/services/(id} | PUT | Service | Service |
+| Modify a service by ID | /mgmt/services/{id} | PATCH | Key value pairs of Service | Service |
+| Delete a service by ID | /mgmt/services/{id} | DELETE | ServiceID | - |
+| Get all systems | /mgmt/systems | GET | - | SystemList |
+| Add a system | /mgmt/systems | POST | System | System |
