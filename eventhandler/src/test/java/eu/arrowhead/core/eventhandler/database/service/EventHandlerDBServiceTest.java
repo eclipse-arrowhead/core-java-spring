@@ -22,6 +22,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
@@ -1397,6 +1398,55 @@ public class EventHandlerDBServiceTest {
 			throw ex;
 		}
 
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void testRegisterSubscriptionOnlyPredefinedPublishersIsTrueOK() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of( getSystemRequestDTO() ) );
+		
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of( getSystemResponseDTO( "systemName" ));
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		subscription.setOnlyPredefinedPublishers( true );
+		
+		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+
+		final ArgumentCaptor<Set> valueCapture = ArgumentCaptor.forClass( Set.class);
+		
+		//for validateSubscriptionRequestDTO(request)
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( eventType ));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.ofNullable( null ) );
+		
+		when( subscriptionRepository.save( any() ) ).thenReturn( subscription  );
+		when( subscriptionPublisherConnectionRepository.saveAll( valueCapture.capture() ) ).thenReturn( List.of() );
+		doNothing().when( subscriptionPublisherConnectionRepository ).flush( );
+		when( subscriptionRepository.saveAndFlush( any() ) ).thenReturn( subscription );
+		
+		eventHandlerDBService.registerSubscription( request, authorizedPublishers );
+		
+		//for validateSubscriptionRequestDTO(request)
+		verify( systemRepository, times( 2 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+		verify( subscriptionRepository, times( 1 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+
+		verify( subscriptionRepository, times( 1 ) ).save( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).saveAll( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).flush();
+		verify( subscriptionRepository, times( 1 ) ).saveAndFlush( any() );
+		
+		final Set<SubscriptionPublisherConnection> publisherConnections = valueCapture.getValue();
+		assertNotNull( publisherConnections );
+		//TODO implement additional asserts here
 	}
 	
 	//=================================================================================================
