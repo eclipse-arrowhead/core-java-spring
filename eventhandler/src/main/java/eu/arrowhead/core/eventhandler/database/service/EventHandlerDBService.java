@@ -456,6 +456,9 @@ public class EventHandlerDBService {
 	private System validateSystemRequestDTO(final SystemRequestDTO systemRequestDTO) {
 		logger.debug("validateSystemRequestDTO started...");
 
+		if ( systemRequestDTO == null) {
+			throw new InvalidParameterException("SystemRequestDTO" + NULL_ERROR_MESSAGE);
+		}
 		
 		if (Utilities.isEmpty(systemRequestDTO.getSystemName())) {
 			throw new InvalidParameterException("System name" + EMPTY_OR_NULL_ERROR_MESSAGE);
@@ -495,6 +498,10 @@ public class EventHandlerDBService {
 	private EventType validateEventType(final String eventType) {
 		logger.debug("validateEventType started...");
 		
+		if ( eventType == null) {
+			throw new InvalidParameterException("EventType" + NULL_ERROR_MESSAGE);
+		}
+		
 		try {
 			
 			final String validEventTypeName = eventType.toUpperCase().trim();
@@ -517,6 +524,10 @@ public class EventHandlerDBService {
 	//-------------------------------------------------------------------------------------------------
 	private EventType validateEventTypeIsInDB(final String eventType) {
 		logger.debug("validateEventTypeIsInDB started...");
+		
+		if ( eventType == null) {
+			throw new InvalidParameterException("EventType" + NULL_ERROR_MESSAGE);
+		}
 		
 		try {
 			
