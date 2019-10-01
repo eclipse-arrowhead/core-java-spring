@@ -562,7 +562,42 @@ public class EventHandlerDBServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class )
-	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameter() {
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterSubscriberSystemNull() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSubscriberSystem( null );
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "SubscriptionRequestDTO is null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameterRequestNull() {
 		
 		final SubscriptionRequestDTO request = null;
 		
