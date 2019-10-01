@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -501,6 +502,98 @@ public class EventHandlerDBServiceTest {
 		}
 		
 	}
+	
+	//=================================================================================================
+	//Tests of getSubscriptionBySubscriptionRequestDTO
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSubscriptionBySubscriptionRequestDTOWithEventTypeInDBOK() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( eventType ) );
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		final Subscription response = eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+		
+		verify( subscriptionRepository, times( 1 ) ).findByEventTypeAndSubscriberSystem( any(), any() );
+		assertNotNull( response );
+		assertNotNull( response.getSubscriberSystem() );
+		assertNotNull( response.getEventType() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetSubscriptionBySubscriptionRequestDTOWithEventTypeNotInDBOK() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		final Subscription response = eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 1 ) ).saveAndFlush( any() );
+		
+		verify( subscriptionRepository, times( 1 ) ).findByEventTypeAndSubscriberSystem( any(), any() );
+		assertNotNull( response );
+		assertNotNull( response.getSubscriberSystem() );
+		assertNotNull( response.getEventType() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class )
+	public void testGetSubscriptionBySubscriptionRequestDTOInvalidParameter() {
+		
+		final SubscriptionRequestDTO request = null;
+		
+		final System system = createSystemForDBMock( "systemName" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( null));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.of( subscription ) );
+		
+		try {
+			
+			eventHandlerDBService.getSubscriptionBySubscriptionRequestDTO( request );
+		
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+			verify( eventTypeRepository, times( 0 ) ).findByEventTypeName( any() );
+			verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+			verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+			
+			Assert.assertTrue( ex.getMessage().contains( "SubscriptionRequestDTO is null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
 	//=================================================================================================
 	//Assistant methods
 
