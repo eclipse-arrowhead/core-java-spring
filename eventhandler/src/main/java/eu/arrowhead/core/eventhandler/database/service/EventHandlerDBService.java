@@ -391,7 +391,12 @@ public class EventHandlerDBService {
 	//-------------------------------------------------------------------------------------------------
 	private Subscription validateSubscriptionRequestDTO( final SubscriptionRequestDTO request ) {
 		logger.debug("validatesubscriptionRequestDTO started ...");
-		
+
+		if (request == null) {
+			
+			throw new InvalidParameterException("SubscriptionRequestDTO" + NULL_ERROR_MESSAGE);
+		}
+
 		final System validSubscriberSystem = validateSystemRequestDTO( request.getSubscriberSystem() );
 		final EventType validEventType = validateEventType( request.getEventType() );
 		final String validNotifyUri = validateNotifyUri( request.getNotifyUri() );
