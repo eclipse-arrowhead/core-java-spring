@@ -49,6 +49,7 @@ public class EventHandlerDBService {
 	private static final String NULL_ERROR_MESSAGE = " is null";
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
+	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 
 	private static final Logger logger = LogManager.getLogger(EventHandlerDBService.class);
 	
@@ -408,8 +409,42 @@ public class EventHandlerDBService {
 		subscription.setFilterMetaData( Utilities.map2Text( request.getFilterMetaData() ) );
 		subscription.setOnlyPredefinedPublishers( request.getSources() != null && !request.getSources().isEmpty() );
 		subscription.setMatchMetaData( request.getMatchMetaData() );
-		subscription.setStartDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() ) );
-		subscription.setEndDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() ) );
+		if ( subscription.isMatchMetaData() && subscription.getFilterMetaData() == null || subscription.getFilterMetaData().isEmpty()) {
+			
+			throw new InvalidParameterException("If MatchMetaData is true filterMetaData sould not be null or empty");
+		}
+		
+		if ( request.getStartDate() != null ) {
+			
+			try {
+				
+				subscription.setStartDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() ) );
+				
+			} catch (Exception ex) {
+				
+				throw new InvalidParameterException("StartDate" + INVALID_TYPE_ERROR_MESSAGE);
+			}
+			
+		} else {
+			
+			request.setStartDate( null );
+		}
+		
+		if ( request.getEndDate() != null ) {
+			
+			try {
+				
+				subscription.setEndDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() ) );
+				
+			} catch (Exception ex) {
+				
+				throw new InvalidParameterException("EndDate" + INVALID_TYPE_ERROR_MESSAGE);
+			}
+			
+		} else {
+			
+			request.setEndDate( null );
+		}
 		
 		validateDateLimits( subscription );
 		
