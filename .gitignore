@@ -54,3 +54,5 @@ choreographer.log
 serviceregistry.log
 authorization.log
 /choreographer/target
+
+*.log
