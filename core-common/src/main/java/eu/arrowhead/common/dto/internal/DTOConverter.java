@@ -23,7 +23,6 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
-import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
@@ -652,10 +651,10 @@ public class DTOConverter {
 		return new ChoreographerWorkspaceResponseDTO(
 				workspaceEntry.getId(),
 				workspaceEntry.getName(),
-				workspaceEntry.getRelativeXCoordinate(),
-				workspaceEntry.getRelativeYCoordinate(),
-				workspaceEntry.getRelativeZCoordinate(),
-				workspaceEntry.getRelativeRCoordinate(),
+				workspaceEntry.getXCoordinate(),
+				workspaceEntry.getYCoordinate(),
+				workspaceEntry.getZCoordinate(),
+				workspaceEntry.getRCoordinate(),
 				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getUpdatedAt()));
     }
