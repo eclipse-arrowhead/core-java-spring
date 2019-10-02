@@ -3,6 +3,9 @@
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
  meant to open the doors to the potentials of Digital Industry and to maintain a leadership position of the industries in Europe. All partners involved will work on creating the capability to efficiently design and integrate hardware and software of Internet of Things (IoT) devices. Linking the real with the digital world takes more than just adding software to the hardware.
  
+
+## Disclaimer
+Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you have older systems please refer to the [Migration Guide](#migration) 
  
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
@@ -120,7 +123,7 @@ Old payload, which is no longer usable
 } 
  ```
 
-New payload  
+New payload - you can easily map the old fields to the new ones.
  ```json
 {
   "serviceDefinition": "IndoorTemperature",
@@ -192,7 +195,7 @@ This System provides the database, which stores information related to the curre
 The purpose of this System is therefore to allow:
 -	Application Systems to register what Services they offer at the moment, making this announcement available to other Application Systems on the network. 
 -	They are also allowed to remove or update their entries when it is necessary. 
--	All Application Systems can utilize the lookup functionality of the Registry to find appropriate Service offerings in the network. 
+-	All Application Systems can utilize the lookup functionality of the Registry to find Public Core System Service offerings in the network, otherwise the Orchestrator has to be used. 
 
 However, it is worth noting, that within this generation the lookup functionality of Services is integrated within the “orchestration process”. Therefore, in the primary scenario, when an Application System is looking for a Service to consume, it shall ask the Orchestrator System via the Orchestration Service to locate one or more suitable Service Providers and help establish the connection based on metadata submitted in the request. Direct lookups from Application Systems within the network is not advised in this generation, due to security reasons.
 
@@ -245,10 +248,10 @@ Client endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| Echo     | /echo       | GET    | -     | OK     |
-| Query    | /query      | POST   | ServiceQueryForm | ServiceQueryList |
-| Register | /register   | POST   | ServiceRegistryEntry | ServiceRegistryEntry |
-| Unregister | /unregister | POST | Address, Port, Service Definition, System Name in query parameters| - |
+| [Echo](#serviceregistry_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+| [Query](#serviceregistry_endpoints_post_query)    | /query      | POST   | [ServiceQueryForm](#datastructures_servicequeryform) | [ServiceQueryList](#datastructures_servicequerylist) |
+| [Register](#serviceregistry_endpoints_post_register) | /register   | POST   | [ServiceRegistryEntry](#datastructures_serviceregistryentry) | [ServiceRegistryEntry](#datastructures_serviceregistryentry) |
+| [Unregister](#serviceregistry_delete_unregister) | /unregister | DELETE | Address, Port, Service Definition, System Name in query parameters| OK |
 
 Private endpoint description<br />
 
@@ -265,10 +268,10 @@ Management endpoint description<br />
 | Add an entry | /mgmt/ | POST | ServiceRegistryEntry | ServiceRegistryEntry |
 | Get an entry by ID | /mgmt/{id} | GET | ServiceID | ServiceRegistryEntry |
 | Replace an entry by ID | /mgmt/{id} | PUT | ServiceRegistryEntry | ServiceRegistryEntry |
-| Modify an entry by ID | /mgmt/{id} PATCH | Key value pairs of ServiceRegistryEntry | ServiceRegistryEntry |
+| Modify an entry by ID | /mgmt/{id} | PATCH | Key value pairs of ServiceRegistryEntry | ServiceRegistryEntry |
 | Delete and entry by ID | /mgmt/{id} | DELETE | ServiceRegistryEntryID | - |
 | Get grouped view | /mgmt/grouped | GET | - | ServiceRegistryGrouped |
-| Get Service Registry Entries by Service Definition | /mgmt/servicedef/{serviceDefinition} | GET | ServiceDefinition | ServiceRegistryEntryList |
+| Get Service Registry Entries by Service Definition | /mgmt/servicedef/<br />{serviceDefinition} | GET | ServiceDefinition | ServiceRegistryEntryList |
 | Get all services | /mgmt/services | GET | - | ServiceList |
 | Add a service | /mgmt/services | POST | Service | Service |
 | Get a service by ID | /mgmt/services/{id} | GET | ServiceID | Service |
@@ -277,3 +280,272 @@ Management endpoint description<br />
 | Delete a service by ID | /mgmt/services/{id} | DELETE | ServiceID | - |
 | Get all systems | /mgmt/systems | GET | - | SystemList |
 | Add a system | /mgmt/systems | POST | System | System |
+| Get a system by ID | /mgmt/systems/{id} | GET | SystemID | System |
+| Replace a system by ID | /mgmt/systems/{id} | PUT | System | System |
+| Modify a system by ID | /mgmt/systems/{id} | PATCH | Key value pairs of System | System |
+| Delete a system by ID | /mgmt/systems/{id} | DELETE | SystemID | - |
+
+<a name="serviceregistry_endpoints_get_echo" />
+
+##### Echo 
+```
+GET /serviceregistry/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+> **Note:** 4.1.2 version: GET /serviceregistry
+
+<a name="serviceregistry_endpoints_post_query" />
+
+##### Query
+```
+POST /serviceregistry/query
+```
+
+Returns ServiceQueryList that fits the input specification. Mainly used by the Orchestrator.
+
+<a name="datastructures_servicequeryform" />
+
+__ServiceQueryForm__ is the input
+```json
+{
+ "serviceDefinitionRequirement": "string",
+ "interfaceRequirements": [
+   "string"
+ ],
+ "securityRequirements": [
+   "NOT_SECURE"
+ ],
+ "metadataRequirements": {
+   "additionalProp1": "string",
+   "additionalProp2": "string",
+   "additionalProp3": "string"
+ },
+ "versionRequirement": 0,
+ "maxVersionRequirement": 0,
+ "minVersionRequirement": 0,
+ "pingProviders": true
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `serviceDefinitionRequirement` | Name of the required Service Definition | yes |
+| `interfaceRequirements` | List of required interfaces | no |
+| `securityRequirements` | List of required security settings | no |
+| `metadataRequirements` | Key value pairs of required metadata | no |
+| `versionRequirement` | Required version number | no |
+| `maxVersionRequirement` | Maximum version requirement | no |
+| `minVersionRequirement` | Minimum version requirement | no |
+| `pingProviders` | Return only available providers | no |
+
+> **Note:** Valid `interfaceRequirements` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+
+> **Note:** Possible values for `securityRequirements` are:
+> * NOT_SECURE
+> * SECURE
+> * TOKEN
+> * not defined, if you don't want to filter on security type
+
+<a name="datastructures_servicequerylist" />
+
+Returns a __ServiceQueryList__
+```json
+{
+ "serviceQueryData": [
+   {
+     "id": 0,
+     "serviceDefinition": {
+       "id": 0,
+       "serviceDefinition": "string",
+       "createdAt": "string",
+       "updatedAt": "string"
+     },
+     "provider": {
+       "id": 0,
+       "systemName": "string",
+       "address": "string",
+       "port": 0,
+       "authenticationInfo": "string",
+       "createdAt": "string",
+       "updatedAt": "string"
+     },
+     "serviceUri": "string",
+     "endOfValidity": "string",
+     "secure": "NOT_SECURE",
+     "metadata": {
+       "additionalProp1": "string",
+       "additionalProp2": "string",
+       "additionalProp3": "string"
+     },
+     "version": 0,
+     "interfaces": [
+       {
+         "id": 0,
+         "interfaceName": "string",
+         "createdAt": "string",
+         "updatedAt": "string"
+       }
+     ],
+     "createdAt": "string",
+     "updatedAt": "string"
+    }
+ ],
+ "unfilteredHits": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `serviceQueryData` | The array of objects containing the data |
+| `id` | ID of the entry, used by the Orchestrator |
+| `serviceDefinition` | Service Definition |
+| `provider` | Provider System |
+| `serviceUri` | URI of the service |
+| `endOfValidity` | Service is available until this timestamp. |
+| `secure` | Security info |
+| `metadata` | Metadata |
+| `version` | Version of the Service |
+| `interfaces` | List of interfaces the Service supports |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+| `unfilteredHits` | Number of hits based on service definition without filters |
+
+> **Note:** 4.1.2 version: PUT /serviceregistry /query <br />
+            This version always returned the records in an array of JSON objects. The response did not contain any information about the unfiltered hits and the objects did not contain any modification related timestamp information. Interfaces and metadata were bound to the service definition and security type was not defined. Service Registry object did contain an unnecessary "udp" flag beside the interface definition.
+
+<a name="serviceregistry_endpoints_post_register" />
+
+##### Register
+```
+POST /serviceregistry/register
+```
+
+Registers a service. A provider is allowed to register only its own services. It means that provider
+system name and certificate common name must match for successful registration.
+
+<a name=datastructures_serviceregistryentry" />
+
+__ServiceRegistryEntry__ is the input
+```json
+{
+  "serviceDefinition": "string",
+  "providerSystem": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "serviceUri": "string",
+  "endOfValidity": "string",
+  "secure": "NOT_SECURE",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0,
+  "interfaces": [
+    "string"
+  ]
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `serviceDefinition` | Service Definition | yes |
+| `providerSystem` | Provider System | yes |
+| `serviceUri` |  URI of the service | yes |
+| `endOfValidity` | Service is available until this timestamp | no |
+| `secure` | Security info | no |
+| `metadata` | Metadata | no |
+| `version` | Version of the Service | no |
+| `interfaces` | List of the interfaces the Service supports | yes |
+
+> **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+
+> **Note:** Possible values for `secure` are:
+> * NOT_SECURE (default value if field is not defined)
+> * SECURE
+> * TOKEN
+
+Returns a __ServiceRegistryEntry__
+
+```json
+{
+  "id": 0,
+  "serviceDefinition": {
+    "id": 0,
+    "serviceDefinition": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "provider": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "serviceUri": "string",
+  "endOfValidity": "string",
+  "secure": "NOT_SECURE",
+  "metadata": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "version": 0,
+  "interfaces": [
+    {
+      "id": 0,
+      "interfaceName": "string",
+      "createdAt": "string",
+      "updatedAt": "string"
+ }
+ ],
+ "createdAt": "string",
+ "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the ServiceRegistryEntry |
+| `serviceDefinition` | Service Definition |
+| `provider` | Provider System |
+| `serviceUri` |  URI of the service |
+| `endOfValidity` | Service is available until this timestamp |
+| `secure` | Security info |
+| `metadata` | Metadata |
+| `version` | Version of the Service |
+| `interfaces` | List of the interfaces the Service supports |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: POST /serviceregistry /register <br />
+            In this version interfaces and metadata were bound to the service definition and security type was not
+            defined at all. The response object did not contain any modification related time stamp information.
+            Service Registry object did contain an unnecessary "udp" flag beside the interface definition.
+            
+<a name="serviceregistry_delete_unregister" />
+            
+##### Unregister 
+```
+DELETE /serviceregistry/unregister
+```
+
+Removes a registered service. A provider is allowed to unregister only its own services. It means
+that provider system name and certificate common name must match for successful unregistration.
+
+Query params:
+* service_definition - name of the service to be removed
+* system_name - name of the provider
+* address 
+* port
+
+> **Note:** 4.1.2 version: PUT /serviceregistry/remove <br />
+            In this version the input was a JSON object with many unnecessary information.
