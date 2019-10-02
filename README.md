@@ -432,7 +432,7 @@ POST /serviceregistry/register
 Registers a service. A provider is allowed to register only its own services. It means that provider
 system name and certificate common name must match for successful registration.
 
-<a name=datastructures_serviceregistryentry" />
+<a name="datastructures_serviceregistryentry" />
 
 __ServiceRegistryEntry__ is the input
 ```json
