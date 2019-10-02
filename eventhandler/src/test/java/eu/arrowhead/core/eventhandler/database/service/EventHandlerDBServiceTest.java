@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -1319,8 +1320,7 @@ public class EventHandlerDBServiceTest {
 		final Set<SystemResponseDTO> authorizedPublishers = Set.of();
 		
 		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
-		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
-		
+
 		final System system = createSystemForDBMock( "systemName" );
 		final EventType eventType = createEventTypeForDBMock( "eventType" );
 
@@ -1405,17 +1405,18 @@ public class EventHandlerDBServiceTest {
 	@Test
 	public void testRegisterSubscriptionOnlyPredefinedPublishersIsTrueOK() {
 		
-		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSources( Set.of( getSystemRequestDTO() ) );
+		final SystemRequestDTO predifinedPublisher = getSystemRequestDTO();
+		predifinedPublisher.setSystemName("predifinedsystemname");
 		
-		final Set<SystemResponseDTO> authorizedPublishers = Set.of( getSystemResponseDTO( "systemName" ));
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of( predifinedPublisher ) );
+		
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of( getSystemResponseDTO( "systemName" ), getSystemResponseDTO( "predifinedsystemname" ) );
 		
 		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
 		subscription.setOnlyPredefinedPublishers( true );
-		
-		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
-		
-		final System system = createSystemForDBMock( "systemName" );
+
+		final System system = createSystemForDBMock( "predifinedsystemname" );
 		final EventType eventType = createEventTypeForDBMock( "eventType" );
 
 		final ArgumentCaptor<Set> valueCapture = ArgumentCaptor.forClass( Set.class);
@@ -1446,8 +1447,383 @@ public class EventHandlerDBServiceTest {
 		
 		final Set<SubscriptionPublisherConnection> publisherConnections = valueCapture.getValue();
 		assertNotNull( publisherConnections );
-		//TODO implement additional asserts here
+		assertTrue( publisherConnections.size() == 1 );
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void testRegisterSubscriptionOnlyPredefinedPublishersIsFalseOK() {
+		
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of( ) );
+		
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of( getSystemResponseDTO( "systemName" ), getSystemResponseDTO( "predifinedsystemname" ) );
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		subscription.setOnlyPredefinedPublishers( false );
+
+		final System system = createSystemForDBMock( "predifinedsystemname" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+
+		final ArgumentCaptor<Set> valueCapture = ArgumentCaptor.forClass( Set.class);
+		
+		//for validateSubscriptionRequestDTO(request)
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( eventType ));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.ofNullable( null ) );
+		
+		when( subscriptionRepository.save( any() ) ).thenReturn( subscription  );
+		when( subscriptionPublisherConnectionRepository.saveAll( valueCapture.capture() ) ).thenReturn( List.of() );
+		doNothing().when( subscriptionPublisherConnectionRepository ).flush( );
+		when( subscriptionRepository.saveAndFlush( any() ) ).thenReturn( subscription );
+		
+		eventHandlerDBService.registerSubscription( request, authorizedPublishers );
+		
+		//for validateSubscriptionRequestDTO(request)
+		verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+		verify( subscriptionRepository, times( 1 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+
+		verify( subscriptionRepository, times( 1 ) ).save( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).saveAll( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).flush();
+		verify( subscriptionRepository, times( 1 ) ).saveAndFlush( any() );
+		
+		final Set<SubscriptionPublisherConnection> publisherConnections = valueCapture.getValue();
+		assertNotNull( publisherConnections );
+		assertTrue( publisherConnections.size() == 2 );
+	}
+	
+	//=================================================================================================
+	//Tests of updateSubscription
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateSubscriptionOK() {
+		
+		final long id = 1L;
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of();
+		final Subscription subscriptionToUpdate = createSubscriptionForDBMock( 1, "eventType", "subscriberToUpdateName" );
+		final Subscription subscriptionForUpdate = createSubscriptionForDBMock( 1, "eventType", "subscriberForUpdateName" );
+		
+		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
+		
+		final System systemForUpdate = createSystemForDBMock( "systemNameForUpdate" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		
+		//getSubscriptionById
+		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.of( subscriptionToUpdate ) );
+		
+		when( subscriptionPublisherConnectionRepository.findBySubscriptionEntry( any() ) ).thenReturn( involvedPublisherSystems );
+		
+		//for validateSubscriptionRequestDTO(request)
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( systemForUpdate ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( eventType ));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		//for uniqueConstraintCheck
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.ofNullable( null ) );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).refresh( any() );
+		
+		when( subscriptionPublisherConnectionRepository.saveAll( any() ) ).thenReturn( List.of() );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).flush();
+		
+		when( subscriptionRepository.saveAndFlush( any() ) ).thenReturn( subscriptionForUpdate );
+			
+		final Subscription response = eventHandlerDBService.updateSubscription( id, request, authorizedPublishers );
+		
+		verify( subscriptionRepository, times( 1 ) ).findById( anyLong() );			
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).findBySubscriptionEntry( any() );
+		
+		//for validateSubscriptionRequestDTO(request)
+		verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+		verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+        
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 1 ) ).refresh( any() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).saveAll( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).flush();
+		verify( subscriptionRepository, times( 1 ) ).saveAndFlush( any() );
+		
+		assertNotNull( response );
+		assertTrue( "subscriberForUpdateName".equalsIgnoreCase( response.getSubscriberSystem().getSystemName() ) );
+	}
+	
+		//-------------------------------------------------------------------------------------------------
+		// skipped	@Tests validateSubscriptionRequestDTO(request) -  same method as in getSubscriptionBySubscriptionRequestDTO tests
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateSubscriptionOnlyPredefinedPublishersIsTrueOK() {
+		
+		final long id = 1L;
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of( getSystemRequestDTO() ) );
+		
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of();
+		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
+		
+		final Subscription subscriptionToUpdate = createSubscriptionForDBMock( 1, "eventType", "subscriberToUpdateName" );		
+		
+		final Subscription subscriptionForUpdate = createSubscriptionForDBMock( 1, "eventType", "subscriberForUpdateName" );
+		subscriptionForUpdate.setOnlyPredefinedPublishers( true );	
+		
+		final System systemForUpdate = createSystemForDBMock( "systemNameForUpdate" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		
+		//getSubscriptionById
+		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.of( subscriptionToUpdate ) );
+		
+		when( subscriptionPublisherConnectionRepository.findBySubscriptionEntry( any() ) ).thenReturn( involvedPublisherSystems );
+		
+		//for validateSubscriptionRequestDTO(request)
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( systemForUpdate ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( eventType ));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		//for uniqueConstraintCheck
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.ofNullable( null ) );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).refresh( any() );
+		
+		when( subscriptionPublisherConnectionRepository.saveAll( any() ) ).thenReturn( List.of() );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).flush();
+		
+		when( subscriptionRepository.saveAndFlush( any() ) ).thenReturn( subscriptionForUpdate );
+			
+		final Subscription response = eventHandlerDBService.updateSubscription( id, request, authorizedPublishers );
+		
+		verify( subscriptionRepository, times( 1 ) ).findById( anyLong() );			
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).findBySubscriptionEntry( any() );
+		
+		//for validateSubscriptionRequestDTO(request)
+		verify( systemRepository, times( 2 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+		verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+        
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 1 ) ).refresh( any() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).saveAll( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).flush();
+		verify( subscriptionRepository, times( 1 ) ).saveAndFlush( any() );
+		
+		assertNotNull( response );
+		assertTrue( "subscriberForUpdateName".equalsIgnoreCase( response.getSubscriberSystem().getSystemName() ) );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateSubscriptionOnlyPredefinedPublishersIsFalseOK() {
+		
+		final long id = 1L;
+		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
+		request.setSources( Set.of() );
+		
+		final Set<SystemResponseDTO> authorizedPublishers = Set.of();
+		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
+		
+		final Subscription subscriptionToUpdate = createSubscriptionForDBMock( 1, "eventType", "subscriberToUpdateName" );		
+		
+		final Subscription subscriptionForUpdate = createSubscriptionForDBMock( 1, "eventType", "subscriberForUpdateName" );
+		subscriptionForUpdate.setOnlyPredefinedPublishers( false );
+		
+		final System systemForUpdate = createSystemForDBMock( "systemNameForUpdate" );
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		
+		//getSubscriptionById
+		when( subscriptionRepository.findById( anyLong() ) ).thenReturn(Optional.of( subscriptionToUpdate ) );
+		
+		when( subscriptionPublisherConnectionRepository.findBySubscriptionEntry( any() ) ).thenReturn( involvedPublisherSystems );
+		
+		//for validateSubscriptionRequestDTO(request)
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( systemForUpdate ) );
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( eventType ));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		//for uniqueConstraintCheck
+		when( subscriptionRepository.findByEventTypeAndSubscriberSystem( any(), any() ) ).thenReturn( Optional.ofNullable( null ) );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).refresh( any() );
+		
+		when( subscriptionPublisherConnectionRepository.saveAll( any() ) ).thenReturn( List.of() );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).flush();
+		
+		when( subscriptionRepository.saveAndFlush( any() ) ).thenReturn( subscriptionForUpdate );
+			
+		final Subscription response = eventHandlerDBService.updateSubscription( id, request, authorizedPublishers );
+		
+		verify( subscriptionRepository, times( 1 ) ).findById( anyLong() );			
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).findBySubscriptionEntry( any() );
+		
+		//for validateSubscriptionRequestDTO(request)
+		verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+		verify( subscriptionRepository, times( 0 ) ).findByEventTypeAndSubscriberSystem( any(), any() );			
+        
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 1 ) ).refresh( any() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).saveAll( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).flush();
+		verify( subscriptionRepository, times( 1 ) ).saveAndFlush( any() );
+		
+		assertNotNull( response );
+		assertTrue( "subscriberForUpdateName".equalsIgnoreCase( response.getSubscriberSystem().getSystemName() ) );
+	}
+	
+	//=================================================================================================
+	//Tests of getInvolvedSubscriptions
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetInvolvedSubscriptionsOK() {
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		final EventType eventType = createEventTypeForDBMock( "eventType" );
+		final System system = createSystemForDBMock( "systemName" );
+
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( eventTypeRepository.findByEventTypeName( any() ) ).thenReturn( Optional.ofNullable( eventType ));
+		when( eventTypeRepository.saveAndFlush( any() ) ).thenReturn( eventType );
+		
+		when( subscriptionRepository.findAllByEventType( any() ) ).thenReturn( Set.of( subscription )  );
+		when( systemRepository.findBySystemNameAndAddressAndPort( any(), any(), anyInt() ) ).thenReturn( Optional.of( system ) );
+		
+		when( subscriptionPublisherConnectionRepository.findAllBySystemAndAuthorized( any(), anyBoolean() ) ).thenReturn( List.of() );
+		
+		eventHandlerDBService.getInvolvedSubscriptions( request );
+		
+		verify( eventTypeRepository, times( 1 ) ).findByEventTypeName( any() );
+		verify( eventTypeRepository, times( 0 ) ).saveAndFlush( any() );
+		verify( subscriptionRepository, times( 1 ) ).findAllByEventType( any() );			
+		verify( systemRepository, times( 1 ) ).findBySystemNameAndAddressAndPort( any(), any(), anyInt() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).findAllBySystemAndAuthorized( any(), anyBoolean() );
+		
+	}
+	
+	//=================================================================================================
+	//Tests of getInvolvedSubscriptionsBySubscriberSystemId
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetInvolvedSubscriptionsBySubscriberSystemIdOK() {
+		
+		final long id = 1L;
+		final System system = createSystemForDBMock( "systemName" );
+
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findById( anyLong() ) ).thenReturn(Optional.of( system ) );
+		when( subscriptionRepository.findAllBySubscriberSystem( any() ) ).thenReturn( List.of( subscription )  );
+		
+		eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( id );
+		
+		verify( systemRepository, times( 1 ) ).findById( anyLong() );
+		verify( subscriptionRepository, times( 1 ) ).findAllBySubscriberSystem( any() );			
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = InvalidParameterException.class )
+	public void testGetInvolvedSubscriptionsBySubscriberSystemIdInvalidParameterIdNull() {
+		
+		final Long id = null;
+		final System system = createSystemForDBMock( "systemName" );
+
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findById( anyLong() ) ).thenReturn(Optional.ofNullable( system ) );
+		when( subscriptionRepository.findAllBySubscriberSystem( any() ) ).thenReturn( List.of( subscription )  );
+		
+		try {
+			
+			eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( id );
+			
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findById( anyLong() );
+			verify( subscriptionRepository, times( 0 ) ).findAllBySubscriberSystem( any() );			
+			
+			assertTrue( ex.getMessage().contains( "SubscriberSystemId is null" ));
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = InvalidParameterException.class )
+	public void testGetInvolvedSubscriptionsBySubscriberSystemIdInvalidParameterIdInvalId() {
+		
+		final Long id = 0L;
+		final System system = createSystemForDBMock( "systemName" );
+
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findById( anyLong() ) ).thenReturn(Optional.ofNullable( system ) );
+		when( subscriptionRepository.findAllBySubscriberSystem( any() ) ).thenReturn( List.of( subscription )  );
+		
+		try {
+			
+			eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( id );
+			
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 0 ) ).findById( anyLong() );
+			verify( subscriptionRepository, times( 0 ) ).findAllBySubscriberSystem( any() );			
+			
+			assertTrue( ex.getMessage().contains( "SubscriberSystemId must be greater than zero." ));
+			
+			throw ex;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = InvalidParameterException.class )
+	public void testGetInvolvedSubscriptionsBySubscriberSystemIdInvalidParameterSubscriberSystemNotInDB() {
+		
+		final long id = 1L;
+		final System system = null;
+
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+
+		when( systemRepository.findById( anyLong() ) ).thenReturn(Optional.ofNullable( system ) );
+		when( subscriptionRepository.findAllBySubscriberSystem( any() ) ).thenReturn( List.of( subscription )  );
+		
+		try {
+			
+			eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( id );
+			
+		} catch (Exception ex) {
+			
+			verify( systemRepository, times( 1 ) ).findById( anyLong() );
+			verify( subscriptionRepository, times( 0 ) ).findAllBySubscriberSystem( any() );			
+			
+			assertTrue( ex.getMessage().contains( "SubscriberSystem is not available in database" ));
+			
+			throw ex;
+		}
+	}
+	
 	
 	//=================================================================================================
 	//Assistant methods
