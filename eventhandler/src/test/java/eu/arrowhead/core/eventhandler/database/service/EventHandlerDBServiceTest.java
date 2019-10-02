@@ -1824,6 +1824,70 @@ public class EventHandlerDBServiceTest {
 		}
 	}
 	
+	//=================================================================================================
+	//Tests of updateSubscriberAuthorization
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateSubscriberAuthorizationOK() {
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final List<Subscription> involvedSubscriptions = List.of( subscription );
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
+		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
+
+		when( subscriptionPublisherConnectionRepository.findBySubscriptionEntry( any() ) ).thenReturn( involvedPublisherSystems );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).refresh( any() );
+		
+		when( subscriptionPublisherConnectionRepository.saveAll( any() ) ).thenReturn( List.of() );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).flush();
+		
+		eventHandlerDBService.updateSubscriberAuthorization( involvedSubscriptions, authorizedPublishers );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).findBySubscriptionEntry( any() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 1 ) ).refresh( any() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).saveAll( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).flush();
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateSubscriberAuthorizationOnlyPredefinedPublishersIsTrueOK() {
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		subscription.setOnlyPredefinedPublishers( true );
+		
+		final List<Subscription> involvedSubscriptions = List.of( subscription );
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
+		final Set<SubscriptionPublisherConnection> involvedPublisherSystems = Set.of();
+
+		when( subscriptionPublisherConnectionRepository.findBySubscriptionEntry( any() ) ).thenReturn( involvedPublisherSystems );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).refresh( any() );
+		
+		when( subscriptionPublisherConnectionRepository.saveAll( any() ) ).thenReturn( List.of() );
+		
+		doNothing().when( subscriptionPublisherConnectionRepository ).flush();
+		
+		eventHandlerDBService.updateSubscriberAuthorization( involvedSubscriptions, authorizedPublishers );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).findBySubscriptionEntry( any() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 0 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 0 ) ).refresh( any() );
+		
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).saveAll( any() );
+		verify( subscriptionPublisherConnectionRepository, times( 1 ) ).flush();
+		
+	}
 	
 	//=================================================================================================
 	//Assistant methods
