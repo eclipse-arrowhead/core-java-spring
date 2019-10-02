@@ -18,8 +18,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [Security](#serviceregistry_security)
        * [Endpoints](#serviceregistry_endpoints)
            * [Client](#serviceregistry_endpoints_client)
-           * [Management](#serviceregistry_endpoints_mgmt)
-           * [Private](#serviceregistry_endpoints_private) 
+           * [Private](#serviceregistry_endpoints_private)
+           * [Management](#serviceregistry_endpoints_mgmt) 
     2. [Authorization](#authorization)
        * [System Design Description Overview](#authorization_sdd)
            * [Token Generation](#asd) 
@@ -248,8 +248,10 @@ If these criteria are met, the Application System’s registration or removal me
 
 The Service Registry offers three types of endpoints. Client, Management and Private.
 
-Swagger API documentation is available on: https://<host>:<port>
-The base URL for the requests: http://<host>:<port>/serviceregistry
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/serviceregistry`
+
+<a name="serviceregistry_endpoints_client" />
 
 Client endpoint description<br />
 
@@ -260,12 +262,16 @@ Client endpoint description<br />
 | [Register](#serviceregistry_endpoints_post_register) | /register   | POST   | [ServiceRegistryEntry](#datastructures_serviceregistryentry) | [ServiceRegistryEntry](#datastructures_serviceregistryentry) |
 | [Unregister](#serviceregistry_delete_unregister) | /unregister | DELETE | Address, Port, Service Definition, System Name in query parameters| OK |
 
+<a name="serviceregistry_endpoints_private" />
+
 Private endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | Query System | /query/system| POST | System | System |
 | Query System By ID | /query/system/{id} | GET | ID | System|
+
+<a name="serviceregistry_endpoints_mgmt" />
 
 Management endpoint description<br />
 
