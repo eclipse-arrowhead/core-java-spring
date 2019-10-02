@@ -1,6 +1,7 @@
 package eu.arrowhead.common.dto.internal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,15 +9,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.arrowhead.common.database.entity.*;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.EventType;
@@ -64,7 +66,7 @@ public class DTOConverter {
 		final long count = systemEntryList.getTotalElements();		
 		final SystemListResponseDTO systemListResponseDTO = new SystemListResponseDTO();
 		systemListResponseDTO.setCount(count);
-		systemListResponseDTO.setData(systemEntryListToSystemResponeDTOList(systemEntryList.getContent()));
+		systemListResponseDTO.setData(systemEntryListToSystemResponseDTOList(systemEntryList.getContent()));
 		
 		return systemListResponseDTO;
 	}
@@ -109,7 +111,7 @@ public class DTOConverter {
 		dto.setSecure(entry.getSecure());
 		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
 		dto.setVersion(entry.getVersion());
-		dto.setInterfaces(collectInterfacesFromServiceSergistry(entry.getInterfaceConnections()));
+		dto.setInterfaces(collectInterfacesFromServiceRegistry(entry.getInterfaceConnections()));
 		dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()));
 		dto.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
 		
@@ -434,14 +436,6 @@ public class DTOConverter {
 
 		return new OrchestratorStoreListResponseDTO(entries, totalElements);
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
-		Assert.notNull(foreignSystem, "ForeignSystem is null");
-		
-		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
-										 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	public static SystemRequestDTO convertSystemToSystemRequestDTO(final System system) {
@@ -620,7 +614,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<SystemResponseDTO> systemEntryListToSystemResponeDTOList(final List<System> systemList) {
+	private static List<SystemResponseDTO> systemEntryListToSystemResponseDTOList(final List<System> systemList) {
 		final List<SystemResponseDTO> systemResponseDTOs = new ArrayList<>(systemList.size());
 		
 		for (final System system : systemList) {
@@ -631,7 +625,7 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromServiceSergistry(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
+	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromServiceRegistry(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
 		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
 		for (final ServiceRegistryInterfaceConnection conn : interfaceConnections) {
 			result.add(convertServiceInterfaceToServiceInterfaceResponseDTO(conn.getServiceInterface()));
@@ -665,7 +659,106 @@ public class DTOConverter {
 		
 		return result;
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
+		Assert.notNull(foreignSystem, "ForeignSystem is null");
+		
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+									 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
+	}
+
+	private static List<ServiceDefinitionResponseDTO> collectServiceDefinitionsFromChoreographerActionStep(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
+		List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
+		for (ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
+			result.add(convertServiceDefinitionToServiceDefinitionResponseDTO(conn.getServiceDefinitionEntry()));
+		}
+
+		result.sort(Comparator.comparing(ServiceDefinitionResponseDTO::getId));
+		return result;
+	}
+
+	private static List<ChoreographerNextActionStepResponseDTO> collectChoreographerNextActionStepsFromChoreographerActionStep(final Set<ChoreographerNextActionStep> nextActionSteps) {
+		List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
+		for (ChoreographerNextActionStep nextActionStep : nextActionSteps) {
+			result.add(convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(nextActionStep.getNextActionStepEntry()));
+		}
+
+		result.sort(Comparator.comparing(ChoreographerNextActionStepResponseDTO::getId));
+
+		return result;
+	}
+
+	private static ChoreographerNextActionStepResponseDTO convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(ChoreographerActionStep nextActionStepEntry) {
+		return new ChoreographerNextActionStepResponseDTO(nextActionStepEntry.getId(), nextActionStepEntry.getName());
+	}
+
+	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep actionStep) {
+	    Assert.notNull(actionStep, "ChoreographerActionStep is null.");
+
+		return new ChoreographerActionStepResponseDTO(
+				actionStep.getId(),
+				actionStep.getName(),
+				collectServiceDefinitionsFromChoreographerActionStep(actionStep.getActionStepServiceDefinitionConnections()),
+				collectChoreographerNextActionStepsFromChoreographerActionStep(actionStep.getNextActionSteps()),
+				Utilities.convertZonedDateTimeToUTCString(actionStep.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(actionStep.getUpdatedAt()));
+	}
+
+	public static List<ChoreographerActionStepResponseDTO> collectChoreographerActionStepsFromChoreographerAction(final Set<ChoreographerActionActionStepConnection> actionStepConnections) {
+		Assert.notNull(actionStepConnections, "ActionStepConnectionSet is null.");
+
+		List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
+		for(ChoreographerActionActionStepConnection conn : actionStepConnections) {
+			result.add(convertChoreographerActionStepToChoreographerActionStepResponseDTO(conn.getActionStepEntry()));
+		}
+
+		result.sort(Comparator.comparing(ChoreographerActionStepResponseDTO::getId));
+
+		return result;
+	}
+
+	public static String collectChoreographerNextActionNameFromChoreographerAction(final ChoreographerAction nextAction) {
+		if (nextAction != null) {
+			return nextAction.getActionName();
+		}
+		return null;
+	}
+
+    public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(ChoreographerAction actionEntry) {
+		Assert.notNull(actionEntry, "ChoreographerAction entry is null.");
+
+		return new ChoreographerActionResponseDTO(actionEntry.getId(),
+				actionEntry.getActionName(),
+				collectChoreographerNextActionNameFromChoreographerAction(actionEntry.getNextAction()),
+				collectChoreographerActionStepsFromChoreographerAction(actionEntry.getActionActionStepConnections()),
+				Utilities.convertZonedDateTimeToUTCString(actionEntry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(actionEntry.getUpdatedAt()));
+	}
+
+	public static List<ChoreographerActionResponseDTO> collectChoreographerActionsFromChoreographerActionPlan(final Set<ChoreographerActionPlanActionConnection> actionConnections) {
+		Assert.notNull(actionConnections, "ActionConnectionsSet is null.");
+
+		List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
+		for (ChoreographerActionPlanActionConnection conn : actionConnections) {
+			result.add(convertChoreographerActionToChoreographerActionResponseDTO(conn.getActionEntry()));
+		}
+
+		result.sort(Comparator.comparing(ChoreographerActionResponseDTO::getId));
+
+		return result;
+	}
+
+	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(ChoreographerActionPlan actionPlanEntry) {
+		Assert.notNull(actionPlanEntry, "ChoreographerActionPlan entry is null.");
+
+		return new ChoreographerActionPlanResponseDTO(actionPlanEntry.getId(),
+				actionPlanEntry.getActionPlanName(),
+				collectChoreographerActionsFromChoreographerActionPlan(actionPlanEntry.getActionPlanActionConnections()),
+				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
+				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
+	}
+}	
 	
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {

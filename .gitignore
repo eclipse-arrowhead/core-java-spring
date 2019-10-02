@@ -49,5 +49,8 @@ wrapper
 gatekeeper/gatekeeper\.log
 /eventhandler/*.log
 /orchestrator/*.log
-
-*.log
+/choreographer/*.log
+choreographer.log
+serviceregistry.log
+authorization.log
+/choreographer/target
