@@ -333,6 +333,16 @@ public class EventHandlerDBService {
 	public List<Subscription> getInvolvedSubscriptionsBySubscriberSystemId(final Long subscriberSystemId) {
 		logger.debug("getInvolvedSubscriptionsBySubscriberSystemId started ...");
 		
+		if ( subscriberSystemId == null ) {
+			
+			throw new InvalidParameterException("SubscriberSystemId" + NULL_ERROR_MESSAGE);
+		}
+		
+		if ( subscriberSystemId < 1 ) {
+			
+			throw new InvalidParameterException("SubscriberSystemId" + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		
 		try {
 			
 			final Optional<System> subscriberSystemOptional = systemRepository.findById(subscriberSystemId);
@@ -343,6 +353,10 @@ public class EventHandlerDBService {
 			
 			return subscriptionRepository.findAllBySubscriberSystem( subscriberSystemOptional.get() );
 			
+		} catch (final InvalidParameterException ex) {
+			
+			throw ex;
+		
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
