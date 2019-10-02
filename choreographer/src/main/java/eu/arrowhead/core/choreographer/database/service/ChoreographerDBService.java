@@ -388,12 +388,11 @@ public class ChoreographerDBService {
         Direction validatedDirection = direction == null ? Direction.ASC : direction;
         String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
+        if (!ChoreographerActionPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+            throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+        }
+
         try {
-            if (!ChoreographerActionPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-                throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
-            }
-
-
             return choreographerActionPlanRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
         } catch (Exception ex) {
             logger.debug(ex.getMessage(), ex);
