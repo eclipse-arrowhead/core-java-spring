@@ -242,7 +242,7 @@ This System can be secured via the HTTPS protocol. If it is started in secure mo
 
 If these criteria are met, the Application System’s registration or removal message is processed. An Application System can only delete or alter entries that contain the Application System as the Service Provider in the entry. 
 
-<a name="serviceregistry_endpoints />
+<a name="serviceregistry_endpoints" />
 
 #### Endpoints
 
