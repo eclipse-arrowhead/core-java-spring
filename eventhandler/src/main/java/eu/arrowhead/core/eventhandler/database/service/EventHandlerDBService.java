@@ -278,35 +278,28 @@ public class EventHandlerDBService {
 			
 			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry( subscriptionToUpdate );
 			
-			final EventType eventTypeForUpdate = validateEventType( request.getEventType() );
-			final System subscriberSystemForUpdate = validateSystemRequestDTO( request.getSubscriberSystem() );
-			final String filterMetadataForUpdate = Utilities.map2Text(request.getFilterMetaData());
-			final boolean matchMetaDataForUpdate = request.getMatchMetaData();
-			final String notifyUriForUpdate = validateNotifyUri( request.getNotifyUri() );
-			final boolean onlyPredifindProvidersForUpdate = request.getSources() != null && !request.getSources().isEmpty();
-			final ZonedDateTime startDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
-			final ZonedDateTime endDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
-
-			if ( originalEventTypeId != eventTypeForUpdate.getId() ||
-					originalSubscriberSystemId != subscriberSystemForUpdate.getId()) {
+			final Subscription subscriptionForUpdate = validateSubscriptionRequestDTO( request );
+			
+			if ( originalEventTypeId != subscriptionForUpdate.getEventType().getId() ||
+					originalSubscriberSystemId != subscriptionForUpdate.getSubscriberSystem().getId()) {
 				
-				checkSubscriptionUniqueConstraintsByEventTypeAndSubscriber(eventTypeForUpdate, subscriberSystemForUpdate);
+				checkSubscriptionUniqueConstraintsByEventTypeAndSubscriber( subscriptionForUpdate.getEventType(), subscriptionForUpdate.getSubscriberSystem());
 			}		
 			
 			subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
 			subscriptionRepository.refresh( subscriptionToUpdate );		
 			
-			subscriptionToUpdate.setEventType(eventTypeForUpdate);
-			subscriptionToUpdate.setSubscriberSystem(subscriberSystemForUpdate);
-			subscriptionToUpdate.setFilterMetaData(filterMetadataForUpdate);
-			subscriptionToUpdate.setMatchMetaData(matchMetaDataForUpdate);
-			subscriptionToUpdate.setNotifyUri(notifyUriForUpdate);
-			subscriptionToUpdate.setOnlyPredefinedPublishers(onlyPredifindProvidersForUpdate);
-			subscriptionToUpdate.setStartDate(startDateForUpdate);
-			subscriptionToUpdate.setEndDate(endDateForUpdate);
+			subscriptionToUpdate.setEventType( subscriptionForUpdate.getEventType() );
+			subscriptionToUpdate.setSubscriberSystem( subscriptionForUpdate.getSubscriberSystem() );
+			subscriptionToUpdate.setFilterMetaData( subscriptionForUpdate.getFilterMetaData() );
+			subscriptionToUpdate.setMatchMetaData( subscriptionForUpdate.isMatchMetaData() );
+			subscriptionToUpdate.setNotifyUri( subscriptionForUpdate.getNotifyUri() );
+			subscriptionToUpdate.setOnlyPredefinedPublishers( subscriptionForUpdate.isOnlyPredefinedPublishers() );
+			subscriptionToUpdate.setStartDate( subscriptionForUpdate.getStartDate() );
+			subscriptionToUpdate.setEndDate( subscriptionForUpdate.getEndDate() );
 						
 			addAndSaveSubscriptionEntryPublisherConnections(subscriptionToUpdate, request, authorizedPublishers);
-			
+		
 			return subscriptionRepository.saveAndFlush(subscriptionToUpdate);
 					
 		}catch (final Exception ex) {
