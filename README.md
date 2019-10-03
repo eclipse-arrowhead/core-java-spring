@@ -20,6 +20,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Client](#serviceregistry_endpoints_client)
            * [Private](#serviceregistry_endpoints_private)
            * [Management](#serviceregistry_endpoints_mgmt) 
+           * [Removed Endpoints](#serviceregistry_removed)
     2. [Authorization](#authorization)
        * [System Design Description Overview](#authorization_sdd)
            * [Token Generation](#asd) 
@@ -72,14 +73,11 @@ Gateway will be available on ```localhost:8453``` <br />
 
 Swagger with API documentation is available in the root route.
 
-#### Insecure Mode
+#### Insecure Mode - (not recommended)
 
 To start in insecure mode, you have to change the __server.ssl.enabled__ property to false. You'll have to do it for each core system, under the path target/application.properties. Note that if you recompile after the changes, the target/application.properties file will be overwritten by the default ones in the src/main/resources/application.properties.
 
 The Gatekeeper and Gateway use encryption based on the certificates, hence there is no way to start the Gatekeeper and Gateway in insecure mode. But you can use the local cloud without these core systems. All you have to do is to set __gatekeeper\_is\_present=false__ in the application.properties of the ochestrator, and start the script __start\_coresystems\_local.bat__ or __start\_coresystems_local.sh__ depending on your operating system.
-
-
-Enjoy! ;)
 
 
 <a name="migration" />
@@ -96,17 +94,17 @@ Major endpoint changes:<br />
 
 The following endpoints no longer exist, instead use the ones on the right:
 
- * PUT /mgmt/services -> POST /serviceregistry/mgmt/services
- * PUT /mgmt/systems -> POST /serviceregistry/mgmt/systems
- * GET /serviceregistry/mgmt/systemId/{systemId} -> GET /serviceregistry/mgmt/systems/{id}
- * GET /serviceregistry/mgmt/serviceId/{serviceId}/providers
- * PUT /serviceregistry/mgmt/query -> POST /serviceregistry/query
- * PUT /serviceregistry/mgmt/subscriptions/{id}
- * PUT /serviceregistry/support/remove -> DELETE /serviceregistry/unregister
- * DELETE /serviceregistry/mgmt/all
+ * `PUT /mgmt/services` -> `POST /serviceregistry/mgmt/services`
+ * `PUT /mgmt/systems` -> `POST /serviceregistry/mgmt/systems`
+ * `GET /serviceregistry/mgmt/systemId/{systemId}` -> `GET /serviceregistry/mgmt/systems/{id}`
+ * `GET /serviceregistry/mgmt/serviceId/{serviceId}/providers`
+ * `PUT /serviceregistry/mgmt/query` -> `POST /serviceregistry/query`
+ * `PUT /serviceregistry/mgmt/subscriptions/{id}`
+ * `PUT /serviceregistry/support/remove` -> `DELETE /serviceregistry/unregister`
+ * `DELETE /serviceregistry/mgmt/all`
  
  
- * __/register__ - data structure changed
+ * __serviceregistry/register__ - data structure changed
  
 Old payload, which is no longer usable
  ```json
@@ -288,19 +286,35 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 | [Modify an entry by ID](#serviceregistry_endpoints_patch_mgmt) | /mgmt/{id} | PATCH | Key value pairs of [ServiceRegistryEntry](#datastructures_serviceregistryentry) | [ServiceRegistryEntry](#datastructures_serviceregistryentry) |
 | [Delete and entry by ID](serviceregistry_endpoints_delete_mgmt) | /mgmt/{id} | DELETE | ServiceRegistryEntryID | - |
 | [Get grouped view](#serviceregistry_endpoints_get_mgmt_grouped) | /mgmt/grouped | GET | - | [ServiceRegistryGrouped](#datastructures_serviceregistrygrouped) |
-| [Get Service Registry Entries by Service Definition](#serviceregistry_endpoints_get_servicedef) | /mgmt/servicedef/<br />{serviceDefinition} | GET | ServiceDefinition | [ServiceRegistryEntryList](#datastructures_serviceregistryentrylist) |
-| Get all services | /mgmt/services | GET | - | ServiceList |
-| Add a service | /mgmt/services | POST | Service | Service |
-| Get a service by ID | /mgmt/services/{id} | GET | ServiceID | Service |
-| Replace a service by ID | /mgmt/services/(id} | PUT | Service | Service |
-| Modify a service by ID | /mgmt/services/{id} | PATCH | Key value pairs of Service | Service |
-| Delete a service by ID | /mgmt/services/{id} | DELETE | ServiceID | - |
-| Get all systems | /mgmt/systems | GET | - | SystemList |
-| Add a system | /mgmt/systems | POST | System | System |
-| Get a system by ID | /mgmt/systems/{id} | GET | SystemID | System |
-| Replace a system by ID | /mgmt/systems/{id} | PUT | System | System |
-| Modify a system by ID | /mgmt/systems/{id} | PATCH | Key value pairs of System | System |
-| Delete a system by ID | /mgmt/systems/{id} | DELETE | SystemID | - |
+| [Get Service Registry Entries by Service Definition](#serviceregistry_endpoints_get_servicedef) | /mgmt/servicedef/<br />{serviceDefinition} | GET | [ServiceDefinition](#datastructures_servicedefinition) | [ServiceRegistryEntryList](#datastructures_serviceregistryentrylist) |
+| [Get all services](#serviceregistry_endpoints_get_services) | /mgmt/services | GET | - | [ServiceDefinitionList](#datastructures_servicedefinitionlist) |
+| [Add a service](#serviceregistry_endpoints_post_service) | /mgmt/services | POST | [ServiceDefinition](#datastructures_servicedefinition) | [ServiceDefinition](#datastructures_servicedefinition) |
+| [Get a service by ID](#serviceregistry_endpoints_get_service_id) | /mgmt/services/{id} | GET | ServiceID | [ServiceDefinition](#datastructures_servicedefinition) |
+| [Replace a service by ID](#serviceregistry_endpoints_put_service_id) | /mgmt/services/(id} | PUT | Service | [ServiceDefinition](#datastructures_servicedefinition) |
+| [Modify a service by ID](#serviceregistry_endpoints_patch_service_id) | /mgmt/services/{id} | PATCH | Key value pairs of [ServiceDefinition](#datastructures_servicedefinition) | [ServiceDefinition](#datastructures_servicedefinition) |
+| [Delete a service by ID](#serviceregistry_endpoints_delete_service_id) | /mgmt/services/{id} | DELETE | ServiceID | - |
+| [Get all systems](#serviceregistry_endpoints_get_systems) | /mgmt/systems | GET | - | [SystemList](#datastructures_systemlist) |
+| [Add a system](#serviceregistry_endpoints_post_systems) | /mgmt/systems | POST | [System](#datastructure_system) | [System](#datastructure_system) |
+| [Get a system by ID](#serviceregistry_endpoints_get_system_id) | /mgmt/systems/{id} | GET | SystemID | [System](#datastructure_system) |
+| [Replace a system by ID](#serviceregistry_endpoints_put_system_id) | /mgmt/systems/{id} | PUT | [System](#datastructure_system) | [System](#datastructure_system) |
+| [Modify a system by ID](#serviceregistry_endpoints_patch_system_id) | /mgmt/systems/{id} | PATCH | Key value pairs of [System](#datastructure_system) | [System](#datastructure_system) |
+| [Delete a system by ID](#serviceregistry_endpoints_delete_system_id) | /mgmt/systems/{id} | DELETE | SystemID | - |
+
+<a name="serviceregistry_removed" />
+
+Removed Endpoints <br />
+
+The following endpoints no longer exist:
+* `PUT /mgmt/services`
+* `PUT /mgmgt/systems`
+* `GET /serviceregistry/mgmt`
+* `GET /serviceregistry/mgmt/systemId/{systemId}`
+* `GET /serviceregistry/mgmt/serviceId/{serviceId}/providers`
+* `PUT /serviceregistry/mgmt/query`
+* `PUT /serviceregistry/mgmt/subscriptions/{id}`
+* `PUT /serviceregistry/support/remove`
+* `DELETE /serviceregistry/mgmt/all` 
+
 
 <a name="serviceregistry_endpoints_get_echo" />
 
@@ -1349,5 +1363,503 @@ Returns a __ServiceRegistryEntryList__
             definition and security type was not defined. Service Registry object did contain an "udp"
             flag beside the interface definition.
 
+<a name="serviceregistry_endpoints_get_services" />
 
+##### Get all services
+```
+GET /serviceregistry/mgmt/services
+```
 
+Returns a list of Service Definition records. If `page` and `item_per_page` are not defined, returns all
+records.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_servicedefinitionlist" />
+
+Returns a __ServiceDefinitionList__
+
+```json
+{
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": "string",
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+   ],
+  "count": 0
+}
+```
+
+> **Note:** 4.1.2 version: GET /mgmt/services <br />
+            This version always returned the records in an array of JSON objects. The objects did not contain any
+            modification related time stamp information. Interfaces and metadata were part of the service
+            definition entity.
+            
+<a name="serviceregistry_endpoints_post_service" />
+
+##### Add a service
+```
+POST /serviceregistry/mgmt/services
+```
+
+Creates service definition record and returns the newly created record.
+
+<a name="datastructures_servicedefinition" />
+
+__Service Definition__ is the input
+```json
+{
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `serviceDefinition` | Service Definition | yes |
+
+Returns a _Service Definition__   
+
+```json
+{
+  "id": 0,
+  "serviceDefinition": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```  
+
+| Field | Description | 
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `serviceDefinition` | Service Definition |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: POST /mgmt/services <br />
+            In this version interfaces and metadata were part of the service definition entity. The response object
+            did not contain any modification related time stamp information.
+            
+<a name="serviceregistry_endpoints_get_service_id" />
+
+##### Get a service by ID
+```
+GET /serviceregistry/mgmt/services/{id}
+```
+
+Returns the Service Definition record specified by the id path parameter.
+
+Returns a __ServiceDefinition__
+
+```json
+{
+  "id": 0,
+  "serviceDefinition": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description | 
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `serviceDefinition` | Service Definition |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /mgmt/services/{serviceId}
+            The response object did not contain any modification related time stamp information. Interfaces and
+            metadata were part of the service definition entity.
+
+<a name="serviceregistry_endpoints_put_service_id" />
+
+##### Replace a service by ID
+```
+PUT /serviceregistry/mgmt/services/{id}
+```            
+
+Updates and returns the modified Service Definition record specified by the ID path parameter.
+
+__ServiceDefinition__ is the input
+```json
+{
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- | 
+| `serviceDefinition` | Service Definition | yes |
+
+Returns a __ServiceDefinition__
+
+```json
+{
+  "id": 0,
+  "serviceDefinition": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description | 
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `serviceDefinition` | Service Definition |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: PUT /mgmt/services/{serviceId} <br />
+            The response object did not contain any modification related time stamp information. Interfaces and
+            metadata were part of the service definition entity.
+            
+<a name="serviceregistry_endpoints_patch_service_id" />
+
+##### Modify a service by ID
+```
+PATCH /serviceregistry/mgmt/services/{id}
+```            
+
+Updates and returns the modified Service Definition record specified by the ID path parameter.
+
+__ServiceDefinition__ is the input
+```json
+{
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- | 
+| `serviceDefinition` | Service Definition | yes |
+
+Returns a __ServiceDefinition__
+
+```json
+{
+  "id": 0,
+  "serviceDefinition": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description | 
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `serviceDefinition` | Service Definition |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: Not existed
+
+<a name="serviceregistry_endpoints_delete_service_id" />
+
+##### Delete a service by ID
+```
+DELETE /serviceregistry/mgmt/services/{id}
+```
+
+Removes the service definition record specified by the id path parameter.
+
+> **Note:** 4.1.2 version: DELETE /mgmt/services/{serviceId}
+            This version did return HTTP 404 (Not Found), when record was not found by ID.
+            
+<a name="serviceregistry_endpoints_get_systems" />
+
+##### Get all systems
+```
+GET /serviceregistry/mgmt/systems
+```            
+
+Returns a list of System records. If `page` and `item_per_page` are not defined, it returns all records.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+            
+<a name="datastructures_systemlist" />
+
+Returns a __SystemList__
+
+```json
+{
+  "data": [
+    {
+      "id": 0,
+      "systemName": "string",
+      "address": "string",
+      "port": 0,
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ],
+  "count": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `systemName` | Name of the System |
+| `address` | Address |
+| `port` | Port |
+| `authenticationInfo` | Authentication Info |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /mgmt/systems
+            This version always returned the records in an array of JSON objects. The objects did not contain any
+            modification related time stamp information.
+            
+            
+<a name="serviceregistry_endpoints_post_systems" />
+
+##### Add a system
+```
+POST /serviceregistry/mgmt/systems
+```            
+
+Creates a System record and returns the newly created record.
+
+<a name="datastructure_system" />
+
+__System__ is the input
+
+```json
+{
+  "systemName": "string",
+  "address": "string",
+  "port": 0,
+  "authenticationInfo": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `systemName` | Name of the System | yes |
+| `address` | Address | yes |
+| `port` | Port | yes |
+| `authenticationInfo` | Authentication Info | no |
+
+Returns a __System__
+
+```json
+{
+  "id": 0,
+  "systemName": "string",
+  "address": "string",
+  "port": 0,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `systemName` | Name of the System |
+| `address` | Address |
+| `port` | Port |
+| `authenticationInfo` | Authentication Info |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: POST /mgmt/systems <br />
+            In this version the response object did not contain any modification related time stamp information.
+
+<a name="serviceregistry_endpoints_get_system_id" />
+
+##### Get a system by ID
+```
+GET /serviceregistry/systems/{id}
+```
+
+Returns the System record specified by the ID path parameter.
+
+<a name="datastructure_system" />
+
+Returns a __System__
+
+```json
+{
+  "id": 0,
+  "systemName": "string",
+  "address": "string",
+  "port": 0,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `systemName` | Name of the System |
+| `address` | Address |
+| `port` | Port |
+| `authenticationInfo` | Authentication Info |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /mgmt/systems/{systemId} <br />
+            In this version the response object did not contain any modification related time stamp information
+ 
+
+<a name="serviceregistry_endpoints_put_system_id" />
+
+##### Replace a system by ID
+```
+PUT /serviceregistry/mgmt/systems/{id}
+```
+
+Updates and returns the modified System record specified by the ID path parameter. Not defined
+fields are going to be updated to "null" value.
+
+__System__ is the input
+
+```json
+{
+  "systemName": "string",
+  "address": "string",
+  "port": 0,
+  "authenticationInfo": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `systemName` | Name of the System | yes |
+| `address` | Address | yes |
+| `port` | Port | yes |
+| `authenticationInfo` | Authentication Info | no |
+
+Returns a __System__
+
+```json
+{
+  "id": 0,
+  "systemName": "string",
+  "address": "string",
+  "port": 0,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `systemName` | Name of the System |
+| `address` | Address |
+| `port` | Port |
+| `authenticationInfo` | Authentication Info |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: PUT /mgmt/systems/{systemId} <br />
+            In this version the response object did not contain any modification related time stamp information.
+            
+<a name="serviceregistry_endpoints_patch_system_id" />
+
+##### Modify a system by ID
+```
+PATCH /serviceregistry/mgmt/systems/{id}
+```            
+
+Updates and returns the modified system record specified by the id path parameter. Not defined
+fields are going to be NOT updated.
+
+__System__ is the input
+
+```json
+{
+  "systemName": "string",
+  "address": "string",
+  "port": 0,
+  "authenticationInfo": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `systemName` | Name of the System | yes |
+| `address` | Address | yes |
+| `port` | Port | yes |
+| `authenticationInfo` | Authentication Info | no |
+
+Returns a __System__
+
+```json
+{
+  "id": 0,
+  "systemName": "string",
+  "address": "string",
+  "port": 0,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `systemName` | Name of the System |
+| `address` | Address |
+| `port` | Port |
+| `authenticationInfo` | Authentication Info |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+                        
+> **Note:** 4.1.2 version: Not existed
+
+<a name="serviceregistry_endpoints_delete_system_id" />
+
+##### Delete a system by ID
+```
+DELETE /serviceregistry/mgmt/systems/{id}
+```                        
+
+Removes the System record specified by the ID path parameter.
+
+> **Note:** 4.1.2 version: DELETE /mgmt/systems/{systemId} <br />
+            This version did return HTTP 404 (Not Found), when record was not found by ID.
+            
+            
