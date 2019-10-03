@@ -185,15 +185,15 @@ Join our developer team on Slack. Write an email to [szvetlin@aitia.ai](mailto:s
 
 <a name="documentation" />
 
-## Documentation 
+# Documentation 
  
 <a name="serviceregistry" />
  
-### Service Registry 
+# Service Registry 
  
 <a name="serviceregistry_sdd" />
  
-#### System Design Description Overview
+## System Design Description Overview
 
 This System provides the database, which stores information related to the currently actively offered Services within the Local Cloud.
 
@@ -208,7 +208,7 @@ However, the lookup of other Application Systems and Services directly is not wi
 
 <a name="serviceregistry_usecases" />
 
-#### Services and Use Cases
+## Services and Use Cases
 
 This System only provides one Core Service the __Service Discovery__
 
@@ -231,7 +231,7 @@ There is another functionality that does not bound to any Services, just an inte
 
 <a name="serviceregistry_security" />
 
-#### Security
+## Security
 
 This System can be secured via the HTTPS protocol. If it is started in secure mode, it verifies whether the Application System possesses a proper X.509 identity certificate and whether that certificate is Arrowhead compliant in its making. This certificate structure and creation guidelines ensure:
 -	Application System is properly bootstrapped into the Local Cloud
@@ -242,7 +242,7 @@ If these criteria are met, the Application System’s registration or removal me
 
 <a name="serviceregistry_endpoints" />
 
-#### Endpoints
+## Endpoints
 
 The Service Registry offers three types of endpoints. Client, Management and Private.
 
@@ -251,7 +251,7 @@ The base URL for the requests: `http://<host>:<port>/serviceregistry`
 
 <a name="serviceregistry_endpoints_client" />
 
-Client endpoint description<br />
+### Client endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
@@ -262,7 +262,7 @@ Client endpoint description<br />
 
 <a name="serviceregistry_endpoints_private" />
 
-Private endpoint description<br />
+### Private endpoint description<br />
 
 These services can only be used by other core services, therefore they are not part of the public API.
 
@@ -273,7 +273,7 @@ These services can only be used by other core services, therefore they are not p
 
 <a name="serviceregistry_endpoints_mgmt" />
 
-Management endpoint description<br />
+### Management endpoint description<br />
 
 There endpoints are mainly used by the Management Tool and Cloud Administrators.
 
@@ -302,7 +302,7 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 
 <a name="serviceregistry_removed" />
 
-Removed Endpoints <br />
+### Removed Endpoints <br />
 
 The following endpoints no longer exist:
 * `PUT /mgmt/services`
@@ -318,7 +318,7 @@ The following endpoints no longer exist:
 
 <a name="serviceregistry_endpoints_get_echo" />
 
-##### Echo 
+### Echo 
 ```
 GET /serviceregistry/echo
 ```
@@ -329,7 +329,7 @@ Returns a "Got it" message with the purpose of testing the core service availabi
 
 <a name="serviceregistry_endpoints_post_query" />
 
-##### Query
+### Query
 ```
 POST /serviceregistry/query
 ```
@@ -448,7 +448,7 @@ Returns a __ServiceQueryList__
 
 <a name="serviceregistry_endpoints_post_register" />
 
-##### Register
+### Register
 ```
 POST /serviceregistry/register
 ```
@@ -564,7 +564,7 @@ Returns a __ServiceRegistryEntry__
             
 <a name="serviceregistry_delete_unregister" />
             
-##### Unregister 
+### Unregister 
 ```
 DELETE /serviceregistry/unregister
 ```
@@ -586,7 +586,7 @@ Query params:
             
 <a name="serviceregistry_endpoints_post_query_system" />            
             
-##### Query System            
+### Query System            
 ```
 POST /serviceregistry/query/system
 ```
@@ -595,14 +595,14 @@ This service can only be used by other core services, therefore is not part of t
 
 <a name="serviceregistry_endpoints_get_query_system_id" />
 
-##### Query System by ID
+### Query System by ID
 ```
 GET /serviceregistry/system/{id}
 ```
 
 This service can only be used by other core services, therefore is not part of the public API.
 
-##### Get all entries
+### Get all entries
 ```
 GET /serviceregistry/mgmt
 ```
@@ -700,7 +700,7 @@ Returns a __ServiceRegistryEntryList__
            
 <a name="serviceregistry_endpoints_post_mgmt" />
 
-##### Add an entry
+### Add an entry
 ```
 POST /serviceregistry/mgmt
 ```           
@@ -814,7 +814,7 @@ Returns a __ServiceRegistryEntry__
             
 <a name="serviceregistry_endpoints_get_mgmt" />
 
-##### Get an entry by ID
+### Get an entry by ID
 ```
 GET /serviceregistry/mgmt/{id}
 ```
@@ -884,7 +884,7 @@ Returns a __ServiceRegistryEntry__
             
 <a name="serviceregistry_endpoints_put_mgmt" />            
             
-##### Replace an entry by ID            
+### Replace an entry by ID            
 ```
 PUT /serviceregistry/mgmt/{id}
 ```
@@ -998,7 +998,7 @@ Returns a __ServiceRegistryEntry__
             
 <a name="serviceregistry_endpoints_patch_mgmt" />            
             
-##### Modify an entry by ID     
+### Modify an entry by ID     
 ```
 PATCH /serviceregistry/mgmt/{id}
 ```   
@@ -1109,7 +1109,7 @@ Returns a __ServiceRegistryEntry__
 
 <a name="serviceregistry_endpoints_delete_mgmt" />
 
-##### Delete an entry by ID
+### Delete an entry by ID
 ```
 DELETE /serviceregistry/mgmt/{id}
 ```
@@ -1121,7 +1121,7 @@ Remove the service registry record specified by the id path parameter.
     
 <a name="serviceregistry_endpoints_get_mgmt_grouped" />
 
-##### Get grouped view
+### Get grouped view
 ```
 GET /serviceregistry/mgmt/grouped
 ```        
@@ -1268,7 +1268,7 @@ Returns a __ServiceRegistryGrouped__
 
 <a name="serviceregistry_endpoints_get_servicedef" />
 
-##### Get Service Registry Entries by Service Definition
+### Get Service Registry Entries by Service Definition
 ```
 GET /serviceregistry/mgmt/servicedef/{serviceDefinition}
 ```
@@ -1365,7 +1365,7 @@ Returns a __ServiceRegistryEntryList__
 
 <a name="serviceregistry_endpoints_get_services" />
 
-##### Get all services
+### Get all services
 ```
 GET /serviceregistry/mgmt/services
 ```
@@ -1416,7 +1416,7 @@ Returns a __ServiceDefinitionList__
             
 <a name="serviceregistry_endpoints_post_service" />
 
-##### Add a service
+### Add a service
 ```
 POST /serviceregistry/mgmt/services
 ```
@@ -1460,7 +1460,7 @@ Returns a _Service Definition__
             
 <a name="serviceregistry_endpoints_get_service_id" />
 
-##### Get a service by ID
+### Get a service by ID
 ```
 GET /serviceregistry/mgmt/services/{id}
 ```
@@ -1491,7 +1491,7 @@ Returns a __ServiceDefinition__
 
 <a name="serviceregistry_endpoints_put_service_id" />
 
-##### Replace a service by ID
+### Replace a service by ID
 ```
 PUT /serviceregistry/mgmt/services/{id}
 ```            
@@ -1533,7 +1533,7 @@ Returns a __ServiceDefinition__
             
 <a name="serviceregistry_endpoints_patch_service_id" />
 
-##### Modify a service by ID
+### Modify a service by ID
 ```
 PATCH /serviceregistry/mgmt/services/{id}
 ```            
@@ -1573,7 +1573,7 @@ Returns a __ServiceDefinition__
 
 <a name="serviceregistry_endpoints_delete_service_id" />
 
-##### Delete a service by ID
+### Delete a service by ID
 ```
 DELETE /serviceregistry/mgmt/services/{id}
 ```
@@ -1585,7 +1585,7 @@ Removes the service definition record specified by the id path parameter.
             
 <a name="serviceregistry_endpoints_get_systems" />
 
-##### Get all systems
+### Get all systems
 ```
 GET /serviceregistry/mgmt/systems
 ```            
@@ -1648,7 +1648,7 @@ Returns a __SystemList__
             
 <a name="serviceregistry_endpoints_post_systems" />
 
-##### Add a system
+### Add a system
 ```
 POST /serviceregistry/mgmt/systems
 ```            
@@ -1704,7 +1704,7 @@ Returns a __System__
 
 <a name="serviceregistry_endpoints_get_system_id" />
 
-##### Get a system by ID
+### Get a system by ID
 ```
 GET /serviceregistry/systems/{id}
 ```
@@ -1743,7 +1743,7 @@ Returns a __System__
 
 <a name="serviceregistry_endpoints_put_system_id" />
 
-##### Replace a system by ID
+### Replace a system by ID
 ```
 PUT /serviceregistry/mgmt/systems/{id}
 ```
@@ -1798,7 +1798,7 @@ Returns a __System__
             
 <a name="serviceregistry_endpoints_patch_system_id" />
 
-##### Modify a system by ID
+### Modify a system by ID
 ```
 PATCH /serviceregistry/mgmt/systems/{id}
 ```            
@@ -1852,7 +1852,7 @@ Returns a __System__
 
 <a name="serviceregistry_endpoints_delete_system_id" />
 
-##### Delete a system by ID
+### Delete a system by ID
 ```
 DELETE /serviceregistry/mgmt/systems/{id}
 ```                        
