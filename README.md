@@ -1549,7 +1549,7 @@ __ServiceDefinition__ is the input
 
 | Field | Description | Mandatory |
 | ----- | ----------- | --------- | 
-| `serviceDefinition` | Service Definition | yes |
+| `serviceDefinition` | Service Definition | no |
 
 Returns a __ServiceDefinition__
 
@@ -1819,9 +1819,9 @@ __System__ is the input
 
 | Field | Description | Mandatory |
 | ----- | ----------- | --------- |
-| `systemName` | Name of the System | yes |
-| `address` | Address | yes |
-| `port` | Port | yes |
+| `systemName` | Name of the System | no |
+| `address` | Address | no |
+| `port` | Port | no |
 | `authenticationInfo` | Authentication Info | no |
 
 Returns a __System__
