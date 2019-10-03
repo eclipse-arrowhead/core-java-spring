@@ -3,9 +3,9 @@ package eu.arrowhead.core.eventhandler.database.service;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.Subscription;
@@ -45,7 +43,6 @@ import eu.arrowhead.common.database.repository.SubscriptionRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.shared.EventTypeResponseDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
@@ -1890,38 +1887,60 @@ public class EventHandlerDBServiceTest {
 	}
 	
 	//=================================================================================================
-	//Assistant methods
-
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionListResponseDTO createSubscriptionListResponseForDBMock( final int resultSize ) {
+	//Tests of removeSubscriptionEntries
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveSubscriptionEntriesOK() {
 		
-		final List<SubscriptionResponseDTO> data = new ArrayList<>( resultSize );
-		for (int i = 0; i < resultSize; i++) {
-			
-			data.add( createSubscriptionResponseForDBMock( "eventType" + i, "subscriber" + i ) );
-			
-		}
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		final List<Subscription> request = List.of( subscription );
 		
-		return new SubscriptionListResponseDTO(data, resultSize);
+		doNothing().when( subscriptionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).flush();
 		
-	}
-
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionResponseDTO createSubscriptionResponseForDBMock( ) {
+		eventHandlerDBService.removeSubscriptionEntries( request );
 		
-		final SubscriptionResponseDTO response = createSubscriptionResponseForDBMock( "testEventType", "testSubscriberSystemName");
-		response.setSources(Set.of());
-		
-		return response;
+		verify( subscriptionRepository, times( 1 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 1 ) ).flush();
 		
 	}
 	
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionResponseDTO createSubscriptionResponseForDBMock( final String eventType, final String subscriberName ) {
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveSubscriptionEntriesRequestNullOK() {
 		
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( createSubscriptionForDBMock(1, eventType, subscriberName ));
+		final List<Subscription> request = null;
+		
+		doNothing().when( subscriptionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).flush();
+		
+		eventHandlerDBService.removeSubscriptionEntries( request );
+		
+		verify( subscriptionRepository, times( 0 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 0 ) ).flush();
+		
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRemoveSubscriptionEntriesRequestEmptyOK() {
+		
+		final List<Subscription> request = List.of();
+		
+		doNothing().when( subscriptionRepository ).deleteInBatch( any() );
+		doNothing().when( subscriptionRepository ).flush();
+		
+		eventHandlerDBService.removeSubscriptionEntries( request );
+		
+		verify( subscriptionRepository, times( 0 ) ).deleteInBatch( any() );
+		verify( subscriptionRepository, times( 0 ) ).flush();
+		
+	}
+	
+	//=================================================================================================
+	//Assistant methods
+	
 	//-------------------------------------------------------------------------------------------------	
 	private Subscription createSubscriptionForDBMock(final int i, final String eventType, final String subscriberName) {
 		
@@ -1942,18 +1961,6 @@ public class EventHandlerDBServiceTest {
 		return subscription;
 	}
 
-	//-------------------------------------------------------------------------------------------------	
-	private EventTypeResponseDTO createEventTypeResponseDTO( final String eventType ) {
-		
-		final EventType eventTypeFromDB = new EventType( eventType );
-		eventTypeFromDB.setId( 1L );
-		eventTypeFromDB.setCreatedAt( ZonedDateTime.now() );
-		eventTypeFromDB.setUpdatedAt( ZonedDateTime.now() );
-		
-		return DTOConverter.convertEventTypeToEventTypeResponseDTO( eventTypeFromDB );
-		
-	}
-	
 	//-------------------------------------------------------------------------------------------------	
 	private EventType createEventTypeForDBMock( final String eventType ) {
 		
@@ -1978,49 +1985,6 @@ public class EventHandlerDBServiceTest {
 				null, //endDate, 
 				null); //sources)
 	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestWithNullMetaDataDTOForTest() {
-		
-		return new SubscriptionRequestDTO(
-				"eventType", 
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				null, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
-	}
-
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestDTOWithNullEventTypeForTest() {
-		
-		return new SubscriptionRequestDTO(
-				null, //EventType
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestDTOWithEmptyEventTypeForTest() {
-		
-		return new SubscriptionRequestDTO(
-				"   ", //EventType
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
-	}
-
 	//-------------------------------------------------------------------------------------------------	
 	private SystemRequestDTO getSystemRequestDTO() {
 		
@@ -2055,7 +2019,7 @@ public class EventHandlerDBServiceTest {
 	//-------------------------------------------------------------------------------------------------	
 	private Set<SystemResponseDTO> getSystemResponseDTOSet( final int size ) {
 		
-		final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet();
+		final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet<>();
 		for (int i = 0; i < size; i++) {
 			
 			systemResponseDTOSet.add( getSystemResponseDTO( "systemName" + i));
@@ -2074,88 +2038,6 @@ public class EventHandlerDBServiceTest {
 				null, //metaData, 
 				"payload", 
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusSeconds(1)));
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private EventPublishRequestDTO getSubscriberAuthorizationUpdateEventPublishRequestDTOForTest() {
-		
-		return new EventPublishRequestDTO(
-				CoreCommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE, 
-				getSystemRequestDTO(), //source, 
-				null, //metaData, 
-				"1", 
-				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusSeconds(1)));
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSet(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			subscriptionSet.add( createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i));
-			
-		}
-		
-		return subscriptionSet;
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSetWithStartDateInPast(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			final Subscription subscription = createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i);
-			subscription.setStartDate( ZonedDateTime.now().minusMinutes( 5 ) );
-			
-			subscriptionSet.add( subscription );
-			
-		}
-		
-		final Subscription subscription = createSubscriptionForDBMock( size + 1,  "eventType" + size , "subscriberName" + size);
-		subscription.setStartDate( ZonedDateTime.now() );
-		subscriptionSet.add( subscription );
-		
-		return subscriptionSet;
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSetWithEndDateInPast(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			final Subscription subscription = createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i);
-			subscription.setEndDate( ZonedDateTime.now().minusMinutes( 5 ) );
-			
-			subscriptionSet.add( subscription );
-			
-		}
-		
-		final Subscription subscription = createSubscriptionForDBMock( size + 1,  "eventType" + size , "subscriberName" + size );
-		subscription.setEndDate( ZonedDateTime.now() );
-		
-		subscriptionSet.add( subscription );
-		
-		return subscriptionSet;
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSetWithMatchMetaData(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			final Subscription subscription = createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i);
-			subscription.setMatchMetaData( true );
-			subscription.setFilterMetaData( Utilities.map2Text( Map.of("1", "a")) );
-			
-			subscriptionSet.add( subscription );
-			
-		}
-		
-		return subscriptionSet;
 	}
 
 }
