@@ -1,4 +1,4 @@
-package eu.arrowhead.core.eventhandler.service;
+package eu.arrowhead.core.eventhandler.publish;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

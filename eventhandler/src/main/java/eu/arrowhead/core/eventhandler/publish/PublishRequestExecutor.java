@@ -1,4 +1,4 @@
-package eu.arrowhead.core.eventhandler.service;
+package eu.arrowhead.core.eventhandler.publish;
 
 import java.time.ZonedDateTime;
 import java.util.Set;
