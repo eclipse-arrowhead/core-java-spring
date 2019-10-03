@@ -1436,7 +1436,7 @@ __Service Definition__ is the input
 | ----- | ----------- | --------- |
 | `serviceDefinition` | Service Definition | yes |
 
-Returns a _Service Definition__   
+Returns a __Service Definition__ 
 
 ```json
 {
