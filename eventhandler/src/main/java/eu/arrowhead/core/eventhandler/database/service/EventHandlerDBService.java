@@ -382,6 +382,11 @@ public class EventHandlerDBService {
 	public void removeSubscriptionEntries( final List<Subscription> toBeRemoved ) {
 		logger.debug( "removeSubscriptionEntries started..." );
 		
+		if ( toBeRemoved == null || toBeRemoved.isEmpty()) {
+			
+			return;
+		}
+		
 		try {
 			
 			subscriptionRepository.deleteInBatch( toBeRemoved );
