@@ -16,9 +16,7 @@
   	</properties>
   
   	<build>
-  	
 		<plugins>
-			
 			<plugin>
     			<groupId>org.springframework.boot</groupId>
     			<artifactId>spring-boot-maven-plugin</artifactId>
@@ -103,7 +101,7 @@
  			<plugin>
 				<artifactId>jdeb</artifactId>
 				<groupId>org.vafer</groupId>
-				<version>1.7</version>
+				<version>1.8</version>
 				<executions>
 					<execution>
 						<phase>package</phase>

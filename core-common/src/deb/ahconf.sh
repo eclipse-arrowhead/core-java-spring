@@ -229,15 +229,31 @@ ah_cert_trust () {
     fi
 }
 
-ah_db_tables () {
+ah_db_tables_and_user () {
+	mysql_user_name=${1}
+	priv_file_name=${2}
+	db_get arrowhead-core-common/db_host; db_host=$RET || true
+	db_get arrowhead-core-common/mysql_password_system; system_passwd=$RET || true
+	
+	# Generate password (if required)
+	if [ -z "${system_passwd}" ]; then
+		system_passwd="$(openssl rand -base64 12)"
+		db_set arrowhead-core-common/mysql_password_system ${system_passws}
+	fi  
 
-    if mysql -u root -e "SHOW DATABASES" >/dev/null 2>/dev/null; then
-        mysql -u root < create_arrowhead_tables.sql
+    if mysql -u root -h ${db_host} -e "SHOW DATABASES" >/dev/null 2>/dev/null; then
+        mysql -u root -h ${db_host} < /usr/share/arrowhead/conf/create_arrowhead_tables.sql
+		mysql -u root -h ${db_host} <<EOF
+DROP USER IF EXISTS '${mysql_user_name}'@'localhost';
+DROP USER IF EXISTS '${mysql_user_name}'@'%';
+CREATE USER	'${mysql_user_name}'@'localhost' IDENTIFIED BY '${system_passwd}';
+CREATE USER '${mysql_user_name}'@'%' IDENTIFIED BY '${system_passwd}';
+EOF
+		mysql -u root -h ${db_host} < ${priv_file_name}
     else
         db_input critical arrowhead-core-common/mysql_password_root || true
         db_go || true
         db_get arrowhead-core-common/mysql_password_root; AH_MYSQL_ROOT=$RET
-        db_unregister arrowhead-core-common/mysql_password_root
 
         OPT_FILE="$(mktemp -q --tmpdir "arrowhead-core-common.XXXXXX")"
         trap 'rm -f "${OPT_FILE}"' EXIT
@@ -248,6 +264,23 @@ ah_db_tables () {
 password="${AH_MYSQL_ROOT}"
 EOF
 
-        mysql --defaults-extra-file="${OPT_FILE}" -u root < create_arrowhead_tables.sql
+        mysql --defaults-extra-file="${OPT_FILE}" -h ${db_host} -u root < /usr/share/arrowhead/conf/create_arrowhead_tables.sql
+		mysql --defaults-extra-file="${OPT_FILE}" -h ${db_host} -u root <<EOF
+DROP USER IF EXISTS '${mysql_user_name}'@'localhost';
+DROP USER IF EXISTS '${mysql_user_name}'@'%';
+CREATE USER	'${mysql_user_name}'@'localhost' IDENTIFIED BY '${system_passwd}';
+CREATE USER '${mysql_user_name}'@'%' IDENTIFIED BY '${system_passwd}';
+EOF
+		mysql --defaults-extra-file="${OPT_FILE}" -h ${db_host} -u root < /usr/share/arrowhead/conf/${priv_file_name}
     fi
 }
+
+ah_transform_log_file () {
+	log_path=${1}
+	
+	mv ${log_path}/log4j2.xml ${log_path}/log4j2.xml.orig
+	sed -r '\|^.*<Property name=\"LOG_DIR\">|s|(.*)$|<Property name=\"LOG_DIR\">/var/log/arrowhead</Property>|' ${log_path}/log4j2.xml.orig > ${log_path}/log4j2.xml
+	rm ${log_path}/log4j2.xml.orig
+	chown :arrowhead ${log_path}/log4j2.xml
+	chmod 640 ${log_path}/log4j2.xml
+} 

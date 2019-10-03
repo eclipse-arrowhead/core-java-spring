@@ -51,8 +51,18 @@ Description: Password for the MySQL root user. Note that password is stored by d
 Template: arrowhead-core-common/cert_password
 Type: password
 Default:
-Description: Password for the certificates and stores (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: Password for the certificates and stores (Minimum 6 characters, leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
 
 Template: arrowhead-core-common/reconf_warning
 Type: note
 Description: You have to manually reconfigure all Arrowhead systems when changing passwords
+
+Template: arrowhead-core-common/db_host
+Type: string
+Default: 127.0.0.1
+Description: Enter the hostname or IP address of the database server
+
+Template: arrowhead-core-common/mysql_password_system
+Type: password
+Default:
+Description: MySQL password for system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
