@@ -91,7 +91,7 @@ You can migrate your existing database manually. See the [Quick Start Guide](#qu
 
 Major endpoint changes:<br />
 
-### Service Registry:
+### Service Registry Core System:
 
 The following endpoints no longer exist, instead use the ones on the right:
 
@@ -151,13 +151,12 @@ New payload - you can easily map the old fields to the new ones.
  ]
 }
 ```
- <a name="authorization-migration" />
  
-### Authorization:
+### Authorization Core System:
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
  
-### Orchestration:
+### Orchestration Core System:
  Store based orchestration is available for now.
  * __/mgmt/store__ - data structure changed
  
