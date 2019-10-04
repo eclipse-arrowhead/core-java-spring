@@ -41,6 +41,7 @@ public class EventHandlerDriver {
 	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
+	private static final String EMPTY_PARAMETER_ERROR_MESSAGE = " is empty.";
 	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
@@ -203,7 +204,7 @@ public class EventHandlerDriver {
 		}
 		
 		if ( involvedSubscriptions.isEmpty() ) {
-			throw new InvalidParameterException("involvedSubscriptions" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+			throw new InvalidParameterException("involvedSubscriptions" + EMPTY_PARAMETER_ERROR_MESSAGE);
 		}
 		
 	}
