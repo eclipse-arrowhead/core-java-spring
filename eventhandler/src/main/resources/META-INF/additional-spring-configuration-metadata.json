@@ -38,5 +38,10 @@
     "name": "core_system_name",
     "type": "java.lang.String",
     "description": "A description for 'core_system_name'"
+  },
+  {
+    "name": "event_handler_max_express_subscribers",
+    "type": "java.lang.Integer",
+    "description": "A description for 'event_handler_max_express_subscribers'"
   }
 ]}

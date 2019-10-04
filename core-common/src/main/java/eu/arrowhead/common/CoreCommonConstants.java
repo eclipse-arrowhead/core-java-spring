@@ -137,7 +137,9 @@ public class CoreCommonConstants {
 	public static final String EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE = "SUBSCRIBER_AUTH_UPDATE";	
 	public static final String EVENT_PUBLISHING_QUEUE = "eventPublishingQueue";
 	public static final String EVENT_PUBLISHING_QUEUE_WATCHER_TASK = "eventPublishingQueueWatcherTask";
-
+	public static final String EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = "event_handler_max_express_subscribers";
+	public static final String $EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD = "${" + EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + "}";
+	public static final String EVENT_PUBLISHING_EXPRESS_EXECUTOR = "eventPublishingExpressExecutor";
 
 	//=================================================================================================
 	// assistant methods

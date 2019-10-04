@@ -42,6 +42,12 @@ public class PublishingQueueWatcherTask extends Thread {
 	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
 	private long timeStampTolerance;
 	
+	@Value( CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD )
+	private int maxExpressSubscribers;
+	
+	@Resource(name = CoreCommonConstants.EVENT_PUBLISHING_EXPRESS_EXECUTOR)
+	private PublishRequestFixedExecutor expressExecutor;
+	
 	@Autowired
 	private HttpService httpService;
 	
@@ -94,9 +100,15 @@ public class PublishingQueueWatcherTask extends Thread {
 		final EventPublishRequestDTO request = eventPublishStartDTO.getRequest();
 		final Set<Subscription> involvedSubscriptions = eventPublishStartDTO.getInvolvedSubscriptions();
 		
-		final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);
+		if ( involvedSubscriptions.size() < maxExpressSubscribers ) {
+			
+			expressExecutor.execute( request, involvedSubscriptions );
 		
-		publishRequestExecutor.execute();
+		}else { 
+			
+			final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);			
+			publishRequestExecutor.execute();
+		}
 		
 	}
 

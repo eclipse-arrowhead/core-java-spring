@@ -6,24 +6,32 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 
-public class PublishRequestExecutor {
+public class PublishRequestFixedExecutor {
 	//=================================================================================================
 	// members
 	
+	@Value( CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD )
+	private int maxExpressSubscribers;
+	
 	private static final int MAX_THREAD_POOL_SIZE = 20;
 
-	private final ThreadPoolExecutor threadPool;
-	private final EventPublishRequestDTO publishRequestDTO;
-	private final Set<Subscription> involvedSubscriptions;
-	private final HttpService httpService;
+	private  ThreadPoolExecutor threadPool;
+	
+	@Autowired
+	private HttpService httpService;
 	
 	private final Logger logger = LogManager.getLogger(PublishRequestExecutor.class);
 	
@@ -31,31 +39,33 @@ public class PublishRequestExecutor {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public PublishRequestExecutor(final EventPublishRequestDTO publishRequestDTO, 
-								  final Set<Subscription> involvedSubscriptions,
-								  final HttpService httpService) {
+	
+	@PostConstruct
+	public void init() {
+		logger.debug("PublishRequestFixedExecutor.init started...");
 		
-		this.publishRequestDTO = publishRequestDTO;
-		this.involvedSubscriptions = involvedSubscriptions;
-		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(
-				this.involvedSubscriptions.size() > MAX_THREAD_POOL_SIZE ? 
-						MAX_THREAD_POOL_SIZE : this.involvedSubscriptions.size());
-		this.httpService = httpService;
+		if ( threadPool == null ) {
+			
+			threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool( maxExpressSubscribers > MAX_THREAD_POOL_SIZE ? 
+					MAX_THREAD_POOL_SIZE : maxExpressSubscribers );
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public void execute(
 			  final EventPublishRequestDTO publishRequestDTO, 
-			  final Set<Subscription> involvedSubscriptions,
-			  final HttpService httpService) {
-		logger.debug("PublishRequestExecutor.execute started...");
-		validateMembers();
+			  final Set<Subscription> involvedSubscriptions ) {
+		logger.debug("PublishRequestFixedExecutor.execute started...");
 		
 		for ( final Subscription subscription : involvedSubscriptions ) {			
 			try {
 
+				validateSubscription( subscription );
+				
 				threadPool.execute(new PublishEventTask(subscription, publishRequestDTO, httpService));
+			
 			} catch (final RejectedExecutionException ex) {
+				
 				logger.error("PublishEventTask execution rejected at {}", ZonedDateTime.now());
 				
 			}
@@ -63,24 +73,7 @@ public class PublishRequestExecutor {
 		
 		threadPool.shutdown();
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public void execute() {
-		logger.debug("PublishRequestExecutor.execute started...");
-		validateMembers();
-		
-		for ( final Subscription subscription : involvedSubscriptions ) {			
-			try {
 
-				threadPool.execute(new PublishEventTask(subscription, publishRequestDTO, httpService));
-			} catch (final RejectedExecutionException ex) {
-				logger.error("PublishEventTask execution rejected at {}", ZonedDateTime.now());
-				
-			}
-		}
-		
-		threadPool.shutdown();
-	}
 	//-------------------------------------------------------------------------------------------------
 	public void shutdownExecutionNow() {
 		threadPool.shutdownNow();
@@ -90,10 +83,13 @@ public class PublishRequestExecutor {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private void validateMembers() {
-		Assert.notNull(this.threadPool, "threadPool is null");
-		Assert.notNull(this.publishRequestDTO, "publishRequestDTO is null");
-		Assert.notNull(this.involvedSubscriptions, "involvedSubscriptions is null");
-		Assert.notNull(this.httpService, "httpService is null");
+	private void validateSubscription( final Subscription subscription) {
+		logger.debug("PublishRequestFixedExecutor.validateSubscription started...");
+		
+		Assert.notNull( subscription, "subscription is null");
+		Assert.notNull( subscription.getNotifyUri(), "subscription is null");
+		Assert.notNull( subscription.getSubscriberSystem(), "subscription.SubscriberSystem is null");
+		Assert.notNull( subscription.getSubscriberSystem().getSystemName(), "subscriptionsubscription.SubscriberSystem.SystemName is null");
+		Assert.notNull( subscription.getSubscriberSystem().getAddress(), "subscriptionsubscription.SubscriberSystem.Address is null");		
 	}
 }

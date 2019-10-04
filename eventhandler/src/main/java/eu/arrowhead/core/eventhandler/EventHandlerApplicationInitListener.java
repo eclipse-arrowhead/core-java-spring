@@ -1,26 +1,22 @@
 package eu.arrowhead.core.eventhandler;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.ApplicationInitListener;
-import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.internal.EventPublishStartDTO;
-import eu.arrowhead.core.eventhandler.metadatafiltering.DefaultMetadataFilter;
-import eu.arrowhead.core.eventhandler.metadatafiltering.MetadataFilteringAlgorithm;
-import eu.arrowhead.core.eventhandler.publish.PublishingQueue;
-import eu.arrowhead.core.eventhandler.publish.PublishingQueueWatcherTask;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.core.eventhandler.metadatafiltering.DefaultMetadataFilter;
+import eu.arrowhead.core.eventhandler.metadatafiltering.MetadataFilteringAlgorithm;
+import eu.arrowhead.core.eventhandler.publish.PublishRequestFixedExecutor;
+import eu.arrowhead.core.eventhandler.publish.PublishingQueue;
+import eu.arrowhead.core.eventhandler.publish.PublishingQueueWatcherTask;
 
 @Component
 public class EventHandlerApplicationInitListener extends ApplicationInitListener {
@@ -51,6 +47,12 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	@Bean( CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK)
 	public PublishingQueueWatcherTask getPublishingQueueWatcherTask() {
 		return new PublishingQueueWatcherTask();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean( CoreCommonConstants.EVENT_PUBLISHING_EXPRESS_EXECUTOR)
+	public PublishRequestFixedExecutor getPublishingExpressExecutor() {
+		return new PublishRequestFixedExecutor();
 	}
 	
 	//=================================================================================================
