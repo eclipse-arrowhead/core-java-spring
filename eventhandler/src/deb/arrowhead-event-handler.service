@@ -4,7 +4,7 @@ After=network.target mysql.target
 
 [Service]
 WorkingDirectory=/etc/arrowhead/systems/event_handler
-ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/event_handler/log4j2.xml -jar /usr/share/arrowhead/authorization/arrowhead-eventhandler.jar 
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=file:/etc/arrowhead/systems/event_handler/log4j2.xml -jar /usr/share/arrowhead/event_handler/arrowhead-eventhandler.jar 
 TimeoutStopSec=5
 Type=simple
 User=arrowhead
