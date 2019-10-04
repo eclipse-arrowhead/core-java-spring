@@ -51,28 +51,27 @@ public class PublishingQueueWatcherTask extends Thread {
 	//-------------------------------------------------------------------------------------------------	
 	@Override
 	public void run() {
-		try {
-			logger.debug("PublishingQueueWatcherTask.run started...");
+		logger.debug("PublishingQueueWatcherTask.run started...");
+		
+		interrupted = Thread.currentThread().isInterrupted();
+		
+		while ( !interrupted ) {
 			
-			interrupted = Thread.currentThread().isInterrupted();
-			
-			while ( !interrupted ) {
+			try {
 				
-				try {
-					
-					publishEventFromQueue();
-					
-				} catch ( final InterruptedException ex ) {
-					
-					interrupted = true;
-				}
+				publishEventFromQueue();
 				
-			}		
-	
-		} catch (final Throwable ex) {			
+			} catch ( final InterruptedException ex ) {
+				
+				interrupted = true;
 			
-			logger.debug("Exception:", ex.getMessage());			
-		}
+			} catch ( final Throwable ex) {
+				
+				logger.debug( ex.getMessage() );
+			}
+			
+		}		
+
 	}
 
 	//-------------------------------------------------------------------------------------------------	
