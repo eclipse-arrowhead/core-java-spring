@@ -30,7 +30,7 @@
          	<Column name="message" pattern="%m" />
          	<Column name="exception" pattern="%throwable " />
 			<ThresholdFilter level="${JDBC_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
-      </JDBC>
+      	</JDBC>
     </Appenders>
     <Loggers>
 		<Root level="WARN">
