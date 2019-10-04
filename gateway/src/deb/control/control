@@ -1,0 +1,10 @@
+Package: arrowhead-gateway
+Version: [[version]]
+Section: contrib/java
+Priority: optional
+Architecture: all
+Maintainer: Rajmund Bocsi <rbocsi@aitia.ai>
+Homepage: http://www.arrowhead.eu
+Description: Arrowhead Gateway System
+Distribution: development
+Depends: java-runtime-headless, virtual-mysql-server, arrowhead-core-common
