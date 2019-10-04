@@ -1,13 +1,11 @@
 package eu.arrowhead.core.eventhandler.service;
 
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,11 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
-
-import org.junit.Test;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -46,20 +42,12 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.internal.EventPublishStartDTO;
-import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
-import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.shared.EventTypeResponseDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
-import eu.arrowhead.core.eventhandler.metadatafiltering.MetadataFilteringAlgorithm;
 import eu.arrowhead.core.eventhandler.publish.PublishingQueue;
 
 @RunWith(SpringRunner.class)
@@ -305,6 +293,837 @@ public class EventHandlerDriverTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterRequestNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = null;
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "EventPublishRequestDTO is null." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterEventTypeNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setEventType( null );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "EventType is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterEventTypeEmpty() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setEventType( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "EventType is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterPayloadNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setPayload( null );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "Payload is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterPayloadEmpty() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setPayload( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "Payload is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterTimeStampNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( null );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "TimeStamp is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterTimeStampEmpty() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "TimeStamp is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterTimeStampWrongFormat() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "2019_02_04 12:12:12" );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "TimeStamp is not valid." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterTimeStampInFuture() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "3019-09-27 09:40:34" );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "TimeStamp is further in the future than the tolerated time difference" ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterTimeStampInPast() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "1019-09-27 09:40:34" );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "TimeStamp is further in the past than the tolerated time difference" ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterSourceNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( null );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "System is null." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterSourceSystemNameNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
+		systemRequestDTO.setSystemName( null );
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( systemRequestDTO );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "System name is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterSourceSystemNameEmpty() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
+		systemRequestDTO.setSystemName( "  " );
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( systemRequestDTO );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "System name is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterSourceSystemAddressNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
+		systemRequestDTO.setAddress( null );
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( systemRequestDTO );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "System address is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterSourceSystemAddressEmpty() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
+		systemRequestDTO.setAddress( "  " );
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( systemRequestDTO );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "System address is null or blank." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterSourceSystemPortNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
+		systemRequestDTO.setPort( null );
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( systemRequestDTO );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "System port is null." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterSourceSystemPortLessThenOne() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
+		systemRequestDTO.setPort( 0 );
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( systemRequestDTO );
+		
+		final Set<Subscription> involvedSubscriptions = Set.of( createSubscriptionForDBMock( 1, "eventType", "subscriberName" ));
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "System port is less than one." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterInvolvedSubscriptionsNull() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		
+		final Set<Subscription> involvedSubscriptions = null;
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "involvedSubscriptions is null." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testPublishEventInalidParameterInvolvedSubscriptionsEmpty() {
+		
+		ReflectionTestUtils.setField( eventHandlerDriver, "timeStampTolerance", 120);
+		ReflectionTestUtils.setField( eventHandlerDriver, "httpService", httpService);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		
+		final Set<Subscription> involvedSubscriptions = Set.of();
+
+		try {
+			
+			doNothing().when( publishingQueue ).put( any() );
+		
+		} catch (InterruptedException e1) {
+			
+			assertTrue( false );
+		}
+		
+		try {
+		
+		eventHandlerDriver.publishEvent( request, involvedSubscriptions );
+
+		} catch (Exception ex) {
+			
+			assertTrue( ex.getMessage().contains( "involvedSubscriptions is empty." ) );
+			
+			try {
+				
+				verify( publishingQueue, times( 0 ) ).put( any() );
+			
+			} catch (InterruptedException e) {
+				
+				assertTrue( false );
+			}
+			
+			throw ex;
+		}
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPublishEventInterruptedExceptionOk() {
 		
@@ -407,36 +1226,6 @@ public class EventHandlerDriverTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionListResponseDTO createSubscriptionListResponseForDBMock( final int resultSize ) {
-		
-		final List<SubscriptionResponseDTO> data = new ArrayList<>( resultSize );
-		for (int i = 0; i < resultSize; i++) {
-			
-			data.add( createSubscriptionResponseForDBMock( "eventType" + i, "subscriber" + i ) );
-			
-		}
-		
-		return new SubscriptionListResponseDTO(data, resultSize);
-		
-	}
-
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionResponseDTO createSubscriptionResponseForDBMock( ) {
-		
-		final SubscriptionResponseDTO response = createSubscriptionResponseForDBMock( "testEventType", "testSubscriberSystemName");
-		response.setSources(Set.of());
-		
-		return response;
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionResponseDTO createSubscriptionResponseForDBMock( final String eventType, final String subscriberName ) {
-		
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( createSubscriptionForDBMock(1, eventType, subscriberName ));
-	}
-
-	//-------------------------------------------------------------------------------------------------	
 	private Subscription createSubscriptionForDBMock(final int i, final String eventType, final String subscriberName) {
 		
 		final Subscription subscription = new Subscription(
@@ -457,18 +1246,6 @@ public class EventHandlerDriverTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	private EventTypeResponseDTO createEventTypeResponseDTO( final String eventType ) {
-		
-		final EventType eventTypeFromDB = new EventType( eventType );
-		eventTypeFromDB.setId( 1L );
-		eventTypeFromDB.setCreatedAt( ZonedDateTime.now() );
-		eventTypeFromDB.setUpdatedAt( ZonedDateTime.now() );
-		
-		return DTOConverter.convertEventTypeToEventTypeResponseDTO( eventTypeFromDB );
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
 	private EventType createEventTypeForDBMock( final String eventType ) {
 		
 		final EventType eventTypeFromDB = new EventType( eventType );
@@ -477,62 +1254,6 @@ public class EventHandlerDriverTest {
 		eventTypeFromDB.setUpdatedAt( ZonedDateTime.now() );
 		
 		return  eventTypeFromDB ;		
-	}
-
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestDTOForTest() {
-		
-		return new SubscriptionRequestDTO(
-				"eventType", 
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestWithNullMetaDataDTOForTest() {
-		
-		return new SubscriptionRequestDTO(
-				"eventType", 
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				null, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
-	}
-
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestDTOWithNullEventTypeForTest() {
-		
-		return new SubscriptionRequestDTO(
-				null, //EventType
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestDTOWithEmptyEventTypeForTest() {
-		
-		return new SubscriptionRequestDTO(
-				"   ", //EventType
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -569,7 +1290,7 @@ public class EventHandlerDriverTest {
 	//-------------------------------------------------------------------------------------------------	
 	private Set<SystemResponseDTO> getSystemResponseDTOSet( final int size ) {
 		
-		final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet();
+		final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet<>();
 		for (int i = 0; i < size; i++) {
 			
 			systemResponseDTOSet.add( getSystemResponseDTO( "systemName" + i));
@@ -588,88 +1309,6 @@ public class EventHandlerDriverTest {
 				null, //metaData, 
 				"payload", 
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusSeconds(1)));
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private EventPublishRequestDTO getSubscriberAuthorizationUpdateEventPublishRequestDTOForTest() {
-		
-		return new EventPublishRequestDTO(
-				CoreCommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE, 
-				getSystemRequestDTO(), //source, 
-				null, //metaData, 
-				"1", 
-				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusSeconds(1)));
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSet(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			subscriptionSet.add( createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i));
-			
-		}
-		
-		return subscriptionSet;
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSetWithStartDateInPast(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			final Subscription subscription = createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i);
-			subscription.setStartDate( ZonedDateTime.now().minusMinutes( 5 ) );
-			
-			subscriptionSet.add( subscription );
-			
-		}
-		
-		final Subscription subscription = createSubscriptionForDBMock( size + 1,  "eventType" + size , "subscriberName" + size);
-		subscription.setStartDate( ZonedDateTime.now() );
-		subscriptionSet.add( subscription );
-		
-		return subscriptionSet;
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSetWithEndDateInPast(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			final Subscription subscription = createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i);
-			subscription.setEndDate( ZonedDateTime.now().minusMinutes( 5 ) );
-			
-			subscriptionSet.add( subscription );
-			
-		}
-		
-		final Subscription subscription = createSubscriptionForDBMock( size + 1,  "eventType" + size , "subscriberName" + size );
-		subscription.setEndDate( ZonedDateTime.now() );
-		
-		subscriptionSet.add( subscription );
-		
-		return subscriptionSet;
-	}
-	
-	//-------------------------------------------------------------------------------------------------		
-	private Set<Subscription> getSubscriptionSetWithMatchMetaData(final int size) {
-		
-		final Set<Subscription> subscriptionSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			final Subscription subscription = createSubscriptionForDBMock( i + 1,  "eventType" + i , "subscriberName" + i);
-			subscription.setMatchMetaData( true );
-			subscription.setFilterMetaData( Utilities.map2Text( Map.of("1", "a")) );
-			
-			subscriptionSet.add( subscription );
-			
-		}
-		
-		return subscriptionSet;
 	}
 	
 }
