@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for arrowhead-authorization
+# postinst script for arrowhead-gatekeeper
 #
 # see: dh_installdeb(1)
 
@@ -7,8 +7,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="authorization"
-PKG_NAME="arrowhead-authorization"
+SYSTEM_NAME="gatekeeper"
+PKG_NAME="arrowhead-gatekeeper"
 
 # summary of how this script can be called:
 #        * <postinst> `configure' <most-recently-configured-version>
