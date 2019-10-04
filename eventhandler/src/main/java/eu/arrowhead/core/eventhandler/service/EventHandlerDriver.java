@@ -1,6 +1,5 @@
 package eu.arrowhead.core.eventhandler.service;
 
-import java.security.InvalidParameterException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
@@ -30,6 +29,7 @@ import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.eventhandler.publish.PublishingQueue;
 
