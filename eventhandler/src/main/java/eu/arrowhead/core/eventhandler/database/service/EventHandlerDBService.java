@@ -404,12 +404,12 @@ public class EventHandlerDBService {
 	//-------------------------------------------------------------------------------------------------
 	private Subscription validateSubscriptionRequestDTO( final SubscriptionRequestDTO request ) {
 		logger.debug("validatesubscriptionRequestDTO started ...");
-		
-		if (request == null) {
+
+		if ( request == null ) {
 			
 			throw new InvalidParameterException("SubscriptionRequestDTO" + NULL_ERROR_MESSAGE);
 		}
-		
+
 		final System validSubscriberSystem = validateSystemRequestDTO( request.getSubscriberSystem() );
 		final EventType validEventType = validateEventType( request.getEventType() );
 		final String validNotifyUri = validateNotifyUri( request.getNotifyUri() );
@@ -503,7 +503,7 @@ public class EventHandlerDBService {
 	private System validateSystemRequestDTO(final SystemRequestDTO systemRequestDTO) {
 		logger.debug("validateSystemRequestDTO started...");
 
-		if (systemRequestDTO == null) {
+		if ( systemRequestDTO == null) {
 			throw new InvalidParameterException("SystemRequestDTO" + NULL_ERROR_MESSAGE);
 		}
 		
@@ -571,7 +571,6 @@ public class EventHandlerDBService {
 	//-------------------------------------------------------------------------------------------------
 	private EventType validateEventTypeIsInDB(final String eventType) {
 		logger.debug("validateEventTypeIsInDB started...");
-		
 		
 		if ( Utilities.isEmpty( eventType )) {
 			throw new InvalidParameterException("EventType" + EMPTY_OR_NULL_ERROR_MESSAGE);			
