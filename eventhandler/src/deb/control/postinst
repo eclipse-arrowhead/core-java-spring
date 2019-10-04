@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for arrowhead-authorization
+# postinst script for arrowhead-event-handler
 #
 # see: dh_installdeb(1)
 
@@ -7,8 +7,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="authorization"
-PKG_NAME="arrowhead-authorization"
+SYSTEM_NAME="event_handler"
+PKG_NAME="arrowhead-event-handler"
 
 # summary of how this script can be called:
 #        * <postinst> `configure' <most-recently-configured-version>
