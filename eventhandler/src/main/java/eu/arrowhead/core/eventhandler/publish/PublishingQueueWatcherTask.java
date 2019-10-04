@@ -76,7 +76,9 @@ public class PublishingQueueWatcherTask extends Thread {
 				logger.debug( ex.getMessage() );
 			}
 			
-		}		
+		}
+		
+		expressExecutor.shutdownExecutionNow();
 
 	}
 
