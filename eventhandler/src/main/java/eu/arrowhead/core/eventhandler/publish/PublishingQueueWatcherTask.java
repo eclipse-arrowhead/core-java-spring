@@ -1,8 +1,8 @@
-package eu.arrowhead.core.eventhandler.service;
+package eu.arrowhead.core.eventhandler.publish;
 
+import java.security.InvalidParameterException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -11,51 +11,30 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
-import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckRequestDTO;
-import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.EventPublishStartDTO;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.eventhandler.publish.PublishingQueue;
 
-@Component
-public class EventHandlerDriver {	
+public class PublishingQueueWatcherTask extends Thread {
 
 	//=================================================================================================
 	// members
 	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-	private static final String EMPTY_PARAMETER_ERROR_MESSAGE = " is empty.";
 	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE = " is less than one.";
 	
-	private static final String AUTH_SUBSCRIPTION_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private boolean interrupted = false;
 	
-	private static final Logger logger = LogManager.getLogger(EventHandlerDriver.class);
-	
-	@Autowired
-	private HttpService httpService;
-
-	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	private Map<String,Object> arrowheadContext;
+	private final Logger logger = LogManager.getLogger(PublishingQueueWatcherTask.class);
 	
 	@Resource(name = CoreCommonConstants.EVENT_PUBLISHING_QUEUE)
 	private PublishingQueue publishingQueue;
@@ -63,59 +42,91 @@ public class EventHandlerDriver {
 	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
 	private long timeStampTolerance;
 	
+	@Value( CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD )
+	private int maxExpressSubscribers;
+	
+	@Resource(name = CoreCommonConstants.EVENT_PUBLISHING_EXPRESS_EXECUTOR)
+	private PublishRequestFixedExecutor expressExecutor;
+	
+	@Autowired
+	private HttpService httpService;
+	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-	public Set<SystemResponseDTO> getAuthorizedPublishers(final SystemRequestDTO subscriberSystem) {
-		logger.debug("getAuthorizedPublishers started...");
+	@Override
+	public void run() {
+		logger.debug("PublishingQueueWatcherTask.run started...");
 		
-		Assert.notNull(subscriberSystem, "subscriberSystem is null.");
+		interrupted = Thread.currentThread().isInterrupted();
 		
-		final UriComponents checkUri = getAuthSubscriptionCheckUri();
-		final AuthorizationSubscriptionCheckRequestDTO payload = new AuthorizationSubscriptionCheckRequestDTO(subscriberSystem, null);
-		final ResponseEntity<AuthorizationSubscriptionCheckResponseDTO> response = httpService.sendRequest(checkUri, HttpMethod.POST, AuthorizationSubscriptionCheckResponseDTO.class, payload);		
-		
-		return response.getBody().getPublishers();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	public void publishEvent(final EventPublishRequestDTO request, final Set<Subscription> involvedSubscriptions) {
-		logger.debug("publishEvent started...");
-		
-		checkPublishRequestDTO( request );
-		checkInvolvedSubscriptions( involvedSubscriptions );
-		
-		final EventPublishStartDTO eventPublishStartDTO = new EventPublishStartDTO( request, involvedSubscriptions );
-		
-		try {
+		while ( !interrupted ) {
 			
-			publishingQueue.put( eventPublishStartDTO );
+			try {
+				
+				publishEventFromQueue();
+				
+			} catch ( final InterruptedException ex ) {
+				
+				interrupted = true;
 			
-		} catch (final Exception ex) {
+			} catch ( final Throwable ex) {
+				
+				logger.debug( ex.getMessage() );
+			}
 			
-			logger.debug("publishEvent finished with exception : " + ex);
 		}
+		
+		expressExecutor.shutdownExecutionNow();
+
+	}
+
+	//-------------------------------------------------------------------------------------------------	
+	public void destroy() {
+		logger.debug("PublishingQueueWatcherTask.destroy started...");
+		
+		interrupted = true;
 	}
 	
 	//=================================================================================================
-	// assistant methods
-	
-	//-------------------------------------------------------------------------------------------------
-	private UriComponents getAuthSubscriptionCheckUri() {
-		logger.debug("getAuthSubscriptionCheckUri started...");
+	//Assistant methods
+
+	//-------------------------------------------------------------------------------------------------	
+	private void publishEventFromQueue() throws InterruptedException {
+		logger.debug("PublishingQueueWatcherTask.publishEventFromQueue started...");
 		
-		if (arrowheadContext.containsKey(AUTH_SUBSCRIPTION_CHECK_URI_KEY)) {
-			try {
-				return (UriComponents) arrowheadContext.get(AUTH_SUBSCRIPTION_CHECK_URI_KEY);
-			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
-			}
+		final EventPublishStartDTO eventPublishStartDTO = publishingQueue.take();
+		validateEventPublishStartDTO( eventPublishStartDTO );
+		
+		final EventPublishRequestDTO request = eventPublishStartDTO.getRequest();
+		final Set<Subscription> involvedSubscriptions = eventPublishStartDTO.getInvolvedSubscriptions();
+		
+		if ( involvedSubscriptions.size() < maxExpressSubscribers ) {
+			
+			expressExecutor.execute( request, involvedSubscriptions );
+		
+		}else { 
+			
+			final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);			
+			publishRequestExecutor.execute();
 		}
 		
-		throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
 	}
 
+	//-------------------------------------------------------------------------------------------------	
+	private void validateEventPublishStartDTO(final EventPublishStartDTO eventPublishStartDTO) {
+		logger.debug("PublishingQueueWatcherTask.validateEventPublishStartDTO started...");
+		
+		if ( eventPublishStartDTO == null ) {
+			
+			throw new InvalidParameterException( "EventPublishStartDTO" + NULL_PARAMETER_ERROR_MESSAGE );
+		}
+		
+		checkPublishRequestDTO( eventPublishStartDTO.getRequest() );
+		checkInvolvedSubscriptions( eventPublishStartDTO.getInvolvedSubscriptions() );
+		
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private void checkPublishRequestDTO( final EventPublishRequestDTO request ) {
@@ -204,7 +215,7 @@ public class EventHandlerDriver {
 		}
 		
 		if ( involvedSubscriptions.isEmpty() ) {
-			throw new InvalidParameterException("involvedSubscriptions" + EMPTY_PARAMETER_ERROR_MESSAGE);
+			throw new InvalidParameterException("involvedSubscriptions" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
 	}
