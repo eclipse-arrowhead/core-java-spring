@@ -23,6 +23,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Removed Endpoints](#serviceregistry_removed)
     2. [Authorization](#authorization)
        * [System Design Description Overview](#authorization_sdd)
+       * [Services and Use Cases](#authorization_usecases)
            * [Token Generation](#asd) 
        * [Endpoints](#authorization_endpoints)
  
@@ -1861,5 +1862,41 @@ Removes the System record specified by the ID path parameter.
 
 > **Note:** 4.1.2 version: DELETE /mgmt/systems/{systemId} <br />
             This version did return HTTP 404 (Not Found), when record was not found by ID.
+            
+<a name="authorization" />
+
+# Authorization
+
+<a name="authorization_sdd" />
+
+## System Design Description Overview
+
+This System has:
+* A database that describes which Application System can consume what Services from which Application Systems (Intra-Cloud access rules)
+* A database that describes which other Local Clouds are allowed to consume what Services from this Cloud (Inter-Cloud authorization rules)
+
+The purpose of this System is therefore to:
+* Provide AuthorizationControl Service (both intra- and inter-Cloud)
+* Provide a TokenGeneration Service for allowing session control within the Local Cloud
+
+The purpose of the TokenGeneration functionality is to create session control functionality through the Core Sytems. The output is  [JSON Web Token](https://jwt.io) that validates the Service Consumer system when it will try to access the Service from another Application System (Service Provider). This Token shall be primarily generated during the orchestration process and only released to the Service Consumer when all affected Core Systems are notified and agreed to the to-be-established Service connection. 
+
+This System (in line with all core Systems) utilizes the X.509 certificate Common Name naming convention in order to work. 
+
+<a name="authorization_usecases" />
+
+## Services and Use Cases
+
+This System only provides two Core Services: 
+* AuthorizationControl
+* TokenGeneration
+
+There are two use cases connected to the Authorization System:
+* Check access rights (invoke the AuthorizationControl)
+* Generate an access token (the Orchestrator invokes the TokenGeneration)
+
+![Authorization Cross check](/documentation/images/authorization_crosscheck.png)
+
+           
             
             
