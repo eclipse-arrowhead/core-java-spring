@@ -151,12 +151,13 @@ New payload - you can easily map the old fields to the new ones.
  ]
 }
 ```
+ <a name="authorization-migration" />
  
-### Authorization
+### Authorization:
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
  
-### Orchestration
+### Orchestration:
  Store based orchestration is available for now.
  * __/mgmt/store__ - data structure changed
  
