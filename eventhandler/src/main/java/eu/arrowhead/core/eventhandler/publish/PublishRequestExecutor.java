@@ -44,27 +44,6 @@ public class PublishRequestExecutor {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void execute(
-			  final EventPublishRequestDTO publishRequestDTO, 
-			  final Set<Subscription> involvedSubscriptions,
-			  final HttpService httpService) {
-		logger.debug("PublishRequestExecutor.execute started...");
-		validateMembers();
-		
-		for ( final Subscription subscription : involvedSubscriptions ) {			
-			try {
-
-				threadPool.execute(new PublishEventTask(subscription, publishRequestDTO, httpService));
-			} catch (final RejectedExecutionException ex) {
-				logger.error("PublishEventTask execution rejected at {}", ZonedDateTime.now());
-				
-			}
-		}
-		
-		threadPool.shutdown();
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	public void execute() {
 		logger.debug("PublishRequestExecutor.execute started...");
 		validateMembers();
