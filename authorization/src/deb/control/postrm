@@ -1,5 +1,5 @@
 #!/bin/sh
-# postrm script for arrowhead-serviceregistry
+# postrm script for arrowhead-authorization
 #
 # see: dh_installdeb(1)
 
@@ -7,7 +7,7 @@ set -e
 
 . /usr/share/debconf/confmodule
 
-SYSTEM_NAME="service_registry"
+SYSTEM_NAME="authorization"
 
 # summary of how this script can be called:
 #        * <postrm> `remove'
@@ -34,9 +34,7 @@ case "$1" in
 			${SYSTEM_DIR}/log4j2.xml \
             ${SYSTEM_DIR}/application.properties \
             ${SYSTEM_DIR}/${SYSTEM_NAME}.p12 \
-			${AH_SYSTEMS_DIR}/sysop/sysop.p12
         rmdir ${SYSTEM_DIR} 2>/dev/null || true
-		rmdir ${AH_SYSTEMS_DIR}/sysop 2>/dev/null || true
         db_purge
     ;;
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)

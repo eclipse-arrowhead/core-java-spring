@@ -66,3 +66,7 @@ Template: arrowhead-core-common/mysql_password_system
 Type: password
 Default:
 Description: MySQL password for system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+
+Template: arrowhead-core-common/sr_host
+Type: string
+Description: Enter the hostname or IP address of the Service Registry (leave empty if the SR on the same computer than the system)

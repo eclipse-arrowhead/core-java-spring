@@ -1,5 +1,5 @@
 #!/bin/sh
-# preinst script for arrowhead-serviceregistry
+# preinst script for arrowhead-authorization
 #
 # see: dh_installdeb(1)
 

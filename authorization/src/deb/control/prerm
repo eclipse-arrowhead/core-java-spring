@@ -1,11 +1,11 @@
 #!/bin/sh
-# prerm script for arrowhead-serviceregistry
+# prerm script for arrowhead-authorization
 #
 # see: dh_installdeb(1)
 
 set -e
 
-PKG_NAME="arrowhead-serviceregistry"
+PKG_NAME="arrowhead-authorization"
 
 # summary of how this script can be called:
 #        * <prerm> `remove'
