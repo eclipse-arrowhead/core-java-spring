@@ -71,7 +71,6 @@ public class PublishRequestFixedExecutor {
 			}
 		}
 		
-		threadPool.shutdown();
 	}
 
 	//-------------------------------------------------------------------------------------------------
