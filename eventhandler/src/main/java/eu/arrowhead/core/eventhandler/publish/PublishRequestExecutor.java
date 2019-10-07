@@ -58,7 +58,7 @@ public class PublishRequestExecutor {
 			}
 		}
 		
-		threadPool.shutdown();
+		threadPool.shutdownNow();
 	}
 	//-------------------------------------------------------------------------------------------------
 	public void shutdownExecutionNow() {
@@ -80,7 +80,7 @@ public class PublishRequestExecutor {
 			
 		} catch (final IllegalArgumentException  ex) {
 			
-			threadPool.isShutdown();
+			shutdownExecutionNow();
 			
 			throw ex;
 		}
