@@ -1,14 +1,11 @@
 package eu.arrowhead.core.eventhandler.publish;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -18,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -26,11 +22,9 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.EventPublishStartDTO;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.http.HttpService;
 
 @RunWith(SpringRunner.class)
@@ -58,935 +52,935 @@ public class PublishingQueueWatcherTaskTest {
 	@Test
 	public void testRunExpressExecutorOk() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 1 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 1 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorPublishStartRequestNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishStartDTO publishStartDTO = null;
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishStartDTO publishStartDTO = null;
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = null ;
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = null ;
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestEventTypeNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setEventType( null );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setEventType( null );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestEventTypeEmptyNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setEventType( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setEventType( "   " );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestPayloadNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setPayload( null );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setPayload( null );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestPayloadEmptyNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setPayload( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setPayload( "   " );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestTimeStampNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( null );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setTimeStamp( null );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestTimeStampEmptyNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setTimeStamp( "   " );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestTimeStampInvalidFormatNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "2019_10_07 10:58:00" );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setTimeStamp( "2019_10_07 10:58:00" );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestTimeStampInFutureNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "3019-10-07 10:58:00" );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setTimeStamp( "3019-10-07 10:58:00" );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestTimeStampInPastNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setTimeStamp( "1019-10-07 10:58:00" );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setTimeStamp( "1019-10-07 10:58:00" );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestSourceNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.setSource( null );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.setSource( null );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestSourceSystemNameNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.getSource().setSystemName( null );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.getSource().setSystemName( null );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestSourceSystemNameEmptyNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.getSource().setSystemName( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.getSource().setSystemName( "   " );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestSourceSystemAddressNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.getSource().setAddress( null );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.getSource().setAddress( null );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestSourceSystemAddressEmptyNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.getSource().setAddress( "   " );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.getSource().setAddress( "   " );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestSourceSystemPortNullNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.getSource().setPort( null );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.getSource().setPort( null );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorEventPublishRequestSourceSystemPortLessThanOneNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		request.getSource().setPort( 0 );
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			request.getSource().setPort( 0 );
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 3 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorInvolvedSubscriptionsNullOneNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();		
+		final Set<Subscription> involvedSubscriptions = null;
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();		
-			final Set<Subscription> involvedSubscriptions = null;
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunExpressExecutorInvolvedSubscriptionsEmptyOneNoExecution() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();		
+		final Set<Subscription> involvedSubscriptions = Set.of();
+		
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();		
-			final Set<Subscription> involvedSubscriptions = Set.of();
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testRunPublishRequestExecutorOk() {
 		
-			ReflectionTestUtils.setField( testingObject, "interrupted", false);
-			ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
-			ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
-			ReflectionTestUtils.setField( testingObject, "httpService",  httpService);
+		ReflectionTestUtils.setField( testingObject, "interrupted", false);
+		ReflectionTestUtils.setField( testingObject, "timeStampTolerance", 120 );
+		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
+		ReflectionTestUtils.setField( testingObject, "httpService",  httpService);
+		
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 13 );
+		final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+		
+		try {
+			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
+		
+		} catch (InterruptedException e) {
 			
+			assertTrue( false );
+		}
+		
+		doNothing().when( expressExecutor ).shutdownExecutionNow();
+		
+		testingObject.run();
+		
+		try {
 			
-			final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-			final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( 13 );
-			final EventPublishStartDTO publishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
+			verify( publishingQueue, times( 2 )).take();
+		
+		} catch (InterruptedException e) {
 			
-			try {
-				when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			doNothing().when( expressExecutor ).shutdownExecutionNow();
-			
-			testingObject.run();
-			
-			try {
-				
-				verify( publishingQueue, times( 2 )).take();
-			
-			} catch (InterruptedException e) {
-				
-				assertTrue( false );
-			}
-			
-			verify( expressExecutor, times( 0 )).execute( any(), any() );
-			verify( expressExecutor, times( 1 )).shutdownExecutionNow();
-			
-			final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
-			
-			assertTrue( runInterupted );
+			assertTrue( false );
+		}
+		
+		verify( expressExecutor, times( 0 )).execute( any(), any() );
+		verify( expressExecutor, times( 1 )).shutdownExecutionNow();
+		
+		final Boolean runInterupted = (Boolean) ReflectionTestUtils.getField( testingObject, "interrupted");
+		
+		assertTrue( runInterupted );
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1089,26 +1083,7 @@ public class PublishingQueueWatcherTaskTest {
 		
 		return system;
 	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private SystemResponseDTO getSystemResponseDTO( final String systemName ) {
-		
-		return DTOConverter.convertSystemToSystemResponseDTO(createSystemForDBMock( systemName ));
-	}
-	
-	//-------------------------------------------------------------------------------------------------	
-	private Set<SystemResponseDTO> getSystemResponseDTOSet( final int size ) {
-		
-		final Set<SystemResponseDTO> systemResponseDTOSet = new HashSet<>();
-		for (int i = 0; i < size; i++) {
-			
-			systemResponseDTOSet.add( getSystemResponseDTO( "systemName" + i));
-			
-		}
-		
-		return systemResponseDTOSet;
-	}
-	
+
 	//-------------------------------------------------------------------------------------------------		
 	private EventPublishRequestDTO getEventPublishRequestDTOForTest() {
 		
