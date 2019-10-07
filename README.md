@@ -2726,11 +2726,15 @@ These services can only be used by other core services, therefore they are not p
 
 <a name="orchestrator_endpoints_mgmt" />
 
+### Management Endpoint Description <br />
+
 There endpoints are mainly used by the Management Tool and Cloud Administrators.
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 
 <a name="orchestrator_removed" />
+
+### Removed Endpoints <br />
 
             
