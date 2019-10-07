@@ -92,8 +92,8 @@ CREATE TABLE `service_interface` (
   UNIQUE KEY `interface` (`interface_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `service_interface` (interface_name) VALUES ("HTTP-SECURE-JSON");
-INSERT INTO `service_interface` (interface_name) VALUES ("HTTP-INSECURE-JSON");
+INSERT INTO `service_interface` (interface_name) VALUES ('HTTP-SECURE-JSON');
+INSERT INTO `service_interface` (interface_name) VALUES ('HTTP-INSECURE-JSON');
 
 -- Service Registry
 
@@ -264,8 +264,8 @@ CREATE TABLE `subscription` (
   `match_meta_data` int(1) NOT NULL DEFAULT 0,
   `only_predefined_publishers` int(1) NOT NULL DEFAULT 0,
   `notify_uri` text NOT NULL,
-  `start_date` timestamp ,
-  `end_date` timestamp ,
+  `start_date` timestamp NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -290,44 +290,74 @@ CREATE TABLE `subscription_publisher_connection` (
 
 -- Choreographer
 
-DROP TABLE IF EXISTS `choreographer_plan`;
-CREATE TABLE `choreographer_plan` (
+DROP TABLE IF EXISTS `choreographer_action_plan`;
+CREATE TABLE `choreographer_action_plan` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
+  `action_plan_name` varchar(255) UNIQUE NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `choreographer_action`;
+CREATE TABLE `choreographer_action` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `action_name` varchar(255) UNIQUE NOT NULL,
+  `next_action_id` bigint(20) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `choreographer_action_step`;
+CREATE TABLE `choreographer_action_step` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(255) UNIQUE NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-
-DROP TABLE IF EXISTS `choreographer_plan_step`;
-CREATE TABLE `choreographer_plan_step` (
+DROP TABLE IF EXISTS `choreographer_action_plan_action_connection`;
+CREATE TABLE `choreographer_action_plan_action_connection` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `plan_id` bigint(20) NOT NULL,
+  `action_plan_id` bigint(20) NOT NULL,
+  `action_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `FKaxgcwgyga50fsi9tyupu19xp` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-
-DROP TABLE IF EXISTS `choreographer_plan_step_service`;
-CREATE TABLE `choreographer_plan_step_service` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `plan_step_id` bigint(20) NOT NULL,
-  `service_id` bigint(20) NOT NULL,
-  KEY `FK62jllkni532a5e757u1x7jjnw` (`service_id`),
-  CONSTRAINT `FK62jllkni532a5e757u1x7jjnw` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FKfvq70kdu6sibc1i3acutbnqp2` FOREIGN KEY (`plan_step_id`) REFERENCES `choreographer_plan_step` (`id`) ON DELETE CASCADE
+  CONSTRAINT `action_plan_fk1` FOREIGN KEY (`action_plan_id`) REFERENCES `choreographer_action_plan` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `action_fk1` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `choreographer_next_steps`;
-CREATE TABLE `choreographer_next_steps` (
+DROP TABLE IF EXISTS `choreographer_action_action_step_connection`;
+CREATE TABLE `choreographer_action_action_step_connection` (
   `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `plan_step_id` bigint(20) NOT NULL,
-  `next_step_id` bigint(20) NOT NULL,
-  KEY `FKkc9vycv0onpa957jdey7f7rdm` (`next_step_id`),
-  CONSTRAINT `FK5x0k6luexx1mmtci9iqmangig` FOREIGN KEY (`plan_step_id`) REFERENCES `choreographer_plan_step` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FKkc9vycv0onpa957jdey7f7rdm` FOREIGN KEY (`next_step_id`) REFERENCES `choreographer_plan_step` (`id`) ON DELETE CASCADE
+  `action_id` bigint(20) NOT NULL,
+  `action_step_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `action_fk2` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `action_step_fk1` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `choreographer_action_step_service_definition_connection`;
+CREATE TABLE `choreographer_action_step_service_definition_connection` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `action_step_id` bigint(20) NOT NULL,
+  `service_definition_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `choreographer_next_action_step`;
+CREATE TABLE `choreographer_next_action_step` (
+  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+  `action_step_id` bigint(20) NOT NULL,
+  `next_action_step_id` bigint(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Set up privileges
@@ -439,19 +469,25 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'event_handler'@'%';
 -- Choreographer
 DROP USER IF EXISTS 'choreographer'@'localhost';
 CREATE USER IF NOT EXISTS 'choreographer'@'localhost' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_steps` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step` TO 'choreographer'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step_service` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan_action_connection` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'choreographer'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'localhost';
 
 DROP USER IF EXISTS 'choreographer'@'%';
 CREATE USER IF NOT EXISTS 'choreographer'@'%' IDENTIFIED BY 'Qa5yx4oBp4Y9RLX';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_steps` TO 'choreographer'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan` TO 'choreographer'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step` TO 'choreographer'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_plan_step_service` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan_action_connection` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'choreographer'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'choreographer'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'choreographer'@'%';
 

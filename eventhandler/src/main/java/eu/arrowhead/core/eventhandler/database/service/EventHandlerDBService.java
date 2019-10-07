@@ -43,12 +43,13 @@ public class EventHandlerDBService {
 	// members
 	
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
-	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = "The following sortable field  is not available : ";
+	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field  is not available.";
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String NULL_ERROR_MESSAGE = " is null";
 	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
-	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";;
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
+	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 
 	private static final Logger logger = LogManager.getLogger(EventHandlerDBService.class);
 	
@@ -277,35 +278,28 @@ public class EventHandlerDBService {
 			
 			final Set<SubscriptionPublisherConnection> involvedPublisherSystems = subscriptionPublisherConnectionRepository.findBySubscriptionEntry( subscriptionToUpdate );
 			
-			final EventType eventTypeForUpdate = validateEventType( request.getEventType() );
-			final System subscriberSystemForUpdate = validateSystemRequestDTO( request.getSubscriberSystem() );
-			final String filterMetadataForUpdate = Utilities.map2Text(request.getFilterMetaData());
-			final boolean matchMetaDataForUpdate = request.getMatchMetaData();
-			final String notifyUriForUpdate = validateNotifyUri( request.getNotifyUri() );
-			final boolean onlyPredifindProvidersForUpdate = request.getSources() != null && !request.getSources().isEmpty();
-			final ZonedDateTime startDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
-			final ZonedDateTime endDateForUpdate = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
-
-			if ( originalEventTypeId != eventTypeForUpdate.getId() ||
-					originalSubscriberSystemId != subscriberSystemForUpdate.getId()) {
+			final Subscription subscriptionForUpdate = validateSubscriptionRequestDTO( request );
+			
+			if ( originalEventTypeId != subscriptionForUpdate.getEventType().getId() ||
+					originalSubscriberSystemId != subscriptionForUpdate.getSubscriberSystem().getId()) {
 				
-				checkSubscriptionUniqueConstraintsByEventTypeAndSubscriber(eventTypeForUpdate, subscriberSystemForUpdate);
+				checkSubscriptionUniqueConstraintsByEventTypeAndSubscriber( subscriptionForUpdate.getEventType(), subscriptionForUpdate.getSubscriberSystem());
 			}		
 			
 			subscriptionPublisherConnectionRepository.deleteInBatch( involvedPublisherSystems );
 			subscriptionRepository.refresh( subscriptionToUpdate );		
 			
-			subscriptionToUpdate.setEventType(eventTypeForUpdate);
-			subscriptionToUpdate.setSubscriberSystem(subscriberSystemForUpdate);
-			subscriptionToUpdate.setFilterMetaData(filterMetadataForUpdate);
-			subscriptionToUpdate.setMatchMetaData(matchMetaDataForUpdate);
-			subscriptionToUpdate.setNotifyUri(notifyUriForUpdate);
-			subscriptionToUpdate.setOnlyPredefinedPublishers(onlyPredifindProvidersForUpdate);
-			subscriptionToUpdate.setStartDate(startDateForUpdate);
-			subscriptionToUpdate.setEndDate(endDateForUpdate);
+			subscriptionToUpdate.setEventType( subscriptionForUpdate.getEventType() );
+			subscriptionToUpdate.setSubscriberSystem( subscriptionForUpdate.getSubscriberSystem() );
+			subscriptionToUpdate.setFilterMetaData( subscriptionForUpdate.getFilterMetaData() );
+			subscriptionToUpdate.setMatchMetaData( subscriptionForUpdate.isMatchMetaData() );
+			subscriptionToUpdate.setNotifyUri( subscriptionForUpdate.getNotifyUri() );
+			subscriptionToUpdate.setOnlyPredefinedPublishers( subscriptionForUpdate.isOnlyPredefinedPublishers() );
+			subscriptionToUpdate.setStartDate( subscriptionForUpdate.getStartDate() );
+			subscriptionToUpdate.setEndDate( subscriptionForUpdate.getEndDate() );
 						
 			addAndSaveSubscriptionEntryPublisherConnections(subscriptionToUpdate, request, authorizedPublishers);
-			
+		
 			return subscriptionRepository.saveAndFlush(subscriptionToUpdate);
 					
 		}catch (final Exception ex) {
@@ -339,6 +333,16 @@ public class EventHandlerDBService {
 	public List<Subscription> getInvolvedSubscriptionsBySubscriberSystemId(final Long subscriberSystemId) {
 		logger.debug("getInvolvedSubscriptionsBySubscriberSystemId started ...");
 		
+		if ( subscriberSystemId == null ) {
+			
+			throw new InvalidParameterException("SubscriberSystemId" + NULL_ERROR_MESSAGE);
+		}
+		
+		if ( subscriberSystemId < 1 ) {
+			
+			throw new InvalidParameterException("SubscriberSystemId" + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+		
 		try {
 			
 			final Optional<System> subscriberSystemOptional = systemRepository.findById(subscriberSystemId);
@@ -349,6 +353,10 @@ public class EventHandlerDBService {
 			
 			return subscriptionRepository.findAllBySubscriberSystem( subscriberSystemOptional.get() );
 			
+		} catch (final InvalidParameterException ex) {
+			
+			throw ex;
+		
 		}catch (final Exception ex) {
 			
 			logger.debug(ex.getMessage(), ex);
@@ -373,6 +381,11 @@ public class EventHandlerDBService {
 	@Transactional( rollbackFor = ArrowheadException.class )	
 	public void removeSubscriptionEntries( final List<Subscription> toBeRemoved ) {
 		logger.debug( "removeSubscriptionEntries started..." );
+		
+		if ( toBeRemoved == null || toBeRemoved.isEmpty()) {
+			
+			return;
+		}
 		
 		try {
 			
@@ -408,8 +421,42 @@ public class EventHandlerDBService {
 		subscription.setFilterMetaData( Utilities.map2Text( request.getFilterMetaData() ) );
 		subscription.setOnlyPredefinedPublishers( request.getSources() != null && !request.getSources().isEmpty() );
 		subscription.setMatchMetaData( request.getMatchMetaData() );
-		subscription.setStartDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() ) );
-		subscription.setEndDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() ) );
+		if ( subscription.isMatchMetaData() && ( subscription.getFilterMetaData() == null || subscription.getFilterMetaData().isEmpty() ) ) {
+			
+			throw new InvalidParameterException("If MatchMetaData is true filterMetaData sould not be null or empty");
+		}
+		
+		if ( request.getStartDate() != null ) {
+			
+			try {
+				
+				subscription.setStartDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() ) );
+				
+			} catch (Exception ex) {
+				
+				throw new InvalidParameterException("StartDate" + INVALID_TYPE_ERROR_MESSAGE);
+			}
+			
+		} else {
+			
+			request.setStartDate( null );
+		}
+		
+		if ( request.getEndDate() != null ) {
+			
+			try {
+				
+				subscription.setEndDate( Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() ) );
+				
+			} catch (Exception ex) {
+				
+				throw new InvalidParameterException("EndDate" + INVALID_TYPE_ERROR_MESSAGE);
+			}
+			
+		} else {
+			
+			request.setEndDate( null );
+		}
 		
 		validateDateLimits( subscription );
 		
@@ -456,6 +503,9 @@ public class EventHandlerDBService {
 	private System validateSystemRequestDTO(final SystemRequestDTO systemRequestDTO) {
 		logger.debug("validateSystemRequestDTO started...");
 
+		if ( systemRequestDTO == null) {
+			throw new InvalidParameterException("SystemRequestDTO" + NULL_ERROR_MESSAGE);
+		}
 		
 		if (Utilities.isEmpty(systemRequestDTO.getSystemName())) {
 			throw new InvalidParameterException("System name" + EMPTY_OR_NULL_ERROR_MESSAGE);
@@ -495,6 +545,10 @@ public class EventHandlerDBService {
 	private EventType validateEventType(final String eventType) {
 		logger.debug("validateEventType started...");
 		
+		if ( Utilities.isEmpty( eventType )) {
+			throw new InvalidParameterException("EventType" + EMPTY_OR_NULL_ERROR_MESSAGE);			
+		}
+		
 		try {
 			
 			final String validEventTypeName = eventType.toUpperCase().trim();
@@ -517,6 +571,10 @@ public class EventHandlerDBService {
 	//-------------------------------------------------------------------------------------------------
 	private EventType validateEventTypeIsInDB(final String eventType) {
 		logger.debug("validateEventTypeIsInDB started...");
+		
+		if ( Utilities.isEmpty( eventType )) {
+			throw new InvalidParameterException("EventType" + EMPTY_OR_NULL_ERROR_MESSAGE);			
+		}
 		
 		try {
 			
