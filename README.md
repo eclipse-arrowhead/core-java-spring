@@ -1936,7 +1936,7 @@ The base URL for the requests: `http://<host>:<port>/authorization`
 | [Echo](#authorization_endpoints_get_echo)     | /echo       | GET    | -     | OK     |  
 | [Get Public Key](#authorization_endpoints__get_publickey) | /publickey | GET | - | [Public Key](#datastructures_publickey) |
 
-<a name="authorization_endpoints_private />
+<a name="authorization_endpoints_private" />
 
 ### Private endpoint description <br />
         
@@ -2138,7 +2138,7 @@ POST /authorization/mgmt/intracloud
 
 Creates Intracloud authorization rules and returns the newly created rules.
 
-<a name="datastructures_intracloud_rule"_form />
+<a name="datastructures_intracloud_rule_form" />
 
 __IntracloudRuleForm__ is the input
 
