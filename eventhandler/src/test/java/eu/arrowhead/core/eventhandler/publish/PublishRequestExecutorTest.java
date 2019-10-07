@@ -1,10 +1,10 @@
 package eu.arrowhead.core.eventhandler.publish;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,16 +12,16 @@ import static org.mockito.Mockito.verify;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -43,6 +43,8 @@ public class PublishRequestExecutorTest {
 	
 	private  ThreadPoolExecutor threadPool;
 	
+	private Logger logger;
+	
 	@Mock
 	private HttpService httpService;
 	
@@ -63,6 +65,10 @@ public class PublishRequestExecutorTest {
        
 		threadPool = mock(ThreadPoolExecutor.class, "threadPool");
 		ReflectionTestUtils.setField( testingObject, "threadPool", threadPool);
+		
+		logger = mock(Logger.class);
+		
+		ReflectionTestUtils.setField( testingObject, "logger", logger);
     }
 	
 	//=================================================================================================
@@ -77,8 +83,7 @@ public class PublishRequestExecutorTest {
 		
 		final PublishEventTask publishEventTask = new PublishEventTask( subscription0, request, httpService );
 		
-		final ArgumentCaptor<PublishEventTask> valueCapture = ArgumentCaptor.forClass( PublishEventTask.class);
-		doNothing().when( threadPool ).execute( valueCapture.capture() );
+		doNothing().when( threadPool ).execute( any() );
 		
 		testingObject.execute();
 		
@@ -87,9 +92,41 @@ public class PublishRequestExecutorTest {
 		
 		assertNotNull( subscriptionInTask );
 		
-		verify( threadPool, times( 1 ) ).shutdown();
+		verify( threadPool, times( 1 ) ).shutdownNow();
 	
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteThrowExceptionThenContinuousOk() {
+		
+		final Subscription subscription0 = createSubscriptionForDBMock( 1 , "eventType1", "subscriberName1" );
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+		
+		final PublishEventTask publishEventTask = new PublishEventTask( subscription0, request, httpService );
+		
+		final ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass( String.class);
+		
+		doThrow( RejectedExecutionException.class ).doNothing().when( threadPool ).execute( any() );
+		doNothing().when( logger ).error( valueCapture.capture(), any( ZonedDateTime.class ));
+		
+		testingObject.execute();
+		
+		verify( threadPool, times( numberOfSubscribers ) ).execute( any() );
+		final Subscription subscriptionInTask = (Subscription) ReflectionTestUtils.getField( publishEventTask, "subscription");
+		
+		assertNotNull( subscriptionInTask );
+		
+		verify( threadPool, times( 1 ) ).shutdownNow();
+		verify( logger, times( 1 ) ).error( any( String.class), any( ZonedDateTime.class ));
+		
+		final String logMessage = valueCapture.getValue();
+		
+		assertNotNull( logMessage );
+		assertTrue( "PublishEventTask execution rejected at {}".equalsIgnoreCase( logMessage ) );
+	
+	}
+
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test( expected = IllegalArgumentException.class )
@@ -142,6 +179,34 @@ public class PublishRequestExecutorTest {
 		}
 	
 	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = IllegalArgumentException.class )
+	public void testExecuteInvalidFieldHttpServiceNullCoseNoExecution() {
+		
+		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( numberOfSubscribers );
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+
+		ReflectionTestUtils.setField( testingObject, "publishRequestDTO", request );
+		ReflectionTestUtils.setField( testingObject, "involvedSubscriptions", involvedSubscriptions );
+		ReflectionTestUtils.setField( testingObject, "httpService", null );
+		
+		doNothing().when( threadPool ).execute( any() );
+		
+		try {
+			
+			testingObject.execute();
+			
+		} catch (Exception ex) {
+			
+			verify( threadPool, times( 0 ) ).execute( any() );
+
+			assertTrue( ex.getMessage().contains( "httpService is null" ) );
+		
+			throw ex;
+		}
+	
+	}
 	
 	//=================================================================================================
 	//Assistant methods
