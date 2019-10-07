@@ -11,6 +11,7 @@ db_get arrowhead-core-common/company; AH_COMPANY=$RET
 db_get arrowhead-core-common/country; AH_COUNTRY=$RET
 
 OWN_IP=`ip -o -4  address show  | awk ' NR==2 { gsub(/\/.*/, "", $4); print $4 } '`
+echo $OWN_IP
 
 ah_cert () {
     dst_path=${1}

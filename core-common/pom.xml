@@ -97,6 +97,7 @@
 		                  			<mapper>
 		                    			<type>perm</type>
 		                    			<prefix>/usr/share/arrowhead/conf</prefix>
+		                    			<filemode>755</filemode>
 		                  			</mapper>
 	                			</data>
 	                			
