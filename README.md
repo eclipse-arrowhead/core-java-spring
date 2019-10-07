@@ -24,8 +24,12 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     2. [Authorization](#authorization)
        * [System Design Description Overview](#authorization_sdd)
        * [Services and Use Cases](#authorization_usecases)
-           * [Token Generation](#asd) 
+       * [Service Description Overview](#authorization_service_description_overview)
        * [Endpoints](#authorization_endpoints)
+            * [Client](#authorization_endpoints_client)
+            * [Private](#authorization_endpoints_private)
+            * [Management](#authorization_endpoints_mgmt) 
+            * [Removed Endpoints](#authorization_removed)
  
 <a name="quickstart" />
 
@@ -1896,7 +1900,689 @@ There are two use cases connected to the Authorization System:
 * Generate an access token (the Orchestrator invokes the TokenGeneration)
 
 ![Authorization Cross check](/documentation/images/authorization_crosscheck.png)
+Figure 1. Authorization crosscheck during orchestration process
 
-           
+<a name="authorization_service_description_overview" />
+
+## Service Description Overview
+
+The AuthorizationControl Service provides 2 different interfaces to look up authorization rights:
+* Intra-Cloud authorization: defines an authorization right between a consumer and provider system in the same Local Cloud for a specific Service.
+* Inter-Cloud authorization: defines an authorization right for an external Cloud to consume a specific Service from the Local Cloud.
+
+<a name="authorization_endpoints" />
+
+## Endpoints 
+
+The Authorization offers three types of endpoints. Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/authorization`
+
+<a name="authorization_endpoints_client" />   
+
+### Client endpoint description <br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#authorization_endpoints_get_echo)     | /echo       | GET    | -     | OK     |  
+| [Get Public Key](#authorization_endpoints__get_publickey) | /publickey | GET | - | [Public Key](#datastructures_publickey) |
+
+<a name="authorization_endpoints_private />
+
+### Private endpoint description <br />
+        
+These services can only be used by other core services, therefore they are not part of the public API.        
+        
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |        
+| [Check an Intercloud rule](#authorization_endpoints_post_intercloud_check) | /intercloud/check | POST | [InterCloudRule](#datastructures_intercloudrule) | OK |
+| [Check an Intracloud rule](#authorization_endpoints_post_intracloud_check) | /intracloud/check | POST | [IntraCloudRule](#datastructures_intracloudrule) | OK |
+| [Generate Token](#authoritation_endpoints_post_token) | /token | POST | TokenRule | TokenData |
+
+<a name="authorization_endpoints_mgmt" />
+
+### Management Endpoint Description <br />
+
+There endpoints are mainly used by the Management Tool and Cloud Administrators.
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get all Intracloud rules](#authorization_endpoints_getintracloud) | /mgmt/intracloud | GET | - | [IntracloudRuleList](#datastructures_intracloud_list) |
+| [Add Intercloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
+| [Get an Intercloud rule by ID](#authorization_endpoints_get_intracloud_id) | /mgmt/intracloud/{id} | GET | IntracloudRuleID | [IntracloudRule](#datastructures_intracloud_rule) |
+| [Delete an Intracloud rule by ID](#authorization_endpoints_delete_intracloud_id) | /mgmt/intracloud/{id} | DELETE | IntracloudRuleID | - |
+| [Get all Intercloud rules](#authorization_endpoinds_get_intercloud) | /mgmt/intercloud | GET | - | [IntercloudRuleList](#datastructures_intercloud_list) |
+| [Add Intercloud rules](#authorization_endpoints_post_intercloud) | /mgmt/intercloud | POST | [IntercloudRuleForm](#datastructures_intercloud_rule_form) | IntercloudRule |
+| [Get an Intercloud rule by ID](#authorization_endpoints_get_intercloud_id) | /mgmt/intercloud/{id} | GET | IntercloudRuleID | IntercloudRule |
+| [Delete an Intercloud rule by ID](#authorization_endpoints_delete_intercloud_id) | /mgmt/intercloud/{id} | DELETE | IntercloudRuleID | - |
+
+<a name="authorization_removed" />
+
+### Removed Endpoints <br />
+
+The following services no longer exist:
+* `GET /authorization/mgmt/intracloud/systemId/{systemId}/services`
+* `GET /authorization/mgmt/intracloud/systemId/{systemId}`
+* `GET /authorization/mgmt/intracloud/servicedef/{serviceDefinition}`
+* `PUT /authorization/mgmt/intracloud`
+* `DELETE /authorization/mgmt/intracloud/systemId/{systemId}`
+* `GET /authorization/mgmt/intercloud/operator/{operator}/cloudname/{cloudName}/services`
+* `GET /authorization/mgmt/intercloud/operator/{operator}/cloudname/{cloudName}`
+* `GET /authorization/mgmt/intercloud/servicedef/{serviceDefinition}`
+* `PUT /authorization/mgmt/intercloud`
+* `DELETE /authorization/mgmt/intercloud/operator/{operator}/cloudname/{cloudName}` 
+
+<a name="authorization_endpoinds_get_echo" />
+
+### Echo
+```
+GET /authorization/echo
+```
+            
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+> **Note:** 4.1.2 version: GET /authorization/mgmt
+            It was only available for the system operator of the local cloud.  
+            
+<a name="authorization_endpoints__get_publickey" />
+
+### Get Public Key
+```
+GET /authorization/publickey
+```                      
+
+Returns the public key of the Authorization core service as a (Base64 encoded) text. This service is
+necessary for providers if they want to utilize the token based security.
+
+> **Note:**: 4.1.2 version: GET /authorization/mgmt/publickey
+             It was only available for system operator of the local cloud.
+             
+<a name="authorization_endpoints_post_intercloud_check" />
+
+### Check an Intercloud rule
+```
+POST /authorization/intercloud/check
+```              
+
+TODO
+
+<a name="authorization_endpoints_post_intracloud_check" />
+
+### Check an Intracloud rule
+```
+POST /authorization/intracloud/check
+```
+
+TODO
+
+<a name="authoritation_endpoints_post_token" />
+
+### Generate Token
+```
+POST /authorization/token
+```
+
+TODO
+
+<a name="authorization_endpoints_getintracloud" />
+
+###Get all Intracloud rules
+```
+GET /authorization/mgmt/intracloud
+```
+
+Returns a list of Intracloud authorization records. If `page` and `item_per_page` are not
+defined, it returns all records.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_intracloud_list" />
+
+Returns an __IntracloudRuleList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "interfaces": [
+        {
+          "id": 0,
+          "interfaceName": "string",
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+``` 
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | number of records |
+| `data` | An array containing the data | 
+| `id` | ID of the entry |
+| `consumerSystem` | Consumer System |
+| `providerSystem` | Provider System |
+| `serviceDefinition` | Service Definition |
+| `interfaces` | Interfaces |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** Authorization is a little stricter than before: the access now depends on specific interfaces besides
+            provider and service.
+            
+> **Note:** 4.1.2 version: GET /authorization/mgmt/intracloud <br />
+            This version always returned all records in an array of JSON objects. The objects did not contain
+            any time information. Access didn't depend on interface.
+            
+<a name="authorization_endpoints_post_intracloud" />
+
+### Add Intercloud rules
+```
+POST /authorization/mgmt/intracloud
+```                        
+
+Creates Intracloud authorization rules and returns the newly created rules.
+
+<a name="datastructures_intracloud_rule"_form />
+
+__IntracloudRuleForm__ is the input
+
+```json
+{
+  "consumerId": 0,
+  "providerIds": [
+    0
+  ],
+  "interfaceIds": [
+    0
+  ],
+  "serviceDefinitionIds": [
+    0
+  ]
+}
+```
+> **Note:** This is a very general stucture, however only two possible combinations are allowed:
+> * One provider ID, one interface ID with multiple service definition IDs
+> * Multiple provider IDs, multiple interface IDs with one service definition ID.
+
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `consumerId` | ID of the consumer | yes |
+| `providerIds` | IDs of the providers | yes |
+| `interfaceIds` | IDs of the interfaces | yes |
+| `serviceDefinitionIds` | IDs of the Service Definitions | yes |
+
+Returns an __IntracloudRuleList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "interfaces": [
+        {
+          "id": 0,
+          "interfaceName": "string",
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+``` 
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | number of records |
+| `data` | An array containing the data | 
+| `id` | ID of the entry |
+| `consumerSystem` | Consumer System |
+| `providerSystem` | Provider System |
+| `serviceDefinition` | Service Definition |
+| `interfaces` | Interfaces |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: POST /authorization/mgmt/intracloud <br />
+            This version required whole JSON objects as consumer, provider and service instead of ids and
+            didn't use interface restrictions.
+            
+<a name="authorization_endpoints_get_intracloud_id" />
+
+### Get an Intracloud rule by ID
+```
+GET /authorization/mgmt/intracloud/{id}
+```
+
+Returns the Intracloud related authorization rule specified by the ID path parameter.
+
+<a name="datastructures_intracloud_rule" />
+
+Returns an __IntraCloudRule__
+
+```json
+{
+  "id": 0,
+  "consumerSystem": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "providerSystem": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "serviceDefinition": {
+    "id": 0,
+    "serviceDefinition": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "interfaces": [
+    {
+      "id": 0,
+      "interfaceName": "string",
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ],
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the entry |
+| `consumerSystem` | Consumer System |
+| `providerSystem` | Provider System |
+| `serviceDefinition` | Service Definition |
+| `interfaces` | Interfaces |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /authorization/mgmt/intracloud/{id} <br />
+            The returned structure did not contain time information and interface restrictions
+            
+<a name="authorization_endpoints_delete_intracloud_id" />
+
+### Delete an Intracloud rule by ID
+```
+DELETE /authorization/mgmt/intracloud/{id}
+```            
+
+Removes the Intracloud related authorization rule specified by the ID path parameter.
+
+> **Note:** 4.1.2 version: DELETE /authorization/mgmt/intracloud/{id}
+            Same the new version.
+            
+<a name="authorization_endpoinds_get_intercloud" />
+
+### Get all Intercloud rules
+```
+GET authorization/mgmt/intercloud
+```            
+
+Returns a list of Intercloud related authorization rules. If `page` and `item_per_page` are not
+defined, it returns all records. 
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_intercloud_list" />
+
+Returns an __IntercloudRuleList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "cloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": true,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "interfaces": [
+        {
+          "id": 0,
+          "interfaceName": "string",
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | number of records |
+| `data` | An array containing the data | 
+| `id` | ID of the entry |
+| `cloud` | Cloud information |
+| `provider` | Provider System |
+| `serviceDefinition` | Service Definition |
+| `interfaces` | Interfaces |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** Authorization is stricter than before: the access now depends on specific provider and interfaces
+            besides service.
+
+> **Note:** 4.1.2 version: GET /authorization/mgmt/intercloud <br />
+            This version always returned all records in an array of JSON objects. The objects did not contain
+            any time information. Access didn't depend on provider and interface.   
+            
+<a name=""  />
+
+### Add Intercloud rules
+```
+POST /authorization/mgmt/intercloud
+```                    
+
+Creates Intercloud authorization rules and returns the newly created rules.
+
+<a name="datastructures_intercloud_rule_form" />
+
+Input is __IntercloudRuleForm__
+
+```json
+{
+  "cloudId": 0,
+  "providerIdList": [
+    0
+  ],
+  "interfaceIdList": [
+    0
+  ],
+  "serviceDefinitionIdList": [
+    0
+  ]
+}
+```
+
+> **Note:** This is a very general stucture, however only two possible combinations are allowed:
+> * One provider ID, one interface ID with multiple service definition IDs
+> * Multiple provider IDs, multiple interface IDs with one service definition ID.
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `cloudId` | ID of the Cloud | yes |
+| `providerIds` | IDs of the providers | yes |
+| `interfaceIds` | IDs of the interfaces | yes |
+| `serviceDefinitionIds` | IDs of the Service Definitions | yes |
+
+Returns an __IntercloudRuleList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "cloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": true,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "interfaces": [
+        {
+          "id": 0,
+          "interfaceName": "string",
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | number of records |
+| `data` | An array containing the data | 
+| `id` | ID of the entry |
+| `cloud` | Cloud information |
+| `provider` | Provider System |
+| `serviceDefinition` | Service Definition |
+| `interfaces` | Interfaces |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: POST /authorization/mgmt/intercloud <br />
+            This version required whole JSON objects as consumer cloud and service instead of ids and didn't
+            use provider and interface restrictions.
+            
+<a name="authorization_endpoints_get_intercloud_id" />
+
+### Get an Intercloud rule by ID
+```
+GET /authorization/mgmt/intercloud/{id}
+```            
+
+Returns the Intercloud related authorization record specified by the ID path parameter.
+
+Returns an __IntercloudRuleList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "cloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": true,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "interfaces": [
+        {
+          "id": 0,
+          "interfaceName": "string",
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | number of records |
+| `data` | An array containing the data | 
+| `id` | ID of the entry |
+| `cloud` | Cloud information |
+| `provider` | Provider System |
+| `serviceDefinition` | Service Definition |
+| `interfaces` | Interfaces |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /authorization/mgmt/intercloud/{id} <br />
+            The returned structure did not contain time information, provider and interface restrictions.
+
+<a name="authorization_endpoints_delete_intercloud_id" />
+
+### Delete an Intercloud rule by ID
+
+Removes the Intercloud related authorization record specified by the ID path parameter.            
+
+> **Note:** 4.1.2 version: DELETE /authorization/mgmt/intercloud/{id}
+            Same as the new version.
             
             
