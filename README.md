@@ -2653,6 +2653,41 @@ The Services of the Gatekeeper can be utilized when inter-Cloud collaboration, s
 
 The Services of the QoS management System can be used to manage device, network and service-level Quality of Service agreements and configurations.
 
+Orchestrator can be used in two ways. The first one uses predefined rules (coming from the
+Orchestrator Store DB) to find the appropriate providers for the consumer. The second option is the
+dynamic orchestration in which case the core service searches the whole local cloud (and maybe
+some other clouds) to find matching providers.
+
+### Store Orchestration:
+* requester system is mandatory,
+* requested service and all the other parameters are optional,
+* if requested service is not specified, then this service returns the top priority local provider
+of all services contained by the orchestrator store database for the requester system.
+if requested service is specified, then you have to define the service definition and exactly
+one interface (all other service requirements are optional). In this case, it returns all
+accessible providers from the orchestrator store database that provides the specified service
+via the specified interface to the specified consumer.
+
+### Dynamic Orchestration:
+* requester system is mandatory,
+* requested service is mandatory, but just the service definition part, all other parameters of
+the requested service are optional,
+* all other parameters are optional
+
+### Orchestration flags:
+* `matchmaking`: the service automatically selects exactly one provider from the appropriate
+providers (if any),
+* `metadataSearch`: query in the Service Registry uses metadata filtering,
+* `onlyPreferred`: the service filters the results with the specified provider list,
+* `pingProviders`: the service checks whether the returning providers are online and remove the
+unaccessible ones from the results,
+* `overrideStore`: Services uses dynamic orchestration if this flag is true, otherwise it uses the
+orchestration store,
+* `enableInterCloud`: the service can search another clouds for providers if none of the local
+cloud providers match the requirements,
+* `triggerInterCloud`: the service skipped the search in the local cloud and tries to find
+providers in other clouds instead. 
+
 <a name="orchestrator_usecases" />
 
 ## Services and Use Cases
@@ -2714,7 +2749,10 @@ The base URL for the requests: `http://<host>:<port>/orchestrator`
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-
+| [Echo](#orcchestrator_endpoints_get_echo) | /echo  | GET | - | OK |
+| [Orchestration](#orchestrator_endpoints_post_orchestration) | /orchestration | POST | [Service Request](#datastructures_servicerequest) | [Orchestration Response](#datastructures_orchestration_response) |
+| [Start store Orchestration by ID](#orchrestrator_endpoints_get_oschestration_id) | /orchestration/{id} | GET | StoreEntryID | [Orchestration Response](#datastructures_orchestration_response) |
+ 
 <a name="orchestrator_endpoints_private" />
 
 ### Private endpoint description <br />
@@ -2732,9 +2770,924 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
+| [Get all Store Entries](#orchestrator_endpoints_get_store) | /mgmt/store | GET | - | [StoreEntryList](#datastructures_storeentrylist) |
+| [Add Store Entries](#orchestrator_endpoints_post_store) | /mgmt/store | POST | [StoreRules](#datastructures_storerules) | [StoreEntryList](#datastructures_storeentrylist) |
+| [Get Store Entry by ID](#orchestrator_endpoints_get_store_id) | /mgmt/store/{id} | GET | StoreEntryID | [StoreEntry](#datastructures_storeentry) |
+| [Delete Store Entry by ID](#orchestrator_endpoints_delete_store_id) | /mgmt/store/{id} | DELETE | StoreEntryID | - |
+| [Get Entries by Consumer](#orchestrator_endpoints_post_consumer) | /mgmt/store/<br />all_by_consumer | POST | [ConsumerRule](#datastructures_consumer_rule) | [StoreEntryList](#datastructures_storeentrylist) |
+| [Get Top Priority Entries](#orchestrator_endpoints_get_priority) | /mgmt/store/<br />all_top_priority | GET | - | [StoreEntryList](#datastructures_storeentrylist) |
+| [Modify Priorities](#orchestrator_endpoints_post_priorities) | /mgmt/store/<br />modify_priorities | POST | [PriorityList](#datastructures_prioritylist) | - |
 
 <a name="orchestrator_removed" />
 
 ### Removed Endpoints <br />
 
+The following services  no longer exist:
+* `GET /orchestrator/mgmt/store/default/{id}`
+* `PUT /orchestrator/mgmt/store/update/{id}`
+* `DELETE /orchestrator/mgmt/store/consumerId/{systemId}`
+
+<a name="orcchestrator_endpoints_get_echo" />
+
+### Echo
+```
+GET /orchestrator/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+> **Note:** 4.1.2 version: GET /orchestrator/orchestration
+            It was basically the same with a slightly different return message
             
+<a name="orchestrator_endpoints_post_orchestration" />
+
+### Orchestration
+```
+POST /orchestrator/orchestration
+```
+
+Initializes the orchestration process in which the Orchestrator Core System tries to find providers
+that match the specified requirements (and the consumer have right to use them).
+
+<a name="datastructures_servicerequest" />
+
+__ServiceRequest__ is the input
+
+```json
+{
+  "requesterSystem": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "requestedService": {
+    "serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+    "securityRequirements": [
+      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+    ],
+    "metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "versionRequirement": 0,
+    "maxVersionRequirement": 0,
+   "minVersionRequirement": 0
+  },
+  "preferredProviders": [
+    {
+      "providerCloud": {
+        "operator": "string",
+        "name": "string"
+      },
+      "providerSystem": {
+        "systemName": "string",
+        "address": "string",
+        "port": 0
+      }
+    }
+  ],
+  "orchestrationFlags": {
+    "additionalProp1": true,
+    "additionalProp2": true,
+    "additionalProp3": true
+  }
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requesterSystem` | Requester System | yes |
+| `requestedService` | Requested Service | no |
+| `preferredProviders` | Preferred Providers | no |
+| `orchestrationFlags` | Orchestration Flags | no |
+
+
+Orchestrator can be used in two ways. The first one uses predefined rules (coming from the
+Orchestrator Store DB) to find the appropriate providers for the consumer. The second option is the
+dynamic orchestration in which case the core service searches the whole local cloud (and maybe
+some other clouds) to find matching providers.
+
+#### Store Orchestration:
+* requester system is mandatory,
+* requested service and all the other parameters are optional,
+* if requested service is not specified, then this service returns the top priority local provider
+of all services contained by the orchestrator store database for the requester system.
+if requested service is specified, then you have to define the service definition and exactly
+one interface (all other service requirements are optional). In this case, it returns all
+accessible providers from the orchestrator store database that provides the specified service
+via the specified interface to the specified consumer.
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requesterSystem` | Requester System | yes |
+| `requestedService` | Requested Service | no |
+| `preferredProviders` | Preferred Providers | no |
+| `orchestrationFlags` | Orchestration Flags | no |
+
+#### Dynamic Orchestration:
+* requester system is mandatory,
+* requested service is mandatory, but just the service definition part, all other parameters of
+the requested service are optional,
+* all other parameters are optional
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requesterSystem` | Requester System | yes |
+| `requestedService` | Requested Service | yes |
+| `preferredProviders` | Preferred Providers | no |
+| `orchestrationFlags` | Orchestration Flags | no |
+            
+Orchestration flags:
+* `matchmaking`: the service automatically selects exactly one provider from the appropriate
+providers (if any),
+* `metadataSearch`: query in the Service Registry uses metadata filtering,
+* `onlyPreferred`: the service filters the results with the specified provider list,
+* `pingProviders`: the service checks whether the returning providers are online and remove the
+unaccessible ones from the results,
+* `overrideStore`: Services uses dynamic orchestration if this flag is true, otherwise it uses the
+orchestration store,
+* `enableInterCloud`: the service can search another clouds for providers if none of the local
+cloud providers match the requirements,
+* `triggerInterCloud`: the service skipped the search in the local cloud and tries to find
+providers in other clouds instead.            
+
+<a name="datastructures_orchestration_response" />
+
+Returns an __Orchestration Response__
+
+```json
+{
+  "response": [
+    {
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "service": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceUri": "string",
+      "secure": "TOKEN",
+      "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },  
+      "interfaces": [
+        {
+          "id": 0,
+          "createdAt": "string",
+          "interfaceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "version": 0,
+      "authorizationTokens": {
+        "interfaceName1": "token1",
+        "interfaceName2": "token2"
+      },
+      "warnings": [
+        "FROM_OTHER_CLOUD", "TTL_UNKNOWN"
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `resposne` | Array containing the data |
+| `provider` | Provider System |
+| `service` | Service |
+| `serviceUri` |  URI of the Service |
+| `secure` | Security info |
+| `metadata` | Metadata |
+| `interfaces` | List of the interfaces the Service supports |
+| `version` | Version of the Service |
+| `authorizationTokens` | Authorization Tokens |
+| `warnings` | Warnings |
+
+> **Note:** `authorizationTokens` object only appears if the provider requires token authentication,
+            `authorizationTokens` is interface-specific
+
+> **Note:** `warnings array` can contains the following texts: 
+> * `FROM_OTHER_CLOUD` (if the provider is in an other cloud)
+> * `TTL_EXPIRED` (the provider is no longer accessible)
+> * `TTL_EXPIRING` (the provider will be inaccessible in a matter of minutes),
+> * `TTL_UNKNOWN` (the provider does not specified expiration time)
+
+> **Note:** 4.1.2 version: POST /orchestrator/ochestration<br />
+            It was basically the same, however security requirement was not available.
+
+<a name="orchrestrator_endpoints_get_oschestration_id" />
+
+### Start store Orchestration by ID
+```
+GET /orchestrator/rchestration/{id}
+```
+
+If the consumer knows its' ID, it can used this service as shortcut for store-based orchestration when
+the service returns the top priority local provider of all services contained by the orchestrator store
+database for the requester system (identified by the ID)
+
+Returns an __Orchestration Response__
+
+```json
+{
+  "response": [
+    {
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "service": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceUri": "string",
+      "secure": "TOKEN",
+      "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },  
+      "interfaces": [
+        {
+          "id": 0,
+          "createdAt": "string",
+          "interfaceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "version": 0,
+      "authorizationTokens": {
+        "interfaceName1": "token1",
+        "interfaceName2": "token2"
+      },
+      "warnings": [
+        "FROM_OTHER_CLOUD", "TTL_UNKNOWN"
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `resposne` | Array containing the data |
+| `provider` | Provider System |
+| `service` | Service |
+| `serviceUri` |  URI of the Service |
+| `secure` | Security info |
+| `metadata` | Metadata |
+| `interfaces` | List of the interfaces the Service supports |
+| `version` | Version of the Service |
+| `authorizationTokens` | Authorization Tokens |
+| `warnings` | Warnings |
+
+> **Note:** `authorizationTokens` object only appears if the provider requires token authentication,
+            `authorizationTokens` is interface-specific
+
+> **Note:** `warnings array` can contains the following texts: 
+> * `FROM_OTHER_CLOUD` (if the provider is in an other cloud)
+> * `TTL_EXPIRED` (the provider is no longer accessible)
+> * `TTL_EXPIRING` (the provider will be inaccessible in a matter of minutes),
+> * `TTL_UNKNOWN` (the provider does not specified expiration time)
+
+<a name="orchestrator_endpoints_get_store" />
+
+### Get all Store Entries 
+```
+GET /orchestrator/mgmt/store
+```
+
+Returns a list of orchestrator store rule records. If `page` and `item_per_page` are not defined, returns
+all records. 
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_storeentrylist" />
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Foreign |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** Rules are a little stricter than before: the service interface is also part of it. But the defaultEntry flag
+           is no longer supported; now, entries with priority 1 is considered as defaults.
+           
+> **Note:** 4.1.2 version: GET /orchestrator/mgmt/store/all <br />
+            This version always returned all records in an array of JSON objects. The objects did not contain
+            any time information. Rules didn't depend on interface.
+            
+<a name="orchestrator_endpoints_post_store" />
+
+### Add Store Entries
+```
+POST /orchestrator/mgmt/store
+```                       
+
+Creates Orchestrator Store records and returns the newly created records.
+
+<a name="datastructures_storerules" />
+
+__StoreRules__ is the input
+
+```json
+[
+  {
+    "serviceDefinitionName": "string",
+    "consumerSystemId": 0,
+    "attribute": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "providerSystem": {
+      "systemName": "string",
+      "address": "string",
+      "port": 0
+    },
+    "cloud": {
+      "operator": "string",
+      "name": "string"
+    },
+    "serviceInterfaceName": "string",
+    "priority": 1
+  }
+]
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `serviceDefinitionName` | Service Definition | yes |
+| `consumerSystemId` | Consumer System ID | yes |
+| `attribute` | Attributes | no |
+| `providerSystem` | Provider System | yes |
+| `cloud` | Cloud | yes |
+| `serviceInterfaceName` | Service Interface Name | yes |
+| `priority` | Priority | yes |
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Foreign |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: POST /orchestrator/mgmt/store<br/ >
+            This version required whole JSON objects as consumer instead of id and didn't contains interface
+            names. Also, it used defaultEntry flags.
+            
+<a name="orchestrator_endpoints_get_store_id" />
+
+### Get Store Entry by ID 
+```
+GET /orchestrator/mgmt/store/{id}
+```             
+
+Returns the orchestrator store rule record specified by the ID path parameter.
+
+```json
+{
+  "id": 0,
+  "serviceDefinition": {
+    "id": 0,
+    "serviceDefinition": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "consumerSystem": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "foreign": true,
+  "providerCloud": {
+    "id": 0,
+    "operator": "string",
+    "name": "string",
+    "authenticationInfo": "string",
+    "secure": true,
+    "neighbor": true,
+    "ownCloud": false,
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "providerSystem": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "serviceInterface": {
+    "id": 0,
+    "interfaceName": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "priority": 1,
+  "attribute": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Foreign |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /orchestrator/mgmt/store/{id} <br />
+            The returned structure did not contain time information and interface names
+
+<a name="orchestrator_endpoints_delete_store_id" />
+
+### Delete Store Entries by ID
+```
+DELETE /orchestrator/mgmt/store/{id}
+```
+
+Removes the Orchestrator Store rule record specified by the ID path parameter.
+
+> **Note:** 4.1.2 version: DELETE /orchestrator/mgmt/store/{id} <br />
+            Same as the new version.
+            
+<a name="orchestrator_endpoints_post_consumer" />
+  
+### Get Entries by Consumer
+```
+GET /orchestrator/mgmt/store/all_by_consumer
+```
+
+Returns a list of Orchestrator Store rule records related to consumer, service definition and
+optionally service interface. If `page` and `item_per_page` are not defined, no paging is involved.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_consumer_rule" />
+
+__ConsumerRule is the input__
+
+```json
+{
+ "consumerSystemId": 0,
+ "serviceDefinitionName": "string",
+ "serviceInterfaceName": "string"
+}
+``` 
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `consumerSystemId` | ID of the Consumer | yes |
+| `serviceDefinitionName` | Service Definition | yes |
+| `serviceInterfaceName` | Service Interface | no |
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Foreign |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store <br />
+            This version always returned all matching records in an array of JSON objects. The objects did not
+            contain any time information and filtering by interface name was not available.
+            
+<a name="orchestrator_endpoints_get_priority" />
+
+### Get Top Priority Entries
+```
+GET /orchestrator/mgmt/store/all_top_priority
+```            
+            
+Returns a list of orchestrator store rule records whose priority is 1. If `page` and `item_per_page` are
+not defined, no paging is involved.             
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Foreign |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /orchestrator/mgmt/store/all_default <br />
+            This version always returned all records where defaultEntry flag is true in an array of JSON objects.
+            The objects did not contain any time information.             
+
+<a name="orchestrator_endpoints_post_priorities" />
+
+### Modify Priorities
+```
+POST /orchestrator/mgmt/store/modify_priorities
+```            
+
+Changes the priority field of the specified entries.
+
+<a name="datastructures_prioritylist" />
+
+__PriorityList__ is the input
+
+```json
+{
+  "priorityMap": {
+    "{id1}": 1,
+    "{id2}": 2,
+    "{id3}": 3
+ }
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `priorityMap` | Priority List | yes |
+
+> **Note:** The keys of the map are Orcherstrator store rule IDs, the values are the new priorities.
+
+> **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store/priorities<br />
+            Same as the new version
