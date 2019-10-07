@@ -34,7 +34,7 @@ import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 
 @RunWith(SpringRunner.class)
-public class PublishRequestExecutorTests {
+public class PublishRequestExecutorTest {
 	
 	//=================================================================================================
 	// members
@@ -92,32 +92,54 @@ public class PublishRequestExecutorTests {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Test
+	@Test( expected = IllegalArgumentException.class )
+	public void testExecuteInvalidFieldInvolvedSubscriptionsNullCoseNoExecution() {
+		
+		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
+
+		ReflectionTestUtils.setField( testingObject, "publishRequestDTO", request );
+		ReflectionTestUtils.setField( testingObject, "involvedSubscriptions", null );
+
+		doNothing().when( threadPool ).execute( any() );
+		
+		try {
+			
+			testingObject.execute();
+			
+		} catch (Exception ex) {
+			
+			verify( threadPool, times( 0 ) ).execute( any() );
+
+			assertTrue( ex.getMessage().contains( "involvedSubscriptions is null" ) );
+		
+			throw ex;
+		}
+	
+	}	
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test( expected = IllegalArgumentException.class )
 	public void testExecuteInvalidFieldRequestNullCoseNoExecution() {
 		
-		final Subscription subscription0 = createSubscriptionForDBMock( 1 , "eventType1", "subscriberName1" );
-		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		final PublishEventTask publishEventTask = new PublishEventTask( subscription0, request, httpService );
-		
 		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( numberOfSubscribers );
-
-		
+	
 		ReflectionTestUtils.setField( testingObject, "publishRequestDTO", null );
 		ReflectionTestUtils.setField( testingObject, "involvedSubscriptions", involvedSubscriptions );
-		ReflectionTestUtils.setField( testingObject, "threadPool", threadPool);
-		ReflectionTestUtils.setField( testingObject, "httpService", httpService );
+
+		doNothing().when( threadPool ).execute( any() );
 		
-		final ArgumentCaptor<PublishEventTask> valueCapture = ArgumentCaptor.forClass( PublishEventTask.class);
-		doNothing().when( threadPool ).execute( valueCapture.capture() );
+		try {
+			
+			testingObject.execute();
+			
+		} catch (Exception ex) {
+			
+			verify( threadPool, times( 0 ) ).execute( any() );
+
+			assertTrue( ex.getMessage().contains( "publishRequestDTO is null" ) );
 		
-		testingObject.execute();
-		
-		verify( threadPool, times( 0 ) ).execute( any() );
-		final Subscription subscriptionInTask = (Subscription) ReflectionTestUtils.getField( publishEventTask, "subscription");
-		
-		assertNull( subscriptionInTask );
-		
-		verify( threadPool, times( 1 ) ).shutdown();
+			throw ex;
+		}
 	
 	}	
 	
