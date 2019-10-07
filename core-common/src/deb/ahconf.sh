@@ -238,7 +238,7 @@ ah_db_tables_and_user () {
 	# Generate password (if required)
 	if [ -z "${system_passwd}" ]; then
 		system_passwd="$(openssl rand -base64 12)"
-		db_set arrowhead-core-common/mysql_password_system ${system_passws}
+		db_set arrowhead-core-common/mysql_password_system ${system_passwd}
 	fi  
 
     if mysql -u root -h ${db_host} -e "SHOW DATABASES" >/dev/null 2>/dev/null; then
@@ -249,7 +249,7 @@ DROP USER IF EXISTS '${mysql_user_name}'@'%';
 CREATE USER	'${mysql_user_name}'@'localhost' IDENTIFIED BY '${system_passwd}';
 CREATE USER '${mysql_user_name}'@'%' IDENTIFIED BY '${system_passwd}';
 EOF
-		mysql -u root -h ${db_host} < ${priv_file_name}
+		mysql -u root -h ${db_host} < /usr/share/arrowhead/conf/${priv_file_name}
     else
         db_input critical arrowhead-core-common/mysql_password_root || true
         db_go || true
