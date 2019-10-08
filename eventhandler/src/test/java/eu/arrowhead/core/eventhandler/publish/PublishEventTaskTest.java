@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -155,7 +156,125 @@ public class PublishEventTaskTest {
 		assertTrue( "https://localhost:12345/notifyUri".equalsIgnoreCase( uri.toUriString() ) );
 	
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunIfSubscriptionIsNullMethodLogsAndReturn() {
+		
+		final Subscription subscription = null;
+		
+		ReflectionTestUtils.setField( testingObject, "subscription", subscription);
+		
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass( String.class);
+		final ArgumentCaptor<Object> errorMessageValueCapture = ArgumentCaptor.forClass( Object.class);
+		final ArgumentCaptor<String> traceValueCapture = ArgumentCaptor.forClass( String.class);
 
+		doNothing().when( logger ).debug( debugValueCapture.capture());
+		doNothing().when( logger ).debug( debugValueCapture.capture(), errorMessageValueCapture.capture() );
+		doNothing().when( logger ).trace( traceValueCapture.capture());
+
+		testingObject.run();
+		
+		verify( httpService, never() ).sendRequest( 
+				any( UriComponents.class),
+				eq( HttpMethod.POST ), 
+				eq( Void.class ), 
+				any( EventDTO.class )
+				);
+		
+		verify( logger, never() ).trace( any( String.class ) );
+		verify( logger, times( 1 ) ).debug( any( String.class ) );
+		verify( logger, times( 1 ) ).debug( any( String.class ), any( Object.class) );
+		
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		final String errorMessage = (String) errorMessageValueCapture.getValue();
+		
+		assertNotNull( debugMessages );
+		assertTrue( "PublishEventTask.run started...".equalsIgnoreCase( debugMessages.get( 0 ) ) );
+		assertTrue( "Exception:".equalsIgnoreCase( debugMessages.get( 1 ) ) );
+		assertTrue( "subscription is null".equalsIgnoreCase( errorMessage ) );
+		
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunIfSubscriptionSubscriberSystemIsNullMethodLogsAndReturn() {
+		
+		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
+		subscription.setSubscriberSystem( null );
+
+		ReflectionTestUtils.setField( testingObject, "subscription", subscription);
+		
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass( String.class);
+		final ArgumentCaptor<Object> errorMessageValueCapture = ArgumentCaptor.forClass( Object.class);
+		final ArgumentCaptor<String> traceValueCapture = ArgumentCaptor.forClass( String.class);
+
+		doNothing().when( logger ).debug( debugValueCapture.capture());
+		doNothing().when( logger ).debug( debugValueCapture.capture(), errorMessageValueCapture.capture() );
+		doNothing().when( logger ).trace( traceValueCapture.capture());
+
+		testingObject.run();
+		
+		verify( httpService, never() ).sendRequest( 
+				any( UriComponents.class),
+				eq( HttpMethod.POST ), 
+				eq( Void.class ), 
+				any( EventDTO.class )
+				);
+		
+		verify( logger, never() ).trace( any( String.class ) );
+		verify( logger, times( 1 ) ).debug( any( String.class ) );
+		verify( logger, times( 1 ) ).debug( any( String.class ), any( Object.class) );
+		
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		final String errorMessage = (String) errorMessageValueCapture.getValue();
+		
+		assertNotNull( debugMessages );
+		assertTrue( "PublishEventTask.run started...".equalsIgnoreCase( debugMessages.get( 0 ) ) );
+		assertTrue( "Exception:".equalsIgnoreCase( debugMessages.get( 1 ) ) );
+		assertTrue( "subscription.SubscriberSystem is null".equalsIgnoreCase( errorMessage ) );
+		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRunIfHttpServiceIsNullMethodLogsAndReturn() {
+		
+		final HttpService nullHttpService = null;
+		
+		ReflectionTestUtils.setField( testingObject, "httpService", nullHttpService);
+		
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass( String.class);
+		final ArgumentCaptor<Object> errorMessageValueCapture = ArgumentCaptor.forClass( Object.class);
+		final ArgumentCaptor<String> traceValueCapture = ArgumentCaptor.forClass( String.class);
+
+		doNothing().when( logger ).debug( debugValueCapture.capture());
+		doNothing().when( logger ).debug( debugValueCapture.capture(), errorMessageValueCapture.capture() );
+		doNothing().when( logger ).trace( traceValueCapture.capture());
+
+		testingObject.run();
+		
+		verify( httpService, never() ).sendRequest( 
+				any( UriComponents.class),
+				eq( HttpMethod.POST ), 
+				eq( Void.class ), 
+				any( EventDTO.class )
+				);
+		
+		verify( logger, never() ).trace( any( String.class ) );
+		verify( logger, times( 1 ) ).debug( any( String.class ) );
+		verify( logger, times( 1 ) ).debug( any( String.class ), any( Object.class) );
+		
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		final String errorMessage = (String) errorMessageValueCapture.getValue();
+		
+		assertNotNull( debugMessages );
+		assertTrue( "PublishEventTask.run started...".equalsIgnoreCase( debugMessages.get( 0 ) ) );
+		assertTrue( "Exception:".equalsIgnoreCase( debugMessages.get( 1 ) ) );
+		assertTrue( "httpService is null".equalsIgnoreCase( errorMessage ) );
+		
+	}
+	
 	//=================================================================================================
 	//Assistant methods
 
