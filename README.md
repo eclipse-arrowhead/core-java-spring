@@ -77,12 +77,16 @@ After succeeding enter the scripts folder and execute ```start_core_systems.sh``
 
 Wait until servers start...
 
-Service Registry will be available on ```localhost:8443``` <br />
-Authorization will be available on ```localhost:8445``` <br />
-Orchestrator will be available on ```localhost:8441``` <br />
-Event Handler will be available on ```localhost:8455``` <br />
-Gatekeeper will be available on ```localhost:8449``` <br />
-Gateway will be available on ```localhost:8453``` <br />
+> **Note:** By default servers start in SECURE mode. To access them, you need to use an example certificate, provided in the `certificate` directory.
+
+> **Note:** If you wish to change the the configuration, do it by by modifying the `application.properties` file. Don't forget to change all of them!
+
+Service Registry will be available on ```https://localhost:8443``` <br />
+Authorization will be available on ```https://localhost:8445``` <br />
+Orchestrator will be available on ```https://localhost:8441``` <br />
+Event Handler will be available on ```https://localhost:8455``` <br />
+Gatekeeper will be available on ```https://localhost:8449``` <br />
+Gateway will be available on ```https://localhost:8453``` <br />
 
 Swagger with API documentation is available in the root route.
 
