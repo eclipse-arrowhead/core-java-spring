@@ -145,7 +145,7 @@ public class PublishRequestFixedExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testExecuteIllegalArgumentSubscriptionNullCoseNoExecution() {
+	public void testExecuteIllegalArgumentSubscriptionNullCauseNoExecution() {
 		
 		ReflectionTestUtils.setField( testingObject, "threadPool", threadPool);
 		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
@@ -178,7 +178,7 @@ public class PublishRequestFixedExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testExecuteIllegalArgumentSubscriptionNotifyUriNullCoseNoExecution() {
+	public void testExecuteIllegalArgumentSubscriptionNotifyUriNullCauseNoExecution() {
 		
 		ReflectionTestUtils.setField( testingObject, "threadPool", threadPool);
 		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
@@ -213,7 +213,7 @@ public class PublishRequestFixedExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testExecuteIllegalArgumentSubscriptionSubscriberSystemNullCoseNoExecution() {
+	public void testExecuteIllegalArgumentSubscriptionSubscriberSystemNullCauseNoExecution() {
 		
 		ReflectionTestUtils.setField( testingObject, "threadPool", threadPool);
 		ReflectionTestUtils.setField( testingObject, "maxExpressSubscribers", 10);
