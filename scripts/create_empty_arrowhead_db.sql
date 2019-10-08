@@ -248,7 +248,7 @@ CREATE TABLE `logs` (
 DROP TABLE IF EXISTS `event_type`;
   CREATE TABLE `event_type` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `event_type_name` varchar(255) DEFAULT NULL,
+  `event_type_name` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -264,8 +264,8 @@ CREATE TABLE `subscription` (
   `match_meta_data` int(1) NOT NULL DEFAULT 0,
   `only_predefined_publishers` int(1) NOT NULL DEFAULT 0,
   `notify_uri` text NOT NULL,
-  `start_date` timestamp ,
-  `end_date` timestamp ,
+  `start_date` timestamp NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
