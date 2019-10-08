@@ -449,7 +449,7 @@ public class EventHandlerControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void unSubscriptionIsOkTest() throws Exception {
+	public void unsubscriptionIsOkTest() throws Exception {
 		
 		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
 		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
