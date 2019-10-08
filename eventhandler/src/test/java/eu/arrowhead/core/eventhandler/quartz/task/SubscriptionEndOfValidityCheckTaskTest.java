@@ -31,7 +31,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.eventhandler.database.service.EventHandlerDBService;
 
 
@@ -47,11 +46,7 @@ public class SubscriptionEndOfValidityCheckTaskTest {
 	@Mock
 	EventHandlerDBService eventHandlerDBService; 
 
-	
 	private Logger logger;
-	
-	@Mock
-	private HttpService httpService;
 	
 	//=================================================================================================
 	// methods
