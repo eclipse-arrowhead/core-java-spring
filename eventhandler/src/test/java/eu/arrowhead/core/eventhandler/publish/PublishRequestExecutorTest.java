@@ -129,7 +129,7 @@ public class PublishRequestExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test( expected = IllegalArgumentException.class )
-	public void testExecuteInvalidFieldInvolvedSubscriptionsNullCoseNoExecution() {
+	public void testExecuteInvalidFieldInvolvedSubscriptionsNullCauseNoExecution() {
 		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 
@@ -155,7 +155,7 @@ public class PublishRequestExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test( expected = IllegalArgumentException.class )
-	public void testExecuteInvalidFieldRequestNullCoseNoExecution() {
+	public void testExecuteInvalidFieldRequestNullCauseNoExecution() {
 		
 		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( numberOfSubscribers );
 	
@@ -181,7 +181,7 @@ public class PublishRequestExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test( expected = IllegalArgumentException.class )
-	public void testExecuteInvalidFieldHttpServiceNullCoseNoExecution() {
+	public void testExecuteInvalidFieldHttpServiceNullCauseNoExecution() {
 		
 		final Set<Subscription> involvedSubscriptions = createLargeSetOfSubscriptions( numberOfSubscribers );
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
