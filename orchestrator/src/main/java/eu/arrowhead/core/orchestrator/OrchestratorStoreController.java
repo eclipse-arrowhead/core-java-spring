@@ -85,18 +85,6 @@ public class OrchestratorStoreController {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(path = CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI)
-	public String echoService() {
-		return "Got it!";
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return OrchestratorStore entry by id", response = OrchestratorStoreResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE),

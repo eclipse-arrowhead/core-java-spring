@@ -58,7 +58,7 @@ public class PublishRequestExecutor {
 			}
 		}
 		
-		threadPool.shutdown();
+		threadPool.shutdownNow();
 	}
 	//-------------------------------------------------------------------------------------------------
 	public void shutdownExecutionNow() {
@@ -70,9 +70,19 @@ public class PublishRequestExecutor {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void validateMembers() {
-		Assert.notNull(this.threadPool, "threadPool is null");
-		Assert.notNull(this.publishRequestDTO, "publishRequestDTO is null");
-		Assert.notNull(this.involvedSubscriptions, "involvedSubscriptions is null");
-		Assert.notNull(this.httpService, "httpService is null");
+
+		try {
+			
+			Assert.notNull(this.threadPool, "threadPool is null");
+			Assert.notNull(this.publishRequestDTO, "publishRequestDTO is null");
+			Assert.notNull(this.involvedSubscriptions, "involvedSubscriptions is null");
+			Assert.notNull(this.httpService, "httpService is null");
+			
+		} catch (final IllegalArgumentException  ex) {
+			
+			shutdownExecutionNow();
+			
+			throw ex;
+		}
 	}
 }
