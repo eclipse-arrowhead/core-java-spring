@@ -1944,9 +1944,9 @@ These services can only be used by other core services, therefore they are not p
         
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |        
-| [Check an Intercloud rule](#authorization_endpoints_post_intercloud_check) | /intercloud/check | POST | [InterCloudRule](#datastructures_intercloudrule) | OK |
-| [Check an Intracloud rule](#authorization_endpoints_post_intracloud_check) | /intracloud/check | POST | [IntraCloudRule](#datastructures_intracloudrule) | OK |
-| [Generate Token](#authoritation_endpoints_post_token) | /token | POST | TokenRule | TokenData |
+| [Check an Intercloud rule](#authorization_endpoints_post_intercloud_check) | /intercloud/check | POST | [InterCloudRule](#datastructures_intercloudrule) | [InterCloudResult](#datastructures_intercloudresult) |
+| [Check an Intracloud rule](#authorization_endpoints_post_intracloud_check) | /intracloud/check | POST | [IntraCloudRule](#datastructures_intracloudrule) | [IntraCloudResult](#datastructures_intracloudresult) |
+| [Generate Token](#authoritation_endpoints_post_token) | /token | POST | [TokenRule](#datastructures_tokenrule) | [TokenData](#datastructures_tokendata) |
 
 <a name="authorization_endpoints_mgmt" />
 
@@ -2013,7 +2013,79 @@ necessary for providers if they want to utilize the token based security.
 POST /authorization/intercloud/check
 ```              
 
-TODO
+This service can only be used by other core services, therefore is not part of the public API.
+
+Checks whether a Cloud is authorized to use a Service
+
+<a name="datastructures_intercloudrule" />
+
+__InterCloudRule__ is the input
+
+```json
+{
+  "cloud": {
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ],
+    "name": "string",
+    "neighbor": true,
+    "operator": "string",
+    "secure": true
+  },
+  "providerIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `cloud` | Cloud | yes |
+| `providerIdsWithInterfaceIds` | Provider IDs with Interface IDs | yes |
+
+<a name="datastructures_intercloudresult" />
+
+Returns an __InterCloudResult__
+
+```json
+{
+  "authorizedProviderIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "cloud": {
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "id": 0,
+    "name": "string",
+    "neighbor": true,
+    "operator": "string",
+    "ownCloud": true,
+    "secure": true,
+    "updatedAt": "string"
+  },
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `authorizedProviderIdsWithInterfaceIds` | Authorized Provider IDs with Interface IDs |
+| `cloud` | Cloud |
 
 <a name="authorization_endpoints_post_intracloud_check" />
 
@@ -2021,8 +2093,72 @@ TODO
 ```
 POST /authorization/intracloud/check
 ```
+This service can only be used by other core services, therefore is not part of the public API.
 
-TODO
+Checks whether the consumer System can use a Service from a list of provider Systems
+
+<a name="datastructures_intracloudrule" />
+
+__IntraCloudRule__ is the input
+
+```json
+{
+  "consumer": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "providerIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "serviceDefinitionId": 0
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `consumer` | Consumer | yes |
+| `providerIdsWithInterfaceIds` | Provider IDs with Interface IDs | yes |
+| `serviceDefinitionId` | Service Definition ID | yes |
+
+<a name="datastructures_intracloudresult" />
+
+Returns a __IntraCloudResult__
+
+```json
+{
+  "authorizedProviderIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "consumer": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "id": 0,
+    "port": 0,
+    "systemName": "string",
+    "updatedAt": "string"
+  },
+  "serviceDefinitionId": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `authorizedProviderIdsWithInterfaceIds` | Authorized Provider IDs with Interface IDs |
+| `consumer` | Consumer |
+| `serviceDefinitionId` | Service Definition ID |
 
 <a name="authoritation_endpoints_post_token" />
 
@@ -2031,7 +2167,85 @@ TODO
 POST /authorization/token
 ```
 
-TODO
+This service can only be used by other core services, therefore is not part of the public API.
+
+Generates a JWT for Authentication
+
+<a name="datastructures_tokenrule" />
+
+__TokenRule__ is the input
+
+```json
+{
+  "consumer": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "consumerCloud": {
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ],
+    "name": "string",
+    "neighbor": true,
+    "operator": "string",
+    "secure": true
+  },
+  "duration": 0,
+  "providers": [
+    {
+      "provider": {
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "systemName": "string"
+      },
+      "serviceInterfaces": [
+        "string"
+      ]
+    }
+  ],
+  "service": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `consumer` | Consumer | yes |
+| `consumerCloud` | Cloud of the Consumer | yes |
+| `duration` | Validity duration of the Token | yes |
+| `providers` | Providers | yes |
+| `service` | Service | yes |
+
+<a name="datastructures_tokendata" />
+
+Returns a __TokenData__
+
+```json
+{
+  "tokenData": [
+    {
+      "providerAddress": "string",
+      "providerName": "string",
+      "providerPort": 0,
+      "tokens": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      }
+    }
+  ]
+}
+```
+
+| Field | Description | 
+| ----- | ----------- |
+| `tokenData` | Token Data |
 
 <a name="authorization_endpoints_getintracloud" />
 
@@ -3174,7 +3388,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3309,7 +3523,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3393,7 +3607,7 @@ Returns the orchestrator store rule record specified by the ID path parameter.
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3534,7 +3748,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3646,7 +3860,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
