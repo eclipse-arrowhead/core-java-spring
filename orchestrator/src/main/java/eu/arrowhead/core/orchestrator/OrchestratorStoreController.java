@@ -307,32 +307,32 @@ public class OrchestratorStoreController {
 			}
 			
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getAddress() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getAddress() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Address "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystemDTO().getAddress())) {
+			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystem().getAddress())) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Address "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getSystemName() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getSystemName() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.SystemName "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystemDTO().getSystemName())) {
+			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystem().getSystemName())) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.SystemName "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getPort() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Port "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || 
-				orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || 
+				orchestratorStoreRequestDTO.getProviderSystem().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
 											  origin);
 			}
