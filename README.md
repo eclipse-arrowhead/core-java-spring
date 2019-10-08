@@ -30,6 +30,14 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
             * [Private](#authorization_endpoints_private)
             * [Management](#authorization_endpoints_mgmt) 
             * [Removed Endpoints](#authorization_removed)
+    3. [Orchestrator](#orchestrator)
+       * [System Design Description Overview](#orchestrator_sdd)
+       * [Services and Use Cases](#orchestrator_usecases)  
+       * [Endpoints](orchestrator_endpoints)
+           * [Client](#orchestrator_endpoints_client)
+           * [Private](#orchestrator_endpoints_private)
+           * [Management](#orchestrator_endpoints_management)     
+           * [Removed Endpoints](#orchestrator_removed)
  
 <a name="quickstart" />
 
@@ -1928,7 +1936,7 @@ The base URL for the requests: `http://<host>:<port>/authorization`
 | [Echo](#authorization_endpoints_get_echo)     | /echo       | GET    | -     | OK     |  
 | [Get Public Key](#authorization_endpoints__get_publickey) | /publickey | GET | - | [Public Key](#datastructures_publickey) |
 
-<a name="authorization_endpoints_private />
+<a name="authorization_endpoints_private" />
 
 ### Private endpoint description <br />
         
@@ -1936,9 +1944,9 @@ These services can only be used by other core services, therefore they are not p
         
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |        
-| [Check an Intercloud rule](#authorization_endpoints_post_intercloud_check) | /intercloud/check | POST | [InterCloudRule](#datastructures_intercloudrule) | OK |
-| [Check an Intracloud rule](#authorization_endpoints_post_intracloud_check) | /intracloud/check | POST | [IntraCloudRule](#datastructures_intracloudrule) | OK |
-| [Generate Token](#authoritation_endpoints_post_token) | /token | POST | TokenRule | TokenData |
+| [Check an Intercloud rule](#authorization_endpoints_post_intercloud_check) | /intercloud/check | POST | [InterCloudRule](#datastructures_intercloudrule) | [InterCloudResult](#datastructures_intercloudresult) |
+| [Check an Intracloud rule](#authorization_endpoints_post_intracloud_check) | /intracloud/check | POST | [IntraCloudRule](#datastructures_intracloudrule) | [IntraCloudResult](#datastructures_intracloudresult) |
+| [Generate Token](#authoritation_endpoints_post_token) | /token | POST | [TokenRule](#datastructures_tokenrule) | [TokenData](#datastructures_tokendata) |
 
 <a name="authorization_endpoints_mgmt" />
 
@@ -2005,7 +2013,79 @@ necessary for providers if they want to utilize the token based security.
 POST /authorization/intercloud/check
 ```              
 
-TODO
+This service can only be used by other core services, therefore is not part of the public API.
+
+Checks whether a Cloud is authorized to use a Service
+
+<a name="datastructures_intercloudrule" />
+
+__InterCloudRule__ is the input
+
+```json
+{
+  "cloud": {
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ],
+    "name": "string",
+    "neighbor": true,
+    "operator": "string",
+    "secure": true
+  },
+  "providerIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `cloud` | Cloud | yes |
+| `providerIdsWithInterfaceIds` | Provider IDs with Interface IDs | yes |
+
+<a name="datastructures_intercloudresult" />
+
+Returns an __InterCloudResult__
+
+```json
+{
+  "authorizedProviderIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "cloud": {
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "id": 0,
+    "name": "string",
+    "neighbor": true,
+    "operator": "string",
+    "ownCloud": true,
+    "secure": true,
+    "updatedAt": "string"
+  },
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `authorizedProviderIdsWithInterfaceIds` | Authorized Provider IDs with Interface IDs |
+| `cloud` | Cloud |
 
 <a name="authorization_endpoints_post_intracloud_check" />
 
@@ -2013,8 +2093,72 @@ TODO
 ```
 POST /authorization/intracloud/check
 ```
+This service can only be used by other core services, therefore is not part of the public API.
 
-TODO
+Checks whether the consumer System can use a Service from a list of provider Systems
+
+<a name="datastructures_intracloudrule" />
+
+__IntraCloudRule__ is the input
+
+```json
+{
+  "consumer": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "providerIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "serviceDefinitionId": 0
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `consumer` | Consumer | yes |
+| `providerIdsWithInterfaceIds` | Provider IDs with Interface IDs | yes |
+| `serviceDefinitionId` | Service Definition ID | yes |
+
+<a name="datastructures_intracloudresult" />
+
+Returns a __IntraCloudResult__
+
+```json
+{
+  "authorizedProviderIdsWithInterfaceIds": [
+    {
+      "id": 0,
+      "idList": [
+        0
+      ]
+    }
+  ],
+  "consumer": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "id": 0,
+    "port": 0,
+    "systemName": "string",
+    "updatedAt": "string"
+  },
+  "serviceDefinitionId": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `authorizedProviderIdsWithInterfaceIds` | Authorized Provider IDs with Interface IDs |
+| `consumer` | Consumer |
+| `serviceDefinitionId` | Service Definition ID |
 
 <a name="authoritation_endpoints_post_token" />
 
@@ -2023,7 +2167,85 @@ TODO
 POST /authorization/token
 ```
 
-TODO
+This service can only be used by other core services, therefore is not part of the public API.
+
+Generates a JWT for Authentication
+
+<a name="datastructures_tokenrule" />
+
+__TokenRule__ is the input
+
+```json
+{
+  "consumer": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "consumerCloud": {
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ],
+    "name": "string",
+    "neighbor": true,
+    "operator": "string",
+    "secure": true
+  },
+  "duration": 0,
+  "providers": [
+    {
+      "provider": {
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "systemName": "string"
+      },
+      "serviceInterfaces": [
+        "string"
+      ]
+    }
+  ],
+  "service": "string"
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `consumer` | Consumer | yes |
+| `consumerCloud` | Cloud of the Consumer | yes |
+| `duration` | Validity duration of the Token | yes |
+| `providers` | Providers | yes |
+| `service` | Service | yes |
+
+<a name="datastructures_tokendata" />
+
+Returns a __TokenData__
+
+```json
+{
+  "tokenData": [
+    {
+      "providerAddress": "string",
+      "providerName": "string",
+      "providerPort": 0,
+      "tokens": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      }
+    }
+  ]
+}
+```
+
+| Field | Description | 
+| ----- | ----------- |
+| `tokenData` | Token Data |
 
 <a name="authorization_endpoints_getintracloud" />
 
@@ -2130,7 +2352,7 @@ POST /authorization/mgmt/intracloud
 
 Creates Intracloud authorization rules and returns the newly created rules.
 
-<a name="datastructures_intracloud_rule"_form />
+<a name="datastructures_intracloud_rule_form" />
 
 __IntracloudRuleForm__ is the input
 
@@ -2585,4 +2807,1101 @@ Removes the Intercloud related authorization record specified by the ID path par
 > **Note:** 4.1.2 version: DELETE /authorization/mgmt/intercloud/{id}
             Same as the new version.
             
+<a name="orchestrator" />
+
+# Orchestrator
+
+<a name="orchestrator_sdd" />
+
+## System Design Description Overview
+
+The Orchestrator provides runtime (late) binding between Application Systems. 
+
+The primary purpose for the Orchestrator System is to provide Application Systems with orchestration information: where they need to connect to. The outcome of the "Orchestration Service" include rules that will tell the Application System what Service provider System(s) it should connect to and how (acting as a Service Consumer). Such orchestration rules include:
+
+* Accessibility information details of a Service provider (e.g network address and port),
+* Details of the Service instance within the provider System (e.g. base URL, IDD specification and other metadata),
+* item Authorization-related information (e.g. access token and signature),
+* Additional information that is necessary for establishing connection.
+
+This orchestration rule information can reach the given Application System (consumer) in two different ways: the System itself can request it ("pull") or the Orchestrator itself can update the System when it is needed ("push method"). However, in both cases, there shall be an underlying, hidden process ("orchestration process"), which ensures the consistence of state between the various Core Systems.
+
+In G4.0, only the pull method is implemented and the Orchestrator shall negotiate with the other Core Systems while trying to facilitate the new service request (or trying to push a new status). This is necessary for the following cases and requirements (basically, when ad hoc, unsupervised connections are not allowed):
+
+* When accountability is required for all Systems in the Local Cloud: connections cannot be established without the knowledge, approval and logged orchestration events of the Core Systems ("central governance"). 
+* QoS and resource management reasons: ad hoc peer-to-peer connections cannot be allowed in certain managed networks and deployment scenarios. Every connection attempt shall be properly authorized and its QoS expectations (resource reservations) handled.  
+* Inter-Cloud orchestration can only happen via negotiations between the two Core System sets. Ad hoc inter-cloud connections shall not be allowed in the Arrowhead framework.
+
+In these cases, when the Orchestrator is the sole entry point to establishing new connections within the Local Cloud, Application Systems do not have the possibility to skip any of the control loops with all the appropriate Core Systems. When such security and safety concerns are not present, the orchestration process might be cut back or these interactions between Core Systems might be limited. Within G4.0, this is not the primary use case, but it is allowed. With the proper self-implemented (modified) and a self-compiled Orchestrator can fit the deployment best.
+
+Therefore, the Orchestrator provides two core Services and may consume many other ones, but at least two -- again, depending on its deployment. This figure depicts the mandatory and optional interfaces of this System.
+
+![Overview of the Orchestrator](/documentation/images/orchestrator_overview.png)
+
+In here, the provided Services are:
+* Orchestration Service
+* OrchestrationStoreManagement Service
+
+Meanwhile the consumed Services can vary, depending on the instantiation/installation of this System. For example, the Orchestrator can utilize the services of: 
+* ServiceDiscovery Service from the ServiceRegistry,
+* AuthorizationControl Service from the Authorization System,
+* TokenGeneration Service from the Authorization System,
+* GlobalServiceDiscovery from the Gatekeeper,
+* Inter-CloudNegotiations from the Gatekeeper,
+* QoSVerify from the QoS Manager,
+* QoSReserve from the QoS Manager,
+* Logging services from other supporting Systems, e.g. Historian,
+* and any other service from Core Systems that are necessary to settle during orchestration.
+
+The Orchestrator mainly consumes services from other Core Systems in order to fulfil its primary functionality: provide connection targets for Application Systems in a secure and resource managed manner -- hence build an SoS. 
+
+During this orchestration process the Orchestrator either facilitates a service request from an Application System or processes a system-of-systems (SoS) level choreography push from the Plant Description Engine ("Choreographer"). For the latter case, the Orchestrator System consumes the OrchestrationPush from affected Application Systems in order to deliver a renewed set of connection rules to them. 
+
+Within the Orchestrator, there is a database which captures design time bindings between Application Systems, the Orchestration Store. Operators of the Cloud and other System-of-Systems designer tools ("SoS Choreographers") are allowed to modify the rules stored in the Orchestration Store, other generic Application Systems are not.
+
+The ServiceDiscovery Service is used to publish the Orchestration Service in the Service Registry. This Service is also used to query the Service Registry and fetch (metadata) information on other Application Systems.
+
+The Services of the Authorization System can be used to verify access control and implement other security-related administration tasks. 
+
+The Services of the Gatekeeper can be utilized when inter-Cloud collaboration, servicing is required. 
+
+The Services of the QoS management System can be used to manage device, network and service-level Quality of Service agreements and configurations.
+
+Orchestrator can be used in two ways. The first one uses predefined rules (coming from the
+Orchestrator Store DB) to find the appropriate providers for the consumer. The second option is the
+dynamic orchestration in which case the core service searches the whole local cloud (and maybe
+some other clouds) to find matching providers.
+
+### Store Orchestration:
+* requester system is mandatory,
+* requested service and all the other parameters are optional,
+* if requested service is not specified, then this service returns the top priority local provider
+of all services contained by the orchestrator store database for the requester system.
+if requested service is specified, then you have to define the service definition and exactly
+one interface (all other service requirements are optional). In this case, it returns all
+accessible providers from the orchestrator store database that provides the specified service
+via the specified interface to the specified consumer.
+
+### Dynamic Orchestration:
+* requester system is mandatory,
+* requested service is mandatory, but just the service definition part, all other parameters of
+the requested service are optional,
+* all other parameters are optional
+
+### Orchestration flags:
+* `matchmaking`: the service automatically selects exactly one provider from the appropriate
+providers (if any),
+* `metadataSearch`: query in the Service Registry uses metadata filtering,
+* `onlyPreferred`: the service filters the results with the specified provider list,
+* `pingProviders`: the service checks whether the returning providers are online and remove the
+unaccessible ones from the results,
+* `overrideStore`: Services uses dynamic orchestration if this flag is true, otherwise it uses the
+orchestration store,
+* `enableInterCloud`: the service can search another clouds for providers if none of the local
+cloud providers match the requirements,
+* `triggerInterCloud`: the service skipped the search in the local cloud and tries to find
+providers in other clouds instead. 
+
+<a name="orchestrator_usecases" />
+
+## Services and Use Cases
+
+For the Orchestrator System, the primary scenario is to provide Application Systems with orchestration information upon request ([Service Request](#datastructures_servicerequest)). The outcome ([Orchestration Response](#datastructures_orchestration_response)) include orchestration rules that will tell the Application System what service provider(s) it should connect to and how.
+
+An alternative, secondary version of this scenario involves the same information, however, provided by a connection initialized by the Orchestrator, rather than the Application Service itself ("orchestration push"). This is used to relay changes made in the Orchestration Store to the Application Systems ("changes information exchange setup within the SoS"). 
+
+Another scenario is when the Orchestration Store (that stores design time orchestration-related information) of the Orchestrator is being configured via an HMI or via the Plant Description Engine (SoS Choreographer) by the operators of the Local Cloud.
+
+Use case 1: *Service Request From Application System*
+
+| Name | Description |
+| ---- | --------- |
+| ID | Orchestration Pull |
+| Brief Description | An Application System requests a Service |
+| Primary Actors | Service Consumer System |
+| Secondary Actors | - the other Core System instances of the Local Cloud <br/>- the Core Systems instance of another Local Cloud (in case of inter-Cloud orchestration) |
+| Preconditions | - |
+| Main Flow | - The Application System requests orchestration.<br/>- The Orchestrator System begins the orchestration process with the other Core Systems.<br />- The Orchestrator System responds to the Application System based on the request. |
+| Postconditions | - |
+
+Use case 2: *Orchestration information pushed to Application System*
+
+| Name | Description |
+| ---- | ----------- |
+| ID | Orchestration Push |
+| Brief Description | The Orchestrator pushes new information on Application Systems |
+| Primary Actors | Orchestrator |
+| Secondary Actors | the other Core Systems instances of the Local Cloud |
+| Preconditions | Change in the Orchestration Store. | 
+| Main flow | - The Orchestrator detects a change in the Orchestration Store.<br />- The Orchestrator begins the orchestration process with the other Core Systems for every change in the Store.<br />- The orchestrator pushes new connection rules to the Application Systems based on the new Store entry. |
+| Postconditions | - |
+
+Use case 3: *Orchestration information pushed to Application System*
+
+| Name | Description |
+| ---- | ----------- |
+| ID | Orchestration Push |
+| Brief Description | The Orchestrator pushes new information on Application Systems |
+| Primary Actors | Orchestrator |
+| Secondary Actors | the other Core Systems instances of the Local Cloud |
+| Preconditions | Change in the Orchestration Store. |
+| Main flow | - The Orchestrator detects a change in the Orchestration Store.<br />- The Orchestrator begins the orchestration process with the other Core Systems for every change in the Store.<br />- The orchestrator pushes new connection rules to the Application Systems based on the new Store entry. |
+| Postconditions | - |
+
+<a name="orchestrator_endpoints" />
+
+## Endpoints
+
+The Orchestrator offers three types of endpoints. Client, Management and Private.
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/orchestrator`
+
+<a name="orchestrator_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#orcchestrator_endpoints_get_echo) | /echo  | GET | - | OK |
+| [Orchestration](#orchestrator_endpoints_post_orchestration) | /orchestration | POST | [Service Request](#datastructures_servicerequest) | [Orchestration Response](#datastructures_orchestration_response) |
+| [Start store Orchestration by ID](#orchrestrator_endpoints_get_oschestration_id) | /orchestration/{id} | GET | StoreEntryID | [Orchestration Response](#datastructures_orchestration_response) |
+ 
+<a name="orchestrator_endpoints_private" />
+
+### Private endpoint description <br />
+
+These services can only be used by other core services, therefore they are not part of the public API.
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+
+<a name="orchestrator_endpoints_mgmt" />
+
+### Management Endpoint Description <br />
+
+There endpoints are mainly used by the Management Tool and Cloud Administrators.
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get all Store Entries](#orchestrator_endpoints_get_store) | /mgmt/store | GET | - | [StoreEntryList](#datastructures_storeentrylist) |
+| [Add Store Entries](#orchestrator_endpoints_post_store) | /mgmt/store | POST | [StoreRules](#datastructures_storerules) | [StoreEntryList](#datastructures_storeentrylist) |
+| [Get Store Entry by ID](#orchestrator_endpoints_get_store_id) | /mgmt/store/{id} | GET | StoreEntryID | [StoreEntry](#datastructures_storeentry) |
+| [Delete Store Entry by ID](#orchestrator_endpoints_delete_store_id) | /mgmt/store/{id} | DELETE | StoreEntryID | - |
+| [Get Entries by Consumer](#orchestrator_endpoints_post_consumer) | /mgmt/store/<br />all_by_consumer | POST | [ConsumerRule](#datastructures_consumer_rule) | [StoreEntryList](#datastructures_storeentrylist) |
+| [Get Top Priority Entries](#orchestrator_endpoints_get_priority) | /mgmt/store/<br />all_top_priority | GET | - | [StoreEntryList](#datastructures_storeentrylist) |
+| [Modify Priorities](#orchestrator_endpoints_post_priorities) | /mgmt/store/<br />modify_priorities | POST | [PriorityList](#datastructures_prioritylist) | - |
+
+<a name="orchestrator_removed" />
+
+### Removed Endpoints <br />
+
+The following services  no longer exist:
+* `GET /orchestrator/mgmt/store/default/{id}`
+* `PUT /orchestrator/mgmt/store/update/{id}`
+* `DELETE /orchestrator/mgmt/store/consumerId/{systemId}`
+
+<a name="orcchestrator_endpoints_get_echo" />
+
+### Echo
+```
+GET /orchestrator/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+> **Note:** 4.1.2 version: GET /orchestrator/orchestration
+            It was basically the same with a slightly different return message
             
+<a name="orchestrator_endpoints_post_orchestration" />
+
+### Orchestration
+```
+POST /orchestrator/orchestration
+```
+
+Initializes the orchestration process in which the Orchestrator Core System tries to find providers
+that match the specified requirements (and the consumer have right to use them).
+
+<a name="datastructures_servicerequest" />
+
+__ServiceRequest__ is the input
+
+```json
+{
+  "requesterSystem": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "requestedService": {
+    "serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+    "securityRequirements": [
+      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+    ],
+    "metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "versionRequirement": 0,
+    "maxVersionRequirement": 0,
+   "minVersionRequirement": 0
+  },
+  "preferredProviders": [
+    {
+      "providerCloud": {
+        "operator": "string",
+        "name": "string"
+      },
+      "providerSystem": {
+        "systemName": "string",
+        "address": "string",
+        "port": 0
+      }
+    }
+  ],
+  "orchestrationFlags": {
+    "additionalProp1": true,
+    "additionalProp2": true,
+    "additionalProp3": true
+  }
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requesterSystem` | Requester System | yes |
+| `requestedService` | Requested Service | no |
+| `preferredProviders` | Preferred Providers | no |
+| `orchestrationFlags` | Orchestration Flags | no |
+
+
+Orchestrator can be used in two ways. The first one uses predefined rules (coming from the
+Orchestrator Store DB) to find the appropriate providers for the consumer. The second option is the
+dynamic orchestration in which case the core service searches the whole local cloud (and maybe
+some other clouds) to find matching providers.
+
+#### Store Orchestration:
+* requester system is mandatory,
+* requested service and all the other parameters are optional,
+* if requested service is not specified, then this service returns the top priority local provider
+of all services contained by the orchestrator store database for the requester system.
+if requested service is specified, then you have to define the service definition and exactly
+one interface (all other service requirements are optional). In this case, it returns all
+accessible providers from the orchestrator store database that provides the specified service
+via the specified interface to the specified consumer.
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requesterSystem` | Requester System | yes |
+| `requestedService` | Requested Service | no |
+| `preferredProviders` | Preferred Providers | no |
+| `orchestrationFlags` | Orchestration Flags | no |
+
+#### Dynamic Orchestration:
+* requester system is mandatory,
+* requested service is mandatory, but just the service definition part, all other parameters of
+the requested service are optional,
+* all other parameters are optional
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requesterSystem` | Requester System | yes |
+| `requestedService` | Requested Service | yes |
+| `preferredProviders` | Preferred Providers | no |
+| `orchestrationFlags` | Orchestration Flags | no |
+            
+Orchestration flags:
+* `matchmaking`: the service automatically selects exactly one provider from the appropriate
+providers (if any),
+* `metadataSearch`: query in the Service Registry uses metadata filtering,
+* `onlyPreferred`: the service filters the results with the specified provider list,
+* `pingProviders`: the service checks whether the returning providers are online and remove the
+unaccessible ones from the results,
+* `overrideStore`: Services uses dynamic orchestration if this flag is true, otherwise it uses the
+orchestration store,
+* `enableInterCloud`: the service can search another clouds for providers if none of the local
+cloud providers match the requirements,
+* `triggerInterCloud`: the service skipped the search in the local cloud and tries to find
+providers in other clouds instead.            
+
+<a name="datastructures_orchestration_response" />
+
+Returns an __Orchestration Response__
+
+```json
+{
+  "response": [
+    {
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "service": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceUri": "string",
+      "secure": "TOKEN",
+      "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },  
+      "interfaces": [
+        {
+          "id": 0,
+          "createdAt": "string",
+          "interfaceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "version": 0,
+      "authorizationTokens": {
+        "interfaceName1": "token1",
+        "interfaceName2": "token2"
+      },
+      "warnings": [
+        "FROM_OTHER_CLOUD", "TTL_UNKNOWN"
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `resposne` | Array containing the data |
+| `provider` | Provider System |
+| `service` | Service |
+| `serviceUri` |  URI of the Service |
+| `secure` | Security info |
+| `metadata` | Metadata |
+| `interfaces` | List of the interfaces the Service supports |
+| `version` | Version of the Service |
+| `authorizationTokens` | Authorization Tokens |
+| `warnings` | Warnings |
+
+> **Note:** `authorizationTokens` object only appears if the provider requires token authentication,
+            `authorizationTokens` is interface-specific
+
+> **Note:** `warnings array` can contains the following texts: 
+> * `FROM_OTHER_CLOUD` (if the provider is in an other cloud)
+> * `TTL_EXPIRED` (the provider is no longer accessible)
+> * `TTL_EXPIRING` (the provider will be inaccessible in a matter of minutes),
+> * `TTL_UNKNOWN` (the provider does not specified expiration time)
+
+> **Note:** 4.1.2 version: POST /orchestrator/ochestration<br />
+            It was basically the same, however security requirement was not available.
+
+<a name="orchrestrator_endpoints_get_oschestration_id" />
+
+### Start store Orchestration by ID
+```
+GET /orchestrator/rchestration/{id}
+```
+
+If the consumer knows its' ID, it can used this service as shortcut for store-based orchestration when
+the service returns the top priority local provider of all services contained by the orchestrator store
+database for the requester system (identified by the ID)
+
+Returns an __Orchestration Response__
+
+```json
+{
+  "response": [
+    {
+      "provider": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "service": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceUri": "string",
+      "secure": "TOKEN",
+      "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },  
+      "interfaces": [
+        {
+          "id": 0,
+          "createdAt": "string",
+          "interfaceName": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "version": 0,
+      "authorizationTokens": {
+        "interfaceName1": "token1",
+        "interfaceName2": "token2"
+      },
+      "warnings": [
+        "FROM_OTHER_CLOUD", "TTL_UNKNOWN"
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `resposne` | Array containing the data |
+| `provider` | Provider System |
+| `service` | Service |
+| `serviceUri` |  URI of the Service |
+| `secure` | Security info |
+| `metadata` | Metadata |
+| `interfaces` | List of the interfaces the Service supports |
+| `version` | Version of the Service |
+| `authorizationTokens` | Authorization Tokens |
+| `warnings` | Warnings |
+
+> **Note:** `authorizationTokens` object only appears if the provider requires token authentication,
+            `authorizationTokens` is interface-specific
+
+> **Note:** `warnings array` can contains the following texts: 
+> * `FROM_OTHER_CLOUD` (if the provider is in an other cloud)
+> * `TTL_EXPIRED` (the provider is no longer accessible)
+> * `TTL_EXPIRING` (the provider will be inaccessible in a matter of minutes),
+> * `TTL_UNKNOWN` (the provider does not specified expiration time)
+
+<a name="orchestrator_endpoints_get_store" />
+
+### Get all Store Entries 
+```
+GET /orchestrator/mgmt/store
+```
+
+Returns a list of orchestrator store rule records. If `page` and `item_per_page` are not defined, returns
+all records. 
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_storeentrylist" />
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Provider System in  Foreign Cloud |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** Rules are a little stricter than before: the service interface is also part of it. But the defaultEntry flag
+           is no longer supported; now, entries with priority 1 is considered as defaults.
+           
+> **Note:** 4.1.2 version: GET /orchestrator/mgmt/store/all <br />
+            This version always returned all records in an array of JSON objects. The objects did not contain
+            any time information. Rules didn't depend on interface.
+            
+<a name="orchestrator_endpoints_post_store" />
+
+### Add Store Entries
+```
+POST /orchestrator/mgmt/store
+```                       
+
+Creates Orchestrator Store records and returns the newly created records.
+
+<a name="datastructures_storerules" />
+
+__StoreRules__ is the input
+
+```json
+[
+  {
+    "serviceDefinitionName": "string",
+    "consumerSystemId": 0,
+    "attribute": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "providerSystem": {
+      "systemName": "string",
+      "address": "string",
+      "port": 0
+    },
+    "cloud": {
+      "operator": "string",
+      "name": "string"
+    },
+    "serviceInterfaceName": "string",
+    "priority": 1
+  }
+]
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `serviceDefinitionName` | Service Definition | yes |
+| `consumerSystemId` | Consumer System ID | yes |
+| `attribute` | Attributes | no |
+| `providerSystem` | Provider System | yes |
+| `cloud` | Cloud | yes |
+| `serviceInterfaceName` | Service Interface Name | yes |
+| `priority` | Priority | yes |
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Provider System in  Foreign Cloud |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: POST /orchestrator/mgmt/store<br/ >
+            This version required whole JSON objects as consumer instead of id and didn't contains interface
+            names. Also, it used defaultEntry flags.
+            
+<a name="orchestrator_endpoints_get_store_id" />
+
+### Get Store Entry by ID 
+```
+GET /orchestrator/mgmt/store/{id}
+```             
+
+Returns the orchestrator store rule record specified by the ID path parameter.
+
+```json
+{
+  "id": 0,
+  "serviceDefinition": {
+    "id": 0,
+    "serviceDefinition": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "consumerSystem": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "foreign": true,
+  "providerCloud": {
+    "id": 0,
+    "operator": "string",
+    "name": "string",
+    "authenticationInfo": "string",
+    "secure": true,
+    "neighbor": true,
+    "ownCloud": false,
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "providerSystem": {
+    "id": 0,
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "serviceInterface": {
+    "id": 0,
+    "interfaceName": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  },
+  "priority": 1,
+  "attribute": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Provider System in  Foreign Cloud |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /orchestrator/mgmt/store/{id} <br />
+            The returned structure did not contain time information and interface names
+
+<a name="orchestrator_endpoints_delete_store_id" />
+
+### Delete Store Entries by ID
+```
+DELETE /orchestrator/mgmt/store/{id}
+```
+
+Removes the Orchestrator Store rule record specified by the ID path parameter.
+
+> **Note:** 4.1.2 version: DELETE /orchestrator/mgmt/store/{id} <br />
+            Same as the new version.
+            
+<a name="orchestrator_endpoints_post_consumer" />
+  
+### Get Entries by Consumer
+```
+GET /orchestrator/mgmt/store/all_by_consumer
+```
+
+Returns a list of Orchestrator Store rule records related to consumer, service definition and
+optionally service interface. If `page` and `item_per_page` are not defined, no paging is involved.
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+<a name="datastructures_consumer_rule" />
+
+__ConsumerRule is the input__
+
+```json
+{
+ "consumerSystemId": 0,
+ "serviceDefinitionName": "string",
+ "serviceInterfaceName": "string"
+}
+``` 
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `consumerSystemId` | ID of the Consumer | yes |
+| `serviceDefinitionName` | Service Definition | yes |
+| `serviceInterfaceName` | Service Interface | no |
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Provider System in  Foreign Cloud |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store <br />
+            This version always returned all matching records in an array of JSON objects. The objects did not
+            contain any time information and filtering by interface name was not available.
+            
+<a name="orchestrator_endpoints_get_priority" />
+
+### Get Top Priority Entries
+```
+GET /orchestrator/mgmt/store/all_top_priority
+```            
+            
+Returns a list of orchestrator store rule records whose priority is 1. If `page` and `item_per_page` are
+not defined, no paging is involved.             
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+Returns a __StoreEntryList__
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "serviceDefinition": {
+        "id": 0,
+        "serviceDefinition": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "consumerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "foreign": true,
+      "providerCloud": {
+        "id": 0,
+        "operator": "string",
+        "name": "string",
+        "authenticationInfo": "string",
+        "secure": true,
+        "neighbor": true,
+        "ownCloud": false,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "providerSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "serviceInterface": {
+        "id": 0,
+        "interfaceName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "priority": 1,
+      "attribute": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of records found |
+| `data` | Array of data |
+| `id` | ID of the Store Entry
+| `serviceDefinition` | Service Definition |
+| `consumerSystem` | Consumer System |
+| `foreign` | Provider System in  Foreign Cloud |
+| `providerCloud` | Provider Cloud |
+| `providerSystem` | Provider System |
+| `serviceInterface` |  Service Interface |
+| `priority` | Priority |
+| `metadata` | Metadata |
+| `attribute` | Attributes |
+| `createdAt` | Creation date of the entry |
+| `updatedAt` | When the entry was last updated |
+
+> **Note:** 4.1.2 version: GET /orchestrator/mgmt/store/all_default <br />
+            This version always returned all records where defaultEntry flag is true in an array of JSON objects.
+            The objects did not contain any time information.             
+
+<a name="orchestrator_endpoints_post_priorities" />
+
+### Modify Priorities
+```
+POST /orchestrator/mgmt/store/modify_priorities
+```            
+
+Changes the priority field of the specified entries.
+
+<a name="datastructures_prioritylist" />
+
+__PriorityList__ is the input
+
+```json
+{
+  "priorityMap": {
+    "{id1}": 1,
+    "{id2}": 2,
+    "{id3}": 3
+ }
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `priorityMap` | Priority List | yes |
+
+> **Note:** The keys of the map are Orcherstrator store rule IDs, the values are the new priorities.
+
+> **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store/priorities<br />
+            Same as the new version
