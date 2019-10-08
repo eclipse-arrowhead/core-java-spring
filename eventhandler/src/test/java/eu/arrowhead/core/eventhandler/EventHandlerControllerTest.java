@@ -454,7 +454,7 @@ public class EventHandlerControllerTest {
 		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
 		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
 
-		deleteUnregisterSubscription( queryStr, status().isOk() );
+		deleteSubscription( queryStr, status().isOk() );
 
 	}
 	
@@ -720,7 +720,7 @@ public class EventHandlerControllerTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private MvcResult deleteUnregisterSubscription(final String queryStr, final ResultMatcher matcher) throws Exception {
+	private MvcResult deleteSubscription(final String queryStr, final ResultMatcher matcher) throws Exception {
 		final String validatedQueryStr = Utilities.isEmpty(queryStr) ? "" : "?" + queryStr.trim();
 		return this.mockMvc.perform(delete(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE + validatedQueryStr)
 						   .accept(MediaType.APPLICATION_JSON))
