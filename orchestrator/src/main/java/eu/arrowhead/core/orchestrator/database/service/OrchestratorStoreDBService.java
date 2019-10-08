@@ -393,7 +393,7 @@ public class OrchestratorStoreDBService {
 		logger.debug("createOrchestratorStoreEntity started...");
 		
 		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestDTO.getConsumerSystemId()); 
-		final Cloud validCloud = validateProviderCloud(orchestratorStoreRequestDTO.getCloudDTO());	
+		final Cloud validCloud = validateProviderCloud(orchestratorStoreRequestDTO.getCloud());	
 		final boolean isLocalCloud = localCloudConditionCheck(validCloud);
 		
 		if (isLocalCloud) {
@@ -512,7 +512,7 @@ public class OrchestratorStoreDBService {
 	private OrchestratorStore validateLocalOrchestratorStoreRequestDTO(final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System validConsumerSystem) {
 		logger.debug("validateOrchestratorStoreRequestDTO started...");
 		
-		final long validProviderSystemId = validateProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO());		
+		final long validProviderSystemId = validateProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystem());		
 		final ServiceDefinition validServiceDefinition = validateServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
@@ -863,7 +863,7 @@ public class OrchestratorStoreDBService {
 																		 final Cloud validProviderCloud) {
 		logger.debug("validateForeignOrchestratorStoreRequestDTO started...");
 		
-		final long validProviderSystemId = validateForeignProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO(), validProviderCloud);		
+		final long validProviderSystemId = validateForeignProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystem(), validProviderCloud);		
 		final ServiceDefinition validServiceDefinition = validateForeignServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateForeignServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
