@@ -74,7 +74,7 @@ public class PublishRequestFixedExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitMaxExpressSubscribersIsLessThenMaxThreadPoolSize() {
+	public void testInitMaxExpressSubscribersIsLessThanMaxThreadPoolSize() {
 		
 		ReflectionTestUtils.setField( testingObject, "threadPool", null);
 		
@@ -96,7 +96,7 @@ public class PublishRequestFixedExecutorTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitMaxExpressSubscribersIsMoreThenMaxThreadPoolSize() {
+	public void testInitMaxExpressSubscribersIsMoreThanMaxThreadPoolSize() {
 		
 		ReflectionTestUtils.setField( testingObject, "threadPool", null);
 		
