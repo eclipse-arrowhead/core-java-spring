@@ -3174,7 +3174,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3309,7 +3309,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3393,7 +3393,7 @@ Returns the orchestrator store rule record specified by the ID path parameter.
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3534,7 +3534,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
@@ -3646,7 +3646,7 @@ Returns a __StoreEntryList__
 | `id` | ID of the Store Entry
 | `serviceDefinition` | Service Definition |
 | `consumerSystem` | Consumer System |
-| `foreign` | Foreign |
+| `foreign` | Provider System in  Foreign Cloud |
 | `providerCloud` | Provider Cloud |
 | `providerSystem` | Provider System |
 | `serviceInterface` |  Service Interface |
