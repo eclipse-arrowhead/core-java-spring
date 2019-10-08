@@ -518,7 +518,7 @@ public class EventHandlerControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void publishNulTimeStampTest() throws Exception {
+	public void publishNullTimeStampTest() throws Exception {
 		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		request.setTimeStamp( null );
