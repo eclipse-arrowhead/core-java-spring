@@ -63,7 +63,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -76,7 +76,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -102,7 +102,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -115,7 +115,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -143,7 +143,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -156,7 +156,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -186,7 +186,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -199,7 +199,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -229,7 +229,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -242,7 +242,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -272,7 +272,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -285,7 +285,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -315,7 +315,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -328,7 +328,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -358,7 +358,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -371,7 +371,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -401,7 +401,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -414,7 +414,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -444,7 +444,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -457,7 +457,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -487,7 +487,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -500,7 +500,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -530,7 +530,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -543,7 +543,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -573,7 +573,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -586,7 +586,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -616,7 +616,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -629,7 +629,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -659,7 +659,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -672,7 +672,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -702,7 +702,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -715,7 +715,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -745,7 +745,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -758,7 +758,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -788,7 +788,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -801,7 +801,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -831,7 +831,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -844,7 +844,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -872,7 +872,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -885,7 +885,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -914,7 +914,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -927,7 +927,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -957,7 +957,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenReturn( publishStartDTO ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -970,7 +970,7 @@ public class PublishingQueueWatcherTaskTest {
 			
 			verify( publishingQueue, times( 2 )).take();
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
@@ -998,7 +998,7 @@ public class PublishingQueueWatcherTaskTest {
 		try {
 			when( publishingQueue.take() ).thenThrow( InterruptedException.class );
 		
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			
 			assertTrue( false );
 		}
