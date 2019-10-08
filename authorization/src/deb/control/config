@@ -12,7 +12,7 @@ fi
 
 # Get installation type
 db_input high arrowhead-core-common/db_host || true
-db_input high arrowhead-core-common/mysql_password_system || true
+db_input high arrowhead-core-common/mysql_password_auth || true
 db_input high arrowhead-core-common/sr_host || true
 
 # Run dialogs

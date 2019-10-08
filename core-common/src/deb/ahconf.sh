@@ -17,6 +17,11 @@ ah_cert () {
     dst_path=${1}
     dst_name=${2}
     cn=${3}
+	passwd=${4}
+	
+	if [ -z ${passwd} ]; then
+		passwd=${AH_PASS_CERT}
+	fi
 
     file="${dst_path}/${dst_name}.p12"
 
@@ -31,9 +36,9 @@ ah_cert () {
             -keysize 2048 \
             -dname "CN=${cn}, OU=${AH_OPERATOR}, O=${AH_COMPANY}, C=${AH_COUNTRY}" \
             -validity 3650 \
-            -keypass ${AH_PASS_CERT} \
+            -keypass ${passwd} \
             -keystore ${file} \
-            -storepass ${AH_PASS_CERT} \
+            -storepass ${passwd} \
             -storetype PKCS12 \
             -ext BasicConstraints=ca:true,pathlen:3 \
 			-ext SubjectAlternativeName=IP:127.0.0.1,DNS:localhost,DNS:`hostname`,IP:${OWN_IP}
@@ -94,6 +99,11 @@ ah_cert_import () {
     src_name=${2}
     dst_path=${3}
     dst_name=${4}
+	passwd=${5}
+	
+	if [ -z ${passwd} ]; then
+		passwd=${AH_PASS_CERT}
+	fi
 
     src_file="${src_path}/${src_name}.crt"
     dst_file="${dst_path}/${dst_name}.p12"
@@ -103,8 +113,8 @@ ah_cert_import () {
         -file ${src_file} \
         -alias ${src_name} \
         -keystore ${dst_file} \
-        -keypass ${AH_PASS_CERT} \
-        -storepass ${AH_PASS_CERT} \
+        -keypass ${passwd} \
+        -storepass ${passwd} \
         -storetype PKCS12 \
         -noprompt
 }
@@ -159,13 +169,33 @@ ah_cert_signed () {
 
 ah_cert_signed_system () {
     name=${1}
+	passwd=${2}
+	host=${3}
+	ip=${4}
+	path_dir=${5}
+	
+	if [ -z ${passwd} ] ; then
+		passwd=${AH_PASS_CERT}
+	fi
+	
+	if [ -z ${host} ]; then
+		host=`hostname`
+	fi
+	
+	if [ -z ${ip} ]; then
+		ip=${OWN_IP}
+	fi
+	
+	if [ -z ${path_dir} ]; then
+		path_dir=${AH_SYSTEMS_DIR}
+	fi
 
-    path="${AH_SYSTEMS_DIR}/${name}"
+    path="${path_dir}/${name}"
     file="${path}/${name}.p12"
     src_file="${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
 
     if [ ! -f "${file}" ]; then
-		ah_cert ${path} ${name} "${name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu"
+		ah_cert ${path} ${name} "${name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${passwd}
 
         keytool -export \
             -alias ${AH_CLOUD_NAME} \
@@ -175,31 +205,31 @@ ah_cert_signed_system () {
             -trustcacerts \
             -alias ${AH_CLOUD_NAME} \
             -keystore ${file} \
-            -keypass ${AH_PASS_CERT} \
-            -storepass ${AH_PASS_CERT} \
+            -keypass ${passwd} \
+            -storepass ${passwd} \
             -storetype PKCS12 \
             -noprompt
 
         keytool -certreq \
             -alias ${name} \
-            -keypass ${AH_PASS_CERT} \
+            -keypass ${passwd} \
             -keystore ${file} \
-            -storepass ${AH_PASS_CERT} \
+            -storepass ${passwd} \
         | keytool -gencert \
             -alias ${AH_CLOUD_NAME} \
             -keypass ${AH_PASS_CERT} \
             -keystore ${src_file} \
             -storepass ${AH_PASS_CERT} \
             -validity 3650 \
-			-ext SubjectAlternativeName=IP:127.0.0.1,DNS:localhost,DNS:`hostname`,IP:${OWN_IP} \
+			-ext SubjectAlternativeName=IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip} \
         | keytool -importcert \
             -alias ${name} \
-            -keypass ${AH_PASS_CERT} \
+            -keypass ${passwd} \
             -keystore ${file} \
-            -storepass ${AH_PASS_CERT} \
+            -storepass ${passwd} \
             -noprompt
 		
-        ah_cert_import "${AH_CONF_DIR}" "master" "${path}" ${name}
+        ah_cert_import "${AH_CONF_DIR}" "master" "${path}" ${name} ${passwd}
     fi
 }
 
@@ -207,6 +237,11 @@ ah_cert_trust () {
     dst_path=${1}
     src_path=${2}
     src_name=${3}
+	passwd=${4}
+	
+	if [ -z ${passwd} ]; then
+		passwd=${AH_PASS_CERT}
+	fi
 
     src_file="${src_path}/${src_name}.p12"
     dst_file="${dst_path}/truststore.p12"
@@ -220,8 +255,8 @@ ah_cert_trust () {
             -trustcacerts \
             -alias ${src_name} \
             -keystore ${dst_file} \
-            -keypass ${AH_PASS_CERT} \
-            -storepass ${AH_PASS_CERT} \
+            -keypass ${passwd} \
+            -storepass ${passwd} \
             -storetype PKCS12 \
             -noprompt
 
@@ -233,14 +268,9 @@ ah_cert_trust () {
 ah_db_tables_and_user () {
 	mysql_user_name=${1}
 	priv_file_name=${2}
-	db_get arrowhead-core-common/db_host; db_host=$RET || true
-	db_get arrowhead-core-common/mysql_password_system; system_passwd=$RET || true
+	system_passwd=${3}
 	
-	# Generate password (if required)
-	if [ -z "${system_passwd}" ]; then
-		system_passwd="$(openssl rand -base64 12)"
-		db_set arrowhead-core-common/mysql_password_system ${system_passwd}
-	fi  
+	db_get arrowhead-core-common/db_host; db_host=$RET || true
 
     if mysql -u root -h ${db_host} -e "SHOW DATABASES" >/dev/null 2>/dev/null; then
         mysql -u root -h ${db_host} < /usr/share/arrowhead/conf/create_arrowhead_tables.sql

@@ -27,8 +27,16 @@ case "$1" in
         . /usr/share/arrowhead/conf/ahconf.sh
         SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
+		db_get arrowhead-core-common/mysql_password_gw; system_passwd=$RET || true
+		db_unregister arrowhead-core-common/mysql_password_gw
+		
+		# Generate password (if required)
+		if [ -z "${system_passwd}" ]; then
+			system_passwd="$(openssl rand -base64 12)"
+		fi  
+		
         echo "Configuring MySQL database..." >&2
-        ah_db_tables_and_user ${SYSTEM_NAME} ${SYSTEM_NAME}_privileges.sql
+        ah_db_tables_and_user ${SYSTEM_NAME} ${SYSTEM_NAME}_privileges.sql ${system_passwd}
 
         if [ ! -d "${SYSTEM_DIR}" ]; then
             mkdir -p ${SYSTEM_DIR}
@@ -47,8 +55,6 @@ case "$1" in
 		fi
 		
 		db_get arrowhead-core-common/db_host; db_host=$RET || true
-		db_get arrowhead-core-common/mysql_password_system; system_passwd=$RET || true
-		db_unregister arrowhead-core-common/mysql_password_system
 
 		mv ${SYSTEM_DIR}/application.properties ${SYSTEM_DIR}/application.properties.orig
 		cat ${SYSTEM_DIR}/application.properties.orig | \
