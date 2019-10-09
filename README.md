@@ -184,15 +184,14 @@ New payload - you can easily map the old fields to the new ones.
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
  
- How to [Add Intercloud rules](#authorization_endpoints_post_intracloud)
+ How to [Add Intercloud rules](#authorization_endpoints_post_intracloud) <br />
  How to [Add Intercloud rules](#authorization_endpoints_post_intercloud)
  
 ### Orchestration Core System:
  * __/mgmt/store__ - data structure changed
+ * __/orchestrator/orchestration__ - data structure changed
  
  Description for this endpoint is available here: [Orchestration](#orchestrator_endpoints_post_orchestration)
- 
- ServiceRequestForm data structure changed.
  
  Old payload, which is no longer usable
  
