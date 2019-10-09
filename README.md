@@ -33,7 +33,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     3. [Orchestrator](#orchestrator)
        * [System Design Description Overview](#orchestrator_sdd)
        * [Services and Use Cases](#orchestrator_usecases)  
-       * [Endpoints](orchestrator_endpoints)
+       * [Endpoints](#orchestrator_endpoints)
            * [Client](#orchestrator_endpoints_client)
            * [Private](#orchestrator_endpoints_private)
            * [Management](#orchestrator_endpoints_management)     
@@ -45,7 +45,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 
 ### Docker
 
-Placeholder
+Guide and install scripts coming soon.
 
 ### Compile source code and manually install MySQL and Maven.
 #### Requirements
@@ -68,21 +68,34 @@ Run the MySQL script which is in the ```scripts``` folder. If you won't run this
 Execute ```mvn install``` command. Wait until the build succeeds. 
 This command builds all available projects. <br />
 
-After succeeding enter the scripts folder and execute ```start_core_systems.sh``` or ```start_core_systems.bat``` depending on your operating system.
+After the build is complete, the jars with the appropriate `application.properites` will be available in their directory.
+
+#### Starting the core systems manually:
+
+Change directory to:
+
 - serviceregistry/target directory.
 ```cd serviceregistry/target``` <br />and execute: ```java -jar arrowhead-serviceregistry-4.1.3.jar```
 - authorization/target directory. ```cd authorization/target``` <br />and execute: ```java -jar arrowhead-authorization-4.1.3.jar``` 
 - orchestrator/target directory. ```orchestrator/target``` <br />and execute: ```java -jar arrowhead-orchestrator-4.1.3.jar```
 
+#### Starting the core system automatically:
+
+After successful build enter the scripts folder and execute ```start_core_systems.sh``` or ```start_core_systems.bat``` depending on your operating system.
+
 
 Wait until servers start...
 
-Service Registry will be available on ```localhost:8443``` <br />
-Authorization will be available on ```localhost:8445``` <br />
-Orchestrator will be available on ```localhost:8441``` <br />
-Event Handler will be available on ```localhost:8455``` <br />
-Gatekeeper will be available on ```localhost:8449``` <br />
-Gateway will be available on ```localhost:8453``` <br />
+> **Note:** By default servers start in SECURE mode. To access them, you need to use an example certificate, provided in the `certificate` directory.
+
+> **Note:** If you wish to change the the configuration, do it by by modifying the `application.properties` file in the `target` directory! Don't forget to change all of them!
+
+Service Registry will be available on ```https://localhost:8443``` <br />
+Authorization will be available on ```https://localhost:8445``` <br />
+Orchestrator will be available on ```https://localhost:8441``` <br />
+Event Handler will be available on ```https://localhost:8455``` <br />
+Gatekeeper will be available on ```https://localhost:8449``` <br />
+Gateway will be available on ```https://localhost:8453``` <br />
 
 Swagger with API documentation is available in the root route.
 
@@ -119,6 +132,8 @@ The following endpoints no longer exist, instead use the ones on the right:
  
  * __serviceregistry/register__ - data structure changed
  
+Description for this endpoint is available here: [Register](#serviceregistry_endpoints_post_register)
+ 
 Old payload, which is no longer usable
  ```json
 {
@@ -142,6 +157,7 @@ Old payload, which is no longer usable
  ```
 
 New payload - you can easily map the old fields to the new ones.
+
  ```json
 {
   "serviceDefinition": "IndoorTemperature",
@@ -168,9 +184,96 @@ New payload - you can easily map the old fields to the new ones.
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
  
+ How to [Add Intercloud rules](#authorization_endpoints_post_intracloud) <br />
+ How to [Add Intercloud rules](#authorization_endpoints_post_intercloud)
+ 
 ### Orchestration Core System:
- Store based orchestration is available for now.
  * __/mgmt/store__ - data structure changed
+ * __/orchestrator/orchestration__ - data structure changed
+ 
+ Description for this endpoint is available here: [Orchestration](#orchestrator_endpoints_post_orchestration)
+ 
+ Old payload, which is no longer usable
+ 
+ ```json
+{
+  "requesterSystem" : {
+    "systemName" : "client1",
+    "address" : "localhost",
+    "port" : 0,
+    "authenticationInfo" : "null"
+  },
+  "requestedService" : {
+    "serviceDefinition" : "IndoorTemperature",
+    "interfaces" : [ "json" ],
+    "serviceMetadata" : {
+      "unit" : "celsius"
+    }
+  },
+  "orchestrationFlags" : {
+    "onlyPreferred" : false,
+    "overrideStore" : true,
+    "externalServiceRequest" : false,
+    "enableInterCloud" : true,
+    "enableQoS" : false,
+    "matchmaking" : false,
+    "metadataSearch" : true,
+    "triggerInterCloud" : false,
+    "pingProviders" : false
+  },
+  "preferredProviders" : [ ],
+  "requestedQoS" : { },
+  "commands" : { }
+}
+```
+
+New payload - you can easily map the old fields to the new ones.
+
+```json
+{
+  "requesterSystem": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "requestedService": {
+    "serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+    "securityRequirements": [
+      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+    ],
+    "metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "versionRequirement": 0,
+    "maxVersionRequirement": 0,
+   "minVersionRequirement": 0
+  },
+  "preferredProviders": [
+    {
+      "providerCloud": {
+        "operator": "string",
+        "name": "string"
+      },
+      "providerSystem": {
+        "systemName": "string",
+        "address": "string",
+        "port": 0
+      }
+    }
+  ],
+  "orchestrationFlags": {
+    "additionalProp1": true,
+    "additionalProp2": true,
+    "additionalProp3": true
+  }
+}
+```
  
 
 <a name="howtocontribute" />
@@ -508,6 +611,8 @@ __ServiceRegistryEntry__ is the input
 | `interfaces` | List of the interfaces the Service supports | yes |
 
 > **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+
+> **Note:** `authenticationInfo` is the public key of the system. In Insecure mode you can omit sending this key.
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -2964,7 +3069,7 @@ The base URL for the requests: `http://<host>:<port>/orchestrator`
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#orcchestrator_endpoints_get_echo) | /echo  | GET | - | OK |
-| [Orchestration](#orchestrator_endpoints_post_orchestration) | /orchestration | POST | [Service Request](#datastructures_servicerequest) | [Orchestration Response](#datastructures_orchestration_response) |
+| [Orchestration](#orchestrator_endpoints_post_orchestration) | /orchestration | POST | [ServiceRequestForm](#datastructures_servicerequestform) | [Orchestration Response](#datastructures_orchestration_response) |
 | [Start store Orchestration by ID](#orchrestrator_endpoints_get_oschestration_id) | /orchestration/{id} | GET | StoreEntryID | [Orchestration Response](#datastructures_orchestration_response) |
  
 <a name="orchestrator_endpoints_private" />
@@ -3023,9 +3128,9 @@ POST /orchestrator/orchestration
 Initializes the orchestration process in which the Orchestrator Core System tries to find providers
 that match the specified requirements (and the consumer have right to use them).
 
-<a name="datastructures_servicerequest" />
+<a name="datastructures_servicerequestform" />
 
-__ServiceRequest__ is the input
+__ServiceRequestForm__ is the input
 
 ```json
 {
@@ -3203,7 +3308,7 @@ Returns an __Orchestration Response__
 > * `TTL_EXPIRING` (the provider will be inaccessible in a matter of minutes),
 > * `TTL_UNKNOWN` (the provider does not specified expiration time)
 
-> **Note:** 4.1.2 version: POST /orchestrator/ochestration<br />
+> **Note:** 4.1.2 version: POST /orchestrator/orchestration<br />
             It was basically the same, however security requirement was not available.
 
 <a name="orchrestrator_endpoints_get_oschestration_id" />
