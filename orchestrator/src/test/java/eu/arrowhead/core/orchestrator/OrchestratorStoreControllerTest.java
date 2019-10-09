@@ -478,7 +478,7 @@ public class OrchestratorStoreControllerTest {
 		final List<OrchestratorStoreRequestDTO> orchestratorStoreRequestDTOList = new ArrayList<>(listSize);
 		for (int i = 0; i < listSize; ++i) {
 			final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getLocalOrchestratorStoreRequestDTOForTest();
-			orchestratorStoreRequestDTO.setProviderSystemDTO(getProviderSystemRequestDTOForTest());
+			orchestratorStoreRequestDTO.setProviderSystem(getProviderSystemRequestDTOForTest());
 			orchestratorStoreRequestDTO.setPriority(i + 1);
 			orchestratorStoreRequestDTOList.add(orchestratorStoreRequestDTO);
 		}

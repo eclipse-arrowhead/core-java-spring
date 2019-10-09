@@ -85,18 +85,6 @@ public class OrchestratorStoreController {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(path = CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI)
-	public String echoService() {
-		return "Got it!";
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return OrchestratorStore entry by id", response = OrchestratorStoreResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_STORE_MGMT_BY_ID_HTTP_200_MESSAGE),
@@ -307,32 +295,32 @@ public class OrchestratorStoreController {
 			}
 			
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getAddress() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getAddress() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Address "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystemDTO().getAddress())) {
+			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystem().getAddress())) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Address "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getSystemName() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getSystemName() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.SystemName "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystemDTO().getSystemName())) {
+			if (Utilities.isEmpty(orchestratorStoreRequestDTO.getProviderSystem().getSystemName())) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.SystemName "+ EMPTY_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() == null) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getPort() == null) {
 				throw new BadPayloadException("orchestratorStoreRequestDTO.ProviderSystemDTO.Port "+ NULL_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || 
-				orchestratorStoreRequestDTO.getProviderSystemDTO().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			if (orchestratorStoreRequestDTO.getProviderSystem().getPort() < CommonConstants.SYSTEM_PORT_RANGE_MIN || 
+				orchestratorStoreRequestDTO.getProviderSystem().getPort() > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
 											  origin);
 			}

@@ -101,26 +101,6 @@ public class OrchestratorAccessControlFilterTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testMgmtEchoCertificateSysop() throws Exception {
-		this.mockMvc.perform(get(ORCH_MGMT_STORE_ECHO)
-				    .secure(true)
-					.with(x509("certificates/valid.pem"))
-					.accept(MediaType.TEXT_PLAIN))
-					.andExpect(status().isOk());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testMgmtEchoCertificateNoSysop() throws Exception {
-		this.mockMvc.perform(get(ORCH_MGMT_STORE_ECHO)
-				    .secure(true)
-					.with(x509("certificates/provider.pem"))
-					.accept(MediaType.TEXT_PLAIN))
-					.andExpect(status().isUnauthorized());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
 	public void testExternalOrchestrationWithGatekeeper() throws Exception {
 		final Map<String, Boolean> flags = new HashMap<>();
 		flags.put(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, true);

@@ -1045,7 +1045,7 @@ public class OrchestratorStoreDBServiceTest {
 		providerSystemRequestDTO.setAddress("");
 		
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setProviderSystemDTO(providerSystemRequestDTO);
+		orchestratorStoreRequestDTO.setProviderSystem(providerSystemRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 	}
@@ -1055,7 +1055,7 @@ public class OrchestratorStoreDBServiceTest {
 		final SystemRequestDTO providerSystemRequestDTO = getProviderSystemRequestDTOForTest();
 		providerSystemRequestDTO.setAddress("");
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setProviderSystemDTO(providerSystemRequestDTO);
+		orchestratorStoreRequestDTO.setProviderSystem(providerSystemRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 	}
@@ -1065,7 +1065,7 @@ public class OrchestratorStoreDBServiceTest {
 		final CloudRequestDTO providerCloudRequestDTO = getLocalProviderCloudRequestDTOForTest();
 		providerCloudRequestDTO.setName(" ");
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setCloudDTO(providerCloudRequestDTO);
+		orchestratorStoreRequestDTO.setCloud(providerCloudRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 	}
@@ -1075,7 +1075,7 @@ public class OrchestratorStoreDBServiceTest {
 		final CloudRequestDTO providerCloudRequestDTO = getForeignProviderCloudRequestDTOForTest();
 		providerCloudRequestDTO.setName(" ");
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setCloudDTO(providerCloudRequestDTO);
+		orchestratorStoreRequestDTO.setCloud(providerCloudRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 	}
@@ -1138,7 +1138,7 @@ public class OrchestratorStoreDBServiceTest {
 	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithNullProviderSystemForTest() {
 		final SystemRequestDTO providerSystemRequestDTO = null;
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setProviderSystemDTO(providerSystemRequestDTO);
+		orchestratorStoreRequestDTO.setProviderSystem(providerSystemRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 	}
@@ -1147,7 +1147,7 @@ public class OrchestratorStoreDBServiceTest {
 	private OrchestratorStoreRequestDTO getForeignOrchestratorStoreRequestDTOWithNullProviderSystemForTest() {
 		final SystemRequestDTO providerSystemRequestDTO = null;
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getForeignOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setProviderSystemDTO(providerSystemRequestDTO);
+		orchestratorStoreRequestDTO.setProviderSystem(providerSystemRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 	}
@@ -1156,7 +1156,7 @@ public class OrchestratorStoreDBServiceTest {
 	private OrchestratorStoreRequestDTO getOrchestratorStoreRequestDTOWithNullCloudIdForTest() {
 		final CloudRequestDTO providerCloudRequestDTO = null;
 		final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO = getOrchestratorStoreRequestDTOForTest();
-		orchestratorStoreRequestDTO.setCloudDTO(providerCloudRequestDTO);
+		orchestratorStoreRequestDTO.setCloud(providerCloudRequestDTO);
 		
 		return orchestratorStoreRequestDTO;
 
