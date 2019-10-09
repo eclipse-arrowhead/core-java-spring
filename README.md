@@ -9,6 +9,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
  
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
+    1. [Docker](#quickstart_docker)
+    2. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [How to Contribute](#howtocontribute)
 4. [Documentation](#documentation) 
@@ -43,9 +45,47 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 
 ## Quick Start Guide
 
+<a name="quickstart_docker" />
+
 ### Docker
 
-Guide and install scripts coming soon.
+#### Requirements
+* Docker 
+  * [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+  * [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
+  * [Mac OS](https://docs.docker.com/docker-for-mac/install/) - Helpful tool for container management: [Kitematic](https://kitematic.com/)
+  * [Windows](https://docs.docker.com/docker-for-windows/install/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+Don't forget to create a volume for mysql: `docker volume create --name=mysql`
+Don't forget to run the SQL script inside the MySQL container beforehand. Easier DB setup solution will be coming shortly. 
+
+Inside the `docker` folder some examples provided. 
+
+##### Core System Config
+
+Example Core System Configuration files are available in this folder. 
+
+##### Docker Compose
+
+Example Docker Compose file is located here. The interesting part is the volumes section. 
+Format is /path/on/your/local/machine:/path/inside/docker/container
+
+You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mouning point inside the container, otherwise it will start up with default config.
+
+To update the images: execute `docker-compose pull` command in the directory where the compose file is.
+
+To start the containers: execute `docker-compose up -d` command in the directory where the compose file is.
+
+If you change your config you have to restart the appropriate container
+
+`docker restart <containerName>`
+
+List all containers:
+
+`docker ps -a`
+
+<a name="quickstart_compile" />
 
 ### Compile source code and manually install MySQL and Maven.
 #### Requirements
@@ -162,9 +202,9 @@ New payload - you can easily map the old fields to the new ones.
 {
   "serviceDefinition": "IndoorTemperature",
   "providerSystem": {
-  "systemName": "InsecureTemperatureSensor",
-  "address": "192.168.0.2",
-  "port": 8080,
+    "systemName": "InsecureTemperatureSensor",
+    "address": "192.168.0.2",
+    "port": 8080,
   "authenticationInfo": "eyJhbGciOiJIUzI1Ni..."
  },
   "serviceUri": "temperature",
@@ -176,7 +216,7 @@ New payload - you can easily map the old fields to the new ones.
   "version": 1,
   "interfaces": [
     "HTTP-SECURE-JSON"
- ]
+  ]
 }
 ```
  
@@ -184,7 +224,7 @@ New payload - you can easily map the old fields to the new ones.
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
  
- How to [Add Intercloud rules](#authorization_endpoints_post_intracloud) <br />
+ How to [Add Intracloud rules](#authorization_endpoints_post_intracloud) <br />
  How to [Add Intercloud rules](#authorization_endpoints_post_intercloud)
  
 ### Orchestration Core System:
@@ -243,7 +283,7 @@ New payload - you can easily map the old fields to the new ones.
       "string"
     ],
     "securityRequirements": [
-      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+      "NOT_SECURE", "CERTIFICATE", "TOKEN"
     ],
     "metadataRequirements": {
       "additionalProp1": "string",
@@ -550,7 +590,7 @@ Returns a __ServiceQueryList__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` | URI of the Service |
-| `endOfValidity` | Service is available until this timestamp. |
+| `endOfValidity` | Service is available until this UTC timestamp. |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -604,7 +644,7 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | yes |
 | `providerSystem` | Provider System | yes |
 | `serviceUri` |  URI of the service | yes |
-| `endOfValidity` | Service is available until this timestamp | no |
+| `endOfValidity` | Service is available until this UTC timestamp | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
@@ -667,7 +707,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -801,7 +841,7 @@ Returns a __ServiceRegistryEntryList__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` | URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -855,7 +895,7 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | yes |
 | `providerSystem` | Provider System | yes |
 | `serviceUri` | URI of the Service | no |
-| `endOfValidity` | Service is available until this timestamp. | no |
+| `endOfValidity` | Service is available until this UTC timestamp. | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
@@ -916,7 +956,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -987,7 +1027,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -1040,7 +1080,7 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | yes |
 | `providerSystem` | Provider System | yes |
 | `serviceUri` | URI of the Service | no |
-| `endOfValidity` | Service is available until this timestamp. | no |
+| `endOfValidity` | Service is available until this UTC timestamp. | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
@@ -1101,7 +1141,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -1154,7 +1194,7 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | no |
 | `providerSystem` | Provider System | no |
 | `serviceUri` | URI of the Service | no |
-| `endOfValidity` | Service is available until this timestamp. | no |
+| `endOfValidity` | Service is available until this UTC timestamp. | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
@@ -1215,7 +1255,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -1466,7 +1506,7 @@ Returns a __ServiceRegistryEntryList__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` | URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
