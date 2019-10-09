@@ -1,0 +1,66 @@
+version: "3"
+
+services:
+  mysql:
+    container_name: compose_mysql_1
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=THIS_WILL_BE_YOUR_CONTAINERS_ROOT_PW
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  serviceregistry:
+    container_name: serviceregistry
+    image: arrowhead-ci.tmit.bme.hu/arrowhead/serviceregistry:latest
+    volumes:
+      # dont forget to change the route of the locally available config file
+      # format is <file on your local machine, (change this!!!)>:<file location inside the container (don't change this part!!!)>
+      - /core_system_config/serviceregistry.properties:/serviceregistry/application.properties
+    ports:
+      - 8443:8443
+
+  authorization:
+    container_name: authorization
+    image: arrowhead-ci.tmit.bme.hu/arrowhead/authorization:latest
+    volumes:
+      - /core_system_config/authorization.properties:/authorization/application.properties
+    ports:
+      - 8445:8445
+
+  orchestrator:
+    container_name: orchestrator
+    image: arrowhead-ci.tmit.bme.hu/arrowhead/orchestrator:latest
+    volumes:
+      - /core_system_config/orchestrator.properties:/orchestrator/application.properties
+    ports:
+      - 8441:8441
+
+  eventhandler:
+    container_name: eventhandler
+    image: arrowhead-ci.tmit.bme.hu/arrowhead/eventhandler:latest
+    volumes:
+      - /core_system_config/eventhandler.properties:/eventhandler/application.properties
+    ports:
+      - 8455:8455
+  
+  gatekeeper:
+    container_name: gatekeeper
+    image: arrowhead-ci.tmit.bme.hu/arrowhead/gatekeeper:latest
+    volumes:
+      - /core_system_config/gatekeeper.properties:/gatekeeper/application.properties
+    ports:
+      - 8449:8449
+
+  gateway:
+    container_name: gateway
+    image: arrowhead-ci.tmit.bme.hu/arrowhead/gateway:latest
+    volumes:
+      - /core_system_config/gateway.properties:/gateway/application.properties 
+    ports:
+      - 8453:8453 
+
+volumes:
+  mysql:
+    external: true  
