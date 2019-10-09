@@ -613,6 +613,8 @@ __ServiceRegistryEntry__ is the input
 
 > **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
 
+> **Note:** `authenticationInfo` is the public key of the system. In Insecure mode you can omit sending this key.
+
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
 > * `CERTIFICATE`
