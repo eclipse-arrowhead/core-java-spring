@@ -58,6 +58,7 @@ public class PublishRequestFixedExecutor {
 		logger.debug("PublishRequestFixedExecutor.execute started...");
 		
 		for ( final Subscription subscription : involvedSubscriptions ) {			
+			
 			try {
 
 				validateSubscription( subscription );
@@ -68,6 +69,9 @@ public class PublishRequestFixedExecutor {
 				
 				logger.error("PublishEventTask execution rejected at {}", ZonedDateTime.now());
 				
+			} catch ( final Throwable ex) {
+				
+				logger.debug( ex.getMessage() );
 			}
 		}
 		
