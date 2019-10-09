@@ -12,8 +12,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     1. [Docker](#quickstart_docker)
     2. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
-3. [How to Contribute](#howtocontribute)
-4. [Documentation](#documentation) 
+3. [Certificates](#certificates)
+4. [How to Contribute](#howtocontribute)
+5. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -314,6 +315,12 @@ New payload - you can easily map the old fields to the new ones.
   }
 }
 ```
+
+<a name="certificates" />
+
+## Certificates
+
+Placeholder
  
 
 <a name="howtocontribute" />
