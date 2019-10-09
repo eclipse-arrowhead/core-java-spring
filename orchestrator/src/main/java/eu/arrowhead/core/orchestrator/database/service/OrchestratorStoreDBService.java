@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.ForeignSystem;
@@ -32,15 +33,15 @@ import eu.arrowhead.common.database.repository.OrchestratorStoreRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.CloudResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.OrchestratorStoreListResponseDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreModifyPriorityRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreRequestDTO;
-import eu.arrowhead.common.dto.OrchestratorStoreResponseDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
-import eu.arrowhead.common.dto.SystemResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreListResponseDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreModifyPriorityRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreRequestDTO;
+import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
@@ -120,7 +121,7 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -141,7 +142,7 @@ public class OrchestratorStoreDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE + validatedSortField);
@@ -151,7 +152,7 @@ public class OrchestratorStoreDBService {
 			return orchestratorStoreRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -172,17 +173,17 @@ public class OrchestratorStoreDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE + validatedSortField);
 		}
 		
 		try {
-			return orchestratorStoreRepository.findAllByPriority(CommonConstants.TOP_PRIORITY, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+			return orchestratorStoreRepository.findAllByPriority(CoreCommonConstants.TOP_PRIORITY, PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -206,7 +207,7 @@ public class OrchestratorStoreDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!OrchestratorStore.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE + validatedSortField);
@@ -256,7 +257,7 @@ public class OrchestratorStoreDBService {
 			}
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -288,12 +289,12 @@ public class OrchestratorStoreDBService {
 			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
 					consumerOption.get(), 
 					serviceDefinitionOption.get(),
-					Sort.by(CommonConstants.SORT_FIELD_PRIORITY)
+					Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY)
 					);			
 			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -335,12 +336,12 @@ public class OrchestratorStoreDBService {
 					consumerOption.get(), 
 					serviceDefinitionOption.get(),
 					serviceInterfaceOption.get(),
-					Sort.by(CommonConstants.SORT_FIELD_PRIORITY)
+					Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY)
 					);			
 			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -357,7 +358,7 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -382,7 +383,7 @@ public class OrchestratorStoreDBService {
 			return savedOrchestratorStoreEntries;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -392,7 +393,7 @@ public class OrchestratorStoreDBService {
 		logger.debug("createOrchestratorStoreEntity started...");
 		
 		final System validConsumerSystem = validateSystemId(orchestratorStoreRequestDTO.getConsumerSystemId()); 
-		final Cloud validCloud = validateProviderCloud(orchestratorStoreRequestDTO.getCloudDTO());	
+		final Cloud validCloud = validateProviderCloud(orchestratorStoreRequestDTO.getCloud());	
 		final boolean isLocalCloud = localCloudConditionCheck(validCloud);
 		
 		if (isLocalCloud) {
@@ -432,7 +433,7 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -458,7 +459,7 @@ public class OrchestratorStoreDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -471,10 +472,10 @@ public class OrchestratorStoreDBService {
 		}
 		
 		try {
-			return orchestratorStoreRepository.findAllByPriorityAndSystemId(CommonConstants.TOP_PRIORITY, consumerSystemId);
+			return orchestratorStoreRepository.findAllByPriorityAndSystemId(CoreCommonConstants.TOP_PRIORITY, consumerSystemId);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 		
 	}
@@ -511,7 +512,7 @@ public class OrchestratorStoreDBService {
 	private OrchestratorStore validateLocalOrchestratorStoreRequestDTO(final OrchestratorStoreRequestDTO orchestratorStoreRequestDTO, final System validConsumerSystem) {
 		logger.debug("validateOrchestratorStoreRequestDTO started...");
 		
-		final long validProviderSystemId = validateProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO());		
+		final long validProviderSystemId = validateProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystem());		
 		final ServiceDefinition validServiceDefinition = validateServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());
@@ -768,7 +769,7 @@ public class OrchestratorStoreDBService {
 		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(consumerSystem, serviceDefinition,
 																																					     serviceInterface);
 		if (orchestratorStoreList.isEmpty()) {
-			orchestratorStore.setPriority(CommonConstants.TOP_PRIORITY);
+			orchestratorStore.setPriority(CoreCommonConstants.TOP_PRIORITY);
 			
 			return orchestratorStoreRepository.saveAndFlush(orchestratorStore);
 		} else {
@@ -862,7 +863,7 @@ public class OrchestratorStoreDBService {
 																		 final Cloud validProviderCloud) {
 		logger.debug("validateForeignOrchestratorStoreRequestDTO started...");
 		
-		final long validProviderSystemId = validateForeignProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystemDTO(), validProviderCloud);		
+		final long validProviderSystemId = validateForeignProviderSystemRequestDTO(orchestratorStoreRequestDTO.getProviderSystem(), validProviderCloud);		
 		final ServiceDefinition validServiceDefinition = validateForeignServiceDefinitionName(orchestratorStoreRequestDTO.getServiceDefinitionName());	
 		final int validPriority = validatePriority(orchestratorStoreRequestDTO.getPriority());
 		final ServiceInterface validInterface = validateForeignServiceInterfaceName(orchestratorStoreRequestDTO.getServiceInterfaceName());

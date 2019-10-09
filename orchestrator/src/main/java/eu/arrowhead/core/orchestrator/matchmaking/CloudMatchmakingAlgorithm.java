@@ -1,6 +1,6 @@
 package eu.arrowhead.core.orchestrator.matchmaking;
 
-import eu.arrowhead.common.dto.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 
 public interface CloudMatchmakingAlgorithm {
 

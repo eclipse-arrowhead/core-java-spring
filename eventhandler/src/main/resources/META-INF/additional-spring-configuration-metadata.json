@@ -5,19 +5,19 @@
     "description": "A description for 'sr_address'"
   },
   {
-    "name": "event_publishing_tolerance",
+    "name": "time_stamp_tolerance_seconds",
     "type": "java.lang.Long",
-    "description": "A description for 'event_publishing_tolerance'"
+    "description": "A description for 'time_stamp_tolerance_seconds'"
   },
   {
-    "name": "remove_old_filters",
+    "name": "event_handler_ttl_scheduled",
     "type": "java.lang.Boolean",
-    "description": "A description for 'remove_old_filters'"
+    "description": "A description for 'event_handler_ttl_scheduled'"
   },
   {
-    "name": "check_interval",
+    "name": "event_handler_ttl_interval",
     "type": "java.lang.Long",
-    "description": "A description for 'check_interval'"
+    "description": "A description for 'event_handler_ttl_interval'"
   },
   {
     "name": "sr_port",
@@ -38,5 +38,10 @@
     "name": "core_system_name",
     "type": "java.lang.String",
     "description": "A description for 'core_system_name'"
+  },
+  {
+    "name": "event_handler_max_express_subscribers",
+    "type": "java.lang.Integer",
+    "description": "A description for 'event_handler_max_express_subscribers'"
   }
 ]}

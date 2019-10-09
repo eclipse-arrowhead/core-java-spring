@@ -5,6 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import eu.arrowhead.common.Defaults;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,10 +23,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
 @NamedEntityGraph(name = "serviceDefinitionWithServiceRegistryEntries",
@@ -38,7 +41,7 @@ public class ServiceDefinition {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column(nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
 	private String serviceDefinition; //NOSONAR
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -58,7 +61,11 @@ public class ServiceDefinition {
 	@OneToMany(mappedBy = "serviceDefinition", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
-	
+
+	@OneToMany (mappedBy = "serviceDefinitionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OnDelete (action = OnDeleteAction.CASCADE)
+	private Set<ChoreographerActionStepServiceDefinitionConnection> actionStepServiceDefinitionConnections = new HashSet<>();
+
 	//=================================================================================================
 	// methods
 

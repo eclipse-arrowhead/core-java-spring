@@ -23,7 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
@@ -37,8 +37,8 @@ import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 
 @RunWith(SpringRunner.class)
@@ -80,7 +80,7 @@ public class AuthorizationDBServiceInterCloudTest {
 	public void testGetAuthorizationInterCloudEntriesCallDB() {
 		final int numOfEntries = 3;
 		when(authorizationInterCloudRepository.findAll(any(PageRequest.class))).thenReturn(createPageForMockingAuthorizationInterCloudRepository(numOfEntries));
-		assertEquals(numOfEntries, authorizationDBService.getAuthorizationInterCloudEntries(0, 10, Direction.ASC, CommonConstants.COMMON_FIELD_NAME_ID).getNumberOfElements());
+		assertEquals(numOfEntries, authorizationDBService.getAuthorizationInterCloudEntries(0, 10, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID).getNumberOfElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

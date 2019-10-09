@@ -16,7 +16,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
@@ -35,16 +35,16 @@ public class ForeignSystem {
 	@JoinColumn(name = "providerCloudId", referencedColumnName = "id", nullable = false)
 	private Cloud providerCloud;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String systemName;
 	
-	@Column(nullable = false, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String address;
 	
 	@Column(nullable = false)
 	private int port;
 	
-	@Column(nullable = true, length = Defaults.VARCHAR_EXTENDED)
+	@Column(nullable = true, length = CoreDefaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

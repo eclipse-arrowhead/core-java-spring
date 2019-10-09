@@ -1,6 +1,7 @@
 package eu.arrowhead.core.authorization.database.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
 import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
@@ -33,16 +36,22 @@ import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.database.repository.ServiceInterfaceRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
-import eu.arrowhead.common.dto.AuthorizationInterCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudListResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationInterCloudResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudCheckResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudListResponseDTO;
-import eu.arrowhead.common.dto.AuthorizationIntraCloudResponseDTO;
-import eu.arrowhead.common.dto.DTOConverter;
-import eu.arrowhead.common.dto.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudListResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationInterCloudResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudListResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudResponseDTO;
+import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.DTOUtilities;
+import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.authorization.service.AuthorizationDriver;
+import eu.arrowhead.core.authorization.service.PublishAuthUpdateTask;
 
 @Service
 public class AuthorizationDBService {
@@ -74,6 +83,12 @@ public class AuthorizationDBService {
 	@Autowired
 	private AuthorizationInterCloudInterfaceConnectionRepository authorizationInterCloudInterfaceConnectionRepository;
 	
+	@Autowired
+	private AuthorizationDriver authorizationDriver;
+	
+	@Value(CoreCommonConstants.$AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD)
+	private boolean eventhandlerIsPresent;
+	
 	private final Logger logger = LogManager.getLogger(AuthorizationDBService.class);
 
 	//=================================================================================================
@@ -86,7 +101,7 @@ public class AuthorizationDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!AuthorizationIntraCloud.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
@@ -96,7 +111,7 @@ public class AuthorizationDBService {
 			return authorizationIntraCloudRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -124,7 +139,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -147,13 +162,24 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException("AuthorizationIntraCloud with id of '" + id + "' not exists");
 			}
 			
+			if ( eventhandlerIsPresent)  {
+				final Optional<AuthorizationIntraCloud> authOptional = authorizationIntraCloudRepository.findById( id );
+				if ( authOptional.isPresent() ) {
+					
+					final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, authOptional.get().getConsumerSystem().getId());
+					final Thread publishingThread = new Thread(publishAuthUpdateTask);
+					publishingThread.start();
+
+				}
+			}
+			
 			authorizationIntraCloudRepository.deleteById(id);
 			authorizationIntraCloudRepository.flush();
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -227,7 +253,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -247,7 +273,7 @@ public class AuthorizationDBService {
 		final int validatedPage = page < 0 ? 0 : page;
 		final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size; 		
 		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
-		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 		
 		if (!AuthorizationInterCloud.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
 			throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
@@ -257,7 +283,7 @@ public class AuthorizationDBService {
 			return authorizationInterCloudRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -286,7 +312,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -305,7 +331,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -380,7 +406,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 
@@ -451,7 +477,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
@@ -471,7 +497,7 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}		
 	}
 	
@@ -544,13 +570,33 @@ public class AuthorizationDBService {
 			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public AuthorizationSubscriptionCheckResponseDTO checkAuthorizationSubscriptionRequest(final String consumerName,
+			final String consumerAddress, final Integer consumerPort, final Set<SystemRequestDTO> publishers) {
+		logger.debug("checkAuthorizationSubscriptionRequest started...");
+		
+		try {
+			
+			final System consumer = checkAndGetConsumer(consumerName, consumerAddress, consumerPort);		
+			
+			final Set<SystemResponseDTO> authorizedPublishers = getAuthorizedPublishers(consumer, publishers);
+			
+			return new AuthorizationSubscriptionCheckResponseDTO(DTOConverter.convertSystemToSystemResponseDTO(consumer), authorizedPublishers );
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
 	
 	//=================================================================================================
-	// assistant methods
-	
+	// assistant methods	
+
 	//-------------------------------------------------------------------------------------------------
 	private void checkConstraintsOfAuthorizationIntraCloudTable(final System consumer, final System provider, final ServiceDefinition serviceDefinition) {
 		logger.debug("checkConstraintsOfAuthorizationIntraCloudTable started...");
@@ -605,6 +651,14 @@ public class AuthorizationDBService {
 			final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
 			authorizationIntraCloudRepository.flush();
 			
+			if ( eventhandlerIsPresent)  {
+				
+				final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
+				final Thread publishingThread = new Thread(publishAuthUpdateTask);
+				publishingThread.start();			
+
+			}
+			
 			return savedAuthIntraEntries;
 		} else {
 			throw new InvalidParameterException("Provider system with id of " + providerId + " not exists");
@@ -648,6 +702,14 @@ public class AuthorizationDBService {
 		
 		final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
 		authorizationIntraCloudRepository.flush();
+		
+		if ( eventhandlerIsPresent)  {
+			
+			final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
+			final Thread publishingThread = new Thread(publishAuthUpdateTask);
+			publishingThread.start();
+			
+		}
 		
 		return savedAuthIntraEntries;
 	}
@@ -808,5 +870,47 @@ public class AuthorizationDBService {
 		} else {
 			throw new InvalidParameterException("Consumer with name: " + name + ", address: " + address + " and port: " + port + " is not exist in the database.");
 		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private Set<SystemResponseDTO> getAuthorizedPublishers(final System consumer, final Set<SystemRequestDTO> publishers) {
+		logger.debug("getAuthorizedProviders started...");
+		
+		final List<AuthorizationIntraCloud> authorizationIntraCloudList = authorizationIntraCloudRepository.findAllByConsumerSystem(consumer);
+		
+		final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authorizationIntraCloudList.size());
+		
+		if ( authorizationIntraCloudList.isEmpty() ) {
+			
+			return authorizedPublishers; 
+		}		
+				
+		for (final AuthorizationIntraCloud authorizationIntraCloud : authorizationIntraCloudList) {
+			final SystemResponseDTO authorizedPublisher = DTOConverter.convertSystemToSystemResponseDTO(authorizationIntraCloud.getProviderSystem());
+			
+			if (publishers != null && !publishers.isEmpty()) {
+				
+				for (final SystemRequestDTO systemRequestDTO : publishers) {
+					
+					if (DTOUtilities.equalsSystemInResponseAndRequest(authorizedPublisher, systemRequestDTO)) {
+						
+						if (!authorizedPublishers.contains(authorizedPublisher)) {
+							
+							authorizedPublishers.add(authorizedPublisher);
+							break;
+						}
+					}
+				}
+			}else {
+
+				if (!authorizedPublishers.contains(authorizedPublisher)) {
+					
+					authorizedPublishers.add(authorizedPublisher);
+				}
+				
+			}
+		}
+		
+		return authorizedPublishers;
 	}
 }

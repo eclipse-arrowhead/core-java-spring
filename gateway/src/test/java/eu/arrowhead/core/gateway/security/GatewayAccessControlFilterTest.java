@@ -25,11 +25,12 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.CloudRequestDTO;
-import eu.arrowhead.common.dto.GatewayConsumerConnectionRequestDTO;
-import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
-import eu.arrowhead.common.dto.RelayRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 /**
 * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
@@ -45,7 +46,7 @@ public class GatewayAccessControlFilterTest {
 	// members
 	
 	private static final String GATEWAY_ECHO_URI = CommonConstants.GATEWAY_URI + CommonConstants.ECHO_URI;
-	private static final String GATEWAY_ACTIVE_SESSIONS_MGMT_URI = CommonConstants.GATEWAY_URI + CommonConstants.MGMT_URI + "/sessions";
+	private static final String GATEWAY_ACTIVE_SESSIONS_MGMT_URI = CommonConstants.GATEWAY_URI + CoreCommonConstants.MGMT_URI + "/sessions";
 	private static final String GATEWAY_CONNECT_PROVIDER_URI = CommonConstants.GATEWAY_URI + "/connect_provider";
 	private static final String GATEWAY_CONNECT_CONSUMER_URI = CommonConstants.GATEWAY_URI + "/connect_consumer";
 	

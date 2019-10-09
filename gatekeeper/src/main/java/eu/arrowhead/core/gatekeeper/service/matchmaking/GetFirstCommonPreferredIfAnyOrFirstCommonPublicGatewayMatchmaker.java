@@ -10,7 +10,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.core.gatekeeper.database.service.GatekeeperDBService;
 
 public class GetFirstCommonPreferredIfAnyOrFirstCommonPublicGatewayMatchmaker implements RelayMatchmakingAlgorithm {

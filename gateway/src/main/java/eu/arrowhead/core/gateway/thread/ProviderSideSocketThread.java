@@ -25,9 +25,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.GatewayProviderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
 import eu.arrowhead.core.gateway.service.ActiveSessionDTO;
@@ -76,7 +77,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 		this.connectionRequest = connectionRequest;
 		this.timeout = timeout;
 		this.consumerGatewayPublicKey = Utilities.getPublicKeyFromBase64EncodedString(this.connectionRequest.getConsumerGWPublicKey());
-		this.activeSessions = appContext.getBean(CommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
+		this.activeSessions = appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class);
 		this.sslProperties = appContext.getBean(SSLProperties.class);
 		
 		setName(connectionRequest.getProvider().getSystemName() + "." + connectionRequest.getServiceDefinition());

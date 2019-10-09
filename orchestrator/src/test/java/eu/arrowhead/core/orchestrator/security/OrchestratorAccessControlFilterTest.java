@@ -28,8 +28,9 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.SystemRequestDTO;
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
 /**
  * IMPORTANT: These tests may fail if the certificates are changed in the src/main/resources folder. 
@@ -45,7 +46,7 @@ public class OrchestratorAccessControlFilterTest {
 	// members
 	
 	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_MGMT_STORE_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
+	private static final String ORCH_MGMT_STORE_ECHO = CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
 	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS;
 	
 	@Autowired
@@ -94,26 +95,6 @@ public class OrchestratorAccessControlFilterTest {
 		this.mockMvc.perform(get(ORCH_ECHO)
 				    .secure(true)
 					.with(x509("certificates/other_cloud.pem"))
-					.accept(MediaType.TEXT_PLAIN))
-					.andExpect(status().isUnauthorized());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testMgmtEchoCertificateSysop() throws Exception {
-		this.mockMvc.perform(get(ORCH_MGMT_STORE_ECHO)
-				    .secure(true)
-					.with(x509("certificates/valid.pem"))
-					.accept(MediaType.TEXT_PLAIN))
-					.andExpect(status().isOk());
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testMgmtEchoCertificateNoSysop() throws Exception {
-		this.mockMvc.perform(get(ORCH_MGMT_STORE_ECHO)
-				    .secure(true)
-					.with(x509("certificates/provider.pem"))
 					.accept(MediaType.TEXT_PLAIN))
 					.andExpect(status().isUnauthorized());
 	}

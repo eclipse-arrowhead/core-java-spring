@@ -17,7 +17,7 @@ import javax.persistence.PreUpdate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.CoreDefaults;
 
 @Entity
 public class ServiceInterface {
@@ -29,7 +29,7 @@ public class ServiceInterface {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@Column(nullable = false, unique = true, length = Defaults.VARCHAR_BASIC)
+	@Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
 	private String interfaceName;
 	
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
