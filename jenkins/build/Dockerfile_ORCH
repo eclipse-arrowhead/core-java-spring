@@ -5,4 +5,4 @@ COPY orchestrator/*.jar /orchestrator/arrowhead-orchestrator.jar
 # Application properties file will be mounted as a volume from now on.
 # COPY orchestrator/*.properties /orchestrator/application.properties
 
-CMD java -jar /orchestrator/arrowhead-orchestrator.jar
+CMD java -jar /orchestrator/arrowhead-orchestrator.jar --spring.config.location=file:/orchestrator/application.properties
