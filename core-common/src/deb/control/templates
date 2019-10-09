@@ -59,7 +59,7 @@ Description: You have to manually reconfigure all Arrowhead systems when changin
 
 Template: arrowhead-core-common/db_host
 Type: string
-Default: 127.0.0.1
+Default: localhost
 Description: Enter the hostname or IP address of the database server
 
 Template: arrowhead-core-common/mysql_password_auth
