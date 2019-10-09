@@ -5,4 +5,4 @@ COPY serviceregistry/*.jar /serviceregistry/arrowhead-serviceregistry.jar
 # Application properties file will be mounted as a volume from now on.
 # COPY serviceregistry/*.properties /serviceregistry/application.properties
 
-CMD java -jar /serviceregistry/arrowhead-serviceregistry.jar
+CMD java -jar /serviceregistry/arrowhead-serviceregistry.jar --spring.config.location=file:/serviceregistry/application.properties
