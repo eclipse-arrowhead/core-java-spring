@@ -1,0 +1,36 @@
+version: '3'
+services:
+  serviceregistry:
+    image: "serviceregistry:$BUILD_TAG"
+    build:
+      context: .
+      dockerfile: Dockerfile_SR
+  authorization:
+    image: "authorization:$BUILD_TAG"
+    build:
+      context: .
+      dockerfile: Dockerfile_AUTH
+  orchestrator:
+    image: "orchestrator:$BUILD_TAG"
+    build:
+      context: .
+      dockerfile: Dockerfile_ORCH
+  gatekeeper:
+    image: "gatekeeper:$BUILD_TAG"
+    build:
+      context: .
+      dockerfile: Dockerfile_GK
+  gateway:
+    image: "gateway:$BUILD_TAG"
+    build:
+      context: .
+      dockerfile: Dockerfile_GW
+  eventhandler:
+    image: "eventhandler:$BUILD_TAG"
+    build:
+      context: .
+      dockerfile: Dockerfile_EH
+
+
+
+
