@@ -29,7 +29,7 @@ pipeline
                 {
                     sh '''
                        ./jenkins/copy/copy.sh
-                       ./jenkins/test/maven.sh mvn test
+                       #./jenkins/test/maven.sh mvn test
                        '''
                 }
             }
