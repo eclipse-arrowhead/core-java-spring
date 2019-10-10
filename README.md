@@ -61,7 +61,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
 Don't forget to copy the SQL script next to the docker-compose file. On the first run it initializes the Database! 
 
-Inside the `docker` folder some examples provided. 
+Inside the `docker` folder an example is provided. 
 
 ##### Core System Config
 
