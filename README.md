@@ -58,8 +58,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
   * [Windows](https://docs.docker.com/docker-for-windows/install/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
-Don't forget to create a volume for mysql: `docker volume create --name=mysql`
-Don't forget to run the SQL script inside the MySQL container beforehand. Easier DB setup solution will be coming shortly. 
+Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
+Don't forget to copy the SQL script next to the docker-compose file. On the first run it initializes the Database! 
 
 Inside the `docker` folder some examples provided. 
 
@@ -72,7 +72,7 @@ Example Core System Configuration files are available in this folder.
 Example Docker Compose file is located here. The interesting part is the volumes section. 
 Format is /path/on/your/local/machine:/path/inside/docker/container
 
-You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mouning point inside the container, otherwise it will start up with default config.
+You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mounting point inside the container, otherwise it will start up with default config.
 
 To update the images: execute `docker-compose pull` command in the directory where the compose file is.
 
