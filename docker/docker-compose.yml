@@ -8,12 +8,15 @@ services:
       - MYSQL_ROOT_PASSWORD=THIS_WILL_BE_YOUR_CONTAINERS_ROOT_PW
     volumes:
       - mysql:/var/lib/mysql
+      - ./create_empty_arrowhead_db.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 3306:3306
 
   serviceregistry:
     container_name: serviceregistry
-    image: arrowhead-ci.tmit.bme.hu/arrowhead/serviceregistry:latest
+    image: portus.arrowhead-ci.tmit.bme.hu/arrowhead/serviceregistry:latest
+    depends_on:
+      - mysql
     volumes:
       # dont forget to change the route of the locally available config file
       # format is <file on your local machine, (change this!!!)>:<file location inside the container (don't change this part!!!)>
@@ -23,7 +26,9 @@ services:
 
   authorization:
     container_name: authorization
-    image: arrowhead-ci.tmit.bme.hu/arrowhead/authorization:latest
+    image: portus.arrowhead-ci.tmit.bme.hu/arrowhead/authorization:latest
+    depends_on:
+      - mysql
     volumes:
       - ./core_system_config/authorization.properties:/authorization/application.properties
     ports:
@@ -31,7 +36,9 @@ services:
 
   orchestrator:
     container_name: orchestrator
-    image: arrowhead-ci.tmit.bme.hu/arrowhead/orchestrator:latest
+    image: portus.arrowhead-ci.tmit.bme.hu/arrowhead/orchestrator:latest
+    depends_on:
+      - mysql
     volumes:
       - ./core_system_config/orchestrator.properties:/orchestrator/application.properties
     ports:
@@ -39,7 +46,9 @@ services:
 
   eventhandler:
     container_name: eventhandler
-    image: arrowhead-ci.tmit.bme.hu/arrowhead/eventhandler:latest
+    image: portus.arrowhead-ci.tmit.bme.hu/arrowhead/eventhandler:latest
+    depends_on:
+      - mysql
     volumes:
       - ./core_system_config/eventhandler.properties:/eventhandler/application.properties
     ports:
@@ -47,7 +56,9 @@ services:
   
   gatekeeper:
     container_name: gatekeeper
-    image: arrowhead-ci.tmit.bme.hu/arrowhead/gatekeeper:latest
+    image: portus.arrowhead-ci.tmit.bme.hu/arrowhead/gatekeeper:latest
+    depends_on:
+      - mysql
     volumes:
       - ./core_system_config/gatekeeper.properties:/gatekeeper/application.properties
     ports:
@@ -55,7 +66,9 @@ services:
 
   gateway:
     container_name: gateway
-    image: arrowhead-ci.tmit.bme.hu/arrowhead/gateway:latest
+    image: portus.arrowhead-ci.tmit.bme.hu/arrowhead/gateway:latest
+    depends_on:
+      - mysql
     volumes:
       - ./core_system_config/gateway.properties:/gateway/application.properties
     ports:
