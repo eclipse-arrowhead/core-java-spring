@@ -56,3 +56,6 @@ authorization.log
 
 *.log
 /target
+/deb-installer/.classpath
+/deb-installer/.project
+/deb-installer/.settings
