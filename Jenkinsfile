@@ -41,7 +41,7 @@ pipeline
 				{
 					sh  '''
 					    ./jenkins/copy/copy.sh
-					    ./jenkins/build/maven.sh mvn -B -DskipTests clean package
+					    #./jenkins/build/maven.sh mvn -B -DskipTests clean package
 					    ./jenkins/build/build.sh
 					    '''
 
