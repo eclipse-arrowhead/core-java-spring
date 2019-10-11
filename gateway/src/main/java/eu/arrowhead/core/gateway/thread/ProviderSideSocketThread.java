@@ -167,7 +167,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 					relayClient.sendBytes(relaySession, sender, consumerGatewayPublicKey, data);
 				}
 			}
-		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError ex) {
+		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			closeAndInterrupt();
@@ -207,7 +207,7 @@ public class ProviderSideSocketThread extends Thread implements MessageListener 
 	private void close() {
 		logger.debug("close started...");
 		
-		if (queueId != null) {
+		if (activeSessions != null && queueId != null) {
 			activeSessions.remove(queueId);
 		}
 		
