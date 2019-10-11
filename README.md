@@ -89,7 +89,7 @@ List all containers:
 
 <a name="quickstart_debian" />
 
-### Debian installers
+### Debian Installers
 
 The Debian installer files are located in the deb-installer/package/arrowhead-installers-4.1.3 folder. 
 Please follow this guide to install them: [Debian Installer Guide](documentation/deb-installer/DEBIAN-INSTALL.md)
