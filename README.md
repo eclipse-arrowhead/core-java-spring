@@ -10,6 +10,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
     1. [Docker](#quickstart_docker)
+        * [Handy Docker Commands](#quickstart_dockercommands)
+        * [Troubleshooting](#quickstart_dockertroubleshooting)
     2. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
@@ -62,7 +64,11 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
-Don't forget to copy the SQL script next to the docker-compose file. On the first run it initializes the Database! 
+Don't forget to copy the SQL init script next to the docker-compose file! On the first run it initializes the Database!<br />
+Example copy command which does this for you, execute from the project root directory.
+```
+cp scripts/create_empty_arrowhead_db.sql docker/
+```
 
 Inside the `docker` folder an example is provided. 
 
@@ -81,13 +87,38 @@ To update the images: execute `docker-compose pull` command in the directory whe
 
 To start the containers: execute `docker-compose up -d` command in the directory where the compose file is.
 
+Don't forget to check, are all containers up and running?
+
+![docker ps -a](./documentation/images/docker_ps_a.png)
+
+If all of their is Up, you are all set.
+If they die, please check their logs. 
+
 If you change your config you have to restart the appropriate container
 
 `docker restart <containerName>`
 
-List all containers:
+<a name="quickstart_dockercommands" />`
 
-`docker ps -a`
+##### Handy Docker Commands
+ 
+| Command | Description |
+| ------- | ----------- |
+| `docker ps -a` | List all containers |
+| `docker images` | List all images |
+| `docker-compose up -d` | Starts the Docker containers |
+| `docker-compose down` | Destroys the Docker containers |
+| `docker logs <containerName>` | Shows logs for the container |
+| `docker volume create --name=<volumeName>` | Creates a named volume |
+| `docker volume rm <volumeName>` | Removes the specified named volume |
+
+<a name="quickstart_dockertroubleshooting" />
+
+##### Troubleshooting
+
+Q: MySQL won't start. What did went wrong? <br />
+A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
+
 
 <a name="quickstart_compile" />
 
