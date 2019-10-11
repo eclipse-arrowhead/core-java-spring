@@ -51,6 +51,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ### Docker
 
 #### Requirements
+
+> **Note:** A system with 4GB of RAM is advised. 
+
 * Docker 
   * [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
   * [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
@@ -91,6 +94,8 @@ List all containers:
 ### Compile source code and manually install MySQL and Maven.
 #### Requirements
 
+> **Note:** A system with 2GB of RAM is advised. 
+
 The project has the following dependencies:
 * JRE/JDK 11 [Download from here](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html)
 * Maven 3.5+ [Download from here](http://maven.apache.org/download.cgi) | [Install guide](https://www.baeldung.com/install-maven-on-windows-linux-mac)
@@ -106,7 +111,7 @@ Run the MySQL script which is in the ```scripts``` folder. If you won't run this
 
 ```cd core-java-spring```
 
-Execute ```mvn install``` command. Wait until the build succeeds. 
+Execute ```mvn install -DskipTests ``` command. Wait until the build succeeds. 
 This command builds all available projects. <br />
 
 After the build is complete, the jars with the appropriate `application.properites` will be available in their directory.
