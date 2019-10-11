@@ -65,37 +65,37 @@ Description: Enter the hostname or IP address of the database server
 Template: arrowhead-core-common/mysql_password_auth
 Type: password
 Default:
-Description: MySQL password for Authorization system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: MySQL password for Authorization system (leave empty for random). 
 
 Template: arrowhead-core-common/mysql_password_chor
 Type: password
 Default:
-Description: MySQL password for Choreographer system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: MySQL password for Choreographer system (leave empty for random). 
 
 Template: arrowhead-core-common/mysql_password_eh
 Type: password
 Default:
-Description: MySQL password for Event Handler system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: MySQL password for Event Handler system (leave empty for random). 
 
 Template: arrowhead-core-common/mysql_password_gk
 Type: password
 Default:
-Description: MySQL password for Gatekeeper system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: MySQL password for Gatekeeper system (leave empty for random). 
 
 Template: arrowhead-core-common/mysql_password_gw
 Type: password
 Default:
-Description: MySQL password for Gateway system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: MySQL password for Gateway system (leave empty for random). 
 
 Template: arrowhead-core-common/mysql_password_orch
 Type: password
 Default:
-Description: MySQL password for Orchestrator system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: MySQL password for Orchestrator system (leave empty for random). 
 
 Template: arrowhead-core-common/mysql_password_sr
 Type: password
 Default:
-Description: MySQL password for Service Registry system (leave empty for random). Note that password is stored by debconf in '/var/cache/debconf/passwords.dat'.
+Description: MySQL password for Service Registry system (leave empty for random). 
 
 Template: arrowhead-core-common/sr_host
 Type: string
