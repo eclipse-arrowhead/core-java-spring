@@ -10,7 +10,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
     1. [Docker](#quickstart_docker)
-    2. [Compile Code](#quickstart_compile)
+	2. [Debian Installer](#quickstart_debian)
+    3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
 4. [How to Contribute](#howtocontribute)
@@ -85,6 +86,13 @@ If you change your config you have to restart the appropriate container
 List all containers:
 
 `docker ps -a`
+
+<a name="quickstart_debian" />
+
+### Debian installers
+
+The Debian installer files are located in the deb-installer/package/arrowhead-installers-4.1.3 folder. 
+Please follow this guide to install them: [Debian Installer Guide](documentation/deb-installer/DEBIAN-INSTALL.md)
 
 <a name="quickstart_compile" />
 
