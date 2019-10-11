@@ -56,3 +56,6 @@ authorization.log
 /choreographer/target
 
 *.log
+/deb-installer/.classpath
+/deb-installer/.project
+/deb-installer/.settings
