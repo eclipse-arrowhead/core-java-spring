@@ -30,6 +30,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 	private final ApplicationContext appContext;
 	private final String relayHost;
 	private final int relayPort;
+	private final boolean securedRelay;
 	private final GatekeeperRelayClient relayClient;
 	private final ThreadPoolExecutor threadPool;
 	
@@ -39,7 +40,8 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public GeneralAdvertisementMessageListener(final ApplicationContext appContext, final String relayHost, final int relayPort, final GatekeeperRelayClient relayClient, final int threadPoolSize) {
+	public GeneralAdvertisementMessageListener(final ApplicationContext appContext, final String relayHost, final int relayPort, final boolean securedRelay, final GatekeeperRelayClient relayClient,
+											   final int threadPoolSize) {
 		logger.debug("Constructor started...");
 		
 		Assert.notNull(appContext, "appContext is null.");
@@ -52,6 +54,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 		this.appContext = appContext;
 		this.relayHost = relayHost;
 		this.relayPort = relayPort;
+		this.securedRelay = securedRelay;
 		this.relayClient = relayClient;
 		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadPoolSize);
 		logger.debug("GeneralAdvertisementMessageListener-{} started...", id);
@@ -65,7 +68,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 		if (!closed) {
 			try {
 				if (msg != null) {
-					threadPool.execute(new GatekeeperTask(appContext, relayHost, relayPort, relayClient, msg)); 
+					threadPool.execute(new GatekeeperTask(appContext, relayHost, relayPort, securedRelay ,relayClient, msg)); 
 				}
 			} catch (final RejectedExecutionException ex) {
 				logger.error("Message rejected at {}", ZonedDateTime.now());

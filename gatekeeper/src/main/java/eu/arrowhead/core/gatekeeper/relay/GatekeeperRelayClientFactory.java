@@ -3,6 +3,7 @@ package eu.arrowhead.core.gatekeeper.relay;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.core.gatekeeper.relay.activemq.ActiveMQGatekeeperRelayClient;
 
 public class GatekeeperRelayClientFactory {
@@ -11,15 +12,16 @@ public class GatekeeperRelayClientFactory {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final long timeout) {
-		return createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, true);
+	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final SSLProperties sslProps,
+																    final long timeout) {
+		return createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout, true);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final long timeout, 
-																	final boolean useCache) {
-		return useCache ? new GatekeeperRelayClientUsingCachedSessions(serverCommonName, publicKey, privateKey, timeout) : 
-						  new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout);
+	public static GatekeeperRelayClient createGatekeeperRelayClient(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final SSLProperties sslProps, 
+																	final long timeout, final boolean useCache) {
+		return useCache ? new GatekeeperRelayClientUsingCachedSessions(serverCommonName, publicKey, privateKey, sslProps, timeout) : 
+						  new ActiveMQGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout);
 	}
 
 	//=================================================================================================

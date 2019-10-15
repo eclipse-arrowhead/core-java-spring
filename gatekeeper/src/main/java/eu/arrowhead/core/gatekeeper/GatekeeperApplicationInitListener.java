@@ -8,6 +8,7 @@ import java.util.ServiceConfigurationError;
 
 import javax.jms.Session;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
@@ -41,6 +43,9 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		
 	@Value(CoreCommonConstants.$GATEKEEPER_IS_GATEWAY_MANDATORY_WD)
 	private boolean gatewayIsMandatory;
+	
+	@Autowired
+	private SSLProperties sslProps;
 	
 	private GatekeeperRelayClientUsingCachedSessions gatekeeperRelayClientWithCache;
 	
@@ -119,6 +124,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 		final PublicKey publicKey = (PublicKey) context.get(CommonConstants.SERVER_PUBLIC_KEY);
 		final PrivateKey privateKey = (PrivateKey) context.get(CommonConstants.SERVER_PRIVATE_KEY);
 
-		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout, true);
+		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout,
+																																				  true);
 	}
 }
