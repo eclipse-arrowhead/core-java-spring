@@ -2,6 +2,7 @@ package eu.arrowhead.core.gateway.relay;
 
 import java.security.PrivateKey;
 
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.core.gateway.relay.activemq.ActiveMQGatewayRelayClient;
 
 public class GatewayRelayClientFactory {
@@ -10,8 +11,8 @@ public class GatewayRelayClientFactory {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public static GatewayRelayClient createGatewayRelayClient(final String serverCommonName, final PrivateKey privateKey) {
-		return new ActiveMQGatewayRelayClient(serverCommonName, privateKey);
+	public static GatewayRelayClient createGatewayRelayClient(final String serverCommonName, final PrivateKey privateKey, final SSLProperties sslProps) {
+		return new ActiveMQGatewayRelayClient(serverCommonName, privateKey, sslProps);
 	}
 	
 	//=================================================================================================

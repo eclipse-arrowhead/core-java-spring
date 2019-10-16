@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
@@ -65,6 +66,9 @@ public class GatewayService {
 	@Autowired
 	private ApplicationContext appContext;
 	
+	@Autowired
+	private SSLProperties sslProps;
+	
 	private final Logger logger = LogManager.getLogger(GatewayService.class);
 	
 	private GatewayRelayClient relayClient;
@@ -94,7 +98,7 @@ public class GatewayService {
 		}
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 	
-		relayClient = GatewayRelayClientFactory.createGatewayRelayClient(serverCN, privateKey);	
+		relayClient = GatewayRelayClientFactory.createGatewayRelayClient(serverCN, privateKey, sslProps);	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -350,7 +354,7 @@ public class GatewayService {
 	//-------------------------------------------------------------------------------------------------
 	private Session getRelaySession(final RelayRequestDTO relay) {
 		try {
-			return relayClient.createConnection(relay.getAddress(), relay.getPort());
+			return relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.isSecure());
 		} catch (final JMSException ex) {
 			logger.debug("Exception occured while creating connection for address: {} and port {}:", relay.getAddress(), relay.getPort());
 			logger.debug("Exception message: {}:", ex.getMessage());
