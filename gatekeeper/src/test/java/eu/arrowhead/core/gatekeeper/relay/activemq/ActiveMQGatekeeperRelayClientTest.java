@@ -37,9 +37,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
@@ -58,6 +61,7 @@ import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
 
 @RunWith(SpringRunner.class)
+@SpringBootTest
 public class ActiveMQGatekeeperRelayClientTest {
 	
 	//=================================================================================================
@@ -66,6 +70,9 @@ public class ActiveMQGatekeeperRelayClientTest {
 	private PublicKey clientPublicKey;
 	private PublicKey otherPublicKey;
 	private PrivateKey otherPrivateKey;
+	
+	@Autowired
+	private SSLProperties sslProperties;
 	
 	private ActiveMQGatekeeperRelayClient testObject;
 
@@ -85,7 +92,7 @@ public class ActiveMQGatekeeperRelayClientTest {
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/gatekeeper.p12"), "123456".toCharArray());
 		final PrivateKey clientPrivateKey = Utilities.getPrivateKey(keystore, "123456");
 		
-		testObject = new ActiveMQGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, clientPrivateKey, 1000);
+		testObject = new ActiveMQGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, clientPrivateKey, sslProperties, 1000);
 		
 		final KeyStore keystore2 = KeyStore.getInstance("PKCS12");
 		keystore2.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.p12"), "123456".toCharArray());
@@ -95,55 +102,61 @@ public class ActiveMQGatekeeperRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameNull() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient(null, null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient(null, null, null, null, 0);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameEmpty() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient(" ", null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient(" ", null, null, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorPublicKeyNull() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", null, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", null, null, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorPrivateKeyNull() {
-		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, null, 0);
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, null, null, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorSSLPropertiesNull() {
+		GatekeeperRelayClientFactory.createGatekeeperRelayClient("gatekeeper.testcloud2.aitia.arrowhead.eu", clientPublicKey, otherPrivateKey, null, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionHostNull() throws JMSException {
-		testObject.createConnection(null, 42);
+		testObject.createConnection(null, 42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionHostEmpty() throws JMSException {
-		testObject.createConnection("\n", 42);
+		testObject.createConnection("\n", 42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionPortTooLow() throws JMSException {
-		testObject.createConnection("localhost", -42);
+		testObject.createConnection("localhost", -42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionPortTooHigh() throws JMSException {
-		testObject.createConnection("localhost", 420000);
+		testObject.createConnection("localhost", 420000, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = JMSException.class)
-	public void testCreateConnectionfailed() throws JMSException {
-		testObject.createConnection("invalid.address.dafafasdasdfgf.qq", 42);
+	public void testCreateConnectionFailed() throws JMSException {
+		testObject.createConnection("invalid.address.dafafasdasdfgf.qq", 42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
