@@ -366,7 +366,7 @@ The certificate chain naming convetion have strict rules:
 * A cloud certificate chain name has to constist of four part and the last two part hast to be 'arrowhead' and 'eu'.
 * A client certificate chain name has to constist of five part and the last two part hast to be 'arrowhead' and 'eu'. 
 
-Each SSL certificate contains a private/public key pair. The trust chain is created by issuing the cloud certificate from the root certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
+Each SSL certificate contains a private/public key pair. The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
 
 ### The Key-Store
 
@@ -376,7 +376,7 @@ The Key-Store is intended to store the certificate chain, which will be attached
 
 ### The Trust-Store
 
-The Trust-Store is containing those certificate chains, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having the these certificates within their certificate chain.
+The Trust-Store is containing those certificate chains, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate chain, which ensures that only those incoming HTTPS requests are authorized to access, which are having the these certificates within their certificate chain.
 
 ### How to create my own certificates?
 placeholder
