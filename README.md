@@ -357,29 +357,29 @@ New payload - you can easily map the old fields to the new ones.
 ## Certificates
 
 Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
-1) Master: `arrowhead.eu`
-2) Cloud: `my_cloud.my_company.arrowhead.eu`
-3) Client: `my_client.my_cloud.my_company.arrowhead.eu`
+1) Master certificate: `arrowhead.eu`
+2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
+3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
  
-The certificate chain naming convetion have strict rules:
+The certificate naming convetion have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
-* A cloud certificate chain name has to constist of four part and the last two part hast to be 'arrowhead' and 'eu'.
-* A client certificate chain name has to constist of five part and the last two part hast to be 'arrowhead' and 'eu'. 
+* A cloud certificate name has to constist of four part and the last two part hast to be 'arrowhead' and 'eu'.
+* A client certificate name has to constist of five part and the last two part hast to be 'arrowhead' and 'eu'. 
 
-Each SSL certificate contains a private/public key pair. The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
+The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
 
 ### The Key-Store
 
-The Key-Store is intended to store the certificate chain, which will be attached to the outcoming HTTPS requests. Arrowhead Framework is designed for handling the `p12` type of Key-Stores.
+The Key-Store is intended to store the certificates and/or key-pair certificates. Key-pair certificates are contain the certificate chain with some additinal data, such as the private-public keys, which are necessary for the secure operation. Certificates located in this store (without the keys) will be attached to the outcoming HTTPS requests. Arrowhead Framework is designed for handling the `p12` type of Key-Stores.
 
-*(**Note:** When you creating a new KeyStore by expanding the certificate chain, then the `key-password` and the `key-store-password` must be the same.)*
+*(**Note:** When you creating a new key-pair certificate, then the `key-password` and the `key-store-password` must be the same.)*
 
 ### The Trust-Store
 
-The Trust-Store is containing those certificate chains, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate chain, which ensures that only those incoming HTTPS requests are authorized to access, which are having the these certificates within their certificate chain.
+The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having the this certificate within their certificate chain.
 
 ### How to create my own certificates?
-placeholder
+Currently Arrowhead communitiy have the possibility to create only "self signed" certifications. [See step-by-step tutorial]().
 
 <a name="howtocontribute" />
 
