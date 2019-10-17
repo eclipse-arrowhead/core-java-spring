@@ -363,8 +363,8 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
  
 The certificate naming convetion have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
-* A cloud certificate name has to constist of four part and the last two part hast to be 'arrowhead' and 'eu'.
-* A client certificate name has to constist of five part and the last two part hast to be 'arrowhead' and 'eu'. 
+* A cloud certificate name has to constist of four part and the last two part have to be 'arrowhead' and 'eu'.
+* A client certificate name has to constist of five part and the last two part have to be 'arrowhead' and 'eu'. 
 
 The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
 
@@ -376,7 +376,7 @@ The Key-Store is intended to store the certificates and/or key-pair certificates
 
 ### The Trust-Store
 
-The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having the this certificate within their certificate chain.
+The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
 
 ### How to create my own certificates?
 Currently Arrowhead communitiy have the possibility to create only "self signed" certifications. [See step-by-step tutorial]().
