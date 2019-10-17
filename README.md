@@ -361,7 +361,7 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
 2) Cloud: `my_cloud.my_company.arrowhead.eu`
 3) Client: `my_client.my_cloud.my_company.arrowhead.eu`
  
-The certificate chain naming convetions are strict:
+The certificate chain naming convetion have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
 * A cloud certificate chain name has to constist of four part and the last two part hast to be 'arrowhead' and 'eu'.
 * A client certificate chain name has to constist of five part and the last two part hast to be 'arrowhead' and 'eu'. 
