@@ -174,7 +174,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 					relayClient.sendBytes(relaySession, sender, providerGatewayPublicKey, data);
 				}
 			}
-		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError ex) {
+		} catch (final IOException | JMSException | ArrowheadException | ServiceConfigurationError | IllegalArgumentException ex) {
 			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 			logger.debug("Stacktrace:", ex);
 			closeAndInterrupt();
@@ -198,7 +198,7 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 	private void close() {
 		logger.debug("close started...");
 		
-		if (queueId != null) {
+		if (activeSessions != null && queueId != null) {
 			activeSessions.remove(queueId);
 		}
 		
@@ -220,7 +220,9 @@ public class ConsumerSideServerSocketThread extends Thread implements MessageLis
 			}
 		}
 		
-		availablePorts.offer(port);
+		if (availablePorts != null) {
+			availablePorts.offer(port);
+		}
 		
 		relayClient.closeConnection(relaySession);
 	}
