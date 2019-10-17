@@ -12,7 +12,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     1. [Docker](#quickstart_docker)
         * [Handy Docker Commands](#quickstart_dockercommands)
         * [Troubleshooting](#quickstart_dockertroubleshooting)
-    2. [Compile Code](#quickstart_compile)
+	2. [Debian Installer](#quickstart_debian)
+    3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
 4. [How to Contribute](#howtocontribute)
@@ -119,6 +120,13 @@ If you change your config you have to restart the appropriate container
 Q: MySQL won't start. What did went wrong? <br />
 A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
 
+
+<a name="quickstart_debian" />
+
+### Debian Installers
+
+The Debian installer files are located in the deb-installer/package/arrowhead-installers-4.1.3 folder. 
+Please follow this guide to install them: [Debian Installer Guide](documentation/deb-installer/DEBIAN-INSTALL.md)
 
 <a name="quickstart_compile" />
 
