@@ -379,7 +379,9 @@ The Key-Store is intended to store the certificates and/or key-pair certificates
 The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
 
 ### How to create my own certificates?
-Currently Arrowhead communitiy have the possibility to create only "self signed" certifications. [See step-by-step tutorial]().
+Currently Arrowhead communitiy have the possibility to create only "self signed" certifications. See the tutorials:
+* [Create Arrowhead Cloud Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_cloud_certificate.pdf)
+* [Create Arrowhead Client Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_client_certificate.pdf)
 
 <a name="howtocontribute" />
 
