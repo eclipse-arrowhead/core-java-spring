@@ -363,8 +363,8 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
  
 The certificate naming convetion have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
-* A cloud certificate name has to constist of four part and the last two part have to be 'arrowhead' and 'eu'.
-* A client certificate name has to constist of five part and the last two part have to be 'arrowhead' and 'eu'. 
+* A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
+* A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
 
 The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
 
