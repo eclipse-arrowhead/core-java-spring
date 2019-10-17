@@ -382,6 +382,7 @@ The Trust-Store is containing those certificates, what the web-server considers 
 Currently Arrowhead communitiy have the possibility to create only "self signed" certifications. See the tutorials:
 * [Create Arrowhead Cloud Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_cloud_certificate.pdf)
 * [Create Arrowhead Client Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_client_certificate.pdf)
+* [Create Trust Store](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_trust_store.pdf)
 
 <a name="howtocontribute" />
 
