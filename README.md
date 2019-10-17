@@ -356,8 +356,17 @@ New payload - you can easily map the old fields to the new ones.
 
 ## Certificates
 
-Placeholder
+Arrowhead Framework's security is relying on a SSL Certificate Trust Chain. The Arrowhead trust chain consists of three level:
+1) Root cerificate: `arrowhead.eu`
+2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
+3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
  
+The naming convetions are strict:
+* The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A cloud certificate has to constist of four part and the last two part hast to be 'arrowhead' and 'eu'.
+* A client certificate has to constist of five part and the last two part hast to be 'arrowhead' and 'eu'. 
+
+The trust chain is created by issuing the **cloud certificate from the root certificate** and the **client certificate from the cloud certificate**. 
 
 <a name="howtocontribute" />
 
