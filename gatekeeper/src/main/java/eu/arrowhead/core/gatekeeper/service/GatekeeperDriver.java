@@ -155,12 +155,12 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryResultDTO sendServiceReistryQuery(final ServiceQueryFormDTO gueryForm) {
+	public ServiceQueryResultDTO sendServiceRegistryQuery(final ServiceQueryFormDTO queryForm) {
 		logger.debug("sendServiceReistryQuery started...");		
-		Assert.notNull(gueryForm, "gueryForm is null.");
+		Assert.notNull(queryForm, "queryForm is null.");
 		
 		final UriComponents queryUri = getServiceRegistryQueryUri();
-		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, gueryForm);
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
 		
 		return response.getBody();
 	}

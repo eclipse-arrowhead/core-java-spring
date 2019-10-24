@@ -68,7 +68,7 @@ public class GeneralAdvertisementMessageListener implements Closeable, MessageLi
 		if (!closed) {
 			try {
 				if (msg != null) {
-					threadPool.execute(new GatekeeperTask(appContext, relayHost, relayPort, securedRelay ,relayClient, msg)); 
+					threadPool.execute(new GatekeeperTask(appContext, relayHost, relayPort, securedRelay, relayClient, msg)); 
 				}
 			} catch (final RejectedExecutionException ex) {
 				logger.error("Message rejected at {}", ZonedDateTime.now());

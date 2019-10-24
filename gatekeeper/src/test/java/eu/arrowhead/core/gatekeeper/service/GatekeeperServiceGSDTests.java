@@ -316,7 +316,7 @@ public class GatekeeperServiceGSDTests {
 		cloudDTO.setAuthenticationInfo("test-auth-info");
 		
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
-		when(gatekeeperDriver.sendServiceReistryQuery(any())).thenReturn(srQueryResult);
+		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
 		
 		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
 		assertNull(doGSDPollResponse.getProviderCloud());
@@ -347,7 +347,7 @@ public class GatekeeperServiceGSDTests {
 		
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
 		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO));
-		when(gatekeeperDriver.sendServiceReistryQuery(any())).thenReturn(srQueryResult);
+		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
 		
 		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(new HashMap<>());
 		
@@ -386,7 +386,7 @@ public class GatekeeperServiceGSDTests {
 		
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
 		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO1, serviceRegistryResponseDTO2));
-		when(gatekeeperDriver.sendServiceReistryQuery(any())).thenReturn(srQueryResult);
+		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
 				
 		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(Map.of(2L,List.of(2L)));
 		

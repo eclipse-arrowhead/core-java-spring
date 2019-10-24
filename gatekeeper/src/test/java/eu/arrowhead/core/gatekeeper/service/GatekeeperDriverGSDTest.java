@@ -81,7 +81,7 @@ public class GatekeeperDriverGSDTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testSendServiceReistryQueryNullQueryForm() {
-		testingObject.sendServiceReistryQuery(null);
+		testingObject.sendServiceRegistryQuery(null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
