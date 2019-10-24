@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+  	<parent>
+    	<groupId>eu.arrowhead</groupId>
+    	<artifactId>core</artifactId>
+    	<version>${revision}</version>
+  	</parent>
+  	<packaging>pom</packaging>
+	<artifactId>deb-installer</artifactId>
+	<name>arrowhead-installer</name>
+	<description>Arrowhead Debian Installers</description>
+
+	<url>https://github.com/arrowhead-f/core-java-spring</url>
+	<licenses>
+    	<license>
+	     	<name>Apache License, Version 2.0</name>
+	     	<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	   </license>
+  	</licenses>
+	
+	<profiles>
+		<profile>
+			<id>deb-installer</id>
+			<build>
+				<finalName>arrowhead-installers-${revision}</finalName>
+				<plugins>
+					<plugin>
+    					<groupId>org.springframework.boot</groupId>
+    					<artifactId>spring-boot-maven-plugin</artifactId>
+    					<configuration>
+          					<skip>true</skip>
+    					</configuration>
+  					</plugin>
+  					
+  					<plugin>
+						<artifactId>maven-clean-plugin</artifactId>
+		    			<version>${mvn.clean.version}</version>
+		    			<configuration>
+		      				<filesets>
+		        				<fileset>
+			          				<directory>package</directory>
+							        <excludes>
+			            				<exclude>.placeholder</exclude>
+			            			</excludes>
+			          				<followSymlinks>false</followSymlinks>
+		        				</fileset>
+			      			</filesets>
+		    			</configuration>
+		  			</plugin>
+  					
+				
+					<plugin>
+	                	<groupId>org.apache.maven.plugins</groupId>
+	                	<artifactId>maven-assembly-plugin</artifactId>
+	                	<inherited>false</inherited>
+	                	<executions>
+	                    	<execution>
+		                        <phase>install</phase>
+	    	                    <goals>
+	        	                    <goal>single</goal>
+	            	            </goals>
+	                	        <configuration>
+	                    	        <appendAssemblyId>false</appendAssemblyId>
+	                        	    <descriptors>
+	                            	    <descriptor>dir.xml</descriptor>
+	                            	</descriptors>
+	                        	</configuration>
+	                    	</execution>
+	                	</executions>
+	                	
+	                	<configuration>
+	                		<outputDirectory>package</outputDirectory>
+	                		<tarLongFileMode>omit</tarLongFileMode>
+	                	</configuration>
+            		</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

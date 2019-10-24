@@ -1,0 +1,148 @@
+## Installing Arrowhead on a Debian based Linux distribution
+
+Currently, this guide is known to work on Ubuntu Server 18.04, but it will likely work on other
+version and Debian based Linux distribution also. The following is a quick guide on the essentials.
+
+### 1. Install Linux
+
+Do a normal installation of Linux, and remember to update afterwards:
+
+`sudo apt update && sudo apt dist-upgrade`
+
+### 2. Install MySQL
+
+Pick one of the options below.
+
+#### 2a. MySQL 5.x (Ubuntu)
+
+Install:
+
+`sudo apt install mysql-server`
+
+Check if running:
+
+`sudo netstat -tap | grep mysql`
+
+#### 2b. MySQL 8.x (Oracle)
+
+First, get the latest repository package from <https://dev.mysql.com/downloads/repo/apt/>, eg.:
+
+```bash
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.10-1_all.deb
+sudo dpkg -i mysql-apt-config_0.8.10-1_all.deb
+sudo apt update
+```
+
+To install the MySQL server, run:
+
+```bash
+sudo apt install mysql-server
+```
+
+### 3. Install Java
+
+Ubuntu users (and others?):
+
+`sudo apt install openjdk-11-jre-headless`
+
+**NOTE:** Install JDK version instead of JRE version, if you plan to build the latest Debian Packages from source, using Maven. You just need to 
+change the "-jre-" part to "-jdk-" in the package name. JDK needs more disk space. JRE versions can only run packaged Java applications, but can 
+not build them from source code.
+
+Check Java version:
+
+`java -version`
+
+### 4. Download/install Arrowhead 
+
+Pick one of the options below.
+
+#### 4a. Download an Arrowhead Debian Packages 
+
+Check the GitHub site <https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3> for the latest packages and download
+it: 
+
+```bash
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-core-common_4.1.3.deb`
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-authorization_4.1.3.deb`
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-choreographer_4.1.3.deb`
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-eventhandler_4.1.3.deb`
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-gatekeeper_4.1.3.deb`
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-gateway_4.1.3.deb`
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-orchestrator_4.1.3.deb`
+`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-serviceregistry_4.1.3.deb`
+```
+
+**NOTE:** The arrowhead-core-common package is a requirement for all other packages.
+
+#### 4b. Build Arrowhead Debian Packages
+
+**NOTE:** To compile Arrowhead yourself, you should have both the JDK and Maven installed. 
+
+To build the Debian packages yourself, start by cloning the repository:
+
+`git clone https://github.com/arrowhead-f/core-java-spring.git -b development`
+
+Build them with:
+
+`mvn package`
+
+Copy all the packages to your Arrowhead server (you may have to start SSH server on it first with `sudo systemctl start ssh`:
+
+`scp target/arrowhead-*.deb X.X.X.X:~/`
+
+### 5. Install Arrowhead Core Debian Packages
+
+Go to the folder where you copied the packages and then:
+
+`sudo dpkg -i arrowhead-*.deb`
+
+The installation process will show prompts asking for input parameters. Certificate passwords need to be at least 6 
+character long!
+
+After the process is done, please see the log files in the /var/log/arrowhead folder. If any of the installed systems failed to start
+(because the Service Registry was unreachable at the time when they try to connect to it), please reboot the failed core system manually by using
+`sudo systemctl start arrowhead-<core system name>.service` You can find the service files in the /etc/systemd/system folder.
+
+The created services will restart on reboot.
+
+### 6. Hints
+
+#### Add a new application system
+
+You can use the script `ah_gen_system_cert` to generate certificate to a system.
+
+```sudo ah_gen_system_cert SYSTEM_NAME PASSWORD SYSTEM_HOST SYSTEM_IP```
+
+SYSTEM_NAME and PASSWORD are mandatory parameters. The other two are the DNS name and IP address of the computer that running 
+the system. If SYSTEM_HOST and SYSTEM_IP are not specified, the command assumes the system is running on the local machine.
+Examples:
+
+```sudo ah_gen_system_cert client1 123456 abc.com 10.0.0.22```
+
+```sudo ah_gen_system_cert localsystem1 123456```
+
+Generated certificates will appear in the current directory.
+
+#### Other hints
+
+Log files (log4j2) are available in: `/var/log/arrowhead/*`
+
+Output from systems are available with: `journalctl -u arrowhead-*.service`
+
+Restart services: `sudo systemctl restart arrowhead-\*.service`
+
+Configuration and certificates are found under: `/etc/arrowhead`
+
+Generated passwords can be found in application.properties files located in /etc/arrowhead/systems/<system name>
+directory.
+
+Mysql database: `sudo mysql -u root`, to see the Arrowhead tables:
+
+```SQL
+use arrowhead;
+show tables;
+```
+
+`apt purge` can be used to remove configuration files, log files, etc. Use `sudo apt purge arrowhead-\*` to
+remove everything arrowhead related. Please note the database tables and users will not deleted by the purge.

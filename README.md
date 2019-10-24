@@ -12,7 +12,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     1. [Docker](#quickstart_docker)
         * [Handy Docker Commands](#quickstart_dockercommands)
         * [Troubleshooting](#quickstart_dockertroubleshooting)
-    2. [Compile Code](#quickstart_compile)
+	2. [Debian Installer](#quickstart_debian)
+    3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
 4. [How to Contribute](#howtocontribute)
@@ -119,6 +120,13 @@ If you change your config you have to restart the appropriate container
 Q: MySQL won't start. What did went wrong? <br />
 A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
 
+
+<a name="quickstart_debian" />
+
+### Debian Installers
+
+The Debian installer files are located in the deb-installer/package/arrowhead-installers-4.1.3 folder. 
+Please follow this guide to install them: [Debian Installer Guide](documentation/deb-installer/DEBIAN-INSTALL.md)
 
 <a name="quickstart_compile" />
 
@@ -356,8 +364,33 @@ New payload - you can easily map the old fields to the new ones.
 
 ## Certificates
 
-Placeholder
+Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
+1) Master certificate: `arrowhead.eu`
+2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
+3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
  
+The certificate naming convetion have strict rules:
+* The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
+* A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
+
+The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
+
+### The Key-Store
+
+The Key-Store is intended to store the certificates and/or key-pair certificates. Key-pair certificates are contain the certificate chain with some additinal data, such as the private-public keys, which are necessary for the secure operation. Certificates located in this store (without the keys) will be attached to the outcoming HTTPS requests. Arrowhead Framework is designed for handling the `p12` type of Key-Stores.
+
+*(**Note:** When you creating a new key-pair certificate, then the `key-password` and the `key-store-password` must be the same.)*
+
+### The Trust-Store
+
+The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
+
+### How to create my own certificates?
+Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
+* [Create Arrowhead Cloud Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_cloud_certificate.pdf)
+* [Create Arrowhead Client Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_client_certificate.pdf)
+* [Create Trust Store](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_trust_store.pdf)
 
 <a name="howtocontribute" />
 

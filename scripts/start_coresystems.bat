@@ -20,9 +20,9 @@ cd ..\..\gateway\target
 START "" /B "cmd /c javaw -jar arrowhead-gateway-4.1.3.jar > sout_gateway.log 2>&1"
 echo Gateway started
 
-REM cd ..\..\eventhandler\target
-REM START "" /B "cmd /c javaw -jar arrowhead-eventhandler-4.1.3.jar > sout_eventhandler.log 2>&1"
-REM echo Event Handler started
+cd ..\..\eventhandler\target
+START "" /B "cmd /c javaw -jar arrowhead-eventhandler-4.1.3.jar > sout_eventhandler.log 2>&1"
+echo Event Handler started
 
 cd ..\..\gatekeeper\target
 START "" /B "cmd /c javaw -jar arrowhead-gatekeeper-4.1.3.jar > sout_gk.log 2>&1"
@@ -31,6 +31,10 @@ echo Gatekeeper started
 cd ..\..\orchestrator\target
 START "" /B "cmd /c javaw -jar arrowhead-orchestrator-4.1.3.jar > sout_orch.log 2>&1"
 echo Orchestrator started
+
+cd ..\..\choreographer\target
+START "" /B "cmd /c javaw -jar arrowhead-choreographer-4.1.3.jar > sout_choreographer.log 2>&1"
+echo Choreographer started
 
 cd %parent_path%
 
