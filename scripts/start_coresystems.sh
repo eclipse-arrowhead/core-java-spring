@@ -20,9 +20,9 @@ cd ../../gateway/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-gateway-\*.jar | sort | tail -n1) &> sout_gateway.log &
 echo Gateway started
 
-#cd ../../eventhandler/target
-#nohup java -jar $(find . -maxdepth 1 -name arrowhead-eventhandler-\*.jar | sort | tail -n1) &> sout_eventhandler.log &
-#echo Event Handler started
+cd ../../eventhandler/target
+nohup java -jar $(find . -maxdepth 1 -name arrowhead-eventhandler-\*.jar | sort | tail -n1) &> sout_eventhandler.log &
+echo Event Handler started
 
 cd ../../gatekeeper/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-gatekeeper-\*.jar | sort | tail -n1) &> sout_gk.log &
@@ -31,3 +31,7 @@ echo Gatekeeper started
 cd ../../orchestrator/target
 nohup java -jar $(find . -maxdepth 1 -name arrowhead-orchestrator-\*.jar | sort | tail -n1) &> sout_orch.log &
 echo Orchestrator started
+
+cd ../../choreographer/target
+nohup java -jar $(find . -maxdepth 1 -name arrowhead-choreographer-\*.jar | sort | tail -n1) &> sout_choreographer.log &
+echo Choreographer started

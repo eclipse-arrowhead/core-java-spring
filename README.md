@@ -9,9 +9,15 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
  
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
+    1. [Docker](#quickstart_docker)
+        * [Handy Docker Commands](#quickstart_dockercommands)
+        * [Troubleshooting](#quickstart_dockertroubleshooting)
+	2. [Debian Installer](#quickstart_debian)
+    3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
-3. [How to Contribute](#howtocontribute)
-4. [Documentation](#documentation) 
+3. [Certificates](#certificates)
+4. [How to Contribute](#howtocontribute)
+5. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -33,7 +39,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     3. [Orchestrator](#orchestrator)
        * [System Design Description Overview](#orchestrator_sdd)
        * [Services and Use Cases](#orchestrator_usecases)  
-       * [Endpoints](orchestrator_endpoints)
+       * [Endpoints](#orchestrator_endpoints)
            * [Client](#orchestrator_endpoints_client)
            * [Private](#orchestrator_endpoints_private)
            * [Management](#orchestrator_endpoints_management)     
@@ -43,12 +49,91 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 
 ## Quick Start Guide
 
+<a name="quickstart_docker" />
+
 ### Docker
 
-Placeholder
+#### Requirements
+
+> **Note:** A system with 4GB of RAM is advised. 
+
+* Docker 
+  * [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+  * [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
+  * [Mac OS](https://docs.docker.com/docker-for-mac/install/) - Helpful tool for container management: [Kitematic](https://kitematic.com/)
+  * [Windows](https://docs.docker.com/docker-for-windows/install/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
+Don't forget to copy the SQL init script next to the docker-compose file! On the first run it initializes the Database!<br />
+Example copy command which does this for you, execute from the project root directory.
+```
+cp scripts/create_empty_arrowhead_db.sql docker/
+```
+
+Inside the `docker` folder an example is provided. 
+
+##### Core System Config
+
+Example Core System Configuration files are available in this folder. 
+
+##### Docker Compose
+
+Example Docker Compose file is located here. The interesting part is the volumes section. 
+Format is /path/on/your/local/machine:/path/inside/docker/container
+
+You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mounting point inside the container, otherwise it will start up with default config.
+
+To update the images: execute `docker-compose pull` command in the directory where the compose file is.
+
+To start the containers: execute `docker-compose up -d` command in the directory where the compose file is.
+
+Don't forget to check, are all containers up and running?
+
+![docker ps -a](./documentation/images/docker_ps_a.png)
+
+If all of their is Up, you are all set.
+If they die, please check their logs. 
+
+If you change your config you have to restart the appropriate container
+
+`docker restart <containerName>`
+
+<a name="quickstart_dockercommands" />`
+
+##### Handy Docker Commands
+ 
+| Command | Description |
+| ------- | ----------- |
+| `docker ps -a` | List all containers |
+| `docker images` | List all images |
+| `docker-compose up -d` | Starts the Docker containers |
+| `docker-compose down` | Destroys the Docker containers |
+| `docker logs <containerName>` | Shows logs for the container |
+| `docker volume create --name=<volumeName>` | Creates a named volume |
+| `docker volume rm <volumeName>` | Removes the specified named volume |
+
+<a name="quickstart_dockertroubleshooting" />
+
+##### Troubleshooting
+
+Q: MySQL won't start. What did went wrong? <br />
+A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
+
+
+<a name="quickstart_debian" />
+
+### Debian Installers
+
+The Debian installer files are located in the deb-installer/package/arrowhead-installers-4.1.3 folder. 
+Please follow this guide to install them: [Debian Installer Guide](documentation/deb-installer/DEBIAN-INSTALL.md)
+
+<a name="quickstart_compile" />
 
 ### Compile source code and manually install MySQL and Maven.
 #### Requirements
+
+> **Note:** A system with 2GB of RAM is advised. 
 
 The project has the following dependencies:
 * JRE/JDK 11 [Download from here](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html)
@@ -65,24 +150,37 @@ Run the MySQL script which is in the ```scripts``` folder. If you won't run this
 
 ```cd core-java-spring```
 
-Execute ```mvn install``` command. Wait until the build succeeds. 
+Execute ```mvn install -DskipTests ``` command. Wait until the build succeeds. 
 This command builds all available projects. <br />
 
-After succeeding enter the scripts folder and execute ```start_core_systems.sh``` or ```start_core_systems.bat``` depending on your operating system.
+After the build is complete, the jars with the appropriate `application.properites` will be available in their directory.
+
+#### Starting the core systems manually:
+
+Change directory to:
+
 - serviceregistry/target directory.
 ```cd serviceregistry/target``` <br />and execute: ```java -jar arrowhead-serviceregistry-4.1.3.jar```
 - authorization/target directory. ```cd authorization/target``` <br />and execute: ```java -jar arrowhead-authorization-4.1.3.jar``` 
 - orchestrator/target directory. ```orchestrator/target``` <br />and execute: ```java -jar arrowhead-orchestrator-4.1.3.jar```
 
+#### Starting the core system automatically:
+
+After successful build enter the scripts folder and execute ```start_core_systems.sh``` or ```start_core_systems.bat``` depending on your operating system.
+
 
 Wait until servers start...
 
-Service Registry will be available on ```localhost:8443``` <br />
-Authorization will be available on ```localhost:8445``` <br />
-Orchestrator will be available on ```localhost:8441``` <br />
-Event Handler will be available on ```localhost:8455``` <br />
-Gatekeeper will be available on ```localhost:8449``` <br />
-Gateway will be available on ```localhost:8453``` <br />
+> **Note:** By default servers start in SECURE mode. To access them, you need to use an example certificate, provided in the `certificate` directory.
+
+> **Note:** If you wish to change the the configuration, do it by by modifying the `application.properties` file in the `target` directory! Don't forget to change all of them!
+
+Service Registry will be available on ```https://localhost:8443``` <br />
+Authorization will be available on ```https://localhost:8445``` <br />
+Orchestrator will be available on ```https://localhost:8441``` <br />
+Event Handler will be available on ```https://localhost:8455``` <br />
+Gatekeeper will be available on ```https://localhost:8449``` <br />
+Gateway will be available on ```https://localhost:8453``` <br />
 
 Swagger with API documentation is available in the root route.
 
@@ -119,6 +217,8 @@ The following endpoints no longer exist, instead use the ones on the right:
  
  * __serviceregistry/register__ - data structure changed
  
+Description for this endpoint is available here: [Register](#serviceregistry_endpoints_post_register)
+ 
 Old payload, which is no longer usable
  ```json
 {
@@ -142,13 +242,14 @@ Old payload, which is no longer usable
  ```
 
 New payload - you can easily map the old fields to the new ones.
+
  ```json
 {
   "serviceDefinition": "IndoorTemperature",
   "providerSystem": {
-  "systemName": "InsecureTemperatureSensor",
-  "address": "192.168.0.2",
-  "port": 8080,
+    "systemName": "InsecureTemperatureSensor",
+    "address": "192.168.0.2",
+    "port": 8080,
   "authenticationInfo": "eyJhbGciOiJIUzI1Ni..."
  },
   "serviceUri": "temperature",
@@ -160,7 +261,7 @@ New payload - you can easily map the old fields to the new ones.
   "version": 1,
   "interfaces": [
     "HTTP-SECURE-JSON"
- ]
+  ]
 }
 ```
  
@@ -168,10 +269,128 @@ New payload - you can easily map the old fields to the new ones.
  * __/mgmt/intracloud__ - data structure changed
  * __/mgmt/intercloud__ - data structure changed
  
-### Orchestration Core System:
- Store based orchestration is available for now.
- * __/mgmt/store__ - data structure changed
+ How to [Add Intracloud rules](#authorization_endpoints_post_intracloud) <br />
+ How to [Add Intercloud rules](#authorization_endpoints_post_intercloud)
  
+### Orchestration Core System:
+ * __/mgmt/store__ - data structure changed
+ * __/orchestrator/orchestration__ - data structure changed
+ 
+ Description for this endpoint is available here: [Orchestration](#orchestrator_endpoints_post_orchestration)
+ 
+ Old payload, which is no longer usable
+ 
+ ```json
+{
+  "requesterSystem" : {
+    "systemName" : "client1",
+    "address" : "localhost",
+    "port" : 0,
+    "authenticationInfo" : "null"
+  },
+  "requestedService" : {
+    "serviceDefinition" : "IndoorTemperature",
+    "interfaces" : [ "json" ],
+    "serviceMetadata" : {
+      "unit" : "celsius"
+    }
+  },
+  "orchestrationFlags" : {
+    "onlyPreferred" : false,
+    "overrideStore" : true,
+    "externalServiceRequest" : false,
+    "enableInterCloud" : true,
+    "enableQoS" : false,
+    "matchmaking" : false,
+    "metadataSearch" : true,
+    "triggerInterCloud" : false,
+    "pingProviders" : false
+  },
+  "preferredProviders" : [ ],
+  "requestedQoS" : { },
+  "commands" : { }
+}
+```
+
+New payload - you can easily map the old fields to the new ones.
+
+```json
+{
+  "requesterSystem": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "requestedService": {
+    "serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+    "securityRequirements": [
+      "NOT_SECURE", "CERTIFICATE", "TOKEN"
+    ],
+    "metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    },
+    "versionRequirement": 0,
+    "maxVersionRequirement": 0,
+   "minVersionRequirement": 0
+  },
+  "preferredProviders": [
+    {
+      "providerCloud": {
+        "operator": "string",
+        "name": "string"
+      },
+      "providerSystem": {
+        "systemName": "string",
+        "address": "string",
+        "port": 0
+      }
+    }
+  ],
+  "orchestrationFlags": {
+    "additionalProp1": true,
+    "additionalProp2": true,
+    "additionalProp3": true
+  }
+}
+```
+
+<a name="certificates" />
+
+## Certificates
+
+Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
+1) Master certificate: `arrowhead.eu`
+2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
+3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
+ 
+The certificate naming convetion have strict rules:
+* The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
+* A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
+
+The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
+
+### The Key-Store
+
+The Key-Store is intended to store the certificates and/or key-pair certificates. Key-pair certificates are contain the certificate chain with some additinal data, such as the private-public keys, which are necessary for the secure operation. Certificates located in this store (without the keys) will be attached to the outcoming HTTPS requests. Arrowhead Framework is designed for handling the `p12` type of Key-Stores.
+
+*(**Note:** When you creating a new key-pair certificate, then the `key-password` and the `key-store-password` must be the same.)*
+
+### The Trust-Store
+
+The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
+
+### How to create my own certificates?
+Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
+* [Create Arrowhead Cloud Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_cloud_certificate.pdf)
+* [Create Arrowhead Client Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_client_certificate.pdf)
+* [Create Trust Store](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_trust_store.pdf)
 
 <a name="howtocontribute" />
 
@@ -447,7 +666,7 @@ Returns a __ServiceQueryList__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` | URI of the Service |
-| `endOfValidity` | Service is available until this timestamp. |
+| `endOfValidity` | Service is available until this UTC timestamp. |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -501,13 +720,15 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | yes |
 | `providerSystem` | Provider System | yes |
 | `serviceUri` |  URI of the service | yes |
-| `endOfValidity` | Service is available until this timestamp | no |
+| `endOfValidity` | Service is available until this UTC timestamp | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
 | `interfaces` | List of the interfaces the Service supports | yes |
 
 > **Note:** Valid `interfaces` name pattern: protocol-SECURE or INSECURE format. (e.g.: HTTPS-SECURE-JSON)
+
+> **Note:** `authenticationInfo` is the public key of the system. In Insecure mode you can omit sending this key.
 
 > **Note:** Possible values for `secure` are:
 > * `NOT_SECURE` (default value if field is not defined)
@@ -562,7 +783,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -696,7 +917,7 @@ Returns a __ServiceRegistryEntryList__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` | URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -750,7 +971,7 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | yes |
 | `providerSystem` | Provider System | yes |
 | `serviceUri` | URI of the Service | no |
-| `endOfValidity` | Service is available until this timestamp. | no |
+| `endOfValidity` | Service is available until this UTC timestamp. | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
@@ -811,7 +1032,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -882,7 +1103,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -935,7 +1156,7 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | yes |
 | `providerSystem` | Provider System | yes |
 | `serviceUri` | URI of the Service | no |
-| `endOfValidity` | Service is available until this timestamp. | no |
+| `endOfValidity` | Service is available until this UTC timestamp. | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
@@ -996,7 +1217,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -1049,7 +1270,7 @@ __ServiceRegistryEntry__ is the input
 | `serviceDefinition` | Service Definition | no |
 | `providerSystem` | Provider System | no |
 | `serviceUri` | URI of the Service | no |
-| `endOfValidity` | Service is available until this timestamp. | no |
+| `endOfValidity` | Service is available until this UTC timestamp. | no |
 | `secure` | Security info | no |
 | `metadata` | Metadata | no |
 | `version` | Version of the Service | no |
@@ -1110,7 +1331,7 @@ Returns a __ServiceRegistryEntry__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` |  URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -1361,7 +1582,7 @@ Returns a __ServiceRegistryEntryList__
 | `serviceDefinition` | Service Definition |
 | `provider` | Provider System |
 | `serviceUri` | URI of the Service |
-| `endOfValidity` | Service is available until this timestamp |
+| `endOfValidity` | Service is available until this UTC timestamp |
 | `secure` | Security info |
 | `metadata` | Metadata |
 | `version` | Version of the Service |
@@ -2964,7 +3185,7 @@ The base URL for the requests: `http://<host>:<port>/orchestrator`
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#orcchestrator_endpoints_get_echo) | /echo  | GET | - | OK |
-| [Orchestration](#orchestrator_endpoints_post_orchestration) | /orchestration | POST | [Service Request](#datastructures_servicerequest) | [Orchestration Response](#datastructures_orchestration_response) |
+| [Orchestration](#orchestrator_endpoints_post_orchestration) | /orchestration | POST | [ServiceRequestForm](#datastructures_servicerequestform) | [Orchestration Response](#datastructures_orchestration_response) |
 | [Start store Orchestration by ID](#orchrestrator_endpoints_get_oschestration_id) | /orchestration/{id} | GET | StoreEntryID | [Orchestration Response](#datastructures_orchestration_response) |
  
 <a name="orchestrator_endpoints_private" />
@@ -3023,9 +3244,9 @@ POST /orchestrator/orchestration
 Initializes the orchestration process in which the Orchestrator Core System tries to find providers
 that match the specified requirements (and the consumer have right to use them).
 
-<a name="datastructures_servicerequest" />
+<a name="datastructures_servicerequestform" />
 
-__ServiceRequest__ is the input
+__ServiceRequestForm__ is the input
 
 ```json
 {
@@ -3203,7 +3424,7 @@ Returns an __Orchestration Response__
 > * `TTL_EXPIRING` (the provider will be inaccessible in a matter of minutes),
 > * `TTL_UNKNOWN` (the provider does not specified expiration time)
 
-> **Note:** 4.1.2 version: POST /orchestrator/ochestration<br />
+> **Note:** 4.1.2 version: POST /orchestrator/orchestration<br />
             It was basically the same, however security requirement was not available.
 
 <a name="orchrestrator_endpoints_get_oschestration_id" />

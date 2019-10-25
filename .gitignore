@@ -1,4 +1,3 @@
-/target/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
@@ -56,3 +55,7 @@ authorization.log
 /choreographer/target
 
 *.log
+/target
+/deb-installer/.classpath
+/deb-installer/.project
+/deb-installer/.settings
