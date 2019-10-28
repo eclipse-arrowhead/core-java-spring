@@ -1061,7 +1061,7 @@ public class ServiceRegistryDBService {
 					 "Security type is in conflict with the availability of the authentication info.");
 
 		if (!sslProperties.isSslEnabled() && type != ServiceSecurityType.NOT_SECURE ) {
-			 throw new InvalidParameterException("ServiceRegistry insequre mode can not handle secure services") ;
+			 throw new InvalidParameterException("ServiceRegistry insecure mode can not handle secure services") ;
 		}
 	}
 	
