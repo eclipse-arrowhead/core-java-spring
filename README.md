@@ -2178,7 +2178,7 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all Intracloud rules](#authorization_endpoints_getintracloud) | /mgmt/intracloud | GET | - | [IntracloudRuleList](#datastructures_intracloud_list) |
-| [Add Intercloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
+| [Add Intracloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
 | [Get an Intercloud rule by ID](#authorization_endpoints_get_intracloud_id) | /mgmt/intracloud/{id} | GET | IntracloudRuleID | [IntracloudRule](#datastructures_intracloud_rule) |
 | [Delete an Intracloud rule by ID](#authorization_endpoints_delete_intracloud_id) | /mgmt/intracloud/{id} | DELETE | IntracloudRuleID | - |
 | [Get all Intercloud rules](#authorization_endpoinds_get_intercloud) | /mgmt/intercloud | GET | - | [IntercloudRuleList](#datastructures_intercloud_list) |
@@ -2566,7 +2566,7 @@ Returns an __IntracloudRuleList__
             
 <a name="authorization_endpoints_post_intracloud" />
 
-### Add Intercloud rules
+### Add Intracloud rules
 ```
 POST /authorization/mgmt/intracloud
 ```                        
