@@ -1070,12 +1070,12 @@ public class ServiceRegistryDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private ServiceSecurityType validateSRSecurityValue(final String secure ) {
-		logger.debug("checkSRSecurityValue started...");
+		logger.debug("validateSRSecurityValue started...");
 		
 		ServiceSecurityType validatedType = null;
 		if ( secure != null ) {
 			
-			for ( ServiceSecurityType type : ServiceSecurityType.values()) {
+			for ( final ServiceSecurityType type : ServiceSecurityType.values()) {
 				
 				if ( type.name().equalsIgnoreCase( secure )) {
 					

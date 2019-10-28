@@ -895,7 +895,7 @@ public class ServiceRegistryController {
 		ServiceSecurityType securityType = null;
 		if ( request.getSecure() != null ) {
 			
-			for ( ServiceSecurityType type : ServiceSecurityType.values()) {
+			for ( final ServiceSecurityType type : ServiceSecurityType.values()) {
 				
 				if ( type.name().equalsIgnoreCase( request.getSecure() )) {
 					
