@@ -361,13 +361,29 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
-		request.setSecure(ServiceSecurityType.CERTIFICATE);
+		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterServiceWithInvalidSecureValue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("s");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setSecure("invalidSecurityTypeValue");
+		
+		final MvcResult result = postRegisterService(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Security type is not valid.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -619,7 +635,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
-		request.setSecure(ServiceSecurityType.CERTIFICATE);
+		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -756,7 +772,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
-		request.setSecure(ServiceSecurityType.CERTIFICATE);
+		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
