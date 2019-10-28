@@ -22,6 +22,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
+	public static final String CORE_SYSTEM_DATAMANAGER = "Datamanager";
 	
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -96,6 +97,8 @@ public class CommonConstants {
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 
+	public static final String DATAMANAGER_URI = "/datamanager";
+	
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
