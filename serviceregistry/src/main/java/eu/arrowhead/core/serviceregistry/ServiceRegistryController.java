@@ -892,8 +892,29 @@ public class ServiceRegistryController {
 			}
 		}
 		
-		final ServiceSecurityType type = request.getSecure() == null ? ServiceSecurityType.NOT_SECURE : request.getSecure();
-		if (type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+		ServiceSecurityType securityType = null;
+		if ( request.getSecure() != null ) {
+			
+			for ( final ServiceSecurityType type : ServiceSecurityType.values()) {
+				
+				if ( type.name().equalsIgnoreCase( request.getSecure() )) {
+					
+					securityType = type;
+					break;
+				}
+			}
+			
+			if ( securityType == null ) {
+				
+				throw new BadPayloadException("Security type is not valid.", HttpStatus.SC_BAD_REQUEST, origin); 
+			}
+			
+		} else {
+			
+			securityType = ServiceSecurityType.NOT_SECURE;
+		}
+		
+		if (securityType != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
 			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
 		}
 		
