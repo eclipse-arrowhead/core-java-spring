@@ -14,8 +14,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
-4. [How to Contribute](#howtocontribute)
-5. [Documentation](#documentation) 
+4. [Gatekeeper and Gateway Setup](#setupgatekeeper_and_gateway)
+5. [How to Contribute](#howtocontribute)
+6. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -329,7 +330,11 @@ New payload - you can easily map the old fields to the new ones.
 ## Certificates
 
 Placeholder
- 
+
+<a name="setupgatekeeper_and_gateway" /> 
+## Gatekeeper and Gateway Setup
+
+Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
 
 <a name="howtocontribute" />
 
@@ -2781,7 +2786,7 @@ Returns an __IntercloudRuleList__
             This version always returned all records in an array of JSON objects. The objects did not contain
             any time information. Access didn't depend on provider and interface.   
             
-<a name=""  />
+<a name="authorization_endpoints_post_intercloud" />
 
 ### Add Intercloud rules
 ```
