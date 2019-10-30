@@ -332,6 +332,7 @@ New payload - you can easily map the old fields to the new ones.
 Placeholder
 
 <a name="setupgatekeeper_and_gateway" /> 
+
 ## Gatekeeper and Gateway Setup
 
 Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
