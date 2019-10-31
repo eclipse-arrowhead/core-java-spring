@@ -838,6 +838,10 @@ public class ServiceRegistryController {
 	private void checkSystemRequest(final SystemRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkSystemRequest started...");
 		
+		if (request == null) {
+			throw new BadPayloadException("System is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		if (Utilities.isEmpty(request.getSystemName())) {
 			throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
