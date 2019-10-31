@@ -10,13 +10,16 @@ The following is a quick guide on the essentials.
 The Arrowhead Gatekeeper and Arrowhead Gateway can use any messaging service that implements JMS (Java Message Service) specification. Our default implementation is using ActiveMQ Classic.
 
 You can download it from the following link for both Windows and Unix/Linux operation systems:
+
 [ActiveMQ Classic](https://activemq.apache.org/components/classic/download/)
 The release version of ActiveMQ Classic is just an archive file (ZIP or tar.gz). After extraction you can use it.
 
 **Please note that ActiveMQ needs Java 7+ in able to operate but since Arrowhead needs Java 11 this should not be a problem.**
 
 Some help for the installation:
+
 [ActiveMQ Classic Documentation](https://activemq.apache.org/using-activemq)
+
 [A Guide to installing ActiveMQ on Ubuntu 18.04](https://www.osradar.com/install-apachemq-ubuntu-18-04/)
 
 Before starting the ActiveMQ server you have to modify the configuration. The `activemq.xml` file contains all settings of the server which is located in the `conf` subfolder of the ActiveMQ installation folder.
