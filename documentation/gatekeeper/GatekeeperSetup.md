@@ -2,7 +2,7 @@
 
 Arrowhead Gatekeeper and Arrowhead Gateway are two optional core systems that allow consumers in the local cloud to use providers from other clouds. Because local clouds often can't be accessed from outside, the gatekeeper and gateway systems use a third party software (ActiveMQ) as relay to make connection between clouds.
 **Please note that Arrowhead Gatekeeper and Arrowhead Gateway core systems work only in secure mode.**
-**Please also note that the ActiveMQ server has to accessible for every participant clouds.**
+**Please also note that the ActiveMQ server has to be accessible for every participant clouds.**
 The following is a quick guide on the essentials.
 
 ### 1. Install ActiveMQ
