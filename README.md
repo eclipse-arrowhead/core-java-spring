@@ -65,10 +65,12 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
-Don't forget to copy the SQL init script next to the docker-compose file! On the first run it initializes the Database!<br />
+Don't forget to copy the `initSQL.sh` script next to the docker-compose file and execute it! On the first run it initializes the Database!<br />
 Example copy command which does this for you, execute from the project root directory.
 ```
-cp scripts/create_empty_arrowhead_db.sql docker/
+cp scripts/initSQL.sh docker/
+cd docker
+./initSQL.sh
 ```
 
 Inside the `docker` folder an example is provided. 
