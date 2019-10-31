@@ -283,7 +283,7 @@ public abstract class ApplicationInitListener {
 		result.setProviderSystem(coreSystemDTO);
 		result.setServiceDefinition(coreSystemService.getServiceDefinition());
 		result.setServiceUri(coreSystemService.getServiceUri());
-		result.setSecure(sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE : ServiceSecurityType.NOT_SECURE);
+		result.setSecure(sslProperties.isSslEnabled() ? ServiceSecurityType.CERTIFICATE.name() : ServiceSecurityType.NOT_SECURE.name());
 		result.setInterfaces(interfaces);
 		
 		return result;

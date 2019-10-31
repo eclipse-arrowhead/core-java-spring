@@ -10,6 +10,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
     1. [Docker](#quickstart_docker)
+        * [Handy Docker Commands](#quickstart_dockercommands)
+        * [Troubleshooting](#quickstart_dockertroubleshooting)
 	2. [Debian Installer](#quickstart_debian)
     3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
@@ -53,6 +55,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ### Docker
 
 #### Requirements
+
+> **Note:** A system with 4GB of RAM is advised. 
+
 * Docker 
   * [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
   * [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
@@ -60,10 +65,14 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
   * [Windows](https://docs.docker.com/docker-for-windows/install/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
-Don't forget to create a volume for mysql: `docker volume create --name=mysql`
-Don't forget to run the SQL script inside the MySQL container beforehand. Easier DB setup solution will be coming shortly. 
+Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
+Don't forget to copy the SQL init script next to the docker-compose file! On the first run it initializes the Database!<br />
+Example copy command which does this for you, execute from the project root directory.
+```
+cp scripts/create_empty_arrowhead_db.sql docker/
+```
 
-Inside the `docker` folder some examples provided. 
+Inside the `docker` folder an example is provided. 
 
 ##### Core System Config
 
@@ -74,19 +83,44 @@ Example Core System Configuration files are available in this folder.
 Example Docker Compose file is located here. The interesting part is the volumes section. 
 Format is /path/on/your/local/machine:/path/inside/docker/container
 
-You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mouning point inside the container, otherwise it will start up with default config.
+You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mounting point inside the container, otherwise it will start up with default config.
 
 To update the images: execute `docker-compose pull` command in the directory where the compose file is.
 
 To start the containers: execute `docker-compose up -d` command in the directory where the compose file is.
 
+Don't forget to check, are all containers up and running?
+
+![docker ps -a](./documentation/images/docker_ps_a.png)
+
+If all of their is Up, you are all set.
+If they die, please check their logs. 
+
 If you change your config you have to restart the appropriate container
 
 `docker restart <containerName>`
 
-List all containers:
+<a name="quickstart_dockercommands" />`
 
-`docker ps -a`
+##### Handy Docker Commands
+ 
+| Command | Description |
+| ------- | ----------- |
+| `docker ps -a` | List all containers |
+| `docker images` | List all images |
+| `docker-compose up -d` | Starts the Docker containers |
+| `docker-compose down` | Destroys the Docker containers |
+| `docker logs <containerName>` | Shows logs for the container |
+| `docker volume create --name=<volumeName>` | Creates a named volume |
+| `docker volume rm <volumeName>` | Removes the specified named volume |
+
+<a name="quickstart_dockertroubleshooting" />
+
+##### Troubleshooting
+
+Q: MySQL won't start. What did went wrong? <br />
+A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
+
 
 <a name="quickstart_debian" />
 
@@ -99,6 +133,8 @@ Please follow this guide to install them: [Debian Installer Guide](documentation
 
 ### Compile source code and manually install MySQL and Maven.
 #### Requirements
+
+> **Note:** A system with 2GB of RAM is advised. 
 
 The project has the following dependencies:
 * JRE/JDK 11 [Download from here](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html)
@@ -115,7 +151,7 @@ Run the MySQL script which is in the ```scripts``` folder. If you won't run this
 
 ```cd core-java-spring```
 
-Execute ```mvn install``` command. Wait until the build succeeds. 
+Execute ```mvn install -DskipTests ``` command. Wait until the build succeeds. 
 This command builds all available projects. <br />
 
 After the build is complete, the jars with the appropriate `application.properites` will be available in their directory.
@@ -329,7 +365,32 @@ New payload - you can easily map the old fields to the new ones.
 
 ## Certificates
 
-Placeholder
+Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
+1) Master certificate: `arrowhead.eu`
+2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
+3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
+The certificate naming convetion have strict rules:
+* The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
+* A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
+
+The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
+
+### The Key-Store
+
+The Key-Store is intended to store the certificates and/or key-pair certificates. Key-pair certificates are contain the certificate chain with some additinal data, such as the private-public keys, which are necessary for the secure operation. Certificates located in this store (without the keys) will be attached to the outcoming HTTPS requests. Arrowhead Framework is designed for handling the `p12` type of Key-Stores.
+
+*(**Note:** When you creating a new key-pair certificate, then the `key-password` and the `key-store-password` must be the same.)*
+
+### The Trust-Store
+
+The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
+
+### How to create my own certificates?
+Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
+* [Create Arrowhead Cloud Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_cloud_certificate.pdf)
+* [Create Arrowhead Client Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_client_certificate.pdf)
+* [Create Trust Store](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_trust_store.pdf)
 
 <a name="setupgatekeeper_and_gateway" /> 
 
@@ -2123,7 +2184,7 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all Intracloud rules](#authorization_endpoints_getintracloud) | /mgmt/intracloud | GET | - | [IntracloudRuleList](#datastructures_intracloud_list) |
-| [Add Intercloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
+| [Add Intracloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
 | [Get an Intercloud rule by ID](#authorization_endpoints_get_intracloud_id) | /mgmt/intracloud/{id} | GET | IntracloudRuleID | [IntracloudRule](#datastructures_intracloud_rule) |
 | [Delete an Intracloud rule by ID](#authorization_endpoints_delete_intracloud_id) | /mgmt/intracloud/{id} | DELETE | IntracloudRuleID | - |
 | [Get all Intercloud rules](#authorization_endpoinds_get_intercloud) | /mgmt/intercloud | GET | - | [IntercloudRuleList](#datastructures_intercloud_list) |
@@ -2511,7 +2572,7 @@ Returns an __IntracloudRuleList__
             
 <a name="authorization_endpoints_post_intracloud" />
 
-### Add Intercloud rules
+### Add Intracloud rules
 ```
 POST /authorization/mgmt/intracloud
 ```                        

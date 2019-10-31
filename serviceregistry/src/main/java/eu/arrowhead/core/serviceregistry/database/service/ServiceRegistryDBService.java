@@ -535,6 +535,8 @@ public class ServiceRegistryDBService {
 		final String validatedProviderName = request.getProviderSystem().getSystemName().toLowerCase().trim();
 		final String validatedProviderAddress = request.getProviderSystem().getAddress().toLowerCase().trim();
 		final int validatedProviderPort = request.getProviderSystem().getPort().intValue();
+		final ServiceSecurityType validatedSecurityType = validateSRSecurityValue(request.getSecure() );
+		
 		try {
 			final ServiceDefinition serviceDefinition = findOrCreateServiceDefinition(validatedServiceDefinition);
 			final System provider = findOrCreateSystem(validatedProviderName, validatedProviderAddress, validatedProviderPort, request.getProviderSystem().getAuthenticationInfo());
@@ -542,7 +544,7 @@ public class ServiceRegistryDBService {
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
-			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version,
+			final ServiceRegistry srEntry = createServiceRegistry(serviceDefinition, provider, request.getServiceUri(), endOfValidity, validatedSecurityType, metadataStr, version,
 																  request.getInterfaces());
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
@@ -565,6 +567,7 @@ public class ServiceRegistryDBService {
 		Assert.isTrue(0 < id, "id is not greater than zero");
 		
 		checkServiceRegistryRequest(request);
+		final ServiceSecurityType validatedSecurityType = validateSRSecurityValue(request.getSecure());
 		
 		try {
 			ServiceRegistry srEntry;
@@ -585,7 +588,7 @@ public class ServiceRegistryDBService {
 			final ZonedDateTime endOfValidity = Utilities.isEmpty(request.getEndOfValidity()) ? null : Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
 			final String metadataStr = Utilities.map2Text(request.getMetadata());
 			final int version = request.getVersion() == null ? 1 : request.getVersion().intValue();
-			srEntry = updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, request.getSecure(), metadataStr, version, request.getInterfaces());
+			srEntry = updateServiceRegistry(srEntry, serviceDefinition, provider, request.getServiceUri(), endOfValidity, validatedSecurityType, metadataStr, version, request.getInterfaces());
 		
 			return DTOConverter.convertServiceRegistryToServiceRegistryResponseDTO(srEntry);
 		} catch (final DateTimeParseException ex) {
@@ -656,7 +659,7 @@ public class ServiceRegistryDBService {
 				validatedInterfacesTemp.add(serviceRegistryInterfaceConnection.getServiceInterface().getInterfaceName());
 			}
 			
-			final ServiceSecurityType validatedSecurityType = request.getSecure() != null ? request.getSecure() : srEntry.getSecure();
+			final ServiceSecurityType validatedSecurityType = validateSRSecurityValue(request.getSecure());
 			final String validatedServiceUri = request.getServiceUri() != null ? request.getServiceUri() : srEntry.getServiceUri();
 			final List<String> validatedInterfaces = request.getInterfaces() != null && !request.getInterfaces().isEmpty() ? request.getInterfaces() : validatedInterfacesTemp;
 			
@@ -1061,8 +1064,37 @@ public class ServiceRegistryDBService {
 					 "Security type is in conflict with the availability of the authentication info.");
 
 		if (!sslProperties.isSslEnabled() && type != ServiceSecurityType.NOT_SECURE ) {
-			 throw new InvalidParameterException("ServiceRegistry insequre mode can not handle secure services") ;
+			 throw new InvalidParameterException("ServiceRegistry insecure mode can not handle secure services") ;
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ServiceSecurityType validateSRSecurityValue(final String secure ) {
+		logger.debug("validateSRSecurityValue started...");
+		
+		ServiceSecurityType validatedType = null;
+		if ( secure != null ) {
+			
+			for ( final ServiceSecurityType type : ServiceSecurityType.values()) {
+				
+				if ( type.name().equalsIgnoreCase( secure )) {
+					
+					validatedType = type;
+					break;
+				}
+			}
+			
+			if ( validatedType == null) {
+				
+				throw new InvalidParameterException("Security type is not valid."); 
+			}
+		
+		} else {
+			
+			validatedType = ServiceSecurityType.NOT_SECURE;
+		}
+
+		return validatedType;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
