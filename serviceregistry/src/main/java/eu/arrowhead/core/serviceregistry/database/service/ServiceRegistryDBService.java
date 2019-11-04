@@ -236,7 +236,7 @@ public class ServiceRegistryDBService {
 		final long validatedSystemId = validateSystemId(systemId);
 		final Integer validatedPort = validateAllowNullSystemPort(port);
 		final String validatedSystemName = validateAllowNullSystemParamString(systemName);
-		if (validatedSystemName.contains(".")) {
+		if (validatedSystemName != null && validatedSystemName.contains(".")) {
 			throw new InvalidParameterException("System name can't contain dot (.)");
 		}
 		final String validatedAddress = validateAllowNullSystemParamString(address);
