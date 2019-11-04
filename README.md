@@ -1364,7 +1364,7 @@ GET /serviceregistry/mgmt/grouped
 
 Returns all Service Registry Entries grouped for the purpose of the Management Tools' Service Registry view:
 * autoCompleteData
-* servicesGroupedByServiceDefinitionAndInterface
+* servicesGroupedByServiceDefinition
 * servicesGroupedBySystems
 
 <a name="datastructures_serviceregistrygrouped" />
@@ -1398,11 +1398,10 @@ Returns a __ServiceRegistryGrouped__
       }
     ]
   },
-  "servicesGroupedByServiceDefinitionAndInterface": [
+  "servicesGroupedByServiceDefinition": [
     {
       "serviceDefinitionId": 0,
       "serviceDefinition": "string",
-      "interfaceName": "string",
       "providerServices": [
         {
           "id": 0,
