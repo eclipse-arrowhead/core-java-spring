@@ -137,6 +137,12 @@ public class ServiceRegistryDBServiceSystemTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
+	public void createSystemSystemNameWithDotTest() {
+		serviceRegistryDBService.createSystem("x.y", "x", 1, "x");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
 	public void createSystemAddressEmptyStringTest() {
 		serviceRegistryDBService.createSystem("x", "", 1, "x");
 	}
@@ -232,6 +238,18 @@ public class ServiceRegistryDBServiceSystemTest {
 	@Test(expected = InvalidParameterException.class)
 	public void updateSystemByIdEmptySystemNameTest() {
 		final String systemName0 = "         ";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		serviceRegistryDBService.updateSystem(testId0, systemName0, address0, port0, authenticationInfo0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void updateSystemByIdSystemNameWithDotTest() {
+		final String systemName0 = "test.name";
 		final String address0 = "testAddress0";
 		final int port0 = 1;
 		final long testId0 = 1;
@@ -361,6 +379,18 @@ public class ServiceRegistryDBServiceSystemTest {
 		} catch (final InvalidParameterException ex) {
 			fail();
 		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void mergeSystemByIdSystemNameWithDotTest() {
+		final String systemName0 = "test.address";
+		final String address0 = "testAddress0";
+		final int port0 = 1;
+		final long testId0 = 1;
+		final String authenticationInfo0 = null;
+		
+		serviceRegistryDBService.mergeSystem(testId0, systemName0, address0, port0, authenticationInfo0);		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

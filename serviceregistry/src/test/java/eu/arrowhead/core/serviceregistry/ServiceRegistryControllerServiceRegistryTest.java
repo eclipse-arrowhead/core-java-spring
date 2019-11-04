@@ -288,7 +288,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		
 		// Testing servicesGroupedByServiceDefinition object
 		assertEquals(numOfServices, servicesGroupedByServiceDefinition.size());
-		assertEquals(numOfSystems * 2, servicesGroupedByServiceDefinition.get(0).getProviderServices().size());
+		assertEquals(numOfSystems, servicesGroupedByServiceDefinition.get(0).getProviderServices().size());
 	}
 	
 	//=================================================================================================
