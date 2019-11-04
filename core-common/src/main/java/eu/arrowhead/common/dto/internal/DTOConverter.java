@@ -190,16 +190,16 @@ public class DTOConverter {
 				if (!interfaceIdsForAutoComplete.contains(interfId)) {
 					interfaceIdsForAutoComplete.add(interfId);
 					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
-				}
-				
-				// Creating ServicesGroupedByServiceDefinitionResponseDTO
-				if (servicesByServiceDefinition.containsKey(serviceDefinitionId)) {
-					servicesByServiceDefinition.get(serviceDefinitionId).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
-				} else {
-					final ServicesGroupedByServiceDefinitionResponseDTO dto = new ServicesGroupedByServiceDefinitionResponseDTO(serviceDefinitionId, serviceDefinition, new ArrayList<>());
-					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
-					servicesByServiceDefinition.put(serviceDefinitionId, dto);
-				}
+				}				
+			}
+			
+			// Creating ServicesGroupedByServiceDefinitionResponseDTO
+			if (servicesByServiceDefinition.containsKey(serviceDefinitionId)) {
+				servicesByServiceDefinition.get(serviceDefinitionId).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+			} else {
+				final ServicesGroupedByServiceDefinitionResponseDTO dto = new ServicesGroupedByServiceDefinitionResponseDTO(serviceDefinitionId, serviceDefinition, new ArrayList<>());
+				dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+				servicesByServiceDefinition.put(serviceDefinitionId, dto);
 			}
 		}
 		
