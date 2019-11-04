@@ -8,7 +8,7 @@ services:
       - MYSQL_ROOT_PASSWORD=THIS_WILL_BE_YOUR_CONTAINERS_ROOT_PW
     volumes:
       - mysql:/var/lib/mysql
-      - ./create_empty_arrowhead_db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql:/docker-entrypoint-initdb.d/
     ports:
       - 3306:3306
 

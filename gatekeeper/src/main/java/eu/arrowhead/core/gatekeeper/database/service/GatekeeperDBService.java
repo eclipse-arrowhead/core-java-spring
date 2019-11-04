@@ -862,7 +862,7 @@ public class GatekeeperDBService {
 	private List<Relay> deleteUnnecessaryGatekeeperRelayConnectionsAndGetValidatedAdditionalRelays(final Cloud cloud, final List<Long> gatekeeperRealyIds) {
 		logger.debug("deleteUnnecessaryGatekeeperRelayConnectionsAndGetAdditionallyRelayIds started...");
 		
-		final Set<Long> relaysConnToKeep = new HashSet<>();
+		final Set<Long> relaysToKeep = new HashSet<>();
 		final Set<Long> relaysConnToDelete = new HashSet<>();
 		final Set<Long> relaysToAssign = new HashSet<>();
 		for (final CloudGatekeeperRelay relayConn : cloud.getGatekeeperRelays()) {
@@ -870,7 +870,7 @@ public class GatekeeperDBService {
 			for (final Long dtoRelayId : gatekeeperRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
 					
-					relaysConnToKeep.add(relayConn.getId());
+					relaysToKeep.add(relayConn.getRelay().getId());
 					relayConnToRemove = false;
 					break;
 				} 
@@ -883,11 +883,11 @@ public class GatekeeperDBService {
 		}
 		
 		relaysToAssign.addAll(gatekeeperRealyIds);
-		relaysToAssign.removeAll(relaysConnToKeep);
+		relaysToAssign.removeAll(relaysToKeep);
 		
 		final List<Relay> validatedRelaysToAdd = collectAndValidateGatekeeperRelays(relaysToAssign);
 		
-		if (relaysConnToKeep.isEmpty() &&  validatedRelaysToAdd.isEmpty()) {
+		if (relaysToKeep.isEmpty() && validatedRelaysToAdd.isEmpty()) {
 			throw new InvalidParameterException("Cloud can't exist without gatekeeper Relay");
 		}
 		
@@ -901,7 +901,7 @@ public class GatekeeperDBService {
 	private List<Relay> deleteUnnecessaryGatewayRelayConnectionsAndGetValidatedAdditionalRelays(final Cloud cloud, final List<Long> gatewayRealyIds) {
 		logger.debug("deleteUnnecessaryGatewayRelayConnectionsAndGetAdditionallyRelayIds started...");
 		
-		final Set<Long> relaysConnToKeep = new HashSet<>();
+		final Set<Long> relaysToKeep = new HashSet<>();
 		final Set<Long> relaysConnToDelete = new HashSet<>();
 		final Set<Long> relaysToAssign = new HashSet<>();
 		for (final CloudGatewayRelay relayConn : cloud.getGatewayRelays()) {
@@ -909,7 +909,7 @@ public class GatekeeperDBService {
 			for (final Long dtoRelayId : gatewayRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
 					
-					relaysConnToKeep.add(relayConn.getId());
+					relaysToKeep.add(relayConn.getRelay().getId());
 					relayConnToRemove = false;
 					break;
 				} 
@@ -922,7 +922,7 @@ public class GatekeeperDBService {
 		}
 		
 		relaysToAssign.addAll(gatewayRealyIds);
-		relaysToAssign.removeAll(relaysConnToKeep);
+		relaysToAssign.removeAll(relaysToKeep);
 		
 		final List<CloudGatewayRelay> entriesToDelete = cloudGatewayRelayRepository.findAllById(relaysConnToDelete);
 		cloudGatewayRelayRepository.deleteInBatch(entriesToDelete);
