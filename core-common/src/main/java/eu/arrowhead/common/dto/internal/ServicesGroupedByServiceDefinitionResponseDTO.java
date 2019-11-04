@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 
 @JsonInclude(Include.NON_NULL)
-public class ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO implements Serializable {
+public class ServicesGroupedByServiceDefinitionResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members
@@ -25,10 +25,10 @@ public class ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO implement
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO() {}
+	public ServicesGroupedByServiceDefinitionResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(final long serviceDefinitionId, final String serviceDefinition, final String interfaceName,
+	public ServicesGroupedByServiceDefinitionResponseDTO(final long serviceDefinitionId, final String serviceDefinition, final String interfaceName,
 																	 final List<ServiceRegistryResponseDTO> providerServices) {
 		this.serviceDefinitionId = serviceDefinitionId;
 		this.serviceDefinition = serviceDefinition;

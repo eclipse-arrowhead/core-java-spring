@@ -9,16 +9,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import eu.arrowhead.common.database.entity.*;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerActionActionStepConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlanActionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionStep;
+import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
+import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.EventType;
@@ -32,6 +38,10 @@ import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
@@ -136,7 +146,7 @@ public class DTOConverter {
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
 		
 		final Map<Long,ServicesGroupedBySystemsResponseDTO> servicesBySystemId = new HashMap<>();
-		final Map<String,ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
+		final Map<String,ServicesGroupedByServiceDefinitionResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
 		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
 		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
 		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();		
@@ -187,7 +197,7 @@ public class DTOConverter {
 				if (servicesByServiceDefinitionAndInterface.containsKey(key)) {
 					servicesByServiceDefinitionAndInterface.get(key).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				} else {
-					final ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition,
+					final ServicesGroupedByServiceDefinitionResponseDTO dto = new ServicesGroupedByServiceDefinitionResponseDTO(serviceDefinitionId, serviceDefinition,
 																																						interfaceName,  new ArrayList<>());
 					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 					servicesByServiceDefinitionAndInterface.put(key, dto);
@@ -198,7 +208,7 @@ public class DTOConverter {
 		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
 		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystemsResponseDTOList = new ArrayList<>();
 		servicesGroupedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
-		final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
+		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
 		servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList.addAll(servicesByServiceDefinitionAndInterface.values());
 		
 		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList, autoCompleteDataResponseDTO);
@@ -669,8 +679,8 @@ public class DTOConverter {
 	}
 
 	private static List<ServiceDefinitionResponseDTO> collectServiceDefinitionsFromChoreographerActionStep(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
-		List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
-		for (ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
+		final List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
+		for (final ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
 			result.add(convertServiceDefinitionToServiceDefinitionResponseDTO(conn.getServiceDefinitionEntry()));
 		}
 
@@ -679,8 +689,8 @@ public class DTOConverter {
 	}
 
 	private static List<ChoreographerNextActionStepResponseDTO> collectChoreographerNextActionStepsFromChoreographerActionStep(final Set<ChoreographerNextActionStep> nextActionSteps) {
-		List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
-		for (ChoreographerNextActionStep nextActionStep : nextActionSteps) {
+		final List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
+		for (final ChoreographerNextActionStep nextActionStep : nextActionSteps) {
 			result.add(convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(nextActionStep.getNextActionStepEntry()));
 		}
 
@@ -689,11 +699,11 @@ public class DTOConverter {
 		return result;
 	}
 
-	private static ChoreographerNextActionStepResponseDTO convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(ChoreographerActionStep nextActionStepEntry) {
+	private static ChoreographerNextActionStepResponseDTO convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(final ChoreographerActionStep nextActionStepEntry) {
 		return new ChoreographerNextActionStepResponseDTO(nextActionStepEntry.getId(), nextActionStepEntry.getName());
 	}
 
-	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep actionStep) {
+	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep actionStep) {
 	    Assert.notNull(actionStep, "ChoreographerActionStep is null.");
 
 		return new ChoreographerActionStepResponseDTO(
@@ -708,8 +718,8 @@ public class DTOConverter {
 	public static List<ChoreographerActionStepResponseDTO> collectChoreographerActionStepsFromChoreographerAction(final Set<ChoreographerActionActionStepConnection> actionStepConnections) {
 		Assert.notNull(actionStepConnections, "ActionStepConnectionSet is null.");
 
-		List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
-		for(ChoreographerActionActionStepConnection conn : actionStepConnections) {
+		final List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
+		for(final ChoreographerActionActionStepConnection conn : actionStepConnections) {
 			result.add(convertChoreographerActionStepToChoreographerActionStepResponseDTO(conn.getActionStepEntry()));
 		}
 
@@ -725,7 +735,7 @@ public class DTOConverter {
 		return null;
 	}
 
-    public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(ChoreographerAction actionEntry) {
+    public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(final ChoreographerAction actionEntry) {
 		Assert.notNull(actionEntry, "ChoreographerAction entry is null.");
 
 		return new ChoreographerActionResponseDTO(actionEntry.getId(),
@@ -739,8 +749,8 @@ public class DTOConverter {
 	public static List<ChoreographerActionResponseDTO> collectChoreographerActionsFromChoreographerActionPlan(final Set<ChoreographerActionPlanActionConnection> actionConnections) {
 		Assert.notNull(actionConnections, "ActionConnectionsSet is null.");
 
-		List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
-		for (ChoreographerActionPlanActionConnection conn : actionConnections) {
+		final List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
+		for (final ChoreographerActionPlanActionConnection conn : actionConnections) {
 			result.add(convertChoreographerActionToChoreographerActionResponseDTO(conn.getActionEntry()));
 		}
 
@@ -749,7 +759,7 @@ public class DTOConverter {
 		return result;
 	}
 
-	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(ChoreographerActionPlan actionPlanEntry) {
+	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(final ChoreographerActionPlan actionPlanEntry) {
 		Assert.notNull(actionPlanEntry, "ChoreographerActionPlan entry is null.");
 
 		return new ChoreographerActionPlanResponseDTO(actionPlanEntry.getId(),

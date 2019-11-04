@@ -54,7 +54,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.IdValueDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
-import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO;
+import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.internal.ServicesGroupedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
@@ -266,7 +266,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryGroupedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGroupedResponseDTO.class);
 		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
 		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems = readValue.getServicesGroupedBySystems();
-		final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterface = readValue.getServicesGroupedByServiceDefinitionAndInterface();
+		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionAndInterface = readValue.getServicesGroupedByServiceDefinitionAndInterface();
 		
 		assertNotNull(autoCompleteData);
 		assertNotNull(servicesGroupedBySystems);

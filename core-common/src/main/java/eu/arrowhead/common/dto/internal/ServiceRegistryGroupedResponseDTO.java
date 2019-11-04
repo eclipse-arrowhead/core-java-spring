@@ -15,7 +15,7 @@ public class ServiceRegistryGroupedResponseDTO implements Serializable {
 	private static final long serialVersionUID = 8834608315964460311L;
 	
 	private List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems;
-	private List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterface;
+	private List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionAndInterface;
 	private AutoCompleteDataResponseDTO  autoCompleteData;
 	
 	//=================================================================================================
@@ -26,7 +26,7 @@ public class ServiceRegistryGroupedResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------
 	public ServiceRegistryGroupedResponseDTO(final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems,
-											 final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterface, 
+											 final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionAndInterface, 
 											 final AutoCompleteDataResponseDTO autoCompleteData) {
 		this.servicesGroupedBySystems = servicesGroupedBySystems;
 		this.servicesGroupedByServiceDefinitionAndInterface = servicesGroupedByServiceDefinitionAndInterface;
@@ -35,12 +35,12 @@ public class ServiceRegistryGroupedResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------	
 	public List<ServicesGroupedBySystemsResponseDTO> getServicesGroupedBySystems() { return servicesGroupedBySystems; }
-	public List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> getServicesGroupedByServiceDefinitionAndInterface() { return servicesGroupedByServiceDefinitionAndInterface; }
+	public List<ServicesGroupedByServiceDefinitionResponseDTO> getServicesGroupedByServiceDefinitionAndInterface() { return servicesGroupedByServiceDefinitionAndInterface; }
 	public AutoCompleteDataResponseDTO getAutoCompleteData() { return autoCompleteData; }
 
 	//-------------------------------------------------------------------------------------------------	
 	public void setServicesGroupedBySystems(final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems) { this.servicesGroupedBySystems = servicesGroupedBySystems; }
-	public void setServicesGroupedByServiceDefinitionAndInterface(final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterface) {
+	public void setServicesGroupedByServiceDefinitionAndInterface(final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionAndInterface) {
 		this.servicesGroupedByServiceDefinitionAndInterface = servicesGroupedByServiceDefinitionAndInterface;
 	}
 	public void setAutoCompleteData(final AutoCompleteDataResponseDTO autoCompleteData) { this.autoCompleteData = autoCompleteData; }	
