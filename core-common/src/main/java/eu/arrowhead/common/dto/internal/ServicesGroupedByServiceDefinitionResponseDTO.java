@@ -18,7 +18,6 @@ public class ServicesGroupedByServiceDefinitionResponseDTO implements Serializab
 	
 	private long serviceDefinitionId;
 	private String serviceDefinition;
-	private String interfaceName;
 	private List<ServiceRegistryResponseDTO> providerServices;
 			
 	//=================================================================================================
@@ -28,23 +27,19 @@ public class ServicesGroupedByServiceDefinitionResponseDTO implements Serializab
 	public ServicesGroupedByServiceDefinitionResponseDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServicesGroupedByServiceDefinitionResponseDTO(final long serviceDefinitionId, final String serviceDefinition, final String interfaceName,
-																	 final List<ServiceRegistryResponseDTO> providerServices) {
+	public ServicesGroupedByServiceDefinitionResponseDTO(final long serviceDefinitionId, final String serviceDefinition, final List<ServiceRegistryResponseDTO> providerServices) {
 		this.serviceDefinitionId = serviceDefinitionId;
 		this.serviceDefinition = serviceDefinition;
-		this.interfaceName = interfaceName;
 		this.providerServices = providerServices;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public long getServiceDefinitionId() { return serviceDefinitionId; }
 	public String getServiceDefinition() { return serviceDefinition; }
-	public String getInterfaceName() { return interfaceName; }
 	public List<ServiceRegistryResponseDTO> getProviderServices() { return providerServices; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinitionId(final long serviceDefinitionId) { this.serviceDefinitionId = serviceDefinitionId; }
 	public void setServiceDefinition(final String serviceDefinition) { this.serviceDefinition = serviceDefinition; }
-	public void setInterfaceName(final String interfaceName) { this.interfaceName = interfaceName; }
 	public void setProviderServices(final List<ServiceRegistryResponseDTO> providerServices) { this.providerServices = providerServices; }	
 }

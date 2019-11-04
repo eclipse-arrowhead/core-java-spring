@@ -266,11 +266,11 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryGroupedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGroupedResponseDTO.class);
 		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
 		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems = readValue.getServicesGroupedBySystems();
-		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionAndInterface = readValue.getServicesGroupedByServiceDefinitionAndInterface();
+		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinition = readValue.getServicesGroupedByServiceDefinition();
 		
 		assertNotNull(autoCompleteData);
 		assertNotNull(servicesGroupedBySystems);
-		assertNotNull(servicesGroupedByServiceDefinitionAndInterface);
+		assertNotNull(servicesGroupedByServiceDefinition);
 		
 		// Testing autoCompleteData object
 		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
@@ -286,9 +286,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String oneOfTheInterfaces = servicesGroupedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
 		assertTrue(oneOfTheInterfaces.equals(interface1) || oneOfTheInterfaces.equals(interface2) ? true :false);
 		
-		// Testing servicesGroupedByServiceDefinitionAndInterface object
-		assertEquals(numOfServices * 2, servicesGroupedByServiceDefinitionAndInterface.size());
-		assertEquals(numOfSystems, servicesGroupedByServiceDefinitionAndInterface.get(0).getProviderServices().size());
+		// Testing servicesGroupedByServiceDefinition object
+		assertEquals(numOfServices, servicesGroupedByServiceDefinition.size());
+		assertEquals(numOfSystems * 2, servicesGroupedByServiceDefinition.get(0).getProviderServices().size());
 	}
 	
 	//=================================================================================================

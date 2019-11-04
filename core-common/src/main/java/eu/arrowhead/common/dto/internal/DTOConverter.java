@@ -146,7 +146,7 @@ public class DTOConverter {
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
 		
 		final Map<Long,ServicesGroupedBySystemsResponseDTO> servicesBySystemId = new HashMap<>();
-		final Map<String,ServicesGroupedByServiceDefinitionResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
+		final Map<Long,ServicesGroupedByServiceDefinitionResponseDTO> servicesByServiceDefinition = new HashMap<>();
 		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
 		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
 		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();		
@@ -192,15 +192,13 @@ public class DTOConverter {
 					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
 				}
 				
-				// Creating ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO
-				final String key = serviceDefinitionId + "-" + interfId;
-				if (servicesByServiceDefinitionAndInterface.containsKey(key)) {
-					servicesByServiceDefinitionAndInterface.get(key).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+				// Creating ServicesGroupedByServiceDefinitionResponseDTO
+				if (servicesByServiceDefinition.containsKey(serviceDefinitionId)) {
+					servicesByServiceDefinition.get(serviceDefinitionId).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 				} else {
-					final ServicesGroupedByServiceDefinitionResponseDTO dto = new ServicesGroupedByServiceDefinitionResponseDTO(serviceDefinitionId, serviceDefinition,
-																																						interfaceName,  new ArrayList<>());
+					final ServicesGroupedByServiceDefinitionResponseDTO dto = new ServicesGroupedByServiceDefinitionResponseDTO(serviceDefinitionId, serviceDefinition, new ArrayList<>());
 					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
-					servicesByServiceDefinitionAndInterface.put(key, dto);
+					servicesByServiceDefinition.put(serviceDefinitionId, dto);
 				}
 			}
 		}
@@ -208,10 +206,10 @@ public class DTOConverter {
 		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
 		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystemsResponseDTOList = new ArrayList<>();
 		servicesGroupedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
-		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
-		servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList.addAll(servicesByServiceDefinitionAndInterface.values());
+		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionResponseDTOList = new ArrayList<>();
+		servicesGroupedByServiceDefinitionResponseDTOList.addAll(servicesByServiceDefinition.values());
 		
-		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList, autoCompleteDataResponseDTO);
+		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionResponseDTOList, autoCompleteDataResponseDTO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
