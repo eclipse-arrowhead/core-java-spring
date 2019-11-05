@@ -89,12 +89,13 @@ public class GSDPollRequestExecutor {
 		final Map<String,Session> sessionsForRelays = new HashMap<>();
 		
 		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {
+			final Relay relay = cloudRelay.getValue();
 			try {
 				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());		
-				final Session session = relayClient.createConnection(cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
+				final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
 				sessionsForRelays.put(cloudCN, session);						
 			} catch (final JMSException ex) {
-				logger.debug("Exception occured while creating connection for address: {} and port {}:", cloudRelay.getValue().getAddress(), cloudRelay.getValue().getPort());
+				logger.debug("Exception occured while creating connection for address: {} and port {}:", relay.getAddress(), relay.getPort());
 				logger.debug("Exception message: {}:", ex.getMessage());
 			}
 		}

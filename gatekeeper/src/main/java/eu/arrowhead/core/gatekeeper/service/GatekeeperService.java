@@ -156,7 +156,7 @@ public class GatekeeperService {
 		validateGSDPollRequestDTO(request);
 				
 		// Querying Service Registry core system
-		final ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceReistryQuery(request.getRequestedService());
+		final ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceRegistryQuery(request.getRequestedService());
 		
 		if (srQueryResult.getServiceQueryData() == null || srQueryResult.getServiceQueryData().isEmpty()) {
 			return new GSDPollResponseDTO();
