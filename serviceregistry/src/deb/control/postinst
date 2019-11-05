@@ -24,6 +24,8 @@ PKG_NAME="arrowhead-serviceregistry"
 
 case "$1" in
     configure)
+		dos2unix -q /etc/systemd/system/${PKG_NAME}.service
+		
         . /usr/share/arrowhead/conf/ahconf.sh
         SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
