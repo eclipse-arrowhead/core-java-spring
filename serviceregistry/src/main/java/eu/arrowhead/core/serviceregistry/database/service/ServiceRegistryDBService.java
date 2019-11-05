@@ -484,12 +484,12 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryGroupedResponseDTO getServiceRegistryEntriesForServiceRegistryGroupedResponse() {
+	public ServiceRegistryGroupedResponseDTO getServiceRegistryDataForServiceRegistryGroupedResponse() {
 		logger.debug("getServiceRegistryEntriesForServiceRegistryGroupedResponse started...");
 		
 		final Page<ServiceRegistry> serviceRegistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 		
-		return DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
+		return DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

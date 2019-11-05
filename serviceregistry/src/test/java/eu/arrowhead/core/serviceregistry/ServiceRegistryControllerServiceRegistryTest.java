@@ -255,8 +255,8 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String interface1 = "JSON";
 		final String interface2 = "XML";
 		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
-		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse()).thenReturn(dto);
+		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse()).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPED_URI)
 											   .accept(MediaType.APPLICATION_JSON))

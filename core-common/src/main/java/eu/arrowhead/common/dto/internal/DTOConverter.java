@@ -142,7 +142,7 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3776")
-	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
 		
 		final Map<Long,ServicesGroupedBySystemsResponseDTO> servicesBySystemId = new HashMap<>();
