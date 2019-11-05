@@ -106,11 +106,11 @@ public class RelaySubscriberTask implements Job {
 
 		try {
 			final GatekeeperRelayClient gatekeeperRelayClient = dataContainer.getGatekeeperRelayClient(false);
-			final Session session = gatekeeperRelayClient.createConnection(relay.getAddress(), relay.getPort());
+			final Session session = gatekeeperRelayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
 			final MessageConsumer consumer = gatekeeperRelayClient.subscribeGeneralAdvertisementTopic(session);
 			final GatekeeperRelayClient gatekeeperRelayClientWithCache = dataContainer.getGatekeeperRelayClient(true);
-			final GeneralAdvertisementMessageListener listener = new GeneralAdvertisementMessageListener(applicationContext, relay.getAddress(), relay.getPort(), gatekeeperRelayClientWithCache,
-																									     noWorkers);
+			final GeneralAdvertisementMessageListener listener = new GeneralAdvertisementMessageListener(applicationContext, relay.getAddress(), relay.getPort(), relay.getSecure(),
+																										 gatekeeperRelayClientWithCache, noWorkers);
 			consumer.setMessageListener(listener);
 			final String key = relay.getAddress() + ":" + relay.getPort();
 			dataContainer.getRelayResources().put(key, new RelayResource(session, listener));

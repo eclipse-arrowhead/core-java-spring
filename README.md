@@ -16,8 +16,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
-4. [How to Contribute](#howtocontribute)
-5. [Documentation](#documentation) 
+4. [Gatekeeper and Gateway Setup](#setupgatekeeper_and_gateway)
+5. [How to Contribute](#howtocontribute)
+6. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -370,7 +371,6 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
 1) Master certificate: `arrowhead.eu`
 2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
 3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
- 
 The certificate naming convetion have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
@@ -393,6 +393,12 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 * [Create Arrowhead Cloud Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_cloud_certificate.pdf)
 * [Create Arrowhead Client Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_trust_store.pdf)
+
+<a name="setupgatekeeper_and_gateway" /> 
+
+## Gatekeeper and Gateway Setup
+
+Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
 
 <a name="howtocontribute" />
 
@@ -2180,7 +2186,7 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all Intracloud rules](#authorization_endpoints_getintracloud) | /mgmt/intracloud | GET | - | [IntracloudRuleList](#datastructures_intracloud_list) |
 | [Add Intracloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
-| [Get an Intercloud rule by ID](#authorization_endpoints_get_intracloud_id) | /mgmt/intracloud/{id} | GET | IntracloudRuleID | [IntracloudRule](#datastructures_intracloud_rule) |
+| [Get an Intracloud rule by ID](#authorization_endpoints_get_intracloud_id) | /mgmt/intracloud/{id} | GET | IntracloudRuleID | [IntracloudRule](#datastructures_intracloud_rule) |
 | [Delete an Intracloud rule by ID](#authorization_endpoints_delete_intracloud_id) | /mgmt/intracloud/{id} | DELETE | IntracloudRuleID | - |
 | [Get all Intercloud rules](#authorization_endpoinds_get_intercloud) | /mgmt/intercloud | GET | - | [IntercloudRuleList](#datastructures_intercloud_list) |
 | [Add Intercloud rules](#authorization_endpoints_post_intercloud) | /mgmt/intercloud | POST | [IntercloudRuleForm](#datastructures_intercloud_rule_form) | [IntercloudRuleList](#datastructures_intercloud_list) |
@@ -2843,7 +2849,7 @@ Returns an __IntercloudRuleList__
             This version always returned all records in an array of JSON objects. The objects did not contain
             any time information. Access didn't depend on provider and interface.   
             
-<a name="authorization_endpoints_post_intercloud"  />
+<a name="authorization_endpoints_post_intercloud" />
 
 ### Add Intercloud rules
 ```

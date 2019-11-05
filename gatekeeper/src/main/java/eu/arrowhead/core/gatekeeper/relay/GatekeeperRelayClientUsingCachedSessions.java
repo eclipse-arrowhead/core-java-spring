@@ -15,6 +15,7 @@ import javax.jms.Session;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
 
@@ -31,25 +32,26 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public GatekeeperRelayClientUsingCachedSessions(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final long timeout) {
+	public GatekeeperRelayClientUsingCachedSessions(final String serverCommonName, final PublicKey publicKey, final PrivateKey privateKey, final SSLProperties sslProps, final long timeout) {
 		Assert.isTrue(!Utilities.isEmpty(serverCommonName), "Common name is null or blank.");
 		Assert.notNull(publicKey, "Public key is null.");
 		Assert.notNull(privateKey, "Private key is null.");
+		Assert.notNull(sslProps, "SSL properties object is null.");
 		
-		this.client = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, timeout, false);
+		this.client = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCommonName, publicKey, privateKey, sslProps, timeout, false);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public Session createConnection(final String host, final int port) throws JMSException {
+	public Session createConnection(final String host, final int port, final boolean secure) throws JMSException {
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
 		synchronized (sessionCache) {
-			Session session = createSessionIfNecessary(host, port);
+			Session session = createSessionIfNecessary(host, port, secure);
 			if (isConnectionClosed(session)) {
 				sessionCache.values().remove(session);
-				session = createSessionIfNecessary(host, port);
+				session = createSessionIfNecessary(host, port, secure);
 			}
 			
 			return session;
@@ -118,11 +120,11 @@ public class GatekeeperRelayClientUsingCachedSessions implements GatekeeperRelay
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private Session createSessionIfNecessary(final String host, final int port) throws JMSException {
+	private Session createSessionIfNecessary(final String host, final int port, final boolean secure) throws JMSException {
 		final String cacheKey = host + ":" + port;
 		Session session = sessionCache.get(cacheKey);
 		if (session == null) {
-			session = client.createConnection(host, port);
+			session = client.createConnection(host, port, secure);
 			sessionCache.put(cacheKey, session);
 		}
 		

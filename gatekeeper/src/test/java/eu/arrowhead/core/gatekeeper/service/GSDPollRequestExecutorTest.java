@@ -3,6 +3,7 @@ package eu.arrowhead.core.gatekeeper.service;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -78,7 +79,7 @@ public class GSDPollRequestExecutorTest {
 	@Test
 	public void testExecuteWithThrowingRejectedExecutionException() throws InterruptedException, JMSException {
 		doThrow(RejectedExecutionException.class).when(threadPool).execute(any());
-		when(relayClient.createConnection(any(), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		
 		testingObject.execute();
 		

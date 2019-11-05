@@ -1,6 +1,7 @@
 package eu.arrowhead.core.gatekeeper.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -125,7 +126,7 @@ public class GatekeeperDriverICNTest {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 
-		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(JMSException.class);
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(JMSException.class);
 		
 		testingObject.sendICNProposal(new Cloud(), new ICNProposalRequestDTO());
 	}
@@ -136,7 +137,7 @@ public class GatekeeperDriverICNTest {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(null);
 		
 		final Cloud targetCloud = new Cloud("aitia", "testcloud2", true, true, false, "abcd");
@@ -149,7 +150,7 @@ public class GatekeeperDriverICNTest {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(gaResult);
 		when(relayClient.sendRequestAndReturnResponse(any(Session.class), any(GeneralAdvertisementResult.class), any())).thenReturn(null);
@@ -164,7 +165,7 @@ public class GatekeeperDriverICNTest {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
 		
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(gaResult);
 		final GatekeeperRelayResponse response = new GatekeeperRelayResponse("1234", CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, new ICNProposalResponseDTO());

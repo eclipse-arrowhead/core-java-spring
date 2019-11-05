@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.exception.ArrowheadException;
 
 @RunWith(SpringRunner.class)
@@ -117,6 +118,7 @@ public class GatekeeperDriverTest {
 			public byte[] getEncoded() { return null; }
 			public String getAlgorithm() { return null;	}
 		});
+		ReflectionTestUtils.setField(testingObject, "sslProps", new SSLProperties());
 		testingObject.onApplicationEvent(null);
 		final Object relayClient = ReflectionTestUtils.getField(testingObject, "relayClient");
 		Assert.assertNotNull(relayClient);
