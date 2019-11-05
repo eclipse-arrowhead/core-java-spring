@@ -18,8 +18,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -248,48 +250,57 @@ public class ServiceRegistryControllerServiceRegistryTest {
 	//Tests of getServiceRegistryGroupedData
 	
 	//-------------------------------------------------------------------------------------------------
-//	@Test
-//	public void testGetServiceRegistryGroupedDataToCheckDTO() throws Exception {
-//		final int numOfServices = 4;
-//		final int numOfSystems = 2;		
-//		final String interface1 = "JSON";
-//		final String interface2 = "XML";
-//		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
-//		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
-//		when(serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse()).thenReturn(dto);
-//		
-//		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPED_URI)
-//											   .accept(MediaType.APPLICATION_JSON))
-//											   .andExpect(status().isOk())
-//											   .andReturn();
-//		
-//		final ServiceRegistryGroupedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGroupedResponseDTO.class);
-//		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
-//		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems = readValue.getServicesGroupedBySystems();
-//		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinition = readValue.getServicesGroupedByServiceDefinition();
-//		
-//		assertNotNull(autoCompleteData);
-//		assertNotNull(servicesGroupedBySystems);
-//		assertNotNull(servicesGroupedByServiceDefinition);
-//		
-//		// Testing autoCompleteData object
-//		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
-//		assertEquals(2, interfaceList.size());
-//		assertTrue(interfaceList.get(0).getValue().equals(interface1) || interfaceList.get(1).getValue().equals(interface1) ? true : false);
-//		assertTrue(interfaceList.get(0).getValue().equals(interface2) || interfaceList.get(1).getValue().equals(interface2) ? true : false);		
-//		assertEquals(numOfServices, autoCompleteData.getServiceList().size());
-//		assertEquals(numOfSystems, autoCompleteData.getSystemList().size());
-//		
-//		// Testing servicesGroupedBySystems object
-//		assertEquals(numOfSystems, servicesGroupedBySystems.size());
-//		assertEquals(numOfServices, servicesGroupedBySystems.get(0).getServices().size());
-//		final String oneOfTheInterfaces = servicesGroupedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
-//		assertTrue(oneOfTheInterfaces.equals(interface1) || oneOfTheInterfaces.equals(interface2) ? true :false);
-//		
-//		// Testing servicesGroupedByServiceDefinition object
-//		assertEquals(numOfServices, servicesGroupedByServiceDefinition.size());
-//		assertEquals(numOfSystems, servicesGroupedByServiceDefinition.get(0).getProviderServices().size());
-//	}
+	@Test
+	public void testGetServiceRegistryGroupedDataToCheckDTO() throws Exception {
+		final int numOfServices = 4;
+		final int numOfSystems = 2;		
+		final String interface1 = "JSON";
+		final String interface2 = "XML";
+		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
+		final Map<Long, ServiceDefinition> serviceDefinitionEntries = new HashMap<>();
+		final Map<Long, System> systemEntries = new HashMap<>();
+		final Map<Long, ServiceInterface> interfaceEntries = new HashMap<>();
+		for (final ServiceRegistry srEntry : serviceRegistryEntries) {
+			serviceDefinitionEntries.putIfAbsent(srEntry.getServiceDefinition().getId(), srEntry.getServiceDefinition());
+			systemEntries.putIfAbsent(srEntry.getSystem().getId(), srEntry.getSystem());
+			for (final ServiceRegistryInterfaceConnection interfaceConn : srEntry.getInterfaceConnections()) {
+				interfaceEntries.putIfAbsent(interfaceConn.getServiceInterface().getId(), interfaceConn.getServiceInterface());
+			}
+		}		
+		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceDefinitionEntries.values(), systemEntries.values(),
+																																 interfaceEntries.values(), serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse()).thenReturn(dto);
+		
+		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPED_URI)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final ServiceRegistryGroupedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGroupedResponseDTO.class);
+		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
+		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems = readValue.getServicesGroupedBySystems();
+		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinition = readValue.getServicesGroupedByServiceDefinition();
+		
+		assertNotNull(autoCompleteData);
+		assertNotNull(servicesGroupedBySystems);
+		assertNotNull(servicesGroupedByServiceDefinition);
+		
+		// Testing autoCompleteData object
+		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
+		assertEquals(2, interfaceList.size());
+		assertEquals(numOfServices, autoCompleteData.getServiceList().size());
+		assertEquals(numOfSystems, autoCompleteData.getSystemList().size());
+		
+		// Testing servicesGroupedBySystems object
+		assertEquals(numOfSystems, servicesGroupedBySystems.size());
+		assertEquals(numOfServices, servicesGroupedBySystems.get(0).getServices().size());
+		final String oneOfTheInterfaces = servicesGroupedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
+		assertTrue(oneOfTheInterfaces.equals(interface1) || oneOfTheInterfaces.equals(interface2) ? true :false);
+		
+		// Testing servicesGroupedByServiceDefinition object
+		assertEquals(numOfServices, servicesGroupedByServiceDefinition.size());
+		assertEquals(numOfSystems, servicesGroupedByServiceDefinition.get(0).getProviderServices().size());
+	}
 	
 	//=================================================================================================
 	// Tests of removeServiceRegistryEntryById

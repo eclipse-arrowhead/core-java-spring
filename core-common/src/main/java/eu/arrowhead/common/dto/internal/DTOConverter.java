@@ -142,8 +142,8 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3776")
-	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(final List<ServiceDefinition> serviceDefinitionEntries, final List<System> systemEntries,
-																											  	  final List<ServiceInterface> interfaceEntries, final List<ServiceRegistry> serviceRegistryEntries) {
+	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(final Iterable<ServiceDefinition> serviceDefinitionEntries, final Iterable<System> systemEntries,
+																											  	  final Iterable<ServiceInterface> interfaceEntries, final Iterable<ServiceRegistry> serviceRegistryEntries) {
 		Assert.notNull(serviceDefinitionEntries, "List of serviceDefinitionEntries is null");
 		Assert.notNull(systemEntries, "List of systemEntries is null");
 		Assert.notNull(interfaceEntries, "List of interfaceEntries is null");
