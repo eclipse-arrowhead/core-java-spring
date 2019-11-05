@@ -167,6 +167,9 @@ public class ServiceRegistryDBService {
 		final long validatedSystemId = validateSystemId(systemId);
 		final int validatedPort = validateSystemPort(port);
 		final String validatedSystemName = validateSystemParamString(systemName);
+		if (validatedSystemName.contains(".")) {
+			throw new InvalidParameterException("System name can't contain dot (.)");
+		}
 		final String validatedAddress = validateSystemParamString(address);
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
@@ -233,6 +236,9 @@ public class ServiceRegistryDBService {
 		final long validatedSystemId = validateSystemId(systemId);
 		final Integer validatedPort = validateAllowNullSystemPort(port);
 		final String validatedSystemName = validateAllowNullSystemParamString(systemName);
+		if (validatedSystemName != null && validatedSystemName.contains(".")) {
+			throw new InvalidParameterException("System name can't contain dot (.)");
+		}
 		final String validatedAddress = validateAllowNullSystemParamString(address);
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
@@ -954,6 +960,9 @@ public class ServiceRegistryDBService {
 		}
 		
 		final String validatedSystemName = systemName.trim().toLowerCase();
+		if (validatedSystemName.contains(".")) {
+			throw new InvalidParameterException("System name can't contain dot (.)");
+		}
 		final String validatedAddress = address.trim().toLowerCase();
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
