@@ -487,9 +487,19 @@ public class ServiceRegistryDBService {
 	public ServiceRegistryGroupedResponseDTO getServiceRegistryDataForServiceRegistryGroupedResponse() {
 		logger.debug("getServiceRegistryEntriesForServiceRegistryGroupedResponse started...");
 		
-		final Page<ServiceRegistry> serviceRegistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
+		try {
+
+			final List<ServiceDefinition> serviceDefinitionEntries = serviceDefinitionRepository.findAll();
+			final List<System> systemEntries = systemRepository.findAll();
+			final List<ServiceInterface> interfaceEntries = serviceInterfaceRepository.findAll();
+			final List<ServiceRegistry> serviceRegistryEntries = serviceRegistryRepository.findAll();			
+			return DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceDefinitionEntries, systemEntries, interfaceEntries, serviceRegistryEntries);
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 		
-		return DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
