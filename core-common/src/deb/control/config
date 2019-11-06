@@ -41,10 +41,9 @@ case ${INSTALL_TYPE} in
 
     "Detached" )
         # User dialogs
+		db_input high arrowhead-core-common/cloud_warning || true
         db_input high arrowhead-core-common/cloudname || true
         db_input high arrowhead-core-common/operator || true
-        db_input high arrowhead-core-common/company || true
-        db_input high arrowhead-core-common/country || true
         ;;
 
     * )

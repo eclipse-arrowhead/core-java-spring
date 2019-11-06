@@ -7,8 +7,8 @@ AH_SYSTEMS_DIR="${AH_CONF_DIR}/systems"
 db_get arrowhead-core-common/cert_password; AH_PASS_CERT=$RET
 db_get arrowhead-core-common/cloudname; AH_CLOUD_NAME=$RET
 db_get arrowhead-core-common/operator; AH_OPERATOR=$RET
-db_get arrowhead-core-common/company; AH_COMPANY=$RET
-db_get arrowhead-core-common/country; AH_COUNTRY=$RET
+AH_COMPANY=arrowhead # hard-coded to the Arrowhead Framework
+AH_COUNTRY=eu # hard-coded to the Arrowhead Framework
 
 OWN_IP=`ip -o -4  address show  | awk ' NR==2 { gsub(/\/.*/, "", $4); print $4 } '`
 echo $OWN_IP

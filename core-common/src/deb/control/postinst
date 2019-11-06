@@ -58,14 +58,10 @@ case "$1" in
 				subject=$(keytool -list -keystore "${cloud_cert}" -storepass "${cloud_password}" -v -alias "${cloud_alias}" | grep "Owner:" | head -n1 | sed 's/Owner: //')
 				cloud_name=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\1/')
 				operator=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\2/')
-				company=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\3/')
-				country=$(echo "${subject}" | sed 's/^.*CN=\([^.]*\)\.\([^.]*\)\.\([^.]*\)\.\([^,]*\).*$/\4/')
 
 				# Store data
 				db_set arrowhead-core-common/cloudname ${cloud_name}
 				db_set arrowhead-core-common/operator ${operator}
-				db_set arrowhead-core-common/company ${company}
-				db_set arrowhead-core-common/country ${country}
 			;;
 		esac
 
