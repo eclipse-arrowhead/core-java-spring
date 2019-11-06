@@ -10,6 +10,8 @@ db_get arrowhead-core-common/operator; AH_OPERATOR=$RET
 AH_COMPANY=arrowhead # hard-coded to the Arrowhead Framework
 AH_COUNTRY=eu # hard-coded to the Arrowhead Framework
 
+db_get arrowhead-core-common/relay_master_cert; AH_RELAY_MASTER_CERT=$RET
+
 OWN_IP=`ip -o -4  address show  | awk ' NR==2 { gsub(/\/.*/, "", $4); print $4 } '`
 echo $OWN_IP
 
@@ -259,6 +261,18 @@ ah_cert_trust () {
             -storepass ${passwd} \
             -storetype PKCS12 \
             -noprompt
+			
+			if [ ! -z ${AH_RELAY_MASTER_CERT} ]; then
+				keytool -import \
+						-trustcacerts \
+						-file ${AH_RELAY_MASTER_CERT} \
+						-alias relay.arrowhead.eu \
+						-keystore ${dst_file} \
+						-keypass ${passwd} \
+						-storepass ${passwd} \
+						-storetype PKCS12 \
+						-noprompt
+			fi
 
         chown :arrowhead ${dst_file}
         chmod 640 ${dst_file}

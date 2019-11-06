@@ -36,6 +36,7 @@ case ${INSTALL_TYPE} in
             db_input critical arrowhead-core-common/cloud_alias || true
             db_input critical arrowhead-core-common/cloud_password || true
             db_input critical arrowhead-core-common/master_cert || true
+			db_input critical arrowhead-core-common/relay_master_cert || true
         fi
         ;;
 
