@@ -15,10 +15,14 @@
   		<client.skeleton>core-client-skeleton</client.skeleton>
   	</properties>
   
-  	<build>
-  	
+  	<build>  		
+  		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
 		<plugins>
-			
 			<plugin>
     			<groupId>org.springframework.boot</groupId>
     			<artifactId>spring-boot-maven-plugin</artifactId>
@@ -60,6 +64,7 @@
 										<include>eu/arrowhead/common/exception/*.*</include>
 										<include>eu/arrowhead/common/http/*.*</include>
 										<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>
+										<include>eu/arrowhead/common/filter/thirdparty/*.*</include>
 										<include>eu/arrowhead/common/security/AccessControlFilter.*</include>
 										<include>eu/arrowhead/common/token/*.*</include>
 									</includes>
@@ -68,38 +73,57 @@
 						</configuration>	
 	  				</execution>
 	  			</executions>
-  			</plugin>
-  			
-  			<plugin>
-  				<groupId>org.apache.maven.plugins</groupId>
-  				<artifactId>maven-source-plugin</artifactId>
-  				<executions>
-  					<execution>
-  						<phase>package</phase>
-  						<goals>
-  							<goal>jar</goal>
-  						</goals>
-		  				<configuration>
-		  					<forceCreation>true</forceCreation>
-             				<finalName>${client.skeleton}</finalName>
-		  					<includes>
-		  						<include>eu/arrowhead/common/Utilities.*</include>
-								<include>eu/arrowhead/common/CommonConstants.*</include>
-								<include>eu/arrowhead/common/Defaults.*</include>
-								<include>eu/arrowhead/common/SSLProperties.*</include>
-								<include>eu/arrowhead/common/core/*.*</include>
-								<include>eu/arrowhead/common/dto/shared*.*</include>
-								<include>eu/arrowhead/common/exception/*.*</include>
-								<include>eu/arrowhead/common/http/*.*</include>
-								<include>eu/arrowhead/common/filter/ArrowheadFilter.*</include>
-								<include>eu/arrowhead/common/security/AccessControlFilter.*</include>
-								<include>eu/arrowhead/common/token/*.*</include>
-		  					</includes>
-		  				</configuration>  					
-  					</execution>
-  				</executions>
-  			</plugin>
-  			
+  			</plugin>  			
+ 			<plugin>
+				<artifactId>jdeb</artifactId>
+				<groupId>org.vafer</groupId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jdeb</goal>
+						</goals>
+						<configuration>
+							<snapshotExpand>true</snapshotExpand>
+							<snapshotTemplate>[YYMMddHHmm].${git.commit.id.abbrev}</snapshotTemplate>
+							<deb>target/${project.artifactId}_${revision}.deb</deb>
+							<verbose>true</verbose>
+							<controlDir>${basedir}/src/deb/control</controlDir>
+							<dataSet>
+				                <data>
+		                  			<type>file</type>
+		                  			<src>${project.basedir}/src/deb/ahconf.sh</src>
+		                  			<mapper>
+		                    			<type>perm</type>
+		                    			<prefix>/usr/share/arrowhead/conf</prefix>
+		                    			<filemode>755</filemode>
+		                  			</mapper>
+	                			</data>
+	                			
+	                			<data>
+		                  			<type>file</type>
+		                  			<src>${project.basedir}/../scripts/create_arrowhead_tables.sql</src>
+		                  			<mapper>
+		                    			<type>perm</type>
+		                    			<prefix>/usr/share/arrowhead/conf</prefix>
+		                  			</mapper>
+	                			</data>
+	                			
+	                			<data>
+	                				<type>file</type>
+	                				<src>${project.basedir}/src/deb/ah_gen_system_cert.sh</src>
+	                				<mapper>
+	                					<type>perm</type>
+	                					<prefix>/usr/bin</prefix>
+	                					<filemode>775</filemode>
+	                				</mapper>
+	                			</data>
+	         		     	</dataSet>
+	            		</configuration>
+          			</execution>
+        		</executions>
+      		</plugin>
 	 	</plugins>
   	</build>
 </project>

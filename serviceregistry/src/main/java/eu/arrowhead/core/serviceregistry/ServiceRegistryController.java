@@ -173,7 +173,7 @@ public class ServiceRegistryController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return systems by request parameters", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return systems by request parameters", response = SystemListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEMS_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEMS_HTTP_400_MESSAGE),
@@ -541,10 +541,10 @@ public class ServiceRegistryController {
 	@ResponseBody public ServiceRegistryGroupedResponseDTO getServiceRegistryGroupedData() {
 		logger.debug("New get request for grouped service registry data");
 		
-		final ServiceRegistryGroupedResponseDTO serviceRegistryEntriesForServiceRegistryGroupedResponse = serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse();
+		final ServiceRegistryGroupedResponseDTO serviceRegistryGroupedResponseDTO = serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse();
 		logger.debug("Grouped service registry data successfully retrieved");
 		
-		return serviceRegistryEntriesForServiceRegistryGroupedResponse;
+		return serviceRegistryGroupedResponseDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -838,6 +838,10 @@ public class ServiceRegistryController {
 	private void checkSystemRequest(final SystemRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
 		logger.debug("checkSystemRequest started...");
 		
+		if (request == null) {
+			throw new BadPayloadException("System is null.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
 		if (Utilities.isEmpty(request.getSystemName())) {
 			throw new BadPayloadException(SYSTEM_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
@@ -892,8 +896,29 @@ public class ServiceRegistryController {
 			}
 		}
 		
-		final ServiceSecurityType type = request.getSecure() == null ? ServiceSecurityType.NOT_SECURE : request.getSecure();
-		if (type != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+		ServiceSecurityType securityType = null;
+		if ( request.getSecure() != null ) {
+			
+			for ( final ServiceSecurityType type : ServiceSecurityType.values()) {
+				
+				if ( type.name().equalsIgnoreCase( request.getSecure() )) {
+					
+					securityType = type;
+					break;
+				}
+			}
+			
+			if ( securityType == null ) {
+				
+				throw new BadPayloadException("Security type is not valid.", HttpStatus.SC_BAD_REQUEST, origin); 
+			}
+			
+		} else {
+			
+			securityType = ServiceSecurityType.NOT_SECURE;
+		}
+		
+		if (securityType != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
 			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
 		}
 		

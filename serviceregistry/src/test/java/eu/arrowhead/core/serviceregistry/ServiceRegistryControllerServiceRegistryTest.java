@@ -18,8 +18,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +56,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.IdValueDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryGroupedResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
-import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO;
+import eu.arrowhead.common.dto.internal.ServicesGroupedByServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.internal.ServicesGroupedBySystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
@@ -255,8 +257,19 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String interface1 = "JSON";
 		final String interface2 = "XML";
 		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
-		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse()).thenReturn(dto);
+		final Map<Long, ServiceDefinition> serviceDefinitionEntries = new HashMap<>();
+		final Map<Long, System> systemEntries = new HashMap<>();
+		final Map<Long, ServiceInterface> interfaceEntries = new HashMap<>();
+		for (final ServiceRegistry srEntry : serviceRegistryEntries) {
+			serviceDefinitionEntries.putIfAbsent(srEntry.getServiceDefinition().getId(), srEntry.getServiceDefinition());
+			systemEntries.putIfAbsent(srEntry.getSystem().getId(), srEntry.getSystem());
+			for (final ServiceRegistryInterfaceConnection interfaceConn : srEntry.getInterfaceConnections()) {
+				interfaceEntries.putIfAbsent(interfaceConn.getServiceInterface().getId(), interfaceConn.getServiceInterface());
+			}
+		}		
+		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceDefinitionEntries.values(), systemEntries.values(),
+																																 interfaceEntries.values(), serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse()).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPED_URI)
 											   .accept(MediaType.APPLICATION_JSON))
@@ -266,17 +279,15 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final ServiceRegistryGroupedResponseDTO readValue = objectMapper.readValue(response.getResponse().getContentAsByteArray(), ServiceRegistryGroupedResponseDTO.class);
 		final AutoCompleteDataResponseDTO autoCompleteData = readValue.getAutoCompleteData();
 		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystems = readValue.getServicesGroupedBySystems();
-		final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterface = readValue.getServicesGroupedByServiceDefinitionAndInterface();
+		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinition = readValue.getServicesGroupedByServiceDefinition();
 		
 		assertNotNull(autoCompleteData);
 		assertNotNull(servicesGroupedBySystems);
-		assertNotNull(servicesGroupedByServiceDefinitionAndInterface);
+		assertNotNull(servicesGroupedByServiceDefinition);
 		
 		// Testing autoCompleteData object
 		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
 		assertEquals(2, interfaceList.size());
-		assertTrue(interfaceList.get(0).getValue().equals(interface1) || interfaceList.get(1).getValue().equals(interface1) ? true : false);
-		assertTrue(interfaceList.get(0).getValue().equals(interface2) || interfaceList.get(1).getValue().equals(interface2) ? true : false);		
 		assertEquals(numOfServices, autoCompleteData.getServiceList().size());
 		assertEquals(numOfSystems, autoCompleteData.getSystemList().size());
 		
@@ -286,9 +297,9 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String oneOfTheInterfaces = servicesGroupedBySystems.get(0).getServices().get(0).getInterfaces().get(0).getInterfaceName();
 		assertTrue(oneOfTheInterfaces.equals(interface1) || oneOfTheInterfaces.equals(interface2) ? true :false);
 		
-		// Testing servicesGroupedByServiceDefinitionAndInterface object
-		assertEquals(numOfServices * 2, servicesGroupedByServiceDefinitionAndInterface.size());
-		assertEquals(numOfSystems, servicesGroupedByServiceDefinitionAndInterface.get(0).getProviderServices().size());
+		// Testing servicesGroupedByServiceDefinition object
+		assertEquals(numOfServices, servicesGroupedByServiceDefinition.size());
+		assertEquals(numOfSystems, servicesGroupedByServiceDefinition.get(0).getProviderServices().size());
 	}
 	
 	//=================================================================================================
@@ -361,13 +372,29 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
-		request.setSecure(ServiceSecurityType.CERTIFICATE);
+		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = postRegisterService(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
 		Assert.assertEquals("Security type is in conflict with the availability of the authentication info.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testRegisterServiceWithInvalidSecureValue() throws Exception {
+		final ServiceRegistryRequestDTO request = new ServiceRegistryRequestDTO();
+		request.setServiceDefinition("s");
+		request.setProviderSystem(getAValidSystemRequestDTO());
+		request.setEndOfValidity("2019-06-12 13:51:30");
+		request.setSecure("invalidSecurityTypeValue");
+		
+		final MvcResult result = postRegisterService(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(SERVICE_REGISTRY_REGISTER_URI, error.getOrigin());
+		Assert.assertEquals("Security type is not valid.", error.getErrorMessage());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -619,7 +646,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
-		request.setSecure(ServiceSecurityType.CERTIFICATE);
+		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = addServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
@@ -756,7 +783,7 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		request.setServiceDefinition("s");
 		request.setProviderSystem(getAValidSystemRequestDTO());
 		request.setEndOfValidity("2019-06-12 13:51:30");
-		request.setSecure(ServiceSecurityType.CERTIFICATE);
+		request.setSecure(ServiceSecurityType.CERTIFICATE.name());
 		
 		final MvcResult result = updateServiceRegistry(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);

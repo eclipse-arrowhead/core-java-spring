@@ -15,8 +15,8 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	
 	private String serviceDefinitionName;
 	private Long consumerSystemId;
-	private SystemRequestDTO providerSystemDTO;
-	private CloudRequestDTO cloudDTO;
+	private SystemRequestDTO providerSystem;
+	private CloudRequestDTO cloud;
 	private String serviceInterfaceName;
 	private Integer priority;	
 	private Map<String,String> attribute;
@@ -28,12 +28,12 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	public OrchestratorStoreRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public OrchestratorStoreRequestDTO(final String serviceDefinitionName, final Long consumerSystemId, final SystemRequestDTO providerSystemDTO, final CloudRequestDTO cloudDTO,
+	public OrchestratorStoreRequestDTO(final String serviceDefinitionName, final Long consumerSystemId, final SystemRequestDTO providerSystem, final CloudRequestDTO cloud,
 									   final String serviceInterfaceName, final Integer priority, final Map<String,String> attribute) {
 		this.serviceDefinitionName = serviceDefinitionName;
 		this.consumerSystemId = consumerSystemId;
-		this.providerSystemDTO = providerSystemDTO;
-		this.cloudDTO = cloudDTO;
+		this.providerSystem = providerSystem;
+		this.cloud = cloud;
 		this.serviceInterfaceName = serviceInterfaceName;
 		this.priority = priority;
 		this.attribute = attribute;
@@ -42,8 +42,8 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public String getServiceDefinitionName() {return serviceDefinitionName;}
 	public Long getConsumerSystemId() {return consumerSystemId;}
-	public SystemRequestDTO getProviderSystemDTO() {return providerSystemDTO;}
-	public CloudRequestDTO getCloudDTO() {return cloudDTO;}
+	public SystemRequestDTO getProviderSystem() {return providerSystem;}
+	public CloudRequestDTO getCloud() {return cloud;}
 	public String getServiceInterfaceName() {return serviceInterfaceName;} 
 	public Integer getPriority() {return priority;}
 	public Map<String,String> getAttribute() {return attribute;}	
@@ -51,8 +51,8 @@ public class OrchestratorStoreRequestDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public void setServiceDefinitionName(final String serviceDefinitionName) {this.serviceDefinitionName = serviceDefinitionName;}
 	public void setConsumerSystemId(final Long consumerSystemId) {this.consumerSystemId = consumerSystemId;}
-	public void setProviderSystemDTO(final SystemRequestDTO providerSystemDTO) {this.providerSystemDTO = providerSystemDTO;}
-	public void setCloudDTO(final CloudRequestDTO cloudDTO) {this.cloudDTO = cloudDTO;}
+	public void setProviderSystem(final SystemRequestDTO providerSystemDTO) {this.providerSystem = providerSystemDTO;}
+	public void setCloud(final CloudRequestDTO cloudDTO) {this.cloud = cloudDTO;}
 	public void setServiceInterfaceName(final String serviceInterfaceName) {this.serviceInterfaceName = serviceInterfaceName; }
 	public void setPriority(final Integer priority) {this.priority = priority;}
 	public void setAttribute(final Map<String,String> attribute) {this.attribute = attribute;}

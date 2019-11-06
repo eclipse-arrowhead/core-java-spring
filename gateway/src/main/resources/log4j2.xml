@@ -6,12 +6,13 @@
         </Property>
 		<Property name="JDBC_LEVEL">INFO</Property>
 		<Property name="CONSOLE_FILE_LEVEL">INFO</Property>
+		<Property name="LOG_DIR">.</Property>
     </Properties>
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
-		<RollingFile name="FileAppender" fileName="gateway.log" filePattern="gateway-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="FileAppender" fileName="${LOG_DIR}/gateway.log" filePattern="${LOG_DIR}/gateway-%d{yyyy-MM-dd}-%i.log">
 	    	<PatternLayout>
 	        	<Pattern>${LOG_PATTERN}</Pattern>
 	    	</PatternLayout>

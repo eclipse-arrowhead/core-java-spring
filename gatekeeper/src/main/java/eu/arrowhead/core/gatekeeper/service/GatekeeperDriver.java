@@ -31,6 +31,7 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Cloud;
@@ -87,6 +88,9 @@ public class GatekeeperDriver {
 	@Autowired
 	private HttpService httpService;
 	
+	@Autowired
+	private SSLProperties sslProps;
+	
 	@Value(CommonConstants.$HTTP_CLIENT_SOCKET_TIMEOUT_WD)
 	private long timeout;
 
@@ -118,7 +122,7 @@ public class GatekeeperDriver {
 		}
 		final PrivateKey privateKey = (PrivateKey) arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY);
 	
-		relayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, timeout);	
+		relayClient = GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout);	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -151,12 +155,12 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceQueryResultDTO sendServiceReistryQuery(final ServiceQueryFormDTO gueryForm) {
+	public ServiceQueryResultDTO sendServiceRegistryQuery(final ServiceQueryFormDTO queryForm) {
 		logger.debug("sendServiceReistryQuery started...");		
-		Assert.notNull(gueryForm, "gueryForm is null.");
+		Assert.notNull(queryForm, "queryForm is null.");
 		
 		final UriComponents queryUri = getServiceRegistryQueryUri();
-		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, gueryForm);
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
 		
 		return response.getBody();
 	}
@@ -194,7 +198,7 @@ public class GatekeeperDriver {
 		
 		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(targetCloud));
 		try {
-			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort());
+			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
 			final String recipientCommonName = getRecipientCommonName(targetCloud);
 			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, recipientCommonName, targetCloud.getAuthenticationInfo());
 			if (advResult == null) {

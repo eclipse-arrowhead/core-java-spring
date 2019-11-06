@@ -9,26 +9,59 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+<<<<<<< HEAD
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.choreographer.*;
+=======
+>>>>>>> 8e167226677239291774be8d7eb6c2e7e231ff39
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerActionActionStepConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlanActionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionStep;
+import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
+import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
+import eu.arrowhead.common.database.entity.EventType;
+import eu.arrowhead.common.database.entity.ForeignSystem;
+import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+<<<<<<< HEAD
+=======
+import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
+>>>>>>> 8e167226677239291774be8d7eb6c2e7e231ff39
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.EventTypeResponseDTO;
 import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
@@ -118,17 +151,18 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3776")
-	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(final Iterable<ServiceDefinition> serviceDefinitionEntries, final Iterable<System> systemEntries,
+																											  	  final Iterable<ServiceInterface> interfaceEntries, final Iterable<ServiceRegistry> serviceRegistryEntries) {
+		Assert.notNull(serviceDefinitionEntries, "List of serviceDefinitionEntries is null");
+		Assert.notNull(systemEntries, "List of systemEntries is null");
+		Assert.notNull(interfaceEntries, "List of interfaceEntries is null");
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
 		
 		final Map<Long,ServicesGroupedBySystemsResponseDTO> servicesBySystemId = new HashMap<>();
-		final Map<String,ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesByServiceDefinitionAndInterface = new HashMap<>();
+		final Map<Long,ServicesGroupedByServiceDefinitionResponseDTO> servicesByServiceDefinition = new HashMap<>();
 		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
 		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
-		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();		
-		final Set<Long> serviceIdsForAutoComplete = new HashSet<>();
-		final Set<Long> systemIdsForAutoComplete = new HashSet<>();
-		final Set<Long> interfaceIdsForAutoComplete = new HashSet<>();
+		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();
 						
 		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
 			final long systemId = srEntry.getSystem().getId();
@@ -147,47 +181,34 @@ public class DTOConverter {
 				servicesBySystemId.put(systemId, dto);
 			}
 			
-			// Filling up AutoCompleteDataResponseDTO						
-			if (!serviceIdsForAutoComplete.contains(serviceDefinitionId)) {
-				serviceIdsForAutoComplete.add(serviceDefinitionId);
-				servicesForAutoComplete.add(new IdValueDTO(serviceDefinitionId, serviceDefinition));
-			}
-			
-			if (!systemIdsForAutoComplete.contains(systemId)) {
-				systemIdsForAutoComplete.add(systemId);
-				systemsForAutoComplete.add(new SystemResponseDTO(systemId, systemName, systemAddress, systemPort, null, null, null));
-			}
-						
-			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
-			for (final ServiceRegistryInterfaceConnection connection : interfaceConnections) {
-				final long interfId = connection.getServiceInterface().getId();
-				final String interfaceName = connection.getServiceInterface().getInterfaceName();
-				
-				if (!interfaceIdsForAutoComplete.contains(interfId)) {
-					interfaceIdsForAutoComplete.add(interfId);
-					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
-				}
-				
-				// Creating ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO
-				final String key = serviceDefinitionId + "-" + interfId;
-				if (servicesByServiceDefinitionAndInterface.containsKey(key)) {
-					servicesByServiceDefinitionAndInterface.get(key).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
-				} else {
-					final ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO dto = new ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO(serviceDefinitionId, serviceDefinition,
-																																						interfaceName,  new ArrayList<>());
-					dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
-					servicesByServiceDefinitionAndInterface.put(key, dto);
-				}
+			// Creating ServicesGroupedByServiceDefinitionResponseDTO
+			if (servicesByServiceDefinition.containsKey(serviceDefinitionId)) {
+				servicesByServiceDefinition.get(serviceDefinitionId).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+			} else {
+				final ServicesGroupedByServiceDefinitionResponseDTO dto = new ServicesGroupedByServiceDefinitionResponseDTO(serviceDefinitionId, serviceDefinition, new ArrayList<>());
+				dto.getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
+				servicesByServiceDefinition.put(serviceDefinitionId, dto);
 			}
 		}
+			
+		// Creating AutoCompleteDataResponseDTO	
+		for (final ServiceDefinition serviceDefinition : serviceDefinitionEntries) {
+			servicesForAutoComplete.add(new IdValueDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition()));
+		}
+		for (final System system : systemEntries) {
+			systemsForAutoComplete.add(DTOConverter.convertSystemToSystemResponseDTO(system));
+		}
+		for (final ServiceInterface serviceInterface : interfaceEntries) {
+			interfacesForAutoComplete.add(new IdValueDTO(serviceInterface.getId(), serviceInterface.getInterfaceName()));
+		}
 		
-		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
 		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystemsResponseDTOList = new ArrayList<>();
 		servicesGroupedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
-		final List<ServicesGroupedByServiceDefinitionAndInterfaceResponseDTO> servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList = new ArrayList<>();
-		servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList.addAll(servicesByServiceDefinitionAndInterface.values());
+		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionResponseDTOList = new ArrayList<>();
+		servicesGroupedByServiceDefinitionResponseDTOList.addAll(servicesByServiceDefinition.values());
+		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
 		
-		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionAndInterfaceResponseDTOList, autoCompleteDataResponseDTO);
+		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionResponseDTOList, autoCompleteDataResponseDTO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -485,6 +506,106 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription){
+		Assert.notNull(subscription, "subscription is null");
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
+		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
+		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
+		Assert.notNull(subscription.getUpdatedAt(), "subscription.UpdatedAt is null");
+		
+		final String startDate = subscription.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getStartDate());
+		final String endDate = subscription.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getEndDate());
+		
+		final Set<SystemResponseDTO> sources = collectPublishersFromSubscription(subscription.getPublisherConnections());
+		
+		return new SubscriptionResponseDTO(
+				subscription.getId(), 
+				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
+				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
+				Utilities.text2Map(subscription.getFilterMetaData()), 
+				subscription.getNotifyUri(), 
+				subscription.isMatchMetaData(), 
+				startDate, 
+				endDate, 
+				sources, 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionResponseDTO convertSubscriptionToOnlyAuthorizedSourcesSubscriptionResponseDTO(final Subscription subscription){
+		Assert.notNull(subscription, "subscription is null");
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
+		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
+		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
+		Assert.notNull(subscription.getUpdatedAt(), "subscription.UpdatedAt is null");
+		
+		final String startDate = subscription.getStartDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getStartDate());
+		final String endDate = subscription.getEndDate() == null ? null : Utilities.convertZonedDateTimeToUTCString(subscription.getEndDate());
+		
+		final Set<SystemResponseDTO> sources = collectAuthorizedPublishersFromSubscription(subscription.getPublisherConnections());
+		
+		return new SubscriptionResponseDTO(
+				subscription.getId(), 
+				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
+				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
+				Utilities.text2Map(subscription.getFilterMetaData()), 
+				subscription.getNotifyUri(), 
+				subscription.isMatchMetaData(), 
+				startDate, 
+				endDate, 
+				sources, 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static EventTypeResponseDTO convertEventTypeToEventTypeResponseDTO(final EventType eventType){
+		Assert.notNull(eventType, "eventType is null");
+		Assert.notNull(eventType.getEventTypeName(), "eventType.EvenTypeName is null" );
+
+		return new EventTypeResponseDTO(
+				eventType.getId(), 
+				eventType.getEventTypeName(),
+				Utilities.convertZonedDateTimeToUTCString(eventType.getCreatedAt()), 
+				Utilities.convertZonedDateTimeToUTCString(eventType.getUpdatedAt())
+				);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static EventDTO convertEventPublishRequestDTOToEventDTO(final EventPublishRequestDTO eventPublishRequestDTO){
+		Assert.notNull(eventPublishRequestDTO, "eventPublishRequestDTO is null");
+		Assert.notNull(eventPublishRequestDTO.getEventType(), "eventPublishRequestDTO.EvenType is null" );
+		Assert.notNull(eventPublishRequestDTO.getPayload(), "eventPublishRequestDTO.Payload is null" );
+		Assert.notNull(eventPublishRequestDTO.getTimeStamp(), "eventPublishRequestDTO.TimeStamp is null" );
+		
+		return new EventDTO(
+				eventPublishRequestDTO.getEventType(), 
+				eventPublishRequestDTO.getMetaData(),
+				eventPublishRequestDTO.getPayload(),
+				eventPublishRequestDTO.getTimeStamp()
+				);
+	}
+	
+
+	//-------------------------------------------------------------------------------------------------
+	public static SubscriptionListResponseDTO convertSubscriptionPageToSubscriptionListResponseDTO(final Page<Subscription> entries) {
+		Assert.notNull(entries, "SubscriptionPage is null" );
+		
+		final List<SubscriptionResponseDTO> subscriptionEntries = new ArrayList<>(entries.getNumberOfElements());
+		for ( final Subscription entry : entries ) {
+			
+			subscriptionEntries.add( convertSubscriptionToSubscriptionResponseDTO( entry ) );
+		}
+		
+		return new SubscriptionListResponseDTO( subscriptionEntries, entries.getTotalElements() );
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static RelayRequestDTO convertRelayResponseDTOToRelayRequestDTO(final RelayResponseDTO response) {
 		Assert.notNull(response, "Relay response is null.");
 		
@@ -493,7 +614,7 @@ public class DTOConverter {
 	
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private DTOConverter() {
 		throw new UnsupportedOperationException();
@@ -555,8 +676,8 @@ public class DTOConverter {
 	}
 
 	private static List<ServiceDefinitionResponseDTO> collectServiceDefinitionsFromChoreographerActionStep(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
-		List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
-		for (ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
+		final List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
+		for (final ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
 			result.add(convertServiceDefinitionToServiceDefinitionResponseDTO(conn.getServiceDefinitionEntry()));
 		}
 
@@ -565,8 +686,8 @@ public class DTOConverter {
 	}
 
 	private static List<ChoreographerNextActionStepResponseDTO> collectChoreographerNextActionStepsFromChoreographerActionStep(final Set<ChoreographerNextActionStep> nextActionSteps) {
-		List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
-		for (ChoreographerNextActionStep nextActionStep : nextActionSteps) {
+		final List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
+		for (final ChoreographerNextActionStep nextActionStep : nextActionSteps) {
 			result.add(convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(nextActionStep.getNextActionStepEntry()));
 		}
 
@@ -575,11 +696,11 @@ public class DTOConverter {
 		return result;
 	}
 
-	private static ChoreographerNextActionStepResponseDTO convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(ChoreographerActionStep nextActionStepEntry) {
+	private static ChoreographerNextActionStepResponseDTO convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(final ChoreographerActionStep nextActionStepEntry) {
 		return new ChoreographerNextActionStepResponseDTO(nextActionStepEntry.getId(), nextActionStepEntry.getName());
 	}
 
-	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(ChoreographerActionStep actionStep) {
+	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep actionStep) {
 	    Assert.notNull(actionStep, "ChoreographerActionStep is null.");
 
 		return new ChoreographerActionStepResponseDTO(
@@ -594,8 +715,8 @@ public class DTOConverter {
 	public static List<ChoreographerActionStepResponseDTO> collectChoreographerActionStepsFromChoreographerAction(final Set<ChoreographerActionActionStepConnection> actionStepConnections) {
 		Assert.notNull(actionStepConnections, "ActionStepConnectionSet is null.");
 
-		List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
-		for(ChoreographerActionActionStepConnection conn : actionStepConnections) {
+		final List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
+		for(final ChoreographerActionActionStepConnection conn : actionStepConnections) {
 			result.add(convertChoreographerActionStepToChoreographerActionStepResponseDTO(conn.getActionStepEntry()));
 		}
 
@@ -611,7 +732,7 @@ public class DTOConverter {
 		return null;
 	}
 
-    public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(ChoreographerAction actionEntry) {
+    public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(final ChoreographerAction actionEntry) {
 		Assert.notNull(actionEntry, "ChoreographerAction entry is null.");
 
 		return new ChoreographerActionResponseDTO(actionEntry.getId(),
@@ -625,8 +746,8 @@ public class DTOConverter {
 	public static List<ChoreographerActionResponseDTO> collectChoreographerActionsFromChoreographerActionPlan(final Set<ChoreographerActionPlanActionConnection> actionConnections) {
 		Assert.notNull(actionConnections, "ActionConnectionsSet is null.");
 
-		List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
-		for (ChoreographerActionPlanActionConnection conn : actionConnections) {
+		final List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
+		for (final ChoreographerActionPlanActionConnection conn : actionConnections) {
 			result.add(convertChoreographerActionToChoreographerActionResponseDTO(conn.getActionEntry()));
 		}
 
@@ -635,7 +756,7 @@ public class DTOConverter {
 		return result;
 	}
 
-	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(ChoreographerActionPlan actionPlanEntry) {
+	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(final ChoreographerActionPlan actionPlanEntry) {
 		Assert.notNull(actionPlanEntry, "ChoreographerActionPlan entry is null.");
 
 		return new ChoreographerActionPlanResponseDTO(actionPlanEntry.getId(),
@@ -644,6 +765,7 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
+<<<<<<< HEAD
 
     public static ChoreographerWorkspaceResponseDTO convertChoreographerWorkspaceToChoreographerWorkspaceResponseDTO(ChoreographerWorkspace workspaceEntry) {
 		Assert.notNull(workspaceEntry, "Workspace entry is null.");
@@ -658,4 +780,35 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getUpdatedAt()));
     }
+=======
+	
+	//-------------------------------------------------------------------------------------------------
+	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
+		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
+		
+		for (final SubscriptionPublisherConnection conn : connections) {
+			
+			result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
+			
+		}
+		
+		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private static Set<SystemResponseDTO> collectAuthorizedPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
+		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
+		
+		for (final SubscriptionPublisherConnection conn : connections) {
+			
+			if (conn.isAuthorized()) {
+				result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
+			}
+						
+		}
+		
+		return result;
+	}
+
+>>>>>>> 8e167226677239291774be8d7eb6c2e7e231ff39
 }

@@ -247,6 +247,30 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class) 
+	public void testRegisterServiceResponseSecurityTypeInvalid() {
+		final String systemName = "system";
+		final String address = "localhost";
+		final int port = 1111;
+		final String serviceDefinitionStr = "service_definition";
+		
+		final SystemRequestDTO sysDto = new SystemRequestDTO(); 
+		sysDto.setSystemName(systemName);
+		sysDto.setAddress(address);
+		sysDto.setPort(port);
+		
+		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
+		dto.setServiceDefinition(serviceDefinitionStr);
+		dto.setProviderSystem(sysDto);
+		dto.setSecure("invalidSecurityType");
+		
+		when(serviceDefinitionRepository.findByServiceDefinition(any(String.class))).thenReturn(Optional.of(new ServiceDefinition(serviceDefinitionStr)));
+		when(systemRepository.findBySystemNameAndAddressAndPort(any(String.class), any(String.class), anyInt())).thenReturn(Optional.of(new System(systemName, address, port, null)));
+		
+		serviceRegistryDBService.registerServiceResponse(dto);
+	}
+	
 	//=================================================================================================
 	//Tests of createServiceRegistry		
 	
@@ -1001,7 +1025,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
 		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
 		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
-		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE.name());
 		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
 		serviceRegistryRequestDTO.setVersion(0);
 		
@@ -1015,7 +1039,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
 		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
 		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
-		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE.name());
 		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
 		serviceRegistryRequestDTO.setVersion(0);
 		
@@ -1029,7 +1053,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryRequestDTO.setEndOfValidity(null);
 		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
 		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
-		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE.name());
 		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
 		serviceRegistryRequestDTO.setVersion(0);
 		
@@ -1043,7 +1067,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
 		serviceRegistryRequestDTO.setInterfaces(null);	
 		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
-		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE.name());
 		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
 		serviceRegistryRequestDTO.setVersion(0);
 		
@@ -1057,7 +1081,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
 		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
 		serviceRegistryRequestDTO.setMetadata(null);
-		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE.name());
 		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
 		serviceRegistryRequestDTO.setVersion(0);
 		
@@ -1085,7 +1109,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
 		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
 		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
-		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE.name());
 		serviceRegistryRequestDTO.setServiceUri(null);
 		serviceRegistryRequestDTO.setVersion(0);
 		
@@ -1099,7 +1123,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		serviceRegistryRequestDTO.setEndOfValidity(validTestEndOFValidityFormatForRequestDTO);
 		serviceRegistryRequestDTO.setInterfaces(validTestInterfaces);	
 		serviceRegistryRequestDTO.setMetadata(validTestMetadataForRequestDTO);
-		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE);
+		serviceRegistryRequestDTO.setSecure(ServiceSecurityType.NOT_SECURE.name());
 		serviceRegistryRequestDTO.setServiceUri(validTestServiceUri);
 		serviceRegistryRequestDTO.setVersion(0);
 		
