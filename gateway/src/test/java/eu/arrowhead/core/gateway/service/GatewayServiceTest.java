@@ -2,6 +2,7 @@ package eu.arrowhead.core.gateway.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +46,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
@@ -183,6 +185,7 @@ public class GatewayServiceTest {
 			public byte[] getEncoded() { return null; }
 			public String getAlgorithm() { return null;	}
 		});
+		ReflectionTestUtils.setField(testingObject, "sslProps", new SSLProperties());
 		testingObject.onApplicationEvent(null);
 		final Object relayClient = ReflectionTestUtils.getField(testingObject, "relayClient");
 		Assert.assertNotNull(relayClient);
@@ -445,7 +448,7 @@ public class GatewayServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectProviderCannotConnectRelay() throws JMSException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
-		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(new JMSException("test"));
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
 		
 		testingObject.connectProvider(request);
 	}
@@ -454,7 +457,7 @@ public class GatewayServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectProviderOtherRelayIssue() throws JMSException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenThrow(new JMSException("test"));
 		
@@ -465,7 +468,7 @@ public class GatewayServiceTest {
 	@Test
 	public void testConnectProviderEverythingOK() throws JMSException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		final MessageProducer producer = getTestMessageProducer();
 		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peerName", "queueId", producer, producer));
@@ -577,7 +580,7 @@ public class GatewayServiceTest {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
 		when(availablePorts.poll()).thenReturn(54321);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
-		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(new JMSException("test"));
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
 		
 		testingObject.connectConsumer(request);
 	}
@@ -588,7 +591,7 @@ public class GatewayServiceTest {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
 		when(availablePorts.poll()).thenReturn(54321);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenThrow(new JMSException("test"));
 		
@@ -601,7 +604,7 @@ public class GatewayServiceTest {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
 		when(availablePorts.poll()).thenReturn(54321);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		final MessageProducer producer = getTestMessageProducer();
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer));
@@ -743,7 +746,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
-		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(new JMSException("test"));
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
 		
 		testingObject.closeSession(request);
 	}
@@ -755,7 +758,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeControlRelay(any(Session.class), any(String.class), any(String.class))).thenThrow(new JMSException("test"));
 		

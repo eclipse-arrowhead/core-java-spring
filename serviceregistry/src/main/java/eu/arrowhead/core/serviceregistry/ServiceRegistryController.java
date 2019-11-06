@@ -541,10 +541,10 @@ public class ServiceRegistryController {
 	@ResponseBody public ServiceRegistryGroupedResponseDTO getServiceRegistryGroupedData() {
 		logger.debug("New get request for grouped service registry data");
 		
-		final ServiceRegistryGroupedResponseDTO serviceRegistryEntriesForServiceRegistryGroupedResponse = serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse();
+		final ServiceRegistryGroupedResponseDTO serviceRegistryGroupedResponseDTO = serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse();
 		logger.debug("Grouped service registry data successfully retrieved");
 		
-		return serviceRegistryEntriesForServiceRegistryGroupedResponse;
+		return serviceRegistryGroupedResponseDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

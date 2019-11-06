@@ -167,6 +167,9 @@ public class ServiceRegistryDBService {
 		final long validatedSystemId = validateSystemId(systemId);
 		final int validatedPort = validateSystemPort(port);
 		final String validatedSystemName = validateSystemParamString(systemName);
+		if (validatedSystemName.contains(".")) {
+			throw new InvalidParameterException("System name can't contain dot (.)");
+		}
 		final String validatedAddress = validateSystemParamString(address);
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
@@ -233,6 +236,9 @@ public class ServiceRegistryDBService {
 		final long validatedSystemId = validateSystemId(systemId);
 		final Integer validatedPort = validateAllowNullSystemPort(port);
 		final String validatedSystemName = validateAllowNullSystemParamString(systemName);
+		if (validatedSystemName != null && validatedSystemName.contains(".")) {
+			throw new InvalidParameterException("System name can't contain dot (.)");
+		}
 		final String validatedAddress = validateAllowNullSystemParamString(address);
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
@@ -478,12 +484,22 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public ServiceRegistryGroupedResponseDTO getServiceRegistryEntriesForServiceRegistryGroupedResponse() {
+	public ServiceRegistryGroupedResponseDTO getServiceRegistryDataForServiceRegistryGroupedResponse() {
 		logger.debug("getServiceRegistryEntriesForServiceRegistryGroupedResponse started...");
 		
-		final Page<ServiceRegistry> serviceRegistryEntries = getServiceRegistryEntries(-1, -1, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
+		try {
+
+			final List<ServiceDefinition> serviceDefinitionEntries = serviceDefinitionRepository.findAll();
+			final List<System> systemEntries = systemRepository.findAll();
+			final List<ServiceInterface> interfaceEntries = serviceInterfaceRepository.findAll();
+			final List<ServiceRegistry> serviceRegistryEntries = serviceRegistryRepository.findAll();			
+			return DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceDefinitionEntries, systemEntries, interfaceEntries, serviceRegistryEntries);
+			
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 		
-		return DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -954,6 +970,9 @@ public class ServiceRegistryDBService {
 		}
 		
 		final String validatedSystemName = systemName.trim().toLowerCase();
+		if (validatedSystemName.contains(".")) {
+			throw new InvalidParameterException("System name can't contain dot (.)");
+		}
 		final String validatedAddress = address.trim().toLowerCase();
 		final String validatedAuthenticationInfo = authenticationInfo;
 		
