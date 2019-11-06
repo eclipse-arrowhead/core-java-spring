@@ -10,7 +10,7 @@ public class CoreDefaults {
 	public static final int VARCHAR_EXTENDED = 2047;
 	
 	public static final boolean DEFAULT_LOG_ALL_REQUEST_AND_RESPONSE = false;
-	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = true;
+	public static final boolean DEFAULT_USE_STRICT_SERVICE_INTF_NAME_VERIFIER = false;
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
 	
