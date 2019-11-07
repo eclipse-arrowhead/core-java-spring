@@ -1,8 +1,6 @@
-package eu.arrowhead.common.dto.choreographer;
+package eu.arrowhead.common.dto.internal;
 
-public class ChoreographerWorkspaceResponseDTO {
-
-    private long id;
+public class ChoreographerWorkspaceRequestDTO {
 
     private String name;
 
@@ -14,29 +12,14 @@ public class ChoreographerWorkspaceResponseDTO {
 
     private double relativeRCoordinate;
 
-    private String createdAt;
+    public ChoreographerWorkspaceRequestDTO() {}
 
-    private String updatedAt;
-
-    public ChoreographerWorkspaceResponseDTO() {}
-
-    public ChoreographerWorkspaceResponseDTO(long id, String name, double relativeXCoordinate, double relativeYCoordinate, double relativeZCoordinate, double relativeRCoordinate, String createdAt, String updatedAt) {
-        this.id = id;
+    public ChoreographerWorkspaceRequestDTO(String name, double relativeXCoordinate, double relativeYCoordinate, double relativeZCoordinate, double relativeRCoordinate) {
         this.name = name;
         this.relativeXCoordinate = relativeXCoordinate;
         this.relativeYCoordinate = relativeYCoordinate;
         this.relativeZCoordinate = relativeZCoordinate;
         this.relativeRCoordinate = relativeRCoordinate;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -77,21 +60,5 @@ public class ChoreographerWorkspaceResponseDTO {
 
     public void setRelativeRCoordinate(double relativeRCoordinate) {
         this.relativeRCoordinate = relativeRCoordinate;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

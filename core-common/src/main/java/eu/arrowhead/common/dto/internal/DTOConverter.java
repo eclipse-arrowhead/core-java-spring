@@ -9,12 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-<<<<<<< HEAD
 import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.choreographer.*;
-=======
->>>>>>> 8e167226677239291774be8d7eb6c2e7e231ff39
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
@@ -41,16 +37,12 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
 import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
-<<<<<<< HEAD
-=======
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
->>>>>>> 8e167226677239291774be8d7eb6c2e7e231ff39
+import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerNextActionStepResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
@@ -765,7 +757,6 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
-<<<<<<< HEAD
 
     public static ChoreographerWorkspaceResponseDTO convertChoreographerWorkspaceToChoreographerWorkspaceResponseDTO(ChoreographerWorkspace workspaceEntry) {
 		Assert.notNull(workspaceEntry, "Workspace entry is null.");
@@ -780,8 +771,7 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getUpdatedAt()));
     }
-=======
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
 		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
@@ -810,5 +800,4 @@ public class DTOConverter {
 		return result;
 	}
 
->>>>>>> 8e167226677239291774be8d7eb6c2e7e231ff39
 }

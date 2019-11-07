@@ -352,7 +352,7 @@ CREATE TABLE `choreographer_workspace_system_connection` (
     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT `workspace` FOREIGN KEY (`workspace_id`) REFERENCES `choreographer_workspace` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
+    CONSTRAINT `system_workspace` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

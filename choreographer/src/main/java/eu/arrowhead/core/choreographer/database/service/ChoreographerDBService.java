@@ -13,8 +13,11 @@ import eu.arrowhead.common.database.entity.ChoreographerWorkspace;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.repository.*;
 
+import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerActionStepRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerWorkspaceResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.choreographer.*;
+import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
