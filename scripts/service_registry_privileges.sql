@@ -18,7 +18,13 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud_interface_connect
 GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`subscription` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`subscription_publisher_connection` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan_action_connection` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'service_registry'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'service_registry'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'service_registry'@'localhost';
 
 REVOKE ALL, GRANT OPTION FROM 'service_registry'@'%';
@@ -39,7 +45,13 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud_interface_connect
 GRANT ALL PRIVILEGES ON `arrowhead`.`orchestrator_store` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`subscription` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`subscription_publisher_connection` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_plan_action_connection` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_action_step_connection` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_action_step_service_definition_connection` TO 'service_registry'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`choreographer_next_action_step` TO 'service_registry'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'service_registry'@'%';
 
 FLUSH PRIVILEGES;
