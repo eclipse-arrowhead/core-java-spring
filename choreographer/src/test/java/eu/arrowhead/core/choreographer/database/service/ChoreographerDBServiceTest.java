@@ -3,7 +3,14 @@ package eu.arrowhead.core.choreographer.database.service;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
 import eu.arrowhead.common.database.entity.ChoreographerActionStep;
-import eu.arrowhead.common.database.repository.*;
+import eu.arrowhead.common.database.repository.ChoreographerActionActionStepConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionPlanActionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionPlanRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionStepRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionStepServiceDefinitionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerNextActionStepRepository;
+import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerActionStepRequestDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -12,7 +19,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import org.springframework.data.domain.PageImpl;
@@ -22,10 +30,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static reactor.core.publisher.Mono.when;
 
 @RunWith(SpringRunner.class)
 public class ChoreographerDBServiceTest {
