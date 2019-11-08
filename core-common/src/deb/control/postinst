@@ -109,7 +109,6 @@ case "$1" in
 
 		# Trust the cloud certificate
 		ah_cert_trust ${AH_CONF_DIR} ${AH_CLOUDS_DIR} ${AH_CLOUD_NAME}
-		db_unregister arrowhead-core-common/relay_master_cert;
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
