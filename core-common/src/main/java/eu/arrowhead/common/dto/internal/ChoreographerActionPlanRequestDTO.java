@@ -1,16 +1,16 @@
-package eu.arrowhead.common.dto.choreographer;
+package eu.arrowhead.common.dto.internal;
 
 import java.util.List;
 
-public class ChoreographerActionPlanRequestWithExistingActionDTO {
+public class ChoreographerActionPlanRequestDTO {
 
     private String actionPlanName;
 
     private List<ChoreographerActionRequestDTO> actions;
 
-    public ChoreographerActionPlanRequestWithExistingActionDTO() {}
+    public ChoreographerActionPlanRequestDTO() {}
 
-    public ChoreographerActionPlanRequestWithExistingActionDTO(String actionPlanName, List<ChoreographerActionRequestDTO> actions) {
+    public ChoreographerActionPlanRequestDTO(String actionPlanName, List<ChoreographerActionRequestDTO> actions) {
         this.actionPlanName = actionPlanName;
         this.actions = actions;
     }
