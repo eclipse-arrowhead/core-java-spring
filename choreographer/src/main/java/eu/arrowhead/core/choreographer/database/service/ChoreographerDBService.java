@@ -10,8 +10,15 @@ import eu.arrowhead.common.database.entity.ChoreographerActionStep;
 import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
 import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.repository.*;
 
+import eu.arrowhead.common.database.repository.ChoreographerActionActionStepConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionPlanActionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionPlanRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionStepRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionStepServiceDefinitionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerNextActionStepRepository;
+import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerActionStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
