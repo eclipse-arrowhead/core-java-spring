@@ -48,24 +48,15 @@ public class ChoreographerController {
 
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/actionplan";
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-    private static final String CHOREOGRAPHER_WORKSPACE_MGMT_URI = CoreCommonConstants.MGMT_URI + "/workspace";
-    private static final String CHOREOGRAPHER_WORKSPACE_MGMT_BY_ID_URI = CHOREOGRAPHER_WORKSPACE_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-
 
     private static final String GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE = "ChoreographerActionStep returned.";
     private static final String GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve ChoreographerActionStep.";
-    private static final String GET_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_200_MESSAGE = "ChoreographerWorkspace returned.";
-    private static final String GET_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_400_MESSAGE = "Could not retrieve ChoreographerWorkspace.";
 
     private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE = "ChoreographerActionPlan created with given service definitions.";
     private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE = "Could not create ChoreographerActionPlan.";
-    private static final String POST_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_201_MESSAGE = "ChoreographerWorkspace created with given parameters.";
-    private static final String POST_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_400_MESSAGE = "Could not create ChoreographerWorkspace.";
 
     private static final String DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_200_MESSAGE = "ChoreographerActionPlan successfully removed.";
     private static final String DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_400_MESSAGE = "Could not remove ChoreographerActionPlan.";
-    private static final String DELETE_CHOREOGRAPHER_WORKSPACE_PLAN_HTTP_200_MESSAGE = "ChoreographerWorkspace successfully removed.";
-    private static final String DELETE_CHOREOGRAPHER_WORKSPACE_PLAN_HTTP_400_MESSAGE = "Could not remove ChoreographerWorkspace.";
 
     private final Logger logger = LogManager.getLogger(ChoreographerController.class);
 
