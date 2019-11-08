@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-. /usr/share/debconf/confmodule
-
 if [ "$#" -lt 4 ]; then
     echo "Syntax: ${0} RELAY_NAME PASSWORD RELAY_MASTER_CERT RELAY_MASTER_PASSWORD [RELAY_HOST] [RELAY_IP]"
     exit 1
