@@ -56,9 +56,6 @@ public class ChoreographerDBService {
     @Autowired
     private ChoreographerActionPlanActionConnectionRepository choreographerActionPlanActionConnectionRepository;
 
-    @Autowired
-    private ChoreographerWorkspaceRepository choreographerWorkspaceRepository;
-
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
 
     @Transactional(rollbackFor = ArrowheadException.class)
