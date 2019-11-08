@@ -7,8 +7,6 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.ChoreographerActionPlanRequestDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerWorkspaceRequestDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerWorkspaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
@@ -170,117 +168,6 @@ public class ChoreographerController {
         logger.debug("ChoreographerActionPlans with page: {} and item_per page: {} retrieved successfully", page, size);
 
         return choreographerActionPlanEntriesResponse;
-    }
-
-    @ApiOperation(value = "Register on or more Workspaces.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = CHOREOGRAPHER_WORKSPACE_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public void addWorkspaces(@RequestBody final List<ChoreographerWorkspaceRequestDTO> requests) {
-        for (ChoreographerWorkspaceRequestDTO request : requests) {
-            checkChoreographerWorkspaceRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_WORKSPACE_MGMT_URI);
-            choreographerDBService.createChoreographerWorkspace(request.getName(), request.getRelativeXCoordinate(), request.getRelativeYCoordinate(),
-                    request.getRelativeZCoordinate(), request.getRelativeRCoordinate());
-        }
-    }
-
-    @ApiOperation(value = "Register on or more Workspaces.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = CommonConstants.OP_CHOREOGRAPHER_WORKSPACE_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public void registerWorkspaces(@RequestBody final List<ChoreographerWorkspaceRequestDTO> requests) {
-        for (ChoreographerWorkspaceRequestDTO request : requests) {
-            checkChoreographerWorkspaceRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_WORKSPACE_MGMT_URI);
-            choreographerDBService.createChoreographerWorkspace(request.getName(), request.getRelativeXCoordinate(), request.getRelativeYCoordinate(),
-                    request.getRelativeZCoordinate(), request.getRelativeRCoordinate());
-        }
-    }
-
-    @ApiOperation(value = "Return the requested Workspace entry.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses (value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = CHOREOGRAPHER_WORKSPACE_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public ChoreographerWorkspaceResponseDTO getWorkspaceById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New ChoreographerWorkspaceResponseDTO get request received with id: " + id + ".");
-
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_WORKSPACE_MGMT_BY_ID_URI);
-        }
-
-        ChoreographerWorkspaceResponseDTO choreographerActionPlanByIdResponse = choreographerDBService.getChoreographerWorkspaceByIdResponse(id);
-        logger.debug("ChoreographerWorkspace entry with id: " + " successfully retrieved!");
-
-        return  choreographerActionPlanByIdResponse;
-    }
-
-    @ApiOperation(value = "Return requested Workspace entries by the given parameters.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses (value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_WORKSPACE_MGMT_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = CHOREOGRAPHER_WORKSPACE_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<ChoreographerWorkspaceResponseDTO> getChoreographerWorkspaces(
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-        logger.debug("New getChoreographerWorkspaces get request received with page: {} and item_per page: {}.", page, size);
-
-        CoreUtilities.ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
-
-        List<ChoreographerWorkspaceResponseDTO> choreographerWorspaceEntriesResponse = choreographerDBService.getChoreographerWorkspaceEntriesResponse(validatedPageParams.getValidatedPage(), validatedPageParams.getValidatedSize(),
-                validatedPageParams.getValidatedDirecion(), sortField);
-        logger.debug("Workspaces with page: {} and item_per page: {} retrieved successfully", page, size);
-
-        return choreographerWorspaceEntriesResponse;
-    }
-
-    @ApiOperation(value = "Remove the requested Workspace entry.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_CHOREOGRAPHER_WORKSPACE_PLAN_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_CHOREOGRAPHER_WORKSPACE_PLAN_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @DeleteMapping(path = CHOREOGRAPHER_WORKSPACE_MGMT_BY_ID_URI)
-    public void removeWorkspaceById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Workspace delete request received with id of " + id + ".");
-
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_WORKSPACE_MGMT_BY_ID_URI);
-        }
-
-        choreographerDBService.removeWorkspaceEntryById(id);
-        logger.debug("Workspace with id: " + id + " successfully deleted!");
-    }
-
-    private void checkChoreographerWorkspaceRequest(final ChoreographerWorkspaceRequestDTO request, final String origin) {
-        logger.debug("checkChoreographerWorkspaceRequest started...");
-
-        if(Utilities.isEmpty(request.getName())) {
-            throw new BadPayloadException("Workspace name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
-        }
     }
 
     private void checkChoreographerActionPlanRequest(final ChoreographerActionPlanRequestDTO request, final String origin) {

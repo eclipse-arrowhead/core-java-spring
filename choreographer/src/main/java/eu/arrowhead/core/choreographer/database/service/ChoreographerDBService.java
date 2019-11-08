@@ -9,13 +9,11 @@ import eu.arrowhead.common.database.entity.ChoreographerActionPlanActionConnecti
 import eu.arrowhead.common.database.entity.ChoreographerActionStep;
 import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
 import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
-import eu.arrowhead.common.database.entity.ChoreographerWorkspace;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.repository.*;
 
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerActionStepRequestDTO;
-import eu.arrowhead.common.dto.internal.ChoreographerWorkspaceResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -453,99 +451,5 @@ public class ChoreographerDBService {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
-    }
-
-    @Transactional (rollbackFor = ArrowheadException.class)
-    public ChoreographerWorkspace createChoreographerWorkspace(final String name, final double x, final double y, final double z, final double r) {
-        logger.debug("createChoreographerWorkspace started...");
-
-        try {
-            if(Utilities.isEmpty(name)) {
-                throw new InvalidParameterException("Name of workspace is null or blank.");
-            }
-        } catch (InvalidParameterException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-
-        return choreographerWorkspaceRepository.saveAndFlush(new ChoreographerWorkspace(name, x, y, z, r));
-    }
-
-    public Page<ChoreographerWorkspace> getChoreographerWorkspaceEntries(final int page, final int size, final Direction direction, final String sortField) {
-        logger.debug("getChoreographerWorkspaceEntries started... ");
-
-        int validatedPage = page < 0 ? 0 : page;
-        int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
-        Direction validatedDirection = direction == null ? Direction.ASC : direction;
-        String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
-
-        try {
-            if (!ChoreographerWorkspace.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
-                throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
-            }
-
-
-            return choreographerWorkspaceRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
-        } catch (Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
-
-    public List<ChoreographerWorkspaceResponseDTO> getChoreographerWorkspaceEntriesResponse (final int page, final int size, final Direction direction, final String sortField) {
-        logger.debug("getChoreographerWorkspaceEntriesResponse started...");
-
-        Page<ChoreographerWorkspace> choreographerWorkspaceEntries = getChoreographerWorkspaceEntries(page, size, direction, sortField);
-
-        List<ChoreographerWorkspaceResponseDTO> choreographerWorkspaceResponseDTOS = new ArrayList<>();
-        for(ChoreographerWorkspace workspace : choreographerWorkspaceEntries) {
-            choreographerWorkspaceResponseDTOS.add(DTOConverter.convertChoreographerWorkspaceToChoreographerWorkspaceResponseDTO(workspace));
-        }
-
-        return choreographerWorkspaceResponseDTOS;
-    }
-
-    public ChoreographerWorkspace getChoreographerWorkspace(final long id) {
-        logger.debug("getChoreographerWorkspace started...");
-
-        try {
-            Optional<ChoreographerWorkspace> workspaceOpt = choreographerWorkspaceRepository.findById(id);
-            if (workspaceOpt.isPresent()) {
-                return workspaceOpt.get();
-            } else {
-                throw new InvalidParameterException("Workspace with id of '" + id + "' doesn't exist!");
-            }
-        } catch (InvalidParameterException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
-
-    @Transactional(rollbackFor = ArrowheadException.class)
-    public void removeWorkspaceEntryById(final long id) {
-        logger.debug("removeWorkspaceEntryById started...");
-
-        try {
-            if(!choreographerWorkspaceRepository.existsById(id)) {
-                throw new InvalidParameterException("Workspace with id of '" + id + "' doesn't exist!");
-            }
-            choreographerWorkspaceRepository.deleteById(id);
-            choreographerWorkspaceRepository.flush();
-        } catch (final InvalidParameterException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
-
-    public ChoreographerWorkspaceResponseDTO getChoreographerWorkspaceByIdResponse (final long id) {
-        logger.debug("getChoreographerWorkspaceByIdResponse started...");
-
-        return DTOConverter.convertChoreographerWorkspaceToChoreographerWorkspaceResponseDTO(getChoreographerWorkspace(id));
     }
 }

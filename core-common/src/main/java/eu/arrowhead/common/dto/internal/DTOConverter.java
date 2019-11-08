@@ -758,20 +758,6 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
 
-    public static ChoreographerWorkspaceResponseDTO convertChoreographerWorkspaceToChoreographerWorkspaceResponseDTO(ChoreographerWorkspace workspaceEntry) {
-		Assert.notNull(workspaceEntry, "Workspace entry is null.");
-
-		return new ChoreographerWorkspaceResponseDTO(
-				workspaceEntry.getId(),
-				workspaceEntry.getName(),
-				workspaceEntry.getXCoordinate(),
-				workspaceEntry.getYCoordinate(),
-				workspaceEntry.getZCoordinate(),
-				workspaceEntry.getRCoordinate(),
-				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(workspaceEntry.getUpdatedAt()));
-    }
-
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
 		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());

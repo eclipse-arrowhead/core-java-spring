@@ -333,27 +333,4 @@ CREATE TABLE IF NOT EXISTS `choreographer_next_action_step` (
   CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
- CREATE TABLE `choreographer_workspace` (
-	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-	`name` varchar(255) UNIQUE NOT NULL,
-    `x_coordinate` DOUBLE(8, 5) NOT NULL,
-    `y_coordinate` DOUBLE(8, 5) NOT NULL,
-    `z_coordinate` DOUBLE(8, 5) NOT NULL,
-    `r_coordinate` DOUBLE(8, 5),
-	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
- 
-DROP TABLE IF EXISTS  `choreographer_workspace_system_connection`;
-CREATE TABLE `choreographer_workspace_system_connection` (
-    `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-    `system_id` bigint NOT NULL,
-    `workspace_id` bigint NOT NULL,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `workspace` FOREIGN KEY (`workspace_id`) REFERENCES `choreographer_workspace` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `system_workspace` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 
