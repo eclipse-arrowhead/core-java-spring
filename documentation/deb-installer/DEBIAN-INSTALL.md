@@ -57,20 +57,20 @@ Check Java version:
 
 Pick one of the options below.
 
-#### 4a. Download an Arrowhead Debian Packages 
+#### 4a. Download Arrowhead Debian Packages 
 
-Check the GitHub site <https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3> for the latest packages and download
-it: 
+Check the GitHub site <https://github.com/arrowhead-f/core-java-spring-installers/tree/master/packages> for the latest packages and download
+them: 
 
 ```bash
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-core-common_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-authorization_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-choreographer_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-eventhandler_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-gatekeeper_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-gateway_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-orchestrator_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring/raw/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-serviceregistry_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-core-common_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-authorization_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-choreographer_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-eventhandler_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-gatekeeper_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-gateway_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-orchestrator_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-serviceregistry_4.1.3.deb
 ```
 
 **NOTE:** The arrowhead-core-common package is a requirement for all other packages.
