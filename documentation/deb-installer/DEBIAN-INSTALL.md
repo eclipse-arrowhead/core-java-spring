@@ -63,14 +63,14 @@ Check the GitHub site <https://github.com/arrowhead-f/core-java-spring-installer
 them: 
 
 ```bash
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-core-common_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-authorization_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-choreographer_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-eventhandler_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-gatekeeper_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-gateway_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-orchestrator_4.1.3.deb
-wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-installers-4.1.3/arrowhead-serviceregistry_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-core-common_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-authorization_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-choreographer_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-eventhandler_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-gatekeeper_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-gateway_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-orchestrator_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-serviceregistry_4.1.3.deb
 ```
 
 **NOTE:** The arrowhead-core-common package is a requirement for all other packages.
