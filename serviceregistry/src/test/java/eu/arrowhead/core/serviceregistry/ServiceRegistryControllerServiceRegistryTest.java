@@ -18,8 +18,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -255,8 +257,19 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		final String interface1 = "JSON";
 		final String interface2 = "XML";
 		final Page<ServiceRegistry> serviceRegistryEntries = createServiceRegistryPageForDBMocking(numOfServices, numOfSystems, interface1, interface2);
-		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(serviceRegistryEntries);
-		when(serviceRegistryDBService.getServiceRegistryEntriesForServiceRegistryGroupedResponse()).thenReturn(dto);
+		final Map<Long, ServiceDefinition> serviceDefinitionEntries = new HashMap<>();
+		final Map<Long, System> systemEntries = new HashMap<>();
+		final Map<Long, ServiceInterface> interfaceEntries = new HashMap<>();
+		for (final ServiceRegistry srEntry : serviceRegistryEntries) {
+			serviceDefinitionEntries.putIfAbsent(srEntry.getServiceDefinition().getId(), srEntry.getServiceDefinition());
+			systemEntries.putIfAbsent(srEntry.getSystem().getId(), srEntry.getSystem());
+			for (final ServiceRegistryInterfaceConnection interfaceConn : srEntry.getInterfaceConnections()) {
+				interfaceEntries.putIfAbsent(interfaceConn.getServiceInterface().getId(), interfaceConn.getServiceInterface());
+			}
+		}		
+		final ServiceRegistryGroupedResponseDTO dto = DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceDefinitionEntries.values(), systemEntries.values(),
+																																 interfaceEntries.values(), serviceRegistryEntries);
+		when(serviceRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse()).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(SERVICE_REGISTRY_MGMT_GROUPED_URI)
 											   .accept(MediaType.APPLICATION_JSON))
@@ -275,8 +288,6 @@ public class ServiceRegistryControllerServiceRegistryTest {
 		// Testing autoCompleteData object
 		final List<IdValueDTO> interfaceList = autoCompleteData.getInterfaceList();
 		assertEquals(2, interfaceList.size());
-		assertTrue(interfaceList.get(0).getValue().equals(interface1) || interfaceList.get(1).getValue().equals(interface1) ? true : false);
-		assertTrue(interfaceList.get(0).getValue().equals(interface2) || interfaceList.get(1).getValue().equals(interface2) ? true : false);		
 		assertEquals(numOfServices, autoCompleteData.getServiceList().size());
 		assertEquals(numOfSystems, autoCompleteData.getSystemList().size());
 		

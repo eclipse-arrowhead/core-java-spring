@@ -10,17 +10,19 @@ import eu.arrowhead.common.database.entity.ChoreographerActionStep;
 import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
 import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
+
 import eu.arrowhead.common.database.repository.ChoreographerActionActionStepConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerActionPlanActionConnectionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerActionPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerActionStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerActionStepServiceDefinitionConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerNextActionStepRepository;
 import eu.arrowhead.common.database.repository.ServiceDefinitionRepository;
-import eu.arrowhead.common.database.repository.ChoreographerActionPlanRepository;
-
+import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerActionStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.choreographer.*;
+import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.arrowhead.common.database.entity.System;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
@@ -37,11 +38,10 @@ import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerNextActionStepResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
@@ -142,17 +142,18 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3776")
-	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryEntriesToServiceRegistryGroupedResponseDTO(final Page<ServiceRegistry> serviceRegistryEntries) {
+	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(final Iterable<ServiceDefinition> serviceDefinitionEntries, final Iterable<System> systemEntries,
+																											  	  final Iterable<ServiceInterface> interfaceEntries, final Iterable<ServiceRegistry> serviceRegistryEntries) {
+		Assert.notNull(serviceDefinitionEntries, "List of serviceDefinitionEntries is null");
+		Assert.notNull(systemEntries, "List of systemEntries is null");
+		Assert.notNull(interfaceEntries, "List of interfaceEntries is null");
 		Assert.notNull(serviceRegistryEntries, "List of serviceRegistryEntries is null");
 		
 		final Map<Long,ServicesGroupedBySystemsResponseDTO> servicesBySystemId = new HashMap<>();
 		final Map<Long,ServicesGroupedByServiceDefinitionResponseDTO> servicesByServiceDefinition = new HashMap<>();
 		final List<IdValueDTO> servicesForAutoComplete = new ArrayList<>();
 		final List<SystemResponseDTO> systemsForAutoComplete = new ArrayList<>();
-		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();		
-		final Set<Long> serviceIdsForAutoComplete = new HashSet<>();
-		final Set<Long> systemIdsForAutoComplete = new HashSet<>();
-		final Set<Long> interfaceIdsForAutoComplete = new HashSet<>();
+		final List<IdValueDTO> interfacesForAutoComplete = new ArrayList<>();
 						
 		for (final ServiceRegistry srEntry: serviceRegistryEntries) {
 			final long systemId = srEntry.getSystem().getId();
@@ -171,28 +172,6 @@ public class DTOConverter {
 				servicesBySystemId.put(systemId, dto);
 			}
 			
-			// Filling up AutoCompleteDataResponseDTO						
-			if (!serviceIdsForAutoComplete.contains(serviceDefinitionId)) {
-				serviceIdsForAutoComplete.add(serviceDefinitionId);
-				servicesForAutoComplete.add(new IdValueDTO(serviceDefinitionId, serviceDefinition));
-			}
-			
-			if (!systemIdsForAutoComplete.contains(systemId)) {
-				systemIdsForAutoComplete.add(systemId);
-				systemsForAutoComplete.add(new SystemResponseDTO(systemId, systemName, systemAddress, systemPort, null, null, null));
-			}
-						
-			final Set<ServiceRegistryInterfaceConnection> interfaceConnections = srEntry.getInterfaceConnections();
-			for (final ServiceRegistryInterfaceConnection connection : interfaceConnections) {
-				final long interfId = connection.getServiceInterface().getId();
-				final String interfaceName = connection.getServiceInterface().getInterfaceName();
-				
-				if (!interfaceIdsForAutoComplete.contains(interfId)) {
-					interfaceIdsForAutoComplete.add(interfId);
-					interfacesForAutoComplete.add(new IdValueDTO(interfId, interfaceName));
-				}				
-			}
-			
 			// Creating ServicesGroupedByServiceDefinitionResponseDTO
 			if (servicesByServiceDefinition.containsKey(serviceDefinitionId)) {
 				servicesByServiceDefinition.get(serviceDefinitionId).getProviderServices().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
@@ -202,12 +181,23 @@ public class DTOConverter {
 				servicesByServiceDefinition.put(serviceDefinitionId, dto);
 			}
 		}
+			
+		// Creating AutoCompleteDataResponseDTO	
+		for (final ServiceDefinition serviceDefinition : serviceDefinitionEntries) {
+			servicesForAutoComplete.add(new IdValueDTO(serviceDefinition.getId(), serviceDefinition.getServiceDefinition()));
+		}
+		for (final System system : systemEntries) {
+			systemsForAutoComplete.add(DTOConverter.convertSystemToSystemResponseDTO(system));
+		}
+		for (final ServiceInterface serviceInterface : interfaceEntries) {
+			interfacesForAutoComplete.add(new IdValueDTO(serviceInterface.getId(), serviceInterface.getInterfaceName()));
+		}
 		
-		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
 		final List<ServicesGroupedBySystemsResponseDTO> servicesGroupedBySystemsResponseDTOList = new ArrayList<>();
 		servicesGroupedBySystemsResponseDTOList.addAll(servicesBySystemId.values());
 		final List<ServicesGroupedByServiceDefinitionResponseDTO> servicesGroupedByServiceDefinitionResponseDTOList = new ArrayList<>();
 		servicesGroupedByServiceDefinitionResponseDTOList.addAll(servicesByServiceDefinition.values());
+		final AutoCompleteDataResponseDTO autoCompleteDataResponseDTO = new AutoCompleteDataResponseDTO(servicesForAutoComplete, systemsForAutoComplete, interfacesForAutoComplete);
 		
 		return new ServiceRegistryGroupedResponseDTO(servicesGroupedBySystemsResponseDTOList, servicesGroupedByServiceDefinitionResponseDTOList, autoCompleteDataResponseDTO);
 	}
@@ -766,7 +756,7 @@ public class DTOConverter {
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
 		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
