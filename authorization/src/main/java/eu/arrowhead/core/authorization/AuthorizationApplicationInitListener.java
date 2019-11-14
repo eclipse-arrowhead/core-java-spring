@@ -19,25 +19,15 @@ public class AuthorizationApplicationInitListener extends ApplicationInitListene
 	private boolean eventhandlerIsPresent;
 	
 	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-
-	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		
-		if ( eventhandlerIsPresent ) {
-			
+		if (eventhandlerIsPresent) {
 			return List.of(CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE);
-		
 		} else {
-			
 			return List.of();
 		}
-		
 	}
 }

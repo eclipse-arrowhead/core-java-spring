@@ -25,7 +25,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import eu.arrowhead.common.CoreDefaults;
 
 @Entity
-@Table(name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = {"systemName", "address", "port"}))
+@Table(name = "system_", uniqueConstraints = @UniqueConstraint(columnNames = { "systemName", "address", "port" }))
 @NamedEntityGraph(name = "systemWithServiceRegistryEntries",
 				  attributeNodes = {
 						  @NamedAttributeNode(value = "serviceRegistryEntries")

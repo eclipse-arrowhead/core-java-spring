@@ -6,7 +6,7 @@ import java.util.Map;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
-public class OrchestratorStoreRequestDTO implements Serializable{
+public class OrchestratorStoreRequestDTO implements Serializable {
 
 	//=================================================================================================
 	// members

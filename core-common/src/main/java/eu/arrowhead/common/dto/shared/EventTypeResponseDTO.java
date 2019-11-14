@@ -2,7 +2,7 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
-public class EventTypeResponseDTO implements Serializable{
+public class EventTypeResponseDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
@@ -20,8 +20,7 @@ public class EventTypeResponseDTO implements Serializable{
 	public EventTypeResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventTypeResponseDTO(long id, String eventTypeName, String createdAt, String updatedAt) {
-		
+	public EventTypeResponseDTO(final long id, final String eventTypeName, final String createdAt, final String updatedAt) {
 		this.id = id;
 		this.eventTypeName = eventTypeName;
 		this.createdAt = createdAt;
@@ -39,5 +38,4 @@ public class EventTypeResponseDTO implements Serializable{
 	public void setEventTypeName(final String eventTypeName) { this.eventTypeName = eventTypeName; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
-
 }

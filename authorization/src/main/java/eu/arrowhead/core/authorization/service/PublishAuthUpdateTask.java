@@ -14,19 +14,16 @@ public class PublishAuthUpdateTask implements Runnable {
 	private final AuthorizationDriver authorizationDriver;
 	private final long systemId;
 
-
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-	public PublishAuthUpdateTask( final AuthorizationDriver authorizationDriver, final long systemId ) {
-		
-		Assert.notNull( authorizationDriver, "authorizationDriver is null" );
-		Assert.isTrue( systemId > 0, "systemId is less than one" );
+	public PublishAuthUpdateTask(final AuthorizationDriver authorizationDriver, final long systemId) {
+		Assert.notNull(authorizationDriver, "authorizationDriver is null");
+		Assert.isTrue(systemId > 0, "systemId is less than one");
 		
 		this.authorizationDriver = authorizationDriver;
 		this.systemId = systemId;
-
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -41,12 +38,9 @@ public class PublishAuthUpdateTask implements Runnable {
 				return;
 			}
 			
-			authorizationDriver.publishAuthUpdate( systemId );		
-				
+			authorizationDriver.publishAuthUpdate(systemId);		
 		} catch (final Throwable ex) {			
-			
-			logger.debug("Exception:", ex.getMessage());			
+			logger.debug("Exception:", ex.getMessage());
 		}
 	}
-
 }

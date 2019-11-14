@@ -172,8 +172,8 @@ public class AuthorizationController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTRA_CLOUD_MGMT_URI);
 		
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTRA_CLOUD_MGMT_URI);
 		final AuthorizationIntraCloudListResponseDTO authorizationIntraCloudEntriesResponse = authorizationDBService.getAuthorizationIntraCloudEntriesResponse(validatedPage, validatedSize,
 																																							   validatedDirection, sortField);
 		logger.debug("AuthorizationIntraClouds  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -240,6 +240,7 @@ public class AuthorizationController {
 		final boolean isProviderListEmpty = request.getProviderIds() == null || request.getProviderIds().isEmpty();
 		final boolean isServiceDefinitionListEmpty = request.getServiceDefinitionIds() == null || request.getServiceDefinitionIds().isEmpty();
 		final boolean isInterfaceListEmpty = request.getInterfaceIds() == null || request.getInterfaceIds().isEmpty();
+		
 		if (isConsumerIdInvalid || isProviderListEmpty || isServiceDefinitionListEmpty || isInterfaceListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
 			exceptionMsg = isConsumerIdInvalid ? exceptionMsg + " invalid consumer id," : exceptionMsg;
@@ -325,8 +326,8 @@ public class AuthorizationController {
 				validatedSize = size;
 			}
 		}
-		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTER_CLOUD_MGMT_URI);
 		
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.AUTHORIZATION_URI + AUTHORIZATION_INTER_CLOUD_MGMT_URI);
 		final AuthorizationInterCloudListResponseDTO authorizationInterCloudEntriesResponse = authorizationDBService.getAuthorizationInterCloudEntriesResponse(validatedPage, validatedSize,
 																																							   validatedDirection, sortField);
 		logger.debug("AuthorizationInterClouds  with page: {} and item_per page: {} succesfully retrived", page, size);
@@ -373,6 +374,7 @@ public class AuthorizationController {
 		final boolean isProviderListNotValid = request.getProviderIdList() == null || request.getProviderIdList().isEmpty();
 		final boolean isServiceDefinitionListNotValid = request.getServiceDefinitionIdList() == null || request.getServiceDefinitionIdList().isEmpty() ;
 		final boolean isInterfaceListNotValid = request.getInterfaceIdList() == null || request.getInterfaceIdList().isEmpty();
+		
 		if (isCloudIdNotValid || isProviderListNotValid || isServiceDefinitionListNotValid || isInterfaceListNotValid) {
 			String exceptionMsg = isCloudIdNotValid ? "Cloud Id is not valid," : "";
 			exceptionMsg = isProviderListNotValid ? exceptionMsg + " ProviderList is null or blank," : exceptionMsg; 
@@ -471,6 +473,7 @@ public class AuthorizationController {
 		
 		final boolean isServiceDefinitionIdInvalid = request.getServiceDefinitionId() == null || request.getServiceDefinitionId() < 1;
 		final boolean isProviderListEmpty = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().isEmpty();
+		
 		if (isServiceDefinitionIdInvalid || isProviderListEmpty) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
 			exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " invalid serviceDefinition id," : exceptionMsg;
@@ -495,11 +498,10 @@ public class AuthorizationController {
 						logger.debug("Invalid or duplicated interface id: {} with provider id: {}", interfaceId, providerWithInterfaces.getId()); 
 					}
 				}
+				
 				providerWithInterfaces.getIdList().clear();
 				providerWithInterfaces.getIdList().addAll(interfaceIdCheck);
-				
 				providerIdsWithInterfaceIdsSet.add(providerWithInterfaces);
-				
 			} else {
 				logger.debug("Invalid or duplicated provider system id: {}", providerWithInterfaces.getId());
 			}
@@ -513,7 +515,8 @@ public class AuthorizationController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Checks whether the subscriber System can recieve events from a list of publisher Systems", response = AuthorizationSubscriptionCheckResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiOperation(value = "Checks whether the subscriber System can recieve events from a list of publisher Systems", response = AuthorizationSubscriptionCheckResponseDTO.class,
+				  tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_AUTHORIZATION_INTRA_CLOUD_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_AUTHORIZATION_INTRA_CLOUD_HTTP_400_MESSAGE),
@@ -532,16 +535,14 @@ public class AuthorizationController {
 		
 		checkSystemRequest(consumer, origin, false);
 		
-		if(request.getPublishers() != null && !request.getPublishers().isEmpty()) {
-			
+		if (request.getPublishers() != null && !request.getPublishers().isEmpty()) {
 			for (final SystemRequestDTO publisher : request.getPublishers()) {
-				
 				checkSystemRequest(publisher, origin, false);
 			}
 		}
 		
 		final AuthorizationSubscriptionCheckResponseDTO response = authorizationDBService.checkAuthorizationSubscriptionRequest(consumer.getSystemName(), consumer.getAddress(), consumer.getPort(),
-																															request.getPublishers());
+																																request.getPublishers());
 		logger.debug("checkAuthorizationEventHandlerRequest has been finished");
 		
 		return response;
@@ -564,6 +565,7 @@ public class AuthorizationController {
 		final boolean isCloudNameInvalid = isCloudInvalid || Utilities.isEmpty(request.getCloud().getName());
 		final boolean isServiceDefinitionInvalid = Utilities.isEmpty(request.getServiceDefinition());
 		final boolean isProvidersWithInterfacesListInvalid = request.getProviderIdsWithInterfaceIds() == null || request.getProviderIdsWithInterfaceIds().isEmpty();
+		
 		if (isCloudOperatorInvalid || isCloudNameInvalid || isServiceDefinitionInvalid || isProvidersWithInterfacesListInvalid ) {
 			String exceptionMsg = "Payload is invalid due to the following reasons:";
 			exceptionMsg = isCloudOperatorInvalid ? exceptionMsg + " cloud operator is empty, " : exceptionMsg;
@@ -575,8 +577,8 @@ public class AuthorizationController {
 			throw new BadPayloadException(exceptionMsg, HttpStatus.SC_BAD_REQUEST, CommonConstants.AUTHORIZATION_URI + CommonConstants.OP_AUTH_INTER_CHECK_URI);
 		}
 		
-		final AuthorizationInterCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationInterCloudResponse(request.getCloud().getOperator(), request.getCloud().getName()
-				, request.getServiceDefinition(), request.getProviderIdsWithInterfaceIds());
+		final AuthorizationInterCloudCheckResponseDTO response = authorizationDBService.checkAuthorizationInterCloudResponse(request.getCloud().getOperator(), request.getCloud().getName(),
+																															 request.getServiceDefinition(), request.getProviderIdsWithInterfaceIds());
 		logger.debug("checkAuthorizationInterCloudRequest has been finished");
 		
 		return response;
