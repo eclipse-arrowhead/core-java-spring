@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-public class SubscriptionRequestDTO implements Serializable{
+public class SubscriptionRequestDTO implements Serializable {
 	
 	//=================================================================================================
 	// members

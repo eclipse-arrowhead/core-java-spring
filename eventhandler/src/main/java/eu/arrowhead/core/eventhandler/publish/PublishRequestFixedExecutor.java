@@ -20,10 +20,11 @@ import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 
 public class PublishRequestFixedExecutor {
+	
 	//=================================================================================================
 	// members
 	
-	@Value( CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD )
+	@Value(CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
 	private int maxExpressSubscribers;
 	
 	private static final int MAX_THREAD_POOL_SIZE = 20;
@@ -44,37 +45,25 @@ public class PublishRequestFixedExecutor {
 	public void init() {
 		logger.debug("PublishRequestFixedExecutor.init started...");
 		
-		if ( threadPool == null ) {
-			
-			threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool( maxExpressSubscribers > MAX_THREAD_POOL_SIZE ? 
-					MAX_THREAD_POOL_SIZE : maxExpressSubscribers );
+		if (threadPool == null) {
+			threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool( maxExpressSubscribers > MAX_THREAD_POOL_SIZE ? MAX_THREAD_POOL_SIZE : maxExpressSubscribers);
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void execute(
-			  final EventPublishRequestDTO publishRequestDTO, 
-			  final Set<Subscription> involvedSubscriptions ) {
+	public void execute(final EventPublishRequestDTO publishRequestDTO, final Set<Subscription> involvedSubscriptions) {
 		logger.debug("PublishRequestFixedExecutor.execute started...");
 		
-		for ( final Subscription subscription : involvedSubscriptions ) {			
-			
+		for (final Subscription subscription : involvedSubscriptions) {			
 			try {
-
-				validateSubscription( subscription );
-				
+				validateSubscription(subscription);
 				threadPool.execute(new PublishEventTask(subscription, publishRequestDTO, httpService));
-			
 			} catch (final RejectedExecutionException ex) {
-				
 				logger.error("PublishEventTask execution rejected at {}", ZonedDateTime.now());
-				
 			} catch ( final Throwable ex) {
-				
 				logger.debug( ex.getMessage() );
 			}
 		}
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------

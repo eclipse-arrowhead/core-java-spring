@@ -23,7 +23,6 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 	// members
 	
 	private static final CoreSystem[] allowedCoreSystemsForPublishAuthUpdate = { CoreSystem.AUTHORIZATION };
-
 	
 	//=================================================================================================
 	// assistant methods
@@ -37,25 +36,18 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 		
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
 			// Everybody in the local cloud can test the server => no further check is necessary
-		
 		} else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		
-		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE ) ) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE)) {
 			// Only the specified core systems can use these methods
-			checkIfClientIsAnAllowedCoreSystem( clientCN, cloudCN, allowedCoreSystemsForPublishAuthUpdate, requestTarget );
-		
-		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE ) ){
-			
-			final SubscriptionRequestDTO subscriptionRequestDTO = Utilities.fromJson( requestJSON, SubscriptionRequestDTO.class );
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForPublishAuthUpdate, requestTarget);
+		} else if (requestTarget.endsWith(CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)) {
+			final SubscriptionRequestDTO subscriptionRequestDTO = Utilities.fromJson(requestJSON, SubscriptionRequestDTO.class);
 			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(subscriptionRequestDTO.getSubscriberSystem().getSystemName(), clientCN);				
-			
-		} else if ( requestTarget.endsWith( CommonConstants.OP_EVENT_HANDLER_PUBLISH ) ){
-			
-			final EventPublishRequestDTO eventPublishRequestDTO = Utilities.fromJson( requestJSON, EventPublishRequestDTO.class );
+		} else if (requestTarget.endsWith(CommonConstants.OP_EVENT_HANDLER_PUBLISH)) {
+			final EventPublishRequestDTO eventPublishRequestDTO = Utilities.fromJson(requestJSON, EventPublishRequestDTO.class);
 			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(eventPublishRequestDTO.getSource().getSystemName(), clientCN);				
-			
 		}
 	}
 
@@ -64,13 +56,11 @@ public class EHAccessControlFilter extends CoreSystemAccessControlFilter {
 		final String clientNameFromCN = getClientNameFromCN(clientCN);
 		
 		if (Utilities.isEmpty(requesterSystemName) || Utilities.isEmpty(clientNameFromCN)) {
-			
 			log.debug("Requester system name and client name from certificate do not match!");
 			throw new AuthException("Requester system name or client name from certificate is null or blank!", HttpStatus.UNAUTHORIZED.value());
-		
 		}
 		
-		if(!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
+		if (!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
 			log.debug("Requester system name and client name from certificate do not match!");
 			throw new AuthException("Requester system name(" + requesterSystemName + ") and client name from certificate (" + clientNameFromCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}

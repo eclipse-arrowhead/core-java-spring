@@ -10,20 +10,18 @@ public class PublishingQueue {
 	//=================================================================================================
 	// members
 	
-	private static final  BlockingQueue<EventPublishStartDTO> publishingQueue =  new LinkedBlockingQueue<EventPublishStartDTO>();
+	private static final BlockingQueue<EventPublishStartDTO> publishingQueue = new LinkedBlockingQueue<>();
 	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
 	public void put(final EventPublishStartDTO toPut) throws InterruptedException {
-		
-		publishingQueue.put( toPut );
-	
+		publishingQueue.put(toPut);
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	public EventPublishStartDTO take() throws InterruptedException {
-		
 		return publishingQueue.take();
 	}
 }

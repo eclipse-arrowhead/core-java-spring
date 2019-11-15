@@ -18,7 +18,7 @@ public class DefaultMetadataFilter implements MetadataFilteringAlgorithm {
 
 	//-------------------------------------------------------------------------------------------------	
 	@Override
-	public boolean doFiltering( final MetadataFilteringParameters params ) {
+	public boolean doFiltering(final MetadataFilteringParameters params) {
 		logger.debug("DefaultMetadataFilter.doFiltering started...");
 		
 		Assert.notNull(params, "params is null");
@@ -29,14 +29,11 @@ public class DefaultMetadataFilter implements MetadataFilteringAlgorithm {
 		final Map<String, String> eventMetadata = params.getEventMetadata();
 		
 		for (final String filterKey : metaDataFilterMap.keySet()) {
-			
-			if( !metaDataFilterMap.get( filterKey ).equalsIgnoreCase( eventMetadata.get( filterKey ) ) ) {
-				
+			if (!metaDataFilterMap.get(filterKey).equalsIgnoreCase(eventMetadata.get(filterKey))) {
 				return false;
 			}			
 		}
 		
 		return true;
 	}
-
 }

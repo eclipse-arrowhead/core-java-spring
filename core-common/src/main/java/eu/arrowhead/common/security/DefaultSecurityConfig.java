@@ -35,6 +35,7 @@ public class DefaultSecurityConfig extends WebSecurityConfigurerAdapter {
     	    .csrf().disable()
     	    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER).and()
     		.addFilterAfter(new PayloadSizeFilter(), SecurityContextHolderAwareRequestFilter.class);
+    	
     	if (sslEnabled) {
     		http.requiresChannel().anyRequest().requiresSecure();
     	}
