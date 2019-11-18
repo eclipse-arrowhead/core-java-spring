@@ -42,6 +42,7 @@ import eu.arrowhead.core.eventhandler.metadatafiltering.MetadataFilteringAlgorit
 
 @RunWith(SpringRunner.class)
 public class EventHandlerServiceTest {
+
 	//=================================================================================================
 	// members
 	
@@ -56,558 +57,419 @@ public class EventHandlerServiceTest {
 	
 	@Mock
 	private MetadataFilteringAlgorithm metadataFilter;
-	
 
 	//=================================================================================================
 	// methods
 	
 	//=================================================================================================
-	//Tests of subscribe
+	// Tests of subscribe
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testSubscribeOK() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
+		eventHandlerService.subscribe(request);
 		
-		verify( eventHandlerDriver, times(1) ).getAuthorizedPublishers( any() );
-		verify( eventHandlerDBService, times(1) ).registerSubscription(  any(), any() );
-	
+		verify(eventHandlerDriver, times(1)).getAuthorizedPublishers(any());
+		verify(eventHandlerDBService, times(1)).registerSubscription(any(), any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestNull() {
-		
 		final SubscriptionRequestDTO request = null;
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-		
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterNullEventType() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setEventType( null );
+		request.setEventType(null);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterEmptyEventType() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setEventType( "   " );
+		request.setEventType("   ");
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterNullNotifyUri() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setNotifyUri( null );
+		request.setNotifyUri(null);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterEmptyNotifyUri() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setNotifyUri( "   " );
+		request.setNotifyUri("   ");
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterMatchMetaDataTrueAndFilterMetaDataNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setMatchMetaData( true );
-		request.setFilterMetaData( null );
+		request.setMatchMetaData(true);
+		request.setFilterMetaData(null);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterMatchMetaDataTrueAndFilterMetaDataEmpty() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setMatchMetaData( true );
-		request.setFilterMetaData( Map.of() );
+		request.setMatchMetaData(true);
+		request.setFilterMetaData(Map.of());
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterStartDateInPast() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		final ZonedDateTime past = ZonedDateTime.now().minusMinutes( 10 );
-		request.setStartDate( Utilities.convertZonedDateTimeToUTCString( past ));
+		final ZonedDateTime past = ZonedDateTime.now().minusMinutes(10);
+		request.setStartDate(Utilities.convertZonedDateTimeToUTCString(past));
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterEndDateInPast() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		final ZonedDateTime past = ZonedDateTime.now().minusMinutes( 10 );
-		request.setEndDate( Utilities.convertZonedDateTimeToUTCString( past ));
+		final ZonedDateTime past = ZonedDateTime.now().minusMinutes(10);
+		request.setEndDate(Utilities.convertZonedDateTimeToUTCString(past));
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
-		eventHandlerService.subscribe( request );
-	
+		eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterEndDateIsBeforeStarDate() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		final ZonedDateTime end = ZonedDateTime.now().plusMinutes( 5 );
-		final ZonedDateTime start = ZonedDateTime.now().plusMinutes( 10 );
-		request.setEndDate( Utilities.convertZonedDateTimeToUTCString( end ));
-		request.setStartDate( Utilities.convertZonedDateTimeToUTCString( start ));
+		final ZonedDateTime end = ZonedDateTime.now().plusMinutes(5);
+		final ZonedDateTime start = ZonedDateTime.now().plusMinutes(10);
+		request.setEndDate(Utilities.convertZonedDateTimeToUTCString(end));
+		request.setStartDate(Utilities.convertZonedDateTimeToUTCString(start));
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains("Start Date sould be before End Date"));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("Start Date sould be before End Date"));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterSubscriberSystemNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSubscriberSystem( null );
+		request.setSubscriberSystem(null);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains("System is null."));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System is null."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterSubscriberSystemSystemNameNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setSystemName( null );
+		request.getSubscriberSystem().setSystemName(null);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains("System name is null or blank."));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System name is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterSubscriberSystemSystemNameEmpty() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setSystemName( "  " );
+		request.getSubscriberSystem().setSystemName("  ");
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains("System name is null or blank."));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System name is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterSubscriberSystemAddressNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setAddress( null );
+		request.getSubscriberSystem().setAddress(null);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains("System address is null or blank."));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System address is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterSubscriberSystemAddressEmpty() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setAddress( "   " );
+		request.getSubscriberSystem().setAddress("   ");
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "System address is null or blank." ));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System address is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterSubscriberSystemPortNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setPort( null );
+		request.getSubscriberSystem().setPort(null);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains("System port is null."));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System port is null."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testSubscribeInvalidRequestParameterSubscriberSystemPortLessThanOne() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setPort( -1 );
+		request.getSubscriberSystem().setPort(-1);
+		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet(7);
 		
-		final Set<SystemResponseDTO> authorizedPublishers = getSystemResponseDTOSet( 7 );
-		
-		when( eventHandlerDriver.getAuthorizedPublishers( any() )).thenReturn( authorizedPublishers );
-		doNothing().when( eventHandlerDBService ).registerSubscription( any(), any());
+		when(eventHandlerDriver.getAuthorizedPublishers(any())).thenReturn(authorizedPublishers);
+		doNothing().when(eventHandlerDBService).registerSubscription(any(), any());
 	
 		try {
-			
-			eventHandlerService.subscribe( request );
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "System port is less than one." ));
+			eventHandlerService.subscribe(request);
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System port is less than one."));
 			throw ex;
 		}
-	
 	}
 	
 	//=================================================================================================
-	//Tests of unsubscribe
+	// Tests of unsubscribe
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testUnsubscribeOK() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
-		eventHandlerService.unsubscribe( 
-				request.getEventType(), 
-				request.getSubscriberSystem().getSystemName(),
-				request.getSubscriberSystem().getAddress(),
-				request.getSubscriberSystem().getPort());
+		eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
 		
-		verify( eventHandlerDBService, times(1) ).deleteSubscription( any(), any());
-	
+		verify(eventHandlerDBService, times(1)).deleteSubscription(any(), any());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUnsubscribeInvalidRequestParameterEventTypeNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setEventType( null );
+		request.setEventType(null);
 
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
 		try {
-			
-			eventHandlerService.unsubscribe( 
-					request.getEventType(), 
-					request.getSubscriberSystem().getSystemName(),
-					request.getSubscriberSystem().getAddress(),
-					request.getSubscriberSystem().getPort());
-			
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "EventType is null or blank." ));
+			eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("EventType is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUnsubscribeInvalidRequestParameterEventTypeEmpty() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setEventType( "   " );
+		request.setEventType("   ");
 
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
 		try {
-			
-			eventHandlerService.unsubscribe( 
-					request.getEventType(), 
-					request.getSubscriberSystem().getSystemName(),
-					request.getSubscriberSystem().getAddress(),
-					request.getSubscriberSystem().getPort());
-			
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "EventType is null or blank." ));
+			eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("EventType is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUnsubscribeInvalidRequestParameterSubscriberNameNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setSystemName( null );
+		request.getSubscriberSystem().setSystemName(null);
 
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
 		try {
-			
-			eventHandlerService.unsubscribe( 
-					request.getEventType(), 
-					request.getSubscriberSystem().getSystemName(),
-					request.getSubscriberSystem().getAddress(),
-					request.getSubscriberSystem().getPort());
-			
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "SubscriberName is null or blank." ));
+			eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("SubscriberName is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUnsubscribeInvalidRequestParameterSubscriberNameEmpty() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setSystemName( "    " );
+		request.getSubscriberSystem().setSystemName("    ");
 
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
 		try {
-			
-			eventHandlerService.unsubscribe( 
-					request.getEventType(), 
-					request.getSubscriberSystem().getSystemName(),
-					request.getSubscriberSystem().getAddress(),
-					request.getSubscriberSystem().getPort());
-			
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "SubscriberName is null or blank." ));
+			eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("SubscriberName is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUnsubscribeInvalidRequestParameterSubscriberAddressNull() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setAddress( null );
+		request.getSubscriberSystem().setAddress(null);
 
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
 		try {
-			
-			eventHandlerService.unsubscribe( 
-					request.getEventType(), 
-					request.getSubscriberSystem().getSystemName(),
-					request.getSubscriberSystem().getAddress(),
-					request.getSubscriberSystem().getPort());
-			
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "SubscriberAddress is null or blank." ));
+			eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("SubscriberAddress is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUnsubscribeInvalidRequestParameterSubscriberAddressEmpty() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setAddress( "    " );
+		request.getSubscriberSystem().setAddress("    ");
 
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
 		try {
-			
-			eventHandlerService.unsubscribe( 
-					request.getEventType(), 
-					request.getSubscriberSystem().getSystemName(),
-					request.getSubscriberSystem().getAddress(),
-					request.getSubscriberSystem().getPort());
-			
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "SubscriberAddress is null or blank." ));
+			eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("SubscriberAddress is null or blank."));
 			throw ex;
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testUnsubscribeInvalidRequestParameterSubscriberPort() {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setPort( -1 );
+		request.getSubscriberSystem().setPort(-1);
 
-		doNothing().when( eventHandlerDBService ).deleteSubscription( any(), any());
+		doNothing().when(eventHandlerDBService).deleteSubscription(any(), any());
 		
 		try {
-			
-			eventHandlerService.unsubscribe( 
-					request.getEventType(), 
-					request.getSubscriberSystem().getSystemName(),
-					request.getSubscriberSystem().getAddress(),
-					request.getSubscriberSystem().getPort());
-			
-		} catch (Exception ex) {
-			
-			Assert.assertTrue( ex.getMessage().contains( "System port is less than one." ));
+			eventHandlerService.unsubscribe(request.getEventType(), request.getSubscriberSystem().getSystemName(), request.getSubscriberSystem().getAddress(), request.getSubscriberSystem().getPort());
+		} catch (final Exception ex) {
+			Assert.assertTrue(ex.getMessage().contains("System port is less than one."));
 			throw ex;
 		}
-	
 	}
 	
 	//=================================================================================================
@@ -652,7 +514,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "EventPublishRequestDTO is null." ));
 			throw ex;
@@ -676,7 +538,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "EventType is null or blank." ));
 			throw ex;
@@ -700,7 +562,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "EventType is null or blank." ));
 			throw ex;
@@ -724,7 +586,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "Payload is null or blank." ));
 			throw ex;
@@ -748,7 +610,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "Payload is null or blank." ));
 			throw ex;
@@ -772,7 +634,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "TimeStamp is null or blank." ));
 			throw ex;
@@ -796,7 +658,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "TimeStamp is null or blank." ));
 			throw ex;
@@ -820,7 +682,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "TimeStamp is not valid." ));
 			throw ex;
@@ -844,7 +706,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "TimeStamp is further in the future than the tolerated time difference" ));
 			throw ex;
@@ -868,7 +730,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "TimeStamp is further in the past than the tolerated time difference" ));
 			throw ex;
@@ -1013,7 +875,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "EventType is null or blank." ));
 			throw ex;
@@ -1037,7 +899,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "EventType is null or blank." ));
 			throw ex;
@@ -1061,7 +923,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "EventType is not valid." ));
 			throw ex;
@@ -1085,7 +947,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "Payload is not valid." ));
 			throw ex;
@@ -1109,7 +971,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "Payload is not valid." ));
 			throw ex;
@@ -1133,7 +995,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.publishSubscriberAuthorizationUpdateResponse( request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "Payload is not valid." ));
 			throw ex;
@@ -1211,7 +1073,7 @@ public class EventHandlerServiceTest {
 			
 			eventHandlerService.updateSubscription( 1L, request );
 			
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			
 			Assert.assertTrue( ex.getMessage().contains( "SubscriptionRequestDTO is null." ));
 			throw ex;

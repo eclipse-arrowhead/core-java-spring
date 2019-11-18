@@ -54,146 +54,116 @@ public class SubscriptionEndOfValidityCheckTaskTest {
 	//-------------------------------------------------------------------------------------------------
     @Before
     public void setUp() throws Exception {
-        
 		logger = mock(Logger.class);		
-		ReflectionTestUtils.setField( subscriptionEndOfValidityCheckTask, "logger", logger);
+		ReflectionTestUtils.setField(subscriptionEndOfValidityCheckTask, "logger", logger);
     }
     
 	//=================================================================================================
-	//Tests of checkSubscriptionEndOfValidity
+	// Tests of checkSubscriptionEndOfValidity
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckSubscriptionEndOfValidityOK() {
-
-		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass( String.class);
-
-		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
-		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of( subscription ) );
+		final Subscription subscription = createSubscriptionForDBMock(1, "eventType", "subscriberName");
+		final Page<Subscription> subscriptionPage = new PageImpl<>(List.of(subscription));
 		
-		doNothing().when( logger ).debug( debugValueCapture.capture());
-		when( eventHandlerDBService.getSubscriptions( anyInt(), anyInt(), any( Direction.class ), any( String.class ) ) ).thenReturn( subscriptionPage );
-		doNothing().when( eventHandlerDBService ).removeSubscriptionEntries( any() );		
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+		when(eventHandlerDBService.getSubscriptions(anyInt(), anyInt(), any(Direction.class), any(String.class))).thenReturn(subscriptionPage);
+		doNothing().when(eventHandlerDBService).removeSubscriptionEntries(any());		
 
 		final List<Subscription> response = subscriptionEndOfValidityCheckTask.checkSubscriptionEndOfValidity();
 		
-		verify( logger, atLeastOnce() ).debug( any( String.class ) );
+		verify(logger, atLeastOnce()).debug(any(String.class));
 		final List<String> debugMessages = debugValueCapture.getAllValues();
-		assertNotNull( debugMessages );
-		
-		assertNotNull( response );
-		
+		assertNotNull(debugMessages);
+		assertNotNull(response);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckSubscriptionEndOfValidityIfEndDateIsNotInFutureThenToBeRemovedNotNull() {
-
-		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass( String.class);
-		final ArgumentCaptor<String> removeMessageValueCapture = ArgumentCaptor.forClass( String.class);
-
-		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
-		subscription.setEndDate( ZonedDateTime.now().minusYears( 1000 ));
+		final Subscription subscription = createSubscriptionForDBMock(1, "eventType", "subscriberName");
+		subscription.setEndDate(ZonedDateTime.now().minusYears(1000));
+		final Page<Subscription> subscriptionPage = new PageImpl<>(List.of(subscription));
 		
-		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of( subscription ) );
-		
-		doNothing().when( logger ).debug( removeMessageValueCapture.capture(), any( Subscription.class ) );
-		doNothing().when( logger ).debug( debugValueCapture.capture());
-		when( eventHandlerDBService.getSubscriptions( anyInt(), anyInt(), any( Direction.class ), any( String.class ) ) ).thenReturn( subscriptionPage );
-		doNothing().when( eventHandlerDBService ).removeSubscriptionEntries( any() );	
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<String> removeMessageValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug(removeMessageValueCapture.capture(), any(Subscription.class));
+		doNothing().when(logger).debug(debugValueCapture.capture());
+		when(eventHandlerDBService.getSubscriptions(anyInt(), anyInt(), any(Direction.class), any(String.class))).thenReturn(subscriptionPage);
+		doNothing().when(eventHandlerDBService).removeSubscriptionEntries(any());	
 
 		final List<Subscription> response = subscriptionEndOfValidityCheckTask.checkSubscriptionEndOfValidity();
 		
-		verify( logger, atLeastOnce() ).debug( any( String.class ) );
-		verify( logger, atLeastOnce() ).debug( any( String.class ), any( Subscription.class ) );
-		
+		verify(logger, atLeastOnce()).debug(any(String.class));
+		verify(logger, atLeastOnce()).debug(any(String.class), any(Subscription.class));
 		final List<String> debugMessages = debugValueCapture.getAllValues();
-		assertNotNull( debugMessages );
-		
+		assertNotNull(debugMessages);
 		final String removeMessage = removeMessageValueCapture.getValue();
-		assertNotNull( removeMessage );
-
-		assertNotNull( response );
-		
+		assertNotNull(removeMessage);
+		assertNotNull(response);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testCheckSubscriptionEndOfValidityNoSubscriptionsLogsAndReturn() {
-
-		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass( String.class);
-		final ArgumentCaptor<String> removeMessageValueCapture = ArgumentCaptor.forClass( String.class);
-
-		final Subscription subscription = createSubscriptionForDBMock( 1, "eventType", "subscriberName" );
-		subscription.setEndDate( ZonedDateTime.now().minusYears( 1000 ));
+		final Subscription subscription = createSubscriptionForDBMock(1, "eventType", "subscriberName");
+		subscription.setEndDate(ZonedDateTime.now().minusYears(1000));
+		final Page<Subscription> subscriptionPage = new PageImpl<>(List.of());
 		
-		final Page<Subscription> subscriptionPage = new PageImpl<>( List.of() );
-		
-		doNothing().when( logger ).debug( removeMessageValueCapture.capture(), any( Subscription.class ) );
-		doNothing().when( logger ).debug( debugValueCapture.capture());
-		when( eventHandlerDBService.getSubscriptions( anyInt(), anyInt(), any( Direction.class ), any( String.class ) ) ).thenReturn( subscriptionPage );
-		doNothing().when( eventHandlerDBService ).removeSubscriptionEntries( any() );
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<String> removeMessageValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug(removeMessageValueCapture.capture(), any( Subscription.class));
+		doNothing().when(logger).debug(debugValueCapture.capture());
+		when(eventHandlerDBService.getSubscriptions(anyInt(), anyInt(), any(Direction.class), any(String.class))).thenReturn(subscriptionPage);
+		doNothing().when(eventHandlerDBService).removeSubscriptionEntries(any());
 		
 		final List<Subscription> response = subscriptionEndOfValidityCheckTask.checkSubscriptionEndOfValidity();
 		
-		verify( logger, times( 2 ) ).debug( any( String.class ) );
-		verify( logger, never() ).debug( any( String.class ), any( Subscription.class ) );
+		verify(logger, times(2)).debug(any(String.class));
+		verify(logger, never()).debug(any(String.class), any(Subscription.class));
 		
 		final List<String> debugMessages = debugValueCapture.getAllValues();
-		assertNotNull( debugMessages );
-		assertTrue( "Subscription database is empty".equalsIgnoreCase( debugMessages.get( 1 ) ) );
-		
-		assertNotNull( response );
-		assertTrue( response.isEmpty() );
-		
+		assertNotNull(debugMessages);
+		assertTrue("Subscription database is empty".equalsIgnoreCase(debugMessages.get(1)));
+		assertNotNull(response);
+		assertTrue(response.isEmpty());
 	}
 	
 	//=================================================================================================
-	//Assistant methods
+	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------	
 	private Subscription createSubscriptionForDBMock(final int i, final String eventType, final String subscriberName) {
-		
-		final Subscription subscription = new Subscription(
-				createEventTypeForDBMock( eventType ), 
-				createSystemForDBMock( subscriberName ), 
-				null, 
-				"notifyUri", 
-				false, 
-				false,
-				null, 
-				null);
-		
-		subscription.setId( i );
-		subscription.setCreatedAt( ZonedDateTime.now() );
-		subscription.setUpdatedAt( ZonedDateTime.now() );
+		final Subscription subscription = new Subscription(createEventTypeForDBMock(eventType), createSystemForDBMock(subscriberName), null, "notifyUri", false, false, null, null);
+		subscription.setId(i);
+		subscription.setCreatedAt(ZonedDateTime.now());
+		subscription.setUpdatedAt(ZonedDateTime.now());
 		
 		return subscription;
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	private EventType createEventTypeForDBMock( final String eventType ) {
+	private EventType createEventTypeForDBMock(final String eventType) {
+		final EventType eventTypeFromDB = new EventType(eventType);
+		eventTypeFromDB.setId(1L);
+		eventTypeFromDB.setCreatedAt(ZonedDateTime.now());
+		eventTypeFromDB.setUpdatedAt(ZonedDateTime.now());
 		
-		final EventType eventTypeFromDB = new EventType( eventType );
-		eventTypeFromDB.setId( 1L );
-		eventTypeFromDB.setCreatedAt( ZonedDateTime.now() );
-		eventTypeFromDB.setUpdatedAt( ZonedDateTime.now() );
-		
-		return  eventTypeFromDB ;		
+		return eventTypeFromDB;		
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	private System createSystemForDBMock( final String systemName) {
-		
+	private System createSystemForDBMock(final String systemName) {
 		final System system = new System();
-		system.setId( 1L );
-		system.setSystemName( systemName );
-		system.setAddress( "localhost" );
-		system.setPort( 12345 );	
-		system.setCreatedAt( ZonedDateTime.now() );
-		system.setUpdatedAt( ZonedDateTime.now() );
+		system.setId(1L);
+		system.setSystemName(systemName);
+		system.setAddress("localhost");
+		system.setPort(12345);	
+		system.setCreatedAt(ZonedDateTime.now());
+		system.setUpdatedAt(ZonedDateTime.now());
 		
 		return system;
 	}
-	
 }
