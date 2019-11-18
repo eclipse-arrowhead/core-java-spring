@@ -5,4 +5,4 @@ COPY gateway/*.jar /gateway/arrowhead-gateway.jar
 # Application properties file will be mounted as a volume from now on.
 # COPY gateway/*.properties /gateway/application.properties
 
-ENTRYPOINT java -jar /gateway/arrowhead-gateway.jar --spring.config.location=file:/gateway/application.properties
+CMD cd /gateway && java -jar arrowhead-gateway.jar
