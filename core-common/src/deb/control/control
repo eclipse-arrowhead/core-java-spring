@@ -7,4 +7,4 @@ Maintainer: Rajmund Bocsi <rbocsi@aitia.ai>
 Homepage: http://www.arrowhead.eu
 Description: Arrowhead Common
 Distribution: development
-Depends: java-runtime-headless, openssl, debconf
+Depends: java-runtime-headless, openssl, dos2unix, debconf

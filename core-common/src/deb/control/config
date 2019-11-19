@@ -36,15 +36,15 @@ case ${INSTALL_TYPE} in
             db_input critical arrowhead-core-common/cloud_alias || true
             db_input critical arrowhead-core-common/cloud_password || true
             db_input critical arrowhead-core-common/master_cert || true
+			db_input critical arrowhead-core-common/relay_master_cert || true
         fi
         ;;
 
     "Detached" )
         # User dialogs
+		db_input high arrowhead-core-common/cloud_warning || true
         db_input high arrowhead-core-common/cloudname || true
         db_input high arrowhead-core-common/operator || true
-        db_input high arrowhead-core-common/company || true
-        db_input high arrowhead-core-common/country || true
         ;;
 
     * )

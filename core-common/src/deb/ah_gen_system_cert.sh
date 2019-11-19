@@ -3,7 +3,7 @@
 . /usr/share/debconf/confmodule
 . /usr/share/arrowhead/conf/ahconf.sh
 
-if [ "$#" -lt 1 ]; then
+if [ "$#" -lt 2 ]; then
     echo "Syntax: ${0} SYSTEM_NAME PASSWORD [SYSTEM_HOST] [SYSTEM_IP]"
     exit 1
 fi
