@@ -3314,7 +3314,6 @@ __ServiceRequestForm__ is the input
 | `preferredProviders` | Preferred Providers | no |
 | `orchestrationFlags` | Orchestration Flags | no |
 
-
 Orchestrator can be used in two ways. The first one uses predefined rules (coming from the
 Orchestrator Store DB) to find the appropriate providers for the consumer. The second option is the
 dynamic orchestration in which case the core service searches the whole local cloud (and maybe
@@ -3441,6 +3440,9 @@ Returns an __Orchestration Response__
             It was basically the same, however security requirement was not available.
 
 <a name="orchrestrator_endpoints_get_oschestration_id" />
+
+###### Orchestration activity diagran
+![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_orchestration_activity_uml.png)
 
 ### Start store Orchestration by ID
 ```
