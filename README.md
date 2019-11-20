@@ -814,7 +814,10 @@ Returns a __ServiceRegistryEntry__
             Service Registry object did contain an  "udp" flag beside the interface definition.
             
 <a name="serviceregistry_delete_unregister" />
-            
+
+###### Register activity diagram
+![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_service_registry_register_activity_uml.png)
+
 ### Unregister 
 ```
 DELETE /serviceregistry/unregister
