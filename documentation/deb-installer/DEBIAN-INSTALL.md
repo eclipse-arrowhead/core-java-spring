@@ -57,20 +57,20 @@ Check Java version:
 
 Pick one of the options below.
 
-#### 4a. Download an Arrowhead Debian Packages 
+#### 4a. Download Arrowhead Debian Packages 
 
-Check the GitHub site <https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3> for the latest packages and download
-it: 
+Check the GitHub site <https://github.com/arrowhead-f/core-java-spring-installers/tree/master/packages> for the latest packages and download
+them: 
 
 ```bash
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-core-common_4.1.3.deb`
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-authorization_4.1.3.deb`
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-choreographer_4.1.3.deb`
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-eventhandler_4.1.3.deb`
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-gatekeeper_4.1.3.deb`
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-gateway_4.1.3.deb`
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-orchestrator_4.1.3.deb`
-`wget -c  https://github.com/arrowhead-f/core-java-spring/tree/master/deb-installer/package/arrowhead-installers-4.1.3/arrowhead-serviceregistry_4.1.3.deb`
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-core-common_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-authorization_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-choreographer_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-eventhandler_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-gatekeeper_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-gateway_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-orchestrator_4.1.3.deb
+wget -c  https://github.com/arrowhead-f/core-java-spring-installers/raw/master/packages/arrowhead-serviceregistry_4.1.3.deb
 ```
 
 **NOTE:** The arrowhead-core-common package is a requirement for all other packages.
@@ -110,7 +110,7 @@ The created services will restart on reboot.
 
 #### Add a new application system
 
-You can use the script `ah_gen_system_cert` to generate certificate to a system.
+You can use the script `ah_gen_system_cert` to generate certificate (and trust store) to a system.
 
 ```sudo ah_gen_system_cert SYSTEM_NAME PASSWORD SYSTEM_HOST SYSTEM_IP```
 
@@ -122,7 +122,24 @@ Examples:
 
 ```sudo ah_gen_system_cert localsystem1 123456```
 
-Generated certificates will appear in the current directory.
+A new directory is generated in your current directory which is named SYSTEM_NAME. Generated certificates will appear in this directory.
+
+#### Add a new relay
+
+You can use the script `ah_gen_relay_cert` to generate certificate (and trust store) to a ActiveMQ relay.
+
+```sudo ah_gen_relay_cert RELAY_NAME PASSWORD RELAY_MASTER_CERT RELAY_MASTER_PASSWORD RELAY_HOST RELAY_IP```
+
+RELAY_NAME, PASSWORD, RELAY_MASTER_CERT (path to the relay master certificate .p12 file) and RELAY_MASTER_PASSWORD are mandatory parameters. 
+The other two are the DNS name and IP address of the computer that running the relay. If RELAY_HOST and RELAY_IP are not specified, the 
+command assumes the relay is running on the local machine.
+Examples:
+
+```sudo ah_gen_cert relay1 123456 ./relay-master.p12 654321 abc.com 10.0.0.22```
+
+```sudo ah_gen_cert relay1 123456 ./relay-master.p12 654321```
+
+A new directory is generated in your current directory which is named RELAY_NAME. Generated certificates will appear in this directory.
 
 #### Other hints
 

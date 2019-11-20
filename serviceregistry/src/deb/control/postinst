@@ -24,12 +24,15 @@ PKG_NAME="arrowhead-serviceregistry"
 
 case "$1" in
     configure)
+		dos2unix -q /etc/systemd/system/${PKG_NAME}.service
+		
         . /usr/share/arrowhead/conf/ahconf.sh
+		
         SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
 		db_get arrowhead-core-common/mysql_password_sr; system_passwd=$RET || true
 		db_unregister arrowhead-core-common/mysql_password_sr
-		
+
 		# Generate password (if required)
 		if [ -z "${system_passwd}" ]; then
 			system_passwd="$(openssl rand -base64 12)"
