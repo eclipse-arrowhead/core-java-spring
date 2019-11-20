@@ -3441,7 +3441,7 @@ Returns an __Orchestration Response__
 
 <a name="orchrestrator_endpoints_get_oschestration_id" />
 
-###### Orchestration activity diagran
+###### Orchestration activity diagram
 ![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_orchestration_activity_uml.png)
 
 ### Start store Orchestration by ID
@@ -3526,7 +3526,7 @@ Returns an __Orchestration Response__
 
 <a name="orchestrator_endpoints_get_store" />
 
-###### Store Orchestration activity diagran
+###### Store Orchestration activity diagram
 ![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_store_orchestration_activity_uml.png)
 
 ### Get all Store Entries 
