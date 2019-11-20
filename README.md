@@ -45,7 +45,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Private](#orchestrator_endpoints_private)
            * [Management](#orchestrator_endpoints_management)     
            * [Removed Endpoints](#orchestrator_removed)
-    4. [EventHandler](#Event Handler)
+    4. [EventHandler](#event_handler)
        * [System Design Description Overview](#event_handler_sdd)
        * [Services and Use Cases](#event_handler_usecases)  
        * [Endpoints](#event_handler_endpoints)
@@ -4141,6 +4141,8 @@ __PriorityList__ is the input
 
 > **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store/priorities<br />
             Same as the new version
+
+<a name="event_handler" />
 
 # Event Handler
 
