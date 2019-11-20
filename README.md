@@ -4150,11 +4150,15 @@ __PriorityList__ is the input
 
 ## System Design Description Overview
 
-<a name="orchestrator_usecases" />
+The Event Handler core system provides functionality of distributing event notification that might occur in a given Arrowhead local cloud. The Event Handler is in principle a publish subscribe mechanism-based systems: it receives the events from Event Producers and forwards them to subscribing Event Consumers.
+
+This System (in line with all core Systems) utilizes the X.509 certificate Common Name naming convention in order to work. 
+
+<a name="event_handler_usecases" />
 
 ## Services and Use Cases
 
-<a name="orchestrator_endpoints" />
+<a name="event_handler_endpoints" />
 
 ## Endpoints
 
