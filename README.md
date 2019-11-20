@@ -48,6 +48,11 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     4. [EventHandler](#event_handler)
        * [System Design Description Overview](#event_handler_sdd)
        * [Services and Use Cases](#event_handler_usecases)  
+       * [Service Description Overview](#publish_service_description_overview)
+           * [Publish](#publish_service_description_overview)
+	   * [Subcribe](#subscribe_service_description_overview)
+	   * [Unsubscribe](#unsubscribe_service_description_overview)
+	   * [PublishAuthUpdate](#publish_auth_update_service_description_overview)
        * [Endpoints](#event_handler_endpoints)
            * [Client](#event_handler_endpoints_client)
            * [Private](#event_handler_endpoints_private)
@@ -4163,6 +4168,14 @@ This System provides the followning Core Services:
 * Subscribe
 * Unsubscribe
 * PublishAuthUpdate
+
+
+<a name="publish_service_description_overview" />
+
+## Publish Service Description Overview
+
+Start the publishing process to deliver the event to the subscribers.
+
 
 <a name="event_handler_endpoints" />
 
