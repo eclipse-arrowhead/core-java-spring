@@ -105,6 +105,7 @@ public class OrchestratorDriverTest {
 	@Test
 	public void testGenerateAuthTokensNoNeedForAuthTokensBecauseOfEmptyORList() {
 		final List<OrchestrationResultDTO> result = orchestratorDriver.generateAuthTokens(new OrchestrationFormRequestDTO(), List.of());
+
 		Assert.assertEquals(true, result.isEmpty());
 	}
 	
@@ -116,6 +117,7 @@ public class OrchestratorDriverTest {
 		final OrchestrationResultDTO dto2 = new OrchestrationResultDTO();
 		dto2.setSecure(ServiceSecurityType.NOT_SECURE);
 		final List<OrchestrationResultDTO> result = orchestratorDriver.generateAuthTokens(new OrchestrationFormRequestDTO(), List.of(dto1, dto2));
+		
 		Assert.assertEquals(2, result.size());
 		Assert.assertNull(result.get(0).getAuthorizationTokens());
 		Assert.assertNull(result.get(1).getAuthorizationTokens());
@@ -127,6 +129,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
 		
 		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		
 		orchestratorDriver.generateAuthTokens(new OrchestrationFormRequestDTO(), List.of(dto));
 	}
 	
@@ -137,6 +140,7 @@ public class OrchestratorDriverTest {
 		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
 		
 		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		
 		orchestratorDriver.generateAuthTokens(new OrchestrationFormRequestDTO(), List.of(dto));
 	}
 	
@@ -159,6 +163,7 @@ public class OrchestratorDriverTest {
 		request.setRequesterSystem(new SystemRequestDTO());
 		
 		orchestratorDriver.generateAuthTokens(request, List.of(dto));
+		
 		Assert.assertEquals("ABCDE", dto.getAuthorizationTokens().get(dto.getInterfaces().get(0).getInterfaceName()));
 	}
 	
@@ -204,6 +209,7 @@ public class OrchestratorDriverTest {
 		
 		final List<ServiceRegistryResponseDTO> srResults = getSRResults();
 		final List<ServiceRegistryResponseDTO> afterAuthorization = orchestratorDriver.queryAuthorization(new SystemRequestDTO(), srResults);
+		
 		Assert.assertEquals(1, afterAuthorization.size());
 		Assert.assertEquals(1, srResults.size());
 		Assert.assertEquals(2, afterAuthorization.get(0).getProvider().getId());
@@ -226,6 +232,7 @@ public class OrchestratorDriverTest {
 																																											  HttpStatus.OK));
 		
 		final SystemResponseDTO systemResponseDTO = orchestratorDriver.queryServiceRegistryBySystemId(1L);
+		
 		Assert.assertNotNull(systemResponseDTO);
 	}
 	

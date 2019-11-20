@@ -84,7 +84,6 @@ public class GSDPollRequestExecutorTest {
 		testingObject.execute();
 		
 		final GSDPollResponseDTO gsdPollResponseDTO = (GSDPollResponseDTO) queue.take();
-		
 		assertNull(gsdPollResponseDTO.getProviderCloud());
 	}
 	

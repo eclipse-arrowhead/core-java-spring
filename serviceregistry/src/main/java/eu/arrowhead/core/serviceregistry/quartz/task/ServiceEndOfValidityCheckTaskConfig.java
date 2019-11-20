@@ -21,7 +21,7 @@ public class ServiceEndOfValidityCheckTaskConfig {
 	//=================================================================================================
 	// members
 
-	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.class);
+	protected final Logger logger = LogManager.getLogger(ProvidersReachabilityTaskConfig.class);
 	
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR

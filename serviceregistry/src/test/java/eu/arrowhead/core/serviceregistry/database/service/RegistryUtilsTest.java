@@ -50,6 +50,7 @@ public class RegistryUtilsTest {
 	@Test
 	public void testNormalizeInterfaceNamesUppercaseTrim() {
 		final List<String> result = RegistryUtils.normalizeInterfaceNames(List.of(" http-secure-xml "));
+
 		Assert.assertEquals(1, result.size());
 		Assert.assertEquals("HTTP-SECURE-XML", result.get(0));
 	}
@@ -58,6 +59,7 @@ public class RegistryUtilsTest {
 	@Test
 	public void testNormalizeInterfaceNamesAll() {
 		final List<String> result = RegistryUtils.normalizeInterfaceNames(getExampleInterfaceNameList());
+
 		Assert.assertEquals(3, result.size());
 		Assert.assertEquals("HTTP-SECURE-JSON", result.get(0));
 		Assert.assertEquals("HTTP-SECURE-XML", result.get(1));
@@ -78,9 +80,13 @@ public class RegistryUtilsTest {
 		final ServiceRegistry sr = new ServiceRegistry();
 		final List<ServiceRegistry> providedServices = List.of(sr);
 		final List<ServiceRegistry> expectedList = List.of(sr);
+		
 		RegistryUtils.filterOnInterfaces(providedServices, null); // it just shows there is no exception and no changes if it called with null second parameter
+		
 		Assert.assertEquals(expectedList, providedServices);
+		
 		RegistryUtils.filterOnInterfaces(providedServices, List.of()); // it just shows there is no exception and no changes if it called with empty second parameter
+		
 		Assert.assertEquals(expectedList, providedServices);
 	}
 	
@@ -88,7 +94,9 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnInterfacesUnknownInterface() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		RegistryUtils.filterOnInterfaces(providedServices, List.of("HTTP-INSECURE-XML"));
+		
 		Assert.assertEquals(0, providedServices.size());
 	}
 	
@@ -96,9 +104,12 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnInterfacesGood() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(2).getInterfaceConnections().size());
+		
 		RegistryUtils.filterOnInterfaces(providedServices, List.of("HTTP-SECURE-JSON"));
+		
 		Assert.assertEquals(2, providedServices.size());
 		Assert.assertEquals(1, providedServices.get(0).getId());
 		Assert.assertEquals(3, providedServices.get(1).getId());
@@ -109,9 +120,13 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnInterfacesGood2() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		final List<ServiceRegistry> expectedList = new ArrayList<ServiceRegistry>(providedServices);
+		
 		RegistryUtils.filterOnInterfaces(providedServices, List.of("HTTP-SECURE-JSON", "HTTP-INSECURE-JSON"));
+		
 		Assert.assertEquals(3, providedServices.size());
 		Assert.assertEquals(expectedList, providedServices);
 	}
@@ -138,6 +153,7 @@ public class RegistryUtilsTest {
 	@Test
 	public void testNormalizeSecurityTypesDoesNothing() {
 		final List<ServiceSecurityType> result = RegistryUtils.normalizeSecurityTypes(List.of(ServiceSecurityType.TOKEN));
+		
 		Assert.assertEquals(1, result.size());
 		Assert.assertEquals(ServiceSecurityType.TOKEN, result.get(0));
 	}
@@ -156,9 +172,13 @@ public class RegistryUtilsTest {
 		final ServiceRegistry sr = new ServiceRegistry();
 		final List<ServiceRegistry> providedServices = List.of(sr);
 		final List<ServiceRegistry> expectedList = List.of(sr);
+		
 		RegistryUtils.filterOnSecurityType(providedServices, null); // it just shows there is no exception and no changes if it called with null second parameter
+		
 		Assert.assertEquals(expectedList, providedServices);
+		
 		RegistryUtils.filterOnSecurityType(providedServices, List.of()); // it just shows there is no exception and no changes if it called with empty second parameter
+		
 		Assert.assertEquals(expectedList, providedServices);
 	}
 	
@@ -166,8 +186,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnSecurityTypeNoMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.NOT_SECURE));
+		
 		Assert.assertEquals(0, providedServices.size());
 	}
 	
@@ -175,8 +198,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnSecurityTypeOneMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.TOKEN));
+		
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(1, providedServices.get(0).getId());
 	}
@@ -185,8 +211,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnSecurityTypeTwoMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.CERTIFICATE));
+		
 		Assert.assertEquals(2, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(0).getId());
 		Assert.assertEquals(3, providedServices.get(1).getId());
@@ -197,8 +226,11 @@ public class RegistryUtilsTest {
 	public void testFilterOnSecurityTypeThreeMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
 		final List<ServiceRegistry> expected = new ArrayList<>(providedServices);
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnSecurityType(providedServices, List.of(ServiceSecurityType.CERTIFICATE, ServiceSecurityType.TOKEN));
+		
 		Assert.assertEquals(3, providedServices.size());
 		Assert.assertEquals(expected, providedServices);
 	}
@@ -215,8 +247,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnVersionExactNoMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnVersion(providedServices, 1);
+		
 		Assert.assertEquals(0, providedServices.size());
 	}
 	
@@ -224,8 +259,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnVersionExactOneMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnVersion(providedServices, 2);
+		
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(0).getId());
 	}
@@ -242,8 +280,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnVersionMinMaxNoMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnVersion(providedServices, 3, 5);
+		
 		Assert.assertEquals(0, providedServices.size());
 	}
 	
@@ -251,8 +292,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnVersionMinMaxOneMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnVersion(providedServices, 5, 12);
+		
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(3, providedServices.get(0).getId());
 	}
@@ -261,8 +305,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnVersionMinMaxTwoMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnVersion(providedServices, 2, 10);
+		
 		Assert.assertEquals(2, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(0).getId());
 		Assert.assertEquals(3, providedServices.get(1).getId());
@@ -279,6 +326,7 @@ public class RegistryUtilsTest {
 	@Test(expected = IllegalStateException.class)
 	public void testNormalizeMetadataDuplicateKeys() {
 		final Map<String,String> map = Map.of("A", "B", "A ", "C");
+		
 		RegistryUtils.normalizeMetadata(map);
 	}
 	
@@ -287,7 +335,9 @@ public class RegistryUtilsTest {
 	public void testNormalizeMetadataNullValueRemoved() {
 		final Map<String,String> map = new HashMap<>();
 		map.put("A", null);
+		
 		final Map<String,String> normalizedMap = RegistryUtils.normalizeMetadata(map);
+		
 		Assert.assertEquals(0, normalizedMap.size());
 	}
 	
@@ -296,7 +346,9 @@ public class RegistryUtilsTest {
 	public void testNormalizeMetadataTrimKeyAndValue() {
 		final Map<String,String> map = new HashMap<>();
 		map.put("A  ", "B  ");
+		
 		final Map<String,String> normalizedMap = RegistryUtils.normalizeMetadata(map);
+		
 		Assert.assertEquals(1, normalizedMap.size());
 		Assert.assertTrue(normalizedMap.containsKey("A"));
 		Assert.assertEquals("B", normalizedMap.get("A"));
@@ -316,9 +368,13 @@ public class RegistryUtilsTest {
 		final ServiceRegistry sr = new ServiceRegistry();
 		final List<ServiceRegistry> providedServices = List.of(sr);
 		final List<ServiceRegistry> expectedList = List.of(sr);
+		
 		RegistryUtils.filterOnMeta(providedServices, null); // it just shows there is no exception and no changes if it called with null second parameter
+		
 		Assert.assertEquals(expectedList, providedServices);
+		
 		RegistryUtils.filterOnMeta(providedServices, Map.of()); // it just shows there is no exception and no changes if it called with empty second parameter
+		
 		Assert.assertEquals(expectedList, providedServices);
 	}
 	
@@ -326,8 +382,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnMetaExactMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnMeta(providedServices, Map.of("key", "value2"));
+		
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(3, providedServices.get(0).getId());
 	}
@@ -336,8 +395,11 @@ public class RegistryUtilsTest {
 	@Test
 	public void testFilterOnMetaSubsetMatch() {
 		final List<ServiceRegistry> providedServices = getProvidedServices();
+		
 		Assert.assertEquals(3, providedServices.size());
+		
 		RegistryUtils.filterOnMeta(providedServices, Map.of("key", "value"));
+		
 		Assert.assertEquals(1, providedServices.size());
 		Assert.assertEquals(2, providedServices.get(0).getId());
 	}
@@ -356,7 +418,9 @@ public class RegistryUtilsTest {
 		final ServiceRegistry sr = new ServiceRegistry();
 		final List<ServiceRegistry> providedServices = List.of(sr);
 		final List<ServiceRegistry> expectedList = List.of(sr);
+		
 		RegistryUtils.filterOnPing(providedServices, -1); // it just shows there is no exception if it called with invalid second parameter
+		
 		Assert.assertEquals(expectedList, providedServices);
 	}
  	

@@ -271,13 +271,12 @@ public class GatekeeperServiceICNTest {
 		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
 		targetCloud.setGatewayRelays(Set.of());
 		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
-		
 		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
 		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
-		
 		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO());
 		
 		final ICNResultDTO icnResult = testingObject.initICN(form);
+		
 		Assert.assertEquals(0, icnResult.getResponse().size());
 	}
 	
@@ -296,14 +295,13 @@ public class GatekeeperServiceICNTest {
 		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
 		targetCloud.setGatewayRelays(Set.of());
 		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
-		
 		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
 		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
-		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
 		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(new ICNProposalResponseDTO(List.of(resultDTO)));
 		
 		final ICNResultDTO icnResult = testingObject.initICN(form);
+		
 		Assert.assertEquals(1, icnResult.getResponse().size());
 		Assert.assertEquals(resultDTO, icnResult.getResponse().get(0));
 	}
@@ -323,21 +321,19 @@ public class GatekeeperServiceICNTest {
 		final Cloud targetCloud = new Cloud("aitia", "testcloud1", false, true, false, "abcd");
 		targetCloud.setGatewayRelays(Set.of());
 		when(gatekeeperDBService.getCloudById(anyLong())).thenReturn(targetCloud);
-		
 		final Cloud ownCloud = new Cloud("aitia", "testcloud2", false, false, true, "efgh");
 		when(commonDBService.getOwnCloud(anyBoolean())).thenReturn(ownCloud);
-		
 		final OrchestrationResultDTO resultDTO = new OrchestrationResultDTO();
 		resultDTO.setProvider(new SystemResponseDTO());
 		RelayResponseDTO relay = new RelayResponseDTO();
 		relay.setType(RelayType.GATEWAY_RELAY);
 		final ICNProposalResponseDTO icnResponse = new ICNProposalResponseDTO(resultDTO, relay, new GatewayProviderConnectionResponseDTO());
-		
 		when(gatekeeperDriver.sendICNProposal(any(Cloud.class), any(ICNProposalRequestDTO.class))).thenReturn(icnResponse);
 		when(gatekeeperDriver.connectConsumer(any(GatewayConsumerConnectionRequestDTO.class))).thenReturn(33333);
 		when(gatekeeperDriver.getGatewayHost()).thenReturn("127.0.0.1");
 		
 		final ICNResultDTO icnResult = testingObject.initICN(form);
+		
 		Assert.assertEquals(1, icnResult.getResponse().size());
 		Assert.assertEquals(CoreSystem.GATEWAY.name().toLowerCase(), icnResponse.getResponse().get(0).getProvider().getSystemName());
 		Assert.assertEquals("127.0.0.1", icnResponse.getResponse().get(0).getProvider().getAddress());
@@ -360,6 +356,7 @@ public class GatekeeperServiceICNTest {
 	@Test(expected = AuthException.class)
 	public void testDoICNRequestedCloudWantsToUseGatewayButRequesterCloudDoesNotSupportedGateways() {
 		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
+		
 		testingObject.doICN(new ICNProposalRequestDTO());
 	}
 	
@@ -369,6 +366,7 @@ public class GatekeeperServiceICNTest {
 		ReflectionTestUtils.setField(testingObject, "gatewayIsMandatory", true);
 		ICNProposalRequestDTO request = new ICNProposalRequestDTO();
 		request.setGatewayIsPresent(true);
+		
 		testingObject.doICN(request);
 	}
 	
@@ -839,6 +837,7 @@ public class GatekeeperServiceICNTest {
 		when(gatekeeperDriver.queryOrchestrator(any(OrchestrationFormRequestDTO.class))).thenReturn(new OrchestrationResponseDTO());
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
 		Assert.assertTrue(response.getResponse().isEmpty());
 	}
 	
@@ -862,6 +861,7 @@ public class GatekeeperServiceICNTest {
 		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(new OrchestrationResponseDTO());
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
 		Assert.assertTrue(response.getResponse().isEmpty());
 	}
 	
@@ -885,6 +885,7 @@ public class GatekeeperServiceICNTest {
 		when(gatekeeperDriver.queryAuthorizationBasedOnOchestrationResponse(any(CloudRequestDTO.class), any(OrchestrationResponseDTO.class))).thenReturn(orchestrationResponse);
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
 		Assert.assertEquals(1, response.getResponse().size());
 	}
 	
@@ -952,6 +953,7 @@ public class GatekeeperServiceICNTest {
 		when(gatekeeperDriver.connectProvider(any(GatewayProviderConnectionRequestDTO.class))).thenReturn(connectionResponseDTO);
 		
 		final ICNProposalResponseDTO response = testingObject.doICN(request);
+		
 		Assert.assertEquals(1, response.getResponse().size());
 		Assert.assertNotNull(response.getRelay());
 		Assert.assertEquals("localhost", response.getRelay().getAddress());

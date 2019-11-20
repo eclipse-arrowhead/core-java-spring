@@ -140,7 +140,7 @@ public class GatekeeperControllerGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitiateGlobalServiceDiscoveryWithNullCloudInPreferreCloudList() throws Exception {
+	public void testInitiateGlobalServiceDiscoveryWithNullCloudInPreferredCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		final List<CloudRequestDTO> preferredClouds = new ArrayList<>();
@@ -159,7 +159,7 @@ public class GatekeeperControllerGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitiateGlobalServiceDiscoveryWithNullOperatorInPreferreCloudList() throws Exception {
+	public void testInitiateGlobalServiceDiscoveryWithNullOperatorInPreferredCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
@@ -180,7 +180,7 @@ public class GatekeeperControllerGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitiateGlobalServiceDiscoveryWithBlankOperatorInPreferreCloudList() throws Exception {
+	public void testInitiateGlobalServiceDiscoveryWithBlankOperatorInPreferredCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
@@ -201,7 +201,7 @@ public class GatekeeperControllerGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitiateGlobalServiceDiscoveryWithNullNameInPreferreCloudList() throws Exception {
+	public void testInitiateGlobalServiceDiscoveryWithNullNameInPreferredCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		
@@ -222,7 +222,7 @@ public class GatekeeperControllerGSDTests {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitiateGlobalServiceDiscoveryWithBlankNameInPreferreCloudList() throws Exception {
+	public void testInitiateGlobalServiceDiscoveryWithBlankNameInPreferredCloudList() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
 		

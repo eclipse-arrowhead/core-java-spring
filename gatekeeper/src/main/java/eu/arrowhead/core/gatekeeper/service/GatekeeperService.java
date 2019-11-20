@@ -163,8 +163,8 @@ public class GatekeeperService {
 		}
 		
 		// Querying Authorization core system
-		final Map<Long, List<Long>> authorizedProviderIdsWithInterfaceIdList = gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(srQueryResult.getServiceQueryData(), request.getRequesterCloud(), 
-																																 	  request.getRequestedService().getServiceDefinitionRequirement());
+		final Map<Long,List<Long>> authorizedProviderIdsWithInterfaceIdList = gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(srQueryResult.getServiceQueryData(), request.getRequesterCloud(), 
+																																 	 request.getRequestedService().getServiceDefinitionRequirement());
 		if (authorizedProviderIdsWithInterfaceIdList.isEmpty()) {
 			return new GSDPollResponseDTO();
 		}
@@ -564,5 +564,4 @@ public class GatekeeperService {
 		
 		return gatewayMatchmaker.doMatchmaking(relayMMParams);
 	}
-
 }

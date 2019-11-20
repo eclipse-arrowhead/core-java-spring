@@ -26,7 +26,7 @@ public class ServiceEndOfValidityCheckTask implements Job {
 	//=================================================================================================
 	// members
 
-	protected Logger logger = LogManager.getLogger(ServiceEndOfValidityCheckTask.class);
+	protected final Logger logger = LogManager.getLogger(ServiceEndOfValidityCheckTask.class);
 	private static final int PAGE_SIZE = 1000;
 	
 	@Autowired

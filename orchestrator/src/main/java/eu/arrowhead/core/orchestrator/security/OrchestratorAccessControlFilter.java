@@ -51,7 +51,7 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 	//-------------------------------------------------------------------------------------------------
 	private void checkIfRequesterSystemNameisEqualsWithClientNameFromCN(final String requesterSystemName, final String clientCN) {
 		final String clientNameFromCN = getClientNameFromCN(clientCN);
-		if(!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
+		if (!requesterSystemName.equalsIgnoreCase(clientNameFromCN) && !requesterSystemName.replaceAll("_", "").equalsIgnoreCase(clientNameFromCN)) {
 			log.debug("Requester system name and client name from certificate do not match!");
 			throw new AuthException("Requester system name(" + requesterSystemName + ") and client name from certificate (" + clientNameFromCN + ") do not match!", HttpStatus.UNAUTHORIZED.value());
 		}

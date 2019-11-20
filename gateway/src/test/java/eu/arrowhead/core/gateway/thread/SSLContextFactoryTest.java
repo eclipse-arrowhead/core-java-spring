@@ -31,6 +31,7 @@ public class SSLContextFactoryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateGatewaySSLContextSSLNotEnabled() {
 		final SSLProperties sslProps = new SSLProperties();
+
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -39,6 +40,7 @@ public class SSLContextFactoryTest {
 	public void testCreateGatewaySSLContextKeystoreTypeNull() {
 		final SSLProperties sslProps = new SSLProperties();
 		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -48,6 +50,7 @@ public class SSLContextFactoryTest {
 		final SSLProperties sslProps = new SSLProperties();
 		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
 		ReflectionTestUtils.setField(sslProps, "keyStoreType", "");
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -57,6 +60,7 @@ public class SSLContextFactoryTest {
 		final SSLProperties sslProps = new SSLProperties();
 		ReflectionTestUtils.setField(sslProps, "sslEnabled", true);
 		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -68,6 +72,7 @@ public class SSLContextFactoryTest {
 		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
 		final Resource keystore = new FileSystemResource("invalid.txt");
 		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -79,6 +84,7 @@ public class SSLContextFactoryTest {
 		ReflectionTestUtils.setField(sslProps, "keyStoreType", "PKCS12");
 		final Resource keystore = new ClassPathResource("certificates/gateway.p12");
 		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -91,6 +97,7 @@ public class SSLContextFactoryTest {
 		final Resource keystore = new ClassPathResource("certificates/gateway.p12");
 		ReflectionTestUtils.setField(sslProps, "keyStore", keystore);
 		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -105,6 +112,7 @@ public class SSLContextFactoryTest {
 		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
 		final Resource truststore = new FileSystemResource("invalid.txt");
 		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -119,6 +127,7 @@ public class SSLContextFactoryTest {
 		ReflectionTestUtils.setField(sslProps, "keyStorePassword", "123456");
 		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
 		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 
@@ -135,6 +144,7 @@ public class SSLContextFactoryTest {
 		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
 		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
 		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+		
 		SSLContextFactory.createGatewaySSLContext(sslProps);
 	}
 	
@@ -150,7 +160,9 @@ public class SSLContextFactoryTest {
 		final Resource truststore = new ClassPathResource("certificates/truststore.p12");
 		ReflectionTestUtils.setField(sslProps, "trustStore", truststore);
 		ReflectionTestUtils.setField(sslProps, "trustStorePassword", "123456");
+		
 		final SSLContext sslContext = SSLContextFactory.createGatewaySSLContext(sslProps);
+		
 		Assert.assertNotNull(sslContext);;
 	}
 }
