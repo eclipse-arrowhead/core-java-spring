@@ -95,7 +95,7 @@ Copy all the packages to your Arrowhead server (you may have to start SSH server
 
 Go to the folder where you copied the packages and then:
 
-`sudo dpkg -i arrowhead-*.deb`
+`sudo apt install ./arrowhead-*.deb`
 
 The installation process will show prompts asking for input parameters. Certificate passwords need to be at least 6 
 character long!
