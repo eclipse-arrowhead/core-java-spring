@@ -694,6 +694,9 @@ Returns a __ServiceQueryList__
 
 <a name="serviceregistry_endpoints_post_register" />
 
+###### Query activity diagram
+![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_service_registry_query_activity_uml.png)
+
 ### Register
 ```
 POST /serviceregistry/register
