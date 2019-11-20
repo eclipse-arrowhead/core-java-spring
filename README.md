@@ -3526,6 +3526,9 @@ Returns an __Orchestration Response__
 
 <a name="orchestrator_endpoints_get_store" />
 
+###### Store Orchestration activity diagran
+![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_store_orchestration_activity_uml.png)
+
 ### Get all Store Entries 
 ```
 GET /orchestrator/mgmt/store
