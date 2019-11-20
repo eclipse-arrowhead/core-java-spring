@@ -838,7 +838,10 @@ Query params:
 > **Note:** 4.1.2 version: PUT /serviceregistry/remove <br />
             In this version the input was a JSON object with many unnecessary information.
             
-<a name="serviceregistry_endpoints_post_query_system" />            
+<a name="serviceregistry_endpoints_post_query_system" />
+
+###### Unregister activity diagram
+![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/delete_service_registry_unregister_activity_uml.png)
             
 ### Query System            
 ```
@@ -3061,7 +3064,7 @@ The primary purpose for the Orchestrator System is to provide Application System
 
 * Accessibility information details of a Service provider (e.g network address and port),
 * Details of the Service instance within the provider System (e.g. base URL, IDD specification and other metadata),
-* item Authorization-related information (e.g. access token and signature),
+* Authorization-related information (e.g. access token and signature),
 * Additional information that is necessary for establishing connection.
 
 This orchestration rule information can reach the given Application System (consumer) in two different ways: the System itself can request it ("pull") or the Orchestrator itself can update the System when it is needed ("push method"). However, in both cases, there shall be an underlying, hidden process ("orchestration process"), which ensures the consistence of state between the various Core Systems.
