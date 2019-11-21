@@ -4545,3 +4545,37 @@ These services can only be used by other core services, therefore they are not p
 <a name="gatekeeper_removed" />
 
 ### Removed Endpoints <br />
+
+# Gateway
+ 
+<a name="gateway_sdd" />
+ 
+## System Design Description Overview
+
+<a name="gateway_usecases" />
+
+## Services and Use Cases
+
+<a name="gateway_security" />
+
+## Security
+
+<a name="gateway_endpoints" />
+
+## Endpoints
+
+<a name="gateway_endpoints_client" />
+
+### Client endpoint description<br />
+
+<a name="gateway_endpoints_private" />
+
+### Private endpoint description<br />
+
+<a name="gateway_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+<a name="gateway_removed" />
+
+### Removed Endpoints <br />
