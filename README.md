@@ -4511,3 +4511,37 @@ Removes the subscription record specified by the id path parameter.
 
 Private Services
 These services can only be used by other core services, therefore they are not part of the public API.
+
+# Gatekeeper 
+ 
+<a name="gatekeeper_sdd" />
+ 
+## System Design Description Overview
+
+<a name="gatekeeper_usecases" />
+
+## Services and Use Cases
+
+<a name="gatekeeper_security" />
+
+## Security
+
+<a name="gatekeeper_endpoints" />
+
+## Endpoints
+
+<a name="gatekeeper_endpoints_client" />
+
+### Client endpoint description<br />
+
+<a name="gatekeeper_endpoints_private" />
+
+### Private endpoint description<br />
+
+<a name="gatekeeper_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+<a name="gatekeeper_removed" />
+
+### Removed Endpoints <br />
