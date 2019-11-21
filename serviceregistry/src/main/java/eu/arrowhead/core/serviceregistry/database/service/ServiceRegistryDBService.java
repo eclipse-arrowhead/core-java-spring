@@ -907,6 +907,20 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<System> getSystemByName(final String systemName) {
+		logger.debug("getSystemByName started...");
+		
+		final String name = validateSystemParamString(systemName);
+		try {
+			return systemRepository.findBySystemName(name);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
