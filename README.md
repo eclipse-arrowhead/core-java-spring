@@ -419,9 +419,9 @@ The Trust-Store is containing those certificates, what the web-server considers 
 
 ### How to create my own certificates?
 Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
-* [Create Arrowhead Cloud Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_cloud_certificate.pdf)
-* [Create Arrowhead Client Self Signed Certificate](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_client_certificate.pdf)
-* [Create Trust Store](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_trust_store.pdf)
+* [Create Arrowhead Cloud Self Signed Certificate](documentation/certificates/create_cloud_certificate.pdf)
+* [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
+* [Create Trust Store](documentation/certificates/create_trust_store.pdf)
 
 <a name="setupgatekeeper_and_gateway" /> 
 
@@ -718,7 +718,7 @@ Returns a __ServiceQueryList__
 <a name="serviceregistry_endpoints_post_register" />
 
 ###### Query activity diagram
-![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_service_registry_query_activity_uml.png)
+![Alt text](documentation/images/post_service_registry_query_activity_uml.png)
 
 ### Register
 ```
@@ -839,7 +839,7 @@ Returns a __ServiceRegistryEntry__
 <a name="serviceregistry_delete_unregister" />
 
 ###### Register activity diagram
-![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_service_registry_register_activity_uml.png)
+![Alt text](documentation/images/post_service_registry_register_activity_uml.png)
 
 ### Unregister 
 ```
@@ -864,7 +864,7 @@ Query params:
 <a name="serviceregistry_endpoints_post_query_system" />
 
 ###### Unregister activity diagram
-![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/delete_service_registry_unregister_activity_uml.png)
+![Alt text](documentation/images/delete_service_registry_unregister_activity_uml.png)
             
 ### Query System            
 ```
