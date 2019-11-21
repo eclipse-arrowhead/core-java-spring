@@ -4540,8 +4540,8 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-|[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|
-|[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|
+|[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|POST|GSDQueryForm|GSDQueryResult|
+|[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|POST|ICNRequestForm|ICNResult|
 
 ### Private endpoint description<br />
 
