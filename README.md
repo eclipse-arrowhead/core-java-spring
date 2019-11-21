@@ -4524,7 +4524,9 @@ This supporting core system has the purpose of providing inter-Cloud servicing c
 - Inter-Cloud Negotiation (ICN)
 
 These Services are part of the inter-Cloud orchestration process, but the Gatekeeper is only available for the other core systems. Gatekeeper is the only one core system which has the functionality of discovering other Clouds via Relay systems. Neighbor Clouds and Relay systems are stored in the MySQL database of this module.  
-During the inter-Cloud orchestration, the Global Service Discovery is the first process which aims to collect the known clouds with providers serving the specified service. After GSD, the Inter Cloud Negotiation process steps in place with the purpose establishing the way of collaboration. Working together with the Orchestrators of both Clouds, at the end a servicing instace can be created.
+During the inter-Cloud orchestration, the Global Service Discovery is the first process which aims to collect the known clouds with providers serving the specified service. After GSD, the Inter Cloud Negotiation process steps in place with the purpose of establishing the way of collaboration. Working together with the Orchestrators of both Clouds, at the end a servicing instace can be created.
+
+> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
 
 <a name="gatekeeper_usecases" />
 
