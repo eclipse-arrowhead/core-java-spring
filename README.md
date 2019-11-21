@@ -4538,12 +4538,12 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
 
 <a name="gatekeeper_endpoints_private" />
 
+### Private endpoint description<br />
+
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 |[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|POST|GSDQueryForm|GSDQueryResult|
 |[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|POST|ICNRequestForm|ICNResult|
-
-### Private endpoint description<br />
 
 <a name="gatekeeper_endpoints_mgmt" />
 
