@@ -3474,7 +3474,7 @@ Returns an __Orchestration Response__
 <a name="orchrestrator_endpoints_get_oschestration_id" />
 
 ###### Orchestration activity diagram
-![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_orchestration_activity_uml.png)
+![Alt text](documentation/images/post_orchestration_activity_uml.png)
 
 ### Start store Orchestration by ID
 ```
@@ -3559,7 +3559,7 @@ Returns an __Orchestration Response__
 <a name="orchestrator_endpoints_get_store" />
 
 ###### Store Orchestration activity diagram
-![Alt text](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/images/post_store_orchestration_activity_uml.png)
+![Alt text](documentation/images/post_store_orchestration_activity_uml.png)
 
 ### Get all Store Entries 
 ```
@@ -4564,6 +4564,8 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
  
 ## System Design Description Overview
 establish the datapath 
+
+![Alt text](documentation/images/gateway_overview.png)
 
 <a name="gateway_usecases" />
 
