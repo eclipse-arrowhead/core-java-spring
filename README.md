@@ -58,7 +58,23 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Private](#event_handler_endpoints_private)
            * [Management](#event_handler_endpoints_management)
            * [Removed Endpoints](#event_handler_removed)
-
+	5. [Gatekeeper](#gatekeeper)
+	   * [System Design Description Overview](#gatekeeper_sdd)
+       * [Services and Use Cases](#gatekeeper_usecases)  
+       * [Endpoints](#gatekeeper_endpoints)
+           * [Client](#gatekeeper_endpoints_client)
+           * [Private](#gatekeeper_endpoints_private)
+           * [Management](#gatekeeper_endpoints_management)     
+           * [Removed Endpoints](#gatekeeper_removed)
+	6. [Gateway](#gateway)
+	   * [System Design Description Overview](#gateway_sdd)
+       * [Services and Use Cases](#gateway_usecases)  
+       * [Endpoints](#gateway_endpoints)
+           * [Client](#gateway_endpoints_client)
+           * [Private](#gateway_endpoints_private)
+           * [Management](#gateway_endpoints_management)     
+           * [Removed Endpoints](#gateway_removed)
+	
 <a name="quickstart" />
 
 ## Quick Start Guide
