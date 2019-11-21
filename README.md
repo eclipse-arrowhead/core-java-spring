@@ -4629,6 +4629,18 @@ __GSDQueryForm__ is the input
 }
 ```
 
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requestedService` | Object describes the requested service | yes |
+| `serviceDefinitionRequirement` | Service Definition | yes |
+| `interfaceRequirements` | List of interfaces | no |
+| `versionRequirement` | Version of the Service | no |
+| `maxVersionRequirement` | Maximum version of the Service | no |
+| `minVersionRequirement` | Minimum version of the Service | no |
+| `pingProviders` | Whether or not the providers should be pinged | no |
+| `metadataRequirements` | Metadata | no |
+| `preferredClouds` | List of preferred couds | no |
+
 <a name="datastructures_gsdqueryresult" />
 
 __GSDQueryResult__ is the output
@@ -4638,14 +4650,14 @@ __GSDQueryResult__ is the output
   "results": [
     {
       "providerCloud": {
-        "authenticationInfo": "string",
-        "createdAt": "string",
-        "id": 0,
-        "name": "string",
-        "neighbor": true,
-        "operator": "string",
+	    "id": 0,
+		"name": "string",
+		"operator": "string",
+        "authenticationInfo": "string",        
+        "neighbor": true,        
         "ownCloud": true,
         "secure": true,
+		"createdAt": "string",
         "updatedAt": "string"
       },
 	  "requiredServiceDefinition": "string",
@@ -4663,6 +4675,16 @@ __GSDQueryResult__ is the output
   "unsuccessfulRequests": 0
 }
 ```
+
+| Field | Description |
+| ----- | ----------- |
+| `results` | List of result objects |
+| `providerCloud` | Cloud where the result coming from |
+| `requiredServiceDefinition` | Serfvice Definition |
+| `availableInterfaces` | List of availble interfaces |
+| `serviceMetadata` | Metadata |
+| `numOfProviders` | Number of providers serving the service within the cloud |
+| `unsuccessfulRequests` | Number of clouds not responded |
 
 # Gateway
  
