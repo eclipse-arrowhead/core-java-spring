@@ -62,6 +62,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [System Design Description Overview](#gatekeeper_sdd)
        * [Services and Use Cases](#gatekeeper_usecases)  
        * [Endpoints](#gatekeeper_endpoints)
+		   * [Client](#gatekeeper_endpoints_client)
            * [Private](#gatekeeper_endpoints_private)
            * [Management](#gatekeeper_endpoints_management)     
            * [Removed Endpoints](#gatekeeper_removed)
@@ -69,6 +70,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [System Design Description Overview](#gateway_sdd)
        * [Services and Use Cases](#gateway_usecases)  
        * [Endpoints](#gateway_endpoints)
+	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_management)     
            * [Removed Endpoints](#gateway_removed)
@@ -4538,6 +4540,14 @@ placeholder
 
 ## Endpoints
 
+<a name="gatekeeper_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#gatekeeper_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+
 <a name="gatekeeper_endpoints_private" />
 
 ### Private endpoint description<br />
@@ -4559,11 +4569,20 @@ placeholder
 
 placeholder
 
-<a name="gatekeeper_endpoints_post_init_gsd_echo" />
+<a name="gatekeeper_endpoints_get_echo" />
+
+### Echo 
+```
+GET /gatekeeper/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="gatekeeper_endpoints_post_init_gsd" />
 
 ### Init GSD 
 ```
-Post /gatekeeper/init_gsd
+POST /gatekeeper/init_gsd
 ```
 
 Returns the result of Global Service Discovery.
@@ -4661,6 +4680,10 @@ establish the datapath
 <a name="gateway_endpoints" />
 
 ## Endpoints
+
+<a name="gateway_endpoints_client" />
+
+### Client endpoint description<br />
 
 <a name="gateway_endpoints_private" />
 
