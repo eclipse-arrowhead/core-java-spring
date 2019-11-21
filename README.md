@@ -45,7 +45,20 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Private](#orchestrator_endpoints_private)
            * [Management](#orchestrator_endpoints_management)     
            * [Removed Endpoints](#orchestrator_removed)
- 
+    4. [EventHandler](#event_handler)
+       * [System Design Description Overview](#event_handler_sdd)
+       * [Services and Use Cases](#event_handler_usecases)  
+       * [Service Description Overview](#publish_service_description_overview)
+           * [Publish](#publish_service_description_overview)
+	   * [Subcribe](#subscribe_service_description_overview)
+	   * [Unsubscribe](#unsubscribe_service_description_overview)
+	   * [PublishAuthUpdate](#publish_auth_update_service_description_overview)
+       * [Endpoints](#event_handler_endpoints)
+           * [Client](#event_handler_endpoints_client)
+           * [Private](#event_handler_endpoints_private)
+           * [Management](#event_handler_endpoints_management)
+           * [Removed Endpoints](#event_handler_removed)
+
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -395,12 +408,6 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 * [Create Trust Store](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/create_trust_store.pdf)
 
 <a name="setupgatekeeper_and_gateway" /> 
-
-### System Operator Certificate
-
-The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
-SysOp certificate allows the client to use the management endpoints of the Arrowhed Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser.
-* [Import SysOp Certificate (Windows 10)](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/import_sysop_certificate_win10.pdf)
 
 ## Gatekeeper and Gateway Setup
 
@@ -4153,3 +4160,338 @@ __PriorityList__ is the input
 
 > **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store/priorities<br />
             Same as the new version
+
+<a name="event_handler" />
+
+# Event Handler
+
+<a name="event_handler_sdd" />
+
+## System Design Description Overview
+
+The Event Handler core system provides functionality of distributing event notification that might occur in a given Arrowhead local cloud. The Event Handler is in principle a publish subscribe mechanism-based systems: it receives the events from Event Producers and forwards them to subscribing Event Consumers.
+
+This System (in line with all core Systems) utilizes the X.509 certificate Common Name naming convention in order to work. 
+
+<a name="event_handler_usecases" />
+
+## Services and Use Cases
+
+This System provides the followning Core Services: 
+* Publish
+* Subscribe
+* Unsubscribe
+* PublishAuthUpdate
+
+
+<a name="publish_service_description_overview" />
+
+## Publish Service Description Overview
+
+Start the publishing process to deliver the event to the subscribers.
+
+
+<a name="event_handler_endpoints" />
+
+## Endpoints
+
+Swagger API documentation is available on: `https://<host>:<port>` <br />
+The base URL for the requests: `http://<host>:<port>/eventhandler`
+
+Uri: /eventhandler/echo 
+Type: GET
+
+Returns a “Got it” message with the purpose of testing the core service availability.
+
+Uri: /eventhandler/publish
+Type: POST
+
+Start the publishing process to deliver the event to the subscribers.
+
+Input JSON structure:
+
+  
+{
+  "eventType": "string",
+  "metaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "source": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "timeStamp": "string"
+}
+
+
+4.1.3.
+return type – Unlike the 4.1.2 version, for performance and security reasons there is no attempted delivery resultMap to be returned to the publisher.
+input type – Unlike the 4.1.2 version, there is no additional event field in input JSON. The eventType, metaData, payload and timestamp fields alongside with source field are the top level fields in the current version. Since the change of the return type there is no deliveryCompleteUri field in the current version.
+
+
+Uri: /eventhandler/subscribe
+Type: POST
+
+Creates a subscription record specified by parameters.
+
+Input JSON structure:
+
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+
+
+4.1.3.
+
+authorization – Subscribers will only receive events form publishers if the subscriber  system has a valid authorization record with the publisher (subscriber as consumer, publisher as provider, for any service and interface).
+sources –  If sources field is empty or not present the subscriber will receive events from all authorized publishers. If there is even one publisher system in the sources field, the subscriber will only receive events from the authorized publishers from the given publisher systems. Unlike the 4.1.2 version, if a given publisherSystem do not exists in the database it will not be created .
+matchMetaData – If matchMetaData field is true,  filterMetaData field must have at least one key-value pair defined.
+filterMetaData – If filterMetaData field has key-value pairs defined and matchMetaData field is true,  the subscriber will only receive events when the event has the all the  key-value pairs defined in its metadata. The keys must match case, the values are not case sensitive.
+startDate – If startDate is defined, the subscriber system will only receive events when the events timestamp is after startDate. StartDate must be after the current datetime.
+endDate – If endDate is defined, the subscriber system will only receive events when the events timestamp is before endDate. EndDate must be after the current datetime. If startDate is defined endDate must be after startDate.
+subscriberSystem – Unlike the 4.1.2 version, if a given subscriberSystem do not exists in the database it will not be created .
+
+Uri: /eventhandler/unsubscribe
+Type: DELETE
+Query params: 
+event_type – string value of subscriptions event type name (mandatory),
+system_name –  string value of subscriber system name (mandatory),
+address – string value of subscriber system address (mandatory),
+port – integer value of subscriber system port (mandatory)
+
+Removes the subscription record specified by parameters.  
+
+
+The following services are no longer exist:
+
+DELETE /eventhandler/subscription/type/{type} /consumer/{systemName} 
+PUT /eventhandler/subscription 
+Management Services
+These services can only be used by the system operator of the local cloud. All date fields contain the text representation of a UTC timestamp. 
+
+Uri: /eventhandler/mgmt/subscriptions 
+Type: GET
+Query params: 
+page – zero-based page index (optional),
+item_per_page – maximum number of items returned (optional),
+sort_field – sort field (optional, default: id, possible values: id, createdAt, updatedAt),
+direction – direction of sorting (optional, default: ASC, possible values: ASC or DESC)
+Returns a page of subscription record. If page and item_per_page are not defined, returns all records. 
+
+Returned JSON structure:
+
+
+  
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "eventType": {
+        "id": 0,
+	  "eventTypeName": "string",
+	  "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+	    "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+	"createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+
+
+Uri: /eventhandler/mgmt/subscriptions/{id} 
+Type: GET
+
+Returns the subscription record specified by the id path parameter.
+
+Returned JSON structure: 
+
+
+{	
+	"id": 0,
+      "eventType": {
+        "id": 0,
+	  "eventTypeName": "string",
+	  "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+	    "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+	"createdAt": "string",
+      "updatedAt": "string"
+}
+
+
+Uri: /eventhandler/mgmt/subscriptions/{id} 
+Type: PUT
+
+Update requested Subscription entry by the given id and parameters 
+
+Input JSON structure:
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0,
+      "systemName": "string"
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  } 
+}
+
+Returns the updated subscription record specified by the id and parameter.
+
+Returned JSON structure: 
+
+{	
+	"id": 0,
+      "eventType": {
+        "id": 0,
+	  "eventTypeName": "string",
+	  "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+	    "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+	"createdAt": "string",
+      "updatedAt": "string"
+}
+
+
+
+Uri: /eventhandler/mgmt/subscriptions/{id} 
+Type: DELETE
+
+Removes the subscription record specified by the id path parameter.
+
+
+Private Services
+These services can only be used by other core services, therefore they are not part of the public API.

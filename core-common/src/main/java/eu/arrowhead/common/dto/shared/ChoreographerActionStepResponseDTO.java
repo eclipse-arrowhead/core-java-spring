@@ -1,7 +1,6 @@
-package eu.arrowhead.common.dto.choreographer;
+package eu.arrowhead.common.dto.shared;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 
 import java.io.Serializable;
 import java.util.List;

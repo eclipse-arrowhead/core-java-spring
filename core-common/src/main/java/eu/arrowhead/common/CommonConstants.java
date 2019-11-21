@@ -95,7 +95,7 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
-	
+
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
