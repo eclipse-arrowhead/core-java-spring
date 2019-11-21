@@ -4532,6 +4532,8 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
 
 ## Services and Use Cases
 
+placeholder
+
 <a name="gatekeeper_endpoints" />
 
 ## Endpoints
@@ -4542,16 +4544,106 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-|[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|POST|GSDQueryForm|GSDQueryResult|
+|[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|POST|[GSDQueryForm](#datastructures_gsdqueryform)|[GSDQueryResult](#datastructures_gsdqueryresult)|
 |[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|POST|ICNRequestForm|ICNResult|
 
 <a name="gatekeeper_endpoints_mgmt" />
 
 ### Management endpoint description<br />
 
+placeholder
+
 <a name="gatekeeper_removed" />
 
 ### Removed Endpoints <br />
+
+placeholder
+
+<a name="gatekeeper_endpoints_post_init_gsd_echo" />
+
+### Init GSD 
+```
+Post /gatekeeper/init_gsd
+```
+
+Returns the result of Global Service Discovery.
+
+<a name="datastructures_gsdqueryform" />
+
+__GSDQueryForm__ is the input
+
+```json
+{
+  "requestedService": {
+	"serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+	"securityRequirements": [
+      "NOT_SECURE"
+    ],
+	"versionRequirement": 0,
+    "maxVersionRequirement": 0,
+    "minVersionRequirement": 0,
+    "pingProviders": true,
+	"metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    }
+  },
+  "preferredClouds": [
+    {
+	  "name": "string",
+      "operator": "string",
+	  "neighbor": true,
+      "secure": true,
+      "authenticationInfo": "string",
+      "gatekeeperRelayIds": [
+        0
+      ],
+      "gatewayRelayIds": [
+        0
+      ],
+    }
+  ]
+}
+```
+
+<a name="datastructures_gsdqueryresult" />
+
+__GSDQueryResult__ is the output
+
+```json
+{
+  "results": [
+    {
+      "providerCloud": {
+        "authenticationInfo": "string",
+        "createdAt": "string",
+        "id": 0,
+        "name": "string",
+        "neighbor": true,
+        "operator": "string",
+        "ownCloud": true,
+        "secure": true,
+        "updatedAt": "string"
+      },
+	  "requiredServiceDefinition": "string",
+	  "availableInterfaces": [
+        "string"
+      ],
+      "serviceMetadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+	   "numOfProviders": 0
+    }
+  ],
+  "unsuccessfulRequests": 0
+}
+```
 
 # Gateway
  
