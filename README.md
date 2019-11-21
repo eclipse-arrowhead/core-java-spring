@@ -62,7 +62,6 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [System Design Description Overview](#gatekeeper_sdd)
        * [Services and Use Cases](#gatekeeper_usecases)  
        * [Endpoints](#gatekeeper_endpoints)
-           * [Client](#gatekeeper_endpoints_client)
            * [Private](#gatekeeper_endpoints_private)
            * [Management](#gatekeeper_endpoints_management)     
            * [Removed Endpoints](#gatekeeper_removed)
@@ -70,7 +69,6 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [System Design Description Overview](#gateway_sdd)
        * [Services and Use Cases](#gateway_usecases)  
        * [Endpoints](#gateway_endpoints)
-           * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_management)     
            * [Removed Endpoints](#gateway_removed)
@@ -4534,19 +4532,16 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
 
 ## Services and Use Cases
 
-<a name="gatekeeper_security" />
-
-## Security
-
 <a name="gatekeeper_endpoints" />
 
 ## Endpoints
 
-<a name="gatekeeper_endpoints_client" />
-
-### Client endpoint description<br />
-
 <a name="gatekeeper_endpoints_private" />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+|[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|
+|[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|
 
 ### Private endpoint description<br />
 
@@ -4571,17 +4566,9 @@ establish the datapath
 
 ## Services and Use Cases
 
-<a name="gateway_security" />
-
-## Security
-
 <a name="gateway_endpoints" />
 
 ## Endpoints
-
-<a name="gateway_endpoints_client" />
-
-### Client endpoint description<br />
 
 <a name="gateway_endpoints_private" />
 
