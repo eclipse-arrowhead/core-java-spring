@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mysql:
-    container_name: compose_mysql_1
+    container_name: mysql
     image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=THIS_WILL_BE_YOUR_CONTAINERS_ROOT_PW
