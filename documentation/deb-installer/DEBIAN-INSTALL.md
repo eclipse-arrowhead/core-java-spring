@@ -39,6 +39,27 @@ To install the MySQL server, run:
 sudo apt install mysql-server
 ```
 
+**NOTE:** The Arrowhead installers use MySQL root user to create database tables, users and privileges for the Arrowhead core systems, so if the database
+and the core system is not on the same machine you have to make sure that MySQL root user has remote access. 
+
+Login to the machine where the database is located and start the mysql command line interface:
+
+`mysql -uroot -p`
+
+After typing the password use the following SQL commands to enable remote access:
+
+```
+CREATE USER 'root'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON * . * TO 'root'@'localhost' IDENTIFIED BY 'password' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
+
+Exposing root user to every host is a HUGE SECURITY RISK so we recommend revoking the remote root access after the installation is done:
+
+```
+DROP USER 'root'@'%';
+```
+
 ### 3. Install Java
 
 Ubuntu users (and others?):
