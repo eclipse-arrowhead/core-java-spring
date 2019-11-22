@@ -4555,7 +4555,7 @@ placeholder
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 |[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|POST|[GSDQueryForm](#datastructures_gsdqueryform)|[GSDQueryResult](#datastructures_gsdqueryresult)|
-|[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|POST|ICNRequestForm|ICNResult|
+|[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|POST|[ICNRequestForm](#datastructures_icnrequestform)|[ICNResult](#datastructures_icnresult)|
 
 <a name="gatekeeper_endpoints_mgmt" />
 
@@ -4634,6 +4634,7 @@ __GSDQueryForm__ is the input
 | `requestedService` | Object describes the requested service | yes |
 | `serviceDefinitionRequirement` | Service Definition | yes |
 | `interfaceRequirements` | List of interfaces | no |
+| `securityRequirements` | List of required security levels | no |
 | `versionRequirement` | Version of the Service | no |
 | `maxVersionRequirement` | Maximum version of the Service | no |
 | `minVersionRequirement` | Minimum version of the Service | no |
@@ -4685,6 +4686,143 @@ __GSDQueryResult__ is the output
 | `serviceMetadata` | Metadata |
 | `numOfProviders` | Number of providers serving the service within the cloud |
 | `unsuccessfulRequests` | Number of clouds not responded |
+
+<a name="gatekeeper_endpoints_post_init_icn" />
+
+### Init ICN 
+```
+POST /gatekeeper/init_icn
+```
+
+Returns the result of Inter-Cloud Negotiation.
+
+<a name="datastructures_icnrequestform" />
+
+__ICNRequestForm__ is the input
+
+```json
+{
+  "targetCloudId": 0,
+  "requestedService": {
+    "serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+    "securityRequirements": [
+      "NOT_SECURE"
+    ],
+	"versionRequirement": 0,
+    "maxVersionRequirement": 0,
+    "minVersionRequirement": 0,
+    "pingProviders": true,	
+	"metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    }
+  },
+  "preferredSystems": [
+    {
+      "systemName": "string",
+	  "address": "string",
+	  "port": 0,
+      "authenticationInfo": "string"
+    }
+  ],
+  "requesterSystem": {
+	"systemName": "string",
+    "address": "string",
+	"port": 0,
+    "authenticationInfo": "string"
+  },
+  "negotiationFlags": {
+    "additionalProp1": true,
+    "additionalProp2": true,
+    "additionalProp3": true
+  }
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `targetCloudId` | Local ID of the target cloud | yes |
+| `requestedService` | Object describes the requested service | yes |
+| `serviceDefinitionRequirement` | Service Definition | yes |
+| `interfaceRequirements` | List of interfaces | no |
+| `securityRequirements` | List of required security levels | no |
+| `versionRequirement` | Version of the Service | no |
+| `maxVersionRequirement` | Maximum version of the Service | no |
+| `minVersionRequirement` | Minimum version of the Service | no |
+| `pingProviders` | Whether or not the providers should be pinged | no |
+| `metadataRequirements` | Metadata | no |
+| `preferredSystems` | List of perferred systems | no |
+| `requesterSystem` | Requester Cloud details (Own cloud) | yes |
+| `negotiationFlags` | Orchestration flags | no |
+
+<a name="datastructures_icnresult" />
+
+__ICNResult__ is the output
+
+```json
+{
+  "response": [
+    {
+      "service": {
+	    "id": 0,       
+        "serviceDefinition": "string",
+		"createdAt": "string", 
+        "updatedAt": "string"
+      },
+	  "serviceUri": "string",
+	  "provider": {
+	    "id": 0,
+		"systemName": "string",
+        "address": "string",
+		"port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",        
+        "updatedAt": "string"
+      },
+	  "interfaces": [
+        {
+          "id": 0,
+          "interfaceName": "string",
+		  "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],      
+      "secure": "NOT_SECURE",     
+      "version": 0,
+	  "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+	  "authorizationTokens": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "warnings": [
+        "FROM_OTHER_CLOUD"
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `results` | List of result objects |
+| `service` | Required service |
+| `serviceUri` | URI of the service |
+| `provider` | Provider details |
+| `interfaces` | List of available interfaces |
+| `secure` | Level of security |
+| `version` | Version number |
+| `metadata` | Service metadata |
+| `authorizationTokens` | Authorization Tokens per interfaces |
+| `warnings` | Warnings |
 
 # Gateway
  
