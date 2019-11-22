@@ -35,6 +35,12 @@ public class CoreSystemRegistrationProperties {
 	
 	@Value(CoreCommonConstants.$SERVER_PORT)
 	private int coreSystemPort;
+	
+	@Value(CoreCommonConstants.$DOMAIN_NAME)
+	private String coreSystemDomainName;
+	
+	@Value(CoreCommonConstants.$DOMAIN_PORT)
+	private int coreSystemDomainPort;
 
 	//=================================================================================================
 	// methods
@@ -62,12 +68,20 @@ public class CoreSystemRegistrationProperties {
 	public int getServiceRegistryPort() { return serviceRegistryPort; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public String getCoreSystemAddress() { 
-		return Utilities.isEmpty(coreSystemAddress) ? CommonConstants.LOCALHOST : coreSystemAddress;
+	public String getCoreSystemDomainName() { 
+		if (Utilities.isEmpty(coreSystemDomainName)) {
+			return Utilities.isEmpty(coreSystemAddress) ? CommonConstants.LOCALHOST : coreSystemAddress;
+		}
+		
+		return coreSystemDomainName;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public int getCoreSystemPort() { 
-		return coreSystemPort <= 0 ? coreSystem.getDefaultPort() : coreSystemPort;
+	public int getCoreSystemDomainPort() {
+		if (coreSystemDomainPort <= 0) {
+			return coreSystemPort <= 0 ? coreSystem.getDefaultPort() : coreSystemPort;
+		}
+		
+		return coreSystemDomainPort;
 	}
 }

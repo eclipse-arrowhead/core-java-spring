@@ -54,6 +54,10 @@ public class CoreCommonConstants {
 	public static final String $SERVER_ADDRESS = "${" + SERVER_ADDRESS + "}";
 	public static final String SERVER_PORT = "server.port";
 	public static final String $SERVER_PORT = "${" + SERVER_PORT + "}";
+	public static final String DOMAIN_NAME = "domain.name";
+	public static final String $DOMAIN_NAME = "${" + DOMAIN_NAME + "}";
+	public static final String DOMAIN_PORT = "domain.port";
+	public static final String $DOMAIN_PORT = "${" + DOMAIN_PORT + "}";
 	public static final String CORE_SYSTEM_NAME = "core_system_name";
 	public static final String $CORE_SYSTEM_NAME = "${" + CORE_SYSTEM_NAME + "}";
 	public static final String LOG_ALL_REQUEST_AND_RESPONSE = "log_all_request_and_response";
