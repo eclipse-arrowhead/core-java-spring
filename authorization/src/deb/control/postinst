@@ -52,7 +52,7 @@ case "$1" in
 		
 		ah_transform_log_file ${SYSTEM_DIR}
 
-		db_get arrowhead-core-common/sr_host: sr_host=$RET || true
+		db_get arrowhead-core-common/sr_host; sr_host=$RET || true
 		
 		if [ -z ${sr_host} ]; then
 			sr_host=${OWN_IP}
