@@ -4567,6 +4567,7 @@ placeholder
 | [Get Cloud by ID](#gatekeeper_endpoints_get_cloud_by_id) | /mgmgt/clouds/{id} | GET | cloudId | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse) |
 | [Register Clouds](#gatekeeper_endpoints_register_clouds) | /mgmgt/clouds | POST | [CloudRequest list](#datastructures_cloudrequestlist) | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse2) |
 | [Update Cloud](#gatekeeper_endpoints_update_cloud) | /mgmgt/clouds/{id} | PUT | [CloudRequest](#datastructures_cloudrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse2) |
+| [Assign Relays to Cloud](#gatekeeper_endpoints_assign_relays_to_cloud) | /mgmgt/clouds/assign | POST | [CloudRelaysAssignmentRequest](#datastructures_cloudrelaysassignmentrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse3) |
 
 <a name="gatekeeper_removed" />
 
@@ -5133,6 +5134,94 @@ __CloudRequest__ is the input.
 | `gatewayRelayIds` | List of Relay IDs uesd by Gateway |
 
 <a name="datastructures_cloudwithrelaysresponse2" />
+
+__CloudWithRelaysRespone__ is the output.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,      
+  "ownCloud": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "gatekeeperRelays": [
+      {
+       "id": 0,
+	   "address": "string",
+       "port": 0,		            
+       "exclusive": true,
+        "secure": true,
+        "type": "GATEKEEPER_RELAY",
+	    "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ],
+    "gatewayRelays": [
+      {
+        "id": 0,
+		"address": "string",
+        "port": 0,		            
+        "exclusive": true,
+        "secure": true,
+        "type": "GATEWAY_RELAY",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
+| `gatewayRelays` | List of Relays uesd by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_assign_relays_to_cloud" />
+
+### Assign Relays to Cloud
+```
+POST /gatekeeper/mgmgt/clouds/assign
+```
+
+Returns updated Cloud entry.
+
+<a name="datastructures_cloudrelaysassignmentrequest" />
+
+__CloudRelaysAssignmentRequest__ is the input.
+
+```json
+{
+  "cloudId": 0,
+  "gatekeeperRelayIds": [
+    0
+  ],
+  "gatewayRelayIds": [
+    0
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `cloudId` |ID of the cloud |
+| `gatekeeperRelayIds` | List of Relay IDs uesd by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs uesd by Gateway |
+
+<a name="datastructures_cloudwithrelaysresponse3" />
 
 __CloudWithRelaysRespone__ is the output.
 
