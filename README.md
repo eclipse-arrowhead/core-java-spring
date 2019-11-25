@@ -4565,7 +4565,8 @@ placeholder
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all Cloud entries](#gatekeeper_endpoints_get_all_cloud) | /mgmgt/clouds | GET | - | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse) |
 | [Get Cloud by ID](#gatekeeper_endpoints_get_cloud_by_id) | /mgmgt/clouds/{id} | GET | cloudId | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse) |
-| [Register clouds](#gatekeeper_endpoints_register_clouds) | /mgmgt/clouds | POST | [CloudRequest list](#datastructures_cloudrequestlist) | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse2) |
+| [Register Clouds](#gatekeeper_endpoints_register_clouds) | /mgmgt/clouds | POST | [CloudRequest list](#datastructures_cloudrequestlist) | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse2) |
+| [Update Cloud](#gatekeeper_endpoints_update_cloud) | /mgmgt/clouds/{id} | PUT | [CloudRequest](#datastructures_cloudrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse2) |
 
 <a name="gatekeeper_removed" />
 
@@ -4930,7 +4931,7 @@ GET /gatekeeper/mgmgt/clouds/{id}
 
 Returns the Cloud Entry specified by the ID path parameter.
 
-<a name="datastructures_cloudwithrelayslistresponse" />
+<a name="datastructures_cloudwithrelaysresponse" />
 
 __CloudWithRelaysRespone__ is the output.
 
@@ -5079,6 +5080,102 @@ __CloudWithRelaysListRespone__ is the output.
 | ----- | ----------- |
 | `count` | Number of record found |
 | `data` | Array of data |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
+| `gatewayRelays` | List of Relays uesd by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_update_cloud" />
+
+### Update Cloud
+```
+PUT /gatekeeper/mgmgt/clouds/{id}
+```
+
+Returns updated Cloud entry.
+
+<a name="datastructures_cloudrequest" />
+
+__CloudRequest__ is the input.
+
+```json
+{
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "gatekeeperRelayIds": [
+    0
+  ],
+  "gatewayRelayIds": [
+    0
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `secure` | Whether or not it is a secured Cloud |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelayIds` | List of Relay IDs uesd by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs uesd by Gateway |
+
+<a name="datastructures_cloudwithrelaysresponse2" />
+
+__CloudWithRelaysRespone__ is the output.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,      
+  "ownCloud": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "gatekeeperRelays": [
+      {
+       "id": 0,
+	   "address": "string",
+       "port": 0,		            
+       "exclusive": true,
+        "secure": true,
+        "type": "GATEKEEPER_RELAY",
+	    "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ],
+    "gatewayRelays": [
+      {
+        "id": 0,
+		"address": "string",
+        "port": 0,		            
+        "exclusive": true,
+        "secure": true,
+        "type": "GATEWAY_RELAY",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
 | `name` | Name of the cloud |
 | `operator` | Operator of the cloud |
 | `neighbor` | Whether or not it is a neighbor Cloud |
