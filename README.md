@@ -4568,6 +4568,7 @@ placeholder
 | [Register Clouds](#gatekeeper_endpoints_register_clouds) | /mgmgt/clouds | POST | [CloudRequest list](#datastructures_cloudrequestlist) | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse2) |
 | [Update Cloud](#gatekeeper_endpoints_update_cloud) | /mgmgt/clouds/{id} | PUT | [CloudRequest](#datastructures_cloudrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse2) |
 | [Assign Relays to Cloud](#gatekeeper_endpoints_assign_relays_to_cloud) | /mgmgt/clouds/assign | POST | [CloudRelaysAssignmentRequest](#datastructures_cloudrelaysassignmentrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse3) |
+| [Delete Cloud](#gatekeeper_endpoints_delete_cloud) | /mgmgt/clouds/{id} | DELETE | cloudId | - |
 
 <a name="gatekeeper_removed" />
 
@@ -5277,6 +5278,15 @@ __CloudWithRelaysRespone__ is the output.
 | `port` | Port of the Relay |
 | `exclusive` | Whether or not is is a not public Relay |
 | `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_delete_cloud" />
+
+### Delete Cloud
+```
+DELETE /gatekeeper/mgmgt/clouds/{id}
+```
+
+Remove requested Cloud entry
 
 # Gateway
  
