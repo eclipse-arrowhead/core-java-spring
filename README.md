@@ -4561,7 +4561,9 @@ placeholder
 
 ### Management endpoint description<br />
 
-placeholder
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get all Cloud entries](#gatekeeper_endpoints_get_all_cloud) | /mgmgt/clouds | GET | - | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse) |
 
 <a name="gatekeeper_removed" />
 
@@ -4823,6 +4825,99 @@ __ICNResult__ is the output
 | `metadata` | Service metadata |
 | `authorizationTokens` | Authorization Tokens per interfaces |
 | `warnings` | Warnings |
+
+<a name="gatekeeper_endpoints_get_all_cloud" />
+
+### Get all Cloud entries 
+```
+POST /gatekeeper/mgmgt/clouds
+```
+
+Returns Cloud entries by the given paging parameters. If `page` and `item_per_page` are
+not defined, no paging is involved.             
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+
+<a name="datastructures_cloudwithrelayslistresponse" />
+
+__CloudWithRelaysListRespone__ is the output.
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+	  "id": 0,
+      "name": "string",
+	  "operator": "string",
+      "neighbor": true,      
+      "ownCloud": true,
+      "secure": true,
+      "authenticationInfo": "string",
+      "createdAt": "string",
+	  "updatedAt": "string",
+      "gatekeeperRelays": [
+        {
+          "id": 0,
+		  "address": "string",
+          "port": 0,		            
+          "exclusive": true,
+          "secure": true,
+          "type": "GATEKEEPER_RELAY",
+		  "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "gatewayRelays": [
+        {
+          "id": 0,
+		  "address": "string",
+          "port": 0,		            
+          "exclusive": true,
+          "secure": true,
+          "type": "GATEWAY_RELAY",
+		  "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
+| `gatewayRelays` | List of Relays uesd by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
 
 # Gateway
  
