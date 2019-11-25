@@ -64,7 +64,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [Endpoints](#gatekeeper_endpoints)
 		   * [Client](#gatekeeper_endpoints_client)
            * [Private](#gatekeeper_endpoints_private)
-           * [Management](#gatekeeper_endpoints_management)     
+           * [Management](#gatekeeper_endpoints_mgmt)     
            * [Removed Endpoints](#gatekeeper_removed)
     6. [Gateway](#gateway)
        * [System Design Description Overview](#gateway_sdd)
@@ -72,7 +72,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [Endpoints](#gateway_endpoints)
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
-           * [Management](#gateway_endpoints_management)     
+           * [Management](#gateway_endpoints_mgmt)     
            * [Removed Endpoints](#gateway_removed)
 	
 <a name="quickstart" />
@@ -4564,6 +4564,7 @@ placeholder
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all Cloud entries](#gatekeeper_endpoints_get_all_cloud) | /mgmgt/clouds | GET | - | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse) |
+| [Get Cloud by ID](#gatekeeper_endpoints_get_cloud_by_id) | /mgmgt/clouds/{id} | GET | cloudId | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse) |
 
 <a name="gatekeeper_removed" />
 
@@ -4830,7 +4831,7 @@ __ICNResult__ is the output
 
 ### Get all Cloud entries 
 ```
-POST /gatekeeper/mgmgt/clouds
+GET /gatekeeper/mgmgt/clouds
 ```
 
 Returns Cloud entries by the given paging parameters. If `page` and `item_per_page` are
@@ -4906,6 +4907,72 @@ __CloudWithRelaysListRespone__ is the output.
 | ----- | ----------- |
 | `count` | Number of record found |
 | `data` | Array of data |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
+| `gatewayRelays` | List of Relays uesd by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_get_cloud_by_id" />
+
+### Get all Cloud entries 
+```
+GET /gatekeeper/mgmgt/clouds/{id}
+```
+
+Returns the Cloud Entry specified by the ID path parameter.
+
+<a name="datastructures_cloudwithrelayslistresponse" />
+
+__CloudWithRelaysRespone__ is the output.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,      
+  "ownCloud": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "gatekeeperRelays": [
+      {
+       "id": 0,
+	   "address": "string",
+       "port": 0,		            
+       "exclusive": true,
+        "secure": true,
+        "type": "GATEKEEPER_RELAY",
+	    "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ],
+    "gatewayRelays": [
+      {
+        "id": 0,
+		"address": "string",
+        "port": 0,		            
+        "exclusive": true,
+        "secure": true,
+        "type": "GATEWAY_RELAY",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
 | `name` | Name of the cloud |
 | `operator` | Operator of the cloud |
 | `neighbor` | Whether or not it is a neighbor Cloud |
