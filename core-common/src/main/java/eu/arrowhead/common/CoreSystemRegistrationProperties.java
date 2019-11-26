@@ -78,10 +78,14 @@ public class CoreSystemRegistrationProperties {
 	
 	//-------------------------------------------------------------------------------------------------
 	public int getCoreSystemDomainPort() {
-		if (coreSystemDomainPort <= 0) {
-			return coreSystemPort <= 0 ? coreSystem.getDefaultPort() : coreSystemPort;
+		if (coreSystemDomainPort > 0) {
+			return coreSystemDomainPort;
 		}
 		
-		return coreSystemDomainPort;
+		if (coreSystemPort > 0) {
+			return coreSystemPort;
+		}
+		
+		throw new ServiceConfigurationError("Please specify a " + CoreCommonConstants.SERVER_PORT + " in the application.properties file.");
 	}
 }
