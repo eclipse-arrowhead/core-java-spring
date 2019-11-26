@@ -4574,6 +4574,7 @@ placeholder
 | [Get Relay by Address and Port](#gatekeeper_endpoints_get_relay_by_address_and_port) | /mgmgt/relays/{address}/{port} | GET | address, port | [RelayResponse](#datastructures_relayresponse2) |
 | [Register Relays](#gatekeeper_endpoints_register_relays) | /mgmgt/relays | POST | [RelayRequest list](#datastructures_relayrequestlist) | [RelayListResponse](#datastructures_relaylistresponse2) |
 | [Update Relay](#gatekeeper_endpoints_update_relay) | /mgmgt/relays/{id} | PUT | [RelayRequest](#datastructures_relayrequest) | [RelayResponse](#datastructures_relayresponse3) |
+| [Delete Relay](#gatekeeper_endpoints_delete_relay) | /mgmgt/relays/{id} | DELETE | relayId | - |
 
 <a name="gatekeeper_removed" />
 
@@ -5504,8 +5505,7 @@ Returns updated Relay entry specified by the ID path parameter.
 __RelayRequest__ is the input.
 
 ```json
-[
- {      
+{      
   "address": "string",
   "port": 0,
   "exclusive": true,
@@ -5513,8 +5513,7 @@ __RelayRequest__ is the input.
   "type": "GATEKEEPER_RELAY",
   "createdAt": "string",
   "updatedAt": "string"
- }
-]
+}
 ```
 
 | Field | Description |
@@ -5550,6 +5549,15 @@ __RelayRespone__ is the output.
 | `exclusive` | Whether or not is is a not public Relay |
 | `secure` | Whether or not it is a secured Relay |
 | `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_delete_relay" />
+
+### Delete Relay
+```
+DELETE /gatekeeper/mgmgt/relays/{id}
+```
+
+Remove requested Relay entry.
 
 # Gateway
  
