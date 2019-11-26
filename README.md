@@ -4952,19 +4952,19 @@ __CloudWithRelaysRespone__ is the output.
   "gatekeeperRelays": [
       {
        "id": 0,
-	   "address": "string",
+       "address": "string",
        "port": 0,		            
        "exclusive": true,
-        "secure": true,
-        "type": "GATEKEEPER_RELAY",
-	    "createdAt": "string",
-        "updatedAt": "string"
+       "secure": true,
+       "type": "GATEKEEPER_RELAY",
+       "createdAt": "string",
+       "updatedAt": "string"
       }
     ],
     "gatewayRelays": [
       {
         "id": 0,
-		"address": "string",
+	"address": "string",
         "port": 0,		            
         "exclusive": true,
         "secure": true,
@@ -5008,11 +5008,11 @@ __CloudRequest__ list is the input.
 [
   {   
     "name": "string",
-	"operator": "string",
+    "operator": "string",
     "neighbor": true,    
     "secure": true,
-	"authenticationInfo": "string",
-	 "gatekeeperRelayIds": [
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
       0
     ],
     "gatewayRelayIds": [
@@ -5041,36 +5041,36 @@ __CloudWithRelaysListRespone__ is the output.
   "count": 0,
   "data": [
     {
-	  "id": 0,
+      "id": 0,
       "name": "string",
-	  "operator": "string",
+      "operator": "string",
       "neighbor": true,      
       "ownCloud": true,
       "secure": true,
       "authenticationInfo": "string",
       "createdAt": "string",
-	  "updatedAt": "string",
+      "updatedAt": "string",
       "gatekeeperRelays": [
         {
           "id": 0,
-		  "address": "string",
+	  "address": "string",
           "port": 0,		            
           "exclusive": true,
           "secure": true,
           "type": "GATEKEEPER_RELAY",
-		  "createdAt": "string",
+	  "createdAt": "string",
           "updatedAt": "string"
         }
       ],
       "gatewayRelays": [
         {
           "id": 0,
-		  "address": "string",
+	  "address": "string",
           "port": 0,		            
           "exclusive": true,
           "secure": true,
           "type": "GATEWAY_RELAY",
-		  "createdAt": "string",
+          "createdAt": "string",
           "updatedAt": "string"
         }
       ]
@@ -5153,19 +5153,19 @@ __CloudWithRelaysRespone__ is the output.
   "gatekeeperRelays": [
       {
        "id": 0,
-	   "address": "string",
+       "address": "string",
        "port": 0,		            
        "exclusive": true,
-        "secure": true,
-        "type": "GATEKEEPER_RELAY",
-	    "createdAt": "string",
-        "updatedAt": "string"
+       "secure": true,
+       "type": "GATEKEEPER_RELAY",
+       "createdAt": "string",
+       "updatedAt": "string"
       }
     ],
     "gatewayRelays": [
       {
         "id": 0,
-		"address": "string",
+	"address": "string",
         "port": 0,		            
         "exclusive": true,
         "secure": true,
@@ -5241,19 +5241,19 @@ __CloudWithRelaysRespone__ is the output.
   "gatekeeperRelays": [
       {
        "id": 0,
-	   "address": "string",
+       "address": "string",
        "port": 0,		            
        "exclusive": true,
-        "secure": true,
-        "type": "GATEKEEPER_RELAY",
-	    "createdAt": "string",
-        "updatedAt": "string"
+       "secure": true,
+       "type": "GATEKEEPER_RELAY",
+       "createdAt": "string",
+       "updatedAt": "string"
       }
     ],
     "gatewayRelays": [
       {
         "id": 0,
-		"address": "string",
+	"address": "string",
         "port": 0,		            
         "exclusive": true,
         "secure": true,
@@ -5328,12 +5328,12 @@ __RelayListRespone__ is the output.
   "data": [
     {      
       "id": 0,
-	  "address": "string",
+      "address": "string",
       "port": 0,
-	  "exclusive": true,
+      "exclusive": true,
       "secure": true,
       "type": "GATEKEEPER_RELAY",
-	  "createdAt": "string",
+      "createdAt": "string",
       "updatedAt": "string"
     }
   ]
