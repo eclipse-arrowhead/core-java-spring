@@ -4580,7 +4580,11 @@ placeholder
 
 ### Removed Endpoints <br />
 
-placeholder
+The following endopints no longer exist:
+* `GET /gatekeeper/mgmt/neighborhood/operator/{operator}/cloudname/{cloudName}`
+* `DELETE /gatekeeper/mgmt/neighborhood/operator/{operator}/cloudname/{cloudName}`
+* `GET /gatekeeper/mgmt/brokers/brokername/{brokerName}`
+* `GET /gatekeeper/mgmt/brokers/address/{address}`
 
 <a name="gatekeeper_endpoints_get_echo" />
 
