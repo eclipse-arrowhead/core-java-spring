@@ -4573,6 +4573,7 @@ placeholder
 | [Get Relay by ID](#gatekeeper_endpoints_get_relay_by_id) | /mgmgt/relays/{id} | GET | relayId | [RelayResponse](#datastructures_relayresponse) |
 | [Get Relay by Address and Port](#gatekeeper_endpoints_get_relay_by_address_and_port) | /mgmgt/relays/{address}/{port} | GET | address, port | [RelayResponse](#datastructures_relayresponse2) |
 | [Register Relays](#gatekeeper_endpoints_register_relays) | /mgmgt/relays | POST | [RelayRequest list](#datastructures_relayrequestlist) | [RelayListResponse](#datastructures_relaylistresponse2) |
+| [Update Relay](#gatekeeper_endpoints_update_relay) | /mgmgt/relays/{id} | PUT | [RelayRequest](#datastructures_relayrequest) | [RelayResponse](#datastructures_relayresponse3) |
 
 <a name="gatekeeper_removed" />
 
@@ -5106,7 +5107,7 @@ __CloudWithRelaysListRespone__ is the output.
 PUT /gatekeeper/mgmgt/clouds/{id}
 ```
 
-Returns updated Cloud entry.
+Returns updated Cloud entry specified by the ID path parameter.
 
 <a name="datastructures_cloudrequest" />
 
@@ -5450,7 +5451,6 @@ __RelayRequest__ list is the input
 
 | Field | Description |
 | ----- | ----------- |
-| `id` | ID of the Relay |
 | `address` | Host of the Relay |
 | `port` | Port of the Relay |
 | `exclusive` | Whether or not is is a not public Relay |
@@ -5483,6 +5483,67 @@ __RelayListRespone__ is the output.
 | ----- | ----------- |
 | `count` | Number of record found |
 | `data` | Array of data |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_update_relay" />
+
+### Update Relay
+```
+PUT /gatekeeper/mgmgt/relays/{id}
+```
+
+Returns updated Relay entry specified by the ID path parameter.
+
+<a name="datastructures_relayrequest" />
+
+__RelayRequest__ is the input.
+
+```json
+[
+ {      
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+ }
+]
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="datastructures_relayresponse3" />
+
+__RelayRespone__ is the output.
+
+```json
+{      
+  "id": 0,
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
 | `id` | ID of the Relay |
 | `address` | Host of the Relay |
 | `port` | Port of the Relay |
