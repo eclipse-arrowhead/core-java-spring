@@ -4569,6 +4569,7 @@ placeholder
 | [Update Cloud](#gatekeeper_endpoints_update_cloud) | /mgmgt/clouds/{id} | PUT | [CloudRequest](#datastructures_cloudrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse2) |
 | [Assign Relays to Cloud](#gatekeeper_endpoints_assign_relays_to_cloud) | /mgmgt/clouds/assign | POST | [CloudRelaysAssignmentRequest](#datastructures_cloudrelaysassignmentrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse3) |
 | [Delete Cloud](#gatekeeper_endpoints_delete_cloud) | /mgmgt/clouds/{id} | DELETE | cloudId | - |
+| [Get all Relay entries](#gatekeeper_endpoints_get_all_relay) | /mgmgt/relays | GET | - | [RelayListResponse](#datastructures_relaylistresponse) |
 
 <a name="gatekeeper_removed" />
 
@@ -5287,6 +5288,68 @@ DELETE /gatekeeper/mgmgt/clouds/{id}
 ```
 
 Remove requested Cloud entry
+
+<a name="gatekeeper_endpoints_get_all_relay" />
+
+### Get all Relay entries 
+```
+GET /gatekeeper/mgmgt/relays
+```
+
+Returns Relay entries by the given paging parameters. If `page` and `item_per_page` are
+not defined, no paging is involved.             
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+
+<a name="datastructures_relaylistresponse" />
+
+__RelayListRespone__ is the output.
+
+```json
+{
+  "count": 0,
+  "data": [
+    {      
+      "id": 0,
+	  "address": "string",
+      "port": 0,
+	  "exclusive": true,
+      "secure": true,
+      "type": "GATEKEEPER_RELAY",
+	  "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
 
 # Gateway
  
