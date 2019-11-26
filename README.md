@@ -4534,7 +4534,28 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
 
 ## Services and Use Cases
 
-placeholder
+Use case 1: *Global Service Discovery request*
+
+| Name | Description |
+| ---- | --------- |
+| ID | GSD-1 |
+| Brief Description | The Gatekeeper is tasked to find a Service in other Local Clouds |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Relays used by the Gatekeeper <br/>- the Gatekeeper instances of another Clouds |
+| Preconditions | Orchestration process was started by an Application System. |
+| Main Flow | - The Orchestrator consumes the GSD Initialization Service of its local Gatekeeper. <br/>- Gatekeeper collects the prefferd or neighbor Clouds and one of its Relays. <br/>- The Gatekeeper queries the other Gatekeepers via the Relays. <br/>- These Gatekeepers verify whether they could facilitate this request or not. <br/>- The requester Gatekeeper collects these answers and respond via the GSD Initialization Service to its Orchestrator |
+| Postconditions | The Orchestrator has a list of other Local Clouds that can provide the Service we are looking for.  |
+
+Use case 2: *Inter-Cloud Negotiation request*
+
+| Name | Description |
+| ---- | --------- |
+| ID | ICN-1 |
+| Brief Description | The Gatekeeper is tasked to start negotiating with another Cloud. |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Relays used by the Gatekeeper <br/>- the Gatekeeper instances of another Clouds <br/>- the other Orchestrator from the second Cloud|
+| Preconditions | Orchestration process was started by an Application System. The GSD process has ended, the requester Orchestrator has chosen a partnering Cloud, where it wants to connect to. |
+| Main Flow | - The Orchestrator consumes the ICN Initialization Service of its local Gatekeeper. <br/>- The Gatekeeper consumes the other Gatekeeper's ICN Proposal service via an Relay.<br/>- The secondary Gatekeeper validates the AuthorizationControl and requests Orchestration from its own Orchestrator <br/>- The secondary Orhestrator responds to the secondary Gatekeeper with an Orchestration result. <br/>- The secondary Gatekeeper responds to the primary, requester Gatekeeper. <br/>- Additional administrative tasks are executed (e.g. configuration of the Gateway modules) <br/>- The primary, requester Orchestrator is receiving the response via the ICN initialization service. |
 
 <a name="gatekeeper_endpoints" />
 
