@@ -4571,6 +4571,7 @@ placeholder
 | [Delete Cloud](#gatekeeper_endpoints_delete_cloud) | /mgmgt/clouds/{id} | DELETE | cloudId | - |
 | [Get all Relay entries](#gatekeeper_endpoints_get_all_relay) | /mgmgt/relays | GET | - | [RelayListResponse](#datastructures_relaylistresponse) |
 | [Get Relay by ID](#gatekeeper_endpoints_get_relay_by_id) | /mgmgt/relays/{id} | GET | relayId | [RelayResponse](#datastructures_relayresponse) |
+| [Get Relay by Address and Port](#gatekeeper_endpoints_get_relay_by_address_and_port) | /mgmgt/relays/{address}/{port} | GET | relayAddress, relayPort | [RelayResponse](#datastructures_relayresponse2) |
 
 <a name="gatekeeper_removed" />
 
@@ -5362,6 +5363,41 @@ GET /gatekeeper/mgmgt/relays/{id}
 Returns the Relay Entry specified by the ID path parameter.
 
 <a name="datastructures_relayresponse" />
+
+__RelayRespone__ is the output.
+
+```json
+{      
+  "id": 0,
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_get_relay_by_address_and_port" />
+
+### Get Relay by Address and Port 
+```
+GET /gatekeeper/mgmgt/relays/{address}/{port}
+```
+
+Returns the Relay Entry specified by the address and port path parameter.
+
+<a name="datastructures_relayresponse2" />
 
 __RelayRespone__ is the output.
 
