@@ -5738,7 +5738,99 @@ __GatewayConsumerConnectionRequest__ is the input.
 | `consumerCloud` | Cloud of Consumer Application System |
 | `provider` | Provider Application System |
 | `providerCloud` | Cloud of Provider Application System |
-| `providerGWPublicKey` | Base64 encoded public key of provider cloud's Gatekeeper |
-| `peerName` | Server Common Name of provider cloud's Gatekeeper |
-| `queueId` | ID of the queue in the Relay created by the provider |
+| `providerGWPublicKey` | Base64 encoded public key of provider cloud's Gateway |
+| `peerName` | Server Common Name of provider cloud's Gateway |
+| `queueId` | ID of the message queue in the Relay created by the provider |
 | `serviceDefinition` | Definition of the service. |
+
+<a name="gateway_endpoints_connect_to_provider" />
+
+### Connect To Provider 
+```
+POST /gateway/connect_provider
+```
+
+Creates a Socket and Message queue between the given Relay and Provider and return the necesarry connection informations.
+
+<a name="datastructures_gatewayproviderconnectionrequest" />
+
+__GatewayProviderConnectionRequest__ is the input.
+
+```json
+{
+  "consumer": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"    
+  },
+  "consumerCloud": {    
+    "name": "string",
+    "operator": "string",
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "provider": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "providerCloud": {
+    "name": "string",
+    "operator": "string",
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "consumerGWPublicKey": "string",
+  "relay": {
+    "address": "string",
+    "port": 0,
+    "exclusive": true,
+    "secure": true,
+    "type": "string"
+  },
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `consumer` | Consumer Application System |
+| `consumerCloud` | Cloud of Consumer Application System |
+| `provider` | Provider Application System |
+| `providerCloud` | Cloud of Provider Application System |
+| `consumerGWPublicKey` | Base64 encoded public key of consumer cloud's Gateway |
+| `serviceDefinition` | Definition of the service. |
+
+<a name="datastructures_gatewayproviderconnectionresponse" />
+
+__GatewayProviderConnectionResponse__ is the output.
+
+```json
+{
+  "peerName": "string",
+  "queueId": "string",
+  "providerGWPublicKey": "string"  
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `peerName` | Server Common Name of provider cloud's Gateway |
+| `queueId` | ID of the message queue in the Relay created by the provider |
+| `providerGWPublicKey` | Base64 encoded public key of provider cloud's Gateway |
