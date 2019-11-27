@@ -5645,6 +5645,7 @@ Use case 2: *Connect to Provider*
 | -------- | ----------- | ------ | ----- | ------ |
 | [Connect To Consumer](#gateway_endpoints_connect_to_consumer) | /connect_consumer | POST    | [GatewayConsumerConnectionRequest](#datastructures_gatewayconsumerconnectionrequest) | Server Port number |
 | [Connect To Provider](#gateway_endpoints_connect_to_provider) | /connect_provider | POST    | [GatewayProviderConnectionRequest](#datastructures_gatewayproviderconnectionrequest) | [GatewayProviderConnectionResponse](#datastructures_gatewayproviderconnectionresponse) |
+| [Get Public Key](#gateway_endpoints_get_public_key) | /publickey | GET    | - | Public Key string |
 
 <a name="gateway_endpoints_mgmt" />
 
@@ -5834,3 +5835,12 @@ __GatewayProviderConnectionResponse__ is the output.
 | `peerName` | Server Common Name of provider cloud's Gateway |
 | `queueId` | ID of the message queue in the Relay created by the provider |
 | `providerGWPublicKey` | Base64 encoded public key of provider cloud's Gateway |
+
+<a name="gateway_endpoints_get_public_key" />
+
+### Get Public Key
+```
+GET /gateway/publickey
+```
+
+Returns the public key of the Gateway core service as a Base64 encoded text.
