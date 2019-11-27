@@ -5589,7 +5589,13 @@ Remove requested Relay entry.
 <a name="gateway_sdd" />
  
 ## System Design Description Overview
-establish the datapath 
+
+This supporting core system has the purpose of establishing a secured datapath - if required - between a consumer and a provider located in different clouds by its following services:
+
+- Connect to Consumer
+- Connect to Provider
+
+These Services are part of the Inter-Cloud Negotiation (ICN) process initiated by the requester cloud's Gatekeeper. During the ICN process, when a Gateway is required by one of the cloud, then the Gatekeepers in both cloud establish a new datapath to their application systems ans ensure the data exchange via a Relay system.
 
 ![Alt text](documentation/images/gateway_overview.png)
 
