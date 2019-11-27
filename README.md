@@ -72,8 +72,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [Endpoints](#gateway_endpoints)
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
-           * [Management](#gateway_endpoints_mgmt)     
-           * [Removed Endpoints](#gateway_removed)
+           * [Management](#gateway_endpoints_mgmt)
 	
 <a name="quickstart" />
 
@@ -5650,10 +5649,6 @@ Use case 2: *Connect to Provider*
 <a name="gateway_endpoints_mgmt" />
 
 ### Management endpoint description<br />
-
-<a name="gateway_removed" />
-
-### Removed Endpoints <br />
 
 placeholder
 
