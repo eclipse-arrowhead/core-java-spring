@@ -5665,7 +5665,7 @@ GET /gateway/echo
 
 Returns a "Got it" message with the purpose of testing the core service availability.
 
-<a name="gatekeeper_endpoints_get_relay_by_address_and_port" />
+<a name="gateway_endpoints_connect_to_consumer" />
 
 ### Connect To Consumer 
 ```
@@ -5684,14 +5684,14 @@ __GatewayConsumerConnectionRequest__ is the input.
     "systemName": "string",
     "address": "string",
     "port": 0,
-	"authenticationInfo": "string"    
+    "authenticationInfo": "string"    
   },
   "consumerCloud": {    
     "name": "string",
     "operator": "string",
-	"neighbor": true,
+    "neighbor": true,
     "secure": true,
-	"authenticationInfo": "string",
+    "authenticationInfo": "string",
     "gatekeeperRelayIds": [
       0
     ],
@@ -5708,9 +5708,9 @@ __GatewayConsumerConnectionRequest__ is the input.
   "providerCloud": {
     "name": "string",
     "operator": "string",
-	"neighbor": true,
+    "neighbor": true,
     "secure": true,
-	"authenticationInfo": "string",
+    "authenticationInfo": "string",
     "gatekeeperRelayIds": [
       0
     ],
@@ -5724,7 +5724,7 @@ __GatewayConsumerConnectionRequest__ is the input.
   "relay": {
     "address": "string",
     "port": 0,
-	"exclusive": true,
+    "exclusive": true,
     "secure": true,
     "type": "string"
   },
