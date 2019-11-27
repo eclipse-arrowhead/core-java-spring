@@ -5631,11 +5631,20 @@ Use case 2: *Connect to Provider*
 
 <a name="gateway_endpoints_client" />
 
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#gateway_endpoints_get_echo) | /echo | GET    | -    | OK     |
+
 ### Client endpoint description<br />
 
 <a name="gateway_endpoints_private" />
 
 ### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Connect To Consumer](#gateway_endpoints_connect_to_consumer) | /connect_consumer | POST    | [GatewayConsumerConnectionRequest](#datastructures_gatewayconsumerconnectionrequest) | Server Port number |
+| [Connect To Provider](#gateway_endpoints_connect_to_provider) | /connect_provider | POST    | [GatewayProviderConnectionRequest](#datastructures_gatewayproviderconnectionrequest) | [GatewayProviderConnectionResponse](#datastructures_gatewayproviderconnectionresponse) |
 
 <a name="gateway_endpoints_mgmt" />
 
@@ -5644,3 +5653,92 @@ Use case 2: *Connect to Provider*
 <a name="gateway_removed" />
 
 ### Removed Endpoints <br />
+
+placeholder
+
+<a name="gateway_endpoints_get_echo" />
+
+### Echo 
+```
+GET /gateway/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="gatekeeper_endpoints_get_relay_by_address_and_port" />
+
+### Connect To Consumer 
+```
+POST /gateway/connect_consumer
+```
+
+Creates a ServerSocket between the given Relay and Consumer and return the ServerSocket port.
+
+<a name="datastructures_gatewayconsumerconnectionrequest" />
+
+__GatewayConsumerConnectionRequest__ is the input.
+
+```json
+{
+  "consumer": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+	"authenticationInfo": "string"    
+  },
+  "consumerCloud": {    
+    "name": "string",
+    "operator": "string",
+	"neighbor": true,
+    "secure": true,
+	"authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "provider": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "providerCloud": {
+    "name": "string",
+    "operator": "string",
+	"neighbor": true,
+    "secure": true,
+	"authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "providerGWPublicKey": "string",
+  "peerName": "string",
+  "queueId": "string",
+  "relay": {
+    "address": "string",
+    "port": 0,
+	"exclusive": true,
+    "secure": true,
+    "type": "string"
+  },
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `consumer` | Consumer Application System |
+| `consumerCloud` | Cloud of Consumer Application System |
+| `provider` | Provider Application System |
+| `providerCloud` | Cloud of Provider Application System |
+| `providerGWPublicKey` | Base64 encoded public key of provider cloud's Gatekeeper |
+| `peerName` | Server Common Name of provider cloud's Gatekeeper |
+| `queueId` | ID of the queue in the Relay created by the provider |
+| `serviceDefinition` | Definition of the service. |
