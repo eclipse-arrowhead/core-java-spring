@@ -5603,6 +5603,28 @@ These Services are part of the Inter-Cloud Negotiation (ICN) process initiated b
 
 ## Services and Use Cases
 
+Use case 1: *Connect to Consumer*
+
+| Name | Description |
+| ---- | --------- |
+| ID | Connect-To-Consumer |
+| Brief Description | The Gateway is tasked to connect to the Consumer and mediate between the Relay and the Consumer. |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Arrowhead compliant ActiveMQ Relay |
+| Preconditions | Inter-Cloud orchestration process was started by a consuming Application System. |
+| Main Flow | - The Gatekeeper sends a ConnectToConsumerRequest to the Gateway. <br/>- The Gateway internally creates a new ActiveSession object. <br/>- The Gateway starts a new thread. <br/>- The Gateway creates a sslServerSocket. <br/>- The Consumer connects to the port of the serverSocket. <br/>- The Gateway gets the request from the Consumer through the SSLSocket forwards it to the Relay. <br/>- The Gateway gets the response from the Provider via the Relay, decrypts and forwards it to the Consumer through the socket. <br/>- The Gateway checks the control messages from the Relay and if a "close" message is received, than close the session. |
+
+Use case 2: *Connect to Provider*
+
+| Name | Description |
+| ---- | --------- |
+| ID | Connect-To-Provider |
+| Brief Description | The Gateway is tasked to connect to the Provider and mediate between the Relay and the Provider. |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Arrowhead compliant ActiveMQ Relay |
+| Preconditions | Inter-Cloud orchestration process was started by a consuming Application System. |
+| Main Flow | - The Gatekeeper sends a ConnectToProviderRequest to the Gateway. <br/>- The Gateway internally creates a new ActiveSession object with new queues for a choosen Relay. <br/>- The Gateway starts a new thread. <br/>- The Gateway creates a sslServerSocket. <br/>- The Gateway gets the request from the Consumer through the Relay. <br/>-  The Gateway gets the response from the Provider via the SSLSocket, then encrypts and forwards it to the Relay. <br/>- The Gateway checks the control messages from the Relay and if a "close" message is received, than close the session. |
+
 <a name="gateway_endpoints" />
 
 ## Endpoints
