@@ -80,11 +80,11 @@ public class GSDPollTask implements Runnable {
 			queue.add(response.getGSDPollResponse());
 		} catch (final InvalidParameterException | BadPayloadException ex) {	
 			// We forward this two type of arrowhead exception to the caller
-			logger.debug("Exception:", ex.getMessage());
+			logger.debug("Exception: {}", ex.getMessage());
 			queue.add(new ErrorMessageDTO(ex));
 		} catch (final Throwable ex) {			
 			// Must catch all throwable, otherwise the blocking queue would block the whole process
-			logger.debug("Exception:", ex.getMessage());
+			logger.debug("Exception: {}", ex.getMessage());
 			
 			// adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
 			queue.add(new GSDPollResponseDTO()); 			
