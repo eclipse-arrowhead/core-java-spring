@@ -5289,7 +5289,7 @@ This supporting core system has the purpose of establishing a secured datapath -
 - Connect to Consumer
 - Connect to Provider
 
-These Services are part of the Inter-Cloud Negotiation (ICN) process initiated by the requester cloud's Gatekeeper. During the ICN process, when a Gateway is required by one of the cloud, then the Gatekeepers in both cloud establish a new datapath to their application systems ans ensure the data exchange via a Relay system.
+These Services are part of the Inter-Cloud Negotiation (ICN) process initiated by the requester cloud's Gatekeeper. During the ICN process, when a Gateway is required by one of the cloud, then the Gatekeepers in both cloud establish a new datapath to their application systems and ensure the data exchange via a Relay system.
 
 ![Alt text](documentation/images/gateway_overview.png)
 
@@ -5325,11 +5325,11 @@ Use case 2: *Connect to Provider*
 
 <a name="gateway_endpoints_client" />
 
+### Client endpoint description<br />
+
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#gateway_endpoints_get_echo) | /echo | GET    | -    | OK     |
-
-### Client endpoint description<br />
 
 <a name="gateway_endpoints_private" />
 
