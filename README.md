@@ -5293,6 +5293,8 @@ These Services are part of the Inter-Cloud Negotiation (ICN) process initiated b
 
 ![Alt text](documentation/images/gateway_overview.png)
 
+> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
+
 <a name="gateway_usecases" />
 
 ## Services and Use Cases
