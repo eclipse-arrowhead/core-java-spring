@@ -9,6 +9,11 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+/**
+ * Third party code from: https://stackoverflow.com/a/54258488
+ * @author granadaCoder (https://stackoverflow.com/users/214977/granadacoder)
+ *
+ */
 public class MultiReadRequestWrapper extends HttpServletRequestWrapper {
 
 	//=================================================================================================
@@ -31,7 +36,7 @@ public class MultiReadRequestWrapper extends HttpServletRequestWrapper {
     //-------------------------------------------------------------------------------------------------
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
-    	return  new CustomServletInputStream(body.getBytes());
+    	return new CustomServletInputStream(body.getBytes());
 	}
 
 	//-------------------------------------------------------------------------------------------------

@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Third party code from: https://stackoverflow.com/a/54258488
+ * @author granadaCoder (https://stackoverflow.com/users/214977/granadacoder)
+ *
+ */
 public class CustomServletInputStream extends ServletInputStream {
 	
 	//=================================================================================================
