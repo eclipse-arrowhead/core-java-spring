@@ -5643,7 +5643,7 @@ __ActiveSessionList__ is the output.
 | `sessionStartedAt` | Time stamp of session start |
 | `consumerServerSocketPort` | Port number delegated to consumer connection |
 
-<a name="gateway_endpoints_get_close_session" />
+<a name="gateway_endpoints_close_session" />
 
 ### Close Session
 ```
