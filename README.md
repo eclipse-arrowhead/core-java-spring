@@ -4359,7 +4359,7 @@ __GSDQueryForm__ is the input
       ],
       "gatewayRelayIds": [
         0
-      ],
+      ]
     }
   ]
 }
