@@ -4299,7 +4299,7 @@ Use case 2: *Inter-Cloud Negotiation request*
 
 ### Removed Endpoints <br />
 
-The following endopints no longer exist:
+The following endpoints no longer exist:
 * `GET /gatekeeper/mgmt/neighborhood/operator/{operator}/cloudname/{cloudName}`
 * `DELETE /gatekeeper/mgmt/neighborhood/operator/{operator}/cloudname/{cloudName}`
 * `GET /gatekeeper/mgmt/brokers/brokername/{brokerName}`
@@ -4376,7 +4376,7 @@ __GSDQueryForm__ is the input
 | `minVersionRequirement` | Minimum version of the Service | no |
 | `pingProviders` | Whether or not the providers should be pinged | no |
 | `metadataRequirements` | Metadata | no |
-| `preferredClouds` | List of preferred couds | no |
+| `preferredClouds` | List of preferred clouds | no |
 
 <a name="datastructures_gsdqueryresult" />
 
@@ -4417,8 +4417,8 @@ __GSDQueryResult__ is the output
 | ----- | ----------- |
 | `results` | List of result objects |
 | `providerCloud` | Cloud where the result coming from |
-| `requiredServiceDefinition` | Serfvice Definition |
-| `availableInterfaces` | List of availble interfaces |
+| `requiredServiceDefinition` | Service Definition |
+| `availableInterfaces` | List of available interfaces |
 | `serviceMetadata` | Metadata |
 | `numOfProviders` | Number of providers serving the service within the cloud |
 | `unsuccessfulRequests` | Number of clouds not responded |
@@ -4664,7 +4664,7 @@ Returns the Cloud Entry specified by the ID path parameter.
 
 <a name="datastructures_cloudwithrelaysresponse" />
 
-__CloudWithRelaysRespone__ is the output.
+__CloudWithRelaysResponse__ is the output.
 
 ```json
 {
@@ -4712,8 +4712,8 @@ __CloudWithRelaysRespone__ is the output.
 | `ownCloud` | Whether or not it is the own Cloud |
 | `secure` | Whether or not it is a secured Cloud/Relay |
 | `authenticationInfo` | Base64 encoded public key of the Cloud |
-| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
-| `gatewayRelays` | List of Relays uesd by Gateway |
+| `gatekeeperRelays` | List of Relays used by Gatekeeper |
+| `gatewayRelays` | List of Relays used by Gateway |
 | `address` | Host of the Relay |
 | `port` | Port of the Relay |
 | `exclusive` | Whether or not is is a not public Relay |
@@ -4757,12 +4757,12 @@ __CloudRequest__ list is the input.
 | `neighbor` | Whether or not it is a neighbor Cloud |
 | `secure` | Whether or not it is a secured Cloud |
 | `authenticationInfo` | Base64 encoded public key of the Cloud |
-| `gatekeeperRelayIds` | List of Relay IDs uesd by Gatekeeper |
-| `gatewayRelayIds` | List of Relay IDs uesd by Gateway |
+| `gatekeeperRelayIds` | List of Relay IDs used by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs used by Gateway |
 
 <a name="datastructures_cloudwithrelayslistresponse2" />
 
-__CloudWithRelaysListRespone__ is the output.
+__CloudWithRelaysListResponse__ is the output.
 
 ```json
 {
@@ -4860,12 +4860,12 @@ __CloudRequest__ is the input.
 | `neighbor` | Whether or not it is a neighbor Cloud |
 | `secure` | Whether or not it is a secured Cloud |
 | `authenticationInfo` | Base64 encoded public key of the Cloud |
-| `gatekeeperRelayIds` | List of Relay IDs uesd by Gatekeeper |
-| `gatewayRelayIds` | List of Relay IDs uesd by Gateway |
+| `gatekeeperRelayIds` | List of Relay IDs used by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs used by Gateway |
 
 <a name="datastructures_cloudwithrelaysresponse2" />
 
-__CloudWithRelaysRespone__ is the output.
+__CloudWithRelaysResponse__ is the output.
 
 ```json
 {
@@ -4948,12 +4948,12 @@ __CloudRelaysAssignmentRequest__ is the input.
 | Field | Description |
 | ----- | ----------- |
 | `cloudId` |ID of the cloud |
-| `gatekeeperRelayIds` | List of Relay IDs uesd by Gatekeeper |
-| `gatewayRelayIds` | List of Relay IDs uesd by Gateway |
+| `gatekeeperRelayIds` | List of Relay IDs used by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs used by Gateway |
 
 <a name="datastructures_cloudwithrelaysresponse3" />
 
-__CloudWithRelaysRespone__ is the output.
+__CloudWithRelaysResponse__ is the output.
 
 ```json
 {
@@ -5001,8 +5001,8 @@ __CloudWithRelaysRespone__ is the output.
 | `ownCloud` | Whether or not it is the own Cloud |
 | `secure` | Whether or not it is a secured Cloud/Relay |
 | `authenticationInfo` | Base64 encoded public key of the Cloud |
-| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
-| `gatewayRelays` | List of Relays uesd by Gateway |
+| `gatekeeperRelays` | List of Relays used by Gatekeeper |
+| `gatewayRelays` | List of Relays used by Gateway |
 | `address` | Host of the Relay |
 | `port` | Port of the Relay |
 | `exclusive` | Whether or not is is a not public Relay |
@@ -5048,7 +5048,7 @@ Query params:
 
 <a name="datastructures_relaylistresponse" />
 
-__RelayListRespone__ is the output.
+__RelayListResponse__ is the output.
 
 ```json
 {
@@ -5090,7 +5090,7 @@ Returns the Relay Entry specified by the ID path parameter.
 
 <a name="datastructures_relayresponse" />
 
-__RelayRespone__ is the output.
+__RelayResponse__ is the output.
 
 ```json
 {      
@@ -5125,7 +5125,7 @@ Returns the Relay Entry specified by the address and port path parameter.
 
 <a name="datastructures_relayresponse2" />
 
-__RelayRespone__ is the output.
+__RelayResponse__ is the output.
 
 ```json
 {      
@@ -5183,7 +5183,7 @@ __RelayRequest__ list is the input
 
 <a name="datastructures_relaylistresponse2" />
 
-__RelayListRespone__ is the output.
+__RelayListResponse__ is the output.
 
 ```json
 {
@@ -5249,7 +5249,7 @@ __RelayRequest__ is the input.
 
 <a name="datastructures_relayresponse3" />
 
-__RelayRespone__ is the output.
+__RelayResponse__ is the output.
 
 ```json
 {      
@@ -5451,7 +5451,7 @@ __GatewayConsumerConnectionRequest__ is the input.
 POST /gateway/connect_provider
 ```
 
-Creates a Socket and Message queue between the given Relay and Provider and return the necesarry connection informations.
+Creates a Socket and Message queue between the given Relay and Provider and returns the necessary connection information.
 
 <a name="datastructures_gatewayproviderconnectionrequest" />
 
