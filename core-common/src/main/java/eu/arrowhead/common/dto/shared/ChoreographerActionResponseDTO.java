@@ -1,6 +1,5 @@
-package eu.arrowhead.common.dto.choreographer;
+package eu.arrowhead.common.dto.shared;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
