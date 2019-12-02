@@ -6,9 +6,8 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanRequestWithExistingActionDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.internal.ChoreographerActionPlanRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.Api;
@@ -49,12 +48,13 @@ public class ChoreographerController {
 
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_URI = CoreCommonConstants.MGMT_URI + "/actionplan";
     private static final String CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-    private static final String CHOREOGRAPHER_ACTION_PLAN_WITH_ACTIONS_MGMT_URI = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI + "/withactions";
 
     private static final String GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE = "ChoreographerActionStep returned.";
     private static final String GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE = "Could not retrieve ChoreographerActionStep.";
+
     private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE = "ChoreographerActionPlan created with given service definitions.";
     private static final String POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE = "Could not create ChoreographerActionPlan.";
+
     private static final String DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_200_MESSAGE = "ChoreographerActionPlan successfully removed.";
     private static final String DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_400_MESSAGE = "Could not remove ChoreographerActionPlan.";
 

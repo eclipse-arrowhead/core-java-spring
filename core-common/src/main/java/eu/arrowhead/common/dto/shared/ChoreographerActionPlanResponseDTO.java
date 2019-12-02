@@ -1,4 +1,4 @@
-package eu.arrowhead.common.dto.choreographer;
+package eu.arrowhead.common.dto.shared;
 
 
 
