@@ -16,7 +16,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
-4. [Gatekeeper and Gateway Setup](#setupgatekeeper_and_gateway)
+4. [Gatekeeper and Gateway Setup with ActiveMQ Relay](#setupgatekeeper_and_gateway)
 5. [How to Contribute](#howtocontribute)
 6. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
@@ -428,9 +428,9 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 
 <a name="setupgatekeeper_and_gateway" /> 
 
-## Gatekeeper and Gateway Setup
+## Gatekeeper and Gateway Setup with ActiveMQ Relay
 
-Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
+Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
 
 <a name="howtocontribute" />
 
@@ -4226,7 +4226,7 @@ During the inter-Cloud orchestration, the Global Service Discovery is the first 
 
 ![Alt text](documentation/images/gatekeeper_overview.png)
 
-> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
+> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
 
 <a name="gatekeeper_usecases" />
 
@@ -5297,7 +5297,7 @@ These Services are part of the Inter-Cloud Negotiation (ICN) process initiated b
 
 ![Alt text](documentation/images/gateway_overview.png)
 
-> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide](documentation/gatekeeper/GatekeeperSetup.md)
+> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
 
 <a name="gateway_usecases" />
 
