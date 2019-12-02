@@ -80,6 +80,8 @@ Inside the `docker` folder an example is provided.
 
 Example Core System Configuration files are available in this folder. 
 
+> **Note:** Don't forget to set `domain.name` and `domain.port` properties!
+
 ##### Docker Compose
 
 Example Docker Compose file is located here. The interesting part is the volumes section. 
@@ -130,6 +132,8 @@ A: Probably you missed to copy the init SQL script next to the compose file, or 
 
 The Debian installer files are located in the deb-installer/package/arrowhead-installers-4.1.3 folder. 
 Please follow this guide to install them: [Debian Installer Guide](documentation/deb-installer/DEBIAN-INSTALL.md)
+
+> **Note:** Preferred installation mode for Raspberry Pi.
 
 <a name="quickstart_compile" />
 
