@@ -11,6 +11,7 @@ AH_COMPANY=arrowhead # hard-coded to the Arrowhead Framework
 AH_COUNTRY=eu # hard-coded to the Arrowhead Framework
 
 db_get arrowhead-core-common/relay_master_cert; AH_RELAY_MASTER_CERT=$RET
+db_get arrowhead-core-common/domain_name; AH_DOMAIN_NAME=$RET
 
 OWN_IP=`ip -o -4  address show  | awk ' NR==2 { gsub(/\/.*/, "", $4); print $4 } '`
 echo $OWN_IP
@@ -169,6 +170,26 @@ ah_cert_signed () {
     fi
 }
 
+ah_ip_valid () {
+	my_ip=${1}
+	
+	if expr "$my_ip" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' >/dev/null; then
+		OLD_IFS=${IFS}
+		IFS=.
+		set $my_ip
+		for quad in 1 2 3 4; do
+			if eval [ \$$quad -gt 255 ]; then
+				IFS=OLD_IFS
+				return 1
+			fi
+		done
+		IFS=${OLD_IFS}
+		return 0
+	else
+		return 1
+	fi
+}
+ 
 ah_cert_signed_system () {
     name=${1}
 	passwd=${2}
@@ -197,6 +218,16 @@ ah_cert_signed_system () {
     src_file="${AH_CLOUDS_DIR}/${AH_CLOUD_NAME}.p12"
 
     if [ ! -f "${file}" ]; then
+		san="IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip}"
+		
+		if [ ! -z ${AH_DOMAIN_NAME} ]; then
+			if ah_ip_valid ${AH_DOMAIN_NAME}; then
+				san=${san},IP:${AH_DOMAIN_NAME}
+			else
+				san=${san},DNS:${AH_DOMAIN_NAME}
+			fi
+		fi
+		
 		ah_cert ${path} ${name} "${name}.${AH_CLOUD_NAME}.${AH_OPERATOR}.arrowhead.eu" ${passwd}
 
         keytool -export \
@@ -223,7 +254,7 @@ ah_cert_signed_system () {
             -keystore ${src_file} \
             -storepass ${AH_PASS_CERT} \
             -validity 3650 \
-			-ext SubjectAlternativeName=IP:127.0.0.1,DNS:localhost,DNS:${host},IP:${ip} \
+			-ext SubjectAlternativeName=${san} \
         | keytool -importcert \
             -alias ${name} \
             -keypass ${passwd} \
