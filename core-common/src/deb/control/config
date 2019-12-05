@@ -58,6 +58,8 @@ if [ -z "${AH_PASS_CERT}" ]; then
     db_input high arrowhead-core-common/cert_password || true
 fi
 
+db_input high arrowhead-core-common/domain_name || true
+
 # Run dialogs
 db_go || true
 

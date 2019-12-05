@@ -99,3 +99,7 @@ Description: MySQL password for Service Registry system (leave empty for random)
 Template: arrowhead-core-common/sr_host
 Type: string
 Description: Enter the hostname or IP address of the Service Registry (leave empty if the SR on the same computer than the system)
+
+Template: arrowhead-core-common/domain_name
+Type: string
+Description: Enter the hostname or IP address on which local systems can access this machine (leave empty for auto-detected IP address)
