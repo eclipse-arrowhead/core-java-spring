@@ -181,7 +181,7 @@ Verify that you have Java (```java -version```), Maven (```mvn -version```), MyS
 Pull this code and enter the directory. 
 ```git clone https://github.com/arrowhead-f/core-java-spring.git```
 
-Run the MySQL script which is in the ```scripts``` folder. If you won't run this script first, the project won't build. 
+Got to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` MySQL script. If you won't run this script first, the project won't build. 
 
 ```cd core-java-spring```
 
