@@ -1,4 +1,4 @@
-Use case 3: *Publish Authorization Update Event *
+Use case 3: *Publish Authorization Update Event*
 
 | Name | Description |
 | ---- | --------- |
