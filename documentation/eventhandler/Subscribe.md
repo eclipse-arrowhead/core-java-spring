@@ -52,8 +52,8 @@ __SubscriptionRequest__ is the input.
 | `subscriberSystem` | Details of subscriber system | mandatory | as in system |
 
 | __System__  fields |
-
 | ------------------------------------------------------- |
+
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `systemName` | The name of the system. | mandatory | max. length = 255 |
