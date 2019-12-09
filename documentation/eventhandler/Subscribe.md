@@ -46,7 +46,7 @@ __SubscriptionRequest__ is the input.
 | `filterMetaData` | The recievied event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
 | `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  ture or false |
 | `notifyUri` | Url subpath of the subscriber sytem's notification endpoint | mandatory | max.length = 65535 |
-| `sources` | List of publisher systems | optional (if not difined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not difined |
+| `sources` | List of publisher systems | optional (if not difined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not not defined |
 | `startDate` | If startDate is defined, the subscriber system will only receive events when the events timestamp is after startDate.  | optional ( StartDate must be after the current datetime. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
 | `endDate` | If endDate is defined, the subscriber system will only receive events when the events timestamp is before endDate. | optional ( EndDate must be after the current datetime. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
 | `subscriberSystem` | Details of subscriber system | mandatory | as in system |
