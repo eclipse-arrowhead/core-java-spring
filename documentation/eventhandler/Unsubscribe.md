@@ -7,7 +7,7 @@ Removes the subscription record specified by parameters.
 <a name="datastructures_eventhandlerunsubscriberequest" />
 
 __Unsubscribe query parameters__ are the input :
-`https://eventhandler_ip:unsubscribe_port/eventhandler/unsubscribe?address=`192.168.0.1`&event_type=`EVENT_TYPE_1`&port=`9009`&system_name=`test_consumer`
+`https://eventhandler_ip:unsubscribe_port/eventhandler/unsubscribe?address=`192.168.0.1`&event_type=`EVENT_TYPE_1`&port=`9009`&system_name=`test_consumer
 
 | __Unsubscribe__  query parameters |
 | ------------------------------------------------------- |
