@@ -4188,6 +4188,10 @@ __PriorityList__ is the input
 
 ## System Design Description Overview
 
+Event handler SysD:
+![Alt text](documentation/eventhandler/SysD_EventHandler.png)
+
+
 placeholder
 
 <a name="event_handler_usecases" />
