@@ -4194,16 +4194,13 @@ placeholder
 
 ## Services and Use Cases
 
-
-
-
-
 <a name="publish_service_description_overview" />
 
 ## Publish Service Description Overview
 
+[Publish_SD ](documentation/eventhandler/Arrowhead EventPublishing SD.pdf)
 [Publish Event Use Case ](documentation/eventhandler/EH_use_case_1.md)
-
+[Publish_IDD ](documentation/eventhandler/Publish.md)
 
 <a name="eventhandler_endpoints" />
 
