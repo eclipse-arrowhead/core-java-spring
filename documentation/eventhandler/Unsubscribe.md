@@ -11,6 +11,7 @@ __Unsubscribe query parameters__ are the input :
 
 | __Unsubscribe__  query parameters |
 | ------------------------------------------------------- |
+
 | Parameter | Description | Necessity | Format/Limitations |
 | --------- | ----------- | --------- | ----------- |
 | `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
