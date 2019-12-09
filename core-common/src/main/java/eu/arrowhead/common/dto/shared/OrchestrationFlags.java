@@ -11,6 +11,7 @@ public class OrchestrationFlags extends HashMap<String,Boolean> {
 	// members
 
 	private static final long serialVersionUID = 5901365646769727914L;
+	
 	private static final Map<String,Flag> flagMap = initFlagMap();
 	
 	//=================================================================================================

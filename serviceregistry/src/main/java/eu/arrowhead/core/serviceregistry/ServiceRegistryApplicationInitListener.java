@@ -1,5 +1,7 @@
 package eu.arrowhead.core.serviceregistry;
 
+import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +12,11 @@ import org.springframework.stereotype.Component;
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.core.serviceregistry.database.service.ServiceRegistryDBService;
 
 @Component
 public class ServiceRegistryApplicationInitListener extends ApplicationInitListener {
@@ -21,6 +26,9 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 	
 	@Autowired
 	private CommonDBService commonDBService; 
+	
+	@Autowired
+	private ServiceRegistryDBService serviceRegistryDBService;
 
 	//=================================================================================================
 	// assistant methods
@@ -31,6 +39,22 @@ public class ServiceRegistryApplicationInitListener extends ApplicationInitListe
 		logger.debug("customInit started...");
 		if (!isOwnCloudRegistered()) {
 			registerOwnCloud(event.getApplicationContext());
+		}
+		
+		try {
+			final String name = coreSystemRegistrationProperties.getCoreSystem().name().toLowerCase();
+			final List<System> oldSystems = serviceRegistryDBService.getSystemByName(name);
+			if (!oldSystems.isEmpty()) {
+				for (final System system : oldSystems) {
+					serviceRegistryDBService.removeSystemById(system.getId());
+				}
+			}
+			
+			final String authInfo = sslProperties.isSslEnabled() ? Base64.getEncoder().encodeToString(publicKey.getEncoded()) : null;
+			serviceRegistryDBService.createSystem(name, coreSystemRegistrationProperties.getCoreSystemDomainName(), coreSystemRegistrationProperties.getCoreSystemDomainPort(), authInfo);
+		} catch (final ArrowheadException ex) {
+			logger.error("Can't registrate {} as a system.", coreSystemRegistrationProperties.getCoreSystem().name());
+			logger.debug("Stacktrace", ex);
 		}
 	}
 	

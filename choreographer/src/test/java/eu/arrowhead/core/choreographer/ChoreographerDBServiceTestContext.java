@@ -8,11 +8,14 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class ChoreographerDBServiceTestContext {
+	
+	//=================================================================================================
+	// methods
 
+	//-------------------------------------------------------------------------------------------------
     @Bean
     @Primary // This bean is primary only in test context
     public ChoreographerDBService mockChoreographerDBService() {
         return Mockito.mock(ChoreographerDBService.class);
     }
-
 }

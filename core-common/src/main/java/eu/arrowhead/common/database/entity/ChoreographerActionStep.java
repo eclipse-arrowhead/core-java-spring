@@ -1,17 +1,29 @@
 package eu.arrowhead.common.database.entity;
 
-import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.Defaults;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import eu.arrowhead.common.CoreDefaults;
+
 @Entity
 public class ChoreographerActionStep {
+	
+	//=================================================================================================
+	// members
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -42,84 +54,48 @@ public class ChoreographerActionStep {
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerActionStepServiceDefinitionConnection> actionStepServiceDefinitionConnections = new HashSet<>();
 
-    public ChoreographerActionStep() {}
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerActionStep() {}
 
-    public ChoreographerActionStep(String name) {
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerActionStep(final String name) {
         this.name = name;
     }
 
-    public long getId() {
-        return id;
+    //-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public String getName() { return name; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	public Set<ChoreographerActionActionStepConnection> getActionActionStepConnections() { return actionActionStepConnections; }
+	public Set<ChoreographerNextActionStep> getNextActionSteps() { return nextActionSteps; }
+	public Set<ChoreographerNextActionStep> getActionSteps() { return actionSteps; }
+	public Set<ChoreographerActionStepServiceDefinitionConnection> getActionStepServiceDefinitionConnections() { return actionStepServiceDefinitionConnections; }
+    
+	//-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+    public void setName(final String name) { this.name = name; }
+    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public void setActionActionStepConnections(final Set<ChoreographerActionActionStepConnection> actionActionStepConnections) { this.actionActionStepConnections = actionActionStepConnections; }
+    public void setNextActionSteps(final Set<ChoreographerNextActionStep> nextActionSteps) { this.nextActionSteps = nextActionSteps; }
+    public void setActionSteps(final Set<ChoreographerNextActionStep> actionSteps) { this.actionSteps = actionSteps; }
+    public void setActionStepServiceDefinitionConnections(final Set<ChoreographerActionStepServiceDefinitionConnection> actionStepServiceDefinitionConnections) {
+    	this.actionStepServiceDefinitionConnections = actionStepServiceDefinitionConnections;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public ZonedDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(ZonedDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Set<ChoreographerActionActionStepConnection> getActionActionStepConnections() {
-        return actionActionStepConnections;
-    }
-
-    public void setActionActionStepConnections(Set<ChoreographerActionActionStepConnection> actionActionStepConnections) {
-        this.actionActionStepConnections = actionActionStepConnections;
-    }
-
-    public Set<ChoreographerNextActionStep> getNextActionSteps() {
-        return nextActionSteps;
-    }
-
-    public void setNextActionSteps(Set<ChoreographerNextActionStep> nextActionSteps) {
-        this.nextActionSteps = nextActionSteps;
-    }
-
-    public Set<ChoreographerNextActionStep> getActionSteps() {
-        return actionSteps;
-    }
-
-
-    public void setActionSteps(Set<ChoreographerNextActionStep> actionSteps) {
-        this.actionSteps = actionSteps;
-    }
-
-    public Set<ChoreographerActionStepServiceDefinitionConnection> getActionStepServiceDefinitionConnections() {
-        return actionStepServiceDefinitionConnections;
-    }
-
-    public void setActionStepServiceDefinitionConnections(Set<ChoreographerActionStepServiceDefinitionConnection> actionStepServiceDefinitionConnections) {
-        this.actionStepServiceDefinitionConnections = actionStepServiceDefinitionConnections;
-    }
-
-    @PrePersist
+    //-------------------------------------------------------------------------------------------------
+	@PrePersist
     public void onCreate() {
         this.createdAt = ZonedDateTime.now();
         this.updatedAt = this.createdAt;
     }
 
-    @PreUpdate
+    //-------------------------------------------------------------------------------------------------
+	@PreUpdate
     public void onUpdate() {
         this.updatedAt = ZonedDateTime.now();
     }

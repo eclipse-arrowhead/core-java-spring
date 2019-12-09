@@ -1,13 +1,17 @@
 package eu.arrowhead.common.database.repository;
 
-import eu.arrowhead.common.database.entity.ChoreographerActionStep;
-import eu.arrowhead.common.database.entity.ServiceDefinition;
-import org.springframework.stereotype.Repository;
-
 import java.util.Optional;
 
-@Repository
-public interface ChoreographerActionStepRepository extends RefreshableRepository<ChoreographerActionStep, Long> {
+import org.springframework.stereotype.Repository;
 
+import eu.arrowhead.common.database.entity.ChoreographerActionStep;
+
+@Repository
+public interface ChoreographerActionStepRepository extends RefreshableRepository<ChoreographerActionStep,Long> {
+	
+	//=================================================================================================
+	// methods
+
+	//-------------------------------------------------------------------------------------------------
     public Optional<ChoreographerActionStep> findByName(final String name);
 }

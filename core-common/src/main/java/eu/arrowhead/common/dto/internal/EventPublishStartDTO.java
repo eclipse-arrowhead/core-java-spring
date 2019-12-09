@@ -23,8 +23,7 @@ public class EventPublishStartDTO implements Serializable {
 	public EventPublishStartDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public EventPublishStartDTO( final EventPublishRequestDTO request, final Set<Subscription> involvedSubscriptions ) {
-		
+	public EventPublishStartDTO(final EventPublishRequestDTO request, final Set<Subscription> involvedSubscriptions) {
 		this.request = request;
 		this.involvedSubscriptions = involvedSubscriptions;
 	}
@@ -34,8 +33,6 @@ public class EventPublishStartDTO implements Serializable {
 	public Set<Subscription> getInvolvedSubscriptions() { return involvedSubscriptions; }
 	
 	//-------------------------------------------------------------------------------------------------
-
-	public void setRequest( final EventPublishRequestDTO request) { this.request = request; }
-	public void setInvolvedSubscriptions( final Set<Subscription> involvedSubscriptions) {	this.involvedSubscriptions = involvedSubscriptions; }
-
+	public void setRequest(final EventPublishRequestDTO request) { this.request = request; }
+	public void setInvolvedSubscriptions(final Set<Subscription> involvedSubscriptions) { this.involvedSubscriptions = involvedSubscriptions; }
 }

@@ -4,5 +4,6 @@ import eu.arrowhead.common.database.entity.ChoreographerActionActionStepConnecti
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ChoreographerActionActionStepConnectionRepository extends RefreshableRepository<ChoreographerActionActionStepConnection, Long> {
+public interface ChoreographerActionActionStepConnectionRepository extends RefreshableRepository<ChoreographerActionActionStepConnection,Long> {
+	
 }

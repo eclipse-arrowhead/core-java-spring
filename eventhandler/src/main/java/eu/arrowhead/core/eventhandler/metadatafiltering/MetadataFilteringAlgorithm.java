@@ -1,6 +1,7 @@
 package eu.arrowhead.core.eventhandler.metadatafiltering;
 
 public interface MetadataFilteringAlgorithm {
+	
 	//=================================================================================================
 	// methods
 	

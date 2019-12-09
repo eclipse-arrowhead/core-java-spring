@@ -162,14 +162,12 @@ public class AuthorizationDBService {
 				throw new InvalidParameterException("AuthorizationIntraCloud with id of '" + id + "' not exists");
 			}
 			
-			if ( eventhandlerIsPresent)  {
-				final Optional<AuthorizationIntraCloud> authOptional = authorizationIntraCloudRepository.findById( id );
-				if ( authOptional.isPresent() ) {
-					
+			if (eventhandlerIsPresent)  {
+				final Optional<AuthorizationIntraCloud> authOptional = authorizationIntraCloudRepository.findById(id);
+				if (authOptional.isPresent()) {
 					final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, authOptional.get().getConsumerSystem().getId());
 					final Thread publishingThread = new Thread(publishAuthUpdateTask);
 					publishingThread.start();
-
 				}
 			}
 			
@@ -383,7 +381,6 @@ public class AuthorizationDBService {
 		}
 				
 		try {
-			
 			final Optional<Cloud> cloudOpt = cloudRepository.findById(cloudId);
 			Cloud cloud;
 			if (cloudOpt.isPresent()) {
@@ -430,6 +427,7 @@ public class AuthorizationDBService {
 		try {
 			final boolean isServiceDefinitionIdInvalid = serviceDefinitionId < 1 || !serviceDefinitionRepository.existsById(serviceDefinitionId);
 			final boolean isProviderListEmpty = providerIdsWithInterfaceIds == null || providerIdsWithInterfaceIds.isEmpty();
+			
 			if (isServiceDefinitionIdInvalid || isProviderListEmpty) {
 				String exceptionMsg = "Following parameters are invalid:";
 				exceptionMsg = isServiceDefinitionIdInvalid ? exceptionMsg + " serviceDefinition id," : exceptionMsg;
@@ -512,6 +510,7 @@ public class AuthorizationDBService {
 			final boolean isCloudNameInvalid = Utilities.isEmpty(cloudName);
 			final boolean isServiceDefinitionInvalid = Utilities.isEmpty(serviceDefinition);
 			final boolean isProviderIdsWithInterfaceIdsListInvalid = providerIdsWithInterfaceIds == null ||  providerIdsWithInterfaceIds.isEmpty();
+			
 			if (isCloudOperatorInvalid || isCloudNameInvalid || isServiceDefinitionInvalid || isProviderIdsWithInterfaceIdsListInvalid) {
 				String exceptionMsg = "Following parameters are invalid:";
 				exceptionMsg = isCloudOperatorInvalid ? exceptionMsg + " cloudOperator," : exceptionMsg;
@@ -575,17 +574,15 @@ public class AuthorizationDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public AuthorizationSubscriptionCheckResponseDTO checkAuthorizationSubscriptionRequest(final String consumerName,
-			final String consumerAddress, final Integer consumerPort, final Set<SystemRequestDTO> publishers) {
+	public AuthorizationSubscriptionCheckResponseDTO checkAuthorizationSubscriptionRequest(final String consumerName, final String consumerAddress, final Integer consumerPort,
+																						   final Set<SystemRequestDTO> publishers) {
 		logger.debug("checkAuthorizationSubscriptionRequest started...");
 		
 		try {
-			
 			final System consumer = checkAndGetConsumer(consumerName, consumerAddress, consumerPort);		
-			
 			final Set<SystemResponseDTO> authorizedPublishers = getAuthorizedPublishers(consumer, publishers);
 			
-			return new AuthorizationSubscriptionCheckResponseDTO(DTOConverter.convertSystemToSystemResponseDTO(consumer), authorizedPublishers );
+			return new AuthorizationSubscriptionCheckResponseDTO(DTOConverter.convertSystemToSystemResponseDTO(consumer), authorizedPublishers);
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
@@ -651,12 +648,10 @@ public class AuthorizationDBService {
 			final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
 			authorizationIntraCloudRepository.flush();
 			
-			if ( eventhandlerIsPresent)  {
-				
+			if (eventhandlerIsPresent) {
 				final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
 				final Thread publishingThread = new Thread(publishAuthUpdateTask);
 				publishingThread.start();			
-
 			}
 			
 			return savedAuthIntraEntries;
@@ -703,12 +698,10 @@ public class AuthorizationDBService {
 		final List<AuthorizationIntraCloud> savedAuthIntraEntries = authorizationIntraCloudRepository.saveAll(authIntraEntries);
 		authorizationIntraCloudRepository.flush();
 		
-		if ( eventhandlerIsPresent)  {
-			
+		if (eventhandlerIsPresent) {
 			final PublishAuthUpdateTask publishAuthUpdateTask = new PublishAuthUpdateTask(authorizationDriver, consumer.getId());
 			final Thread publishingThread = new Thread(publishAuthUpdateTask);
 			publishingThread.start();
-			
 		}
 		
 		return savedAuthIntraEntries;
@@ -877,11 +870,8 @@ public class AuthorizationDBService {
 		logger.debug("getAuthorizedProviders started...");
 		
 		final List<AuthorizationIntraCloud> authorizationIntraCloudList = authorizationIntraCloudRepository.findAllByConsumerSystem(consumer);
-		
 		final Set<SystemResponseDTO> authorizedPublishers = new HashSet<>(authorizationIntraCloudList.size());
-		
-		if ( authorizationIntraCloudList.isEmpty() ) {
-			
+		if (authorizationIntraCloudList.isEmpty()) {
 			return authorizedPublishers; 
 		}		
 				
@@ -889,25 +879,18 @@ public class AuthorizationDBService {
 			final SystemResponseDTO authorizedPublisher = DTOConverter.convertSystemToSystemResponseDTO(authorizationIntraCloud.getProviderSystem());
 			
 			if (publishers != null && !publishers.isEmpty()) {
-				
 				for (final SystemRequestDTO systemRequestDTO : publishers) {
-					
 					if (DTOUtilities.equalsSystemInResponseAndRequest(authorizedPublisher, systemRequestDTO)) {
-						
 						if (!authorizedPublishers.contains(authorizedPublisher)) {
-							
 							authorizedPublishers.add(authorizedPublisher);
 							break;
 						}
 					}
 				}
-			}else {
-
+			} else {
 				if (!authorizedPublishers.contains(authorizedPublisher)) {
-					
 					authorizedPublishers.add(authorizedPublisher);
 				}
-				
 			}
 		}
 		

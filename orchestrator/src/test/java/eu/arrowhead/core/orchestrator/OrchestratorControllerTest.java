@@ -85,6 +85,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals("Requested service can not be null when \"" + Flag.OVERRIDE_STORE + "\" is TRUE", error.getErrorMessage());
 	}
@@ -99,6 +100,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals("Requested service can not be null when \"" + Flag.TRIGGER_INTER_CLOUD + "\" is TRUE", error.getErrorMessage());
 	}
@@ -113,6 +115,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals("There is no valid preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true", error.getErrorMessage());
 	}
@@ -124,6 +127,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System is null.", error.getErrorMessage());
@@ -138,6 +142,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System name is null or blank.", error.getErrorMessage());
@@ -153,6 +158,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System name is null or blank.", error.getErrorMessage());
@@ -168,6 +174,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System address is null or blank.", error.getErrorMessage());
@@ -184,6 +191,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System address is null or blank.", error.getErrorMessage());
@@ -200,6 +208,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System port is null.", error.getErrorMessage());
@@ -217,6 +226,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
@@ -234,6 +244,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", error.getErrorMessage());
@@ -252,6 +263,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("Cloud operator is null or blank.", error.getErrorMessage());
@@ -272,6 +284,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("Cloud operator is null or blank.", error.getErrorMessage());
@@ -292,6 +305,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("Cloud name is null or blank.", error.getErrorMessage());
@@ -313,6 +327,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("Cloud name is null or blank.", error.getErrorMessage());
@@ -331,6 +346,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("Requested service definition requirement is null or blank.", error.getErrorMessage());
@@ -351,6 +367,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("Requested service definition requirement is null or blank.", error.getErrorMessage());
@@ -377,6 +394,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("External service request can not be served. Orchestrator runs in NO GATEKEEPER mode.", error.getErrorMessage());
@@ -400,6 +418,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isBadRequest());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(ORCHESTRATION_PROCESS_URI, error.getOrigin());
 		Assert.assertEquals("Forced inter cloud service request can not be served. Orchestrator runs in NO GATEKEEPER mode.", error.getErrorMessage());
@@ -431,6 +450,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
+		
 		Assert.assertEquals(0, response.getResponse().size());
 	}
 	
@@ -460,6 +480,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
+		
 		Assert.assertEquals(1, response.getResponse().size());
 	}
 	
@@ -486,6 +507,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
+		
 		Assert.assertEquals(2, response.getResponse().size());
 	}
 	
@@ -513,6 +535,7 @@ public class OrchestratorControllerTest {
 		
 		final MvcResult result = postOrchestrationProcess(request, status().isOk());
 		final OrchestrationResponseDTO response = objectMapper.readValue(result.getResponse().getContentAsByteArray(), OrchestrationResponseDTO.class);
+		
 		Assert.assertEquals(3, response.getResponse().size());
 	}
 	
@@ -539,6 +562,7 @@ public class OrchestratorControllerTest {
 											 .andReturn();
 		
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
 		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/{" + CoreCommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
 		Assert.assertEquals("Consumer system :  Id must be greater than 0. ", error.getErrorMessage());

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.arrowhead.common.database.entity.System;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
@@ -37,11 +38,10 @@ import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.dto.choreographer.ChoreographerNextActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerNextActionStepResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.EventDTO;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
@@ -142,8 +142,10 @@ public class DTOConverter {
 	
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3776")
-	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(final Iterable<ServiceDefinition> serviceDefinitionEntries, final Iterable<System> systemEntries,
-																											  	  final Iterable<ServiceInterface> interfaceEntries, final Iterable<ServiceRegistry> serviceRegistryEntries) {
+	public static ServiceRegistryGroupedResponseDTO convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(final Iterable<ServiceDefinition> serviceDefinitionEntries,
+																												  final Iterable<System> systemEntries, 
+																												  final Iterable<ServiceInterface> interfaceEntries,
+																												  final Iterable<ServiceRegistry> serviceRegistryEntries) {
 		Assert.notNull(serviceDefinitionEntries, "List of serviceDefinitionEntries is null");
 		Assert.notNull(systemEntries, "List of systemEntries is null");
 		Assert.notNull(interfaceEntries, "List of interfaceEntries is null");
@@ -497,9 +499,9 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription){
+	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription) {
 		Assert.notNull(subscription, "subscription is null");
-		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null");
 		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
 		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
 		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
@@ -510,25 +512,16 @@ public class DTOConverter {
 		
 		final Set<SystemResponseDTO> sources = collectPublishersFromSubscription(subscription.getPublisherConnections());
 		
-		return new SubscriptionResponseDTO(
-				subscription.getId(), 
-				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
-				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
-				Utilities.text2Map(subscription.getFilterMetaData()), 
-				subscription.getNotifyUri(), 
-				subscription.isMatchMetaData(), 
-				startDate, 
-				endDate, 
-				sources, 
-				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
-				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
-				);
+		return new SubscriptionResponseDTO(subscription.getId(), convertEventTypeToEventTypeResponseDTO(subscription.getEventType()),
+										   convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), Utilities.text2Map(subscription.getFilterMetaData()), subscription.getNotifyUri(), 
+										   subscription.isMatchMetaData(), startDate, endDate, sources,	Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+										   Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static SubscriptionResponseDTO convertSubscriptionToOnlyAuthorizedSourcesSubscriptionResponseDTO(final Subscription subscription){
+	public static SubscriptionResponseDTO convertSubscriptionToOnlyAuthorizedSourcesSubscriptionResponseDTO(final Subscription subscription) {
 		Assert.notNull(subscription, "subscription is null");
-		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null" );
+		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null");
 		Assert.notNull(subscription.getEventType(), "subscription.EventType is null");
 		Assert.notNull(subscription.getNotifyUri(), "subscription.NotifyUri is null");
 		Assert.notNull(subscription.getCreatedAt(), "subscription.CreatedAt is null");
@@ -539,61 +532,41 @@ public class DTOConverter {
 		
 		final Set<SystemResponseDTO> sources = collectAuthorizedPublishersFromSubscription(subscription.getPublisherConnections());
 		
-		return new SubscriptionResponseDTO(
-				subscription.getId(), 
-				convertEventTypeToEventTypeResponseDTO(subscription.getEventType()), 
-				convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), 
-				Utilities.text2Map(subscription.getFilterMetaData()), 
-				subscription.getNotifyUri(), 
-				subscription.isMatchMetaData(), 
-				startDate, 
-				endDate, 
-				sources, 
-				Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
-				Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt())
-				);
+		return new SubscriptionResponseDTO(subscription.getId(), convertEventTypeToEventTypeResponseDTO(subscription.getEventType()),
+										   convertSystemToSystemResponseDTO(subscription.getSubscriberSystem()), Utilities.text2Map(subscription.getFilterMetaData()), subscription.getNotifyUri(), 
+										   subscription.isMatchMetaData(), startDate, endDate, sources, Utilities.convertZonedDateTimeToUTCString(subscription.getCreatedAt()), 
+										   Utilities.convertZonedDateTimeToUTCString(subscription.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static EventTypeResponseDTO convertEventTypeToEventTypeResponseDTO(final EventType eventType){
+	public static EventTypeResponseDTO convertEventTypeToEventTypeResponseDTO(final EventType eventType) {
 		Assert.notNull(eventType, "eventType is null");
-		Assert.notNull(eventType.getEventTypeName(), "eventType.EvenTypeName is null" );
+		Assert.notNull(eventType.getEventTypeName(), "eventType.EvenTypeName is null");
 
-		return new EventTypeResponseDTO(
-				eventType.getId(), 
-				eventType.getEventTypeName(),
-				Utilities.convertZonedDateTimeToUTCString(eventType.getCreatedAt()), 
-				Utilities.convertZonedDateTimeToUTCString(eventType.getUpdatedAt())
-				);
+		return new EventTypeResponseDTO(eventType.getId(), eventType.getEventTypeName(), Utilities.convertZonedDateTimeToUTCString(eventType.getCreatedAt()), 
+									    Utilities.convertZonedDateTimeToUTCString(eventType.getUpdatedAt()));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public static EventDTO convertEventPublishRequestDTOToEventDTO(final EventPublishRequestDTO eventPublishRequestDTO){
+	public static EventDTO convertEventPublishRequestDTOToEventDTO(final EventPublishRequestDTO eventPublishRequestDTO) {
 		Assert.notNull(eventPublishRequestDTO, "eventPublishRequestDTO is null");
-		Assert.notNull(eventPublishRequestDTO.getEventType(), "eventPublishRequestDTO.EvenType is null" );
-		Assert.notNull(eventPublishRequestDTO.getPayload(), "eventPublishRequestDTO.Payload is null" );
-		Assert.notNull(eventPublishRequestDTO.getTimeStamp(), "eventPublishRequestDTO.TimeStamp is null" );
+		Assert.notNull(eventPublishRequestDTO.getEventType(), "eventPublishRequestDTO.EvenType is null");
+		Assert.notNull(eventPublishRequestDTO.getPayload(), "eventPublishRequestDTO.Payload is null");
+		Assert.notNull(eventPublishRequestDTO.getTimeStamp(), "eventPublishRequestDTO.TimeStamp is null");
 		
-		return new EventDTO(
-				eventPublishRequestDTO.getEventType(), 
-				eventPublishRequestDTO.getMetaData(),
-				eventPublishRequestDTO.getPayload(),
-				eventPublishRequestDTO.getTimeStamp()
-				);
+		return new EventDTO(eventPublishRequestDTO.getEventType(), eventPublishRequestDTO.getMetaData(), eventPublishRequestDTO.getPayload(), eventPublishRequestDTO.getTimeStamp());
 	}
-	
 
 	//-------------------------------------------------------------------------------------------------
 	public static SubscriptionListResponseDTO convertSubscriptionPageToSubscriptionListResponseDTO(final Page<Subscription> entries) {
 		Assert.notNull(entries, "SubscriptionPage is null" );
 		
 		final List<SubscriptionResponseDTO> subscriptionEntries = new ArrayList<>(entries.getNumberOfElements());
-		for ( final Subscription entry : entries ) {
-			
-			subscriptionEntries.add( convertSubscriptionToSubscriptionResponseDTO( entry ) );
+		for (final Subscription entry : entries) {
+			subscriptionEntries.add(convertSubscriptionToSubscriptionResponseDTO(entry));
 		}
 		
-		return new SubscriptionListResponseDTO( subscriptionEntries, entries.getTotalElements() );
+		return new SubscriptionListResponseDTO(subscriptionEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -601,6 +574,81 @@ public class DTOConverter {
 		Assert.notNull(response, "Relay response is null.");
 		
 		return new RelayRequestDTO(response.getAddress(), response.getPort(), response.isSecure(), response.isExclusive(), response.getType().name());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
+		Assert.notNull(foreignSystem, "ForeignSystem is null");
+		
+		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
+									 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep actionStep) {
+	    Assert.notNull(actionStep, "ChoreographerActionStep is null.");
+
+		return new ChoreographerActionStepResponseDTO(actionStep.getId(), actionStep.getName(),
+													  collectServiceDefinitionsFromChoreographerActionStep(actionStep.getActionStepServiceDefinitionConnections()),
+													  collectChoreographerNextActionStepsFromChoreographerActionStep(actionStep.getNextActionSteps()),
+													  Utilities.convertZonedDateTimeToUTCString(actionStep.getCreatedAt()),
+													  Utilities.convertZonedDateTimeToUTCString(actionStep.getUpdatedAt()));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static List<ChoreographerActionStepResponseDTO> collectChoreographerActionStepsFromChoreographerAction(final Set<ChoreographerActionActionStepConnection> actionStepConnections) {
+		Assert.notNull(actionStepConnections, "ActionStepConnectionSet is null.");
+
+		final List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
+		for (final ChoreographerActionActionStepConnection conn : actionStepConnections) {
+			result.add(convertChoreographerActionStepToChoreographerActionStepResponseDTO(conn.getActionStepEntry()));
+		}
+
+		result.sort(Comparator.comparing(ChoreographerActionStepResponseDTO::getId));
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static String collectChoreographerNextActionNameFromChoreographerAction(final ChoreographerAction nextAction) {
+		if (nextAction != null) {
+			return nextAction.getActionName();
+		}
+		
+		return null;
+	}
+
+    //-------------------------------------------------------------------------------------------------
+	public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(final ChoreographerAction actionEntry) {
+		Assert.notNull(actionEntry, "ChoreographerAction entry is null.");
+
+		return new ChoreographerActionResponseDTO(actionEntry.getId(), actionEntry.getActionName(),
+												  collectChoreographerNextActionNameFromChoreographerAction(actionEntry.getNextAction()),
+												  collectChoreographerActionStepsFromChoreographerAction(actionEntry.getActionActionStepConnections()),
+												  Utilities.convertZonedDateTimeToUTCString(actionEntry.getCreatedAt()),
+												  Utilities.convertZonedDateTimeToUTCString(actionEntry.getUpdatedAt()));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static List<ChoreographerActionResponseDTO> collectChoreographerActionsFromChoreographerActionPlan(final Set<ChoreographerActionPlanActionConnection> actionConnections) {
+		Assert.notNull(actionConnections, "ActionConnectionsSet is null.");
+
+		final List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
+		for (final ChoreographerActionPlanActionConnection conn : actionConnections) {
+			result.add(convertChoreographerActionToChoreographerActionResponseDTO(conn.getActionEntry()));
+		}
+
+		result.sort(Comparator.comparing(ChoreographerActionResponseDTO::getId));
+		return result;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(final ChoreographerActionPlan actionPlanEntry) {
+		Assert.notNull(actionPlanEntry, "ChoreographerActionPlan entry is null.");
+
+		return new ChoreographerActionPlanResponseDTO(actionPlanEntry.getId(), actionPlanEntry.getActionPlanName(),
+													  collectChoreographerActionsFromChoreographerActionPlan(actionPlanEntry.getActionPlanActionConnections()),
+													  Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
+													  Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
 	
 	//=================================================================================================
@@ -659,13 +707,6 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static SystemResponseDTO convertForeignSystemToSystemResponseDTO(final ForeignSystem foreignSystem) {
-		Assert.notNull(foreignSystem, "ForeignSystem is null");
-		
-		return new SystemResponseDTO(foreignSystem.getId(), foreignSystem.getSystemName(), foreignSystem.getAddress(), foreignSystem.getPort(), foreignSystem.getAuthenticationInfo(),
-									 Utilities.convertZonedDateTimeToUTCString(foreignSystem.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(foreignSystem.getUpdatedAt()));		
-	}
-
 	private static List<ServiceDefinitionResponseDTO> collectServiceDefinitionsFromChoreographerActionStep(final Set<ChoreographerActionStepServiceDefinitionConnection> serviceDefinitionConnections) {
 		final List<ServiceDefinitionResponseDTO> result = new ArrayList<>(serviceDefinitionConnections.size());
 		for (final ChoreographerActionStepServiceDefinitionConnection conn : serviceDefinitionConnections) {
@@ -676,6 +717,7 @@ public class DTOConverter {
 		return result;
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	private static List<ChoreographerNextActionStepResponseDTO> collectChoreographerNextActionStepsFromChoreographerActionStep(final Set<ChoreographerNextActionStep> nextActionSteps) {
 		final List<ChoreographerNextActionStepResponseDTO> result = new ArrayList<>(nextActionSteps.size());
 		for (final ChoreographerNextActionStep nextActionStep : nextActionSteps) {
@@ -683,88 +725,19 @@ public class DTOConverter {
 		}
 
 		result.sort(Comparator.comparing(ChoreographerNextActionStepResponseDTO::getId));
-
 		return result;
 	}
 
+	//-------------------------------------------------------------------------------------------------
 	private static ChoreographerNextActionStepResponseDTO convertChoreographerNextActionStepToChoreographerNextActionStepResponseDTO(final ChoreographerActionStep nextActionStepEntry) {
 		return new ChoreographerNextActionStepResponseDTO(nextActionStepEntry.getId(), nextActionStepEntry.getName());
 	}
 
-	public static ChoreographerActionStepResponseDTO convertChoreographerActionStepToChoreographerActionStepResponseDTO(final ChoreographerActionStep actionStep) {
-	    Assert.notNull(actionStep, "ChoreographerActionStep is null.");
-
-		return new ChoreographerActionStepResponseDTO(
-				actionStep.getId(),
-				actionStep.getName(),
-				collectServiceDefinitionsFromChoreographerActionStep(actionStep.getActionStepServiceDefinitionConnections()),
-				collectChoreographerNextActionStepsFromChoreographerActionStep(actionStep.getNextActionSteps()),
-				Utilities.convertZonedDateTimeToUTCString(actionStep.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(actionStep.getUpdatedAt()));
-	}
-
-	public static List<ChoreographerActionStepResponseDTO> collectChoreographerActionStepsFromChoreographerAction(final Set<ChoreographerActionActionStepConnection> actionStepConnections) {
-		Assert.notNull(actionStepConnections, "ActionStepConnectionSet is null.");
-
-		final List<ChoreographerActionStepResponseDTO> result = new ArrayList<>(actionStepConnections.size());
-		for(final ChoreographerActionActionStepConnection conn : actionStepConnections) {
-			result.add(convertChoreographerActionStepToChoreographerActionStepResponseDTO(conn.getActionStepEntry()));
-		}
-
-		result.sort(Comparator.comparing(ChoreographerActionStepResponseDTO::getId));
-
-		return result;
-	}
-
-	public static String collectChoreographerNextActionNameFromChoreographerAction(final ChoreographerAction nextAction) {
-		if (nextAction != null) {
-			return nextAction.getActionName();
-		}
-		return null;
-	}
-
-    public static ChoreographerActionResponseDTO convertChoreographerActionToChoreographerActionResponseDTO(final ChoreographerAction actionEntry) {
-		Assert.notNull(actionEntry, "ChoreographerAction entry is null.");
-
-		return new ChoreographerActionResponseDTO(actionEntry.getId(),
-				actionEntry.getActionName(),
-				collectChoreographerNextActionNameFromChoreographerAction(actionEntry.getNextAction()),
-				collectChoreographerActionStepsFromChoreographerAction(actionEntry.getActionActionStepConnections()),
-				Utilities.convertZonedDateTimeToUTCString(actionEntry.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(actionEntry.getUpdatedAt()));
-	}
-
-	public static List<ChoreographerActionResponseDTO> collectChoreographerActionsFromChoreographerActionPlan(final Set<ChoreographerActionPlanActionConnection> actionConnections) {
-		Assert.notNull(actionConnections, "ActionConnectionsSet is null.");
-
-		final List<ChoreographerActionResponseDTO> result = new ArrayList<>(actionConnections.size());
-		for (final ChoreographerActionPlanActionConnection conn : actionConnections) {
-			result.add(convertChoreographerActionToChoreographerActionResponseDTO(conn.getActionEntry()));
-		}
-
-		result.sort(Comparator.comparing(ChoreographerActionResponseDTO::getId));
-
-		return result;
-	}
-
-	public static ChoreographerActionPlanResponseDTO convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(final ChoreographerActionPlan actionPlanEntry) {
-		Assert.notNull(actionPlanEntry, "ChoreographerActionPlan entry is null.");
-
-		return new ChoreographerActionPlanResponseDTO(actionPlanEntry.getId(),
-				actionPlanEntry.getActionPlanName(),
-				collectChoreographerActionsFromChoreographerActionPlan(actionPlanEntry.getActionPlanActionConnections()),
-				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
-				Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
-	}
-	
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
 		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
-		
 		for (final SubscriptionPublisherConnection conn : connections) {
-			
 			result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
-			
 		}
 		
 		return result;
@@ -773,16 +746,12 @@ public class DTOConverter {
 	//-------------------------------------------------------------------------------------------------
 	private static Set<SystemResponseDTO> collectAuthorizedPublishersFromSubscription(final Set<SubscriptionPublisherConnection> connections) {
 		final Set<SystemResponseDTO> result = new HashSet<>(connections.size());
-		
 		for (final SubscriptionPublisherConnection conn : connections) {
-			
 			if (conn.isAuthorized()) {
 				result.add(convertSystemToSystemResponseDTO(conn.getSystem()));
 			}
-						
 		}
 		
 		return result;
 	}
-
 }

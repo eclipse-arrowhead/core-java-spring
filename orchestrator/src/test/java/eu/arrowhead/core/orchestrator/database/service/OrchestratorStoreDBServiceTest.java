@@ -83,6 +83,7 @@ public class OrchestratorStoreDBServiceTest {
 	@Test
 	public void getOrchestratorStoreByIdTest() {
 		final Optional<OrchestratorStore> orchestratorStoreOptional = Optional.of(getOrchestratorStore());
+
 		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(orchestratorStoreOptional);
 		
 		orchestratorStoreDBService.getOrchestratorStoreById(1);		
@@ -928,19 +929,19 @@ public class OrchestratorStoreDBServiceTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void modifyOrchestratorStorePriorityResponseMapKeyStoreIDNotInDBTest() {
-		final int testMapSize = 3;
 		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 		
+		final int testMapSize = 3;
 		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(getOrchestratorStoreModifyPriorityRequestDTO(testMapSize));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void modifyOrchestratorStorePriorityResponseMapKeyConsumerAndServiceDefinitionCombinationNotInDBTest() {
-		final int testMapSize = 3;
 		when(orchestratorStoreRepository.findById(anyLong())).thenReturn(Optional.of(getOrchestratorStore()));
 		when(orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(any(), any(), any())).thenReturn(new ArrayList<OrchestratorStore>());
 		
+		final int testMapSize = 3;
 		orchestratorStoreDBService.modifyOrchestratorStorePriorityResponse(getOrchestratorStoreModifyPriorityRequestDTO(testMapSize));
 	}
 	

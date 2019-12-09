@@ -429,7 +429,7 @@ public class GatekeeperControllerRelayTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testUpdateRelayByIdWithNulPort() throws Exception {
+	public void testUpdateRelayByIdWithNullPort() throws Exception {
 	final RelayRequestDTO relayRequestDTO = new RelayRequestDTO("1.1.1.1", null, true, false, "GENERAL_RELAY");
 	
 	this.mockMvc.perform(put(RELAYS_MGMT_URI + "/1")

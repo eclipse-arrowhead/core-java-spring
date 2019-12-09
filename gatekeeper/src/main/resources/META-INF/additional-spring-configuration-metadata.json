@@ -15,16 +15,6 @@
     "description": "A description for 'timeout'"
   },
   {
-    "name": "use_gateway",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'use_gateway'"
-  },
-  {
-    "name": "public_brokers",
-    "type": "java.lang.Boolean",
-    "description": "A description for 'public_brokers'"
-  },
-  {
     "name": "disable.hostname.verifier",
     "type": "java.lang.Boolean",
     "description": "A description for 'disable.hostname.verifier'"
@@ -48,5 +38,15 @@
     "name": "gateway_is_mandatory",
     "type": "java.lang.String",
     "description": "A description for 'gateway_is_mandatory'"
+  },
+  {
+    "name": "domain.name",
+    "type": "java.lang.String",
+    "description": "A description for 'domain.name'"
+  },
+  {
+    "name": "domain.port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'domain.port'"
   }
 ]}

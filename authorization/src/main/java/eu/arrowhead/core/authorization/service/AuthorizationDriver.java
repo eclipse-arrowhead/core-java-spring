@@ -27,8 +27,10 @@ import eu.arrowhead.common.http.HttpService;
 
 @Component
 public class AuthorizationDriver {
+	
 	//=================================================================================================
 	// members
+	
 	private static final String EVENT_HANDLER_AUTH_UPDATE_URI_KEY = CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	private static final Logger logger = LogManager.getLogger(AuthorizationDriver.class);
@@ -63,14 +65,11 @@ public class AuthorizationDriver {
 	public void publishAuthUpdate(final long updatedConsumerSystemId) {
 		logger.debug("publishAuthUpdate started...");
 		
-		if ( !eventhandlerIsPresent ) {
-			
+		if (!eventhandlerIsPresent) {
 			return;
-			
 		}
 		
-		if ( systemRequestDTO == null ) {
-			
+		if (systemRequestDTO == null) {
 			initializeSystemRequestDTO();
 		}
 		
@@ -79,23 +78,18 @@ public class AuthorizationDriver {
 		final ZonedDateTime timeStamp = ZonedDateTime.now();
 
 		final EventPublishRequestDTO eventPublishRequestDTO = new EventPublishRequestDTO();
-		eventPublishRequestDTO.setEventType( CoreCommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE );
-		eventPublishRequestDTO.setPayload( String.valueOf( updatedConsumerSystemId ) );
-		eventPublishRequestDTO.setTimeStamp( Utilities.convertZonedDateTimeToUTCString( timeStamp ) );	
-		
-		eventPublishRequestDTO.setSource( systemRequestDTO );
+		eventPublishRequestDTO.setEventType(CoreCommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE);
+		eventPublishRequestDTO.setPayload(String.valueOf(updatedConsumerSystemId));
+		eventPublishRequestDTO.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(timeStamp));	
+		eventPublishRequestDTO.setSource(systemRequestDTO);
 		
 		final UriComponents eventHandlerAuthUpdateUri = getEventHandlerAuthUpdateUri();
 		
 		try {
-			
-			httpService.sendRequest( eventHandlerAuthUpdateUri , HttpMethod.POST, Void.class, eventPublishRequestDTO);
-		
+			httpService.sendRequest(eventHandlerAuthUpdateUri , HttpMethod.POST, Void.class, eventPublishRequestDTO);
 		} catch (final Exception ex) {
-						
-			logger.debug(" Authorization Update publishing was unsuccessful : " + ex);
+			logger.debug("Authorization Update publishing was unsuccessful : " + ex);
 		}
-
 	}
 	
 	//=================================================================================================
@@ -105,18 +99,16 @@ public class AuthorizationDriver {
 	private void initializeSystemRequestDTO() {
 		logger.debug("initializeSystemRequestDTO started...");
 		
-		systemRequestDTO.setAddress( address );
-		systemRequestDTO.setPort( port );
-		systemRequestDTO.setSystemName( systemName );
+		systemRequestDTO.setAddress(address);
+		systemRequestDTO.setPort(port);
+		systemRequestDTO.setSystemName(systemName);
 		
-		if ( sslEnabled ) {
-			
-			final PublicKey publicKey = (PublicKey) arrowheadContext.get( CommonConstants.SERVER_PUBLIC_KEY );
+		if (sslEnabled) {
+			final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
 			final String authInfo = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 			
-			systemRequestDTO.setAuthenticationInfo( authInfo );
+			systemRequestDTO.setAuthenticationInfo(authInfo);
 		}
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -133,5 +125,4 @@ public class AuthorizationDriver {
 		
 		throw new ArrowheadException("Authorization can't find eventhandler authorization_update URI.");
 	}
-
 }

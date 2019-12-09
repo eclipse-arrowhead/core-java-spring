@@ -239,6 +239,7 @@ public class SRAccessControlFilterTest {
 	@Test
 	public void testQueryNotAllowedCoreSystemClientBecauseOfNotOwnService() throws Exception {
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder("test-service").build();
+		
 		postQuery(form, "certificates/gateway.pem", status().isUnauthorized());
 	}
 
@@ -247,7 +248,9 @@ public class SRAccessControlFilterTest {
 	@Test
 	public void testQueryAllowedCoreSystemClientBecauseOfOwnService() throws Exception {
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder(CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition()).build();
+		
 		when(serviceRegistryDBService.queryRegistry(any())).thenReturn(new ServiceQueryResultDTO());
+		
 		postQuery(form, "certificates/authorization.pem", status().isOk());
 	}
 	
@@ -264,6 +267,7 @@ public class SRAccessControlFilterTest {
 	public void testQueryNotPublicCoreSystemService() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement("test-service");
+		
 		postQuery(serviceQueryFormDTO, "certificates/provider.pem", status().isUnauthorized());
 	}
 	
@@ -289,6 +293,7 @@ public class SRAccessControlFilterTest {
 	public void testQueryPublicCoreSystemService() throws Exception {
 		final ServiceQueryFormDTO serviceQueryFormDTO = new ServiceQueryFormDTO();
 		serviceQueryFormDTO.setServiceDefinitionRequirement(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition());
+		
 		when(serviceRegistryDBService.queryRegistry(any())).thenReturn(new ServiceQueryResultDTO());
 		
 		postQuery(serviceQueryFormDTO, "certificates/provider.pem", status().isOk());

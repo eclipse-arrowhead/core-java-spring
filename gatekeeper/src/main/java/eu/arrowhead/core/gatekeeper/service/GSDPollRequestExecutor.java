@@ -60,7 +60,7 @@ public class GSDPollRequestExecutor {
 		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
 			try {
 				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());
-				final Map<String, Session> sessionsToClouds = createSessionsToClouds();
+				final Map<String,Session> sessionsToClouds = createSessionsToClouds();
 				
 				threadPool.execute(new GSDPollTask(relayClient, sessionsToClouds.get(cloudCN), cloudCN, cloudRelay.getKey().getAuthenticationInfo(), gsdPollRequestDTO, queue));
 			} catch (final RejectedExecutionException ex) {

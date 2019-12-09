@@ -469,7 +469,6 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		if (!Objects.equals(expectedSessionId, actualSessionId)) {
 			throw new AuthException("Unauthorized message on queue.");
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
