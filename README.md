@@ -4204,11 +4204,182 @@ placeholder
 placeholder
 
 
-<a name="event_handler_endpoints" />
-
+<a name="eventhandler_endpoints" />
 ## Endpoints
 
-placeholder
+<a name="eventhandler_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#eventhandler_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Subscribe](#eventhandler_endpoints_post_subscribe) | /subscribe | POST    | -    | OK     |
+| [Unsubscribe](#eventhandler_endpoints_post_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
+| [Publish](#eventhandler_endpoints_post_publish) | /publish | POST    | -    | OK     |
+
+<a name="eventhandler_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [AuthUpdate](#eventhandler_endpoints_post_auth_update) | /publish/authupdate | POST    | -    | OK     |
+
+
+### Echo 
+```
+GET /eventhandler/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="eventhandler_endpoints_post_subscribe" />
+
+### Subscribe 
+```
+POST /eventhandler/subscribe
+```
+
+Creates a subscription record specified by parameters.
+
+<a name="datastructures_subscriptionrequest" />
+
+__SubscriptionRequest__ is the input.
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The recievied event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  ture or false |
+| `notifyUri` | Url subpath of the subscriber sytem's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not difined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the events timestamp is after startDate.  | optional ( StartDate must be after the current datetime. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the events timestamp is before endDate. | optional ( EndDate must be after the current datetime. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="#eventhandler_endpoints_post_unsubscribe" />
+
+### Unsubscribe 
+```
+DELETE /eventhandler/unsubscribe
+```
+Removes the subscription record specified by parameters.
+
+<a name="datastructures_eventhandlerunsubscriberequest" />
+
+__Unsubscribe query parameters__ are the input :
+`https://eventhandler_ip:unsubscribe_port/eventhandler/unsubscribe?address=`192.168.0.1`&event_type=`EVENT_TYPE_1`&port=`9009`&system_name=`test_consumer`
+
+| __Unsubscribe__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
+| `event_type` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+| `system_name` | The name of the system. | mandatory | max. length = 255 |
+
+<a name="gateway_endpoints_get_public_key" />
+
+### Publish
+```
+GET /eventhandler/publish
+```
+
+Start the publishing process to deliver the event to the subscribers.
+
+<a name="eventhandler_endpoints_publish" />
+
+__PublishRequest__ is the input:
+
+```json
+{
+  "eventType": "string",
+  "metaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "source": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "timeStamp": "string"
+}
+```
+
+| __PublishRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | max. length = 255 |
+| `metaData` |  The "key - value" pairs for event filtering. | optional | max.length = 65535 |
+| `payload` | String representation of the event. | mandatory | not defined |
+| `source` |   Details of the publisher system. | mandatory | as in system |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_endpoints_post_auth_update" />
+### Publish Auth Update <br />
+        
+This service can only be used by other core services, therefore this is not part of the public API.    
+
 
 # Gatekeeper 
  
