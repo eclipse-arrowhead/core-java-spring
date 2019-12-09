@@ -39,6 +39,7 @@ __SubscriptionRequest__ is the input.
 ```
 | __SubscriptionRequest__  fields |
 | ------------------------------------------------------- |
+
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
@@ -51,6 +52,7 @@ __SubscriptionRequest__ is the input.
 | `subscriberSystem` | Details of subscriber system | mandatory | as in system |
 
 | __System__  fields |
+
 | ------------------------------------------------------- |
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
