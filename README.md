@@ -4194,17 +4194,19 @@ placeholder
 
 ## Services and Use Cases
 
-placeholder
+
+
 
 
 <a name="publish_service_description_overview" />
 
 ## Publish Service Description Overview
 
-placeholder
+[Publish Event Use Case ](documentation/eventhandler/EH_use_case_1.md)
 
 
 <a name="eventhandler_endpoints" />
+
 ## Endpoints
 
 <a name="eventhandler_endpoints_client" />
@@ -4376,6 +4378,7 @@ __PublishRequest__ is the input:
 | `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
 
 <a name="eventhandler_endpoints_post_auth_update" />
+
 ### Publish Auth Update <br />
         
 This service can only be used by other core services, therefore this is not part of the public API.    
