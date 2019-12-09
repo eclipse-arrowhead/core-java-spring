@@ -4186,13 +4186,10 @@ __PriorityList__ is the input
 
 <a name="event_handler_sdd" />
 
-## System Design Description Overview
+## System Design
 
-Event handler SysD:
 ![Alt text](documentation/eventhandler/SysD_EventHandler.png)
 
-
-placeholder
 
 <a name="event_handler_usecases" />
 
@@ -4200,7 +4197,7 @@ placeholder
 
 <a name="publish_service_description_overview" />
 
-## Publish Service Description Overview
+### Publish Service Description Overview
 
 ![Intro.pdf](documentation/eventhandler/Arrowhead EventPublishing SD.pdf)<br />
 [Publish Event Use Case ](documentation/eventhandler/EH_use_case_1.md)<br />
