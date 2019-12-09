@@ -4198,7 +4198,7 @@ placeholder
 
 ## Publish Service Description Overview
 
-[Publish_SD ](documentation/eventhandler/Arrowhead EventPublishing SD.pdf)<br />
+![Publish_SD](documentation/eventhandler/Arrowhead EventPublishing SD.pdf)<br />
 [Publish Event Use Case ](documentation/eventhandler/EH_use_case_1.md)<br />
 [Publish_IDD ](documentation/eventhandler/Publish.md)<br />
 
