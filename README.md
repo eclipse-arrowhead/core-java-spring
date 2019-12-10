@@ -47,7 +47,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Removed Endpoints](#orchestrator_removed)
     4. [EventHandler](#event_handler)
        * [System Design Description Overview](#event_handler_sdd)
-       * [Services and Use Cases](#event_handler_provided_services)  
+       * [Services and Use Cases](#event_handler_usecases)  
        * [Service Description Overview](#publish_service_description_overview)
            * [Publish](#publish_service_description_overview)
            * [Subcribe](#subscribe_service_description_overview)
