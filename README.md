@@ -51,8 +51,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
        * [Service Description Overview](#event_handler_provided_services)
        * [Endpoints](#event_handler_endpoints)
            * [Client](#event_handler_endpoints_client)
-           * [Private](#event_handler_endpoints_private)
            * [Management](#event_handler_endpoints_management)
+           * [Private](#event_handler_endpoints_private)
            * [Removed Endpoints](#event_handler_removed)
     5. [Gatekeeper](#gatekeeper)
        * [System Design Description Overview](#gatekeeper_sdd)
@@ -4230,8 +4230,6 @@ The Event Handler has the following use cases:
 | [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
 | [Publish](#eventhandler_endpoints_post_publish) | /publish | POST    | -    | OK     |
 
-<a name="eventhandler_endpoints_private" />
-
 <a name="eventhandler_endpoints_management" />
 
 ### Management endpoint description<br />
@@ -4243,6 +4241,7 @@ The Event Handler has the following use cases:
 | [Update subscription](#eventhandler_endpoints_put_subscription) | /subscriptions/{id} | PUT    | id && Subscription request| Subscription response |
 | [Delete subscription](#eventhandler_endpoints_delete_subscription) | /subscriptions/{id} | DELETE    | id | OK     |
 
+<a name="eventhandler_endpoints_private" />
 
 ### Private endpoint description<br />
 
