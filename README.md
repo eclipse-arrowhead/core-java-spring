@@ -4190,13 +4190,34 @@ __PriorityList__ is the input
 
 The purpose of Event Handler supporting core system is providing authorized publish-subscribe messaging system to the Arrowhead Framework.
 
-It provides the following services:
+<a name="event_handler_provided_services" />
+
+## Provided services
+
+The Event Handler provides the following services:
 * [Echo](#eventhandler_endpoints_get_echo)
+* [Publish](#eventhandler_endpoints_post_publish)
 * [Subscribe](#eventhandler_endpoints_post_subscribe)
 * [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe)
-* [Publish](#eventhandler_endpoints_post_publish)
-* [AuthorizationUpdate](#eventhandler_endpoints_post_auth_update)
+* [AuthUpdate](#eventhandler_endpoints_post_auth_update)
 
+<a name="event_handler_consumed_services" />
+
+## Consumed services
+
+The Event Handler consumes the following services:
+* CheckAuthorizationSubscription private service from the Authorization core system
+* Notification service from the subscriber client system
+
+<a name="event_handler_usecases" />
+
+## Use cases
+
+The Event Handler has the following use cases:
+* [Publish Event](documentation/eventhandler/use_cases/EH_use_case_1.md)
+* [Register Subscription](documentation/eventhandler/use_cases/EH_use_case_2.md)
+* [Unregister Subscription]()
+* [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_3.md)
 
 <a name="eventhandler_endpoints" />
 
