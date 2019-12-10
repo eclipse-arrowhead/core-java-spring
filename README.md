@@ -4232,6 +4232,18 @@ The Event Handler has the following use cases:
 
 <a name="eventhandler_endpoints_private" />
 
+<a name="eventhandler_endpoints_management" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /subscriptions | GET    | direction && item_per_page && page && sort_field |  Subscription list response  |
+| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /subscriptions/{id} | GET    | id | Subscription response |
+| [Update subscription](#eventhandler_endpoints_put_subscription) | /subscriptions/{id} | PUT    | id && Subscription request| Subscription response |
+| [Delete subscription](#eventhandler_endpoints_delete_subscription) | /subscriptions/{id} | DELETE    | id | OK     |
+
+
 ### Private endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
