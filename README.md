@@ -4199,7 +4199,7 @@ __PriorityList__ is the input
 
 ### Publish Service Description Overview
 
-* [Publish SD.pdf](documentation/eventhandler/publish_sd/Arrowhead EventPublishing SD.pdf)
+* [Publish SD.pdf](documentation/eventhandler/publish_sd/publish_sd.pdf)
 * [Publish Event Use Case ](documentation/eventhandler/EH_use_case_1.md)
 * [Publish_IDD ](documentation/eventhandler/Publish.md)
 
