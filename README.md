@@ -4215,11 +4215,11 @@ The Event Handler has the following use cases:
 * [Unregister Subscription]()
 * [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_3.md)
 
-<a name="eventhandler_endpoints" />
+<a name="event_handler_endpoints" />
 
 ## Endpoints
 
-<a name="eventhandler_endpoints_client" />
+<a name="event_handler_endpoints_client" />
 
 ### Client endpoint description<br />
 
@@ -4230,7 +4230,7 @@ The Event Handler has the following use cases:
 | [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
 | [Publish](#eventhandler_endpoints_post_publish) | /publish | POST    | -    | OK     |
 
-<a name="eventhandler_endpoints_management" />
+<a name="event_handler_endpoints_management" />
 
 ### Management endpoint description<br />
 
