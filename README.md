@@ -4186,22 +4186,17 @@ __PriorityList__ is the input
 
 <a name="event_handler_sdd" />
 
-## System Design
+## System Design Description Overview
 
-![Alt text](documentation/eventhandler/SysD_EventHandler.png)
+The purpose of Event Handler supporting core system is providing authorized publish-subscribe messaging system to the Arrowhead Framework.
 
+It provides the following services:
+* [Echo](#eventhandler_endpoints_get_echo)
+* [Publish](#eventhandler_endpoints_post_publish)
+* [Subscribe](#eventhandler_endpoints_post_subscribe)
+* [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe)
+* [AuthUpdate](#eventhandler_endpoints_post_auth_update)
 
-<a name="event_handler_usecases" />
-
-## Services and Use Cases
-
-<a name="publish_service_description_overview" />
-
-### Publish Service Description Overview
-
-* [Publish SD.pdf](documentation/eventhandler/publish_sd/publish_sd.pdf)
-* [Publish Event Use Case ](documentation/eventhandler/EH_use_case_1.md)
-* [Publish_IDD ](documentation/eventhandler/Publish.md)
 
 <a name="eventhandler_endpoints" />
 
@@ -4215,7 +4210,7 @@ __PriorityList__ is the input
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#eventhandler_endpoints_get_echo) | /echo | GET    | -    | OK     |
 | [Subscribe](#eventhandler_endpoints_post_subscribe) | /subscribe | POST    | -    | OK     |
-| [Unsubscribe](#eventhandler_endpoints_post_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
+| [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
 | [Publish](#eventhandler_endpoints_post_publish) | /publish | POST    | -    | OK     |
 
 <a name="eventhandler_endpoints_private" />
@@ -4226,6 +4221,7 @@ __PriorityList__ is the input
 | -------- | ----------- | ------ | ----- | ------ |
 | [AuthUpdate](#eventhandler_endpoints_post_auth_update) | /publish/authupdate | POST    | -    | OK     |
 
+<a name="eventhandler_endpoints_get_echo" />
 
 ### Echo 
 ```
@@ -4299,7 +4295,7 @@ __SubscriptionRequest__ is the input.
 | `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
 | `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
 
-<a name="#eventhandler_endpoints_post_unsubscribe" />
+<a name="#eventhandler_endpoints_delete_unsubscribe" />
 
 ### Unsubscribe 
 ```
@@ -4322,7 +4318,7 @@ __Unsubscribe query parameters__ are the input :
 | `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
 | `system_name` | The name of the system. | mandatory | max. length = 255 |
 
-<a name="gateway_endpoints_get_public_key" />
+<a name="eventhandler_endpoints_post_publish" />
 
 ### Publish
 ```
@@ -4380,7 +4376,6 @@ __PublishRequest__ is the input:
 ### Publish Auth Update <br />
         
 This service can only be used by other core services, therefore this is not part of the public API.    
-
 
 # Gatekeeper 
  
