@@ -23,6 +23,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	//=================================================================================================
 	// members
 	
+	private static final String SR_TRANSLATOR = "sr_translator";
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY, CoreSystem.EVENT_HANDLER,
 																	 CoreSystem.AUTHORIZATION };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
@@ -37,6 +38,11 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 		
 		final String cloudCN = getServerCloudCN();
+		
+		//TODO: remove this after legacy version is not supported anymore
+		if (isLegacySRTranslator(clientCN, cloudCN)) {
+			return;
+		}
 		
 		if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
@@ -165,5 +171,13 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	//-------------------------------------------------------------------------------------------------
 	private String getClientNameFromCN(final String clientCN) {
 		return clientCN.split("\\.", 2)[0];
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//TODO: delete this after legacy version is not supported anymore
+	protected boolean isLegacySRTranslator(final String clientCN, final String cloudCN) {
+		final String legacyCN = SR_TRANSLATOR + "." + cloudCN;
+		
+		return clientCN.equalsIgnoreCase(legacyCN);
 	}
 }
