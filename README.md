@@ -4241,7 +4241,7 @@ The Event Handler has the following use cases:
 | [Update subscription](#eventhandler_endpoints_put_subscription) | /subscriptions/{id} | PUT    | id && Subscription request| Subscription response |
 | [Delete subscription](#eventhandler_endpoints_delete_subscription) | /subscriptions/{id} | DELETE    | id | OK     |
 
-<a name="eventhandler_endpoints_private" />
+<a name="event_handler_endpoints_private" />
 
 ### Private endpoint description<br />
 
