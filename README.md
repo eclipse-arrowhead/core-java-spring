@@ -4192,10 +4192,10 @@ The purpose of Event Handler supporting core system is providing authorized publ
 
 It provides the following services:
 * [Echo](#eventhandler_endpoints_get_echo)
-* [Publish](#eventhandler_endpoints_post_publish)
 * [Subscribe](#eventhandler_endpoints_post_subscribe)
 * [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe)
-* [AuthUpdate](#eventhandler_endpoints_post_auth_update)
+* [Publish](#eventhandler_endpoints_post_publish)
+* [AuthorizationUpdate](#eventhandler_endpoints_post_auth_update)
 
 
 <a name="eventhandler_endpoints" />
@@ -4219,7 +4219,7 @@ It provides the following services:
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [AuthUpdate](#eventhandler_endpoints_post_auth_update) | /publish/authupdate | POST    | -    | OK     |
+| [AuthorizationUpdate](#eventhandler_endpoints_post_auth_update) | /publish/authupdate | POST    | -    | OK     |
 
 <a name="eventhandler_endpoints_get_echo" />
 
@@ -4295,7 +4295,7 @@ __SubscriptionRequest__ is the input.
 | `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
 | `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
 
-<a name="#eventhandler_endpoints_delete_unsubscribe" />
+<a name="eventhandler_endpoints_delete_unsubscribe" />
 
 ### Unsubscribe 
 ```
