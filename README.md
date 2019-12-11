@@ -4328,10 +4328,8 @@ __SubscriptionRequest__ is the input.
 __SubscriptionRequest__ output:
 
 ```json
+
 {
-  "count": 0,
-  "data": [
-    {
         "id": 0,
         "eventType": {
         "eventTypeName": "string",
@@ -4371,8 +4369,7 @@ __SubscriptionRequest__ output:
       "createdAt": "string",
       "updatedAt": "string"
     }
-  ]
-}
+
 ```
 
 <a name="eventhandler_endpoints_delete_unsubscribe" />
