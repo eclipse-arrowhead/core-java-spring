@@ -4542,6 +4542,53 @@ __Get subscriptions query parameters__  the input :
 | --------- | ----------- | --------- | ----------- |
 | `id` |  Id of subscription | mandatory | integer |
 
+<a name="eventhandler_subscription_response" />
+
+__Get subscription by id__  the output :
+
+```json
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+```
+
 <a name="eventhandler_endpoints_put_subscription" />
 
 ### Update subscription
