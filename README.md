@@ -4410,7 +4410,7 @@ GET /mgmt/eventhandler/subscriptions
 
 __Get subscriptions query parameters__  the input :
 
-`https://eventhandler_ip:eventhandler_port/eventhandler/mgmgt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id`
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmgt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
 
 | __Get subscriptions__  query parameters |
 | ------------------------------------------------------- |
@@ -4421,6 +4421,25 @@ __Get subscriptions query parameters__  the input :
 | `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| max. length = 255 |
 | `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)|  |
 | `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
+
+<a name="eventhandler_endpoints_get_subscription" />
+
+### Get subscription by id
+
+```
+GET /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmgt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
 
 <a name="eventhandler_endpoints_post_auth_update" />
 
