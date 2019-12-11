@@ -4236,10 +4236,10 @@ The Event Handler has the following use cases:
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /subscriptions | GET    | direction && item_per_page && page && sort_field |  Subscription list response  |
-| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /subscriptions/{id} | GET    | id | Subscription response |
-| [Update subscription](#eventhandler_endpoints_put_subscription) | /subscriptions/{id} | PUT    | id && Subscription request| Subscription response |
-| [Delete subscription](#eventhandler_endpoints_delete_subscription) | /subscriptions/{id} | DELETE    | id | OK     |
+| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /mgmt/subscriptions | GET | direction && item_per_page && page && sort_field |  Subscription list response  |
+| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /mgmt/subscriptions/{id} | GET | id | Subscription response |
+| [Update subscription](#eventhandler_endpoints_put_subscription) | /mgmt/subscriptions/{id} | PUT | id && Subscription request| Subscription response |
+| [Delete subscription](#eventhandler_endpoints_delete_subscription) | /mgmt/subscriptions/{id} | DELETE | id | OK |
 
 <a name="event_handler_endpoints_private" />
 
@@ -4350,7 +4350,7 @@ __Unsubscribe query parameters__ are the input :
 
 ### Publish
 ```
-GET /eventhandler/publish
+POST /eventhandler/publish
 ```
 
 Start the publishing process to deliver the event to the subscribers.
@@ -4398,6 +4398,29 @@ __PublishRequest__ is the input:
 | `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
 | `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
 | `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_endpoints_get_subscription_list" />
+
+### Get subscriptions
+
+```
+GET /mgmt/eventhandler/subscriptions
+```
+
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmgt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id`
+
+| __Get subscriptions__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
+| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| max. length = 255 |
+| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)|  |
+| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
 
 <a name="eventhandler_endpoints_post_auth_update" />
 
