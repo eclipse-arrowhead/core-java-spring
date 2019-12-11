@@ -4410,7 +4410,7 @@ GET /mgmt/eventhandler/subscriptions
 
 __Get subscriptions query parameters__  the input :
 
-`https://eventhandler_ip:eventhandler_port/eventhandler/mgmgt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
 
 | __Get subscriptions__  query parameters |
 | ------------------------------------------------------- |
@@ -4432,7 +4432,7 @@ GET /mgmt/eventhandler/subscriptions/{id}
 
 __Get subscriptions query parameters__  the input :
 
-`https://eventhandler_ip:eventhandler_port/eventhandler/mgmgt/subscriptions/`1
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
 
 | __Get subscription by id__   path parameter |
 | ------------------------------------------------------- |
