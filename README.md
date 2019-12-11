@@ -4418,8 +4418,8 @@ __Get subscriptions query parameters__  the input :
 | Parameter | Description | Necessity | Format/Limitations |
 | --------- | ----------- | --------- | ----------- |
 | `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
-| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| max. length = 255 |
-| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)|  |
+| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
+| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
 | `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
 
 <a name="eventhandler_endpoints_get_subscription" />
@@ -4431,6 +4431,86 @@ GET /mgmt/eventhandler/subscriptions/{id}
 ```
 
 __Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+<a name="eventhandler_endpoints_put_subscription" />
+
+### Update subscription
+
+```
+PUT /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Update subscription request__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The recievied event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  ture or false |
+| `notifyUri` | Url subpath of the subscriber sytem's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not difined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the events timestamp is after startDate.  | optional ( StartDate must be after the current datetime. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the events timestamp is before endDate. | optional ( EndDate must be after the current datetime. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+<a name="eventhandler_endpoints_delete_subscription" />
+
+### Delete subscription
+
+```
+DELETE /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Delete subscription parameters__  the input :
 
 `https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
 
