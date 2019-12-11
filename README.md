@@ -4236,8 +4236,8 @@ The Event Handler has the following use cases:
 
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
-| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /mgmt/subscriptions | GET | direction && item_per_page && page && sort_field |  Subscription list response  |
-| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /mgmt/subscriptions/{id} | GET | id | Subscription response |
+| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /mgmt/subscriptions | GET | direction && item_per_page && page && sort_field | [Subscription list response](#eventhandler_subscription_list_response) |
+| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /mgmt/subscriptions/{id} | GET | id | [Subscription response](#eventhandler_subscription_response) |
 | [Update subscription](#eventhandler_endpoints_put_subscription) | /mgmt/subscriptions/{id} | PUT | id && Subscription request| Subscription response |
 | [Delete subscription](#eventhandler_endpoints_delete_subscription) | /mgmt/subscriptions/{id} | DELETE | id | OK |
 
@@ -4322,6 +4322,58 @@ __SubscriptionRequest__ is the input.
 | `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
 | `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
 | `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_subscription_response" />
+
+__SubscriptionRequest__ output:
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
 
 <a name="eventhandler_endpoints_delete_unsubscribe" />
 
@@ -4421,6 +4473,58 @@ __Get subscriptions query parameters__  the input :
 | `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
 | `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
 | `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
+
+<a name="eventhandler_subscription_list_response" />
+
+__Get subscriptions query parameters__  the output :
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
 
 <a name="eventhandler_endpoints_get_subscription" />
 
