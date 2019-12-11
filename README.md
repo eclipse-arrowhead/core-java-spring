@@ -4601,7 +4601,7 @@ __Update subscription request__  the input :
 
 `https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
 
-| __Get subscription by id__   path parameter |
+| __Update subscription__   path parameter |
 | ------------------------------------------------------- |
 
 | Parameter | Description | Necessity | Format/Limitations |
