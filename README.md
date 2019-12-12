@@ -4186,6 +4186,12 @@ __PriorityList__ is the input
 
 The purpose of Event Handler supporting core system is providing authorized publish-subscribe messaging system to the Arrowhead Framework.
 
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH Event Handler`
+![Alt text](https://github.com/arrowhead-f/core-java-spring/raw/documentation_eventhandler/documentation/eventhandler/overview.png)
+
 <a name="event_handler_provided_services" />
 
 ## Provided services
