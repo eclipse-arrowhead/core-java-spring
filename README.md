@@ -4218,8 +4218,8 @@ The Event Handler consumes the following services:
 The Event Handler has the following use cases:
 * [Publish Event](documentation/eventhandler/use_cases/EH_use_case_1.md)
 * [Register Subscription](documentation/eventhandler/use_cases/EH_use_case_2.md)
-* [Unregister Subscription]()
-* [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_3.md)
+* [Unregister Subscription](documentation/eventhandler/use_cases/EH_use_case_3.md)
+* [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_4.md)
 
 <a name="event_handler_endpoints" />
 
