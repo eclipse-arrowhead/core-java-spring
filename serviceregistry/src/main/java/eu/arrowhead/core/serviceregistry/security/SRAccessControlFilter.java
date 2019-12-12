@@ -24,6 +24,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	// members
 	
 	private static final String SR_TRANSLATOR = "sr_translator";
+	private static final String ORCH_TRANSLATOR = "orch_translator";
 	private static final CoreSystem[] allowedCoreSystemsForQuery = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER, CoreSystem.CERTIFICATE_AUTHORITY, CoreSystem.EVENT_HANDLER,
 																	 CoreSystem.AUTHORIZATION };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
@@ -40,7 +41,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		final String cloudCN = getServerCloudCN();
 		
 		//TODO: remove this after legacy version is not supported anymore
-		if (isLegacySRTranslator(clientCN, cloudCN)) {
+		if (isLegacySRTranslator(clientCN, cloudCN) || isLegacyOrchTranslator(clientCN, cloudCN)) {
 			return;
 		}
 		
@@ -177,6 +178,14 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 	//TODO: delete this after legacy version is not supported anymore
 	protected boolean isLegacySRTranslator(final String clientCN, final String cloudCN) {
 		final String legacyCN = SR_TRANSLATOR + "." + cloudCN;
+		
+		return clientCN.equalsIgnoreCase(legacyCN);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	//TODO: delete this after legacy version is not supported anymore
+	protected boolean isLegacyOrchTranslator(final String clientCN, final String cloudCN) {
+		final String legacyCN = ORCH_TRANSLATOR + "." + cloudCN;
 		
 		return clientCN.equalsIgnoreCase(legacyCN);
 	}
