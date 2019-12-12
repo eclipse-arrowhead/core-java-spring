@@ -1,10 +1,10 @@
-Use case 3: *Publish Authorization Update Event*
+Use case 3 : *Unregister Subscription*
 
 | Name | Description |
 | ---- | --------- |
-| ID | Publish-Auth-Update-Event |
-| Brief Description | The Even Handler is tasked to update the allowed providers for the given Subscriber |
-| Primary Actors | Authorization Core Service, Event Handler |
-| Preconditions | -   Subscriber has to be registered to event handler  |
-| Main Flow | - The Authorization Core Service sends an AuthorizationUpdateEvent to the Event Handler. <br/>- The Event Handler denial any request on it's Publish-Auth-Update endpoint if it is not from the Authorization Core Service<br/>- The Event Handler validate: <br/>- - the request format <br/>- - the Event source <br/>- - the Event TimeStamp. <br/>- - the AuthorizationUpdateEvent Type. <br/>- - the AuthorizationUpdateEvent Payload. <br/>- The Event Handler select the involved Subscriber by the request payload.<br/>- The Event Handler query the Authorization Core Service for the authorized providers of the subscriber as a consumer.<br/>- The Event Handler updates the authorization status of the subscribers SubscriptionEntryPublisherConnections. |
-| Postconditions | -   Subscriber could not receive events from unauthorized publishers  |
+| ID | Unsubscribe |
+| Brief Description | The Even Handler is tasked to unregister a subscription |
+| Primary Actors | Subscriber, Event Handler|
+| Preconditions |  Subscriber has to be registered in Service Registry  |
+| Main Flow | - The Subscriber sends an id and a SubscriptionRequest  to the Event Handler's unregister endpoint. <br/>- The Event Handler denial any request on it's Unsubscription endpoint if it is not from the system defined as the SubscriberSystem in the SubscriptionRequest<br/>- The Event Handler unregisters the SubscriptionEntryPublisherConnections and the Subscription. |
+| Postconditions | -   Subscriber would not receive events |
