@@ -4197,6 +4197,10 @@ The purpose of Event Handler supporting core system is providing authorized publ
 ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
 ![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH Event Handler`
 ![Alt text](/documentation/eventhandler/overview.png)
+
+<a name="event_handler_sysd" />
+
+## System Design Overview
 ![Alt text](/documentation/eventhandler/sysd/event_handler_controller.jpg)
 
 <a name="event_handler_provided_services" />
