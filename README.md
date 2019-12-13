@@ -4223,6 +4223,7 @@ The Event Handler has the following use cases:
 * [Unregister Subscription](documentation/eventhandler/use_cases/EH_use_case_3.md)
 ![Alt text](/documentation/eventhandler/use_cases/Unsubscribe.png)
 * [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_4.md)
+![Alt text](/documentation/authorization/SubscriptionAuthUpdate.png)
 ![Alt text](/documentation/eventhandler/use_cases/PublishAuthUpdate.png)
 
 <a name="event_handler_endpoints" />
