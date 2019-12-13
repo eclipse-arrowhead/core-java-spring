@@ -110,7 +110,8 @@ public abstract class ApplicationInitListener {
 		
 		int count = coreSystem.getServices().size();
 		for (final CoreSystemService coreService : coreSystem.getServices()) {
-			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, coreSystemRegistrationProperties.getCoreSystemAddress(), coreSystemRegistrationProperties.getCoreSystemPort());
+			final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, coreSystemRegistrationProperties.getCoreSystemDomainName(), 
+																    coreSystemRegistrationProperties.getCoreSystemDomainPort());
 			try {
 				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
 			} catch (final InvalidParameterException ex) {
@@ -264,8 +265,8 @@ public abstract class ApplicationInitListener {
 		
 		final SystemRequestDTO result = new SystemRequestDTO();
 		result.setSystemName(coreSystemRegistrationProperties.getCoreSystem().name().toLowerCase());
-		result.setAddress(coreSystemRegistrationProperties.getCoreSystemAddress());
-		result.setPort(coreSystemRegistrationProperties.getCoreSystemPort());
+		result.setAddress(coreSystemRegistrationProperties.getCoreSystemDomainName());
+		result.setPort(coreSystemRegistrationProperties.getCoreSystemDomainPort());
 		
 		if (sslProperties.isSslEnabled()) {
 			result.setAuthenticationInfo(Base64.getEncoder().encodeToString(publicKey.getEncoded()));

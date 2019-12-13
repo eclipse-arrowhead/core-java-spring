@@ -35,13 +35,13 @@ public class ProviderReachabilityTaskTest {
 	// members
 	
 	@InjectMocks
-	ProvidersReachabilityTask providersReachabilityTask = new ProvidersReachabilityTask();
+	private ProvidersReachabilityTask providersReachabilityTask = new ProvidersReachabilityTask();
 	
 	@Mock
-	ServiceRegistryDBService serviceRegistryDBService;
+	private ServiceRegistryDBService serviceRegistryDBService;
 	
-	final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
-	final System testSystem = new System("testSystem", "testAddress*/$", 1, "testAuthenticationInfo");
+	private final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
+	private final System testSystem = new System("testSystem", "testAddress*/$", 1, "testAuthenticationInfo");
 
 	//=================================================================================================
 	// methods
@@ -49,11 +49,10 @@ public class ProviderReachabilityTaskTest {
 	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setUp() {
-		final List<ServiceRegistry> sreviceRegistryEntries = new ArrayList<>();
-					
-		sreviceRegistryEntries.add(new ServiceRegistry(serviceDefinition, testSystem, "testUri", ZonedDateTime.now(), ServiceSecurityType.TOKEN, "", 1));
-			
-		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(sreviceRegistryEntries);
+		final List<ServiceRegistry> serviceRegistryEntries = new ArrayList<>();
+		serviceRegistryEntries.add(new ServiceRegistry(serviceDefinition, testSystem, "testUri", ZonedDateTime.now(), ServiceSecurityType.TOKEN, "", 1));
+		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(serviceRegistryEntries);
+		
 		when(serviceRegistryDBService.getServiceRegistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CoreCommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
 		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
@@ -62,6 +61,7 @@ public class ProviderReachabilityTaskTest {
 	@Test
 	public void testCheckProvidersReachabilityConnectionFailure() {
 		final List<ServiceRegistry> removedEntries = providersReachabilityTask.checkProvidersReachability();
+		
 		assertEquals(1, removedEntries.size());
 	}
 }

@@ -312,8 +312,6 @@ public class GatekeeperControllerICNTest {
 		Assert.assertEquals(2, response.getResponse().size());
 	}
 
-	//TODO: additional test cases here (when using gateway)
-	
 	//=================================================================================================
 	// assistant methods
 	

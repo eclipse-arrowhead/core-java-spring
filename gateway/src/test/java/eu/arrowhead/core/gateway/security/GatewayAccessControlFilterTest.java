@@ -50,7 +50,6 @@ public class GatewayAccessControlFilterTest {
 	private static final String GATEWAY_CONNECT_PROVIDER_URI = CommonConstants.GATEWAY_URI + "/connect_provider";
 	private static final String GATEWAY_CONNECT_CONSUMER_URI = CommonConstants.GATEWAY_URI + "/connect_consumer";
 	
-	
 	@Autowired
 	private ApplicationContext appContext;
 	

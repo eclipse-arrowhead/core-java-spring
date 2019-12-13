@@ -28,7 +28,7 @@ public class ProvidersReachabilityTask implements Job {
 	//=================================================================================================
 	// members
 	
-	protected Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);
+	protected final Logger logger = LogManager.getLogger(ProvidersReachabilityTask.class);
 	private static final int PAGE_SIZE = 1000;
 	
 	@Autowired

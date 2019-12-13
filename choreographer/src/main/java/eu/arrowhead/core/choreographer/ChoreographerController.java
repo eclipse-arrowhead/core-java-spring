@@ -3,6 +3,7 @@ package eu.arrowhead.core.choreographer;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.CoreUtilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
@@ -37,11 +38,14 @@ import java.util.List;
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
-    allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.CHOREOGRAPHER_URI)
 public class ChoreographerController {
+	
+	//=================================================================================================
+	// members
 
     private static final String PATH_VARIABLE_ID = "id";
     private static final String ID_NOT_VALID_ERROR_MESSAGE = "ID must be greater than 0.";
@@ -62,10 +66,12 @@ public class ChoreographerController {
 
     @Autowired
     private ChoreographerDBService choreographerDBService;
+    
+    //=================================================================================================
+	// methods
 
-    @ApiOperation(value = "Return an echo message with the purpose of testing the core service availability",
-            response = String.class,
-            tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -76,9 +82,10 @@ public class ChoreographerController {
         return "Got it!";
     }
 
-    @ApiOperation(value = "Register one or more ActionPlans.",
-            notes = "Please note that creating ActionPlans this way means that Actions included in the ActionPlan(s) can't be already existing Actions.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Register one or more ActionPlans.", 
+    			  notes = "Please note that creating ActionPlans this way means that Actions included in the ActionPlan(s) can't be already existing Actions.",
+    			  tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_201_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CHOREOGRAPHER_ACTION_PLAN_WITH_SERVICE_DEFINITIONS_MGMT_HTTP_400_MESSAGE),
@@ -88,14 +95,14 @@ public class ChoreographerController {
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public void registerActionPlans(@RequestBody final List<ChoreographerActionPlanRequestDTO> requests) {
-        for (ChoreographerActionPlanRequestDTO request : requests) {
+        for (final ChoreographerActionPlanRequestDTO request : requests) {
             checkChoreographerActionPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
             choreographerDBService.createChoreographerActionPlan(request.getActionPlanName(), request.getActions());
         }
     }
 
-    @ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    //-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_CHOREOGRAPHER_ACTION_PLAN_HTTP_400_MESSAGE),
@@ -114,8 +121,8 @@ public class ChoreographerController {
         logger.debug("ChoreographerActionStep with id: " + id + " successfully deleted!");
     }
 
-    @ApiOperation(value = "Return the requested ChoreographerActionPlan entry.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    //-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return the requested ChoreographerActionPlan entry.", response = ChoreographerActionPlanResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE),
@@ -130,14 +137,14 @@ public class ChoreographerController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI);
         }
 
-        ChoreographerActionPlanResponseDTO choreographerActionPlanEntryByIdResponse = choreographerDBService.getChoreographerActionPlanByIdResponse(id);
+        final ChoreographerActionPlanResponseDTO choreographerActionPlanEntryByIdResponse = choreographerDBService.getChoreographerActionPlanByIdResponse(id);
         logger.debug("ChoreographerActionPlan entry with id: " + " successfully retrieved!");
 
-        return  choreographerActionPlanEntryByIdResponse;
+        return choreographerActionPlanEntryByIdResponse;
     }
 
-    @ApiOperation(value = "Return requested ChoreographerActionPlan entries by the given parameters.",
-            tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+    //-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested ChoreographerActionPlan entries by the given parameters.", response = List.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE),
@@ -152,19 +159,24 @@ public class ChoreographerController {
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New ChoreographerActionPlan get request received with page: {} and item_per page: {}.", page, size);
 
-        CoreUtilities.ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
-
-        List<ChoreographerActionPlanResponseDTO> choreographerActionPlanEntriesResponse = choreographerDBService.getChoreographerActionPlanEntriesResponse(validatedPageParams.getValidatedPage(), validatedPageParams.getValidatedSize(),
-                validatedPageParams.getValidatedDirecion(), sortField);
+        final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
+        final List<ChoreographerActionPlanResponseDTO> choreographerActionPlanEntriesResponse = choreographerDBService.getChoreographerActionPlanEntriesResponse(validatedPageParams.getValidatedPage(),
+        																																						 validatedPageParams.getValidatedSize(),
+        																																						 validatedPageParams.getValidatedDirecion(),
+        																																						 sortField);
         logger.debug("ChoreographerActionPlans with page: {} and item_per page: {} retrieved successfully", page, size);
 
         return choreographerActionPlanEntriesResponse;
     }
+	
+	//=================================================================================================
+	// assistant methods
 
+	//-------------------------------------------------------------------------------------------------
     private void checkChoreographerActionPlanRequest(final ChoreographerActionPlanRequestDTO request, final String origin) {
         logger.debug("checkChoreographerActionPlanRequest started...");
 
-        if(Utilities.isEmpty(request.getActionPlanName())) {
+        if (Utilities.isEmpty(request.getActionPlanName())) {
             throw new BadPayloadException("ActionPlan name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }

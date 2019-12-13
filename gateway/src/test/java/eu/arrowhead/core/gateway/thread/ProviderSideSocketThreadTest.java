@@ -82,8 +82,8 @@ public class ProviderSideSocketThreadTest {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(appContext.getBean(CoreCommonConstants.GATEWAY_ACTIVE_SESSION_MAP, ConcurrentHashMap.class)).thenReturn(new ConcurrentHashMap<>());
 		when(appContext.getBean(SSLProperties.class)).thenReturn(getTestSSLPropertiesForThread());
-		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		
+		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		testingObject = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
 	}
 
@@ -109,6 +109,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorRelaySessionClosed() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
+
 		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), null, 0);
 	}
 	
@@ -116,6 +117,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		new ProviderSideSocketThread(appContext, relayClient, getTestSession(), null, 0);
 	}
 	
@@ -123,6 +125,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setProvider(null);
 		
@@ -133,6 +136,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderNameNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setSystemName(null);
 		
@@ -143,6 +147,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderNameEmpty() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setSystemName(" ");
 		
@@ -153,6 +158,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderAddressNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAddress(null);
 		
@@ -163,6 +169,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderAddressEmpty() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAddress("\r\n");
 		
@@ -173,6 +180,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderPortNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(null);
 		
@@ -183,6 +191,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderPortTooLow() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(-2);
 		
@@ -193,6 +202,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderPortTooHigh() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setPort(1111111);
 		
@@ -203,6 +213,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderAuthenticationInfoNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAuthenticationInfo(null);
 		
@@ -213,6 +224,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestProviderAuthenticationInfoEmpty() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.getProvider().setAuthenticationInfo("");
 		
@@ -223,6 +235,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestServiceDefinitionNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setServiceDefinition(null);
 		
@@ -233,6 +246,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestServiceDefinitionEmpty() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setServiceDefinition("\t\t\t");
 		
@@ -243,6 +257,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestConsumerGWPublicKeyNull() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setConsumerGWPublicKey(null);
 		
@@ -253,6 +268,7 @@ public class ProviderSideSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorConnectionRequestConsumerGWPublicKeyEmpty() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		
 		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		connectionRequest.setConsumerGWPublicKey(" ");
 		
@@ -287,7 +303,9 @@ public class ProviderSideSocketThreadTest {
 	@Test
 	public void testInitOk() {
 		Assert.assertTrue(!testingObject.isInitialized());
+		
 		testingObject.init("queueId", getTestMessageProducer());
+		
 		Assert.assertTrue(testingObject.isInitialized());
 	}
 	
@@ -304,8 +322,11 @@ public class ProviderSideSocketThreadTest {
 		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
+		
 		doNothing().when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
+		
 		testingObject.onMessage(message);
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}
@@ -317,8 +338,11 @@ public class ProviderSideSocketThreadTest {
 		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
+		
 		doThrow(new JMSException("test")).when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
+		
 		testingObject.onMessage(message);
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}
@@ -330,8 +354,11 @@ public class ProviderSideSocketThreadTest {
 		ReflectionTestUtils.setField(testingObject, "outProvider", outputStream);
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla"));
+		
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
+		
 		testingObject.onMessage(message);
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(!interrupted);
 		Assert.assertArrayEquals(new byte[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }, outputStream.toByteArray());
@@ -348,9 +375,10 @@ public class ProviderSideSocketThreadTest {
 	public void testRunWhenInternalExceptionThrown() {
 		final SSLProperties sslProps = getTestSSLPropertiesForThread();
 		ReflectionTestUtils.setField(sslProps, "keyStoreType", "invalid");
-		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
-		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		
+		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
+
+		final GatewayProviderConnectionRequestDTO connectionRequest = getTestGatewayProviderConnectionRequestDTO();
 		final ProviderSideSocketThread thread = new ProviderSideSocketThread(appContext, relayClient, getTestSession(), connectionRequest, 60000);
 		thread.init("queueId", getTestMessageProducer());
 		thread.run();
@@ -364,7 +392,9 @@ public class ProviderSideSocketThreadTest {
 	@Test
 	public void testRunWhenOtherSideCloseTheConnectionAfterSendingSomeBytes() throws JMSException {
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
 		testingObject.init("queueId", getTestMessageProducer());
+		
 		new Thread() {
 			public void run() {
 				try {
@@ -387,7 +417,9 @@ public class ProviderSideSocketThreadTest {
 		}.start();
 		
 		testingObject.run();
+		
 		verify(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}

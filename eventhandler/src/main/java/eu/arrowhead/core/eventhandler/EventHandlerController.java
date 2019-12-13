@@ -44,7 +44,7 @@ import io.swagger.annotations.ApiResponses;
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS, 
-allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
+			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
 @RequestMapping(CommonConstants.EVENT_HANDLER_URI)
@@ -97,7 +97,7 @@ public class EventHandlerController {
 	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
 	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
 
-	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
+	@Value(CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
 	private long timeStampTolerance;
 	
 	private final Logger logger = LogManager.getLogger(EventHandlerController.class);
@@ -139,9 +139,9 @@ public class EventHandlerController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
 		logger.debug("New getSubscriptions get request recieved with page: {} and item_per page: {}", page, size);
 				
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters( page, size, direction, CommonConstants.EVENT_HANDLER_URI + EVENT_HANDLER_MGMT_URI );
-		final SubscriptionListResponseDTO subscriptionsResponse = eventHandlerDBService.getSubscriptionsResponse( validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																									validParameters.getValidatedDirecion(), sortField );
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.EVENT_HANDLER_URI + EVENT_HANDLER_MGMT_URI);
+		final SubscriptionListResponseDTO subscriptionsResponse = eventHandlerDBService.getSubscriptionsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+																												 validParameters.getValidatedDirecion(), sortField);
 		
 		logger.debug("Subscriptions  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return subscriptionsResponse;
@@ -164,10 +164,9 @@ public class EventHandlerController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		final SubscriptionResponseDTO subscriptionResponse = eventHandlerDBService.getSubscriptionByIdResponse( id );
+		final SubscriptionResponseDTO subscriptionResponse = eventHandlerDBService.getSubscriptionByIdResponse(id);
 		
 		logger.debug("Subscription entry with id: {} successfully retrieved", id);
-		
 		return subscriptionResponse;
 	}
 	
@@ -191,8 +190,6 @@ public class EventHandlerController {
 		eventHandlerDBService.deleteSubscriptionResponse(id);
 		
 		logger.debug("Subscription entry with id: {} successfully deleted", id);
-		
-		return;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -204,9 +201,7 @@ public class EventHandlerController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(path = EVENTHANLER_BY_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public SubscriptionResponseDTO updateSubscription(
-			@PathVariable(value = PATH_VARIABLE_ID) final long id,
-			@RequestBody final SubscriptionRequestDTO request) {
+	@ResponseBody public SubscriptionResponseDTO updateSubscription(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final SubscriptionRequestDTO request) {
 		logger.debug("New updateSubscription put request recieved with id: {}", id);
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + EVENTHANLER_BY_ID_MGMT_URI;
@@ -215,11 +210,9 @@ public class EventHandlerController {
 		}
 		
 		checkSubscriptionRequestDTO(request, origin);
-		
 		final SubscriptionResponseDTO response = eventHandlerService.updateSubscriptionResponse(id, request);
 		
 		logger.debug("Subscription entry with id: {} successfully updated", id);
-		
 		return response;
 	}
 	
@@ -236,9 +229,9 @@ public class EventHandlerController {
 		logger.debug("subscription started ...");
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
-		checkSubscriptionRequestDTO( request, origin );
+		checkSubscriptionRequestDTO(request, origin);
 		
-	    eventHandlerService.subscribe( request );
+	    eventHandlerService.subscribe(request);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -260,7 +253,7 @@ public class EventHandlerController {
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE;
 		checkUnsubscribeParameters(eventType, subscriberName, subscriberAddress, subscriberPort, origin);
 		
-	    eventHandlerService.unsubscribe( eventType, subscriberName, subscriberAddress, subscriberPort );
+	    eventHandlerService.unsubscribe(eventType, subscriberName, subscriberAddress, subscriberPort);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -277,7 +270,6 @@ public class EventHandlerController {
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH;
 		checkEventPublishRequestDTO(request, origin);
-		
 		validateTimeStamp(request, origin);
 		
 	    eventHandlerService.publishResponse(request);
@@ -296,9 +288,7 @@ public class EventHandlerController {
 		logger.debug("publishSubscriberAuthorizationUpdate started ...");
 		
 		final String origin = CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE;
-
 		checkEventPublishRequestDTO(request, origin);
-		
 		validateTimeStamp(request, origin);
 		
 	    eventHandlerService.publishSubscriberAuthorizationUpdateResponse(request);
@@ -308,7 +298,7 @@ public class EventHandlerController {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
-	private void checkSubscriptionRequestDTO( final SubscriptionRequestDTO request, final String origin) {
+	private void checkSubscriptionRequestDTO(final SubscriptionRequestDTO request, final String origin) {
 		logger.debug("checkSubscriptionRequestDTO started ...");
 		
 		if (request == null) {
@@ -317,16 +307,15 @@ public class EventHandlerController {
 		
 		checkSystemRequestDTO(request.getSubscriberSystem(), origin);
 		
-		if ( Utilities.isEmpty( request.getEventType() )) {
+		if (Utilities.isEmpty(request.getEventType())) {
 			throw new BadPayloadException("Request.EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);	
 		}
 		
-		if ( Utilities.isEmpty( request.getNotifyUri() )) {
+		if (Utilities.isEmpty(request.getNotifyUri())) {
 			throw new BadPayloadException("Request.NotifyUri" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);	
 		}		
 		
-		if ( request.getMatchMetaData() && ( request.getFilterMetaData() == null || request.getFilterMetaData().isEmpty() )) {
-			
+		if (request.getMatchMetaData() && (request.getFilterMetaData() == null || request.getFilterMetaData().isEmpty())) {
 			throw new BadPayloadException("Request.MatchMetaData is true but Request.FilterMetaData" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
@@ -374,14 +363,13 @@ public class EventHandlerController {
 		
 		checkSystemRequestDTO(request.getSource(), origin);
 		
-		if ( Utilities.isEmpty( request.getEventType() )) {
+		if (Utilities.isEmpty( request.getEventType())) {
 			throw new BadPayloadException("Request.EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if ( Utilities.isEmpty( request.getPayload() )) {
+		if (Utilities.isEmpty( request.getPayload())) {
 			throw new BadPayloadException("Request.Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}	
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -389,42 +377,33 @@ public class EventHandlerController {
 	private void validateTimeStamp(final EventPublishRequestDTO request, final String origin) {
 		logger.debug("validateTimeStamp started ...");
 		
-		if ( Utilities.isEmpty( request.getTimeStamp() )) {
-			
+		if (Utilities.isEmpty(request.getTimeStamp())) {
 			request.setTimeStamp(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
-		
 		} else	{
-			
 			final ZonedDateTime now = ZonedDateTime.now();
 			final ZonedDateTime timeStamp;
 
 			try {
-				
 				timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(request.getTimeStamp());
-			
 			} catch (final DateTimeParseException ex) {
-				
 				throw new BadPayloadException("Request.TimeStamp" + WRONG_FORMAT_ERROR_MESSAGE + ex, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (timeStamp.isAfter(now.plusSeconds( timeStampTolerance ))) {
-				
+			if (timeStamp.isAfter(now.plusSeconds(timeStampTolerance))) {
 				throw new BadPayloadException("Request.TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
 			
-			if (timeStamp.isBefore(now.minusSeconds( timeStampTolerance ))) {
-				
+			if (timeStamp.isBefore(now.minusSeconds(timeStampTolerance))) {
 				throw new BadPayloadException("Request.TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 			}
-
 		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkUnsubscribeParameters( final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort, final String origin) {
+	private void checkUnsubscribeParameters(final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort, final String origin) {
 		logger.debug("checkUnsubscribeParameters started...");
 		
-		if (Utilities.isEmpty( eventType )) {
+		if (Utilities.isEmpty(eventType)) {
 			throw new BadPayloadException("Event Type is blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
@@ -435,7 +414,5 @@ public class EventHandlerController {
 		if (Utilities.isEmpty(subscriberAddress)) {
 			throw new BadPayloadException("Address of the subscriber system is blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
-		
 	}
-
 }

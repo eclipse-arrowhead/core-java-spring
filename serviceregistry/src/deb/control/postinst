@@ -24,12 +24,15 @@ PKG_NAME="arrowhead-serviceregistry"
 
 case "$1" in
     configure)
+		dos2unix -q /etc/systemd/system/${PKG_NAME}.service
+		
         . /usr/share/arrowhead/conf/ahconf.sh
+		
         SYSTEM_DIR="${AH_SYSTEMS_DIR}/${SYSTEM_NAME}"
 
 		db_get arrowhead-core-common/mysql_password_sr; system_passwd=$RET || true
 		db_unregister arrowhead-core-common/mysql_password_sr
-		
+
 		# Generate password (if required)
 		if [ -z "${system_passwd}" ]; then
 			system_passwd="$(openssl rand -base64 12)"
@@ -41,6 +44,11 @@ case "$1" in
         if [ ! -d "${SYSTEM_DIR}" ]; then
             mkdir -p ${SYSTEM_DIR}
         fi
+
+		domain_name=${AH_DOMAIN_NAME}
+		if [ -z ${domain_name} ]; then
+			domain_name=${OWN_IP}
+		fi
 
         ah_cert_signed_system ${SYSTEM_NAME}
 		
@@ -60,7 +68,7 @@ case "$1" in
 		cat ${SYSTEM_DIR}/application.properties.orig | \
 		sed -r -e "\#^.*spring\.datasource\.url=#s#.*\$#spring.datasource.url=jdbc:mysql://"${db_host}":3306/arrowhead?serverTimezone=Europe/Budapest#"  \
 			   -e "\#^.*spring\.datasource\.password=#s#.*\$#spring.datasource.password=${system_passwd}#" \
-			   -e "\#^.*server\.address=#s#.*\$#server.address=${OWN_IP}#" \
+			   -e "\#^.*domain\.name=#s#.*\$#domain.name=${domain_name}#" \
 			   -e "\#^.*server\.ssl\.key-store=#s#.*\$#server.ssl.key-store=file:${SYSTEM_DIR}/${SYSTEM_NAME}.p12#" \
 			   -e "\#^.*server\.ssl\.key-store-password=#s#.*\$#server.ssl.key-store-password=${AH_PASS_CERT}#" \
 			   -e "\#^.*server\.ssl\.key-password=#s#.*\$#server.ssl.key-password=${AH_PASS_CERT}#" \

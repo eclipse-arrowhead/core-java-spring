@@ -36,10 +36,10 @@ public class ServiceEndOfValidityCheckTaskTest {
 	// members
 	
 	@InjectMocks
-	ServiceEndOfValidityCheckTask serviceEndOfValidityCheckTask = new ServiceEndOfValidityCheckTask();
+	private ServiceEndOfValidityCheckTask serviceEndOfValidityCheckTask = new ServiceEndOfValidityCheckTask();
 	
 	@Mock
-	ServiceRegistryDBService serviceRegistryDBService; 
+	private ServiceRegistryDBService serviceRegistryDBService; 
 
 	//=================================================================================================
 	// methods
@@ -47,7 +47,7 @@ public class ServiceEndOfValidityCheckTaskTest {
 	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setUp() {
-		final List<ServiceRegistry> sreviceRegistryEntries = new ArrayList<>();
+		final List<ServiceRegistry> serviceRegistryEntries = new ArrayList<>();
 		
 		final ZonedDateTime now = ZonedDateTime.now();		
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testService");
@@ -55,17 +55,18 @@ public class ServiceEndOfValidityCheckTaskTest {
 		
 		final ServiceRegistry pastTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.minusMinutes(10), ServiceSecurityType.TOKEN, "", 1);
 		pastTTL.setId(1);
-		sreviceRegistryEntries.add(pastTTL);
+		serviceRegistryEntries.add(pastTTL);
 		
 		final ServiceRegistry futureTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", now.plusMinutes(10), ServiceSecurityType.TOKEN, "", 1);		
 		futureTTL.setId(2);
-		sreviceRegistryEntries.add(futureTTL);
+		serviceRegistryEntries.add(futureTTL);
 		
 		final ServiceRegistry noTTL = new ServiceRegistry(serviceDefinition, testSystem, "testUri", null, ServiceSecurityType.TOKEN, "", 1);
 		noTTL.setId(3);
-		sreviceRegistryEntries.add(noTTL);
+		serviceRegistryEntries.add(noTTL);
 		
-		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(sreviceRegistryEntries);
+		final Page<ServiceRegistry> sreviceRegistryEntriesPage = new PageImpl<ServiceRegistry>(serviceRegistryEntries);
+		
 		when(serviceRegistryDBService.getServiceRegistryEntries(anyInt(), anyInt(), eq(Direction.ASC), eq(CoreCommonConstants.COMMON_FIELD_NAME_ID))).thenReturn(sreviceRegistryEntriesPage);
 		doNothing().when(serviceRegistryDBService).removeBulkOfServiceRegistryEntries(anyIterable());
 	}
@@ -74,6 +75,7 @@ public class ServiceEndOfValidityCheckTaskTest {
 	@Test
 	public void testCheckServicesEndOfValidity() {
 		final List<ServiceRegistry> removedEntries = serviceEndOfValidityCheckTask.checkServicesEndOfValidity();
+		
 		assertEquals(1, removedEntries.size());
 		final long id = removedEntries.get(0).getId();
 		assertEquals(1, id);

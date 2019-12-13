@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import eu.arrowhead.common.database.entity.EventType;
 
 @Repository
-public interface EventTypeRepository extends RefreshableRepository<EventType, Long> {
+public interface EventTypeRepository extends RefreshableRepository<EventType,Long> {
 
 	//=================================================================================================
 	// methods

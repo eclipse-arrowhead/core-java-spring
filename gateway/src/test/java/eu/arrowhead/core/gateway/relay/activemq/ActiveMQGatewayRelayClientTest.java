@@ -162,6 +162,7 @@ public class ActiveMQGatewayRelayClientTest {
 	@Test
 	public void testInitializeProviderSideRelayOK() throws JMSException {
 		final ProviderSideRelayInfo result = testObject.initializeProviderSideRelay(getTestSession(), getTestMessageListener());
+		
 		Assert.assertEquals(48, result.getQueueId().length());
 		Assert.assertEquals("gateway.testcloud2.aitia.arrowhead.eu", result.getPeerName());
 	}
@@ -206,6 +207,7 @@ public class ActiveMQGatewayRelayClientTest {
 	@Test
 	public void testInitializeConsumerSideRelayOk() throws JMSException {
 		final ConsumerSideRelayInfo result = testObject.initializeConsumerSideRelay(getTestSession(), getTestMessageListener(), "gateway.testcloud1.aitia.arrowhead.eu", "12sfsdfsdfasddasd234");
+		
 		Assert.assertNotNull(result);
 		Assert.assertNotNull(result.getMessageSender());
 	}
@@ -244,6 +246,7 @@ public class ActiveMQGatewayRelayClientTest {
 	@Test
 	public void testInitializeControlRelayOk() throws JMSException {
 		final ControlRelayInfo result = testObject.initializeControlRelay(getTestSession(), "gateway.testcloud1.aitia.arrowhead.eu", "12sfsdfsdfasddasd234");
+		
 		Assert.assertNotNull(result);
 		Assert.assertNotNull(result.getControlRequestMessageSender());
 		Assert.assertNotNull(result.getControlResponseMessageSender());
@@ -327,7 +330,8 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText(encoded);
 		
-		byte[] result = testObject.getBytesFromMessage(msg, otherPublicKey);
+		final byte[] result = testObject.getBytesFromMessage(msg, otherPublicKey);
+		
 		Assert.assertArrayEquals(input, result);
 	}
 	
@@ -400,6 +404,7 @@ public class ActiveMQGatewayRelayClientTest {
 	public void testHandleCloseControlMessageInvalidCommand() throws JMSException {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("EXIT abcd");
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -408,6 +413,7 @@ public class ActiveMQGatewayRelayClientTest {
 	public void testHandleCloseControlMessageMissingQueueId() throws JMSException {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE");
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -417,6 +423,7 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE abcd");
 		msg.setJMSDestination(new ActiveMQTopic());
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -426,6 +433,7 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE efgh");
 		msg.setJMSDestination(new ActiveMQQueue("blabla-abcd-CONTROL"));
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -435,6 +443,7 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE abcd");
 		msg.setJMSDestination(new ActiveMQQueue("blabla-abcd-CONTROL"));
+		
 		try {
 			testObject.handleCloseControlMessage(msg, getTestSession());
 		} catch (final Exception ex) {

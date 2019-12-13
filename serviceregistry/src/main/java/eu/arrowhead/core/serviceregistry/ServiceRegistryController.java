@@ -897,24 +897,18 @@ public class ServiceRegistryController {
 		}
 		
 		ServiceSecurityType securityType = null;
-		if ( request.getSecure() != null ) {
-			
-			for ( final ServiceSecurityType type : ServiceSecurityType.values()) {
-				
-				if ( type.name().equalsIgnoreCase( request.getSecure() )) {
-					
+		if (request.getSecure() != null) {
+			for (final ServiceSecurityType type : ServiceSecurityType.values()) {
+				if (type.name().equalsIgnoreCase(request.getSecure())) {
 					securityType = type;
 					break;
 				}
 			}
 			
-			if ( securityType == null ) {
-				
+			if (securityType == null) {
 				throw new BadPayloadException("Security type is not valid.", HttpStatus.SC_BAD_REQUEST, origin); 
 			}
-			
 		} else {
-			
 			securityType = ServiceSecurityType.NOT_SECURE;
 		}
 		
@@ -973,7 +967,7 @@ public class ServiceRegistryController {
 	private void checkServiceRegistryMergeRequest(final long id, final ServiceRegistryRequestDTO request, final String origin) {
 		logger.debug("checkServiceRegistryMergeRequest started...");
 		
-		if ( id <= 0) {
+		if (id <= 0) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		

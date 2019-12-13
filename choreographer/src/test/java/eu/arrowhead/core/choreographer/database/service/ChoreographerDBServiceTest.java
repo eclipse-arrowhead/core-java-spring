@@ -37,6 +37,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @RunWith(SpringRunner.class)
 public class ChoreographerDBServiceTest {
+	
+	//=================================================================================================
+	// members
 
     @InjectMocks
     private ChoreographerDBService choreographerDBService;
@@ -64,8 +67,12 @@ public class ChoreographerDBServiceTest {
 
     @Mock
     ServiceDefinitionRepository serviceDefinitionRepository;
+    
+    //=================================================================================================
+	// methods
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getChoreographerActionPlanByIdTest() {
         final Optional<ChoreographerActionPlan> choreographerActionPlanOptional = Optional.of(getChoreographerActionPlan());
         when(choreographerActionPlanRepository.findById(anyLong())).thenReturn(choreographerActionPlanOptional);
@@ -73,40 +80,49 @@ public class ChoreographerDBServiceTest {
         choreographerDBService.getChoreographerActionPlanById(1);
     }
 
-    @Test(expected = InvalidParameterException.class)
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
     public void getChoreographerActionPlanByIdTestWithNotExistingId() {
         when(choreographerActionPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
         choreographerDBService.getChoreographerActionPlanById(1);
     }
 
-    @Test(expected = InvalidParameterException.class)
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
     public void getChoreographerActionPlanByIdWithInvalidId() {
         choreographerDBService.getChoreographerActionPlanById(-1);
     }
 
-    @Test
+    //-------------------------------------------------------------------------------------------------
+	@Test
     public void getChoreographerActionPlanEntriesResponseOKTest() {
         when(choreographerActionPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerActionPlanList());
 
         choreographerDBService.getChoreographerActionPlanEntriesResponse(0, 10, Direction.ASC, "id");
     }
 
-    @Test(expected = InvalidParameterException.class)
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
     public void getChoreographerActionPlanEntriesTestWithInvalidSortField() {
         when(choreographerActionPlanRepository.findAll(any(PageRequest.class))).thenReturn(getPageOfChoreographerActionPlanList());
 
         choreographerDBService.getChoreographerActionPlanEntriesResponse(0, 10, Sort.Direction.ASC, "notValid");
     }
 
-    @Test(expected = InvalidParameterException.class)
-    public void createChoreographerActionPlanTestWithNullInput() { choreographerDBService.createChoreographerActionPlan(null, null); }
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+    public void createChoreographerActionPlanTestWithNullInput() { 
+		choreographerDBService.createChoreographerActionPlan(null, null);
+	}
 
-    @Test(expected = InvalidParameterException.class)
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
     public void createChoreographerActionPlanTestWithEmptyActionRequestList() {
         choreographerDBService.createChoreographerActionPlan("actionPlan", getChoreographerActionRequestDTOEmptyListForTest());
     }
 
-    @Test(expected = InvalidParameterException.class)
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
     public void createChoreographerActionPlanWithBlankName() {
         List<ChoreographerActionRequestDTO> actions = new ArrayList<>();
         actions.add(getChoreographerActionRequestDTOWithNextActionForTest(3, "testaction0", "testaction1"));
@@ -114,46 +130,55 @@ public class ChoreographerDBServiceTest {
         choreographerDBService.createChoreographerActionPlan("    ", actions);
     }
 
-    @Test(expected = InvalidParameterException.class)
-    public void removeOrchestratorStoreByIdWithInvalidIdTest() {
+    //-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+    public void removeActionPlanEntryByIdWithInvalidIdTest() {
         choreographerDBService.removeActionPlanEntryById(getInvalidIdForTest());
     }
 
     //-------------------------------------------------------------------------------------------------
     @Test(expected = InvalidParameterException.class)
-    public void removeOrchestratorStoreByIdWithIdNotInDBTest() {
+    public void removeActionPlanEntryByIdWithIdNotInDBTest() {
         when(choreographerActionPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
 
         choreographerDBService.removeActionPlanEntryById(getIdForTest());
     }
-
+    
+    //=================================================================================================
+	// assistant methods
+    
+    //-------------------------------------------------------------------------------------------------
     private List<ChoreographerActionRequestDTO> getChoreographerActionRequestDTOEmptyListForTest() {
         return List.of();
     }
 
-    private ChoreographerActionRequestDTO getChoreographerActionRequestDTOWithNextActionForTest(final int stepListSize, final String actionName, final String nextActionName) {
+    //-------------------------------------------------------------------------------------------------
+	private ChoreographerActionRequestDTO getChoreographerActionRequestDTOWithNextActionForTest(final int stepListSize, final String actionName, final String nextActionName) {
         List<ChoreographerActionStepRequestDTO> actionSteps = new ArrayList<>(stepListSize);
-        for (int i = 0; i < stepListSize; i++) {
+        for (int i = 0; i < stepListSize; ++i) {
             actionSteps.add(getChoreographerActionStepDTOForTest(ThreadLocalRandom.current().nextInt(0, 5), ThreadLocalRandom.current().nextInt(0, 5)));
         }
 
         return new ChoreographerActionRequestDTO(actionName, nextActionName, actionSteps);
     }
 
-    private ChoreographerActionStepRequestDTO getChoreographerActionStepDTOForTest(final int usedServicesListSize, final int nextStepListSize) {
+    //-------------------------------------------------------------------------------------------------
+	private ChoreographerActionStepRequestDTO getChoreographerActionStepDTOForTest(final int usedServicesListSize, final int nextStepListSize) {
         String actionStepName = "testactionplan0";
         List<String> usedServiceNames = new ArrayList<>(usedServicesListSize);
-        for (int i = 0; i < usedServicesListSize; i++) {
+        for (int i = 0; i < usedServicesListSize; ++i) {
             usedServiceNames.add("testservicedefinition" + i);
         }
         List<String> nextStepNames = new ArrayList<>(nextStepListSize);
-        for (int i = 1; i <= nextStepListSize; i++) {
+        for (int i = 1; i <= nextStepListSize; ++i) {
             nextStepNames.add("testactionplan" + i);
         }
+        
         return new ChoreographerActionStepRequestDTO(actionStepName, usedServiceNames, nextStepNames);
     }
 
-    private ChoreographerActionPlan getChoreographerActionPlan() {
+    //-------------------------------------------------------------------------------------------------
+	private ChoreographerActionPlan getChoreographerActionPlan() {
         final ChoreographerActionPlan actionPlan = new ChoreographerActionPlan("testactionplan0");
         actionPlan.setCreatedAt(getCreatedAtForTest());
         actionPlan.setUpdatedAt(getUpdatedAtForTest());
@@ -162,7 +187,9 @@ public class ChoreographerDBServiceTest {
         return actionPlan;
     }
 
-    private ChoreographerActionStep getChoreographerActionStep() {
+    //-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unused")
+	private ChoreographerActionStep getChoreographerActionStep() {
         final ChoreographerActionStep actionStep = new ChoreographerActionStep("testactionstep0");
         actionStep.setId(getIdForTest());
         actionStep.setCreatedAt(getCreatedAtForTest());
@@ -171,25 +198,30 @@ public class ChoreographerDBServiceTest {
         return actionStep;
     }
 
-    private PageImpl<ChoreographerActionPlan> getPageOfChoreographerActionPlanList() {
+    //-------------------------------------------------------------------------------------------------
+	private PageImpl<ChoreographerActionPlan> getPageOfChoreographerActionPlanList() {
         final List<ChoreographerActionPlan> choreographerActionPlanList = List.of(getChoreographerActionPlan());
 
         return new PageImpl<>(choreographerActionPlanList);
     }
 
-    private long getIdForTest() {
+    //-------------------------------------------------------------------------------------------------
+	private long getIdForTest() {
         return 1L;
     }
 
-    private long getInvalidIdForTest() {
+    //-------------------------------------------------------------------------------------------------
+	private long getInvalidIdForTest() {
         return -1L;
     }
 
-    private ZonedDateTime getUpdatedAtForTest() {
+    //-------------------------------------------------------------------------------------------------
+	private ZonedDateTime getUpdatedAtForTest() {
         return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13 12:49:30");
     }
 
-    private ZonedDateTime getCreatedAtForTest() {
+    //-------------------------------------------------------------------------------------------------
+	private ZonedDateTime getCreatedAtForTest() {
         return Utilities.parseUTCStringToLocalZonedDateTime("2019-08-13 14:43:19");
     }
 }

@@ -23,7 +23,6 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	
 	//=================================================================================================
 	// members
-	//-------------------------------------------------------------------------------------------------
 	
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -32,25 +31,25 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean( CommonConstants.EVENT_METADATA_FILTER )
+	@Bean(CommonConstants.EVENT_METADATA_FILTER)
 	public MetadataFilteringAlgorithm getMetadataFilter() {
 		return new DefaultMetadataFilter();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean( CoreCommonConstants.EVENT_PUBLISHING_QUEUE )
+	@Bean(CoreCommonConstants.EVENT_PUBLISHING_QUEUE)
 	public PublishingQueue getPublishingQueue() {
 		return new PublishingQueue();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean( CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK)
+	@Bean(CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK)
 	public PublishingQueueWatcherTask getPublishingQueueWatcherTask() {
 		return new PublishingQueueWatcherTask();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Bean( CoreCommonConstants.EVENT_PUBLISHING_EXPRESS_EXECUTOR)
+	@Bean(CoreCommonConstants.EVENT_PUBLISHING_EXPRESS_EXECUTOR)
 	public PublishRequestFixedExecutor getPublishingExpressExecutor() {
 		return new PublishRequestFixedExecutor();
 	}
@@ -61,7 +60,6 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
-		
 		return List.of(CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE);
 	}
 	
@@ -70,9 +68,8 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	protected void customInit(final ContextRefreshedEvent event) {				
 		logger.debug("customInit started...");
 		
-		final PublishingQueueWatcherTask publishingQueueWatcherTask = applicationContext.getBean( CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK, PublishingQueueWatcherTask.class );
+		final PublishingQueueWatcherTask publishingQueueWatcherTask = applicationContext.getBean(CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK, PublishingQueueWatcherTask.class);
 		publishingQueueWatcherTask.start();
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -80,9 +77,7 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	protected void customDestroy() {				
 		logger.debug("customDestroy started...");
 		
-		final PublishingQueueWatcherTask publishingQueueWatcherTask = applicationContext.getBean( CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK, PublishingQueueWatcherTask.class );
+		final PublishingQueueWatcherTask publishingQueueWatcherTask = applicationContext.getBean(CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK, PublishingQueueWatcherTask.class);
 		publishingQueueWatcherTask.destroy();
-		
 	}
-	
 }

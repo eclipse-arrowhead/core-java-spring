@@ -28,7 +28,6 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 
@@ -46,7 +45,6 @@ public class OrchestratorAccessControlFilterTest {
 	// members
 	
 	private static final String ORCH_ECHO = CommonConstants.ORCHESTRATOR_URI + CommonConstants.ECHO_URI;
-	private static final String ORCH_MGMT_STORE_ECHO = CommonConstants.ORCHESTRATOR_URI + CoreCommonConstants.ORCHESTRATOR_STORE_MGMT_URI + CommonConstants.ECHO_URI;
 	private static final String ORCH_ORCHESTRATION = CommonConstants.ORCHESTRATOR_URI +CommonConstants.OP_ORCH_PROCESS;
 	
 	@Autowired
@@ -102,7 +100,7 @@ public class OrchestratorAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testExternalOrchestrationWithGatekeeper() throws Exception {
-		final Map<String, Boolean> flags = new HashMap<>();
+		final Map<String,Boolean> flags = new HashMap<>();
 		flags.put(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, true);
 		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("", flags);
 		
@@ -118,7 +116,7 @@ public class OrchestratorAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testExternalOrchestrationWithoutGatekeeper() throws Exception {
-		final Map<String, Boolean> flags = new HashMap<>();
+		final Map<String,Boolean> flags = new HashMap<>();
 		flags.put(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, true);
 		final OrchestrationFormRequestDTO requestDTO = createOrchestrationFromRequestDTO("", flags);
 		

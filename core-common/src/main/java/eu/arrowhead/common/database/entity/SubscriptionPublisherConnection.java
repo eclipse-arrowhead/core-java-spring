@@ -16,7 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"subscriptionId", "systemId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "subscriptionId", "systemId" }))
 public class SubscriptionPublisherConnection {
 	//=================================================================================================
 	// members

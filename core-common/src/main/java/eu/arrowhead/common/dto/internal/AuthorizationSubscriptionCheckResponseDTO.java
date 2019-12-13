@@ -34,5 +34,4 @@ public class AuthorizationSubscriptionCheckResponseDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public void setConsumer(final SystemResponseDTO consumer) { this.consumer = consumer; }
 	public void setProviders(final Set<SystemResponseDTO> publishers) { this.publishers = publishers; }
-
 }

@@ -1,33 +1,35 @@
 package eu.arrowhead.common.dto.internal;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ChoreographerActionPlanRequestDTO {
+public class ChoreographerActionPlanRequestDTO implements Serializable {
+	
+	//=================================================================================================
+	// members
 
-    private String actionPlanName;
+	private static final long serialVersionUID = 7757993756490969411L;
 
+	private String actionPlanName;
     private List<ChoreographerActionRequestDTO> actions;
 
-    public ChoreographerActionPlanRequestDTO() {}
+    //=================================================================================================
+	// methods
+    
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerActionPlanRequestDTO() {}
 
-    public ChoreographerActionPlanRequestDTO(String actionPlanName, List<ChoreographerActionRequestDTO> actions) {
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerActionPlanRequestDTO(final String actionPlanName, final List<ChoreographerActionRequestDTO> actions) {
         this.actionPlanName = actionPlanName;
         this.actions = actions;
     }
 
-    public String getActionPlanName() {
-        return actionPlanName;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public String getActionPlanName() { return actionPlanName; }
+	public List<ChoreographerActionRequestDTO> getActions() { return actions; }
 
-    public void setActionPlanName(String actionPlanName) {
-        this.actionPlanName = actionPlanName;
-    }
-
-    public List<ChoreographerActionRequestDTO> getActions() {
-        return actions;
-    }
-
-    public void setActions(List<ChoreographerActionRequestDTO> actions) {
-        this.actions = actions;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setActionPlanName(final String actionPlanName) { this.actionPlanName = actionPlanName; }
+    public void setActions(final List<ChoreographerActionRequestDTO> actions) { this.actions = actions; }
 }

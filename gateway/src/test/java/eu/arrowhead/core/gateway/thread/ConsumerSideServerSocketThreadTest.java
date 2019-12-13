@@ -104,6 +104,7 @@ public class ConsumerSideServerSocketThreadTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorRelaySessionClosed() {
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(true);
+		
 		new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), null, null, 0, null, null);
 	}
 	
@@ -165,7 +166,9 @@ public class ConsumerSideServerSocketThreadTest {
 	@Test
 	public void testInitOk() {
 		Assert.assertTrue(!testingObject.isInitialized());
+		
 		testingObject.init(getTestMessageProducer());
+		
 		Assert.assertTrue(testingObject.isInitialized());
 	}
 	
@@ -182,8 +185,11 @@ public class ConsumerSideServerSocketThreadTest {
 		ReflectionTestUtils.setField(testingObject, "outConsumer", outputStream);
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
+		
 		doNothing().when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
+		
 		testingObject.onMessage(message);
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}
@@ -195,8 +201,11 @@ public class ConsumerSideServerSocketThreadTest {
 		ReflectionTestUtils.setField(testingObject, "outConsumer", outputStream);
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla" + GatewayRelayClient.CONTROL_QUEUE_SUFFIX));
+		
 		doThrow(new JMSException("test")).when(relayClient).handleCloseControlMessage(any(Message.class), any(Session.class));
+		
 		testingObject.onMessage(message);
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}
@@ -208,8 +217,11 @@ public class ConsumerSideServerSocketThreadTest {
 		ReflectionTestUtils.setField(testingObject, "outConsumer", outputStream);
 		final ActiveMQTextMessage message = new ActiveMQTextMessage();
 		message.setJMSDestination(new ActiveMQQueue("bla"));
+		
 		when(relayClient.getBytesFromMessage(any(Message.class), any(PublicKey.class))).thenReturn(new byte[] { 10, 8, 6, 4,  2, 9, 7, 5, 3, 1 });
+		
 		testingObject.onMessage(message);
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(!interrupted);
 		Assert.assertArrayEquals(new byte[] { 10, 8, 6, 4,  2, 9, 7, 5, 3, 1 }, outputStream.toByteArray());
@@ -226,6 +238,7 @@ public class ConsumerSideServerSocketThreadTest {
 	public void testRunWhenInternalExceptionThrown() {
 		final SSLProperties sslProps = getTestSSLPropertiesForThread();
 		ReflectionTestUtils.setField(sslProps, "keyStoreType", "invalid");
+		
 		when(appContext.getBean(SSLProperties.class)).thenReturn(sslProps);
 		
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
@@ -243,6 +256,7 @@ public class ConsumerSideServerSocketThreadTest {
 	@Ignore
 	public void testRunWhenOtherSideCloseTheConnectionAfterSendingSomeBytes() throws Exception {
 		doNothing().when(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
 		testingObject.init(getTestMessageProducer());
 		testingObject.start();
 	
@@ -255,6 +269,7 @@ public class ConsumerSideServerSocketThreadTest {
 		sslProviderSocket.close();
 
 		verify(relayClient).sendBytes(any(Session.class), any(MessageProducer.class), any(PublicKey.class), any(byte[].class));
+		
 		final boolean interrupted = (boolean) ReflectionTestUtils.getField(testingObject, "interrupted");
 		Assert.assertTrue(interrupted);
 	}
@@ -369,7 +384,6 @@ public class ConsumerSideServerSocketThreadTest {
 	//-------------------------------------------------------------------------------------------------
 	private void initTestingObject() {
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
-
 		testingObject = new ConsumerSideServerSocketThread(appContext, 22003, relayClient, getTestSession(), publicKey, "queueId", 600000, "consumer", "test-service");
 	}
 }

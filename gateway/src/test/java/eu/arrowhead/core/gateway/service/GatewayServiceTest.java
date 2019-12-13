@@ -104,6 +104,7 @@ public class GatewayServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testOnApplicationEventNoCommonName() {
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)).thenReturn(false);
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -112,6 +113,7 @@ public class GatewayServiceTest {
 	public void testOnApplicationEventCommonNameWrongType() {
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME)).thenReturn(new Object());
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -121,6 +123,7 @@ public class GatewayServiceTest {
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME)).thenReturn("gateway.testcloud2.aitia.arrowhead.eu");
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(false);
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -131,6 +134,7 @@ public class GatewayServiceTest {
 		when(arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME)).thenReturn("gateway.testcloud2.aitia.arrowhead.eu");
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn("not a public key");
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -147,6 +151,7 @@ public class GatewayServiceTest {
 			public String getAlgorithm() { return null; }
 		});
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(false);
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -164,6 +169,7 @@ public class GatewayServiceTest {
 		});
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn("not a private key");
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -186,7 +192,9 @@ public class GatewayServiceTest {
 			public String getAlgorithm() { return null;	}
 		});
 		ReflectionTestUtils.setField(testingObject, "sslProps", new SSLProperties());
+		
 		testingObject.onApplicationEvent(null);
+		
 		final Object relayClient = ReflectionTestUtils.getField(testingObject, "relayClient");
 		Assert.assertNotNull(relayClient);
 	}
@@ -448,6 +456,7 @@ public class GatewayServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectProviderCannotConnectRelay() throws JMSException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
 		
 		testingObject.connectProvider(request);
@@ -457,6 +466,7 @@ public class GatewayServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectProviderOtherRelayIssue() throws JMSException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenThrow(new JMSException("test"));
@@ -468,13 +478,15 @@ public class GatewayServiceTest {
 	@Test
 	public void testConnectProviderEverythingOK() throws JMSException {
 		final GatewayProviderConnectionRequestDTO request = getTestGatewayProviderConnectionRequestDTO();
+		final MessageProducer producer = getTestMessageProducer();
+		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-		final MessageProducer producer = getTestMessageProducer();
 		when(relayClient.initializeProviderSideRelay(any(Session.class), any(MessageListener.class))).thenReturn(new ProviderSideRelayInfo("peerName", "queueId", producer, producer));
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
 		
 		final GatewayProviderConnectionResponseDTO response = testingObject.connectProvider(request);
+		
 		Assert.assertEquals("queueId", response.getQueueId());
 		Assert.assertEquals("peerName", response.getPeerName());
 		final String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
@@ -569,6 +581,7 @@ public class GatewayServiceTest {
 	@Test(expected = UnavailableServerException.class)
 	public void testConnectConsumerNoFreePort() {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		
 		when(availablePorts.poll()).thenReturn(null);
 		
 		testingObject.connectConsumer(request);
@@ -578,6 +591,7 @@ public class GatewayServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectConsumerCannotConnectRelay() throws JMSException {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		
 		when(availablePorts.poll()).thenReturn(54321);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
@@ -589,6 +603,7 @@ public class GatewayServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testConnectConsumerOtherRelayIssue() throws JMSException {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		
 		when(availablePorts.poll()).thenReturn(54321);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
@@ -602,14 +617,16 @@ public class GatewayServiceTest {
 	@Test
 	public void testConnectConsumerEverythingOK() throws JMSException {
 		final GatewayConsumerConnectionRequestDTO request = getTestGatewayConsumerConnectionRequestDTO();
+		final MessageProducer producer = getTestMessageProducer();
+		
 		when(availablePorts.poll()).thenReturn(54321);
 		when(activeSessions.put(any(String.class), any(ActiveSessionDTO.class))).thenReturn(null);
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
-		final MessageProducer producer = getTestMessageProducer();
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), any(String.class), any(String.class))).thenReturn(new ConsumerSideRelayInfo(producer, producer));
 		
 		final int serverPort = testingObject.connectConsumer(request);
+		
 		Assert.assertEquals(54321, serverPort);
 	}
 
@@ -626,6 +643,7 @@ public class GatewayServiceTest {
 		request.setPeerName(null);
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -636,6 +654,7 @@ public class GatewayServiceTest {
 		request.setPeerName("  ");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -646,6 +665,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId(null);
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -656,6 +676,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("  ");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -666,6 +687,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(null);
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -676,6 +698,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO(null, 1000, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -686,6 +709,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("  ", 1000, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -696,6 +720,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", null, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -706,6 +731,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MIN - 1, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -716,6 +742,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", CommonConstants.SYSTEM_PORT_RANGE_MAX + 1, true, true, "GATEWAY_RELAY"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -726,6 +753,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, null));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -736,6 +764,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "invalid"));
+		
 		testingObject.closeSession(request);
 	}
 	
@@ -746,6 +775,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(new JMSException("test"));
 		
 		testingObject.closeSession(request);
@@ -758,6 +788,7 @@ public class GatewayServiceTest {
 		request.setPeerName("test.peer.name");
 		request.setQueueId("test-queue-id");
 		request.setRelay(new RelayRequestDTO("test-address", 1000, true, true, "GATEWAY_RELAY"));
+		
 		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
 		when(relayClient.initializeControlRelay(any(Session.class), any(String.class), any(String.class))).thenThrow(new JMSException("test"));
@@ -787,7 +818,6 @@ public class GatewayServiceTest {
 		final CloudRequestDTO providerCloud = new CloudRequestDTO();
 		providerCloud.setName("testcloud2");
 		providerCloud.setOperator("elte");
-		
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq5Jq4tOeFoLqxOqtYcujbCNZina3iuV9+/o8D1R9D0HvgnmlgPlqWwjDSxV7m7SGJpuc/rRXJ85OzqV3rwRHO8A8YWXiabj8EdgEIyqg4SOgTN7oZ7MQUisTpwtWn9K14se4dHt/YE9mUW4en19p/yPUDwdw3ECMJHamy/O+Mh6rbw6AFhYvz6F5rXYB8svkenOuG8TSBFlRkcjdfqQqtl4xlHgmlDNWpHsQ3eFAO72mKQjm2ZhWI1H9CLrJf1NQs2GnKXgHBOM5ET61fEHWN8axGGoSKfvTed5vhhX7l5uwxM+AKQipLNNKjEaQYnyX3TL9zL8I7y+QkhzDa7/5kQIDAQAB";
 		
 		return new GatewayProviderConnectionRequestDTO(relay, consumer, provider, consumerCloud, providerCloud, "test-service", publicKey);

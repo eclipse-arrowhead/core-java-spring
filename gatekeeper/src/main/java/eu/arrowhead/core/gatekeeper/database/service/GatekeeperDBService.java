@@ -663,7 +663,6 @@ public class GatekeeperDBService {
 		}
 		
 		secure = secure == null ? false : secure;
-		
 		if (secure && Utilities.isEmpty(authenticationInfo)) {
 			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
 		}
@@ -869,7 +868,6 @@ public class GatekeeperDBService {
 			boolean relayConnToRemove = true;
 			for (final Long dtoRelayId : gatekeeperRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
-					
 					relaysToKeep.add(relayConn.getRelay().getId());
 					relayConnToRemove = false;
 					break;
@@ -879,7 +877,6 @@ public class GatekeeperDBService {
 			if (relayConnToRemove) {
 				relaysConnToDelete.add(relayConn.getId());
 			}
-			
 		}
 		
 		relaysToAssign.addAll(gatekeeperRealyIds);
@@ -908,7 +905,6 @@ public class GatekeeperDBService {
 			boolean relayConnToRemove = true;
 			for (final Long dtoRelayId : gatewayRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
-					
 					relaysToKeep.add(relayConn.getRelay().getId());
 					relayConnToRemove = false;
 					break;
@@ -918,7 +914,6 @@ public class GatekeeperDBService {
 			if (relayConnToRemove) {
 				relaysConnToDelete.add(relayConn.getId());
 			}
-			
 		}
 		
 		relaysToAssign.addAll(gatewayRealyIds);

@@ -74,6 +74,7 @@ public class SRX509Test {
 											   .andExpect(status().isOk())
 											   .andReturn();
 		final String result = response.getResponse().getContentAsString();
+
 		Assert.assertEquals("Got it!", result);
 	}
 	
