@@ -27,9 +27,14 @@ bg=blue</panel_attributes><additional_attributes></additional_attributes></eleme
 type=decision</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>60</x><y>430</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>80</x><y>470</y><w>380</w><h>40</h></coordinates><panel_attributes>lt=&lt;..
 [involvedSubscriptions: is Empty]</panel_attributes><additional_attributes>360;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>60</x><y>500</y><w>230</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
 [involvedSubscriptions: is NOT Empty]</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>40</x><y>870</y><w>60</w><h>60</h></coordinates><panel_attributes>bg=green
-type=final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>30</x><y>550</y><w>100</w><h>40</h></coordinates><panel_attributes>grab bags
-bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>30</x><y>610</y><w>100</w><h>40</h></coordinates><panel_attributes>grab bags
-bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>30</x><y>670</y><w>100</w><h>40</h></coordinates><panel_attributes>grab bags
+type=final</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>30</x><y>550</y><w>190</w><h>40</h></coordinates><panel_attributes>filter
+Subscriptions by Start Date
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>30</x><y>610</y><w>190</w><h>40</h></coordinates><panel_attributes>filter
+Subscriptions by End Date
+bg=blue
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>30</x><y>670</y><w>190</w><h>40</h></coordinates><panel_attributes>filter
+Subscriptions by MetaData
+bg=blue
 bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>50</x><y>730</y><w>40</w><h>40</h></coordinates><panel_attributes>bg=orange
 type=decision</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>80</x><y>730</y><w>380</w><h>40</h></coordinates><panel_attributes>lt=&lt;..
 [involvedSubscriptions: is Empty]</panel_attributes><additional_attributes>360;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>440</x><y>460</y><w>60</w><h>60</h></coordinates><panel_attributes>bg=green
