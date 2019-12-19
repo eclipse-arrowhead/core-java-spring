@@ -20,6 +20,11 @@ import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilter {
 	
 	//=================================================================================================
+	// members
+	
+	private static final String ORCH_TRANSLATOR = "orch_translator";
+	
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -40,7 +45,9 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 			if (orchestrationFlags.getOrDefault(CommonConstants.ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST, false)) {
 				// If this is an external service request, only the local Gatekeeper can use these methods
 				final CoreSystem[] allowedCoreSystems = { CoreSystem.GATEKEEPER };
-				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);				
+				checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystems, requestTarget);
+			} else if (isLegacyOrchTranslator(clientCN, cloudCN)) {
+				// TODO Delete this gap for Orchestrator Translator after legacy version is not supported anymore
 			} else {
 				// Otherwise all request from the local cloud are allowed, but requester system has to be match with the certificate
 				checkIfRequesterSystemNameisEqualsWithClientNameFromCN(orchestrationFormRequestDTO.getRequesterSystem().getSystemName(), clientCN);				
@@ -60,5 +67,12 @@ public class OrchestratorAccessControlFilter extends CoreSystemAccessControlFilt
 	//-------------------------------------------------------------------------------------------------
 	private String getClientNameFromCN(final String clientCN) {
 		return clientCN.split("\\.", 2)[0];
+	}
+	//-------------------------------------------------------------------------------------------------
+	//TODO: delete this after legacy version is not supported anymore
+	protected boolean isLegacyOrchTranslator(final String clientCN, final String cloudCN) {
+		final String legacyCN = ORCH_TRANSLATOR + "." + cloudCN;
+		
+		return clientCN.equalsIgnoreCase(legacyCN);
 	}
 }
