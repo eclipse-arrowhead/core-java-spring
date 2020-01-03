@@ -126,28 +126,6 @@ public class EventHandlerService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public void updateSubscriberAuthorizations() {
-		logger.debug("updateSubscriberAuthorizations started ...");
-		
-		final List<Subscription> subscriptions = eventHandlerDBService.getSubscriptionsList();
-		if (subscriptions.isEmpty()) {	
-			return;	
-		} else {	
-			
-			final Map<System, List<Subscription>> mapOfSubscriptions = subscriptions.stream().collect(Collectors.groupingBy(Subscription::getSubscriberSystem));		
-			
-			for (final List<Subscription> subscriptionList : mapOfSubscriptions.values()) {
-				
-				final SystemRequestDTO subscriber = DTOConverter.convertSystemToSystemRequestDTO(subscriptionList.get(0).getSubscriberSystem());		
-				final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
-				
-				eventHandlerDBService.updateSubscriberAuthorization(subscriptionList, authorizedPublishers);
-				
-			}	
-		}		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
 	public SubscriptionResponseDTO updateSubscriptionResponse(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
 		logger.debug("updateSubscriptionResponse started ...");
 		
