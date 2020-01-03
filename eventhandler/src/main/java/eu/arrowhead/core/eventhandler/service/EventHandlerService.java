@@ -2,7 +2,6 @@ package eu.arrowhead.core.eventhandler.service;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
