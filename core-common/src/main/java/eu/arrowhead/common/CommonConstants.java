@@ -22,7 +22,10 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
-	
+	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
+	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
+	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
+
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
 	public static final String CORE_SERVICE_AUTH_CONTROL_INTRA = "authorization-control-intra";
@@ -41,7 +44,18 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
-	
+
+	public static final String CORE_SERVICE_SERVICE_REGISTRY_REGISTER = "service-register";
+	public static final String CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER = "service-unregister";
+
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_REGISTER = "system-register";
+	public static final String CORE_SERVICE_SYSTEM_REGISTRY_UNREGISTER = "system-unregister";
+
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_REGISTER = "device-register";
+	public static final String CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER = "device-unregister";
+
+	public static final String CORE_SERVICE_ONBOARDING_PLAIN = "onboarding-plain";
+
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
@@ -70,7 +84,18 @@ public class CommonConstants {
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
 	public static final String OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION = "service_definition";
-	
+
+	public static final String SYSTEM_REGISTRY_URI = "/systemregistry";
+	public static final String OP_SYSTEM_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_URI = "/unregister";
+
+	public static final String DEVICE_REGISTRY_URI = "/deviceregistry";
+	public static final String OP_DEVICE_REGISTRY_REGISTER_URI = "/register";
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_URI = "/unregister";
+
+	public static final String ONBOARDING_URI = "/onboarding";
+	public static final String OP_ONBOARDING_PLAIN = "/plain";
+
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
 	public static final String OP_AUTH_KEY_URI = "/publickey";
@@ -80,15 +105,15 @@ public class CommonConstants {
 	
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
-	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";
-	public static final String ORCHESTRATON_FLAG_METADATA_SEARCH = "metadataSearch";
-	public static final String ORCHESTRATON_FLAG_ONLY_PREFERRED = "onlyPreferred";
-	public static final String ORCHESTRATON_FLAG_PING_PROVIDERS = "pingProviders";
-	public static final String ORCHESTRATON_FLAG_OVERRIDE_STORE = "overrideStore";
-	public static final String ORCHESTRATON_FLAG_TRIGGER_INTER_CLOUD = "triggerInterCloud";
-	public static final String ORCHESTRATON_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
-	public static final String ORCHESTRATON_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
-	public static final String ORCHESTRATON_FLAG_ENABLE_QOS = "enableQoS";
+	public static final String ORCHESTRATION_FLAG_MATCHMAKING = "matchmaking";
+	public static final String ORCHESTRATION_FLAG_METADATA_SEARCH = "metadataSearch";
+	public static final String ORCHESTRATION_FLAG_ONLY_PREFERRED = "onlyPreferred";
+	public static final String ORCHESTRATION_FLAG_PING_PROVIDERS = "pingProviders";
+	public static final String ORCHESTRATION_FLAG_OVERRIDE_STORE = "overrideStore";
+	public static final String ORCHESTRATION_FLAG_TRIGGER_INTER_CLOUD = "triggerInterCloud";
+	public static final String ORCHESTRATION_FLAG_EXTERNAL_SERVICE_REQUEST = "externalServiceRequest";
+	public static final String ORCHESTRATION_FLAG_ENABLE_INTER_CLOUD = "enableInterCloud";
+	public static final String ORCHESTRATION_FLAG_ENABLE_QOS = "enableQoS";
 	
 	public static final String GATEKEEPER_URI = "/gatekeeper";
 	public static final String OP_GATEKEEPER_GSD_SERVICE = "/init_gsd";

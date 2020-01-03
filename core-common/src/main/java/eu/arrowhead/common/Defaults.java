@@ -11,7 +11,10 @@ public class Defaults {
 	public static final int DEFAULT_URI_CRAWLER_INTERVAL = 30;
 	public static final int DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES = -1; // never expires
 
-	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;	
+	public static final String DEFAULT_SERVICE_REGISTRY_ADDRESS = CommonConstants.LOCALHOST;
+	public static final int DEFAULT_ONBOARDING_PORT = 8435;
+	public static final int DEFAULT_DEVICE_REGISTRY_PORT = 8439;
+	public static final int DEFAULT_SYSTEM_REGISTRY_PORT = 8437;
 	public static final int DEFAULT_SERVICE_REGISTRY_PORT = 8443;
 	public static final int DEFAULT_AUTHORIZATION_PORT = 8445;
 	public static final int DEFAULT_ORCHESTRATOR_PORT = 8441;
