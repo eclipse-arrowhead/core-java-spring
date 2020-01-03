@@ -2,10 +2,12 @@ package eu.arrowhead.core.eventhandler.service;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -19,6 +21,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
@@ -121,6 +124,28 @@ public class EventHandlerService {
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
 		eventHandlerDBService.updateSubscriberAuthorization(involvedSubscriptions, authorizedPublishers);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void updateSubscriberAuthorizations() {
+		logger.debug("updateSubscriberAuthorizations started ...");
+		
+		final List<Subscription> subscriptions = eventHandlerDBService.getSubscriptionsList();
+		if (subscriptions.isEmpty()) {	
+			return;	
+		} else {	
+			
+			final Map<System, List<Subscription>> mapOfSubscriptions = subscriptions.stream().collect(Collectors.groupingBy(Subscription::getSubscriberSystem));		
+			
+			for (final List<Subscription> subscriptionList : mapOfSubscriptions.values()) {
+				
+				final SystemRequestDTO subscriber = DTOConverter.convertSystemToSystemRequestDTO(subscriptionList.get(0).getSubscriberSystem());		
+				final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
+				
+				eventHandlerDBService.updateSubscriberAuthorization(subscriptionList, authorizedPublishers);
+				
+			}	
+		}		
 	}
 	
 	//-------------------------------------------------------------------------------------------------

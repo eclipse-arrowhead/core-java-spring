@@ -104,6 +104,33 @@ public class EventHandlerDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<Subscription> getSubscriptionsList() {
+		logger.debug("getSubscriptionsList started ...");
+		
+		final Page<Subscription> subscriptions;
+		
+		final int validatedPage = 0;
+		final int validatedSize = Integer.MAX_VALUE ;
+		final Direction validatedDirection = Direction.ASC;
+		final String validatedSortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		
+		try {
+			subscriptions = subscriptionRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		
+			if ( subscriptions == null || subscriptions.getContent() == null) {
+				
+				return List.of();
+			}
+			
+			return subscriptions.getContent();
+		
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	public SubscriptionResponseDTO getSubscriptionByIdResponse(final long id) {

@@ -17,6 +17,7 @@ import eu.arrowhead.core.eventhandler.metadatafiltering.MetadataFilteringAlgorit
 import eu.arrowhead.core.eventhandler.publish.PublishRequestFixedExecutor;
 import eu.arrowhead.core.eventhandler.publish.PublishingQueue;
 import eu.arrowhead.core.eventhandler.publish.PublishingQueueWatcherTask;
+import eu.arrowhead.core.eventhandler.service.EventHandlerService;
 
 @Component
 public class EventHandlerApplicationInitListener extends ApplicationInitListener {
@@ -26,6 +27,9 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	
 	@Autowired
 	private ApplicationContext applicationContext;
+	
+	@Autowired
+	private EventHandlerService eventHandlerService;
 	
 	//=================================================================================================
 	// methods
@@ -70,6 +74,8 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 		
 		final PublishingQueueWatcherTask publishingQueueWatcherTask = applicationContext.getBean(CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK, PublishingQueueWatcherTask.class);
 		publishingQueueWatcherTask.start();
+		
+		eventHandlerService.updateSubscriberAuthorizations();
 	}
 	
 	//-------------------------------------------------------------------------------------------------
