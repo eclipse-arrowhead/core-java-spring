@@ -31,7 +31,10 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
-	    <module>deb-installer</module>
+		<module>systemregistry</module>
+		<module>deviceregistry</module>
+		<module>onboarding</module>
+		<module>deb-installer</module>
   	</modules>
   	
 	<properties>
