@@ -339,7 +339,16 @@ public class EventHandlerDBService {
 		logger.debug("updateSubscriberAuthorization started ...");
 		
 		for (final Subscription subscriptionEntry : involvedSubscriptions) {
-			updateSubscriptionEntryPublisherConnections(subscriptionEntry, authorizedPublishers);
+					
+			final Optional<Subscription> subcriptionOptional = subscriptionRepository.findById(subscriptionEntry.getId());
+			if (subcriptionOptional.isPresent()) {
+				final Subscription subscription = subcriptionOptional.get();
+				
+				updateSubscriptionEntryPublisherConnections(subscription, authorizedPublishers);
+			}else {
+				logger.debug("SubscriberSystem" + NOT_IN_DB_ERROR_MESSAGE);
+			}
+			
 		}
 	}
 	

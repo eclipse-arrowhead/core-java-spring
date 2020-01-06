@@ -11,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -35,7 +34,6 @@ import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.eventhandler.publish.PublishingQueue;
 
 @Component
-@Order(11)
 public class EventHandlerDriver {	
 
 	//=================================================================================================

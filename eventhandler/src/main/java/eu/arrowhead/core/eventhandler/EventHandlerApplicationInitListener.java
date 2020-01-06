@@ -17,12 +17,17 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationSubscriptionCheckResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -44,9 +49,6 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	
 	@Autowired
 	private EventHandlerDBService eventHandlerDBService;
-	
-//	@Autowired
-//	private EventHandlerDriver eventHandlerDriver;
 	
 	//=================================================================================================
 	// methods
@@ -142,6 +144,12 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getAuthSubscriptionCheckUri() {
 		logger.debug("getAuthSubscriptionCheckUri started...");
+
+		final UriComponents queryUri = getQueryUri();
+		checkServiceRegistryConnection(queryUri);
+		
+		findCoreSystemServiceUri(CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE, queryUri);
+		
 		
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = applicationContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
@@ -156,4 +164,87 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 		
 		throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQueryUri() {
+		logger.debug("getQueryUri started...");
+		
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = applicationContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		
+		if (context.containsKey(CoreCommonConstants.SR_QUERY_URI)) {
+			try {
+				return (UriComponents) context.get(CoreCommonConstants.SR_QUERY_URI);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("EventHandler can't find Service Registry Query URI.");
+			}
+		}
+		
+		throw new ArrowheadException("EventHandler can't find Service Registry Query URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void checkServiceRegistryConnection(final UriComponents queryUri) {
+		logger.debug("checkServiceRegistryConnection started...");
+	
+		final UriComponents echoUri = createEchoUri(queryUri);
+		try {
+			httpService.sendRequest(echoUri, HttpMethod.GET, String.class);
+		} catch (final ArrowheadException ex) {
+			throw new ArrowheadException("EventHandler can't access Service Registry.");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createEchoUri(final UriComponents queryUri) {
+		logger.debug("createEchoUri started...");
+				
+		final String scheme = queryUri.getScheme();
+		final String echoUriStr = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.ECHO_URI;
+		return Utilities.createURI(scheme, queryUri.getHost(), queryUri.getPort(), echoUriStr);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean findCoreSystemServiceUri(final CoreSystemService coreSystemService, final UriComponents queryUri) {
+		logger.debug("findCoreSystemServiceUri started...");
+		
+		final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+		if (isAlreadyFound(key)) {
+			return true;
+		}
+		
+		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder(coreSystemService.getServiceDefinition()).build();
+		try {
+			final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, form);
+			final ServiceQueryResultDTO result = response.getBody();
+			if (!result.getServiceQueryData().isEmpty()) {
+				final int lastIdx = result.getServiceQueryData().size() - 1; // to make sure we use the newest one if some entries stucked in the DB
+				final ServiceRegistryResponseDTO entry = result.getServiceQueryData().get(lastIdx);
+				final String scheme = entry.getSecure() == ServiceSecurityType.NOT_SECURE ? CommonConstants.HTTP : CommonConstants.HTTPS;
+				final UriComponents uri = Utilities.createURI(scheme, entry.getProvider().getAddress(), entry.getProvider().getPort(), entry.getServiceUri());
+				
+				@SuppressWarnings("unchecked")
+				final Map<String,Object> context = applicationContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+				context.put(key, uri);
+				
+				return true;
+			}
+		} catch (final Exception ex) {
+			logger.error(ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+		}
+		
+		return false;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean isAlreadyFound(final String key) {
+		
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = applicationContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		
+		return context.containsKey(key) && (context.get(key) instanceof UriComponents); 
+	}
+	
+	
 }
