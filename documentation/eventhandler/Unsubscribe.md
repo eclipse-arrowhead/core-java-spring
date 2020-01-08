@@ -14,7 +14,7 @@ __Unsubscribe query parameters__ are the input :
 
 | Parameter | Description | Necessity | Format/Limitations |
 | --------- | ----------- | --------- | ----------- |
-| `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
 | `event_type` | Type of event to subscribe to | mandatory | max. length = 255 |
-| `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+| `port` | The port where the system provides it's services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
 | `system_name` | The name of the system. | mandatory | max. length = 255 |
