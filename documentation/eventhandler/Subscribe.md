@@ -43,7 +43,7 @@ __SubscriptionRequest__ is the input.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
-| `filterMetaData` | The recievied event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `filterMetaData` | The recievied event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
 | `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  ture or false |
 | `notifyUri` | Url subpath of the subscriber sytem's notification endpoint | mandatory | max.length = 65535 |
 | `sources` | List of publisher systems | optional (if not difined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| specifyed at system deployment time |
