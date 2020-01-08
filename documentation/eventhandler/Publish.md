@@ -35,7 +35,7 @@ __PublishRequest__ is the input:
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event. | mandatory | max. length = 255 |
 | `metaData` |  The "key - value" pairs for event filtering. | optional | max.length = 65535 |
-| `payload` | String representation of the event. | mandatory | specifyed at system deployment time |
+| `payload` | String representation of the event. | mandatory | specified at system deployment time |
 | `source` |   Details of the publisher system. | mandatory | as in system |
 | `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
 
