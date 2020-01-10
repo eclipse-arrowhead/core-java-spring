@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS `cloud_gateway_relay` (
   CONSTRAINT `gw_relay_constr` FOREIGN KEY (`relay_id`) REFERENCES `relay` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `system_` (
+CREATE TABLE IF NOT EXISTS `system` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `system_name` varchar(255) NOT NULL,
   `address` varchar(255) NOT NULL,
@@ -64,6 +64,18 @@ CREATE TABLE IF NOT EXISTS `system_` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `triple` (`system_name`,`address`,`port`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `device` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `device_name` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `mac_address` varchar(255) NOT NULL,
+  `authentication_info` varchar(2047) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `double` (`device_name`,`mac_address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `service_definition` (
@@ -87,6 +99,39 @@ CREATE TABLE IF NOT EXISTS `service_interface` (
 INSERT IGNORE INTO `service_interface` (interface_name) VALUES ('HTTP-SECURE-JSON');
 INSERT IGNORE INTO `service_interface` (interface_name) VALUES ('HTTP-INSECURE-JSON');
 
+-- Device Registry
+
+CREATE TABLE IF NOT EXISTS `device_registry` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `device_id` bigint(20) NOT NULL,
+  `end_of_validity` timestamp NULL DEFAULT NULL,
+  `metadata` text,
+  `version` int(11) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `device_registry_device` (`device_id`),
+  CONSTRAINT `device_registry_device` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- System Registry
+
+CREATE TABLE IF NOT EXISTS `system_registry` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `system_id` bigint(20) NOT NULL,
+  `device_id` bigint(20) NOT NULL,
+  `end_of_validity` timestamp NULL DEFAULT NULL,
+  `metadata` text,
+  `version` int(11) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `system_registry_pair` (`system_id`,`device_id`),
+  KEY `system_registry_device` (`device_id`),
+  CONSTRAINT `system_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `system_registry_device` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Service Registry
 
 CREATE TABLE IF NOT EXISTS `service_registry` (
@@ -101,10 +146,10 @@ CREATE TABLE IF NOT EXISTS `service_registry` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `pair` (`service_id`,`system_id`),
-  KEY `system` (`system_id`),
-  CONSTRAINT `service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
+  UNIQUE KEY `service_registry_pair` (`service_id`,`system_id`),
+  KEY `service_registry_system` (`system_id`),
+  CONSTRAINT `service_registry_service` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `service_registry_system` FOREIGN KEY (`system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `service_registry_interface_connection` (
@@ -134,8 +179,8 @@ CREATE TABLE IF NOT EXISTS `authorization_intra_cloud` (
   KEY `provider` (`provider_system_id`),
   KEY `service_intra_auth` (`service_id`),
   CONSTRAINT `service_intra_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
+  CONSTRAINT `provider` FOREIGN KEY (`provider_system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `consumer` FOREIGN KEY (`consumer_system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `authorization_inter_cloud` (
@@ -150,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `authorization_inter_cloud` (
   KEY `service_inter_auth` (`service_id`),
   CONSTRAINT `cloud` FOREIGN KEY (`consumer_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
   CONSTRAINT `service_inter_auth` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `provider_inter_auth` FOREIGN KEY (`provider_system_id`) REFERENCES `system_` (id) ON DELETE CASCADE
+  CONSTRAINT `provider_inter_auth` FOREIGN KEY (`provider_system_id`) REFERENCES `system` (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `authorization_inter_cloud_interface_connection` (
@@ -195,7 +240,7 @@ CREATE TABLE IF NOT EXISTS `orchestrator_store` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `priority_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`priority`),
   UNIQUE KEY `duplication_rule` (`service_id`, `service_interface_id`, `consumer_system_id`,`provider_system_id`, `foreign_`),
-  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `consumer_orch` FOREIGN KEY (`consumer_system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE,
   CONSTRAINT `service_orch` FOREIGN KEY (`service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
   CONSTRAINT `service_intf_orch` FOREIGN KEY (`service_interface_id`) REFERENCES `service_interface` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -251,7 +296,7 @@ CREATE TABLE IF NOT EXISTS `subscription` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pair` (`event_type_id`,`system_id`),
-  CONSTRAINT `subscriber_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `subscriber_system` FOREIGN KEY (`system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE,
   CONSTRAINT `event_type` FOREIGN KEY (`event_type_id`) REFERENCES `event_type` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -265,7 +310,7 @@ CREATE TABLE IF NOT EXISTS `subscription_publisher_connection` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `pair` (`subscription_id`,`system_id`),
   CONSTRAINT `subscription_constraint` FOREIGN KEY (`subscription_id`) REFERENCES `subscription` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `system_constraint` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
+  CONSTRAINT `system_constraint` FOREIGN KEY (`system_id`) REFERENCES `system` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Choreographer

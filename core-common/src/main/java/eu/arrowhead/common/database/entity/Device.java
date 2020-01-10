@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "device", uniqueConstraints = @UniqueConstraint(columnNames = { "deviceName", "address" }))
+@Table(name = "device", uniqueConstraints = @UniqueConstraint(columnNames = { "deviceName", "macAddress" }))
 @NamedEntityGraph(name = "deviceWithSystemRegistryEntries",
 				  attributeNodes = {
-						  @NamedAttributeNode(value = "serviceRegistryEntries")
+						  @NamedAttributeNode(value = "systemRegistryEntries")
 })
 public class Device
 {
@@ -47,7 +47,7 @@ public class Device
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 
-	@OneToMany(mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "device", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<SystemRegistry> systemRegistryEntries = new HashSet<>();
 
@@ -98,7 +98,7 @@ public class Device
 	public void setAuthenticationInfo(final String authenticationInfo) { this.authenticationInfo = authenticationInfo; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setSystemRegistryEntries(final Set<SystemRegistry> serviceRegistryEntries) { this.systemRegistryEntries = serviceRegistryEntries; }
+	public void setSystemRegistryEntries(final Set<SystemRegistry> systemRegistryEntries) { this.systemRegistryEntries = systemRegistryEntries; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

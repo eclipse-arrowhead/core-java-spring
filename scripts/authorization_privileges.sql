@@ -6,7 +6,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'authorizatio
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud_interface_connection` TO 'authorization'@'localhost';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'authorization'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'authorization'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'authorization'@'localhost';
@@ -21,7 +21,7 @@ GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'authorizatio
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud_interface_connection` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud_interface_connection` TO 'authorization'@'%';
-GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'authorization'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'authorization'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'authorization'@'%';
