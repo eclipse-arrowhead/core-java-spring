@@ -4327,12 +4327,12 @@ __SubscriptionRequest__ is the input.
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
-| `filterMetaData` | The recievied event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
-| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  ture or false |
-| `notifyUri` | Url subpath of the subscriber sytem's notification endpoint | mandatory | max.length = 65535 |
-| `sources` | List of publisher systems | optional (if not difined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
-| `startDate` | If startDate is defined, the subscriber system will only receive events when the events timestamp is after startDate.  | optional ( StartDate must be after the current datetime. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
-| `endDate` | If endDate is defined, the subscriber system will only receive events when the events timestamp is before endDate. | optional ( EndDate must be after the current datetime. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `filterMetaData` | The received event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
 | `subscriberSystem` | Details of subscriber system | mandatory | as in system |
 
 | __System__  fields |
@@ -4342,8 +4342,8 @@ __SubscriptionRequest__ is the input.
 | ----- | ----------- | --------- | ----------- |
 | `systemName` | The name of the system. | mandatory | max. length = 255 |
 | `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
-| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
-| `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
 
 <a name="eventhandler_subscription_response" />
 
@@ -4467,8 +4467,8 @@ __PublishRequest__ is the input:
 | ----- | ----------- | --------- | ----------- |
 | `systemName` | The name of the system. | mandatory | max. length = 255 |
 | `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
-| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix  and the "-----END PUBLIC KEY-----" suffix |
-| `port` | The port where the system servs it's services | mandatory | max.length = difined by local cloud operator ( default valid range: 1-65535 ) |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
 
 <a name="eventhandler_endpoints_get_subscription_list" />
 
@@ -4664,12 +4664,12 @@ __Update subscription request__  the input :
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
-| `filterMetaData` | The recievied event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
-| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  ture or false |
-| `notifyUri` | Url subpath of the subscriber sytem's notification endpoint | mandatory | max.length = 65535 |
-| `sources` | List of publisher systems | optional (if not difined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
-| `startDate` | If startDate is defined, the subscriber system will only receive events when the events timestamp is after startDate.  | optional ( StartDate must be after the current datetime. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
-| `endDate` | If endDate is defined, the subscriber system will only receive events when the events timestamp is before endDate. | optional ( EndDate must be after the current datetime. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `filterMetaData` | The received event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
 | `subscriberSystem` | Details of subscriber system | mandatory | as in system |
 
 <a name="eventhandler_endpoints_delete_subscription" />
@@ -6223,3 +6223,4 @@ __ActiveSession__ is the output.
 | `responseQueue` | response messaging queue through the the Relay |
 | `responseControlQueue` | control queue of response messaging through the the Relay |
 | `sessionStartedAt` | Time stamp of session start |
+
