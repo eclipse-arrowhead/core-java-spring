@@ -4664,7 +4664,7 @@ __Update subscription request__  the input :
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
-| `filterMetaData` | The received event have to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `filterMetaData` | The received event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
 | `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
 | `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
 | `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
