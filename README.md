@@ -4466,7 +4466,7 @@ __PublishRequest__ is the input:
 | Field | Description | Necessity | Format/Limitations |
 | ----- | ----------- | --------- | ----------- |
 | `systemName` | The name of the system. | mandatory | max. length = 255 |
-| `address` |  Domain name or Ip of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
 | `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
 | `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
 
