@@ -17,8 +17,9 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
 4. [Gatekeeper and Gateway Setup with ActiveMQ Relay](#setupgatekeeper_and_gateway)
-5. [How to Contribute](#howtocontribute)
-6. [Documentation](#documentation) 
+5. [Continuous Integration / Continuous Delivery](#ci_cd)
+6. [How to Contribute](#howtocontribute)
+7. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -435,6 +436,13 @@ SysOp certificate allows the client to use the management endpoints of the Arrow
 ## Gatekeeper and Gateway Setup with ActiveMQ Relay
 
 Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
+
+<a name="ci_cd" />
+
+## Continuous Integration / Continuous Delivery
+
+Arrowhead's CI/CD pipeline is based on the work of Haris Isakovic and Peter Ketcher from TU Wien. Thank you for providing this amazing guide and countless hours of help setting it up properly.
+[CI/CD Tutorial for Arrowhead Framework](documentation/ci_cd/Arrowhead_CICD.pdf)
 
 <a name="howtocontribute" />
 
