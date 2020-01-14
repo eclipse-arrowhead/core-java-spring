@@ -426,7 +426,9 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 
 The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
 SysOp certificate allows the client to use the management endpoints of the Arrowhed Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser.
-* [Import SysOp Certificate (Windows 10)](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/import_sysop_certificate_win10.pdf)
+* [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
+* [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
+* [Import SysOp Certificate (Linux)](documentation/certificates/import_sysop_certificate_linux.pdf)
 
 <a name="setupgatekeeper_and_gateway" /> 
 
