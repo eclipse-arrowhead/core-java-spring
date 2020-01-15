@@ -28,13 +28,13 @@ import java.time.format.DateTimeParseException;
 			 allowedHeaders = { HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION }
 )
 @RestController
-@RequestMapping(CommonConstants.SERVICE_REGISTRY_URI)
+@RequestMapping(CommonConstants.SYSTEM_REGISTRY_URI)
 public class SystemRegistryController
 {
 
 	//=================================================================================================
 	// members
-	
+
 	private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "System by requested id returned";
 	private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such System by requested id";
 	private static final String PATH_VARIABLE_ID = "id";
@@ -51,7 +51,23 @@ public class SystemRegistryController
 	private static final String PATCH_SYSTEM_HTTP_400_MESSAGE = "Could not update system";
 	private static final String DELETE_SYSTEM_HTTP_200_MESSAGE = "System deleted";
 	private static final String DELETE_SYSTEM_HTTP_400_MESSAGE = "Could not delete system";
-	
+
+	private static final String GET_DEVICE_BY_ID_HTTP_200_MESSAGE = "Device by requested id returned";
+	private static final String GET_DEVICE_BY_ID_HTTP_400_MESSAGE = "No Such Device by requested id";
+	private static final String DEVICE_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/device/{" + PATH_VARIABLE_ID + "}";
+	private static final String DEVICES_URI = CoreCommonConstants.MGMT_URI + "/devices";
+	private static final String DEVICES_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/devices/{" + PATH_VARIABLE_ID + "}";
+	private static final String GET_DEVICES_HTTP_200_MESSAGE = "Devices returned";
+	private static final String GET_DEVICES_HTTP_400_MESSAGE = " Invalid parameters";
+	private static final String POST_DEVICE_HTTP_201_MESSAGE = "Device created";
+	private static final String POST_DEVICE_HTTP_400_MESSAGE = "Could not create device";
+	private static final String PUT_DEVICE_HTTP_200_MESSAGE = "Device updated";
+	private static final String PUT_DEVICE_HTTP_400_MESSAGE = "Could not update device";
+	private static final String PATCH_DEVICE_HTTP_200_MESSAGE = "Device updated";
+	private static final String PATCH_DEVICE_HTTP_400_MESSAGE = "Could not update device";
+	private static final String DELETE_DEVICE_HTTP_200_MESSAGE = "Device deleted";
+	private static final String DELETE_DEVICE_HTTP_400_MESSAGE = "Could not delete device";
+
 	private static final String SERVICES_URI = CoreCommonConstants.MGMT_URI + "/services";
 	private static final String SERVICES_BY_ID_URI = SERVICES_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_SERVICES_HTTP_200_MESSAGE = "Services returned";
@@ -159,24 +175,9 @@ public class SystemRegistryController
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {		
 		logger.debug("getSystems started ...");
-		
-		final int validatedPage;
-		final int validatedSize;
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException(NOT_VALID_PARAMETERS_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}			
-		}
-		
-		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI);
-		
-		return systemRegistryDBService.getSystemEntries(validatedPage, validatedSize, validatedDirection, sortField);
+
+		final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.SYSTEM_REGISTRY_URI + DEVICES_URI);
+		return systemRegistryDBService.getSystemEntries(pageParameters, sortField);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -207,7 +208,7 @@ public class SystemRegistryController
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return system  updated by fields", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return system updated by fields", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = PATCH_SYSTEM_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SYSTEM_HTTP_400_MESSAGE),
@@ -238,43 +239,48 @@ public class SystemRegistryController
 		systemRegistryDBService.removeSystemById(id);
 		logger.debug("System with id: '{}' successfully deleted", id);
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested service definitions by the given parameters", response = ServiceDefinitionsListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return device by id", response = DeviceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICES_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICE_BY_ID_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICE_BY_ID_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = SERVICES_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceDefinitionsListResponseDTO getServiceDefinitions(
+	@GetMapping(SYSTEMS_BY_ID_URI)
+	@ResponseBody public DeviceResponseDTO getDeviceById(@PathVariable(value = PATH_VARIABLE_ID) final long deviceId) {
+		logger.debug("getDeviceById started ...");
+
+		if (deviceId < 1) {
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEM_BY_ID_URI);
+		}
+
+		return systemRegistryDBService.getDeviceById(deviceId);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return requested device by the given parameters", response = DeviceListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEMS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEMS_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = DEVICES_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public DeviceListResponseDTO getDeviceListByRequestParameters(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New Service Definition get request received with page: {} and item_per page: {}", page, size);
-		
-		int validatedPage;
-		int validatedSize;
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}
-		}
+		logger.debug("New DeviceList get request received with page: {} and item_per page: {}", page, size);
 
-		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
-		final ServiceDefinitionsListResponseDTO serviceDefinitionEntries = systemRegistryDBService
-				.getServiceDefinitionEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
-		logger.debug("Service definition  with page: {} and item_per page: {} successfully retrieved", page, size);
+		final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.SYSTEM_REGISTRY_URI + DEVICES_URI);
+		final DeviceListResponseDTO deviceListResponseDTO = systemRegistryDBService
+				.getDeviceEntries(pageParameters, sortField);
+		logger.debug("DeviceList with page: {} and item_per page: {} successfully retrieved", page, size);
 		
-		return serviceDefinitionEntries;
+		return deviceListResponseDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

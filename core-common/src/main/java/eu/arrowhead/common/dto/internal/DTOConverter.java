@@ -9,58 +9,38 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.dto.shared.*;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
-import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
-import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
-import eu.arrowhead.common.database.entity.ChoreographerAction;
-import eu.arrowhead.common.database.entity.ChoreographerActionActionStepConnection;
-import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
-import eu.arrowhead.common.database.entity.ChoreographerActionPlanActionConnection;
-import eu.arrowhead.common.database.entity.ChoreographerActionStep;
-import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
-import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
-import eu.arrowhead.common.database.entity.CloudGatewayRelay;
-import eu.arrowhead.common.database.entity.EventType;
-import eu.arrowhead.common.database.entity.ForeignSystem;
-import eu.arrowhead.common.database.entity.OrchestratorStore;
-import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.database.entity.ServiceDefinition;
-import eu.arrowhead.common.database.entity.ServiceInterface;
-import eu.arrowhead.common.database.entity.ServiceRegistry;
-import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
-import eu.arrowhead.common.database.entity.Subscription;
-import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
-import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerNextActionStepResponseDTO;
-import eu.arrowhead.common.dto.shared.CloudRequestDTO;
-import eu.arrowhead.common.dto.shared.EventDTO;
-import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.shared.EventTypeResponseDTO;
-import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
-import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
-import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
-import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 public class DTOConverter {
 	
 	//=================================================================================================
 	// methods
-	
+
+	//-------------------------------------------------------------------------------------------------
+	public static DeviceResponseDTO convertDeviceToDeviceResponseDTO(final Device device) {
+		Assert.notNull(device, "Device is null");
+		return new DeviceResponseDTO(device.getId(), device.getDeviceName(), device.getAddress(), device.getMacAddress(), device.getAuthenticationInfo(),
+				Utilities.convertZonedDateTimeToUTCString(device.getCreatedAt()), Utilities.convertZonedDateTimeToUTCString(device.getUpdatedAt()));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static DeviceListResponseDTO convertDeviceEntryListToDeviceListResponseDTO(final Page<Device> deviceEntryList) {
+		Assert.notNull(deviceEntryList, "deviceEntryList is null");
+
+		final long count = deviceEntryList.getTotalElements();
+		final DeviceListResponseDTO deviceListResponseDTO = new DeviceListResponseDTO();
+		deviceListResponseDTO.setCount(count);
+		deviceListResponseDTO.setData(deviceEntryListToDeviceResponseDTOList(deviceEntryList.getContent()));
+
+		return deviceListResponseDTO;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public static SystemResponseDTO convertSystemToSystemResponseDTO(final System system) {
 		Assert.notNull(system, "System is null");
@@ -658,18 +638,29 @@ public class DTOConverter {
 	private DTOConverter() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private static List<SystemResponseDTO> systemEntryListToSystemResponseDTOList(final List<System> systemList) {
 		final List<SystemResponseDTO> systemResponseDTOs = new ArrayList<>(systemList.size());
-		
+
 		for (final System system : systemList) {
 			systemResponseDTOs.add(convertSystemToSystemResponseDTO(system));
 		}
-		
+
 		return systemResponseDTOs;
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	private static List<DeviceResponseDTO> deviceEntryListToDeviceResponseDTOList(final List<Device> deviceList) {
+		final List<DeviceResponseDTO> deviceResponseDTOs = new ArrayList<>(deviceList.size());
+
+		for (final Device device : deviceList) {
+			deviceResponseDTOs.add(convertDeviceToDeviceResponseDTO(device));
+		}
+
+		return deviceResponseDTOs;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	private static List<ServiceInterfaceResponseDTO> collectInterfacesFromServiceRegistry(final Set<ServiceRegistryInterfaceConnection> interfaceConnections) {
 		final List<ServiceInterfaceResponseDTO> result = new ArrayList<>(interfaceConnections.size());
@@ -754,4 +745,5 @@ public class DTOConverter {
 		
 		return result;
 	}
+
 }
