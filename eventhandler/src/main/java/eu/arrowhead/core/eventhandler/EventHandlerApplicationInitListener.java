@@ -120,10 +120,17 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 			for (final List<Subscription> subscriptionList : mapOfSubscriptions.values()) {
 				
 				final SystemRequestDTO subscriber = DTOConverter.convertSystemToSystemRequestDTO(subscriptionList.get(0).getSubscriberSystem());		
-				final Set<SystemResponseDTO> authorizedPublishers = getAuthorizedPublishers(subscriber);
 				
-				eventHandlerDBService.updateSubscriberAuthorization(subscriptionList, authorizedPublishers);
-				
+				try {
+					
+					final Set<SystemResponseDTO> authorizedPublishers = getAuthorizedPublishers(subscriber);
+					eventHandlerDBService.updateSubscriberAuthorization(subscriptionList, authorizedPublishers);
+					
+				} catch (ArrowheadException ex) {
+					
+					throw new ArrowheadException("EventHandler can't update Subscribers Authorization: " + ex.getMessage());
+				}
+
 			}	
 		}		
 	}
