@@ -9,8 +9,10 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
-import eu.arrowhead.common.dto.shared.DeviceRequestDTO;
+import eu.arrowhead.common.dto.internal.SystemRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -34,6 +36,7 @@ public class SystemRegistryDBService
     // members
 
     private static final String COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE = "Could not delete System, with given parameters";
+    private static final String COULD_NOT_DELETE_DEVICE_ERROR_MESSAGE = "Could not delete Device, with given parameters";
     private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
 
     private static final int MAX_BATCH_SIZE = 200;
@@ -154,14 +157,14 @@ public class SystemRegistryDBService
     {
         logger.debug("updateSystem started...");
 
-        final long validatedSystemId = validateSystemId(systemId);
+        final long validatedSystemId = validateId(systemId);
         final int validatedPort = validateSystemPort(port);
-        final String validatedSystemName = validateSystemParamString(systemName);
+        final String validatedSystemName = validateParamString(systemName);
         if (validatedSystemName.contains("."))
         {
             throw new InvalidParameterException("System name can't contain dot (.)");
         }
-        final String validatedAddress = validateSystemParamString(address);
+        final String validatedAddress = validateParamString(address);
         final String validatedAuthenticationInfo = authenticationInfo;
 
 
@@ -241,14 +244,14 @@ public class SystemRegistryDBService
     {
         logger.debug("mergeSystem started...");
 
-        final long validatedSystemId = validateSystemId(systemId);
+        final long validatedSystemId = validateId(systemId);
         final Integer validatedPort = validateAllowNullSystemPort(port);
-        final String validatedSystemName = validateAllowNullSystemParamString(systemName);
+        final String validatedSystemName = validateAllowNullParamString(systemName);
         if (validatedSystemName != null && validatedSystemName.contains("."))
         {
             throw new InvalidParameterException("System name can't contain dot (.)");
         }
-        final String validatedAddress = validateAllowNullSystemParamString(address);
+        final String validatedAddress = validateAllowNullParamString(address);
         final String validatedAuthenticationInfo = authenticationInfo;
 
         try
@@ -355,10 +358,69 @@ public class SystemRegistryDBService
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public DeviceResponseDTO createDevice(final DeviceRequestDTO dto)
+    public DeviceResponseDTO createDevice(final String name, final String address, final String macAddress, final String authenticationInfo)
     {
-        final Device device = new Device(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+        final Device device = new Device(name, address, macAddress, authenticationInfo);
         return DTOConverter.convertDeviceToDeviceResponseDTO(deviceRepository.save(device));
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public DeviceResponseDTO updateDeviceByIdResponse(final long id, final String name, final String address, final String macAddress, final String authenticationInfo) {
+
+        logger.debug("updateDeviceByIdResponse started...");
+
+        try {
+
+            final long validatedId = validateId(id);
+            final Device newDevice = validateNonNullDeviceParameters(name, address, macAddress, authenticationInfo);
+
+            final Optional<Device> optionalDevice = deviceRepository.findById(id);
+            final Device device = optionalDevice.orElseThrow(() -> new InvalidParameterException("No device with id : " + id));
+
+            device.setDeviceName(newDevice.getDeviceName());
+            device.setAddress(newDevice.getAddress());
+            device.setMacAddress(newDevice.getMacAddress());
+            device.setAuthenticationInfo(newDevice.getAuthenticationInfo());
+
+            return DTOConverter.convertDeviceToDeviceResponseDTO(deviceRepository.saveAndFlush(device));
+        }
+        catch (final InvalidParameterException ex)
+        {
+            throw ex;
+        }
+        catch (final Exception ex)
+        {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public void removeDeviceById(final long id) {
+        logger.debug("removeDeviceById started...");
+
+        try
+        {
+            if (!deviceRepository.existsById(id))
+            {
+                throw new InvalidParameterException(COULD_NOT_DELETE_DEVICE_ERROR_MESSAGE);
+            }
+
+            deviceRepository.deleteById(id);
+            deviceRepository.flush();
+        }
+        catch (final InvalidParameterException ex)
+        {
+            throw ex;
+        }
+        catch (final Exception ex)
+        {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
     }
     //=================================================================================================
     // assistant methods
@@ -419,19 +481,36 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
+    private void checkConstraintsOfDeviceTable(final String validatedDeviceName, final String validatedMacAddress)
+    {
+        logger.debug("checkConstraintsOfDeviceTable started...");
+
+        try
+        {
+            final Optional<Device> find = deviceRepository.findByDeviceNameAndMacAddress(validatedDeviceName, validatedMacAddress);
+            if (find.isPresent())
+            {
+                throw new InvalidParameterException(
+                        "Device with name: " + validatedDeviceName + ", MAC address: " + validatedMacAddress + " already exists.");
+            }
+        }
+        catch (final InvalidParameterException ex)
+        {
+            throw ex;
+        }
+        catch (final Exception ex)
+        {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
     private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo)
     {
         logger.debug("validateNonNullSystemParameters started...");
 
-        if (Utilities.isEmpty(systemName))
-        {
-            throw new InvalidParameterException("System name is null or empty");
-        }
-
-        if (Utilities.isEmpty(address))
-        {
-            throw new InvalidParameterException("System address is null or empty");
-        }
+        validateNonNullParameters(systemName, address, authenticationInfo);
 
         if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX)
         {
@@ -439,10 +518,6 @@ public class SystemRegistryDBService
         }
 
         final String validatedSystemName = systemName.trim().toLowerCase();
-        if (validatedSystemName.contains("."))
-        {
-            throw new InvalidParameterException("System name can't contain dot (.)");
-        }
         final String validatedAddress = address.trim().toLowerCase();
         final String validatedAuthenticationInfo = authenticationInfo;
 
@@ -452,7 +527,50 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private String validateSystemParamString(final String param)
+    private Device validateNonNullDeviceParameters(final String deviceName, final String address, final String macAddress, final String authenticationInfo)
+    {
+        logger.debug("validateNonNullDeviceParameters started...");
+
+        validateNonNullParameters(deviceName, address, authenticationInfo);
+
+        if (Utilities.isEmpty(macAddress))
+        {
+            throw new InvalidParameterException("MAC address is null or empty");
+        }
+
+        final String validatedDeviceName = deviceName.trim().toLowerCase();
+        final String validatedAddress = address.trim().toLowerCase();
+        final String validatedMacAddress = macAddress.trim().toUpperCase();
+        final String validatedAuthenticationInfo = authenticationInfo;
+
+        checkConstraintsOfDeviceTable(validatedDeviceName, validatedMacAddress);
+
+        return new Device(validatedDeviceName, validatedAddress, validatedMacAddress, validatedAuthenticationInfo);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void validateNonNullParameters(final String name, final String address, final String authenticationInfo)
+    {
+        logger.debug("validateNonNullParameters started...");
+
+        if (Utilities.isEmpty(name))
+        {
+            throw new InvalidParameterException("Name is null or empty");
+        }
+
+        if (Utilities.isEmpty(address))
+        {
+            throw new InvalidParameterException("Address is null or empty");
+        }
+
+        if (name.contains("."))
+        {
+            throw new InvalidParameterException("Name can't contain dot (.)");
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private String validateParamString(final String param)
     {
         logger.debug("validateSystemParamString started...");
 
@@ -478,16 +596,16 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private long validateSystemId(final long systemId)
+    private long validateId(final long id)
     {
-        logger.debug("validateSystemId started...");
+        logger.debug("validateId started...");
 
-        if (systemId < 1)
+        if (id < 1)
         {
-            throw new IllegalArgumentException("System id must be greater than zero");
+            throw new IllegalArgumentException("Id must be greater than zero");
         }
 
-        return systemId;
+        return id;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -504,9 +622,9 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private String validateAllowNullSystemParamString(final String param)
+    private String validateAllowNullParamString(final String param)
     {
-        logger.debug("validateAllowNullSystemParamString started...");
+        logger.debug("validateAllowNullParamString started...");
 
         if (Utilities.isEmpty(param))
         {
@@ -536,5 +654,29 @@ public class SystemRegistryDBService
             provider = createSystem(systemName, address, port, authenticationInfo);
         }
         return provider;
+    }
+
+    public SystemRegistryListResponseDTO getSystemRegistryEntriesResponse(final CoreUtilities.ValidatedPageParams params, final String sortField) {
+        return null;
+    }
+
+    public SystemRegistryResponseDTO getSystemRegistryEntryByIdResponse(final long id) {
+        return null;
+    }
+
+    public void removeSystemRegistryEntryById(long id) {
+
+    }
+
+    public SystemRegistryResponseDTO registerSystemResponse(SystemRegistryRequestDTO request) {
+        return null;
+    }
+
+    public SystemRegistryResponseDTO updateSystemByIdResponse(long id, SystemRegistryRequestDTO request) {
+        return null;
+    }
+
+    public SystemRegistryResponseDTO mergeSystemByIdResponse(long id, SystemRegistryRequestDTO request) {
+        return null;
     }
 }

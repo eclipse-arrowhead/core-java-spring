@@ -2,11 +2,9 @@ package eu.arrowhead.core.systemregistry;
 
 import eu.arrowhead.common.*;
 import eu.arrowhead.common.core.CoreSystem;
-import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.*;
 import eu.arrowhead.common.dto.shared.*;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.common.intf.ServiceInterfaceNameVerifier;
 import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -68,40 +66,36 @@ public class SystemRegistryController
 	private static final String DELETE_DEVICE_HTTP_200_MESSAGE = "Device deleted";
 	private static final String DELETE_DEVICE_HTTP_400_MESSAGE = "Could not delete device";
 
-	private static final String SERVICES_URI = CoreCommonConstants.MGMT_URI + "/services";
-	private static final String SERVICES_BY_ID_URI = SERVICES_URI + "/{" + PATH_VARIABLE_ID + "}";
-	private static final String GET_SERVICES_HTTP_200_MESSAGE = "Services returned";
-	private static final String GET_SERVICES_HTTP_400_MESSAGE = "Could not retrieve service definition";
-	private static final String POST_SERVICES_HTTP_201_MESSAGE = "Service definition created";
-	private static final String POST_SERVICES_HTTP_400_MESSAGE = "Could not create service definition";
-	private static final String PUT_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
-	private static final String PUT_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
-	private static final String PATCH_SERVICES_HTTP_200_MESSAGE = "Service definition updated";
-	private static final String PATCH_SERVICES_HTTP_400_MESSAGE = "Could not update service definition";
-	private static final String DELETE_SERVICES_HTTP_200_MESSAGE = "Service definition removed";
-	private static final String DELETE_SERVICES_HTTP_400_MESSAGE = "Could not remove service definition";
+	private static final String POST_SYSTEMS_HTTP_201_MESSAGE = "System definition created";
+	private static final String POST_SYSTEMS_HTTP_400_MESSAGE = "Could not create system definition";
+	private static final String PUT_SYSTEMS_HTTP_200_MESSAGE = "System definition updated";
+	private static final String PUT_SYSTEMS_HTTP_400_MESSAGE = "Could not update system definition";
+	private static final String PATCH_SYSTEMS_HTTP_200_MESSAGE = "System definition updated";
+	private static final String PATCH_SYSTEMS_HTTP_400_MESSAGE = "Could not update system definition";
+	private static final String DELETE_SYSTEMS_HTTP_200_MESSAGE = "System definition removed";
+	private static final String DELETE_SYSTEMS_HTTP_400_MESSAGE = "Could not remove system definition";
 	
-	private static final String SERVICE_REGISTRY_REGISTER_DESCRIPTION = "Registers a service";
-	private static final String SERVICE_REGISTRY_REGISTER_201_MESSAGE = "Service registered";
-	private static final String SERVICE_REGISTRY_REGISTER_400_MESSAGE = "Could not register service";
-	private static final String SERVICE_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered service";
-	private static final String SERVICE_REGISTRY_UNREGISTER_200_MESSAGE = "Registered service removed";
-	private static final String SERVICE_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove service";
-	private static final String SERVICE_REGISTRY_QUERY_DESCRIPTION = "Return Service Registry data that fits the specification";
-	private static final String SERVICE_REGISTRY_QUERY_200_MESSAGE = "Service Registry data returned";
-	private static final String SERVICE_REGISTRY_QUERY_400_MESSAGE = "Could not query Service Registry";
-	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_DESCRIPTION = "Return system by requested id";
-	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_200_MESSAGE = "System data by id returned";
-	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_400_MESSAGE = "Could not query Service Registry by Consumer system id";
-	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION = "Return System by requested dto";
-	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE = "Consumer System data by requestDTO returned";
-	private static final String SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE = "Could not query Service Registry by Consumer system requestDTO";
-	private static final String SERVICE_REGISTRY_UPDATE_DESCRIPTION = "Update a service";
-	private static final String SERVICE_REGISTRY_UPDATE_200_MESSAGE = "Service updated";
-	private static final String SERVICE_REGISTRY_UPDATE_400_MESSAGE = "Could not update service";
-	private static final String SERVICE_REGISTRY_MERGE_DESCRIPTION = "Merge/Patch a service";
-	private static final String SERVICE_REGISTRY_MERGE_200_MESSAGE = "Service merged";
-	private static final String SERVICE_REGISTRY_MERGE_400_MESSAGE = "Could not merge service";	
+	private static final String SYSTEM_REGISTRY_REGISTER_DESCRIPTION = "Registers a system";
+	private static final String SYSTEM_REGISTRY_REGISTER_201_MESSAGE = "System registered";
+	private static final String SYSTEM_REGISTRY_REGISTER_400_MESSAGE = "Could not register system";
+	private static final String SYSTEM_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered system";
+	private static final String SYSTEM_REGISTRY_UNREGISTER_200_MESSAGE = "Registered system removed";
+	private static final String SYSTEM_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove system";
+	private static final String SYSTEM_REGISTRY_QUERY_DESCRIPTION = "Return System Registry data that fits the specification";
+	private static final String SYSTEM_REGISTRY_QUERY_200_MESSAGE = "System Registry data returned";
+	private static final String SYSTEM_REGISTRY_QUERY_400_MESSAGE = "Could not query System Registry";
+	private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_DESCRIPTION = "Return system by requested id";
+	private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_200_MESSAGE = "System data by id returned";
+	private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_400_MESSAGE = "Could not query System Registry by Consumer system id";
+	private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION = "Return System by requested dto";
+	private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE = "Consumer System data by requestDTO returned";
+	private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE = "Could not query System Registry by Consumer system requestDTO";
+	private static final String SYSTEM_REGISTRY_UPDATE_DESCRIPTION = "Update a system";
+	private static final String SYSTEM_REGISTRY_UPDATE_200_MESSAGE = "System updated";
+	private static final String SYSTEM_REGISTRY_UPDATE_400_MESSAGE = "Could not update system";
+	private static final String SYSTEM_REGISTRY_MERGE_DESCRIPTION = "Merge/Patch a system";
+	private static final String SYSTEM_REGISTRY_MERGE_200_MESSAGE = "System merged";
+	private static final String SYSTEM_REGISTRY_MERGE_400_MESSAGE = "Could not merge system";	
 	
 	private static final String NOT_VALID_PARAMETERS_ERROR_MESSAGE = "Not valid request parameters.";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
@@ -109,35 +103,33 @@ public class SystemRegistryController
 	private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " System address must have value ";
 	private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " System port must have value ";
 	
-	private static final String SERVICE_REGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "serviceDefinition";
-	private static final String SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = CoreCommonConstants.MGMT_URI + "/servicedef" + "/{" + PATH_VARIABLE_SERVICE_DEFINITION + "}";	
-	private static final String SERVICE_REGISTRY_MGMT_GROUPED_URI = CoreCommonConstants.MGMT_URI + "/grouped";
-	private static final String GET_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entries returned";
-	private static final String GET_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrieve service registry entries";
-	private static final String DELETE_SERVICE_REGISTRY_HTTP_200_MESSAGE = "Service Registry entry removed";
-	private static final String DELETE_SERVICE_REGISTRY_HTTP_400_MESSAGE = "Could not remove service registry entry";
+	private static final String SYSTEM_REGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String PATH_VARIABLE_SERVICE_DEFINITION = "systemDefinition";
+	private static final String SYSTEM_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI = CoreCommonConstants.MGMT_URI + "/systemdef" + "/{" + PATH_VARIABLE_SERVICE_DEFINITION + "}";	
+	private static final String SYSTEM_REGISTRY_MGMT_GROUPED_URI = CoreCommonConstants.MGMT_URI + "/grouped";
+	private static final String GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE = "System Registry entries returned";
+	private static final String GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE = "Could not retrieve system registry entries";
+	private static final String DELETE_SYSTEM_REGISTRY_HTTP_200_MESSAGE = "System Registry entry removed";
+	private static final String DELETE_SYSTEM_REGISTRY_HTTP_400_MESSAGE = "Could not remove system registry entry";
 	
 	private final Logger logger = LogManager.getLogger(SystemRegistryController.class);
 
 	@Autowired
 	private SystemRegistryDBService systemRegistryDBService;
 	
-	@Autowired
-	private ServiceInterfaceNameVerifier interfaceNameVerifier;
-	
+
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core system availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = CommonConstants.ECHO_URI)
-	public String echoService() {
+	public String echoSystem() {
 		return "Got it!";
 	}
 	
@@ -154,7 +146,7 @@ public class SystemRegistryController
 		logger.debug("getSystemById started ...");
 		
 		if (systemId < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEM_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 
 		return systemRegistryDBService.getSystemById(systemId);
@@ -233,7 +225,7 @@ public class SystemRegistryController
 		logger.debug("New System delete request received with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
 		systemRegistryDBService.removeSystemById(id);
@@ -253,7 +245,7 @@ public class SystemRegistryController
 		logger.debug("getDeviceById started ...");
 
 		if (deviceId < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEM_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEM_BY_ID_URI);
 		}
 
 		return systemRegistryDBService.getDeviceById(deviceId);
@@ -276,8 +268,7 @@ public class SystemRegistryController
 		logger.debug("New DeviceList get request received with page: {} and item_per page: {}", page, size);
 
 		final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.SYSTEM_REGISTRY_URI + DEVICES_URI);
-		final DeviceListResponseDTO deviceListResponseDTO = systemRegistryDBService
-				.getDeviceEntries(pageParameters, sortField);
+		final DeviceListResponseDTO deviceListResponseDTO = systemRegistryDBService.getDeviceEntries(pageParameters, sortField);
 		logger.debug("DeviceList with page: {} and item_per page: {} successfully retrieved", page, size);
 		
 		return deviceListResponseDTO;
@@ -293,12 +284,12 @@ public class SystemRegistryController
 	})
 	@PostMapping(path = DEVICES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@ResponseBody public DeviceResponseDTO addDevice(@RequestBody final DeviceRequestDTO deviceRequestDto) {
-		logger.debug("New device registration request received with name: {}", deviceRequestDto.getDeviceName());
+	@ResponseBody public DeviceResponseDTO addDevice(@RequestBody final DeviceRequestDTO dto) {
+		logger.debug("New device registration request received with name: {}", dto.getDeviceName());
 
-		validateDevice(deviceRequestDto);
+		validateDevice(dto);
 
-		final DeviceResponseDTO responseDTO = systemRegistryDBService.createDevice(deviceRequestDto);
+		final DeviceResponseDTO responseDTO = systemRegistryDBService.createDevice(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
 		logger.debug("{} successfully registered.", responseDTO);
 		
 		return responseDTO;
@@ -313,140 +304,111 @@ public class SystemRegistryController
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(path = DEVICE_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DeviceResponseDTO putUpdateServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id,
-																				 @RequestBody final DeviceRequestDTO deviceRequestDto) {
-		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
-		logger.debug("New Service Definition update request received with id: {}, definition: {}", id, serviceDefinition);
+	@ResponseBody public DeviceResponseDTO putUpdateDevice(@PathVariable(value = PATH_VARIABLE_ID) final long id,
+																				 @RequestBody final DeviceRequestDTO dto) {
+		logger.debug("New device update request received with id: {}, definition: {}", id, dto);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + DEVICE_BY_ID_URI);
 		}
 
-		validateDevice(deviceRequestDto);
+		validateDevice(dto);
 
-		final ServiceDefinitionResponseDTO serviceDefinitionResponse = systemRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
-		logger.debug("Service definition with id: '{}' successfully updated with definition '{}'.", id, serviceDefinition);
+		final DeviceResponseDTO deviceResponseDTO = systemRegistryDBService.updateDeviceByIdResponse(id, dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+		logger.debug("Device with id: '{}' successfully updated with definition '{}'.", id, deviceResponseDTO);
 		
-		return serviceDefinitionResponse;
+		return deviceResponseDTO;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return updated service definition", response = ServiceDefinitionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Remove device", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = PATCH_SERVICES_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEMS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEMS_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PatchMapping(path = SERVICES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/json")
-	@ResponseBody public ServiceDefinitionResponseDTO patchUpdateServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id,
-																				   @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		// Currently ServiceDefinition has only one updatable field, therefore PUT and PATCH do the same
-		return putUpdateServiceDefinition(id, serviceDefinitionRequestDTO);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove service definition", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICES_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SERVICES_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@DeleteMapping(path = SERVICES_BY_ID_URI)
-	public void removeServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Definition delete request received with id: {}", id);
+	@DeleteMapping(path = DEVICE_BY_ID_URI)
+	public void removeDevice(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New System Definition delete request received with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + DEVICE_BY_ID_URI);
 		}
 		
-		systemRegistryDBService.removeServiceDefinitionById(id);
-		logger.debug("Service definition with id: '{}' successfully deleted", id);
+		systemRegistryDBService.removeDeviceById(id);
+		logger.debug("Device with id: '{}' successfully deleted", id);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested service registry entries by the given parameters", response = ServiceRegistryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return requested system registry entries by the given parameters", response = SystemRegistryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = CoreCommonConstants.MGMT_URI)
-	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntries(
+	@ResponseBody public SystemRegistryListResponseDTO getSystemRegistryEntries(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New Service Registry get request received with page: {} and item_per page: {}", page, size);
+		logger.debug("New System Registry get request received with page: {} and item_per page: {}", page, size);
+
+		final CoreUtilities.ValidatedPageParams params = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.SYSTEM_REGISTRY_URI + CoreCommonConstants.MGMT_URI);
+		final SystemRegistryListResponseDTO systemRegistryEntriesResponse = systemRegistryDBService
+				.getSystemRegistryEntriesResponse(params, sortField);
+		logger.debug("System Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 		
-		int validatedPage;
-		int validatedSize;
-		if (page == null && size == null) {
-			validatedPage = -1;
-			validatedSize = -1;
-		} else {
-			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI +
-											  CoreCommonConstants.MGMT_URI);
-			} else {
-				validatedPage = page;
-				validatedSize = size;
-			}
-		}
-		
-		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI);
-		final ServiceRegistryListResponseDTO serviceRegistryEntriesResponse = systemRegistryDBService
-				.getServiceRegistryEntriesResponse(validatedPage, validatedSize, validatedDirection, sortField);
-		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
-		
-		return serviceRegistryEntriesResponse;
+		return systemRegistryEntriesResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested service registry entry", response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return requested system registry entry", response = SystemRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path =  SERVICE_REGISTRY_MGMT_BY_ID_URI)
-	@ResponseBody public ServiceRegistryResponseDTO getServiceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Registry get request received with id: {}", id);
+	@GetMapping(path =  SYSTEM_REGISTRY_MGMT_BY_ID_URI)
+	@ResponseBody public SystemRegistryResponseDTO getSystemRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New System Registry get request received with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_ID_URI);
 		}
-		final ServiceRegistryResponseDTO serviceRegistryEntryByIdResponse = systemRegistryDBService.getServiceRegistryEntryByIdResponse(id);
-		logger.debug("Service Registry entry with id: {} successfully retrieved", id);
+		final SystemRegistryResponseDTO systemRegistryEntryByIdResponse = systemRegistryDBService.getSystemRegistryEntryByIdResponse(id);
+		logger.debug("System Registry entry with id: {} successfully retrieved", id);
 		
-		return serviceRegistryEntryByIdResponse;
+		return systemRegistryEntryByIdResponse;
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested service registry entries by service definition based on the given parameters", response = ServiceRegistryListResponseDTO.class,
+	@ApiOperation(value = "Return requested system registry entries by system definition based on the given parameters", response = SystemRegistryListResponseDTO.class,
 				  tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path =  SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI)
-	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntriesByServiceDefinition(
-			@PathVariable(value = PATH_VARIABLE_SERVICE_DEFINITION) final String serviceDefinition,
+	@GetMapping(path =  SYSTEM_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI)
+	@ResponseBody public SystemRegistryListResponseDTO getSystemRegistryEntriesBySystemName(
+			@PathVariable(value = PATH_VARIABLE_SERVICE_DEFINITION) final String systemName,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New Service Registry get by Service Definition request received with page: {} and item_per page: {}", page, size);
+		logger.debug("New System Registry get by System Definition request received with page: {} and item_per page: {}", page, size);
 		
-		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("Service definition cannot be empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+		if (Utilities.isEmpty(systemName)) {
+			throw new BadPayloadException("System name cannot be empty.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
 		}
-		
+
+		// TODO get system registry entries with given system name
+
 		int validatedPage;
 		int validatedSize;
 		if (page == null && size == null) {
@@ -454,198 +416,180 @@ public class SystemRegistryController
 			validatedSize = -1;
 		} else {
 			if (page == null || size == null) {
-				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI +
-											  SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+				throw new BadPayloadException("Defined page or size could not be with undefined size or page.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI +
+											  SYSTEM_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
 			} else {
 				validatedPage = page;
 				validatedSize = size;
 			}
 		}
 		
-		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
-		final ServiceRegistryListResponseDTO serviceRegistryEntries = systemRegistryDBService
-				.getServiceRegistryEntriesByServiceDefinitionResponse(serviceDefinition, validatedPage, validatedSize,
+		final Direction validatedDirection = CoreUtilities.calculateDirection(direction, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_SERVICE_DEFINITION_URI);
+		final SystemRegistryListResponseDTO systemRegistryEntries = systemRegistryDBService
+				.getSystemRegistryEntriesBySystemDefinitionResponse(systemDefinition, validatedPage, validatedSize,
 																	  validatedDirection, sortField);
-		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
+		logger.debug("System Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 		
-		return serviceRegistryEntries;
+		return systemRegistryEntries;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return all service registry entries grouped for frontend usage", response = ServiceRegistryGroupedResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Remove the specified system registry entry", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = SERVICE_REGISTRY_MGMT_GROUPED_URI)
-	@ResponseBody public ServiceRegistryGroupedResponseDTO getServiceRegistryGroupedData() {
-		logger.debug("New get request for grouped service registry data");
-		
-		final ServiceRegistryGroupedResponseDTO serviceRegistryGroupedResponseDTO = systemRegistryDBService.getServiceRegistryDataForServiceRegistryGroupedResponse();
-		logger.debug("Grouped service registry data successfully retrieved");
-		
-		return serviceRegistryGroupedResponseDTO;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Remove the specified service registry entry", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SERVICE_REGISTRY_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SERVICE_REGISTRY_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@DeleteMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI)
-	public void removeServiceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Registry delete request received with id: {}", id);
+	@DeleteMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI)
+	public void removeSystemRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+		logger.debug("New System Registry delete request received with id: {}", id);
 		
 		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICE_REGISTRY_MGMT_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_ID_URI);
 		}
 		
-		systemRegistryDBService.removeServiceRegistryEntryById(id);
-		logger.debug("Service Registry with id: '{}' successfully deleted", id);
+		systemRegistryDBService.removeSystemRegistryEntryById(id);
+		logger.debug("System Registry with id: '{}' successfully deleted", id);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_REGISTER_DESCRIPTION, response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = SYSTEM_REGISTRY_REGISTER_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = SERVICE_REGISTRY_REGISTER_201_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_REGISTER_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEM_REGISTRY_REGISTER_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_REGISTER_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceRegistryResponseDTO registerService(@RequestBody final ServiceRegistryRequestDTO request) {
-		logger.debug("New service registration request received");
-		checkServiceRegistryRequest(request, false);
+	@PostMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public SystemRegistryResponseDTO registerSystem(@RequestBody final SystemRegistryRequestDTO request) {
+		logger.debug("New system registration request received");
+		checkSystemRegistryRequest(request, false);
 		
-		final ServiceRegistryResponseDTO response = systemRegistryDBService.registerServiceResponse(request);
-		logger.debug("{} successfully registers its service {}", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+		final SystemRegistryResponseDTO response = systemRegistryDBService.registerSystemResponse(request);
+		logger.debug("{} successfully registers its system {}", request.getProviderSystem().getSystemName(), request.getSystemDefinition());
 	
 		return response;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_REGISTER_DESCRIPTION, response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = SYSTEM_REGISTRY_REGISTER_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = SERVICE_REGISTRY_REGISTER_201_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_REGISTER_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEM_REGISTRY_REGISTER_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_REGISTER_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
 	@PostMapping(path = CoreCommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ServiceRegistryResponseDTO addServiceRegistry(@RequestBody final ServiceRegistryRequestDTO request) {
-		logger.debug("New service registration request received");
-		checkServiceRegistryRequest(request, CoreCommonConstants.MGMT_URI, true);
+	public @ResponseBody SystemRegistryResponseDTO addSystemRegistry(@RequestBody final SystemRegistryRequestDTO request) {
+		logger.debug("New system registration request received");
+		checkSystemRegistryRequest(request, CoreCommonConstants.MGMT_URI, true);
 		
-		final ServiceRegistryResponseDTO response = systemRegistryDBService.registerServiceResponse(request);
-		logger.debug("{}'s service {} is successfully registered", request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+		final SystemRegistryResponseDTO response = systemRegistryDBService.registerSystemResponse(request);
+		logger.debug("{}'s system {} is successfully registered", request.getProviderSystem().getSystemName(), request.getSystemDefinition());
 	
 		return response;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_UPDATE_DESCRIPTION, response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = SYSTEM_REGISTRY_UPDATE_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_UPDATE_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_UPDATE_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_UPDATE_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_UPDATE_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ServiceRegistryResponseDTO updateServiceRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final ServiceRegistryRequestDTO request) { 
-		logger.debug("New service registry update request received");
-		checkServiceRegistryUpdateRequest(id, request, CoreCommonConstants.MGMT_URI);
+	@PutMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody SystemRegistryResponseDTO updateSystemRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final SystemRegistryRequestDTO request) { 
+		logger.debug("New system registry update request received");
+		checkSystemRegistryUpdateRequest(id, request, CoreCommonConstants.MGMT_URI);
 		
-		final ServiceRegistryResponseDTO response = systemRegistryDBService.updateServiceByIdResponse(id, request);
-		logger.debug("Service Registry entry {} is successfully updated with system {} and service {}", id, request.getProviderSystem().getSystemName(), request.getServiceDefinition());
+		final SystemRegistryResponseDTO response = systemRegistryDBService.updateSystemByIdResponse(id, request);
+		logger.debug("System Registry entry {} is successfully updated with system {} and system {}", id, request.getProviderSystem().getSystemName(), request.getSystemDefinition());
 	
 		return response;
 	}
 	
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_MERGE_DESCRIPTION, response = ServiceRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = SYSTEM_REGISTRY_MERGE_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_MERGE_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_MERGE_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_MERGE_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_MERGE_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PatchMapping(path = SERVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ServiceRegistryResponseDTO mergeServiceRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final ServiceRegistryRequestDTO request) { 
-		logger.debug("New service registry merge request received");
-		checkServiceRegistryMergeRequest(id, request, CoreCommonConstants.MGMT_URI);
+	@PatchMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody SystemRegistryResponseDTO mergeSystemRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final SystemRegistryRequestDTO request) { 
+		logger.debug("New system registry merge request received");
+		checkSystemRegistryMergeRequest(id, request, CoreCommonConstants.MGMT_URI);
 		
-		final ServiceRegistryResponseDTO response = systemRegistryDBService.mergeServiceByIdResponse(id, request);
-		logger.debug("Service Registry entry {} is successfully merged witch system {} and service {}", id, response.getProvider().getSystemName(), request.getServiceDefinition());
+		final SystemRegistryResponseDTO response = systemRegistryDBService.mergeSystemByIdResponse(id, request);
+		logger.debug("System Registry entry {} is successfully merged witch system {} and system {}", id, response.getProvider().getSystemName(), request.getSystemDefinition());
 	
 		return response;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_UNREGISTER_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = SYSTEM_REGISTRY_UNREGISTER_DESCRIPTION, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_UNREGISTER_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_UNREGISTER_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_UNREGISTER_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_UNREGISTER_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@DeleteMapping(path = CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI)
-	public void unregisterService(@RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String serviceDefinition,
-								  @RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME) final String providerName,
-								  @RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS) final String providerAddress,
-								  @RequestParam(CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int providerPort) {
-		logger.debug("Service removal request received");
-		checkUnregisterServiceParameters(serviceDefinition, providerName, providerAddress, providerPort);
+	@DeleteMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI)
+	public void unregisterSystem(@RequestParam(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_SERVICE_DEFINITION) final String systemName,
+								  @RequestParam(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME) final String providerName,
+								  @RequestParam(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS) final String providerAddress,
+								  @RequestParam(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int providerPort) {
+		logger.debug("System removal request received");
+		checkUnregisterSystemParameters(systemName, providerName, providerAddress, providerPort);
 		
-		systemRegistryDBService.removeServiceRegistry(serviceDefinition, providerName, providerAddress, providerPort);
-		logger.debug("{} successfully removed its service {}", providerName, serviceDefinition);
+		systemRegistryDBService.removeSystemRegistry(systemName, providerName, providerAddress, providerPort);
+		logger.debug("{} successfully removed its system {}", providerName, systemName);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_QUERY_DESCRIPTION, response = ServiceQueryResultDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = SYSTEM_REGISTRY_QUERY_DESCRIPTION, response = SystemQueryResultDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_QUERY_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_QUERY_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_QUERY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_QUERY_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceQueryResultDTO queryRegistry(@RequestBody final ServiceQueryFormDTO form) {
-		logger.debug("Service query request received");
+	@PostMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public SystemQueryResultDTO queryRegistry(@RequestBody final SystemQueryFormDTO form) {
+		logger.debug("System query request received");
 		
-		if (Utilities.isEmpty(form.getServiceDefinitionRequirement())) {
-			throw new BadPayloadException("Service definition requirement is null or blank" , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI +
-										  CommonConstants.OP_SERVICE_REGISTRY_QUERY_URI);
+		if (Utilities.isEmpty(form.getSystemDefinitionRequirement())) {
+			throw new BadPayloadException("System definition requirement is null or blank" , HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI +
+										  CommonConstants.OP_SYSTEM_REGISTRY_QUERY_URI);
 		}
 		
-		final ServiceQueryResultDTO result = systemRegistryDBService.queryRegistry(form);
-		logger.debug("Return {} providers for service {}", result.getServiceQueryData().size(), form.getServiceDefinitionRequirement());
+		final SystemQueryResultDTO result = systemRegistryDBService.queryRegistry(form);
+		logger.debug("Return {} providers for system {}", result.getSystemQueryData().size(), form.getSystemDefinitionRequirement());
 		
 		return result;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_DESCRIPTION, response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiOperation(value = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_DESCRIPTION, response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SystemResponseDTO queryRegistryBySystemId(@PathVariable(value = PATH_VARIABLE_ID) final long systemId) {
-		logger.debug("Service query by system id request received");
+		logger.debug("System query by system id request received");
 		
 		if (systemId < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI +
-										  CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI +
+										  CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
 		}
 		
 		final SystemResponseDTO result = systemRegistryDBService.getSystemById(systemId);
@@ -655,18 +599,18 @@ public class SystemRegistryController
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION, response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiOperation(value = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION, response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public SystemResponseDTO queryRegistryBySystemDTO(@RequestBody final SystemRequestDTO request) {
-		logger.debug("Service query by systemRequestDTO request received");
+		logger.debug("System query by systemRequestDTO request received");
 
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
+		checkSystemRequest(request, CommonConstants.SYSTEM_REGISTRY_URI + CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
@@ -685,7 +629,7 @@ public class SystemRegistryController
 	private SystemResponseDTO callCreateSystem(final SystemRequestDTO request) {
 		logger.debug("callCreateSystem started...");
 		
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_URI, true);
+		checkSystemRequest(request, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_URI, true);
 		
 		final String systemName = request.getSystemName();
 		final String address = request.getAddress();
@@ -728,7 +672,7 @@ public class SystemRegistryController
 		logger.debug("checkSystemPatchRequest started...");
 		
 		if (systemId <= 0) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
 		boolean needChange = false;
@@ -741,7 +685,7 @@ public class SystemRegistryController
 			needChange = true;
 			for (final CoreSystem coreSysteam : CoreSystem.values()) {
 				if (coreSysteam.name().equalsIgnoreCase(request.getSystemName().trim())) {
-					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+					throw new BadPayloadException("System name '" + request.getSystemName() + "' is a reserved arrowhead core system name.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 				}
 			}
 		}
@@ -750,7 +694,7 @@ public class SystemRegistryController
 			final int validatedPort = request.getPort();
 			if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
 				throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX +".", HttpStatus.SC_BAD_REQUEST,
-											  CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+											  CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 			}
 			
 			needChange = true;
@@ -761,7 +705,7 @@ public class SystemRegistryController
 		}
 		
 		if (!needChange) {
-			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException("Patch request is empty." , HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 	}
 
@@ -770,10 +714,10 @@ public class SystemRegistryController
 		logger.debug("checkSystemPutRequest started...");
 		
 		if (systemId <= 0) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI);
+			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_BY_ID_URI);
 		}
 		
-		checkSystemRequest(request, CommonConstants.SERVICE_REGISTRY_URI + SYSTEMS_BY_ID_URI, true);
+		checkSystemRequest(request, CommonConstants.SYSTEM_REGISTRY_URI + SYSTEMS_BY_ID_URI, true);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -811,20 +755,20 @@ public class SystemRegistryController
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final boolean checkReservedCoreSystemNames) {
-		logger.debug("checkServiceRegistryRequest started...");
+	private void checkSystemRegistryRequest(final SystemRegistryRequestDTO request, final boolean checkReservedCoreSystemNames) {
+		logger.debug("checkSystemRegistryRequest started...");
 
-		final String origin = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
+		final String origin = CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI;
 
-		checkServiceRegistryRequest(request, origin, checkReservedCoreSystemNames);
+		checkSystemRegistryRequest(request, origin, checkReservedCoreSystemNames);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryRequest(final ServiceRegistryRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
-		logger.debug("checkServiceRegistryRequest started...");
+	private void checkSystemRegistryRequest(final SystemRegistryRequestDTO request, final String origin, final boolean checkReservedCoreSystemNames) {
+		logger.debug("checkSystemRegistryRequest started...");
 	
-		if (Utilities.isEmpty(request.getServiceDefinition())) {
-			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		if (Utilities.isEmpty(request.getSystemDefinition())) {
+			throw new BadPayloadException("System definition is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	
 		checkSystemRequest(request.getProviderSystem(), origin, checkReservedCoreSystemNames);
@@ -838,9 +782,9 @@ public class SystemRegistryController
 			}
 		}
 		
-		ServiceSecurityType securityType = null;
+		SystemSecurityType securityType = null;
 		if (request.getSecure() != null) {
-			for (final ServiceSecurityType type : ServiceSecurityType.values()) {
+			for (final SystemSecurityType type : SystemSecurityType.values()) {
 				if (type.name().equalsIgnoreCase(request.getSecure())) {
 					securityType = type;
 					break;
@@ -851,10 +795,10 @@ public class SystemRegistryController
 				throw new BadPayloadException("Security type is not valid.", HttpStatus.SC_BAD_REQUEST, origin); 
 			}
 		} else {
-			securityType = ServiceSecurityType.NOT_SECURE;
+			securityType = SystemSecurityType.NOT_SECURE;
 		}
 		
-		if (securityType != ServiceSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
+		if (securityType != SystemSecurityType.NOT_SECURE && request.getProviderSystem().getAuthenticationInfo() == null) {
 			throw new BadPayloadException("Security type is in conflict with the availability of the authentication info.", HttpStatus.SC_BAD_REQUEST, origin); 
 		}
 		
@@ -870,13 +814,13 @@ public class SystemRegistryController
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkUnregisterServiceParameters(final String serviceDefinition, final String providerName, final String providerAddress, final int providerPort) {
+	private void checkUnregisterSystemParameters(final String systemDefinition, final String providerName, final String providerAddress, final int providerPort) {
 		// parameters can't be null, but can be empty
-		logger.debug("checkUnregisterServiceParameters started...");
+		logger.debug("checkUnregisterSystemParameters started...");
 		
-		final String origin = CommonConstants.SERVICE_REGISTRY_URI + CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
-		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("Service definition is blank", HttpStatus.SC_BAD_REQUEST, origin);
+		final String origin = CommonConstants.SYSTEM_REGISTRY_URI + CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI;
+		if (Utilities.isEmpty(systemDefinition)) {
+			throw new BadPayloadException("System definition is blank", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (Utilities.isEmpty(providerName)) {
@@ -893,14 +837,14 @@ public class SystemRegistryController
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkServiceRegistryUpdateRequest(final long id, final ServiceRegistryRequestDTO request, final String origin) {
-		logger.debug("checkServiceRegistryUpdateRequest started...");
+	private void checkSystemRegistryUpdateRequest(final long id, final SystemRegistryRequestDTO request, final String origin) {
+		logger.debug("checkSystemRegistryUpdateRequest started...");
 		
 		if (id <= 0) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		checkServiceRegistryRequest(request, origin, true);
+		checkSystemRegistryRequest(request, origin, true);
 		
 	}
 
@@ -922,8 +866,8 @@ public class SystemRegistryController
 
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3776")
-	private void checkServiceRegistryMergeRequest(final long id, final ServiceRegistryRequestDTO request, final String origin) {
-		logger.debug("checkServiceRegistryMergeRequest started...");
+	private void checkSystemRegistryMergeRequest(final long id, final SystemRegistryRequestDTO request, final String origin) {
+		logger.debug("checkSystemRegistryMergeRequest started...");
 		
 		if (id <= 0) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE , HttpStatus.SC_BAD_REQUEST, origin);
@@ -968,11 +912,11 @@ public class SystemRegistryController
 			needChange = true;
 		}
 		
-		if (request.getServiceDefinition() != null) {
+		if (request.getSystemDefinition() != null) {
 			needChange = true;
 		}
 		
-		if (request.getServiceUri() != null) {
+		if (request.getSystemUri() != null) {
 			needChange = true;
 		}
 		
