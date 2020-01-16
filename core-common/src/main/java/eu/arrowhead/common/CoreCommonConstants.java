@@ -134,7 +134,12 @@ public class CoreCommonConstants {
 	public static final String $EVENT_HANDLER_TTL_SCHEDULED_WD = "${" + EVENT_HANDLER_TTL_SCHEDULED + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_TTL_SCHEDULED + "}";
 	public static final String EVENT_HANDLER_TTL_INTERVAL = "event_handler_ttl_interval";
 	public static final String $EVENT_HANDLER_TTL_INTERVAL_WD = "${" + EVENT_HANDLER_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES + "}";
+	public static final String EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH = "event_handler_max_retry_connect_auth";
+	public static final String $EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH_WD = "${" + EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH + "}";
+	public static final String EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = "event_handler_retry_connect_auth_interval_sec";
+	public static final String $EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC_WD = "${" + EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC + "}";
 
+	
 	public static final String TIME_STAMP_TOLERANCE_SECONDS = "time_stamp_tolerance_seconds";
 	public static final String $TIME_STAMP_TOLERANCE_SECONDS_WD = "${" + TIME_STAMP_TOLERANCE_SECONDS + ":" + CoreDefaults.DEFAULT_TIME_STAMP_TOLERANCE_SECONDS + "}";
 

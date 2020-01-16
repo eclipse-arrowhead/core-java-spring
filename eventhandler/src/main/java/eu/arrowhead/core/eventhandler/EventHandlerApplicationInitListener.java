@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpMethod;
@@ -44,8 +45,12 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	//=================================================================================================
 	// members
 	
-	private static final String AUTH_SUBSCRIPTION_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+
+	@Value(CoreCommonConstants.$EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH_WD)
+	private int max_retry;
 	
+	@Value(CoreCommonConstants.$EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC_WD)
+	private int delay_sec;
 	
 	@Autowired
 	private EventHandlerDBService eventHandlerDBService;
@@ -94,7 +99,33 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 		final PublishingQueueWatcherTask publishingQueueWatcherTask = applicationContext.getBean(CoreCommonConstants.EVENT_PUBLISHING_QUEUE_WATCHER_TASK, PublishingQueueWatcherTask.class);
 		publishingQueueWatcherTask.start();
 		
-		updateSubscriberAuthorizations();
+		int retry = 0;
+		while (retry < max_retry ) {
+			try {
+				
+				updateSubscriberAuthorizations();
+				logger.info("SubscriberAuthorizations are up to date.");
+				break;
+			} catch (Exception ex) {
+				++retry;
+				logger.info("Unsuccessful update SubscriberAuthorizations. Trys left: " + (max_retry - retry) );
+				
+				if (retry == max_retry) {
+					
+					logger.info("EventHandler could not start becouse of unsuccessful Subscribers Authorization: " + ex);
+					throw ex;
+				
+				}else {
+					
+					try {
+						Thread.sleep( delay_sec * 1000);
+					} catch (final InterruptedException e) {			
+						logger.error(e.getMessage());
+					}
+				}
+			}		
+		}
+		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -156,18 +187,12 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 		final UriComponents queryUri = getQueryUri();
 		checkServiceRegistryConnection(queryUri);
 		
-		findCoreSystemServiceUri(CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE, queryUri);
 		
+		final UriComponents authSubscriptionCheckUri = findCoreSystemServiceUri(CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE, queryUri);
 		
-		@SuppressWarnings("unchecked")
-		final Map<String,Object> context = applicationContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-		
-		if (context.containsKey(AUTH_SUBSCRIPTION_CHECK_URI_KEY)) {
-			try {
-				return (UriComponents) context.get(AUTH_SUBSCRIPTION_CHECK_URI_KEY);
-			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
-			}
+		if ( authSubscriptionCheckUri != null) {
+
+			return authSubscriptionCheckUri;
 		}
 		
 		throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
@@ -213,15 +238,11 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private boolean findCoreSystemServiceUri(final CoreSystemService coreSystemService, final UriComponents queryUri) {
+	private UriComponents findCoreSystemServiceUri(final CoreSystemService coreSystemService, final UriComponents queryUri) {
 		logger.debug("findCoreSystemServiceUri started...");
 		
-		final String key = coreSystemService.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-		if (isAlreadyFound(key)) {
-			return true;
-		}
-		
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO.Builder(coreSystemService.getServiceDefinition()).build();
+		
 		try {
 			final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, form);
 			final ServiceQueryResultDTO result = response.getBody();
@@ -230,29 +251,15 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 				final ServiceRegistryResponseDTO entry = result.getServiceQueryData().get(lastIdx);
 				final String scheme = entry.getSecure() == ServiceSecurityType.NOT_SECURE ? CommonConstants.HTTP : CommonConstants.HTTPS;
 				final UriComponents uri = Utilities.createURI(scheme, entry.getProvider().getAddress(), entry.getProvider().getPort(), entry.getServiceUri());
-				
-				@SuppressWarnings("unchecked")
-				final Map<String,Object> context = applicationContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-				context.put(key, uri);
-				
-				return true;
+			
+				return uri;
 			}
 		} catch (final Exception ex) {
 			logger.error(ex.getMessage());
-			logger.debug("Stacktrace:", ex);
+			logger.debug("Could not find CoreSystemServiceUri:", ex);
 		}
-		
-		return false;
+			
+		return null;
 	}
-
-	//-------------------------------------------------------------------------------------------------
-	private boolean isAlreadyFound(final String key) {
-		
-		@SuppressWarnings("unchecked")
-		final Map<String,Object> context = applicationContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-		
-		return context.containsKey(key) && (context.get(key) instanceof UriComponents); 
-	}
-	
 	
 }

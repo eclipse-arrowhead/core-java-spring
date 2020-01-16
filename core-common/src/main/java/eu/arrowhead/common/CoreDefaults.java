@@ -41,6 +41,8 @@ public class CoreDefaults {
 	
 	public static final boolean DEFAULT_EVENT_HANDLER_TTL_SCHEDULED = false;
 	public static final int DEFAULT_EVENT_HANDLER_TTL_INTERVAL_MINUTES = 17;
+	public static final int DEFAULT_EVENT_HANDLER_MAX_RETRY_CONNECT_AUTH = 3;
+	public static final int DEFAULT_EVENT_HANDLER_RETRY_CONNECT_AUTH_INTERVAL_SEC = 10;
 	
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
 	public static final int DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
