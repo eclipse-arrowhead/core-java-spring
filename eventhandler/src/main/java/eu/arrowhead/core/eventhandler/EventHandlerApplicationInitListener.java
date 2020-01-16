@@ -126,7 +126,7 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 					final Set<SystemResponseDTO> authorizedPublishers = getAuthorizedPublishers(subscriber);
 					eventHandlerDBService.updateSubscriberAuthorization(subscriptionList, authorizedPublishers);
 					
-				} catch (ArrowheadException ex) {
+				} catch (final ArrowheadException ex) {
 					
 					throw new ArrowheadException("EventHandler can't update Subscribers Authorization: " + ex.getMessage());
 				}
