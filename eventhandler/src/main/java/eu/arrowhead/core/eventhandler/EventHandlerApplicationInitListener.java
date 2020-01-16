@@ -128,6 +128,7 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 					
 				} catch (final ArrowheadException ex) {
 					
+					logger.debug("EventHandler can't update Subscribers Authorization: " + ex.getMessage());
 					throw new ArrowheadException("EventHandler can't update Subscribers Authorization: " + ex.getMessage());
 				}
 
