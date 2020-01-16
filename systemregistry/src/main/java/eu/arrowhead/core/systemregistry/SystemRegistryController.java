@@ -149,7 +149,7 @@ public class SystemRegistryController
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(SYSTEMS_BY_ID_URI)
+	@GetMapping(SYSTEM_BY_ID_URI)
 	@ResponseBody public SystemResponseDTO getSystemById(@PathVariable(value = PATH_VARIABLE_ID) final long systemId) {		
 		logger.debug("getSystemById started ...");
 		
@@ -181,7 +181,7 @@ public class SystemRegistryController
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return created system ", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return created system", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SYSTEM_HTTP_400_MESSAGE),
@@ -195,7 +195,7 @@ public class SystemRegistryController
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return updated system ", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return updated system", response = SystemResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
@@ -284,91 +284,52 @@ public class SystemRegistryController
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return requested service definition", response = ServiceDefinitionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return created device", response = DeviceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICES_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_DEVICE_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_DEVICE_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = SERVICES_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceDefinitionResponseDTO  getServiceDefinitionById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-		logger.debug("New Service Definition get request received with id: {}", id);
-		
-		if (id < 1) {
-			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
-		}
-		
-		final ServiceDefinitionResponseDTO serviceDefinitionEntry = systemRegistryDBService.getServiceDefinitionByIdResponse(id);
-		logger.debug("Service definition with id: '{}' successfully retrieved", id);
-		
-		return serviceDefinitionEntry;
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return created service definition", response = ServiceDefinitionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SERVICES_HTTP_201_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SERVICES_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PostMapping(path = SERVICES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = DEVICES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-	@ResponseBody public ServiceDefinitionResponseDTO addServiceDefinition(@RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
-		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
-		logger.debug("New Service Definition registration request received with definition: {}", serviceDefinition);
+	@ResponseBody public DeviceResponseDTO addDevice(@RequestBody final DeviceRequestDTO deviceRequestDto) {
+		logger.debug("New device registration request received with name: {}", deviceRequestDto.getDeviceName());
+
+		validateDevice(deviceRequestDto);
+
+		final DeviceResponseDTO responseDTO = systemRegistryDBService.createDevice(deviceRequestDto);
+		logger.debug("{} successfully registered.", responseDTO);
 		
-		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("Service definition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
-		}
-		
-		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
-			if (coreSystemService.getServiceDefinition().equalsIgnoreCase(serviceDefinition.trim())) {
-				throw new BadPayloadException("serviceDefinition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
-			}
-		}
-		
-		final ServiceDefinitionResponseDTO serviceDefinitionResponse = systemRegistryDBService.createServiceDefinitionResponse(serviceDefinition);
-		logger.debug("{} service definition successfully registered.", serviceDefinition);
-		
-		return serviceDefinitionResponse;
+		return responseDTO;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return updated service definition", response = ServiceDefinitionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return updated device", response = DeviceResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_SERVICES_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SERVICES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_DEVICE_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_DEVICE_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(path = SERVICES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ServiceDefinitionResponseDTO putUpdateServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id,
-																				 @RequestBody final ServiceDefinitionRequestDTO serviceDefinitionRequestDTO) {
+	@PutMapping(path = DEVICE_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public DeviceResponseDTO putUpdateServiceDefinition(@PathVariable(value = PATH_VARIABLE_ID) final long id,
+																				 @RequestBody final DeviceRequestDTO deviceRequestDto) {
 		final String serviceDefinition = serviceDefinitionRequestDTO.getServiceDefinition();
 		logger.debug("New Service Definition update request received with id: {}, definition: {}", id, serviceDefinition);
 		
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
-		}		
-		
-		if (Utilities.isEmpty(serviceDefinition)) {
-			throw new BadPayloadException("serviceDefinition is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_BY_ID_URI);
 		}
-		
-		for (final CoreSystemService coreSystemService : CoreSystemService.values()) {
-			if (coreSystemService.getServiceDefinition().equalsIgnoreCase(serviceDefinition.trim())) {
-				throw new BadPayloadException("serviceDefinition '" + serviceDefinition + "' is a reserved arrowhead core system service.", HttpStatus.SC_BAD_REQUEST, CommonConstants.SERVICE_REGISTRY_URI + SERVICES_URI);
-			}
-		}
-		
+
+		validateDevice(deviceRequestDto);
+
 		final ServiceDefinitionResponseDTO serviceDefinitionResponse = systemRegistryDBService.updateServiceDefinitionByIdResponse(id, serviceDefinition);
 		logger.debug("Service definition with id: '{}' successfully updated with definition '{}'.", id, serviceDefinition);
 		
 		return serviceDefinitionResponse;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return updated service definition", response = ServiceDefinitionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
@@ -942,7 +903,23 @@ public class SystemRegistryController
 		checkServiceRegistryRequest(request, origin, true);
 		
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateDevice(@RequestBody final DeviceRequestDTO deviceRequestDto)
+	{
+		if (Utilities.isEmpty(deviceRequestDto.getDeviceName())) {
+			throw new BadPayloadException("Device name is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
+		}
+
+		if (Utilities.isEmpty(deviceRequestDto.getAddress())) {
+			throw new BadPayloadException("Device address is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
+		}
+
+		if (Utilities.isEmpty(deviceRequestDto.getMacAddress())) {
+			throw new BadPayloadException("Device MAC address is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@SuppressWarnings("squid:S3776")
 	private void checkServiceRegistryMergeRequest(final long id, final ServiceRegistryRequestDTO request, final String origin) {
