@@ -18,11 +18,11 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
+	public static final String CORE_SYSTEM_DATAMANAGER  = "DataManager";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
-	public static final String CORE_SYSTEM_DATAMANAGER = "Datamanager";
 	
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -43,6 +43,9 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 	
+	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
+	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
+
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
 	public static final String ARROWHEAD_CONTEXT = "arrowheadContext";
@@ -97,8 +100,6 @@ public class CommonConstants {
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 
-	public static final String DATAMANAGER_URI = "/datamanager";
-	
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
@@ -110,6 +111,10 @@ public class CommonConstants {
 
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
 	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
+
+	public static final String DATAMANAGER_URI = "/datamanager";
+	public static final String OP_DATAMANAGER_PROXY = "/proxy";
+	public static final String OP_DATAMANAGER_HISTORIAN = "/historian";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
@@ -123,7 +128,8 @@ public class CommonConstants {
 	
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
   			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE,
-  			  																		  CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE);
+  			  																		  CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,
+																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE);
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";
