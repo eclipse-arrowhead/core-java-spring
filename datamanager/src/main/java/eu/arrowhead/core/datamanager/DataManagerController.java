@@ -7,7 +7,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.core.datamanager.database.service.DatamanagerDBService;
+import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -39,12 +39,12 @@ import java.util.List;
 )
 @RestController
 @RequestMapping(CommonConstants.DATAMANAGER_URI)
-public class DatamanagerController {
+public class DataManagerController {
 
-    private final Logger logger = LogManager.getLogger(DatamanagerController.class);
+    private final Logger logger = LogManager.getLogger(DataManagerController.class);
 
     @Autowired
-    private DatamanagerDBService datamanagerDBService;
+    private DataManagerDBService datamanagerDBService;
 
     @ApiOperation(value = "Return an echo message with the purpose of testing the core service availability",
             response = String.class,

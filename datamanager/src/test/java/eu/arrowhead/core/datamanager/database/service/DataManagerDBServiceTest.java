@@ -25,8 +25,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import static reactor.core.publisher.Mono.when;
 
 @RunWith(SpringRunner.class)
-public class DatamanagerDBServiceTest {
+public class DataManagerDBServiceTest {
 
     @InjectMocks
-    private DatamanagerDBService datamanagerDBService;
+    private DataManagerDBService datamanagerDBService;
 }
