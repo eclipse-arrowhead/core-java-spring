@@ -270,67 +270,61 @@ CREATE TABLE IF NOT EXISTS `subscription_publisher_connection` (
 
 -- Choreographer
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_plan` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_plan_name` varchar(255) UNIQUE NOT NULL,
+CREATE TABLE IF NOT EXISTS `choreographer_plan` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `first_action_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_action` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_name` varchar(255) UNIQUE NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `plan_id_first_action` bigint(20) DEFAULT NULL,
+  `plan_id` bigint(20) NOT NULL,
   `next_action_id` bigint(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_plan_id_unique_key` (`name`,`plan_id`),
+  CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `plan_first_action` FOREIGN KEY (`plan_id_first_action`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_step` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(255) UNIQUE NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `choreographer_action_plan_action_connection` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_plan_id` bigint(20) NOT NULL,
+CREATE TABLE IF NOT EXISTS `choreographer_step` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `action_first_step_id` bigint(20),
   `action_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `action_plan_fk1` FOREIGN KEY (`action_plan_id`) REFERENCES `choreographer_action_plan` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `action_fk1` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_action_id_unique_key` (`name`, `action_id`),
+  CONSTRAINT `action_first_step` FOREIGN KEY (`action_first_step_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_action_action_step_connection` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_id` bigint(20) NOT NULL,
-  `action_step_id` bigint(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `action_fk2` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `action_step_fk1` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `choreographer_action_step_service_definition_connection` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_step_id` bigint(20) NOT NULL,
+CREATE TABLE IF NOT EXISTS `choreographer_step_service_definition_connection` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `step_id` bigint(20) NOT NULL,
   `service_definition_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
   CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
+  CONSTRAINT `step` FOREIGN KEY (`step_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_next_action_step` (
-  `id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-  `action_step_id` bigint(20) NOT NULL,
-  `next_action_step_id` bigint(20) NOT NULL,
+CREATE TABLE IF NOT EXISTS `choreographer_next_step` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `step_id` bigint(20) NOT NULL,
+  `next_step_id` bigint(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `current_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`id`),
+  CONSTRAINT `current_step` FOREIGN KEY (step_id) REFERENCES choreographer_step (`id`) ON DELETE CASCADE,
+  CONSTRAINT `next_step` FOREIGN KEY (step_id) REFERENCES choreographer_step (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
