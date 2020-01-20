@@ -61,7 +61,7 @@ public class ServiceDefinition {
 
 	@OneToMany (mappedBy = "serviceDefinitionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ChoreographerActionStepServiceDefinitionConnection> actionStepServiceDefinitionConnections = new HashSet<>();
+	private Set<ChoreographerStepServiceDefinitionConnection> stepServiceDefinitionConnections = new HashSet<>();
 
 	//=================================================================================================
 	// methods

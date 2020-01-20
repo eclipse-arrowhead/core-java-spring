@@ -4,14 +4,14 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
-import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
+import eu.arrowhead.common.database.entity.ChoreographerStep;
 
 @Repository
-public interface ChoreographerActionPlanRepository extends RefreshableRepository<ChoreographerActionPlan,Long> {
+public interface ChoreographerStepRepository extends RefreshableRepository<ChoreographerStep,Long> {
 	
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-    public Optional<ChoreographerActionPlan> findByActionPlanName(final String actionPlanName);
+    public Optional<ChoreographerStep> findByName(final String name);
 }
