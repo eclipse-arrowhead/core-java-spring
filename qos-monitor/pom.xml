@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+  	<parent>
+    	<groupId>eu.arrowhead</groupId>
+	    <artifactId>core</artifactId>
+	    <version>${revision}</version>
+  	</parent>
+  	
+	<artifactId>arrowhead-qos-monitor</artifactId>
+	<packaging>jar</packaging>
+  	<name>Arrowhead QoS Monitor</name>
+  	<description>Arrowhead Quality of Service Monitor core system</description>
+  	
+  	<dependencies>
+	    <dependency>
+	      	<groupId>eu.arrowhead</groupId>
+	      	<artifactId>arrowhead-core-common</artifactId>
+	      	<version>${revision}</version>
+	    </dependency>
+  	</dependencies> 
+  	
+	<build>
+	 	<plugins>
+	   		<plugin>
+	 			<artifactId>maven-resources-plugin</artifactId>
+	        	<version>${mvn.resources.version}</version>
+	        	<executions>
+	          		<execution>
+	            		<id>copy-resources</id>
+	            		<!-- here the phase you need -->
+	            		<phase>validate</phase>
+		            	<goals>
+		              		<goal>copy-resources</goal>
+		            	</goals>
+		            	<configuration>
+		              		<outputDirectory>${basedir}/target</outputDirectory>
+		              		<resources>
+		                		<resource>
+		                  			<directory>src/main/resources</directory>
+		                  			<includes>
+		                  				<include>application.properties</include>
+		                  				<include>log4j2.xml</include>
+		                  			</includes>
+		                		</resource>
+		              		</resources>
+		            	</configuration>
+	          		</execution>
+	        	</executions>
+	      	</plugin>
+	 	</plugins>
+	</build>
+</project>

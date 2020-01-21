@@ -59,3 +59,5 @@ authorization.log
 /deb-installer/.classpath
 /deb-installer/.project
 /deb-installer/.settings
+/qos-monitor/.settings
+/qos-monitor/target
