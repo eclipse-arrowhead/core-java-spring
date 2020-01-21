@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
-import javax.swing.*;
 
 import eu.arrowhead.common.CoreDefaults;
 import org.hibernate.annotations.OnDelete;
@@ -24,8 +23,8 @@ public class ChoreographerPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
-    private String planName;
+    @Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+    private String name;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "firstActionId", referencedColumnName = "id", nullable = false)
@@ -34,6 +33,10 @@ public class ChoreographerPlan {
     @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ChoreographerAction> actions = new HashSet<>();
+
+    @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<ChoreographerSession> sessions = new HashSet<>();
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
@@ -48,25 +51,28 @@ public class ChoreographerPlan {
 	public ChoreographerPlan() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerPlan(final String planName) {
-        this.planName = planName;
+	public ChoreographerPlan(final String name, final ChoreographerAction firstAction) {
+	    this.name = name;
+	    this.firstAction = firstAction;
     }
 
     //-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public String getPlanName() { return planName; }
+	public String getName() { return name; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
     public ChoreographerAction getFirstAction() { return firstAction; }
     public Set<ChoreographerAction> getActions() { return actions; }
+    public Set<ChoreographerSession> getSessions() { return sessions; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-    public void setPlanName(final String planName) { this.planName = planName; }
+    public void setName(final String name) { this.name = name; }
     public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setFirstAction(ChoreographerAction firstAction) { this.firstAction = firstAction; }
     public void setActions(Set<ChoreographerAction> actions) { this.actions = actions; }
+    public void setSessions(Set<ChoreographerSession> sessions) { this.sessions = sessions; }
 
     //-------------------------------------------------------------------------------------------------
 	@PrePersist

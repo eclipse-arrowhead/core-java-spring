@@ -51,6 +51,10 @@ public class ChoreographerStep {
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerStepServiceDefinitionConnection> stepServiceDefinitionConnections = new HashSet<>();
 
+    @OneToMany(mappedBy = "step", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OnDelete (action = OnDeleteAction.CASCADE)
+    private Set<ChoreographerRunningStep> runningSteps = new HashSet<>();
+
     //=================================================================================================
 	// methods
 
@@ -73,7 +77,7 @@ public class ChoreographerStep {
     public Set<ChoreographerStepNextStepConnection> getNextActionSteps() { return nextActionSteps; }
     public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
     public Set<ChoreographerStepServiceDefinitionConnection> getStepServiceDefinitionConnections() { return stepServiceDefinitionConnections; }
-
+    public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
     //-------------------------------------------------------------------------------------------------
 
     public void setId(long id) { this.id = id; }
@@ -87,6 +91,7 @@ public class ChoreographerStep {
     public void setStepServiceDefinitionConnections(Set<ChoreographerStepServiceDefinitionConnection> actionStepServiceDefinitionConnections) {
 	    this.stepServiceDefinitionConnections = actionStepServiceDefinitionConnections;
 	}
+    public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
 
     //-------------------------------------------------------------------------------------------------
 	@PrePersist

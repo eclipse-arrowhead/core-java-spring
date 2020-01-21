@@ -32,12 +32,10 @@ public class ChoreographerStepNextStepConnection {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn (name = "actionStepId", referencedColumnName = "id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private ChoreographerStep stepEntry;
 
     @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn (name = "nextActionStepId", referencedColumnName = "id", nullable = false)
-    @OnDelete (action = OnDeleteAction.CASCADE)
     private ChoreographerStep nextStepEntry;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

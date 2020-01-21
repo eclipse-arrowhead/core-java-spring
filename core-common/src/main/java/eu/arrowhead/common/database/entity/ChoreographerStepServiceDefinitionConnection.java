@@ -32,7 +32,6 @@ public class ChoreographerStepServiceDefinitionConnection {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn (name = "stepId", referencedColumnName = "id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private ChoreographerStep stepEntry;
 
     @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
