@@ -3,12 +3,24 @@ package eu.arrowhead.core.choreographer;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
+import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -18,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(CommonConstants.CHOREOGRAPHER_URI)
 public class ChoreographerController {
 
-    /*
+
 	//=================================================================================================
 	// members
 
@@ -69,13 +81,13 @@ public class ChoreographerController {
     })
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public void registerActionPlans(@RequestBody final List<ChoreographerActionPlanRequestDTO> requests) {
-        for (final ChoreographerActionPlanRequestDTO request : requests) {
-            checkChoreographerActionPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
-            choreographerDBService.createChoreographerActionPlan(request.getName(), request.getActions());
+    @ResponseBody public void registerActionPlans(@RequestBody final List<ChoreographerPlanRequestDTO> requests) {
+        for (final ChoreographerPlanRequestDTO request : requests) {
+            checkPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
+            choreographerDBService.createPlan(request.getName(), request.getFirstActionName(), request.getActions());
         }
     }
-
+/*
     //-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -146,14 +158,14 @@ public class ChoreographerController {
 	
 	//=================================================================================================
 	// assistant methods
-
+     */
 	//-------------------------------------------------------------------------------------------------
-    private void checkChoreographerActionPlanRequest(final ChoreographerActionPlanRequestDTO request, final String origin) {
-        logger.debug("checkChoreographerActionPlanRequest started...");
+    private void checkPlanRequest(final ChoreographerPlanRequestDTO request, final String origin) {
+        logger.debug("checkPlanRequest started...");
 
         if (Utilities.isEmpty(request.getName())) {
-            throw new BadPayloadException("ActionPlan name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+            throw new BadPayloadException("Plan name is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
-     */
+
 }

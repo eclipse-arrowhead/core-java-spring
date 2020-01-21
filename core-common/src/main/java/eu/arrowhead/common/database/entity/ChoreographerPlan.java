@@ -27,7 +27,7 @@ public class ChoreographerPlan {
     private String name;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "firstActionId", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "firstActionId", referencedColumnName = "id")
     private ChoreographerAction firstAction;
 
     @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY, orphanRemoval = true)

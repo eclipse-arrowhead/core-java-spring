@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS `subscription_publisher_connection` (
 CREATE TABLE IF NOT EXISTS `choreographer_plan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `first_action_id` bigint(20) NOT NULL,
+  `first_action_id` bigint(20),
   PRIMARY KEY (`id`),
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -299,7 +299,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `name` varchar(255) NOT NULL,
   `action_first_step_id` bigint(20),
   `action_id` bigint(20) NOT NULL,
-  `serviceName` varchar(255) NOT NULL,
+  `service_name` varchar(255) NOT NULL,
   `metadata` text,
   `parameters` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

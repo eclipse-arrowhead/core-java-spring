@@ -272,7 +272,7 @@ public class ChoreographerDBService {
         	
             if (actions != null && !actions.isEmpty()) {
                 for (final ChoreographerActionRequestDTO action : actions) {
-                    actionPlanEntry.getActions().add(createChoreographerAction(action.getName(), action.getFirstStepNames(), actionPlanEntry.getId(), action.getSteps()));
+                    actionPlanEntry.getActions().add(choreographerActionRepository.saveAndFlush(createChoreographerAction(action.getName(), action.getFirstStepNames(), actionPlanEntry.getId(), action.getSteps())));
                 }
 
                 for (final ChoreographerActionRequestDTO action : actions) {
@@ -281,8 +281,7 @@ public class ChoreographerDBService {
             } else {
                 throw new InvalidParameterException("Plan doesn't have any actions or the action field is blank.");
             }
-            choreographerActionRepository.flush();
-            
+
             return choreographerPlanRepository.saveAndFlush(actionPlanEntry);
         } catch (final InvalidParameterException ex) {
             throw ex;
