@@ -299,6 +299,9 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `name` varchar(255) NOT NULL,
   `action_first_step_id` bigint(20),
   `action_id` bigint(20) NOT NULL,
+  `serviceName` varchar(255) NOT NULL,
+  `metadata` text,
+  `parameters` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -306,17 +309,6 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   CONSTRAINT `action_first_step` FOREIGN KEY (`action_first_step_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
   CONSTRAINT `action` FOREIGN KEY (`action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `choreographer_step_service_definition_connection` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `step_id` bigint(20) NOT NULL,
-  `service_definition_id` bigint(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `service_definition` FOREIGN KEY (`service_definition_id`) REFERENCES `service_definition` (`id`),
-  CONSTRAINT `step` FOREIGN KEY (`step_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_step_next_step_connection` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

@@ -59,10 +59,6 @@ public class ServiceDefinition {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<AuthorizationInterCloud> authorizationInterClouds = new HashSet<>();
 
-	@OneToMany (mappedBy = "serviceDefinitionEntry", fetch = FetchType.LAZY, orphanRemoval = true)
-	@OnDelete (action = OnDeleteAction.CASCADE)
-	private Set<ChoreographerStepServiceDefinitionConnection> stepServiceDefinitionConnections = new HashSet<>();
-
 	//=================================================================================================
 	// methods
 

@@ -25,6 +25,15 @@ public class ChoreographerStep {
     @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
     private String name;
 
+    @Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
+    private String serviceName;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String metadata;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String parameters;
+
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
 
@@ -46,10 +55,6 @@ public class ChoreographerStep {
     @OneToMany (mappedBy = "nextStepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerStepNextStepConnection> steps = new HashSet<>();
-
-    @OneToMany (mappedBy = "stepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
-    @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStepServiceDefinitionConnection> stepServiceDefinitionConnections = new HashSet<>();
 
     @OneToMany(mappedBy = "step", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
@@ -76,7 +81,6 @@ public class ChoreographerStep {
     public ChoreographerAction getAction() { return action; }
     public Set<ChoreographerStepNextStepConnection> getNextSteps() { return nextSteps; }
     public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
-    public Set<ChoreographerStepServiceDefinitionConnection> getStepServiceDefinitionConnections() { return stepServiceDefinitionConnections; }
     public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
     //-------------------------------------------------------------------------------------------------
 
@@ -88,9 +92,6 @@ public class ChoreographerStep {
     public void setAction(ChoreographerAction action) { this.action = action; }
     public void setNextSteps(Set<ChoreographerStepNextStepConnection> nextSteps) { this.nextSteps = nextSteps; }
     public void setSteps(Set<ChoreographerStepNextStepConnection> actionSteps) { this.steps = actionSteps; }
-    public void setStepServiceDefinitionConnections(Set<ChoreographerStepServiceDefinitionConnection> actionStepServiceDefinitionConnections) {
-	    this.stepServiceDefinitionConnections = actionStepServiceDefinitionConnections;
-	}
     public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
 
     //-------------------------------------------------------------------------------------------------
