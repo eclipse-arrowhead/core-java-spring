@@ -43,6 +43,6 @@ CREATE USER IF NOT EXISTS 'gateway'@'%' IDENTIFIED BY 'LfiSM9DpGfDEP5g';
 source gateway_privileges.sql
 
 -- QoS Monitor
-CREATE USER IF NOT EXISTS 'qos_monitor'@'localhost' IDENTIFIED BY 'LfiSM9DpGfDEP5g';
-CREATE USER IF NOT EXISTS 'qos_monitor'@'%' IDENTIFIED BY 'LfiSM9DpGfDEP5g';
+CREATE USER IF NOT EXISTS 'qos_monitor'@'localhost' IDENTIFIED BY 'RLY3UEx6nx4kSXy';
+CREATE USER IF NOT EXISTS 'qos_monitor'@'%' IDENTIFIED BY 'RLY3UEx6nx4kSXy';
 source qos_monitor_privileges.sql
