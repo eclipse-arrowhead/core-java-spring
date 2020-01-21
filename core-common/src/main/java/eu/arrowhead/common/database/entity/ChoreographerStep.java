@@ -67,9 +67,15 @@ public class ChoreographerStep {
 	public ChoreographerStep() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerStep(final String name) {
+
+    public ChoreographerStep(String name, String serviceName, String metadata, String parameters, ChoreographerAction action) {
         this.name = name;
+        this.serviceName = serviceName;
+        this.metadata = metadata;
+        this.parameters = parameters;
+        this.action = action;
     }
+
 
     //-------------------------------------------------------------------------------------------------
 

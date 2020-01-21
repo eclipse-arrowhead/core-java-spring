@@ -1,40 +1,14 @@
 package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.CoreUtilities;
-import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
-import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.ChoreographerActionPlanRequestDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
-import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import java.util.List;
 
 @Api(tags = { CoreCommonConstants.SWAGGER_TAG_ALL })
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -43,7 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping(CommonConstants.CHOREOGRAPHER_URI)
 public class ChoreographerController {
-	
+
+    /*
 	//=================================================================================================
 	// members
 
@@ -97,7 +72,7 @@ public class ChoreographerController {
     @ResponseBody public void registerActionPlans(@RequestBody final List<ChoreographerActionPlanRequestDTO> requests) {
         for (final ChoreographerActionPlanRequestDTO request : requests) {
             checkChoreographerActionPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
-            choreographerDBService.createChoreographerActionPlan(request.getActionPlanName(), request.getActions());
+            choreographerDBService.createChoreographerActionPlan(request.getName(), request.getActions());
         }
     }
 
@@ -176,8 +151,9 @@ public class ChoreographerController {
     private void checkChoreographerActionPlanRequest(final ChoreographerActionPlanRequestDTO request, final String origin) {
         logger.debug("checkChoreographerActionPlanRequest started...");
 
-        if (Utilities.isEmpty(request.getActionPlanName())) {
+        if (Utilities.isEmpty(request.getName())) {
             throw new BadPayloadException("ActionPlan name is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
+     */
 }

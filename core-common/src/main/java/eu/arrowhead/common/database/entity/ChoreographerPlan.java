@@ -51,9 +51,8 @@ public class ChoreographerPlan {
 	public ChoreographerPlan() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerPlan(final String name, final ChoreographerAction firstAction) {
+	public ChoreographerPlan(final String name) {
 	    this.name = name;
-	    this.firstAction = firstAction;
     }
 
     //-------------------------------------------------------------------------------------------------

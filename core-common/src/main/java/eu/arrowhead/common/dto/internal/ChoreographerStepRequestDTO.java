@@ -11,7 +11,9 @@ public class ChoreographerStepRequestDTO implements Serializable {
 	private static final long serialVersionUID = -8100852327039160839L;
 
 	private String name;
-    private List<String> serviceNames;
+    private String serviceName;
+    private String metadata;
+    private String parameters;
     private List<String> nextStepNames;
 
     //=================================================================================================
@@ -21,19 +23,32 @@ public class ChoreographerStepRequestDTO implements Serializable {
 	public ChoreographerStepRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerStepRequestDTO(final String name, final List<String> serviceNames, final List<String> nextStepNames) {
+	public ChoreographerStepRequestDTO(final String name, final String serviceName, final List<String> nextStepNames) {
         this.name = name;
-        this.serviceNames = serviceNames;
+        this.serviceName = serviceName;
+        this.nextStepNames = nextStepNames;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerStepRequestDTO(String name, String serviceName, String metadata, String parameters, List<String> nextStepNames) {
+        this.name = name;
+        this.serviceName = serviceName;
+        this.metadata = metadata;
+        this.parameters = parameters;
         this.nextStepNames = nextStepNames;
     }
 
     //-------------------------------------------------------------------------------------------------
 	public String getName() { return name; }
-	public List<String> getServiceNames() { return serviceNames; }
+	public String getServiceName() { return serviceName; }
 	public List<String> getNextStepNames() { return nextStepNames; }
+    public String getMetadata() { return metadata; }
+    public String getParameters() { return parameters; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setName(final String name) { this.name = name; }
-    public void setServiceNames(final List<String> serviceNames) { this.serviceNames = serviceNames; }
+    public void setServiceName(final String serviceName) { this.serviceName = serviceName; }
     public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
+    public void setMetadata(String metadata) { this.metadata = metadata; }
+    public void setParameters(String parameters) { this.parameters = parameters; }
 }
