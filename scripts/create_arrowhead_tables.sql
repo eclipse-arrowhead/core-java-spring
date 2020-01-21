@@ -318,7 +318,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_step_service_definition_connection` (
   CONSTRAINT `step` FOREIGN KEY (`step_id`) REFERENCES choreographer_step (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `choreographer_next_step` (
+CREATE TABLE IF NOT EXISTS `choreographer_step_next_step_connection` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `step_id` bigint(20) NOT NULL,
   `next_step_id` bigint(20) NOT NULL,
@@ -335,7 +335,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_session` (
   `started at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`)
+  CONSTRAINT `session_plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
@@ -345,7 +345,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
   `message` text,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  CONSTRAINT `step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`)
+  CONSTRAINT `running_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_worklog` (

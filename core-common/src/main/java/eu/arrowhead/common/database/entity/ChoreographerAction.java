@@ -12,7 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import eu.arrowhead.common.CoreDefaults;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name, planId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "planId"}))
 public class ChoreographerAction {
 	
 	//=================================================================================================
@@ -26,7 +26,7 @@ public class ChoreographerAction {
     private String name;
 
     // The plan whose first action is this action must be mapped like this. Better name needed.
-    @OneToOne(mappedBy = "planIdFirstAction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "firstAction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ChoreographerPlan planFirstAction;
 
     @ManyToOne(fetch = FetchType.EAGER)

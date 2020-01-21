@@ -20,7 +20,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"actionStepId", "serviceDefinitionId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"stepId", "serviceDefinitionId"}))
 public class ChoreographerStepServiceDefinitionConnection {
 
 	//=================================================================================================

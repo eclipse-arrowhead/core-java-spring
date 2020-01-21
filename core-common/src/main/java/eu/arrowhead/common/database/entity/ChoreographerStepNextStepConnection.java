@@ -20,7 +20,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"actionStepId", "nextActionStepId"}))
+@Table (uniqueConstraints = @UniqueConstraint(columnNames = {"stepId", "nextStepId"}))
 public class ChoreographerStepNextStepConnection {
 
     //=================================================================================================
@@ -31,11 +31,11 @@ public class ChoreographerStepNextStepConnection {
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn (name = "actionStepId", referencedColumnName = "id", nullable = false)
+    @JoinColumn (name = "stepId", referencedColumnName = "id", nullable = false)
     private ChoreographerStep stepEntry;
 
     @ManyToOne (fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn (name = "nextActionStepId", referencedColumnName = "id", nullable = false)
+    @JoinColumn (name = "nextStepId", referencedColumnName = "id", nullable = false)
     private ChoreographerStep nextStepEntry;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

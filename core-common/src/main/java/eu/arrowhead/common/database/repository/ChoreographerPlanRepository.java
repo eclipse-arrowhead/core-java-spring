@@ -13,5 +13,5 @@ public interface ChoreographerPlanRepository extends RefreshableRepository<Chore
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-    public Optional<ChoreographerPlan> findByActionPlanName(final String actionPlanName);
+    //public Optional<ChoreographerPlan> findByActionPlanName(final String actionPlanName);
 }

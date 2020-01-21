@@ -12,7 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import eu.arrowhead.common.CoreDefaults;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name, actionId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "actionId"}))
 public class ChoreographerStep {
 	
 	//=================================================================================================
@@ -39,9 +39,9 @@ public class ChoreographerStep {
     @JoinColumn(name = "actionId", referencedColumnName = "id", nullable = false)
     private ChoreographerAction action;
 
-    @OneToMany (mappedBy = "actionStepEntry", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany (mappedBy = "stepEntry", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerStepNextStepConnection> nextActionSteps = new HashSet<>();
+    private Set<ChoreographerStepNextStepConnection> nextSteps = new HashSet<>();
 
     @OneToMany (mappedBy = "nextStepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
@@ -74,7 +74,7 @@ public class ChoreographerStep {
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
     public ChoreographerAction getActionFirstStep() { return actionFirstStep; }
     public ChoreographerAction getAction() { return action; }
-    public Set<ChoreographerStepNextStepConnection> getNextActionSteps() { return nextActionSteps; }
+    public Set<ChoreographerStepNextStepConnection> getNextSteps() { return nextSteps; }
     public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
     public Set<ChoreographerStepServiceDefinitionConnection> getStepServiceDefinitionConnections() { return stepServiceDefinitionConnections; }
     public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
@@ -86,7 +86,7 @@ public class ChoreographerStep {
     public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setActionFirstStep(ChoreographerAction actionFirstStep) { this.actionFirstStep = actionFirstStep; }
     public void setAction(ChoreographerAction action) { this.action = action; }
-    public void setNextActionSteps(Set<ChoreographerStepNextStepConnection> nextActionSteps) { this.nextActionSteps = nextActionSteps; }
+    public void setNextSteps(Set<ChoreographerStepNextStepConnection> nextSteps) { this.nextSteps = nextSteps; }
     public void setSteps(Set<ChoreographerStepNextStepConnection> actionSteps) { this.steps = actionSteps; }
     public void setStepServiceDefinitionConnections(Set<ChoreographerStepServiceDefinitionConnection> actionStepServiceDefinitionConnections) {
 	    this.stepServiceDefinitionConnections = actionStepServiceDefinitionConnections;

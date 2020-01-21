@@ -13,6 +13,6 @@ public interface ChoreographerActionRepository extends RefreshableRepository<Cho
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public Optional<ChoreographerAction> findByActionName(final String actionName);
-    public Optional<ChoreographerAction> findByActionNameAndNextAction(final String actionName, final ChoreographerAction nextAction);
+	//public Optional<ChoreographerAction> findByName(final String actionName);
+    //public Optional<ChoreographerAction> findByActionNameAndNextAction(final String actionName, final ChoreographerAction nextAction);
 }
