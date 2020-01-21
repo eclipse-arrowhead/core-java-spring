@@ -91,12 +91,13 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	// methods
 	
 	//=================================================================================================
-	//Tests of getServiceRegistryEntryById
+	// Tests of getServiceRegistryEntryById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceRegistryEntryByIdWithNotExistingId() {
 		when(serviceDefinitionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		
 		serviceRegistryDBService.getServiceRegistryEntryById(-2);
 	}
 	
@@ -110,7 +111,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//=================================================================================================
-	//Tests of getServiceRegistryEntriesByServiceDefinition
+	// Tests of getServiceRegistryEntriesByServiceDefinition
 			
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -122,21 +123,23 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testGetServiceRegistryEntriesByServiceDefinitionWithNotValidServiceDefinition() {
 		when(serviceDefinitionRepository.findByServiceDefinition(any())).thenReturn(Optional.ofNullable(null));
+		
 		serviceRegistryDBService.getServiceRegistryEntriesByServiceDefinition("serviceNotExists", 0, 10, Direction.ASC, CoreCommonConstants.COMMON_FIELD_NAME_ID);
 	}
 			
 	//=================================================================================================
-	//Tests of removeServiceRegistryEntryById
+	// Tests of removeServiceRegistryEntryById
 		
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testRemoveServiceRegistryEntryByIdWithNotExistingId() {
 		when(serviceRegistryRepository.existsById(anyLong())).thenReturn(false);
+		
 		serviceRegistryDBService.removeServiceRegistryEntryById(1);
 	}
 	
 	//=================================================================================================
-	//Tests of registerServiceResponse
+	// Tests of registerServiceResponse
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class) 
@@ -148,6 +151,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class) 
 	public void testRegisterServiceResponseServiceDefinitionNull() {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -156,6 +160,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testRegisterServiceResponseServiceDefinitionEmpty() {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition(" ");
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -164,6 +169,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testRegisterServiceResponseProviderSystemNull() {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition("service_definition");
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -174,6 +180,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition("service_definition");
 		dto.setProviderSystem(sysDto);
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -185,6 +192,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition("service_definition");
 		dto.setProviderSystem(sysDto);
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -196,6 +204,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition("service_definition");
 		dto.setProviderSystem(sysDto);
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -208,6 +217,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition("service_definition");
 		dto.setProviderSystem(sysDto);
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -220,6 +230,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final ServiceRegistryRequestDTO dto = new ServiceRegistryRequestDTO();
 		dto.setServiceDefinition("service_definition");
 		dto.setProviderSystem(sysDto);
+		
 		serviceRegistryDBService.registerServiceResponse(dto);
 	}
 	
@@ -272,7 +283,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	}
 	
 	//=================================================================================================
-	//Tests of createServiceRegistry		
+	// Tests of createServiceRegistry		
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
@@ -290,6 +301,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testCreateServiceRegistryUniqueConstraintViolation() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
+		
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, null, null, 1, null);
 	}
 	
@@ -297,6 +309,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
 	}
 	
@@ -305,8 +318,10 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testCreateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
 		final System provider = new System();
 		provider.setAuthenticationInfo("abcd");
+		
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		when(sslProperties.isSslEnabled()).thenReturn(false);
+		
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), provider, null, null, ServiceSecurityType.CERTIFICATE, null, 1, null);
 	}
 	
@@ -314,6 +329,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryInterfacesListNull() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, null);
 	}
 	
@@ -321,6 +337,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryInterfacesListEmpty() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, Collections.<String>emptyList());
 	}
 	
@@ -328,6 +345,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateServiceRegistryInvalidInterface() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.createServiceRegistry(new ServiceDefinition(), new System(), null, null, ServiceSecurityType.NOT_SECURE, null, 1, List.of("xml"));
 	}
 	
@@ -375,6 +393,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testRemoveServiceRegistryServiceDefinitionNotExists() {
 		when(serviceDefinitionRepository.findByServiceDefinition("servicedefinition")).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", "SystemAddress", 1); // also checks case insensitivity
 	}
 	
@@ -383,6 +402,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testRemoveServiceRegistryProviderSystemNotExists() {
 		when(serviceDefinitionRepository.findByServiceDefinition("servicedefinition")).thenReturn(Optional.of(new ServiceDefinition()));
 		when(systemRepository.findBySystemNameAndAddressAndPort("system", "systemaddress", 1)).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", "SystemAddress", 1); // also checks case insensitivity
 	}
 	
@@ -392,6 +412,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		when(serviceDefinitionRepository.findByServiceDefinition("servicedefinition")).thenReturn(Optional.of(new ServiceDefinition()));
 		when(systemRepository.findBySystemNameAndAddressAndPort("system", "systemaddress", 1)).thenReturn(Optional.of(new System()));
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.removeServiceRegistry("ServiceDefinition", "System", "SystemAddress", 1); // also checks case insensitivity
 	}
 	
@@ -424,9 +445,11 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testQueryRegistryServiceDefinitionRequirementNotFound() {
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
 		form.setServiceDefinitionRequirement("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.empty());
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(0, result.getUnfilteredHits());
 		Assert.assertEquals(0, result.getServiceQueryData().size());
 	}
@@ -437,10 +460,12 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
 		form.setServiceDefinitionRequirement("testService");
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(List.of());
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(0, result.getUnfilteredHits());
 		Assert.assertEquals(0, result.getServiceQueryData().size());
 	}
@@ -451,10 +476,12 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		final ServiceQueryFormDTO form = new ServiceQueryFormDTO();
 		form.setServiceDefinitionRequirement("testService");
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(6, result.getUnfilteredHits());
 		Assert.assertEquals(6, result.getServiceQueryData().size());
 		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
@@ -469,10 +496,12 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		form.setServiceDefinitionRequirement("testService");
 		form.setInterfaceRequirements(List.of(" http-secure-json ")); // also tests normalizing interface requirements
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(6, result.getUnfilteredHits());
 		Assert.assertEquals(5, result.getServiceQueryData().size());
 		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
@@ -488,10 +517,12 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		form.setInterfaceRequirements(List.of(" http-secure-json ")); // also tests normalizing interface requirements
 		form.setSecurityRequirements(List.of(ServiceSecurityType.NOT_SECURE));
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(6, result.getUnfilteredHits());
 		Assert.assertEquals(4, result.getServiceQueryData().size());
 		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
@@ -510,10 +541,12 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		form.setMinVersionRequirement(4); // ignored because of exact version requirement
 		form.setMaxVersionRequirement(10); // ignored because of exact version requirement
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(6, result.getUnfilteredHits());
 		Assert.assertEquals(3, result.getServiceQueryData().size());
 		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
@@ -531,10 +564,12 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		form.setMinVersionRequirement(4); // not ignored because there is no exact version requirement
 		form.setMaxVersionRequirement(10); // not ignored because there is no exact version requirement
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(6, result.getUnfilteredHits());
 		Assert.assertEquals(1, result.getServiceQueryData().size());
 		Assert.assertEquals(4, result.getServiceQueryData().get(0).getId());
@@ -547,6 +582,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		form.setServiceDefinitionRequirement("testService");
 		form.setMetadataRequirements(Map.of("a", "1", " a ", "2"));
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
 		
@@ -565,10 +601,12 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 		form.setMaxVersionRequirement(10); // ignored because of exact version requirement
 		form.setMetadataRequirements(Map.of(" key", "value   ")); // also test normalizing metadata requirements
 		final ServiceDefinition serviceDefinition = new ServiceDefinition("testservice");
+		
 		when(serviceDefinitionRepository.findByServiceDefinition("testservice")).thenReturn(Optional.of(serviceDefinition)); // also tests case insensitivity
 		when(serviceRegistryRepository.findByServiceDefinition(any(ServiceDefinition.class))).thenReturn(getTestProviders(serviceDefinition));
 		
 		final ServiceQueryResultDTO result = serviceRegistryDBService.queryRegistry(form);
+		
 		Assert.assertEquals(6, result.getUnfilteredHits());
 		Assert.assertEquals(2, result.getServiceQueryData().size());
 		for (int i = 0; i < result.getServiceQueryData().size(); ++i) {
@@ -604,6 +642,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = InvalidParameterException.class)
 	public void testUpdateServiceRegistryUniqueConstraintViolation() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.of(new ServiceRegistry()));
+		
 		serviceRegistryDBService.updateServiceRegistry(getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0),
 													   getTestProvidersWithIdsForUniqueConstrantCheck(new ServiceDefinition("testServiceDefinition")).get(0).getServiceDefinition(),
 													   getValidTestProviderForUniqueConstraintCheck(), validTestServiceUri, validTestEndOFValidity, ServiceSecurityType.NOT_SECURE,
@@ -614,6 +653,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistrySecuredButAuthenticationInfoNotSpecified() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), getValidTestServiceDefinition(), getValidTestProvider(),
 													   validTestServiceUri, validTestEndOFValidity, ServiceSecurityType.CERTIFICATE, validTestMetadataStr, 1, validTestInterfaces);
 	}
@@ -623,6 +663,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	public void testUpdateServiceRegistryTryingToRegisterSecuredServiceInInsecureMode() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
 		when(sslProperties.isSslEnabled()).thenReturn(false);
+		
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0),	getValidTestServiceDefinition(),
 													   getValidTestProviderWithAuthenticationInfo(), validTestServiceUri, validTestEndOFValidity, ServiceSecurityType.CERTIFICATE,
 													   validTestMetadataStr, 1, validTestInterfaces);
@@ -632,6 +673,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryInterfacesListNull() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), new ServiceDefinition(), new System(), null, null,
 													   ServiceSecurityType.NOT_SECURE, null, 1, null);
 	}
@@ -640,6 +682,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryInterfacesListEmpty() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), getValidTestServiceDefinition(), getValidTestProvider(),
 													   validTestServiceUri,	validTestEndOFValidity,	ServiceSecurityType.NOT_SECURE,	validTestMetadataStr, 1, null);
 	}
@@ -648,6 +691,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdateServiceRegistryInvalidInterface() {
 		when(serviceRegistryRepository.findByServiceDefinitionAndSystem(any(ServiceDefinition.class), any(System.class))).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.updateServiceRegistry(getTestProviders(new ServiceDefinition("testServiceDefinition")).get(0), getValidTestServiceDefinition(), getValidTestProvider(),
 													   validTestServiceUri, validTestEndOFValidity, ServiceSecurityType.NOT_SECURE, validTestMetadataStr, 1, inValidTestInterfaces);
 	}
@@ -668,6 +712,7 @@ public class ServiceRegistryDBServiceServiceRegistryTest {
 	@Test(expected =  InvalidParameterException.class)
 	public void testUpdateServiceByIdResponseNotPresentId() {
 		when(serviceRegistryRepository.findById(anyLong())).thenReturn(Optional.empty());
+		
 		serviceRegistryDBService.updateServiceByIdResponse(notPresentId, getValidServiceRegistryRequestDTO(new ServiceRegistryRequestDTO()));
 	}	
 	

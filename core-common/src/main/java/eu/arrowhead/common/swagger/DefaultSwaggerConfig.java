@@ -48,6 +48,7 @@ public class DefaultSwaggerConfig implements WebMvcConfigurer {
 		          									  .apiInfo(apiInfo());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
 	@Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
     	registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/swagger/");

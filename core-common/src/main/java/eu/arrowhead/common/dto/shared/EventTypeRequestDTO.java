@@ -2,12 +2,13 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
-public class EventTypeRequestDTO implements Serializable{
+public class EventTypeRequestDTO implements Serializable {
 
 	//=================================================================================================
 	// members
 	
 	private static final long serialVersionUID = 1177806380638957855L;
+	
 	private String eventTypeName;
 		
 	//=================================================================================================
@@ -26,5 +27,4 @@ public class EventTypeRequestDTO implements Serializable{
 
 	//-------------------------------------------------------------------------------------------------
 	public void setEventTypeName(final String eventTypeName) { this.eventTypeName = eventTypeName; }
-	
 }

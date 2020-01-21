@@ -38,7 +38,7 @@ public class EventType {
 	public EventType() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public EventType( final String eventTypeName) {
+	public EventType(final String eventTypeName) {
 		this.eventTypeName = eventTypeName;
 	}
 	
@@ -62,10 +62,10 @@ public class EventType {
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId( final long id) { this.id = id; }
-	public void setEventTypeName( final String eventTypeName ) { this.eventTypeName = eventTypeName; }
-	public void setCreatedAt( final ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt( final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setId(final long id) { this.id = id; }
+	public void setEventTypeName(final String eventTypeName) { this.eventTypeName = eventTypeName; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

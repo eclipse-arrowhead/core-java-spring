@@ -48,5 +48,15 @@
     "name": "eventhandler_is_present",
     "type": "java.lang.Boolean",
     "description": "A description for 'eventhandler_is_present'"
+  },
+  {
+    "name": "domain.name",
+    "type": "java.lang.String",
+    "description": "A description for 'domain.name'"
+  },
+  {
+    "name": "domain.port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'domain.port'"
   }
 ]}

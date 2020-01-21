@@ -50,6 +50,7 @@ public class DefaultIntraCloudProviderMatchmakerTest {
 		dto2.setId(2);
 		
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(List.of(dto1, dto2), new IntraCloudProviderMatchmakingParameters(List.of()));
+
 		Assert.assertEquals(1, selected.getId());
 	}
 	
@@ -73,6 +74,7 @@ public class DefaultIntraCloudProviderMatchmakerTest {
 		ppDTO.setProviderSystem(reqSystem);
 		
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(List.of(dto1, dto2), new IntraCloudProviderMatchmakingParameters(List.of(ppDTO)));
+		
 		Assert.assertEquals(1, selected.getId());
 	}
 
@@ -96,6 +98,7 @@ public class DefaultIntraCloudProviderMatchmakerTest {
 		ppDTO.setProviderSystem(reqSystem);
 		
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(List.of(dto1, dto2), new IntraCloudProviderMatchmakingParameters(List.of(ppDTO)));
+		
 		Assert.assertEquals(2, selected.getId());
 	}
 }

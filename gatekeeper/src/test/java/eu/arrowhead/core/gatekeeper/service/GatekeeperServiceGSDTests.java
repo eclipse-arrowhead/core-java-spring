@@ -84,6 +84,7 @@ public class GatekeeperServiceGSDTests {
 		when(gatekeeperDBService.getCloudByOperatorAndName(any(), any())).thenReturn(cloud);
 		
 		final GSDQueryResultDTO result = gatekeeperService.initGSDPoll(gsdQueryFormDTO);
+		
 		assertEquals("operator", result.getResults().get(0).getProviderCloud().getOperator());
 	}
 	
@@ -319,6 +320,7 @@ public class GatekeeperServiceGSDTests {
 		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
 		
 		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		
 		assertNull(doGSDPollResponse.getProviderCloud());
 		assertNull(doGSDPollResponse.getNumOfProviders());
 	}
@@ -348,10 +350,10 @@ public class GatekeeperServiceGSDTests {
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
 		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO));
 		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
-		
 		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(new HashMap<>());
 		
 		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		
 		assertNull(doGSDPollResponse.getProviderCloud());
 		assertNull(doGSDPollResponse.getNumOfProviders());
 	}
@@ -387,15 +389,14 @@ public class GatekeeperServiceGSDTests {
 		final ServiceQueryResultDTO srQueryResult = new ServiceQueryResultDTO();
 		srQueryResult.setServiceQueryData(List.of(serviceRegistryResponseDTO1, serviceRegistryResponseDTO2));
 		when(gatekeeperDriver.sendServiceRegistryQuery(any())).thenReturn(srQueryResult);
-				
 		when(gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(any(), any(), any())).thenReturn(Map.of(2L,List.of(2L)));
-		
 		final Cloud ownCloud = new Cloud("own-c-operator", "own-c-name", true, true, true, "own-c-auth-info");
 		ownCloud.setCreatedAt(ZonedDateTime.now());
 		ownCloud.setUpdatedAt(ZonedDateTime.now());
 		when(commonDBService.getOwnCloud(true)).thenReturn(ownCloud);
 		
 		final GSDPollResponseDTO doGSDPollResponse = gatekeeperService.doGSDPoll(new GSDPollRequestDTO(serviceQueryFormDTO, cloudDTO, false));
+		
 		assertEquals(1, (int) doGSDPollResponse.getNumOfProviders());
 		assertEquals(1, doGSDPollResponse.getAvailableInterfaces().size());
 		assertEquals("XML", doGSDPollResponse.getAvailableInterfaces().get(0));

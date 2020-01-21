@@ -247,8 +247,7 @@ public class GatekeeperController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
-		if ((dto.getGatekeeperRelayIds() == null || dto.getGatekeeperRelayIds().isEmpty())
-				&& (dto.getGatewayRelayIds() == null || dto.getGatewayRelayIds().isEmpty())) {
+		if ((dto.getGatekeeperRelayIds() == null || dto.getGatekeeperRelayIds().isEmpty()) && (dto.getGatewayRelayIds() == null || dto.getGatewayRelayIds().isEmpty())) {
 			throw new BadPayloadException("GatekeeperRelayIds and GatewayRelayIds list couldn't be null or empty at the same time", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
@@ -359,8 +358,7 @@ public class GatekeeperController {
 		}
 		
 		if (isPortOutOfValidRange(port)) {
-			throw new BadPayloadException("Port should be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX,
-										  HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Port should be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		final RelayResponseDTO relayResponse = gatekeeperDBService.getRelayByAddressAndPortResponse(address, port);

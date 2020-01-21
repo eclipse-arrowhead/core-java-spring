@@ -119,6 +119,16 @@
 	                					<filemode>775</filemode>
 	                				</mapper>
 	                			</data>
+	                			
+	                			<data>
+	                				<type>file</type>
+	                				<src>${project.basedir}/src/deb/ah_gen_relay_cert.sh</src>
+	                				<mapper>
+	                					<type>perm</type>
+	                					<prefix>/usr/bin</prefix>
+	                					<filemode>775</filemode>
+	                				</mapper>
+	                			</data>
 	         		     	</dataSet>
 	            		</configuration>
           			</execution>

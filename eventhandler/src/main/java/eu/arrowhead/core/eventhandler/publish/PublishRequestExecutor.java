@@ -15,6 +15,7 @@ import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 
 public class PublishRequestExecutor {
+	
 	//=================================================================================================
 	// members
 	
@@ -31,15 +32,10 @@ public class PublishRequestExecutor {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public PublishRequestExecutor(final EventPublishRequestDTO publishRequestDTO, 
-								  final Set<Subscription> involvedSubscriptions,
-								  final HttpService httpService) {
-		
+	public PublishRequestExecutor(final EventPublishRequestDTO publishRequestDTO, final Set<Subscription> involvedSubscriptions, final HttpService httpService) {
 		this.publishRequestDTO = publishRequestDTO;
 		this.involvedSubscriptions = involvedSubscriptions;
-		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(
-				this.involvedSubscriptions.size() > MAX_THREAD_POOL_SIZE ? 
-						MAX_THREAD_POOL_SIZE : this.involvedSubscriptions.size());
+		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.involvedSubscriptions.size() > MAX_THREAD_POOL_SIZE ? MAX_THREAD_POOL_SIZE : this.involvedSubscriptions.size());
 		this.httpService = httpService;
 	}
 	
@@ -48,13 +44,11 @@ public class PublishRequestExecutor {
 		logger.debug("PublishRequestExecutor.execute started...");
 		validateMembers();
 		
-		for ( final Subscription subscription : involvedSubscriptions ) {			
+		for (final Subscription subscription : involvedSubscriptions) {			
 			try {
-
 				threadPool.execute(new PublishEventTask(subscription, publishRequestDTO, httpService));
 			} catch (final RejectedExecutionException ex) {
 				logger.error("PublishEventTask execution rejected at {}", ZonedDateTime.now());
-				
 			}
 		}
 		
@@ -70,18 +64,13 @@ public class PublishRequestExecutor {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void validateMembers() {
-
 		try {
-			
 			Assert.notNull(this.threadPool, "threadPool is null");
 			Assert.notNull(this.publishRequestDTO, "publishRequestDTO is null");
 			Assert.notNull(this.involvedSubscriptions, "involvedSubscriptions is null");
 			Assert.notNull(this.httpService, "httpService is null");
-			
 		} catch (final IllegalArgumentException  ex) {
-			
 			shutdownExecutionNow();
-			
 			throw ex;
 		}
 	}

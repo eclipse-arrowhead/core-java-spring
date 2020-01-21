@@ -1,27 +1,36 @@
 Template: arrowhead-core-common/install_type
 Type: select
 Choices: Detached, Authorized
-Description: Do you want to perform (1) a detached, standalone install or (2) authorized install with externally issued cloud cert?
+Description: Do you want to perform (1) a detached, standalone install or (2) authorized install with externally issued cloud certificate?
 
 Template: arrowhead-core-common/cloud_cert
 Type: string
 Default:
-Description: Enter the path for the externally issued cloud cert
+Description: Enter the path for the externally issued cloud certificate (p12 file)
 
 Template: arrowhead-core-common/master_cert
 Type: string
 Default:
-Description: Enter the path for the externally issued master cert
+Description: Enter the path for the externally issued master certificate (crt file)
+
+Template: arrowhead-core-common/relay_master_cert
+Type: string
+Default:
+Description: Enter the path for the extarnally issued relay master certificate (crt file, leave empty if you don't want to use secured relays)
 
 Template: arrowhead-core-common/cloud_password
 Type: password
 Default:
-Description: Enter the password for the externally issued cloud cert
+Description: Enter the password for the externally issued cloud certificate
 
 Template: arrowhead-core-common/cloud_alias
 Type: string
 Default:
-Description: Enter the alias for the externally issued cloud cert
+Description: Enter the alias for the externally issued cloud certificate
+
+Template: arrowhead-core-common/cloud_warning
+Type: note
+Description: The name and operator of a cloud should not contain . (dot) or any whitespaces.
 
 Template: arrowhead-core-common/cloudname
 Type: string
@@ -31,17 +40,7 @@ Description: The name of the Arrowhead local cloud
 Template: arrowhead-core-common/operator
 Type: string
 Default: user
-Description: The name of the operator of the local cloud
-
-Template: arrowhead-core-common/company
-Type: string
-Default: arrowhead
-Description: The name of your company
-
-Template: arrowhead-core-common/country
-Type: string
-Default: eu
-Description: The code of your country
+Description: The name (or name of the organization) of the operator of the local cloud
 
 Template: arrowhead-core-common/mysql_password_root
 Type: password
@@ -100,3 +99,7 @@ Description: MySQL password for Service Registry system (leave empty for random)
 Template: arrowhead-core-common/sr_host
 Type: string
 Description: Enter the hostname or IP address of the Service Registry (leave empty if the SR on the same computer than the system)
+
+Template: arrowhead-core-common/domain_name
+Type: string
+Description: Enter the hostname or IP address on which local systems can access this machine (leave empty for auto-detected IP address)

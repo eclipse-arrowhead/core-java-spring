@@ -4,31 +4,32 @@ import java.io.Serializable;
 import java.util.List;
 
 public class ChoreographerActionStepListResponseDTO implements Serializable {
+	
+	//=================================================================================================
+	// members
+	
+	private static final long serialVersionUID = -4221321354484821514L;
 
-    private List<ChoreographerActionStepResponseDTO> data;
-
+	private List<ChoreographerActionStepResponseDTO> data;
     private long count;
 
-    public ChoreographerActionStepListResponseDTO() {}
+    //=================================================================================================
+    // methods
+	
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerActionStepListResponseDTO() {}
 
-    public ChoreographerActionStepListResponseDTO(List<ChoreographerActionStepResponseDTO> data, long count) {
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerActionStepListResponseDTO(final List<ChoreographerActionStepResponseDTO> data, final long count) {
         this.data = data;
         this.count = count;
     }
 
-    public List<ChoreographerActionStepResponseDTO> getData() {
-        return data;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public List<ChoreographerActionStepResponseDTO> getData() { return data; }
+	public long getCount() { return count; }
 
-    public void setData(List<ChoreographerActionStepResponseDTO> data) {
-        this.data = data;
-    }
-
-    public long getCount() {
-        return count;
-    }
-
-    public void setCount(long count) {
-        this.count = count;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setData(final List<ChoreographerActionStepResponseDTO> data) { this.data = data; }
+    public void setCount(final long count) { this.count = count; }
 }

@@ -71,7 +71,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	//=================================================================================================
-	//Tests of getServiceDefinitions
+	// Tests of getServiceDefinitions
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -79,14 +79,15 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		final int numOfEntries = 5;
 		final Page<ServiceDefinition> serviceDefinitionEntries = createServiceDefinitionPageForDBMocking(numOfEntries);
 		final ServiceDefinitionsListResponseDTO serviceDefinitionEntriesDTO = DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
+
 		when(serviceRegistryDBService.getServiceDefinitionEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceDefinitionEntriesDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/services")
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
-		
 		final ServiceDefinitionsListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionsListResponseDTO.class);
+		
 		assertEquals(numOfEntries, responseBody.getCount());
 	}
 	
@@ -96,6 +97,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		final int numOfEntries = 8;
 		final Page<ServiceDefinition> serviceDefinitionEntries = createServiceDefinitionPageForDBMocking(numOfEntries);
 		final ServiceDefinitionsListResponseDTO serviceDefinitionEntriesDTO = DTOConverter.convertServiceDefinitionsListToServiceDefinitionListResponseDTO(serviceDefinitionEntries);
+		
 		when(serviceRegistryDBService.getServiceDefinitionEntriesResponse(anyInt(), anyInt(), any(), any())).thenReturn(serviceDefinitionEntriesDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/services")
@@ -104,8 +106,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
-		
 		final ServiceDefinitionsListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionsListResponseDTO.class);
+		
 		assertEquals(numOfEntries, responseBody.getCount());
 	}
 	
@@ -137,21 +139,22 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	//=================================================================================================
-	//Tests of getServiceDefinitionsById
+	// Tests of getServiceDefinitionsById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getServiceDefinitionByIdTestWithExistingId() throws Exception {
 		final int requestedId = 1;
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(requestedId, "", "", "");		
+		
 		when(serviceRegistryDBService.getServiceDefinitionByIdResponse(anyLong())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(get("/serviceregistry/mgmt/services/" + requestedId)
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
-		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
+		
 		assertEquals(requestedId, responseBody.getId());
 	}
 	
@@ -164,13 +167,14 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	//=================================================================================================
-	//Tests of addServiceDefinition
+	// Tests of addServiceDefinition
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void addServiceDefinitionTestWithValidDefinition() throws Exception {
 		final String serviceDefinition = "testDefinition";
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(0, serviceDefinition,"","");
+		
 		when(serviceRegistryDBService.createServiceDefinitionResponse(anyString())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post("/serviceregistry/mgmt/services")
@@ -179,8 +183,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isCreated())
 											   .andReturn();
-		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
+		
 		assertEquals(serviceDefinition, responseBody.getServiceDefinition());
 	}
 	
@@ -217,7 +221,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	//=================================================================================================
-	//Tests of putUpdateServiceDefinition
+	// Tests of putUpdateServiceDefinition
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -225,6 +229,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		final String serviceDefinition = "testDefinition";
 		final int id = 5;
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(id, serviceDefinition,"","");
+		
 		when(serviceRegistryDBService.updateServiceDefinitionByIdResponse(anyLong(), anyString())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(put("/serviceregistry/mgmt/services/" + id)
@@ -233,8 +238,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
-		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
+
 		assertEquals(serviceDefinition, responseBody.getServiceDefinition());
 	}
 	
@@ -271,7 +276,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	//=================================================================================================
-	//Tests of patchUpdateServiceDefinition
+	// Tests of patchUpdateServiceDefinition
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -279,6 +284,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 		final String serviceDefinition = "testDefinition";
 		final int id = 5;
 		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(id, serviceDefinition,"","");
+		
 		when(serviceRegistryDBService.updateServiceDefinitionByIdResponse(anyLong(), anyString())).thenReturn(serviceDefinitionResponseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(patch("/serviceregistry/mgmt/services/" + id)
@@ -287,8 +293,8 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 											   .accept(MediaType.APPLICATION_JSON))
 											   .andExpect(status().isOk())
 											   .andReturn();
-		
 		final ServiceDefinitionResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), ServiceDefinitionResponseDTO.class);
+		
 		assertEquals(serviceDefinition, responseBody.getServiceDefinition());
 	}
 	
@@ -313,7 +319,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	}
 	
 	//=================================================================================================
-	//Tests of removeServiceDefinition
+	// Tests of removeServiceDefinition
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -337,7 +343,7 @@ public class ServiceRegistryControllerServiceDefinitionTest {
 	//-------------------------------------------------------------------------------------------------
 	private Page<ServiceDefinition> createServiceDefinitionPageForDBMocking(final int amountOfEntry) {
 		final List<ServiceDefinition> serviceDefinitionList = new ArrayList<>(amountOfEntry);
-		for (int i = 0; i < amountOfEntry; i++) {
+		for (int i = 0; i < amountOfEntry; ++i) {
 			final ServiceDefinition serviceDefinition = new ServiceDefinition("mockedService" + i);
 			serviceDefinition.setId(i);
 			final ZonedDateTime timeStamp = ZonedDateTime.now();

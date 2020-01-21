@@ -252,8 +252,8 @@ public class ServiceRegistryDBService {
 			
 			if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
 				checkConstraintsOfSystemTable(validatedSystemName != null ? validatedSystemName : system.getSystemName(),
-						validatedAddress != null ? validatedAddress : system.getAddress(),
-								validatedPort != null ? validatedPort.intValue() : system.getPort());
+											  validatedAddress != null ? validatedAddress : system.getAddress(),
+											  validatedPort != null ? validatedPort.intValue() : system.getPort());
 			}
 			
 			if (!Utilities.isEmpty(validatedSystemName)) {
@@ -488,18 +488,16 @@ public class ServiceRegistryDBService {
 		logger.debug("getServiceRegistryEntriesForServiceRegistryGroupedResponse started...");
 		
 		try {
-
 			final List<ServiceDefinition> serviceDefinitionEntries = serviceDefinitionRepository.findAll();
 			final List<System> systemEntries = systemRepository.findAll();
 			final List<ServiceInterface> interfaceEntries = serviceInterfaceRepository.findAll();
 			final List<ServiceRegistry> serviceRegistryEntries = serviceRegistryRepository.findAll();			
+
 			return DTOConverter.convertServiceRegistryDataToServiceRegistryGroupedResponseDTO(serviceDefinitionEntries, systemEntries, interfaceEntries, serviceRegistryEntries);
-			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -909,6 +907,20 @@ public class ServiceRegistryDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<System> getSystemByName(final String systemName) {
+		logger.debug("getSystemByName started...");
+		
+		final String name = validateSystemParamString(systemName);
+		try {
+			return systemRepository.findBySystemName(name);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -1088,28 +1100,22 @@ public class ServiceRegistryDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private ServiceSecurityType validateSRSecurityValue(final String secure ) {
+	private ServiceSecurityType validateSRSecurityValue(final String secure) {
 		logger.debug("validateSRSecurityValue started...");
 		
 		ServiceSecurityType validatedType = null;
-		if ( secure != null ) {
-			
-			for ( final ServiceSecurityType type : ServiceSecurityType.values()) {
-				
-				if ( type.name().equalsIgnoreCase( secure )) {
-					
+		if (secure != null) {
+			for (final ServiceSecurityType type : ServiceSecurityType.values()) {
+				if (type.name().equalsIgnoreCase(secure)) {
 					validatedType = type;
 					break;
 				}
 			}
 			
-			if ( validatedType == null) {
-				
+			if (validatedType == null) {
 				throw new InvalidParameterException("Security type is not valid."); 
 			}
-		
 		} else {
-			
 			validatedType = ServiceSecurityType.NOT_SECURE;
 		}
 

@@ -60,7 +60,7 @@ public class EventHandlerDriver {
 	@Resource(name = CoreCommonConstants.EVENT_PUBLISHING_QUEUE)
 	private PublishingQueue publishingQueue;
 	
-	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
+	@Value(CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
 	private long timeStampTolerance;
 	
 	//=================================================================================================
@@ -83,17 +83,13 @@ public class EventHandlerDriver {
 	public void publishEvent(final EventPublishRequestDTO request, final Set<Subscription> involvedSubscriptions) {
 		logger.debug("publishEvent started...");
 		
-		checkPublishRequestDTO( request );
-		checkInvolvedSubscriptions( involvedSubscriptions );
+		checkPublishRequestDTO(request);
+		checkInvolvedSubscriptions(involvedSubscriptions);
 		
-		final EventPublishStartDTO eventPublishStartDTO = new EventPublishStartDTO( request, involvedSubscriptions );
-		
+		final EventPublishStartDTO eventPublishStartDTO = new EventPublishStartDTO(request, involvedSubscriptions);
 		try {
-			
-			publishingQueue.put( eventPublishStartDTO );
-			
+			publishingQueue.put(eventPublishStartDTO);
 		} catch (final Exception ex) {
-			
 			logger.debug("publishEvent finished with exception : " + ex);
 		}
 	}
@@ -116,9 +112,8 @@ public class EventHandlerDriver {
 		throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
 	}
 
-
 	//-------------------------------------------------------------------------------------------------
-	private void checkPublishRequestDTO( final EventPublishRequestDTO request ) {
+	private void checkPublishRequestDTO(final EventPublishRequestDTO request) {
 		logger.debug("checkPublishRequestDTO started...");
 		
 		if (request == null) {
@@ -133,14 +128,12 @@ public class EventHandlerDriver {
 			throw new InvalidParameterException("Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		ckeckTimeStamp( request.getTimeStamp() );	
-		checkSystemRequestDTO( request.getSource() );
-		
+		ckeckTimeStamp(request.getTimeStamp());	
+		checkSystemRequestDTO(request.getSource());
 	}
 	
-	
 	//-------------------------------------------------------------------------------------------------
-	private void ckeckTimeStamp( final String timeStampString ) {
+	private void ckeckTimeStamp(final String timeStampString) {
 		logger.debug("ckeckTimeStamp started...");
 		
 		if (Utilities.isEmpty(timeStampString)) {
@@ -151,24 +144,18 @@ public class EventHandlerDriver {
 		final ZonedDateTime timeStamp;
 
 		try {
-			
 			timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(timeStampString);
-		
 		} catch (final DateTimeParseException ex) {
-			
 			throw new InvalidParameterException("TimeStamp" + INVALID_TYPE_ERROR_MESSAGE);
 		}
 		
-		if (timeStamp.isAfter(now.plusSeconds( timeStampTolerance ))) {
-			
+		if (timeStamp.isAfter(now.plusSeconds(timeStampTolerance))) {
 			throw new InvalidParameterException("TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE);
 		}
 		
-		if (timeStamp.isBefore(now.minusSeconds( timeStampTolerance ))) {
-			
+		if (timeStamp.isBefore(now.minusSeconds(timeStampTolerance))) {
 			throw new InvalidParameterException("TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -198,14 +185,12 @@ public class EventHandlerDriver {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkInvolvedSubscriptions(final Set<Subscription> involvedSubscriptions) {
-		
-		if ( involvedSubscriptions == null ) {
+		if (involvedSubscriptions == null) {
 			throw new InvalidParameterException("involvedSubscriptions" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		if ( involvedSubscriptions.isEmpty() ) {
+		if (involvedSubscriptions.isEmpty()) {
 			throw new InvalidParameterException("involvedSubscriptions" + EMPTY_PARAMETER_ERROR_MESSAGE);
 		}
-		
 	}
 }

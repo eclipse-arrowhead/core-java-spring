@@ -133,7 +133,7 @@ public class GatewayController {
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size) {
 		logger.debug("getActiveSessions started...");
 		
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, "ASC", CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, CommonConstants.SORT_ORDER_ASCENDING, CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);
 		if (activeSessions.isEmpty()) {
 			return new ActiveSessionListDTO(List.of(), 0);
 		}
@@ -150,8 +150,8 @@ public class GatewayController {
 		} else if (validParameters.getValidatedPage() == -1 && validParameters.getValidatedSize() == -1) {
 			// Do nothing
 		} else {
-			throw new BadPayloadException("Page parameter has to be equals or greater than zero and size parameter has to be equals or greater than one.",
-					HttpStatus.SC_BAD_REQUEST, CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);			
+			throw new BadPayloadException("Page parameter has to be equals or greater than zero and size parameter has to be equals or greater than one.", HttpStatus.SC_BAD_REQUEST,
+										  CommonConstants.GATEWAY_URI + ACTIVE_SESSIONS_MGMT_URI);			
 		}
 		
 		logger.debug("getActiveSessions finished...");
@@ -361,7 +361,8 @@ public class GatewayController {
 		
 		final int validatedPort = relay.getPort().intValue();
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
+										  origin);
 		}
 		
 		if (Utilities.isEmpty(relay.getType())) {
@@ -396,7 +397,8 @@ public class GatewayController {
 		
 		final int validatedPort = system.getPort().intValue();
 		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("System port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
+										  origin);
 		}
 	}
 	

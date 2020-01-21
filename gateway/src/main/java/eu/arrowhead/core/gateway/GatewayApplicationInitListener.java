@@ -53,7 +53,6 @@ public class GatewayApplicationInitListener extends ApplicationInitListener {
 		return queue;
 	}
 	
-	
 	//=================================================================================================
 	// assistant methods
 	

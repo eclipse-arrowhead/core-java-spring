@@ -13,7 +13,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 
-public class PublishEventTask implements Runnable{
+public class PublishEventTask implements Runnable {
 
 	//=================================================================================================
 	// members
@@ -28,9 +28,7 @@ public class PublishEventTask implements Runnable{
 	// methods
 
 	//-------------------------------------------------------------------------------------------------	
-	public PublishEventTask(final Subscription subscription, final EventPublishRequestDTO publishRequestDTO,
-			final HttpService httpService) {
-		
+	public PublishEventTask(final Subscription subscription, final EventPublishRequestDTO publishRequestDTO, final HttpService httpService) {
 		this.subscription = subscription;
 		this.publishRequestDTO = publishRequestDTO;
 		this.httpService = httpService;
@@ -49,38 +47,30 @@ public class PublishEventTask implements Runnable{
 			}
 			
 			validateMembers();
-			
-			final UriComponents subscriptionUri = getSubscriptionUri( subscription );
-
-			httpService.sendRequest( subscriptionUri, HttpMethod.POST, Void.class, DTOConverter.convertEventPublishRequestDTOToEventDTO( publishRequestDTO ));			
-				
+			final UriComponents subscriptionUri = getSubscriptionUri(subscription);
+			httpService.sendRequest(subscriptionUri, HttpMethod.POST, Void.class, DTOConverter.convertEventPublishRequestDTOToEventDTO(publishRequestDTO));			
 		} catch (final Throwable ex) {			
-			
 			logger.debug("Exception:", ex.getMessage());			
 		}
 	}
 	
 	//=================================================================================================
-	//Assistant methods
+	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents getSubscriptionUri(final Subscription subscription ) {
+	private UriComponents getSubscriptionUri(final Subscription subscription) {
 		logger.debug("getSubscriptionUri started...");
 		
-		final String scheme = Utilities.isEmpty( subscription.getSubscriberSystem().getAuthenticationInfo() ) ? CommonConstants.HTTP : CommonConstants.HTTPS;
+		final String scheme = Utilities.isEmpty(subscription.getSubscriberSystem().getAuthenticationInfo()) ? CommonConstants.HTTP : CommonConstants.HTTPS;
 
 		return Utilities.createURI(scheme, subscription.getSubscriberSystem().getAddress(), subscription.getSubscriberSystem().getPort(), subscription.getNotifyUri());
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private void validateMembers() {
-
 		Assert.notNull(this.publishRequestDTO, "publishRequestDTO is null");
 		Assert.notNull(this.subscription, "subscription is null");
 		Assert.notNull(this.subscription.getSubscriberSystem(), "subscription.SubscriberSystem is null");
 		Assert.notNull(this.httpService, "httpService is null");
-			
 	}
-
 }

@@ -59,6 +59,7 @@ public class RandomIntraCloudProviderMatchmakerTest {
 		
 		final List<ServiceRegistryResponseDTO> srList = List.of(dto1, dto2);
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(srList, params);
+		
 		Assert.assertEquals(srList.get(rng.nextInt(2)).getId(), selected.getId());
 	}
 	
@@ -89,6 +90,7 @@ public class RandomIntraCloudProviderMatchmakerTest {
 		
 		final List<ServiceRegistryResponseDTO> srList = List.of(dto1, dto2);
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(srList, params);
+		
 		Assert.assertEquals(srList.get(rng.nextInt(2)).getId(), selected.getId());
 	}
 
@@ -112,6 +114,7 @@ public class RandomIntraCloudProviderMatchmakerTest {
 		ppDTO.setProviderSystem(reqSystem);
 		
 		final ServiceRegistryResponseDTO selected = algorithm.doMatchmaking(List.of(dto1, dto2), new IntraCloudProviderMatchmakingParameters(List.of(ppDTO)));
+		
 		Assert.assertEquals(2, selected.getId());
 	}
 }
