@@ -282,7 +282,6 @@ CREATE TABLE IF NOT EXISTS `choreographer_plan` (
 CREATE TABLE IF NOT EXISTS `choreographer_action` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `plan_id_first_action` bigint(20) DEFAULT NULL,
   `plan_id` bigint(20) NOT NULL,
   `next_action_id` bigint(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -290,7 +289,6 @@ CREATE TABLE IF NOT EXISTS `choreographer_action` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_plan_id_unique_key` (`name`,`plan_id`),
   CONSTRAINT `next_action` FOREIGN KEY (`next_action_id`) REFERENCES `choreographer_action` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `plan_first_action` FOREIGN KEY (`plan_id_first_action`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE,
   CONSTRAINT `plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

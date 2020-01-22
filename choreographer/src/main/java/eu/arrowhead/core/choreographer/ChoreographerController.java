@@ -81,7 +81,7 @@ public class ChoreographerController {
     })
     @PostMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody public void registerActionPlans(@RequestBody final List<ChoreographerPlanRequestDTO> requests) {
+    @ResponseBody public void registerPlans(@RequestBody final List<ChoreographerPlanRequestDTO> requests) {
         for (final ChoreographerPlanRequestDTO request : requests) {
             checkPlanRequest(request, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_URI);
             choreographerDBService.createPlan(request.getName(), request.getFirstActionName(), request.getActions());

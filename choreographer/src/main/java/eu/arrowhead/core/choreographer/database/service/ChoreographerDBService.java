@@ -12,7 +12,6 @@ import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
-import eu.arrowhead.common.dto.shared.ChoreographerNextActionStepResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
@@ -140,8 +139,8 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerAction createChoreographerAction(final String name, final List<String> firstStepNames, final long planId, final List<ChoreographerStepRequestDTO> steps) {
-        logger.debug("createChoreographerAction started...");
+    public ChoreographerAction createAction(final String name, final List<String> firstStepNames, final long planId, final List<ChoreographerStepRequestDTO> steps) {
+        logger.debug("createAction started...");
 
         try {
             if (Utilities.isEmpty(name)) {
@@ -214,10 +213,10 @@ public class ChoreographerDBService {
         ChoreographerAction choreographerAction;
 
         try {
-        	final Optional<ChoreographerAction> choreographerActionOpt = choreographerActionRepository.findByNameAndPlanId(name, planId);
+        	final Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByNameAndPlanId(name, planId);
         	
-            if (choreographerActionOpt.isPresent()) {
-                choreographerAction = choreographerActionOpt.get();
+            if (actionOptional.isPresent()) {
+                choreographerAction = actionOptional.get();
             } else {
                 throw new InvalidParameterException("Action with given Action Name of " + name + "doesn't exist!");
             }
@@ -257,7 +256,7 @@ public class ChoreographerDBService {
 
             final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findByName(name);
             planOptional.ifPresent(choreographerActionPlan -> {
-                throw new InvalidParameterException("Plan with given name already exists! Plan NAMES must be UNIQUE!");
+                throw new InvalidParameterException("Plan with given name already exists! Plan names must be unique.");
             });
         } catch (final InvalidParameterException ex) {
             throw ex;
@@ -267,22 +266,32 @@ public class ChoreographerDBService {
         }
 
         try {
-        	final ChoreographerPlan actionPlan = new ChoreographerPlan(name);
-        	final ChoreographerPlan actionPlanEntry = choreographerPlanRepository.save(actionPlan);
+        	final ChoreographerPlan plan = new ChoreographerPlan(name);
+        	final ChoreographerPlan planEntry = choreographerPlanRepository.save(plan);
         	
             if (actions != null && !actions.isEmpty()) {
                 for (final ChoreographerActionRequestDTO action : actions) {
-                    actionPlanEntry.getActions().add(choreographerActionRepository.saveAndFlush(createChoreographerAction(action.getName(), action.getFirstStepNames(), actionPlanEntry.getId(), action.getSteps())));
+                    planEntry.getActions().add(choreographerActionRepository.saveAndFlush(createAction(action.getName(), action.getFirstStepNames(), planEntry.getId(), action.getSteps())));
                 }
 
                 for (final ChoreographerActionRequestDTO action : actions) {
-                    addNextActionToAction(action.getName(), action.getNextActionName(), actionPlanEntry.getId());
+                    addNextActionToAction(action.getName(), action.getNextActionName(), planEntry.getId());
                 }
             } else {
                 throw new InvalidParameterException("Plan doesn't have any actions or the action field is blank.");
             }
 
-            return choreographerPlanRepository.saveAndFlush(actionPlanEntry);
+            if (Utilities.isEmpty(firstActionName)) {
+                throw new InvalidParameterException("A plan must have one first Action.");
+            }
+
+            final Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findByNameAndPlanId(firstActionName, planEntry.getId());
+            if (actionOptional.isPresent()) {
+                ChoreographerAction action = actionOptional.get();
+                planEntry.setFirstAction(action);
+            }
+
+            return choreographerPlanRepository.saveAndFlush(planEntry);
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
