@@ -45,6 +45,12 @@ public class CoreDefaults {
 	public static final long DEFAULT_TIME_STAMP_TOLERANCE_SECONDS = 120;
 	public static final int DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = 10;
 	
+	public static final boolean DEFAULT_PING_TTL_SCHEDULED = false;
+	public static final int DEFAULT_PING_TTL_INTERVAL_MINUTES = 10;
+	
+	public static final boolean DEFAULT_CLOUD_PING_TTL_SCHEDULED = false;
+	public static final int DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES = 10;
+	
 	//=================================================================================================
 	// assistant methods
 	
