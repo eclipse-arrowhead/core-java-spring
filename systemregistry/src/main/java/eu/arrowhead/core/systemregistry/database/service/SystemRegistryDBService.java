@@ -2,7 +2,9 @@ package eu.arrowhead.core.systemregistry.database.service;
 
 import eu.arrowhead.common.*;
 import eu.arrowhead.common.database.entity.Device;
+import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.entity.SystemRegistry;
 import eu.arrowhead.common.database.repository.DeviceRepository;
 import eu.arrowhead.common.database.repository.SystemRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
@@ -10,10 +12,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemRegistryListResponseDTO;
-import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemRegistryRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.common.dto.shared.*;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import org.apache.logging.log4j.LogManager;
@@ -29,8 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class SystemRegistryDBService
-{
+public class SystemRegistryDBService {
 
     //=================================================================================================
     // members
@@ -45,7 +43,7 @@ public class SystemRegistryDBService
 
 
     @Autowired
-    private SystemRegistryRepository serviceRegistryRepository;
+    private SystemRegistryRepository systemRegistryRepository;
 
     @Autowired
     private SystemRepository systemRepository;
@@ -60,26 +58,19 @@ public class SystemRegistryDBService
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public SystemResponseDTO getSystemById(final long systemId)
-    {
+    public SystemResponseDTO getSystemById(final long systemId) {
         logger.debug("getSystemById started...");
 
-        try
-        {
+        try {
             final Optional<System> systemOption = systemRepository.findById(systemId);
-            if (systemOption.isEmpty())
-            {
+            if (systemOption.isEmpty()) {
                 throw new InvalidParameterException("System with id " + systemId + " not found.");
             }
 
             return DTOConverter.convertSystemToSystemResponseDTO(systemOption.get());
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -87,8 +78,7 @@ public class SystemRegistryDBService
 
 
     //-------------------------------------------------------------------------------------------------
-    public SystemListResponseDTO getSystemEntries(final CoreUtilities.ValidatedPageParams pageParams, final String sortField)
-    {
+    public SystemListResponseDTO getSystemEntries(final CoreUtilities.ValidatedPageParams pageParams, final String sortField) {
         logger.debug("getSystemEntries started...");
 
         final int validatedPage = pageParams.getValidatedPage();
@@ -96,18 +86,14 @@ public class SystemRegistryDBService
         final Sort.Direction validatedDirection = pageParams.getValidatedDirection();
         final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
-        if (!System.SORTABLE_FIELDS_BY.contains(validatedSortField))
-        {
+        if (!System.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
             throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
         }
 
-        try
-        {
+        try {
             return DTOConverter.convertSystemEntryListToSystemListResponseDTO(
                     systemRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField)));
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -115,18 +101,14 @@ public class SystemRegistryDBService
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo)
-    {
+    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo) {
         logger.debug("createSystem started...");
 
         final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo);
 
-        try
-        {
+        try {
             return systemRepository.saveAndFlush(system);
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -134,8 +116,7 @@ public class SystemRegistryDBService
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public SystemResponseDTO createSystemResponse(final String systemName, final String address, final int port, final String authenticationInfo)
-    {
+    public SystemResponseDTO createSystemResponse(final String systemName, final String address, final int port, final String authenticationInfo) {
         logger.debug("createSystemResponse started...");
 
         return DTOConverter.convertSystemToSystemResponseDTO(createSystem(systemName, address, port, authenticationInfo));
@@ -144,8 +125,7 @@ public class SystemRegistryDBService
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemResponseDTO updateSystemResponse(final long systemId, final String systemName, final String address, final int port,
-                                                  final String authenticationInfo)
-    {
+                                                  final String authenticationInfo) {
         logger.debug("updateSystemResponse started...");
 
         return DTOConverter.convertSystemToSystemResponseDTO(updateSystem(systemId, systemName, address, port, authenticationInfo));
@@ -153,33 +133,28 @@ public class SystemRegistryDBService
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo)
-    {
+    public System updateSystem(final long systemId, final String systemName, final String address, final int port, final String authenticationInfo) {
         logger.debug("updateSystem started...");
 
         final long validatedSystemId = validateId(systemId);
         final int validatedPort = validateSystemPort(port);
         final String validatedSystemName = validateParamString(systemName);
-        if (validatedSystemName.contains("."))
-        {
+        if (validatedSystemName.contains(".")) {
             throw new InvalidParameterException("System name can't contain dot (.)");
         }
         final String validatedAddress = validateParamString(address);
         final String validatedAuthenticationInfo = authenticationInfo;
 
 
-        try
-        {
+        try {
             final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
-            if (!systemOptional.isPresent())
-            {
+            if (!systemOptional.isPresent()) {
                 throw new InvalidParameterException("No system with id : " + validatedSystemId);
             }
 
             final System system = systemOptional.get();
 
-            if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort))
-            {
+            if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
                 checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, validatedPort);
             }
 
@@ -189,13 +164,9 @@ public class SystemRegistryDBService
             system.setAuthenticationInfo(validatedAuthenticationInfo);
 
             return systemRepository.saveAndFlush(system);
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -203,26 +174,19 @@ public class SystemRegistryDBService
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public void removeSystemById(final long id)
-    {
+    public void removeSystemById(final long id) {
         logger.debug("removeSystemById started...");
 
-        try
-        {
-            if (!systemRepository.existsById(id))
-            {
+        try {
+            if (!systemRepository.existsById(id)) {
                 throw new InvalidParameterException(COULD_NOT_DELETE_SYSTEM_ERROR_MESSAGE);
             }
 
             systemRepository.deleteById(id);
             systemRepository.flush();
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -231,8 +195,7 @@ public class SystemRegistryDBService
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
     public SystemResponseDTO mergeSystemResponse(final long systemId, final String systemName, final String address, final Integer port,
-                                                 final String authenticationInfo)
-    {
+                                                 final String authenticationInfo) {
         logger.debug("mergeSystemResponse started...");
 
         return DTOConverter.convertSystemToSystemResponseDTO(mergeSystem(systemId, systemName, address, port, authenticationInfo));
@@ -240,65 +203,52 @@ public class SystemRegistryDBService
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo)
-    {
+    public System mergeSystem(final long systemId, final String systemName, final String address, final Integer port, final String authenticationInfo) {
         logger.debug("mergeSystem started...");
 
         final long validatedSystemId = validateId(systemId);
         final Integer validatedPort = validateAllowNullSystemPort(port);
         final String validatedSystemName = validateAllowNullParamString(systemName);
-        if (validatedSystemName != null && validatedSystemName.contains("."))
-        {
+        if (validatedSystemName != null && validatedSystemName.contains(".")) {
             throw new InvalidParameterException("System name can't contain dot (.)");
         }
         final String validatedAddress = validateAllowNullParamString(address);
         final String validatedAuthenticationInfo = authenticationInfo;
 
-        try
-        {
+        try {
             final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
-            if (!systemOptional.isPresent())
-            {
+            if (!systemOptional.isPresent()) {
                 throw new InvalidParameterException("No system with id : " + validatedSystemId);
             }
 
             final System system = systemOptional.get();
 
-            if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort))
-            {
+            if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
                 checkConstraintsOfSystemTable(validatedSystemName != null ? validatedSystemName : system.getSystemName(),
-                                              validatedAddress != null ? validatedAddress : system.getAddress(),
-                                              validatedPort != null ? validatedPort.intValue() : system.getPort());
+                        validatedAddress != null ? validatedAddress : system.getAddress(),
+                        validatedPort != null ? validatedPort.intValue() : system.getPort());
             }
 
-            if (!Utilities.isEmpty(validatedSystemName))
-            {
+            if (!Utilities.isEmpty(validatedSystemName)) {
                 system.setSystemName(validatedSystemName);
             }
 
-            if (!Utilities.isEmpty(validatedAddress))
-            {
+            if (!Utilities.isEmpty(validatedAddress)) {
                 system.setAddress(validatedAddress);
             }
 
-            if (validatedPort != null)
-            {
+            if (validatedPort != null) {
                 system.setPort(validatedPort);
             }
 
-            if (!Utilities.isEmpty(validatedAuthenticationInfo))
-            {
+            if (!Utilities.isEmpty(validatedAuthenticationInfo)) {
                 system.setAuthenticationInfo(validatedAuthenticationInfo);
             }
 
             return systemRepository.saveAndFlush(system);
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -306,51 +256,39 @@ public class SystemRegistryDBService
 
 
     //-------------------------------------------------------------------------------------------------
-    public DeviceResponseDTO getDeviceById(long deviceId)
-    {
+    public DeviceResponseDTO getDeviceById(long deviceId) {
         logger.debug("getDeviceById started...");
 
-        try
-        {
+        try {
             final Optional<Device> deviceOptional = deviceRepository.findById(deviceId);
-            if (deviceOptional.isEmpty())
-            {
+            if (deviceOptional.isEmpty()) {
                 throw new InvalidParameterException("Device with id " + deviceId + " not found.");
             }
 
             return DTOConverter.convertDeviceToDeviceResponseDTO(deviceOptional.get());
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
     //-------------------------------------------------------------------------------------------------
-    public DeviceListResponseDTO getDeviceEntries(final CoreUtilities.ValidatedPageParams pageParams, final String sortField)
-    {
+    public DeviceListResponseDTO getDeviceEntries(final CoreUtilities.ValidatedPageParams pageParams, final String sortField) {
         logger.debug("getDeviceList started...");
 
         final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
-        if (!System.SORTABLE_FIELDS_BY.contains(validatedSortField))
-        {
+        if (!System.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
             throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
         }
 
-        try
-        {
+        try {
             final Page<Device> devices = deviceRepository.findAll(PageRequest.of(pageParams.getValidatedPage(), pageParams.getValidatedSize(),
-                                                                                 pageParams.getValidatedDirection(), validatedSortField));
+                    pageParams.getValidatedDirection(), validatedSortField));
             return DTOConverter.convertDeviceEntryListToDeviceListResponseDTO(devices);
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -358,8 +296,7 @@ public class SystemRegistryDBService
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public DeviceResponseDTO createDevice(final String name, final String address, final String macAddress, final String authenticationInfo)
-    {
+    public DeviceResponseDTO createDevice(final String name, final String address, final String macAddress, final String authenticationInfo) {
         final Device device = new Device(name, address, macAddress, authenticationInfo);
         return DTOConverter.convertDeviceToDeviceResponseDTO(deviceRepository.save(device));
     }
@@ -385,13 +322,9 @@ public class SystemRegistryDBService
             device.setAuthenticationInfo(newDevice.getAuthenticationInfo());
 
             return DTOConverter.convertDeviceToDeviceResponseDTO(deviceRepository.saveAndFlush(device));
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
@@ -402,118 +335,181 @@ public class SystemRegistryDBService
     public void removeDeviceById(final long id) {
         logger.debug("removeDeviceById started...");
 
-        try
-        {
-            if (!deviceRepository.existsById(id))
-            {
+        try {
+            if (!deviceRepository.existsById(id)) {
                 throw new InvalidParameterException(COULD_NOT_DELETE_DEVICE_ERROR_MESSAGE);
             }
 
             deviceRepository.deleteById(id);
             deviceRepository.flush();
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemRegistryListResponseDTO getSystemRegistryEntries(final CoreUtilities.ValidatedPageParams params, final String sortField) {
+        logger.debug("getSystemRegistryEntries started...");
+        final String validatedSortField = sortField == null ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+
+        if (!SystemRegistry.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+            throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
+        }
+
+        try {
+            final PageRequest pageRequest = PageRequest.of(params.getValidatedPage(),
+                                                    params.getValidatedSize(),
+                                                    params.getValidatedDirection(),
+                                                    validatedSortField);
+            final Page<SystemRegistry> systemRegistryPage = systemRegistryRepository.findAll(pageRequest);
+            return DTOConverter.convertSystemRegistryPageToSystemRegistryListResponseDTO(systemRegistryPage);
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemRegistryResponseDTO getSystemRegistryById(final long id) {
+        logger.debug("getSystemRegistryById started...");
+
+        return DTOConverter.convertSystemRegistryToSystemRegistryResponseDTO(getSystemRegistryEntryById(id));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public void removeSystemRegistryEntryById(final long id) {
+        logger.debug("removeSystemRegistryEntryById started...");
+
+        try {
+            if (!systemRegistryRepository.existsById(id)) {
+                throw new InvalidParameterException("System Registry entry with id '" + id + "' does not exists");
+            }
+
+            systemRegistryRepository.deleteById(id);
+            systemRegistryRepository.flush();
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemRegistryResponseDTO registerSystemRegistry(final SystemRegistryRequestDTO request) {
+        return null;
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemRegistryResponseDTO updateSystemRegistryById(final long id, final SystemRegistryRequestDTO request) {
+        return null;
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemRegistryResponseDTO mergeSystemRegistryById(final long id, final SystemRegistryRequestDTO request) {
+        return null;
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemRegistryListResponseDTO getSystemRegistryEntriesBySystemName(final String systemName, final CoreUtilities.ValidatedPageParams pageParameters, final String sortField) {
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public void removeSystemRegistryByNameAndAddressAndPort(final String systemName, final String address, final int port) {
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemQueryResultDTO queryRegistry(final SystemQueryFormDTO form) {
+    }
+
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public SystemResponseDTO getSystemByNameAndAddressAndPort(final String systemName, final String address, final int port) {
+    }
+
     //=================================================================================================
     // assistant methods
 
     //-------------------------------------------------------------------------------------------------
     @SuppressWarnings("squid:S1126")
     private boolean checkSystemIfUniqueValidationNeeded(final System system, final String validatedSystemName, final String validatedAddress,
-                                                        final Integer validatedPort)
-    {
+                                                        final Integer validatedPort) {
         logger.debug("checkSystemIfUniqueValidationNeeded started...");
 
         final String actualSystemName = system.getSystemName();
         final String actualAddress = system.getAddress();
         final int actualPort = system.getPort();
 
-        if (validatedSystemName != null && !actualSystemName.equalsIgnoreCase(validatedSystemName))
-        {
+        if (validatedSystemName != null && !actualSystemName.equalsIgnoreCase(validatedSystemName)) {
             return true;
-        }
-
-        if (validatedAddress != null && !actualAddress.equalsIgnoreCase(validatedAddress))
-        {
+        } else if (validatedAddress != null && !actualAddress.equalsIgnoreCase(validatedAddress)) {
             return true;
-        }
-
-        if (validatedPort != null && actualPort != validatedPort.intValue())
-        {
-            return true;
-        }
-
-        return false;
+        } else return validatedPort != null && actualPort != validatedPort;
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress, final int validatedPort)
-    {
+    private void checkConstraintsOfSystemTable(final String validatedSystemName, final String validatedAddress, final int validatedPort) {
         logger.debug("checkConstraintsOfSystemTable started...");
 
-        try
-        {
+        try {
             final Optional<System> find = systemRepository
                     .findBySystemNameAndAddressAndPort(validatedSystemName.toLowerCase().trim(), validatedAddress.toLowerCase().trim(), validatedPort);
-            if (find.isPresent())
-            {
+            if (find.isPresent()) {
                 throw new InvalidParameterException(
                         "System with name: " + validatedSystemName + ", address: " + validatedAddress + ", port: " + validatedPort + " already exists.");
             }
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void checkConstraintsOfDeviceTable(final String validatedDeviceName, final String validatedMacAddress)
-    {
+    private void checkConstraintsOfDeviceTable(final String validatedDeviceName, final String validatedMacAddress) {
         logger.debug("checkConstraintsOfDeviceTable started...");
 
-        try
-        {
+        try {
             final Optional<Device> find = deviceRepository.findByDeviceNameAndMacAddress(validatedDeviceName, validatedMacAddress);
-            if (find.isPresent())
-            {
+            if (find.isPresent()) {
                 throw new InvalidParameterException(
                         "Device with name: " + validatedDeviceName + ", MAC address: " + validatedMacAddress + " already exists.");
             }
-        }
-        catch (final InvalidParameterException ex)
-        {
+        } catch (final InvalidParameterException ex) {
             throw ex;
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
 
     //-------------------------------------------------------------------------------------------------
-    private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo)
-    {
+    private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo) {
         logger.debug("validateNonNullSystemParameters started...");
 
         validateNonNullParameters(systemName, address, authenticationInfo);
 
-        if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX)
-        {
+        if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
             throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
         }
 
@@ -527,14 +523,12 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private Device validateNonNullDeviceParameters(final String deviceName, final String address, final String macAddress, final String authenticationInfo)
-    {
+    private Device validateNonNullDeviceParameters(final String deviceName, final String address, final String macAddress, final String authenticationInfo) {
         logger.debug("validateNonNullDeviceParameters started...");
 
         validateNonNullParameters(deviceName, address, authenticationInfo);
 
-        if (Utilities.isEmpty(macAddress))
-        {
+        if (Utilities.isEmpty(macAddress)) {
             throw new InvalidParameterException("MAC address is null or empty");
         }
 
@@ -549,33 +543,27 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void validateNonNullParameters(final String name, final String address, final String authenticationInfo)
-    {
+    private void validateNonNullParameters(final String name, final String address, final String authenticationInfo) {
         logger.debug("validateNonNullParameters started...");
 
-        if (Utilities.isEmpty(name))
-        {
+        if (Utilities.isEmpty(name)) {
             throw new InvalidParameterException("Name is null or empty");
         }
 
-        if (Utilities.isEmpty(address))
-        {
+        if (Utilities.isEmpty(address)) {
             throw new InvalidParameterException("Address is null or empty");
         }
 
-        if (name.contains("."))
-        {
+        if (name.contains(".")) {
             throw new InvalidParameterException("Name can't contain dot (.)");
         }
     }
 
     //-------------------------------------------------------------------------------------------------
-    private String validateParamString(final String param)
-    {
+    private String validateParamString(final String param) {
         logger.debug("validateSystemParamString started...");
 
-        if (Utilities.isEmpty(param))
-        {
+        if (Utilities.isEmpty(param)) {
             throw new InvalidParameterException("parameter null or empty");
         }
 
@@ -583,12 +571,10 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private int validateSystemPort(final int port)
-    {
+    private int validateSystemPort(final int port) {
         logger.debug("validateSystemPort started...");
 
-        if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX)
-        {
+        if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
             throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
         }
 
@@ -596,12 +582,10 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private long validateId(final long id)
-    {
+    private long validateId(final long id) {
         logger.debug("validateId started...");
 
-        if (id < 1)
-        {
+        if (id < 1) {
             throw new IllegalArgumentException("Id must be greater than zero");
         }
 
@@ -609,12 +593,10 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private Integer validateAllowNullSystemPort(final Integer port)
-    {
+    private Integer validateAllowNullSystemPort(final Integer port) {
         logger.debug("validateAllowNullSystemPort started...");
 
-        if (port != null && (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX))
-        {
+        if (port != null && (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX)) {
             throw new IllegalArgumentException(PORT_RANGE_ERROR_MESSAGE);
         }
 
@@ -622,61 +604,45 @@ public class SystemRegistryDBService
     }
 
     //-------------------------------------------------------------------------------------------------
-    private String validateAllowNullParamString(final String param)
-    {
+    private String validateAllowNullParamString(final String param) {
         logger.debug("validateAllowNullParamString started...");
 
-        if (Utilities.isEmpty(param))
-        {
+        if (Utilities.isEmpty(param)) {
             return null;
         }
 
         return param.trim().toLowerCase();
     }
 
+
     //-------------------------------------------------------------------------------------------------
-    private System findOrCreateSystem(final String systemName, final String address, final int port, final String authenticationInfo)
-    {
+    private SystemRegistry getSystemRegistryEntryById(final long id) {
+        logger.debug("getSystemRegistryEntryById started...");
+        try {
+            final Optional<SystemRegistry> systemRegistry = systemRegistryRepository.findById(id);
+            return systemRegistry.orElseThrow(() -> new InvalidParameterException("System Registry with id of '" + id + "' not exists"));
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private System findOrCreateSystem(final String systemName, final String address, final int port, final String authenticationInfo) {
         final Optional<System> optProvider = systemRepository
                 .findBySystemNameAndAddressAndPort(systemName.toLowerCase().trim(), address.toLowerCase().trim(), port);
         System provider;
-        if (optProvider.isPresent())
-        {
+        if (optProvider.isPresent()) {
             provider = optProvider.get();
-            if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo()))
-            { // authentication info has changed
+            if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo())) { // authentication info has changed
                 provider.setAuthenticationInfo(authenticationInfo);
                 provider = systemRepository.saveAndFlush(provider);
             }
-        }
-        else
-        {
+        } else {
             provider = createSystem(systemName, address, port, authenticationInfo);
         }
         return provider;
-    }
-
-    public SystemRegistryListResponseDTO getSystemRegistryEntriesResponse(final CoreUtilities.ValidatedPageParams params, final String sortField) {
-        return null;
-    }
-
-    public SystemRegistryResponseDTO getSystemRegistryEntryByIdResponse(final long id) {
-        return null;
-    }
-
-    public void removeSystemRegistryEntryById(long id) {
-
-    }
-
-    public SystemRegistryResponseDTO registerSystemResponse(SystemRegistryRequestDTO request) {
-        return null;
-    }
-
-    public SystemRegistryResponseDTO updateSystemByIdResponse(long id, SystemRegistryRequestDTO request) {
-        return null;
-    }
-
-    public SystemRegistryResponseDTO mergeSystemByIdResponse(long id, SystemRegistryRequestDTO request) {
-        return null;
     }
 }

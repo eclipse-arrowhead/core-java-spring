@@ -33,7 +33,10 @@ public class CoreCommonConstants {
 	
 	public static final String SERVER_ERROR_URI = "/error";
 	public static final String MGMT_URI = "/mgmt";
-	
+
+	public static final String OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
+
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
 		

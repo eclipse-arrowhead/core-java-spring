@@ -13,6 +13,8 @@ import eu.arrowhead.common.database.entity.*;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.shared.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
@@ -630,7 +632,43 @@ public class DTOConverter {
 													  Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
 													  Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
-	
+
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemRegistryResponseDTO convertSystemRegistryToSystemRegistryResponseDTO(final SystemRegistry entry) {
+
+		Assert.notNull(entry, "SR entry is null.");
+		Assert.notNull(entry.getDevice(), "Related device is null.");
+		Assert.notNull(entry.getSystem(), "Related system is null.");
+
+		final SystemResponseDTO systemResponseDTO = convertSystemToSystemResponseDTO(entry.getSystem());
+		final DeviceResponseDTO deviceResponseDTO = convertDeviceToDeviceResponseDTO(entry.getDevice());
+
+		final SystemRegistryResponseDTO dto = new SystemRegistryResponseDTO();
+		dto.setId(entry.getId());
+		dto.setProvider(deviceResponseDTO);
+		dto.setSystem(systemResponseDTO);
+		dto.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(entry.getEndOfValidity()));
+		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
+		dto.setVersion(entry.getVersion());
+		dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()));
+		dto.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+
+		return dto;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+
+	public static SystemRegistryListResponseDTO convertSystemRegistryPageToSystemRegistryListResponseDTO(final Page<SystemRegistry> page) {
+
+		final List<SystemRegistryResponseDTO> list = new ArrayList<>(page.getSize());
+		for(final SystemRegistry entry : page)
+		{
+			list.add(convertSystemRegistryToSystemRegistryResponseDTO(entry));
+		}
+		return new SystemRegistryListResponseDTO(list, list.size());
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -745,5 +783,6 @@ public class DTOConverter {
 		
 		return result;
 	}
+
 
 }

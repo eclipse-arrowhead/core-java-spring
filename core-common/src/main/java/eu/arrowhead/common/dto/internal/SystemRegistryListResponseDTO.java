@@ -26,11 +26,16 @@ public class SystemRegistryListResponseDTO implements Serializable {
 	public SystemRegistryListResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
+	public SystemRegistryListResponseDTO(final List<SystemRegistryResponseDTO> data) {
+		this(data, data.size());
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public SystemRegistryListResponseDTO(final List<SystemRegistryResponseDTO> data, final long count) {
 		this.data = data;
 		this.count = count;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public List<SystemRegistryResponseDTO> getData() {return data;}
 	public long getCount() {return count;}

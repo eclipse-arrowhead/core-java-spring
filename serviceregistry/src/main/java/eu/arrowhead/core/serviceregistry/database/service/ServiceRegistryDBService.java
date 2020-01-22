@@ -858,7 +858,7 @@ public class ServiceRegistryDBService {
 		
 		try {
 			if (!serviceRegistryRepository.existsById(id)) {
-				throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
+				throw new InvalidParameterException("Service Registry entry with id '" + id + "' does not exists");
 			}
 			
 			serviceRegistryRepository.deleteById(id);
