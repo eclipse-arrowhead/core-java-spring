@@ -22,6 +22,7 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
+	public static final String CORE_SYSTEM_QOS_MONITOR = "Quality of Service Monitor";
 	
 	public static final String CORE_SERVICE_AUTH_TOKEN_GENERATION = "token-generation";
 	public static final String CORE_SERVICE_AUTH_PUBLIC_KEY = "auth-public-key";
@@ -95,7 +96,7 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
-
+	
 	public static final String GATEWAY_URI = "/gateway";
 	public static final String OP_GATEWAY_KEY_URI = "/publickey";
 	public static final String OP_GATEWAY_CONNECT_PROVIDER_URI = "/connect_provider";
@@ -107,6 +108,8 @@ public class CommonConstants {
 
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
 	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
+	
+	public static final String QOS_MONITOR_URI = "/qosmonitor";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
