@@ -339,6 +339,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_measurement` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`system_id` bigint(20) NOT NULL,
 	`measurement_type` varchar(255) NOT NULL,
+	`last_measurement_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
@@ -359,6 +360,8 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 	`received_all` bigint(20) NOT NULL DEFAULT 0,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE
+	CONSTRAINT `fk_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_measurement` (`measurement_id`)
+	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
