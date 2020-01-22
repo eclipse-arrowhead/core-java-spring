@@ -333,4 +333,32 @@ CREATE TABLE IF NOT EXISTS `choreographer_next_action_step` (
   CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- QoS Monitor
+
+CREATE TABLE IF NOT EXISTS `qos_intra_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`system_id` bigint(20) NOT NULL,
+	`measurement_type` varchar(255) NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_id` bigint(20) NOT NULL,
+	`accessible` int(1) NOT NULL DEFAULT 0,
+	`last_access_at` timestamp,
+	`min_response_time` int(11),
+	`max_response_time` int(11),
+	`mean_response_time` int(11),
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`count_started_at` timestamp,
+	`sent_all` bigint(20) NOT NULL DEFAULT 0,
+	`received_all` bigint(20) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
