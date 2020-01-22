@@ -2,7 +2,7 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
-public class ChoreographerNextActionStepResponseDTO implements Serializable {
+public class ChoreographerNextStepResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members
@@ -16,10 +16,10 @@ public class ChoreographerNextActionStepResponseDTO implements Serializable {
 	// methods
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerNextActionStepResponseDTO() {}
+	public ChoreographerNextStepResponseDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerNextActionStepResponseDTO(final long id, final String stepName) {
+	public ChoreographerNextStepResponseDTO(final long id, final String stepName) {
         this.id = id;
         this.stepName = stepName;
     }

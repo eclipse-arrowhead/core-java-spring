@@ -322,7 +322,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_step_next_step_connection` (
 CREATE TABLE IF NOT EXISTS `choreographer_session` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `plan_id` bigint(20) NOT NULL,
-  `started at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `session_plan` FOREIGN KEY (`plan_id`) REFERENCES `choreographer_plan` (`id`)

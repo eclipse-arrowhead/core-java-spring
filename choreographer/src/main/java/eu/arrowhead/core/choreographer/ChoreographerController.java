@@ -2,9 +2,13 @@ package eu.arrowhead.core.choreographer;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
+import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
 import io.swagger.annotations.Api;
@@ -87,7 +91,7 @@ public class ChoreographerController {
             choreographerDBService.createPlan(request.getName(), request.getFirstActionName(), request.getActions());
         }
     }
-/*
+
     //-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Remove the requested ChoreographerActionPlan entry.", tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses(value = {
@@ -104,12 +108,12 @@ public class ChoreographerController {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI);
         }
 
-        choreographerDBService.removeActionPlanEntryById(id);
+        choreographerDBService.removePlanEntryById(id);
         logger.debug("ChoreographerActionStep with id: " + id + " successfully deleted!");
     }
 
     //-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Return the requested ChoreographerActionPlan entry.", response = ChoreographerActionPlanResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Return the requested ChoreographerActionPlan entry.", response = ChoreographerPlanResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
     @ApiResponses (value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_CHOREOGRAPHER_ACTION_PlAN_MGMT_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CHOREOGRAPHER_ACTION_PLAN_MGMT_HTTP_400_MESSAGE),
@@ -117,14 +121,14 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public ChoreographerActionPlanResponseDTO getActionPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+    @ResponseBody public ChoreographerPlanResponseDTO getActionPlanById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
         logger.debug("New ChoreographerActionStep get request received with id: " + id + ".");
 
         if (id < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.CHOREOGRAPHER_URI + CHOREOGRAPHER_ACTION_PLAN_MGMT_BY_ID_URI);
         }
 
-        final ChoreographerActionPlanResponseDTO choreographerActionPlanEntryByIdResponse = choreographerDBService.getChoreographerActionPlanByIdResponse(id);
+        final ChoreographerPlanResponseDTO choreographerActionPlanEntryByIdResponse = choreographerDBService.getPlanByIdResponse(id);
         logger.debug("ChoreographerActionPlan entry with id: " + " successfully retrieved!");
 
         return choreographerActionPlanEntryByIdResponse;
@@ -139,7 +143,7 @@ public class ChoreographerController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CHOREOGRAPHER_ACTION_PLAN_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody public List<ChoreographerActionPlanResponseDTO> getChoreographerActionPlans(
+    @ResponseBody public List<ChoreographerPlanResponseDTO> getChoreographerActionPlans(
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
@@ -147,7 +151,7 @@ public class ChoreographerController {
         logger.debug("New ChoreographerActionPlan get request received with page: {} and item_per page: {}.", page, size);
 
         final ValidatedPageParams validatedPageParams = CoreUtilities.validatePageParameters(page, size, direction, sortField);
-        final List<ChoreographerActionPlanResponseDTO> choreographerActionPlanEntriesResponse = choreographerDBService.getChoreographerActionPlanEntriesResponse(validatedPageParams.getValidatedPage(),
+        final List<ChoreographerPlanResponseDTO> choreographerActionPlanEntriesResponse = choreographerDBService.getPlanEntriesResponse(validatedPageParams.getValidatedPage(),
         																																						 validatedPageParams.getValidatedSize(),
         																																						 validatedPageParams.getValidatedDirecion(),
         																																						 sortField);
@@ -158,7 +162,7 @@ public class ChoreographerController {
 	
 	//=================================================================================================
 	// assistant methods
-     */
+
 	//-------------------------------------------------------------------------------------------------
     private void checkPlanRequest(final ChoreographerPlanRequestDTO request, final String origin) {
         logger.debug("checkPlanRequest started...");

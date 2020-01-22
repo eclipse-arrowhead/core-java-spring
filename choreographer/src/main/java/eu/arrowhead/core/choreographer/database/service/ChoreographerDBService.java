@@ -12,15 +12,25 @@ import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Sort.Direction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ChoreographerDBService {
@@ -300,22 +310,22 @@ public class ChoreographerDBService {
         }
     }
 
-    /*
+
     //-------------------------------------------------------------------------------------------------
-	public Page<ChoreographerActionPlan> getChoreographerActionPlanEntries(final int page, final int size, final Direction direction, final String sortField) {
-        logger.debug("getChoreographerActionPlanEntries started... ");
+	public Page<ChoreographerPlan> getPlanEntries(final int page, final int size, final Direction direction, final String sortField) {
+        logger.debug("getPlanEntries started... ");
 
         final int validatedPage = page < 0 ? 0 : page;
         final int validatedSize = size <= 0 ? Integer.MAX_VALUE : size;
         final Direction validatedDirection = direction == null ? Direction.ASC : direction;
         final String validatedSortField = Utilities.isEmpty(sortField) ? CoreCommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
 
-        if (!ChoreographerActionPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+        if (!ChoreographerPlan.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
             throw new InvalidParameterException("Sortable field with reference '" + validatedSortField + "' is not available");
         }
 
         try {
-            return choreographerActionPlanRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+            return choreographerPlanRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -323,25 +333,25 @@ public class ChoreographerDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-	public List<ChoreographerActionPlanResponseDTO> getChoreographerActionPlanEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
-        logger.debug("getChoreographerActionPlanEntriesResponse started...");
+	public List<ChoreographerPlanResponseDTO> getPlanEntriesResponse(final int page, final int size, final Direction direction, final String sortField) {
+        logger.debug("getPlanEntriesResponse started...");
 
-        final Page<ChoreographerActionPlan> choreographerActionPlanEntries = getChoreographerActionPlanEntries(page, size, direction, sortField);
+        final Page<ChoreographerPlan> planEntries = getPlanEntries(page, size, direction, sortField);
 
-        final List<ChoreographerActionPlanResponseDTO> actionPlanResponseDTOS = new ArrayList<>();
-        for (final ChoreographerActionPlan actionPlan : choreographerActionPlanEntries) {
-            actionPlanResponseDTOS.add(DTOConverter.convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(actionPlan));
+        final List<ChoreographerPlanResponseDTO> actionPlanResponseDTOS = new ArrayList<>();
+        for (final ChoreographerPlan plan : planEntries) {
+            actionPlanResponseDTOS.add(DTOConverter.convertPlanToPlanResponseDTO(plan));
         }
 
         return actionPlanResponseDTOS;
     }
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerActionPlan getChoreographerActionPlanById(final long id) {
-        logger.debug("getChoreographerActionPlanById started...");
+	public ChoreographerPlan getPlanById(final long id) {
+        logger.debug("getPlanById started...");
 
         try {
-            final Optional<ChoreographerActionPlan> actionPlanOpt = choreographerActionPlanRepository.findById(id);
+            final Optional<ChoreographerPlan> actionPlanOpt = choreographerPlanRepository.findById(id);
             if (actionPlanOpt.isPresent()) {
                 return actionPlanOpt.get();
             } else {
@@ -356,23 +366,23 @@ public class ChoreographerDBService {
     }
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerActionPlanResponseDTO getChoreographerActionPlanByIdResponse(final long id) {
+	public ChoreographerPlanResponseDTO getPlanByIdResponse(final long id) {
         logger.debug("getChoreographerActionPlanByIdResponse started...");
 
-        return DTOConverter.convertChoreographerActionPlanToChoreographerActionPlanResponseDTO(getChoreographerActionPlanById(id));
+        return DTOConverter.convertPlanToPlanResponseDTO(getPlanById(id));
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
-    public void removeActionPlanEntryById(final long id) {
-        logger.debug("removeActionPlanEntryById started...");
+    public void removePlanEntryById(final long id) {
+        logger.debug("removePlanEntryById started...");
 
         try {
-            if (!choreographerActionPlanRepository.existsById(id)) {
+            if (!choreographerPlanRepository.existsById(id)) {
                 throw new InvalidParameterException("ActionPlan with id of '" + id + "' doesn't exist!");
             }
-            choreographerActionPlanRepository.deleteById(id);
-            choreographerActionPlanRepository.flush();
+            choreographerPlanRepository.deleteById(id);
+            choreographerPlanRepository.flush();
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -380,5 +390,4 @@ public class ChoreographerDBService {
             throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
         }
     }
- */
 }

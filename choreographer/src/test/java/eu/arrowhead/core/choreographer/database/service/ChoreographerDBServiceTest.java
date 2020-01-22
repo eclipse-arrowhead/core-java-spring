@@ -49,20 +49,20 @@ public class ChoreographerDBServiceTest {
         final Optional<ChoreographerPlan> choreographerActionPlanOptional = Optional.of(getChoreographerActionPlan());
         when(choreographerPlanRepository.findById(anyLong())).thenReturn(choreographerActionPlanOptional);
 
-        choreographerDBService.getChoreographerActionPlanById(1);
+        choreographerDBService.getPlanById(1);
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
     public void getChoreographerActionPlanByIdTestWithNotExistingId() {
         when(choreographerPlanRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
-        choreographerDBService.getChoreographerActionPlanById(1);
+        choreographerDBService.getPlanById(1);
     }
 
     //-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
     public void getChoreographerActionPlanByIdWithInvalidId() {
-        choreographerDBService.getChoreographerActionPlanById(-1);
+        choreographerDBService.getPlanById(-1);
     }
 
     //-------------------------------------------------------------------------------------------------

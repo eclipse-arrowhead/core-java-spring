@@ -85,6 +85,9 @@ public class ChoreographerStep {
     public ZonedDateTime getUpdatedAt() { return updatedAt; }
     public ChoreographerAction getActionFirstStep() { return actionFirstStep; }
     public ChoreographerAction getAction() { return action; }
+    public String getServiceName() { return serviceName; }
+    public String getMetadata() { return metadata; }
+    public String getParameters() { return parameters; }
     public Set<ChoreographerStepNextStepConnection> getNextSteps() { return nextSteps; }
     public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
     public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
@@ -96,6 +99,9 @@ public class ChoreographerStep {
     public void setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setActionFirstStep(ChoreographerAction actionFirstStep) { this.actionFirstStep = actionFirstStep; }
     public void setAction(ChoreographerAction action) { this.action = action; }
+    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
+    public void setMetadata(String metadata) { this.metadata = metadata; }
+    public void setParameters(String parameters) { this.parameters = parameters; }
     public void setNextSteps(Set<ChoreographerStepNextStepConnection> nextSteps) { this.nextSteps = nextSteps; }
     public void setSteps(Set<ChoreographerStepNextStepConnection> actionSteps) { this.steps = actionSteps; }
     public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }

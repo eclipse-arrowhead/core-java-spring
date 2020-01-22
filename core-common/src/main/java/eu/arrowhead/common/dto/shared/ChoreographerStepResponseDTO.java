@@ -5,42 +5,44 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ChoreographerActionResponseDTO implements Serializable {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class ChoreographerStepResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members
 	
-	private static final long serialVersionUID = -2097830712150683779L;
+	private static final long serialVersionUID = 3665162578177568728L;
 
 	private long id;
 
     private String name;
 
-    private String nextActionName;
+    private String serviceName;
 
-    private List<ChoreographerStepResponseDTO> steps;
+    private String metadata;
 
-    private List<String> firstStepNames;
+    private String parameters;
+
+    private List<ChoreographerNextStepResponseDTO> nextSteps;
 
     private String createdAt;
 
     private String updatedAt;
 
     //=================================================================================================
-	// methods
-    
+    // methods
+	
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerActionResponseDTO() {}
+	public ChoreographerStepResponseDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerActionResponseDTO(final long id, final String name, final String nextActionName, final List<ChoreographerStepResponseDTO> steps, final List<String> firstStepNames, String createdAt,
-                                          final String updatedAt) {
+    public ChoreographerStepResponseDTO(long id, String name, String serviceName, String metadata, String parameters, List<ChoreographerNextStepResponseDTO> nextSteps, String createdAt, String updatedAt) {
         this.id = id;
         this.name = name;
-        this.nextActionName = nextActionName;
-        this.steps = steps;
-        this.firstStepNames = firstStepNames;
+        this.serviceName = serviceName;
+        this.metadata = metadata;
+        this.parameters = parameters;
+        this.nextSteps = nextSteps;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -48,18 +50,20 @@ public class ChoreographerActionResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public String getName() { return name; }
-	public String getNextActionName() { return nextActionName; }
-	public List<ChoreographerStepResponseDTO> getSteps() { return steps; }
-    public List<String> getFirstStepNames() { return firstStepNames; }
-    public String getCreatedAt() { return createdAt; }
+	public String getServiceName() { return serviceName; }
+    public String getMetadata() { return metadata; }
+    public String getParameters() { return parameters; }
+    public List<ChoreographerNextStepResponseDTO> getNextSteps() { return nextSteps; }
+	public String getCreatedAt() { return createdAt; }
 	public String getUpdatedAt() { return updatedAt; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
     public void setName(final String name) { this.name = name; }
-    public void setNextActionName(final String nextActionName) { this.nextActionName = nextActionName; }
-    public void setSteps(final List<ChoreographerStepResponseDTO> steps) { this.steps = steps; }
-    public void setFirstStepNames(List<String> firstStepNames) { this.firstStepNames = firstStepNames; }
+    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
+    public void setMetadata(String metadata) { this.metadata = metadata; }
+    public void setParameters(String parameters) { this.parameters = parameters; }
+    public void setNextSteps(final List<ChoreographerNextStepResponseDTO> nextSteps) { this.nextSteps = nextSteps; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 }
