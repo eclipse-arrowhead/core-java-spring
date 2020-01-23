@@ -289,7 +289,7 @@ public class SystemRegistryController {
 
         validateDevice(dto);
 
-        final DeviceResponseDTO responseDTO = systemRegistryDBService.createDevice(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+        final DeviceResponseDTO responseDTO = systemRegistryDBService.createDeviceDto(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
         logger.debug("{} successfully registered.", responseDTO);
 
         return responseDTO;
@@ -608,7 +608,7 @@ public class SystemRegistryController {
         final String address = request.getAddress();
         final int port = request.getPort();
 
-        final SystemResponseDTO result = systemRegistryDBService.getSystemByNameAndAddressAndPort(systemName, address, port);
+        final SystemResponseDTO result = systemRegistryDBService.getSystemDtoByNameAndAddressAndPort(systemName, address, port);
 
         logger.debug("Return system by name: {}, address: {}, port: {}", systemName, address, port);
         return result;
@@ -628,7 +628,7 @@ public class SystemRegistryController {
         final int port = request.getPort();
         final String authenticationInfo = request.getAuthenticationInfo();
 
-        return systemRegistryDBService.createSystemResponse(systemName, address, port, authenticationInfo);
+        return systemRegistryDBService.createSystemDto(systemName, address, port, authenticationInfo);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -642,7 +642,7 @@ public class SystemRegistryController {
         final int validatedPort = request.getPort();
         final String validatedAuthenticationInfo = request.getAuthenticationInfo();
 
-        return systemRegistryDBService.updateSystemResponse(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
+        return systemRegistryDBService.updateSystemDto(systemId, validatedSystemName, validatedAddress, validatedPort, validatedAuthenticationInfo);
     }
 
     //-------------------------------------------------------------------------------------------------

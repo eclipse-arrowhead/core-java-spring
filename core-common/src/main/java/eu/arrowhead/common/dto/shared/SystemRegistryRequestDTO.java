@@ -18,7 +18,7 @@ public class SystemRegistryRequestDTO implements Serializable {
 	private DeviceRequestDTO provider;
 	private String endOfValidity;
 	private Map<String,String> metadata;
-	private int version;
+	private Integer version;
 
 	//=================================================================================================
 	// methods
@@ -28,12 +28,12 @@ public class SystemRegistryRequestDTO implements Serializable {
 	public DeviceRequestDTO getProvider() { return provider; }
 	public String getEndOfValidity() { return endOfValidity; }
 	public Map<String,String> getMetadata() { return metadata; }
-	public int getVersion() { return version; }
+	public Integer getVersion() { return version; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setSystem(final SystemRequestDTO system) { this.system = system; }
 	public void setProvider(final DeviceRequestDTO provider) { this.provider = provider; }
 	public void setEndOfValidity(final String endOfValidity) { this.endOfValidity = endOfValidity; }
 	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
-	public void setVersion(final int version) { this.version = version; }
+	public void setVersion(final Integer version) { this.version = version; }
 }
