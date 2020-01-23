@@ -26,8 +26,7 @@ public class QoSIntraPingMeasurement {
 	private long id;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false)
-	@Column(unique = true)
+	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSIntraMeasurement measurement;
 	
 	@Column(nullable = false)

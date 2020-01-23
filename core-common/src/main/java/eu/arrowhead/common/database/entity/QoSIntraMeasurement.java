@@ -15,12 +15,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 
 @Entity
-@Table(name = "qos_intra_measurement")
+@Table(name = "qos_intra_measurement", uniqueConstraints = @UniqueConstraint(columnNames = {"systemId", "measurementType"}))
 public class QoSIntraMeasurement {
 	
 	//=================================================================================================
