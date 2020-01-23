@@ -32,6 +32,7 @@ public class CountRestarterTaskConfig {
 	private int ttlInterval;
 	
 	private static final int SCHEDULER_DELAY = 7;
+	private static final String CRONE_EXPRESSION_MIDNIGHT_EVERY_DAY= "0 0 0 ? * * *";
 	
 	private static final String NAME_OF_TRIGGER = "Counter_Restart_Task_Trigger";
 	private static final String NAME_OF_TASK = "Counter_Restart_Task_Detail";	
@@ -65,7 +66,7 @@ public class CountRestarterTaskConfig {
 		
 		CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
 		trigger.setJobDetail(counterRestartTaskDetails().getObject());
-		trigger.setCronExpression("0/30 * * ? * * *");
+		trigger.setCronExpression(CRONE_EXPRESSION_MIDNIGHT_EVERY_DAY);
         trigger.setName(NAME_OF_TRIGGER);
         
         return trigger;
