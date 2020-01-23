@@ -38,5 +38,25 @@
     "name": "gatekeeper_is_present",
     "type": "java.lang.Boolean",
     "description": "A description for 'gatekeeper_is_present'"
+  },
+  {
+    "name": "cloud_ping_ttl_scheduled",
+    "type": "java.lang.String",
+    "description": "A description for 'cloud_ping_ttl_scheduled'"
+  },
+  {
+    "name": "cloud_ping_ttl_interval",
+    "type": "java.lang.String",
+    "description": "A description for 'cloud_ping_ttl_interval'"
+  },
+  {
+    "name": "ping_ttl_scheduled",
+    "type": "java.lang.String",
+    "description": "A description for 'ping_ttl_scheduled'"
+  },
+  {
+    "name": "ping_ttl_interval",
+    "type": "java.lang.String",
+    "description": "A description for 'ping_ttl_interval'"
   }
 ]}
