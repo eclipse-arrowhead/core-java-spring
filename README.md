@@ -6253,6 +6253,20 @@ This supporting core system has the purpose of providing data management feature
 
 <a name="datamanager_usecases" />
 
+These services can be used to store data temporary (Proxy) or an database (Historian). This enables sleepy devices (typically battery powered wireless sensors) to store data and for consumers to always be able to fetch the newest value (Proxy) or historical data (Historian).
+
 ## Services and Use Cases
 
-Use case 1: *Temporary store data*
+Use case 1: *Proxy*
+Use case 1: *Historian*
+
+## Endpoints
+
+### Echo 
+```
+GET /datamanager/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+
