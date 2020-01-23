@@ -6258,7 +6258,10 @@ These services can be used to store data temporary (Proxy) or an database (Histo
 ## Services and Use Cases
 
 Use case 1: *Proxy*
-Use case 1: *Historian*
+Text...
+
+Use case 2: *Historian*
+Text...
 
 ## Endpoints
 
