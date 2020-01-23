@@ -70,6 +70,10 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
+    7. [DataManager](#datamanager)
+       * [System Design Description Overview](#datamanager_sdd)
+       * [Services and Use Cases](#datamanager_usecases)  
+       * [Service Description Overview](#datamanager_provided_services)
 	
 <a name="quickstart" />
 
@@ -213,6 +217,7 @@ Orchestrator will be available on ```https://localhost:8441``` <br />
 Event Handler will be available on ```https://localhost:8455``` <br />
 Gatekeeper will be available on ```https://localhost:8449``` <br />
 Gateway will be available on ```https://localhost:8453``` <br />
+DataManager will be available on ```https://localhost:8461``` <br />
 
 Swagger with API documentation is available in the root route.
 
@@ -6234,3 +6239,20 @@ __ActiveSession__ is the output.
 | `responseControlQueue` | control queue of response messaging through the the Relay |
 | `sessionStartedAt` | Time stamp of session start |
 
+
+# DataManager
+
+<a name="datamanager_sdd" />
+
+## System Design Description Overview
+
+This supporting core system has the purpose of providing data management features in the Arrowhead Framework by its following services:
+
+- Proxy
+- Historian
+
+<a name="datamanager_usecases" />
+
+## Services and Use Cases
+
+Use case 1: *Temporary store data*
