@@ -1,7 +1,10 @@
 package eu.arrowhead.core.qos.quartz.task;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,8 +28,13 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
+import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -47,6 +55,9 @@ public class PingTask implements Job {
 	
 	@Autowired
 	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
+	
+	@Autowired
+	private QoSIntraMeasurementPingRepository qoSIntraMeasurementPingRepository;
 	
 	@Autowired
 	private HttpService httpService;
@@ -80,37 +91,63 @@ public class PingTask implements Job {
 		logger.debug("getSystemToMessure started...");
 
 		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
-		
 		final Set<SystemResponseDTO> systemList = serviceRegistryListResponseDTO.getData().stream().map(ServiceRegistryResponseDTO::getProvider).collect(Collectors.toSet());
-		
+
 		return systemList;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void pingSystem(final SystemResponseDTO system ) {
+	private void pingSystem(final SystemResponseDTO systemResponseDTO ) {
 		logger.debug("pingSystem started...");
-		
-		if (system == null || Utilities.isEmpty(system.getAddress())) {
+
+		if (systemResponseDTO == null || Utilities.isEmpty(systemResponseDTO.getAddress())) {
 			throw new InvalidParameterException("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 
-		final String address = system.getAddress();
-		try {
-			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest ();
-			request.setHost (address);
+		final System system = new System();
+		system.setSystemName(systemResponseDTO.getSystemName());
+		system.setAddress(systemResponseDTO.getAddress());
+		system.setPort(systemResponseDTO.getPort());
 
-			for (int count = 0; count < TIMES_TO_REPEAT; count ++) {
-				final IcmpPingResponse response = IcmpPingUtil.executePingRequest (request);
-				final String formattedResponse = IcmpPingUtil.formatResponse (response);
-				logger.info(formattedResponse);
+		final String address = systemResponseDTO.getAddress();
 
-				Thread.sleep (REST_BETWEEN_PINGS_MILLSEC);
-			}
-		} catch ( final InterruptedException | IllegalArgumentException ex) {
-			logger.debug("" + ex.getMessage());
-		}
+		final List<IcmpPingResponse> responseList = getPingResponseList(address);
+		// TODO continue implementation
+		//final boolean accesible = calculateAccessible(responseList);
+		//final int maxResponseTime = calculateMaxResponseTime(responseList);
+		//final int minResponseTime = calculateMinResponseTime(responseList);
+		//final int meanResponseTime = calculateMeanResponseTime(responseList);
+		//
+        //
+		//final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+		//if (qoSIntraMeasurementOptional.isEmpty()) {
+        //
+		//	final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, QoSMeasurementType.PING, ZonedDateTime.now());
+		//	qoSIntraMeasurementRepository.saveAndFlush(measurement);
+        //
+		//	final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
+		//	if (pingMeasurementOptional.isEmpty()) {
+		//		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
+		//		pingMeasurement.setMeasurement(measurement);
+        //
+		//		pingMeasurement.setAccessible(accessible);
+		//		pingMeasurement.setMaxResponseTime(maxResponseTime);
+		//		pingMeasurement.setMinResponseTime(minResponseTime);
+		//		pingMeasurement.setMeanResponseTime(meanResponseTime);
+		//		pingMeasurement.setCountStartedAt(countStartedAt);
+		//		pingMeasurement.setLastAccessAt(lastAccessAt);
+		//		pingMeasurement.setSent(sent);
+		//		pingMeasurement.setSentAll(sentAll);
+		//		pingMeasurement.setReceived(received);
+		//		pingMeasurement.setReceivedAll(receivedAll);
+		//		pingMeasurement.setUpdatedAt(updatedAt);
+		//		
+		//	}
+		//}
+
+
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private ServiceRegistryListResponseDTO queryServiceRegistryAll() {
 		logger.debug("queryServiceRegistryAll started...");
@@ -126,7 +163,7 @@ public class PingTask implements Job {
 		}
 
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getQueryAllUri() {
 		logger.debug("getQueryUri started...");
@@ -140,5 +177,29 @@ public class PingTask implements Job {
 		}
 
 		throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private List<IcmpPingResponse> getPingResponseList(final String address) {
+		logger.debug("getPingResponseList started...");
+
+		final List<IcmpPingResponse> responseList = new ArrayList<>(TIMES_TO_REPEAT);
+		try {
+			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest ();
+			request.setHost (address);
+
+			for (int count = 0; count < TIMES_TO_REPEAT; count ++) {
+				final IcmpPingResponse response = IcmpPingUtil.executePingRequest (request);
+				final String formattedResponse = IcmpPingUtil.formatResponse (response);
+				logger.info(formattedResponse);
+
+				responseList.add(response);
+				Thread.sleep (REST_BETWEEN_PINGS_MILLSEC);
+			}
+		} catch ( final InterruptedException | IllegalArgumentException ex) {
+			logger.debug("" + ex.getMessage());
+		}
+
+		return responseList;
 	}
 }
