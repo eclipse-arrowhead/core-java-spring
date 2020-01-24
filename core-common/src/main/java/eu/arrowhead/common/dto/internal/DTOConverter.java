@@ -193,11 +193,11 @@ public class DTOConverter {
 		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), Utilities.convertZonedDateTimeToUTCString(intf.getCreatedAt()), 
 											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceQueryResultDTO convertListOfServiceRegistryEntriesToServiceQueryResultDTO(final List<ServiceRegistry> entries, final int unfilteredHits) {
 		final ServiceQueryResultDTO result = new ServiceQueryResultDTO();
-		
+
 		if (entries != null) {
 			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits: " + unfilteredHits);
 			result.setUnfilteredHits(unfilteredHits);
@@ -205,10 +205,24 @@ public class DTOConverter {
 				result.getServiceQueryData().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 			}
 		}
-		
+
 		return result;
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemQueryResultDTO convertListOfSystemRegistryEntriesToSystemQueryResultDTO(final List<SystemRegistry> entries, final int unfilteredHits) {
+		final List<SystemRegistryResponseDTO> results = new ArrayList<>();
+
+		if (entries != null) {
+			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits: " + unfilteredHits);
+			for (final SystemRegistry srEntry : entries) {
+				results.add(convertSystemRegistryToSystemRegistryResponseDTO(srEntry));
+			}
+		}
+
+		return new SystemQueryResultDTO(results, unfilteredHits);
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public static AuthorizationIntraCloudResponseDTO convertAuthorizationIntraCloudToAuthorizationIntraCloudResponseDTO(final AuthorizationIntraCloud entry) {
 		Assert.notNull(entry, "AuthorizationIntraCloud is null");
@@ -658,15 +672,25 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public static SystemRegistryListResponseDTO convertSystemRegistryListToSystemRegistryListResponseDTO(final Iterable<SystemRegistry> page) {
 
-	public static SystemRegistryListResponseDTO convertSystemRegistryPageToSystemRegistryListResponseDTO(final Page<SystemRegistry> page) {
-
-		final List<SystemRegistryResponseDTO> list = new ArrayList<>(page.getSize());
+		final List<SystemRegistryResponseDTO> list = new ArrayList<>();
 		for(final SystemRegistry entry : page)
 		{
 			list.add(convertSystemRegistryToSystemRegistryResponseDTO(entry));
 		}
 		return new SystemRegistryListResponseDTO(list, list.size());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static SystemQueryResultDTO convertSystemRegistryListToSystemQueryResultDTO(final Iterable<SystemRegistry> page)
+	{
+		final List<SystemRegistryResponseDTO> list = new ArrayList<>();
+		for(final SystemRegistry entry : page)
+		{
+			list.add(convertSystemRegistryToSystemRegistryResponseDTO(entry));
+		}
+		return new SystemQueryResultDTO(list, list.size());
 	}
 
 	//=================================================================================================

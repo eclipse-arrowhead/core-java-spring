@@ -23,11 +23,16 @@ public class SystemRegistryApplicationInitListener extends ApplicationInitListen
 	//=================================================================================================
 	// members
 	
+	private final CommonDBService commonDBService;
+	private final SystemRegistryDBService systemRegistryDBService;
+
 	@Autowired
-	private CommonDBService commonDBService; 
-	
-	@Autowired
-	private SystemRegistryDBService systemRegistryDBService;
+	public SystemRegistryApplicationInitListener(final CommonDBService commonDBService,
+												 final SystemRegistryDBService systemRegistryDBService)
+	{
+		this.commonDBService = commonDBService;
+		this.systemRegistryDBService = systemRegistryDBService;
+	}
 
 	//=================================================================================================
 	// assistant methods

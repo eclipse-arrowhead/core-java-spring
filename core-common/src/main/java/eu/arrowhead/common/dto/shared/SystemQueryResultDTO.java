@@ -19,6 +19,15 @@ public class SystemQueryResultDTO implements Serializable {
 	private int unfilteredHits = 0;
 
 	//=================================================================================================
+	// constructors
+
+	public SystemQueryResultDTO(final List<SystemRegistryResponseDTO> systemQueryData, final int unfilteredHits)
+	{
+		this.systemQueryData = systemQueryData;
+		this.unfilteredHits = unfilteredHits;
+	}
+
+	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------

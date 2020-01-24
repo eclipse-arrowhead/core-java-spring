@@ -16,6 +16,7 @@ public class SystemQueryFormDTO implements Serializable {
 	private static final long serialVersionUID = -2699823381165019336L;
 
 	private String systemNameRequirements;
+	private String deviceNameRequirements;
 	private Map<String,String> metadataRequirements; // if specified the whole content of the map must match
 	private Integer versionRequirement; // if specified version must match
 	private Integer minVersionRequirement; // if specified version must be equals or higher; ignored if versionRequirement is specified
@@ -31,6 +32,7 @@ public class SystemQueryFormDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public String getSystemNameRequirements() { return systemNameRequirements; }
+	public String getDeviceNameRequirements() { return deviceNameRequirements; }
 	public Map<String,String> getMetadataRequirements() { return metadataRequirements; }
 	public Integer getVersionRequirement() { return versionRequirement; }
 	public Integer getMinVersionRequirement() { return minVersionRequirement; }
@@ -39,6 +41,7 @@ public class SystemQueryFormDTO implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setSystemNameRequirements(final String systemNameRequirements) { this.systemNameRequirements = systemNameRequirements; }
+	public void setDeviceNameRequirements(final String deviceNameRequirements) { this.deviceNameRequirements = deviceNameRequirements; }
 	public void setMetadataRequirements(final Map<String,String> metadataRequirements) { this.metadataRequirements = metadataRequirements; }
 	public void setVersionRequirement(final Integer versionRequirement) { this.versionRequirement = versionRequirement; }
 	public void setMinVersionRequirement(final Integer minVersionRequirement) { this.minVersionRequirement = minVersionRequirement; }
@@ -51,6 +54,7 @@ public class SystemQueryFormDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	private SystemQueryFormDTO(final Builder builder) {
 		this.systemNameRequirements = builder.systemNameRequirements;
+		this.deviceNameRequirements = builder.deiceNameRequirements;
 		this.metadataRequirements = builder.metadataRequirements;
 		this.versionRequirement = builder.versionRequirement;
 		this.minVersionRequirement = builder.minVersionRequirement;
@@ -68,6 +72,7 @@ public class SystemQueryFormDTO implements Serializable {
 		// members
 
 		private final String systemNameRequirements;
+		private String deiceNameRequirements;
 		private Map<String,String> metadataRequirements;
 		private Integer versionRequirement; 
 		private Integer minVersionRequirement; 
@@ -83,14 +88,20 @@ public class SystemQueryFormDTO implements Serializable {
 			Assert.isTrue(systemNameRequirements != null && !systemNameRequirements.isBlank(), "systemNameRequirements is null or blank.");
 			this.systemNameRequirements = systemNameRequirements;
 		}
-		
+
+
+		//-------------------------------------------------------------------------------------------------
+		public Builder deviceName(final String deiceNameRequirements) {
+			this.deiceNameRequirements = deiceNameRequirements;
+			return this;
+		}
 
 		//-------------------------------------------------------------------------------------------------
 		public Builder metadata(final Map<String,String> metadataRequirements) {
 			this.metadataRequirements = metadataRequirements;
 			return this;
 		}
-		
+
 		//-------------------------------------------------------------------------------------------------
 		public Builder metadata(final String key, final String value) {
 			Assert.isTrue(key != null && !key.isBlank(), "Key is null or blank");

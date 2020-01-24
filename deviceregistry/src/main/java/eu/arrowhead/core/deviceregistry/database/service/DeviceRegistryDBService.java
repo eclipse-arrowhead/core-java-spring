@@ -1,9 +1,10 @@
-package eu.arrowhead.core.systemregistry.database.service;
+package eu.arrowhead.core.deviceregistry.database.service;
 
 import eu.arrowhead.common.*;
 import eu.arrowhead.common.database.entity.Device;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.SystemRegistry;
+import eu.arrowhead.common.database.repository.DeviceRegistryRepository;
 import eu.arrowhead.common.database.repository.DeviceRepository;
 import eu.arrowhead.common.database.repository.SystemRegistryRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
@@ -33,7 +34,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
-public class SystemRegistryDBService
+public class DeviceRegistryDBService
 {
 
     //=================================================================================================
@@ -43,7 +44,9 @@ public class SystemRegistryDBService
     private static final String COULD_NOT_DELETE_DEVICE_ERROR_MESSAGE = "Could not delete Device, with given parameters";
     private static final String PORT_RANGE_ERROR_MESSAGE = "Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".";
 
-    private final Logger logger = LogManager.getLogger(SystemRegistryDBService.class);
+    private final Logger logger = LogManager.getLogger(DeviceRegistryDBService.class);
+
+    private final DeviceRegistryRepository deviceRegistryRepository;
 
     private final SystemRegistryRepository systemRegistryRepository;
 
@@ -57,11 +60,13 @@ public class SystemRegistryDBService
     private int pingTimeout;
 
     @Autowired
-    public SystemRegistryDBService(final SystemRegistryRepository systemRegistryRepository,
+    public DeviceRegistryDBService(final DeviceRegistryRepository deviceRegistryRepository,
+                                   final SystemRegistryRepository systemRegistryRepository,
                                    final SystemRepository systemRepository,
                                    final DeviceRepository deviceRepository,
                                    final SSLProperties sslProperties)
     {
+        this.deviceRegistryRepository = deviceRegistryRepository;
         this.systemRegistryRepository = systemRegistryRepository;
         this.systemRepository = systemRepository;
         this.deviceRepository = deviceRepository;

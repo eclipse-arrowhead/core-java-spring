@@ -16,10 +16,13 @@ public class CoreDefaults {
 	
 	public static final boolean DEFAULT_SERVICE_REGISTRY_PING_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_PING_INTERVAL_MINUTES = 60;
-	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILISECONDS = 5000;
+	public static final int DEFAULT_SERVICE_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
 	public static final boolean DEFAULT_SERVICE_REGISTRY_TTL_SCHEDULED = false;
 	public static final int DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES = 13;
-	
+
+	public static final int DEFAULT_SYSTEM_REGISTRY_PING_INTERVAL_MINUTES = 60;
+	public static final int DEFAULT_SYSTEM_REGISTRY_PING_TIMEOUT_MILLISECONDS = 5000;
+
 	public static final String DEFAULT_OWN_CLOUD_OPERATOR = "default_operator";
 	public static final String DEFAULT_OWN_CLOUD_NAME = "default_insecure_cloud";
 	
