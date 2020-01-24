@@ -21,6 +21,7 @@ public class CoreCommonConstants {
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
 	public static final String SR_QUERY_BY_SYSTEM_ID_URI = "service.registry.query.by.system.id.uri";
 	public static final String SR_QUERY_BY_SYSTEM_DTO_URI = "service.registry.query.by.system.dto.uri";
+	public static final String SR_QUERY_ALL = "service.registry.query.all.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
 	
@@ -36,6 +37,7 @@ public class CoreCommonConstants {
 	
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
+	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_URI = "/query/all";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	
