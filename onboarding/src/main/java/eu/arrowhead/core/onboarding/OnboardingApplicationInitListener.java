@@ -1,4 +1,4 @@
-package eu.arrowhead.core.deviceregistry;
+package eu.arrowhead.core.onboarding;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
@@ -7,7 +7,7 @@ import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
-import eu.arrowhead.core.deviceregistry.database.service.DeviceRegistryDBService;
+import eu.arrowhead.core.onboarding.database.service.OnboardingDBService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -18,21 +18,21 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class DeviceRegistryApplicationInitListener extends ApplicationInitListener
+public class OnboardingApplicationInitListener extends ApplicationInitListener
 {
 
     //=================================================================================================
     // members
 
     private final CommonDBService commonDBService;
-    private final DeviceRegistryDBService deviceRegistryDBService;
+    private final OnboardingDBService onboardingControllerDBService;
 
     @Autowired
-	public DeviceRegistryApplicationInitListener(final CommonDBService commonDBService,
-												 final DeviceRegistryDBService deviceRegistryDBService)
+	public OnboardingApplicationInitListener(final CommonDBService commonDBService,
+                                             final OnboardingDBService onboardingControllerDBService)
 	{
 		this.commonDBService = commonDBService;
-		this.deviceRegistryDBService = deviceRegistryDBService;
+		this.onboardingControllerDBService = onboardingControllerDBService;
 	}
 
 	//=================================================================================================
@@ -51,20 +51,20 @@ public class DeviceRegistryApplicationInitListener extends ApplicationInitListen
         try
         {
             final String name = coreSystemRegistrationProperties.getCoreSystem().name().toLowerCase();
-            final List<System> oldSystems = deviceRegistryDBService.getSystemByName(name);
+            final List<System> oldSystems = onboardingControllerDBService.getSystemByName(name);
             if (!oldSystems.isEmpty())
             {
                 for (final System system : oldSystems)
                 {
-                    deviceRegistryDBService.removeSystemById(system.getId());
+                    onboardingControllerDBService.removeSystemById(system.getId());
                 }
             }
 
             final String authInfo = sslProperties.isSslEnabled() ? Base64.getEncoder().encodeToString(publicKey.getEncoded()) : null;
-            deviceRegistryDBService.createSystem(name,
-                                                 coreSystemRegistrationProperties.getCoreSystemDomainName(),
-                                                 coreSystemRegistrationProperties.getCoreSystemDomainPort(),
-                                                 authInfo);
+            onboardingControllerDBService.createSystem(name,
+                                                       coreSystemRegistrationProperties.getCoreSystemDomainName(),
+                                                       coreSystemRegistrationProperties.getCoreSystemDomainPort(),
+                                                       authInfo);
         }
         catch (final ArrowheadException ex)
         {

@@ -54,7 +54,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_DEVICE_REGISTRY_REGISTER = "device-register";
 	public static final String CORE_SERVICE_DEVICE_REGISTRY_UNREGISTER = "device-unregister";
 
-	public static final String CORE_SERVICE_ONBOARDING_PLAIN = "onboarding-plain";
+	public static final String CORE_SERVICE_ONBOARDING_NAME = "onboarding-plain";
+	public static final String CORE_SERVICE_ONBOARDING_CSR = "onboarding-with-csr";
 
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -102,7 +103,8 @@ public class CommonConstants {
 	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS = "mac_address";
 
 	public static final String ONBOARDING_URI = "/onboarding";
-	public static final String OP_ONBOARDING_PLAIN = "/plain";
+	public static final String OP_ONBOARDING_NAME = "/name";
+	public static final String OP_ONBOARDING_CSR = "/csr";
 
 	public static final String AUTHORIZATION_URI = "/authorization";
 	public static final String OP_AUTH_TOKEN_URI = "/token";
