@@ -448,7 +448,8 @@ public class SystemRegistryController {
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = {CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI, CoreCommonConstants.MGMT_URI},
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public SystemRegistryResponseDTO registerSystem(@RequestBody final SystemRegistryRequestDTO request) {
         logger.debug("New system registration request received");
@@ -456,27 +457,6 @@ public class SystemRegistryController {
 
         final SystemRegistryResponseDTO response = systemRegistryDBService.registerSystemRegistry(request);
         logger.debug("{} successfully registers its system {}", request.getSystem().getSystemName(), request.getSystem());
-
-        return response;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_REGISTER_DESCRIPTION, response = SystemRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEM_REGISTRY_REGISTER_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_REGISTER_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = CoreCommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    SystemRegistryResponseDTO addSystemRegistry(@RequestBody final SystemRegistryRequestDTO request) {
-        logger.debug("New system registration request received");
-        checkSystemRegistryRequest(request, CoreCommonConstants.MGMT_URI, true);
-
-        final SystemRegistryResponseDTO response = systemRegistryDBService.registerSystemRegistry(request);
-        logger.debug("{}'s system {} is successfully registered", request.getSystem().getSystemName(), request.getSystem());
 
         return response;
     }

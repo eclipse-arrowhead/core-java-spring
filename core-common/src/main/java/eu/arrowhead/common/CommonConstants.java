@@ -89,7 +89,6 @@ public class CommonConstants {
 	public static final String OP_SYSTEM_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_SYSTEM_REGISTRY_QUERY_URI = "/query";
-
 	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME = "system_name";
 	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
 	public static final String OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT = "port";
@@ -98,7 +97,9 @@ public class CommonConstants {
 	public static final String OP_DEVICE_REGISTRY_REGISTER_URI = "/register";
 	public static final String OP_DEVICE_REGISTRY_UNREGISTER_URI = "/unregister";
 	public static final String OP_DEVICE_REGISTRY_QUERY_URI = "/query";
-
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_DEVICE_NAME = "device_name";
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS = "address";
+	public static final String OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS = "mac_address";
 
 	public static final String ONBOARDING_URI = "/onboarding";
 	public static final String OP_ONBOARDING_PLAIN = "/plain";

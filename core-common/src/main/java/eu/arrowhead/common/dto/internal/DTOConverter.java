@@ -224,6 +224,20 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public static DeviceQueryResultDTO convertListOfDeviceRegistryEntriesToDeviceQueryResultDTO(final List<DeviceRegistry> entries, final int unfilteredHits) {
+		final List<DeviceRegistryResponseDTO> results = new ArrayList<>();
+
+		if (entries != null) {
+			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits: " + unfilteredHits);
+			for (final DeviceRegistry srEntry : entries) {
+				results.add(convertDeviceRegistryToDeviceRegistryResponseDTO(srEntry));
+			}
+		}
+
+		return new DeviceQueryResultDTO(results, unfilteredHits);
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public static AuthorizationIntraCloudResponseDTO convertAuthorizationIntraCloudToAuthorizationIntraCloudResponseDTO(final AuthorizationIntraCloud entry) {
 		Assert.notNull(entry, "AuthorizationIntraCloud is null");
 		Assert.notNull(entry.getConsumerSystem(), "Consumer is null");
@@ -693,6 +707,47 @@ public class DTOConverter {
 		return new SystemQueryResultDTO(list, list.size());
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public static DeviceRegistryResponseDTO convertDeviceRegistryToDeviceRegistryResponseDTO(final DeviceRegistry entry) {
+
+		Assert.notNull(entry, "DR entry is null.");
+		Assert.notNull(entry.getDevice(), "Related device is null.");
+
+		final DeviceResponseDTO deviceResponseDTO = convertDeviceToDeviceResponseDTO(entry.getDevice());
+
+		final DeviceRegistryResponseDTO dto = new DeviceRegistryResponseDTO();
+		dto.setId(entry.getId());
+		dto.setDevice(deviceResponseDTO);
+		dto.setEndOfValidity(Utilities.convertZonedDateTimeToUTCString(entry.getEndOfValidity()));
+		dto.setMetadata(Utilities.text2Map(entry.getMetadata()));
+		dto.setVersion(entry.getVersion());
+		dto.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getCreatedAt()));
+		dto.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(entry.getUpdatedAt()));
+
+		return dto;
+	}
+	//-------------------------------------------------------------------------------------------------
+	public static DeviceRegistryListResponseDTO convertDeviceRegistryListToDeviceRegistryListResponseDTO(final Iterable<DeviceRegistry> page) {
+
+		final List<DeviceRegistryResponseDTO> list = new ArrayList<>();
+		for(final DeviceRegistry entry : page)
+		{
+			list.add(convertDeviceRegistryToDeviceRegistryResponseDTO(entry));
+		}
+		return new DeviceRegistryListResponseDTO(list, list.size());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static DeviceQueryResultDTO convertDeviceRegistryListToDeviceQueryResultDTO(final Iterable<DeviceRegistry> page)
+	{
+		final List<DeviceRegistryResponseDTO> list = new ArrayList<>();
+		for(final DeviceRegistry entry : page)
+		{
+			list.add(convertDeviceRegistryToDeviceRegistryResponseDTO(entry));
+		}
+		return new DeviceQueryResultDTO(list, list.size());
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -807,6 +862,5 @@ public class DTOConverter {
 		
 		return result;
 	}
-
 
 }

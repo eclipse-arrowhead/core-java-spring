@@ -1,7 +1,6 @@
 package eu.arrowhead.core.deviceregistry;
 
 import eu.arrowhead.common.*;
-import eu.arrowhead.common.core.CoreDevice;
 import eu.arrowhead.common.dto.internal.DeviceListResponseDTO;
 import eu.arrowhead.common.dto.internal.DeviceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.*;
@@ -21,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -34,75 +35,64 @@ public class DeviceRegistryController
     //=================================================================================================
     // members
 
-    private static final String GET_SYSTEM_BY_ID_HTTP_200_MESSAGE = "Device by requested id returned";
-    private static final String GET_SYSTEM_BY_ID_HTTP_400_MESSAGE = "No Such Device by requested id";
-    private static final String PATH_VARIABLE_ID = "id";
+    private static final String GET_DEVICE_BY_ID_HTTP_200_MESSAGE = "Device by requested deviceId returned";
+    private static final String GET_DEVICE_BY_ID_HTTP_400_MESSAGE = "No Such Device by requested deviceId";
+    private static final String PATH_VARIABLE_ID = "deviceId";
     private static final String GET_DEVICES_HTTP_200_MESSAGE = "Devices returned";
     private static final String GET_DEVICES_HTTP_400_MESSAGE = " Invalid parameters";
-    private static final String POST_SYSTEM_HTTP_201_MESSAGE = "Device created";
-    private static final String POST_SYSTEM_HTTP_400_MESSAGE = "Could not create device";
-    private static final String PUT_SYSTEM_HTTP_200_MESSAGE = "Device updated";
-    private static final String PUT_SYSTEM_HTTP_400_MESSAGE = "Could not update device";
-    private static final String PATCH_SYSTEM_HTTP_200_MESSAGE = "Device updated";
-    private static final String PATCH_SYSTEM_HTTP_400_MESSAGE = "Could not update device";
-    private static final String DELETE_SYSTEM_HTTP_200_MESSAGE = "Device deleted";
-    private static final String DELETE_SYSTEM_HTTP_400_MESSAGE = "Could not delete device";
-
-    private static final String GET_DEVICE_BY_ID_HTTP_200_MESSAGE = "Device by requested id returned";
-    private static final String GET_DEVICE_BY_ID_HTTP_400_MESSAGE = "No Such Device by requested id";
-    private static final String DEVICE_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/device/{" + PATH_VARIABLE_ID + "}";
-    private static final String DEVICES_URI = CoreCommonConstants.MGMT_URI + "/devices";
-    private static final String DEVICES_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/devices/{" + PATH_VARIABLE_ID + "}";
-
     private static final String POST_DEVICE_HTTP_201_MESSAGE = "Device created";
     private static final String POST_DEVICE_HTTP_400_MESSAGE = "Could not create device";
     private static final String PUT_DEVICE_HTTP_200_MESSAGE = "Device updated";
     private static final String PUT_DEVICE_HTTP_400_MESSAGE = "Could not update device";
+    private static final String PATCH_DEVICE_HTTP_200_MESSAGE = "Device updated";
+    private static final String PATCH_DEVICE_HTTP_400_MESSAGE = "Could not update device";
+    private static final String DELETE_DEVICE_HTTP_200_MESSAGE = "Device deleted";
+    private static final String DELETE_DEVICE_HTTP_400_MESSAGE = "Could not delete device";
 
-    private static final String DELETE_DEVICES_HTTP_200_MESSAGE = "Device definition removed";
-    private static final String DELETE_DEVICES_HTTP_400_MESSAGE = "Could not remove device definition";
+    private static final String GET_DEVICE_REGISTRY_HTTP_200_MESSAGE = "Device Registry entries returned";
+    private static final String GET_DEVICE_REGISTRY_HTTP_400_MESSAGE = "Could not retrieve device registry entries";
+    private static final String DELETE_DEVICE_REGISTRY_HTTP_200_MESSAGE = "Device Registry entry removed";
+    private static final String DELETE_DEVICE_REGISTRY_HTTP_400_MESSAGE = "Could not remove device registry entry";
 
-    private static final String SYSTEM_REGISTRY_REGISTER_DESCRIPTION = "Registers a device";
-    private static final String SYSTEM_REGISTRY_REGISTER_201_MESSAGE = "Device registered";
-    private static final String SYSTEM_REGISTRY_REGISTER_400_MESSAGE = "Could not register device";
-    private static final String SYSTEM_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered device";
-    private static final String SYSTEM_REGISTRY_UNREGISTER_200_MESSAGE = "Registered device removed";
-    private static final String SYSTEM_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove device";
-    private static final String SYSTEM_REGISTRY_QUERY_DESCRIPTION = "Return Device Registry data that fits the specification";
-    private static final String SYSTEM_REGISTRY_QUERY_200_MESSAGE = "Device Registry data returned";
-    private static final String SYSTEM_REGISTRY_QUERY_400_MESSAGE = "Could not query Device Registry";
-    private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_DESCRIPTION = "Return device by requested id";
-    private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_200_MESSAGE = "Device data by id returned";
-    private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_400_MESSAGE = "Could not query Device Registry by Consumer device id";
-    private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION = "Return Device by requested dto";
-    private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE = "Consumer Device data by requestDTO returned";
-    private static final String SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE = "Could not query Device Registry by Consumer device requestDTO";
-    private static final String SYSTEM_REGISTRY_UPDATE_DESCRIPTION = "Update a device";
-    private static final String SYSTEM_REGISTRY_UPDATE_200_MESSAGE = "Device updated";
-    private static final String SYSTEM_REGISTRY_UPDATE_400_MESSAGE = "Could not update device";
-    private static final String SYSTEM_REGISTRY_MERGE_DESCRIPTION = "Merge/Patch a device";
-    private static final String SYSTEM_REGISTRY_MERGE_200_MESSAGE = "Device merged";
-    private static final String SYSTEM_REGISTRY_MERGE_400_MESSAGE = "Could not merge device";
+    private static final String DEVICE_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/device/{" + PATH_VARIABLE_ID + "}";
+    private static final String DEVICES_URI = CoreCommonConstants.MGMT_URI + "/devices";
+    private static final String DEVICES_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/devices/{" + PATH_VARIABLE_ID + "}";
+
+    private static final String DEVICE_REGISTRY_REGISTER_DESCRIPTION = "Registers a device";
+    private static final String DEVICE_REGISTRY_REGISTER_201_MESSAGE = "Device registered";
+    private static final String DEVICE_REGISTRY_REGISTER_400_MESSAGE = "Could not register device";
+    private static final String DEVICE_REGISTRY_UNREGISTER_DESCRIPTION = "Remove a registered device";
+    private static final String DEVICE_REGISTRY_UNREGISTER_200_MESSAGE = "Registered device removed";
+    private static final String DEVICE_REGISTRY_UNREGISTER_400_MESSAGE = "Could not remove device";
+    private static final String DEVICE_REGISTRY_QUERY_DESCRIPTION = "Return Device Registry data that fits the specification";
+    private static final String DEVICE_REGISTRY_QUERY_200_MESSAGE = "Device Registry data returned";
+    private static final String DEVICE_REGISTRY_QUERY_400_MESSAGE = "Could not query Device Registry";
+    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_DESCRIPTION = "Return device by requested deviceId";
+    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_200_MESSAGE = "Device data by deviceId returned";
+    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_400_MESSAGE = "Could not query Device Registry by Consumer device deviceId";
+    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_DESCRIPTION = "Return Device by requested dto";
+    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_200_MESSAGE = "Consumer Device data by requestDTO returned";
+    private static final String DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_400_MESSAGE = "Could not query Device Registry by Consumer device requestDTO";
+    private static final String DEVICE_REGISTRY_UPDATE_DESCRIPTION = "Update a device";
+    private static final String DEVICE_REGISTRY_UPDATE_200_MESSAGE = "Device updated";
+    private static final String DEVICE_REGISTRY_UPDATE_400_MESSAGE = "Could not update device";
+    private static final String DEVICE_REGISTRY_MERGE_DESCRIPTION = "Merge/Patch a device";
+    private static final String DEVICE_REGISTRY_MERGE_200_MESSAGE = "Device merged";
+    private static final String DEVICE_REGISTRY_MERGE_400_MESSAGE = "Could not merge device";
 
     private static final String ID_NOT_VALID_ERROR_MESSAGE = "Id must be greater than 0. ";
-    private static final String SYSTEM_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
-    private static final String SYSTEM_ADDRESS_NULL_ERROR_MESSAGE = " Device address must have value ";
-    private static final String SYSTEM_PORT_NULL_ERROR_MESSAGE = " Device port must have value ";
-
     private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
     private static final String DEVICE_ADDRESS_NULL_ERROR_MESSAGE = " Device address must have value ";
     private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = " Device MAC address must have value ";
 
-    private static final String SYSTEM_REGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-    private static final String PATH_VARIABLE_SYSTEM_NAME = "systenName";
-    private static final String SYSTEM_REGISTRY_MGMT_BY_SYSTEM_NAME_URI = CoreCommonConstants.MGMT_URI + "/systemname" + "/{" + PATH_VARIABLE_SYSTEM_NAME + "}";
-    private static final String GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE = "Device Registry entries returned";
-    private static final String GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE = "Could not retrieve device registry entries";
-    private static final String DELETE_SYSTEM_REGISTRY_HTTP_200_MESSAGE = "Device Registry entry removed";
-    private static final String DELETE_SYSTEM_REGISTRY_HTTP_400_MESSAGE = "Could not remove device registry entry";
+    private static final String PATH_VARIABLE_DEVICE_NAME = "deviceName";
+    private static final String DEVICE_REGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
+    private static final String DEVICE_REGISTRY_MGMT_BY_DEVICE_NAME_URI = CoreCommonConstants.MGMT_URI + "/devicename" + "/{" + PATH_VARIABLE_DEVICE_NAME + "}";
+
+    private static final String MAC_ADDRESS_PATTERN = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
+    private final Pattern macAddressPattern = Pattern.compile(MAC_ADDRESS_PATTERN);
 
     private final Logger logger = LogManager.getLogger(DeviceRegistryController.class);
-
     private final DeviceRegistryDBService deviceRegistryDBService;
 
     @Autowired
@@ -127,27 +117,27 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return device by id", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Return device by deviceId", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_BY_ID_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_BY_ID_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICE_BY_ID_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICE_BY_ID_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(SYSTEM_BY_ID_URI)
+    @GetMapping(DEVICE_BY_ID_URI)
     @ResponseBody
-    public DeviceResponseDTO getDeviceById(@PathVariable(value = PATH_VARIABLE_ID) final long systemId) {
+    public DeviceResponseDTO getDeviceById(@PathVariable(value = PATH_VARIABLE_ID) final long deviceId) {
         logger.debug("getDeviceById started ...");
 
-        if (systemId < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + SYSTEM_BY_ID_URI);
+        if (deviceId < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICE_BY_ID_URI);
         }
 
-        return deviceRegistryDBService.getDeviceById(systemId);
+        return deviceRegistryDBService.getDeviceById(deviceId);
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return systems by request parameters", response = DeviceListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Return devices by request parameters", response = DeviceListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICES_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICES_HTTP_400_MESSAGE),
@@ -170,84 +160,87 @@ public class DeviceRegistryController
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return created device", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_SYSTEM_HTTP_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_SYSTEM_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_DEVICE_HTTP_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_DEVICE_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @PostMapping(path = DEVICES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     @ResponseBody
-    public DeviceResponseDTO addDevice(@RequestBody final DeviceRequestDTO request) {
-        return callCreateDevice(request);
+    public DeviceResponseDTO addDevice(@RequestBody final DeviceRequestDTO dto) {
+        logger.debug("New device registration request received with name: {}", dto.getDeviceName());
+
+        checkDeviceRequest(dto, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
+
+        final DeviceResponseDTO responseDTO = deviceRegistryDBService.createDeviceDto(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+        logger.debug("{} successfully registered.", responseDTO);
+
+        return responseDTO;
     }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return updated device", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_SYSTEM_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_SYSTEM_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = PUT_DEVICE_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_DEVICE_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @PutMapping(path = DEVICES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DeviceResponseDTO updateDevice(@PathVariable(value = PATH_VARIABLE_ID) final long systemId, @RequestBody final DeviceRequestDTO request) {
-        return callUpdateDevice(request, systemId);
+    public DeviceResponseDTO updateDevice(@PathVariable(value = PATH_VARIABLE_ID) final long deviceId, @RequestBody final DeviceRequestDTO dto) {
+        logger.debug("New device update request received with deviceId: {}, definition: {}", deviceId, dto);
+
+        final String origin = CommonConstants.DEVICE_REGISTRY_URI + DEVICE_BY_ID_URI;
+        if (deviceId < 1) {
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        }
+
+        checkDevicePutRequest(dto, deviceId);
+
+        final DeviceResponseDTO deviceResponseDTO = deviceRegistryDBService
+                .updateDeviceByIdResponse(deviceId, dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+        logger.debug("Device with deviceId: '{}' successfully updated with definition '{}'.", deviceId, deviceResponseDTO);
+
+        return deviceResponseDTO;
     }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return device updated by fields", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = PATCH_SYSTEM_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_SYSTEM_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = PATCH_DEVICE_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PATCH_DEVICE_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @PatchMapping(path = DEVICES_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DeviceResponseDTO mergeDevice(@PathVariable(value = PATH_VARIABLE_ID) final long systemId, @RequestBody final DeviceRequestDTO request) {
-        return callMergeDevice(request, systemId);
+    public DeviceResponseDTO mergeDevice(@PathVariable(value = PATH_VARIABLE_ID) final long deviceId, @RequestBody final DeviceRequestDTO request) {
+        logger.debug("mergeDevice started...");
+
+        checkDeviceMergeRequest(request, deviceId);
+        return deviceRegistryDBService.mergeDevice(deviceId, request);
     }
 
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Remove device", tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_DEVICE_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_DEVICE_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @DeleteMapping(path = DEVICES_BY_ID_URI)
     public void removeDevice(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Device delete request received with id: {}", id);
+        logger.debug("New Device delete request received with deviceId: {}", id);
 
         if (id < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_BY_ID_URI);
         }
 
         deviceRegistryDBService.removeDeviceById(id);
-        logger.debug("Device with id: '{}' successfully deleted", id);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return device by id", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICE_BY_ID_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICE_BY_ID_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(DEVICES_BY_ID_URI)
-    @ResponseBody
-    public DeviceResponseDTO getDeviceById(@PathVariable(value = PATH_VARIABLE_ID) final long deviceId) {
-        logger.debug("getDeviceById started ...");
-
-        if (deviceId < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + SYSTEM_BY_ID_URI);
-        }
-
-        return deviceRegistryDBService.getDeviceById(deviceId);
+        logger.debug("Device with deviceId: '{}' successfully deleted", id);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -275,79 +268,10 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return created device", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = POST_DEVICE_HTTP_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_DEVICE_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PostMapping(path = DEVICES_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @ResponseBody
-    public DeviceResponseDTO addDevice(@RequestBody final DeviceRequestDTO dto) {
-        logger.debug("New device registration request received with name: {}", dto.getDeviceName());
-
-        validateDevice(dto);
-
-        final DeviceResponseDTO responseDTO = deviceRegistryDBService.createDeviceDto(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
-        logger.debug("{} successfully registered.", responseDTO);
-
-        return responseDTO;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return updated device", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = PUT_DEVICE_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_DEVICE_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PutMapping(path = DEVICE_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public DeviceResponseDTO putUpdateDevice(@PathVariable(value = PATH_VARIABLE_ID) final long id,
-                                             @RequestBody final DeviceRequestDTO dto) {
-        logger.debug("New device update request received with id: {}, definition: {}", id, dto);
-
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICE_BY_ID_URI);
-        }
-
-        validateDevice(dto);
-
-        final DeviceResponseDTO deviceResponseDTO = deviceRegistryDBService
-                .updateDeviceByIdResponse(id, dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
-        logger.debug("Device with id: '{}' successfully updated with definition '{}'.", id, deviceResponseDTO);
-
-        return deviceResponseDTO;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Remove device", tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_DEVICES_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_DEVICES_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @DeleteMapping(path = DEVICE_BY_ID_URI)
-    public void removeDevice(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Device Definition delete request received with id: {}", id);
-
-        if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICE_BY_ID_URI);
-        }
-
-        deviceRegistryDBService.removeDeviceById(id);
-        logger.debug("Device with id: '{}' successfully deleted", id);
-    }
-
-    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return requested device registry entries by the given parameters", response = DeviceRegistryListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICE_REGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICE_REGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
@@ -371,21 +295,21 @@ public class DeviceRegistryController
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return requested device registry entry", response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICE_REGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICE_REGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI)
+    @GetMapping(path = DEVICE_REGISTRY_MGMT_BY_ID_URI)
     @ResponseBody
     public DeviceRegistryResponseDTO getDeviceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Device Registry get request received with id: {}", id);
+        logger.debug("New Device Registry get request received with deviceId: {}", id);
 
         if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_ID_URI);
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICE_REGISTRY_MGMT_BY_ID_URI);
         }
         final DeviceRegistryResponseDTO systemRegistryEntryByIdResponse = deviceRegistryDBService.getDeviceRegistryById(id);
-        logger.debug("Device Registry entry with id: {} successfully retrieved", id);
+        logger.debug("Device Registry entry with deviceId: {} successfully retrieved", id);
 
         return systemRegistryEntryByIdResponse;
     }
@@ -394,29 +318,29 @@ public class DeviceRegistryController
     @ApiOperation(value = "Return requested device registry entries by device definition based on the given parameters", response = DeviceRegistryListResponseDTO.class,
             tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICE_REGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICE_REGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = SYSTEM_REGISTRY_MGMT_BY_SYSTEM_NAME_URI)
+    @GetMapping(path = DEVICE_REGISTRY_MGMT_BY_DEVICE_NAME_URI)
     @ResponseBody
     public DeviceRegistryListResponseDTO getDeviceRegistryEntriesByDeviceName(
-            @PathVariable(value = PATH_VARIABLE_SYSTEM_NAME) final String systemName,
+            @PathVariable(value = PATH_VARIABLE_DEVICE_NAME) final String deviceName,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New Device Registry get by Device Definition request received with page: {} and item_per page: {}", page, size);
 
-        final String origin = CommonConstants.DEVICE_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_SYSTEM_NAME_URI;
-        if (Utilities.isEmpty(systemName)) {
+        final String origin = CommonConstants.DEVICE_REGISTRY_URI + DEVICE_REGISTRY_MGMT_BY_DEVICE_NAME_URI;
+        if (Utilities.isEmpty(deviceName)) {
             throw new BadPayloadException("Device name cannot be empty.", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
         final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
         final DeviceRegistryListResponseDTO systemRegistryEntries = deviceRegistryDBService
-                .getDeviceRegistryEntriesByDeviceName(systemName, pageParameters, sortField);
+                .getDeviceRegistryEntriesByDeviceName(deviceName, pageParameters, sortField);
         logger.debug("Device Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 
         return systemRegistryEntries;
@@ -425,37 +349,38 @@ public class DeviceRegistryController
     //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Remove the specified device registry entry", tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_SYSTEM_REGISTRY_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_SYSTEM_REGISTRY_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DELETE_DEVICE_REGISTRY_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DELETE_DEVICE_REGISTRY_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI)
+    @DeleteMapping(path = DEVICE_REGISTRY_MGMT_BY_ID_URI)
     public void removeDeviceRegistryEntryById(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
-        logger.debug("New Device Registry delete request received with id: {}", id);
+        logger.debug("New Device Registry delete request received with deviceId: {}", id);
 
         if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + SYSTEM_REGISTRY_MGMT_BY_ID_URI);
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICE_REGISTRY_MGMT_BY_ID_URI);
         }
 
         deviceRegistryDBService.removeDeviceRegistryEntryById(id);
-        logger.debug("Device Registry with id: '{}' successfully deleted", id);
+        logger.debug("Device Registry with deviceId: '{}' successfully deleted", id);
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiOperation(value = DEVICE_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEM_REGISTRY_REGISTER_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_REGISTER_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_CREATED, message = DEVICE_REGISTRY_REGISTER_201_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_REGISTER_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = {CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI, CoreCommonConstants.MGMT_URI},
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceRegistryResponseDTO registerDevice(@RequestBody final DeviceRegistryRequestDTO request) {
         logger.debug("New device registration request received");
-        checkDeviceRegistryRequest(request, false);
+        checkDeviceRegistryRequest(request, CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_DEVICE_REGISTRY_REGISTER_URI);
 
         final DeviceRegistryResponseDTO response = deviceRegistryDBService.registerDeviceRegistry(request);
         logger.debug("{} successfully registers its device {}", request.getDevice().getDeviceName(), request.getDevice());
@@ -464,35 +389,14 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_REGISTER_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = DEVICE_REGISTRY_UPDATE_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_CREATED, message = SYSTEM_REGISTRY_REGISTER_201_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_REGISTER_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_UPDATE_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_UPDATE_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
-    @PostMapping(path = CoreCommonConstants.MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    DeviceRegistryResponseDTO addDeviceRegistry(@RequestBody final DeviceRegistryRequestDTO request) {
-        logger.debug("New device registration request received");
-        checkDeviceRegistryRequest(request, CoreCommonConstants.MGMT_URI, true);
-
-        final DeviceRegistryResponseDTO response = deviceRegistryDBService.registerDeviceRegistry(request);
-        logger.debug("{}'s device {} is successfully registered", request.getDevice().getDeviceName(), request.getDevice());
-
-        return response;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_UPDATE_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_UPDATE_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_UPDATE_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @PutMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = DEVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     DeviceRegistryResponseDTO updateDeviceRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final DeviceRegistryRequestDTO request) {
         logger.debug("New device registry update request received");
@@ -506,14 +410,14 @@ public class DeviceRegistryController
 
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_MERGE_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = DEVICE_REGISTRY_MERGE_DESCRIPTION, response = DeviceRegistryResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_MERGE_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_MERGE_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_MERGE_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_MERGE_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PatchMapping(path = SYSTEM_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(path = DEVICE_REGISTRY_MGMT_BY_ID_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     DeviceRegistryResponseDTO mergeDeviceRegistry(@PathVariable(value = PATH_VARIABLE_ID) final long id, @RequestBody final DeviceRegistryRequestDTO request) {
         logger.debug("New device registry merge request received");
@@ -526,40 +430,39 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_UNREGISTER_DESCRIPTION, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiOperation(value = DEVICE_REGISTRY_UNREGISTER_DESCRIPTION, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_UNREGISTER_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_UNREGISTER_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_UNREGISTER_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_UNREGISTER_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @DeleteMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI)
-    public void unregisterDevice(@RequestParam(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_SYSTEM_NAME) final String systemName,
-                                 @RequestParam(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_ADDRESS) final String address,
-                                 @RequestParam(CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_PORT) final int port) {
+    @DeleteMapping(path = CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI)
+    public void unregisterDevice(@RequestParam(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_DEVICE_NAME) final String deviceName,
+                                 @RequestParam(CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_REQUEST_PARAM_PROVIDER_MAC_ADDRESS) final String macAddress) {
         logger.debug("Device removal request received");
-        checkUnregisterDeviceParameters(systemName, address, port);
+        checkUnregisterDeviceParameters(deviceName, macAddress);
 
-        deviceRegistryDBService.removeDeviceRegistryByNameAndAddressAndPort(systemName, address, port);
-        logger.debug("{} successfully removed", systemName);
+        deviceRegistryDBService.removeDeviceRegistryByNameAndMacAddress(deviceName, macAddress);
+        logger.debug("{} successfully removed", deviceName);
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_QUERY_DESCRIPTION, response = DeviceQueryResultDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
+    @ApiOperation(value = DEVICE_REGISTRY_QUERY_DESCRIPTION, response = DeviceQueryResultDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_CLIENT})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_QUERY_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_QUERY_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_QUERY_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_QUERY_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(path = CommonConstants.OP_SYSTEM_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = CommonConstants.OP_DEVICE_REGISTRY_QUERY_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceQueryResultDTO queryRegistry(@RequestBody final DeviceQueryFormDTO form) {
         logger.debug("Device query request received");
 
         if (Utilities.isEmpty(form.getDeviceNameRequirements())) {
             throw new BadPayloadException("Device definition requirement is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI +
-                    CommonConstants.OP_SYSTEM_REGISTRY_QUERY_URI);
+                    CommonConstants.OP_DEVICE_REGISTRY_QUERY_URI);
         }
 
         final DeviceQueryResultDTO result = deviceRegistryDBService.queryRegistry(form);
@@ -569,51 +472,50 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
+    @ApiOperation(value = DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @GetMapping(path = CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DeviceResponseDTO queryRegistryByDeviceId(@PathVariable(value = PATH_VARIABLE_ID) final long systemId) {
-        logger.debug("Device query by device id request received");
+    public DeviceResponseDTO queryRegistryByDeviceId(@PathVariable(value = PATH_VARIABLE_ID) final long deviceId) {
+        logger.debug("Device query by device deviceId request received");
 
-        if (systemId < 1) {
+        if (deviceId < 1) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI +
-                    CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI);
+                    CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI);
         }
 
-        final DeviceResponseDTO result = deviceRegistryDBService.getDeviceById(systemId);
+        final DeviceResponseDTO result = deviceRegistryDBService.getDeviceById(deviceId);
 
-        logger.debug("Return device by id: {}", systemId);
+        logger.debug("Return device by deviceId: {}", deviceId);
         return result;
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
+    @ApiOperation(value = DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_DESCRIPTION, response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_PRIVATE})
     @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_OK, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(path = CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceResponseDTO queryRegistryByDeviceDTO(@RequestBody final DeviceRequestDTO request) {
         logger.debug("Device query by systemRequestDTO request received");
 
-        checkDeviceRequest(request, CommonConstants.DEVICE_REGISTRY_URI + CoreCommonConstants.OP_SYSTEM_REGISTRY_QUERY_BY_SYSTEM_ID_URI, false);
+        checkDeviceRequest(request, CommonConstants.DEVICE_REGISTRY_URI + CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI);
 
         final String systemName = request.getDeviceName();
-        final String address = request.getAddress();
-        final int port = request.getPort();
+        final String macAddress = request.getMacAddress();
 
-        final DeviceResponseDTO result = deviceRegistryDBService.getDeviceDtoByNameAndAddressAndPort(systemName, address, port);
+        final DeviceResponseDTO result = deviceRegistryDBService.getDeviceDtoByNameAndMacAddress(systemName, macAddress);
 
-        logger.debug("Return device by name: {}, address: {}, port: {}", systemName, address, port);
+        logger.debug("Return device by name: {}, macAddress: {}", systemName, macAddress);
         return result;
     }
 
@@ -621,82 +523,28 @@ public class DeviceRegistryController
     // assistant methods
 
     //-------------------------------------------------------------------------------------------------
-    private DeviceResponseDTO callCreateDevice(final DeviceRequestDTO request) {
-        logger.debug("callCreateDevice started...");
-
-        checkDeviceRequest(request, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI, true);
-
-        final String systemName = request.getDeviceName();
-        final String address = request.getAddress();
-        final int port = request.getPort();
-        final String authenticationInfo = request.getAuthenticationInfo();
-
-        return deviceRegistryDBService.createDeviceDto(systemName, address, port, authenticationInfo);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private DeviceResponseDTO callUpdateDevice(final DeviceRequestDTO request, final long systemId) {
-        logger.debug("callUpdateDevice started...");
-
-        checkDevicePutRequest(request, systemId);
-
-        final String validatedDeviceName = request.getDeviceName().toLowerCase();
-        final String validatedAddress = request.getAddress().toLowerCase();
-        final int validatedPort = request.getPort();
-        final String validatedAuthenticationInfo = request.getAuthenticationInfo();
-
-        return deviceRegistryDBService.updateDeviceDto(systemId, validatedDeviceName, validatedAddress, validatedPort, validatedAuthenticationInfo);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private DeviceResponseDTO callMergeDevice(final DeviceRequestDTO request, final long systemId) {
-        logger.debug("callMergeDevice started...");
-
-        checkDeviceMergeRequest(request, systemId);
-
-        final String validatedDeviceName = request.getDeviceName() != null ? request.getDeviceName().toLowerCase() : "";
-        final String validatedAddress = request.getAddress() != null ? request.getAddress().toLowerCase() : "";
-        final Integer validatedPort = request.getPort();
-        final String validatedAuthenticationInfo = request.getAuthenticationInfo();
-
-        return deviceRegistryDBService.mergeDeviceResponse(systemId, validatedDeviceName, validatedAddress, validatedPort, validatedAuthenticationInfo);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private void checkDeviceMergeRequest(final DeviceRequestDTO request, final long systemId) {
+    private void checkDeviceMergeRequest(final DeviceRequestDTO request, final long deviceId) {
         logger.debug("checkDevicePatchRequest started...");
         final String origin = CommonConstants.DEVICE_REGISTRY_URI + DEVICES_BY_ID_URI;
 
-        if (systemId <= 0) {
+        if (deviceId <= 0) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_BY_ID_URI);
         }
 
         boolean needChange = false;
-        if (!Utilities.isEmpty(request.getAddress())) {
+        if (Utilities.notEmpty(request.getAddress())) {
             needChange = true;
         }
 
-
-        if (!Utilities.isEmpty(request.getDeviceName())) {
-            needChange = true;
-            for (final CoreDevice coreSysteam : CoreDevice.values()) {
-                if (coreSysteam.name().equalsIgnoreCase(request.getDeviceName().trim())) {
-                    throw new BadPayloadException("Device name '" + request.getDeviceName() + "' is a reserved arrowhead core device name.", HttpStatus.SC_BAD_REQUEST, origin);
-                }
-            }
-        }
-
-        if (request.getPort() != null) {
-            final int validatedPort = request.getPort();
-            if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-                throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST,
-                                              origin);
-            }
-
+        if (Utilities.notEmpty(request.getDeviceName())) {
             needChange = true;
         }
 
-        if (request.getAuthenticationInfo() != null) {
+        if (Utilities.notEmpty(request.getMacAddress())) {
+            needChange = true;
+        }
+
+        if (Utilities.notEmpty(request.getAuthenticationInfo())) {
             needChange = true;
         }
 
@@ -706,11 +554,11 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void checkDevicePutRequest(final DeviceRequestDTO request, final long systemId) {
+    private void checkDevicePutRequest(final DeviceRequestDTO request, final long deviceId) {
         logger.debug("checkDevicePutRequest started...");
         final String origin = CommonConstants.DEVICE_REGISTRY_URI + DEVICES_BY_ID_URI;
 
-        if (systemId <= 0) {
+        if (deviceId <= 0) {
             throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
 
@@ -738,14 +586,6 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void checkDeviceRegistryRequest(final DeviceRegistryRequestDTO request) {
-        logger.debug("checkDeviceRegistryRequest started...");
-
-        final String origin = CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI;
-        checkDeviceRegistryRequest(request, origin);
-    }
-
-    //-------------------------------------------------------------------------------------------------
     private void checkDeviceRegistryRequest(final DeviceRegistryRequestDTO request, final String origin) {
         logger.debug("checkDeviceRegistryRequest started...");
 
@@ -762,22 +602,27 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void checkUnregisterDeviceParameters(final String systemName, final String address, final int port) {
+    private void checkUnregisterDeviceParameters(final String systemName, final String macAddress)
+    {
         // parameters can't be null, but can be empty
         logger.debug("checkUnregisterDeviceParameters started...");
 
-        final String origin = CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI;
+        final String origin = CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI;
 
-        if (Utilities.isEmpty(systemName)) {
+        if (Utilities.isEmpty(systemName))
+        {
             throw new BadPayloadException("Name of the device is blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        if (Utilities.isEmpty(address)) {
-            throw new BadPayloadException("Address of the device is blank", HttpStatus.SC_BAD_REQUEST, origin);
+        if (Utilities.isEmpty(macAddress))
+        {
+            throw new BadPayloadException("MAC Address of the device is blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-            throw new BadPayloadException("Port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+        final Matcher matcher = macAddressPattern.matcher(macAddress);
+        if (matcher.matches())
+        {
+            throw new BadPayloadException("Unrecognized format of MAC Address", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
@@ -790,22 +635,6 @@ public class DeviceRegistryController
         }
 
         checkDeviceRegistryRequest(request, origin);
-
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private void validateDevice(@RequestBody final DeviceRequestDTO deviceRequestDto) {
-        if (Utilities.isEmpty(deviceRequestDto.getDeviceName())) {
-            throw new BadPayloadException("Device name is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
-        }
-
-        if (Utilities.isEmpty(deviceRequestDto.getAddress())) {
-            throw new BadPayloadException("Device address is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
-        }
-
-        if (Utilities.isEmpty(deviceRequestDto.getMacAddress())) {
-            throw new BadPayloadException("Device MAC address is null or blank", HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
-        }
     }
 
     //-------------------------------------------------------------------------------------------------
