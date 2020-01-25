@@ -43,24 +43,18 @@ public class HistorianService {
 	public static boolean Init(Properties propss){
 	  props = propss;
 
-	  System.out.println("HistorianServce::Init()");
-
 	  try {
 	    Class.forName("com.mysql.cj.jdbc.Driver");
 	  } catch (ClassNotFoundException e) {
-	    System.out.println("Where is your MySQL JDBC Driver?");
-	    e.printStackTrace();
+	    logger.debug("Where is your MySQL JDBC Driver?");
 	    return false;
 	  }
 
-	  System.out.println("MySQL JDBC Driver Registered!");
 	  try {
 	    connection = getConnection();
-	    //checkTables(connection, props.getProperty("spring.datasource.database"));
 	    connection.close();
 	  } catch (SQLException e) {
-	    System.out.println("Connection Failed! Check output console");
-	    e.printStackTrace();
+	    logger.debug("Connection Failed! Check output console");
 	    System.exit(-1);
 	    return false;
 	  }
@@ -99,7 +93,6 @@ public class HistorianService {
 	static int serviceToID(String serviceName, Connection conn) {
 	  int id=-1;
 
-	  //System.out.println("serviceToID('"+serviceName+"')");
 	  Statement stmt = null;
 	  try {
 	    stmt = conn.createStatement();
@@ -114,13 +107,10 @@ public class HistorianService {
 	    stmt.close();
 	  }catch(SQLException se){
 	    id = -1;
-	    //se.printStackTrace();
 	  }catch(Exception e){
 	    id = -1;
-	    //e.printStackTrace();
 	  }
 
-	  //System.out.println("serviceToID('"+serviceName+"')="+id);
 	  return id;
 	}
 
@@ -144,7 +134,7 @@ public class HistorianService {
 	    rs.close();
 	    stmt.close();
 	  } catch (SQLException e) {
-	    System.err.println(e.toString());
+	    logger.debug(e.toString());
 	  } finally {
 	    try {
 	      closeConnection(conn);
@@ -165,20 +155,17 @@ public class HistorianService {
 	  try {
 	    conn = getConnection();
 	    int id = serviceToID(serviceName, conn);
-	    //System.out.println("addServiceForSystem: found " + id);
 	    if (id != -1) {
 	      return false; //already exists
 	    } else {
 	      Statement stmt = conn.createStatement();
 	      String sql = "INSERT INTO dmhist_services(system_name, service_name, service_type) VALUES(\""+systemName+"\", \""+serviceName+"\", \""+serviceType+"\");"; //bug: check name for SQL injection!
-	      //System.out.println(sql);
 	      int mid = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 	      ResultSet rs = stmt.getGeneratedKeys();
 	      rs.next();
 	      id = rs.getInt(1);
 	      rs.close();
 	      stmt.close();
-	      //System.out.println("addServiceForSystem: created " + id);
 
 	    }
 
@@ -206,17 +193,14 @@ public class HistorianService {
 	    conn = getConnection();
 	    Statement stmt = conn.createStatement();
 	    String sql = "SELECT DISTINCT(service_name) FROM dmhist_services WHERE system_name='"+systemName+"';";
-	    //System.out.println(sql);
 
 	    ResultSet rs = stmt.executeQuery(sql);
 	    while(rs.next() == true) {
-	      //System.out.println("---"+rs.getString(1));
 	      ret.add(rs.getString(1));
 	    }
 	    rs.close();
 	    stmt.close();
 	  }catch(SQLException db){
-	    //System.out.println(db.toString());
 	  } finally {
 	    try {
 	      connection.close();
@@ -238,25 +222,21 @@ public class HistorianService {
 	  try {
 	    conn = getConnection();
 	    int id = serviceToID(serviceName, conn);
-	    //System.out.println("createEndpoint: found " + id);
 	    if (id != -1) {
 	      return true; //already exists
 	    } else {
 	      Statement stmt = conn.createStatement();
 	      String sql = "INSERT INTO dmhist_services(system_name, service_name) VALUES(\""+systemName+"\", \""+serviceName+"\");"; //bug: check name for SQL injection!
-	      //System.out.println(sql);
 	      int mid = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 	      ResultSet rs = stmt.getGeneratedKeys();
 	      rs.next();
 	      id = rs.getInt(1);
 	      rs.close();
 	      stmt.close();
-	      //System.out.println("createEndpoint: created " + id);
 
 	    }
 
 	  } catch (SQLException e) {
-	    //System.out.println("createEndpoint:: "+e.toString());
 	    return false;
 	  } finally {
 	    try{
@@ -278,7 +258,7 @@ public class HistorianService {
 
 	  double maxTs = maxTs(msg);
 	  double minTs = minTs(msg);
-	  System.out.println("bt(msg): "+(msg.get(0).getBt())+", minTs(msg): "+minTs+", maxTs(msg): " + maxTs);
+	  //logger.debug("bt(msg): "+(msg.get(0).getBt())+", minTs(msg): "+minTs+", maxTs(msg): " + maxTs);
 
 	  Connection conn = null;
 	  try {
@@ -287,7 +267,6 @@ public class HistorianService {
 	    if (sid != -1) {
 	      Statement stmt = conn.createStatement();
 	      String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg, datastored) VALUES("+sid+", "+msg.get(0).getBt()+","+minTs+", "+maxTs+", '"+msg.toString()+"',NOW());"; //how to escape?
-	      System.out.println(sql);
 	      int mid = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 	      ResultSet rs = stmt.getGeneratedKeys();
 	      rs.next();
@@ -300,7 +279,6 @@ public class HistorianService {
 	      String bu = msg.get(0).getBu();
 	      for (SenML m : msg) {
 		double t = 0;
-		System.out.println("m: " + m.toString());
 		if (m.getT() != null) {
 		  if (m.getT() < 268435456) //if relative ts, update it
 		    t = m.getT() + bt;
@@ -326,7 +304,6 @@ public class HistorianService {
 
 		if (n != null) {
 		  sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, sv, bv) VALUES("+sid+", "+mid+", '"+n+"', " + t +", "+unit+", "+value+", "+stringvalue+", "+boolvalue+");";
-		  System.out.println(sql);
 		  stmt = conn.createStatement();
 		  stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 		  rs = stmt.getGeneratedKeys();
@@ -340,7 +317,6 @@ public class HistorianService {
 	      ret = false;
 	    }
 	  } catch (SQLException e) {
-	    //System.out.println(e.toString());
 	    ret = false;
 	  } finally {
 	    try{
@@ -362,7 +338,6 @@ public class HistorianService {
 	  try {
 	    conn = getConnection();
 	    int id = serviceToID(serviceName, conn);
-	    //System.out.println("Got id of: " + id);
 	    if (id == -1)
 	      return null;
 
@@ -372,7 +347,6 @@ public class HistorianService {
 		signalss += ("'"+sig + "',");
 	      }
 	      signalss = signalss.substring(0, signalss.length()-1); //remove last ',' XXX. remove/detect escape characters 
-	      System.out.println("Signals: '" + signalss + "'");
 	    }
 
 	    if (from == -1)
@@ -387,7 +361,6 @@ public class HistorianService {
 	      sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND n IN ("+signalss+") AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
 	    else
 	      sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
-	    System.out.println(sql);
 	    ResultSet rs = stmt.executeQuery(sql);
 
 	    Vector<SenML> messages = new Vector<SenML>();
@@ -397,59 +370,18 @@ public class HistorianService {
 	    double bt = 0;
 	    String bu = null;
 	    while(rs.next() == true && count > 0) {
-	      //Gson gson = new Gson();
-	      //SenML[] smlarr = gson.fromJson(rs.getString("msg"), SenML[].class);
-	      //System.out.println("fetch() " + rs.getString("msg"));
 	      SenML msg = new SenML();
 	      msg.setT((double)rs.getLong("t"));
 	      msg.setN(rs.getString("n"));
 	      msg.setU(rs.getString("u"));
 	      msg.setV(rs.getDouble("v"));
 
-	      System.out.println("\t: " + msg.toString());
 	      messages.add(msg);
 	      count--;
-
-	      /*for (SenML m : smlarr) {
-		  if (m.getBt() != null) {
-		    bt = m.getBt();
-
-		    if (((SenML)messages.firstElement()).getBt() == null)
-		      ((SenML)messages.firstElement()).setBt(bt);
-		  }
-		  if (m.getBu() != null) {
-		    bu = m.getBu();
-
-		    if (((SenML)messages.firstElement()).getBu() == null)
-		      ((SenML)messages.firstElement()).setBu(bu);
-		  }
-
-		  System.out.println("  got " + m.getN());
-		  // check if m contains a value in signals
-		  if (signals.contains(m.getN())) {
-		    if (m.getT() != null) {
-		      if (m.getT() < 268435456) // if less than 2**28, it is relative
-		        m.setT(bt+m.getT());
-		    } else {
-		      m.setT(bt);
-		    }
-		    messages.add(m);
-		    count--;
-		  }
-		}*/
 	    }
 
 	    rs.close();
 	    stmt.close();
-
-	    //update bn fields (i.e. remove if the same as the first
-	    /*String startbn = ((SenML)messages.firstElement()).getBn();
-	    for (int i = 1; i< messages.size(); i++) {
-	      SenML m = (SenML)messages.get(i);
-	      System.out.println("startbn: "+ startbn+"\tm.Bn: "+m.getBn());
-	      if (startbn.equals(m.getBn()))
-		m.setBn(null);
-	    }*/
 
 	    // if no data, was found, just return the header element
 	    if (messages.size() == 1)
@@ -463,26 +395,12 @@ public class HistorianService {
 	    for (SenML m : messages) {
 	      if (m.getT() != null)
 		m.setT(m.getT()-startbt);
-	      System.out.println("\t" + m.toString());
 	    }
-
-	    // update unit tags: XXX do it another way! loop and check if all messages have the same u
-	    /*String startbu = ((SenML)messages.firstElement()).getBu();
-	    if (startbu != null) {
-	      for (SenML m : messages) {
-		try {
-		  if (m.getU().equals(startbu)){
-		    m.setU(null);
-		  }
-		} catch(Exception e){
-		}
-	      }
-	    }*/
 
 	    return messages;
 
 	} catch (SQLException e) {
-	  System.err.println(e.toString());
+	  logger.debug(e.toString());
 	} finally {
 	  try {
 	    closeConnection(conn);
@@ -494,98 +412,25 @@ public class HistorianService {
 	}
 
 
-	/**
-	 * @fn static Vector<SenML> fetchEndpoint(String serviceName, long from, long to, int count)
-	 * @brief
-	 * @param name
-	 * @param count
-	 * @return
-	 */
-	/*public static Vector<SenML> fetchEndpoint(String serviceName, long from, long to, int count) {
-	  Connection conn = null;
+	//returns largest (newest) timestamp value
+	private static double maxTs(Vector<SenML> msg) {
+		double bt = msg.get(0).getBt();
+		double max = bt;
+		for (SenML m : msg) {
 
-	  try {
-	    conn = getConnection();
-	    int id = serviceToID(serviceName, conn);
-	    //System.out.println("Got id of: " + id);
-	    if (id == -1) {
-	      return null;
-	    }
-	    Statement stmt = conn.createStatement();
-	    String sql = "SELECT * FROM dmhist_messages WHERE sid="+id+" ORDER BY datastored DESC LIMIT "+count+";";
-	    System.out.println(sql);
-	    ResultSet rs = stmt.executeQuery(sql);
+			if (m.getT() == null)
+				continue;
+			if (m.getT() > 268435456) { // absolute
+				if (m.getT() > max )
+					max = m.getT();
+			} else {                      //relative
+				if (m.getT()+bt > max )
+					max = m.getT() + bt;
+			}
+		}
 
-	    String msg = "";
-	    Vector<SenML> messages = new Vector<SenML>(); 
-	    while(rs.next() == true && count > 0) {
-	      msg = rs.getString("msg");
-	      System.out.println("###\n"+ msg + "###");
-	      Gson gson = new Gson();
-	      SenML[] smlarr = gson.fromJson(msg, SenML[].class);
-
-	      System.out.println("fetch() " + msg);
-	      for (SenML m : smlarr)
-		messages.add(m);
-	      
-	      count--;
-	    }
-	    rs.close();
-	    stmt.close();
-
-	    // if no data, was found, just return the header element
-	    if (messages.size() <= 1)
-	      return messages;
-
-	    //recalculate a bt time and update all relative timestamps
-	    double startbt = ((SenML)messages.get(0)).getBt();
-	    //((SenML)messages.firstElement()).setBt(startbt);
-	    ((SenML)messages.firstElement()).setT(null);
-	    for (SenML m : messages) {
-	      m.setBn(null);
-	      System.out.println("\t" + m.toString());
-	      if (m.getBt() != null) {
-		m.setT(m.getBt());
-		m.setBt(null);
-	      }
-	      if (m.getT() != null)
-		m.setT(m.getT()-startbt);
-	    }
-	    ((SenML)messages.firstElement()).setBn(serviceName);
-
-	    return messages;
-
-	  } catch (SQLException e) {
-	    System.err.println(e.toString());
-	  } finally {
-	    try{
-	      closeConnection(conn);
-	    } catch(Exception e){}
-
-	  }
-
-	    return null;
-	  }*/
-
-	  //returns largest (newest) timestamp value
-	  private static double maxTs(Vector<SenML> msg) {
-	    double bt = msg.get(0).getBt();
-	    double max = bt;
-	    for (SenML m : msg) {
-
-	      if (m.getT() == null)
-		continue;
-	      if (m.getT() > 268435456) { // absolute
-		if (m.getT() > max )
-		  max = m.getT();
-	      } else {                      //relative
-		  if (m.getT()+bt > max )
-		    max = m.getT() + bt;
-	      }
-	    }
-
-	    return max;
-	  }
+		return max;
+	}
 
 	  //returns smallest (oldest) timestamp value
 	  private static double minTs(Vector<SenML> msg) {

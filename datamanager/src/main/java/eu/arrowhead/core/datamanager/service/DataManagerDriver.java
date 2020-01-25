@@ -37,157 +37,22 @@ public class DataManagerDriver {
 
 	//=================================================================================================
 	// members
-	
-	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
-	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-	private static final String EMPTY_PARAMETER_ERROR_MESSAGE = " is empty.";
-	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
-	private static final String IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the future than the tolerated time difference";
-	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
-	private static final String LESS_THAN_ONE_ERROR_MESSAGE = " is less than one.";
-	
-	private static final String AUTH_SUBSCRIPTION_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	
 	private static final Logger logger = LogManager.getLogger(DataManagerDriver.class);
 	
-	@Autowired
-	private HttpService httpService;
 
-	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
-	private Map<String,Object> arrowheadContext;
 	
-	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
-	private long timeStampTolerance;
 	
 	//=================================================================================================
 	// methods
 
-	//-------------------------------------------------------------------------------------------------	
-	public Set<SystemResponseDTO> getAuthorizedPublishers(final SystemRequestDTO subscriberSystem) {
-		logger.debug("getAuthorizedPublishers started...");
-		
-		Assert.notNull(subscriberSystem, "subscriberSystem is null.");
-		
-		final UriComponents checkUri = getAuthSubscriptionCheckUri();
-		final AuthorizationSubscriptionCheckRequestDTO payload = new AuthorizationSubscriptionCheckRequestDTO(subscriberSystem, null);
-		final ResponseEntity<AuthorizationSubscriptionCheckResponseDTO> response = httpService.sendRequest(checkUri, HttpMethod.POST, AuthorizationSubscriptionCheckResponseDTO.class, payload);		
-		
-		return response.getBody().getPublishers();
-	}
 	
-	//-------------------------------------------------------------------------------------------------
-	public void publishEvent(final EventPublishRequestDTO request, final Set<Subscription> involvedSubscriptions) {
-		logger.debug("publishEvent started...");
-	}
+	
+	
 	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private UriComponents getAuthSubscriptionCheckUri() {
-		logger.debug("getAuthSubscriptionCheckUri started...");
-		
-		if (arrowheadContext.containsKey(AUTH_SUBSCRIPTION_CHECK_URI_KEY)) {
-			try {
-				return (UriComponents) arrowheadContext.get(AUTH_SUBSCRIPTION_CHECK_URI_KEY);
-			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
-			}
-		}
-		
-		throw new ArrowheadException("EventHandler can't find subscription authorization check URI.");
-	}
-
-
-	//-------------------------------------------------------------------------------------------------
-	private void checkPublishRequestDTO( final EventPublishRequestDTO request ) {
-		logger.debug("checkPublishRequestDTO started...");
-		
-		if (request == null) {
-			throw new InvalidParameterException("EventPublishRequestDTO" + NULL_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		if (Utilities.isEmpty(request.getEventType())) {
-			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		if (Utilities.isEmpty(request.getPayload())) {
-			throw new InvalidParameterException("Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		ckeckTimeStamp( request.getTimeStamp() );	
-		checkSystemRequestDTO( request.getSource() );
-		
-	}
 	
 	
-	//-------------------------------------------------------------------------------------------------
-	private void ckeckTimeStamp( final String timeStampString ) {
-		logger.debug("ckeckTimeStamp started...");
-		
-		if (Utilities.isEmpty(timeStampString)) {
-			throw new InvalidParameterException("TimeStamp" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
-		}	
-		
-		final ZonedDateTime now = ZonedDateTime.now();
-		final ZonedDateTime timeStamp;
-
-		try {
-			
-			timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(timeStampString);
-		
-		} catch (final DateTimeParseException ex) {
-			
-			throw new InvalidParameterException("TimeStamp" + INVALID_TYPE_ERROR_MESSAGE);
-		}
-		
-		if (timeStamp.isAfter(now.plusSeconds( timeStampTolerance ))) {
-			
-			throw new InvalidParameterException("TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE);
-		}
-		
-		if (timeStamp.isBefore(now.minusSeconds( timeStampTolerance ))) {
-			
-			throw new InvalidParameterException("TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
-		}
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkSystemRequestDTO(final SystemRequestDTO system) {
-		logger.debug("checkSystemRequestDTO started...");
-		
-		if (system == null) {
-			throw new InvalidParameterException("System" + NULL_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		if (Utilities.isEmpty(system.getSystemName())) {
-			throw new InvalidParameterException("System name" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		if (Utilities.isEmpty(system.getAddress())) {
-			throw new InvalidParameterException("System address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		if (system.getPort() == null) {
-			throw new InvalidParameterException("System port" + NULL_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		if (system.getPort() < 1) {
-			throw new InvalidParameterException("System port" + LESS_THAN_ONE_ERROR_MESSAGE );
-		}
-	}	
-	
-	//-------------------------------------------------------------------------------------------------
-	private void checkInvolvedSubscriptions(final Set<Subscription> involvedSubscriptions) {
-		
-		if ( involvedSubscriptions == null ) {
-			throw new InvalidParameterException("involvedSubscriptions" + NULL_PARAMETER_ERROR_MESSAGE);
-		}
-		
-		if ( involvedSubscriptions.isEmpty() ) {
-			throw new InvalidParameterException("involvedSubscriptions" + EMPTY_PARAMETER_ERROR_MESSAGE);
-		}
-		
-	}
 }

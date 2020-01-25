@@ -53,7 +53,6 @@ public class ProxyService {
 	while (epi.hasNext()) {
 	    ProxyElement pe = epi.next();
 	    if (systemName.equals(pe.systemName)) {
-		//System.out.println("Found endpoint: " + pe.serviceName);
 		res.add(pe);
 	    }
 	}
@@ -88,7 +87,6 @@ public class ProxyService {
 
 	while (epi.hasNext()) {
 	    ProxyElement curpe = epi.next();
-	    //System.out.println("Found endpoint: " + curpe.serviceName);
 	    if (serviceName.equals(curpe.serviceName)) {
 		return curpe;
 	    }
@@ -106,15 +104,10 @@ public class ProxyService {
     public static boolean updateEndpoint(String systemName, String serviceName, Vector<SenML> msg) {
 	Iterator<ProxyElement> epi = endpoints.iterator();
 
-	//Iterator<SenML> sml = msg.iterator();
-	//while(sml.hasNext())
-	//    System.out.println(" "+ sml.next());
-
 	while (epi.hasNext()) {
 	    ProxyElement pe = epi.next();
 	    if (serviceName.equals(pe.serviceName)) {
 		pe.msg = msg;
-		//System.out.println("Updating with: " + msg.toString());
 		return true;
 	    }
 	}
