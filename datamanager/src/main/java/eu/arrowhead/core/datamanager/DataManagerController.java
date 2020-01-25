@@ -39,11 +39,6 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.SenML;
-import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionRequestDTO;
-import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.core.datamanager.service.DataManagerService;
@@ -151,7 +146,6 @@ public class DataManagerController {
 	@GetMapping(value= "/historian")
 	@ResponseBody public String historianS(
 			) {
-		//System.out.println("DataManager::Historian/");
 		Gson gson = new Gson();
 
 		ArrayList<String> systems = HistorianService.getSystems();
@@ -174,7 +168,7 @@ public class DataManagerController {
 	@ResponseBody public String historianSystemGet(
 		@PathVariable(value="systemName", required=true) String systemName
 		) {
-		System.out.println("DataManager:GET:Historian/"+systemName);
+		logger.debug("DataManager:GET:Historian/"+systemName);
 		return historianSystemPut(systemName, "{\"op\": \"list\"}");
 	}
 
@@ -183,7 +177,7 @@ public class DataManagerController {
 			@PathVariable(value="systemName", required=true) String systemName,
 			@RequestBody String requestBody
 		) {
-		System.out.println("DataManager:PUT:Historian/"+systemName);
+		logger.debug("DataManager:PUT:Historian/"+systemName);
 
 		JsonParser parser= new JsonParser();
 		JsonObject obj = null;
@@ -195,24 +189,17 @@ public class DataManagerController {
 
 		String op = obj.get("op").getAsString();
 		if(op.equals("list")) {
-			//System.out.println("OP: list");
 			ArrayList<String> services = HistorianService.getServicesFromSystem(systemName);
-			//for (String srv: services) {
-			//  System.out.println(":" +srv);
-			//}
 			Gson gson = new Gson();
 			JsonObject answer = new JsonObject();
 			JsonElement servicelist = gson.toJsonTree(services);
 			answer.add("services", servicelist);
 			String jsonStr = gson.toJson(answer);
-			System.out.println(jsonStr);
 
 			return jsonStr;
 		} else if(op.equals("create")){
-			//System.out.println("OP: CREATE");
 			String srvName = obj.get("srvName").getAsString();
 			String srvType = obj.get("srvType").getAsString();
-			//System.out.println("Create SRV: "+srvName+" of type: "+srvType+" for: " + systemName);
 
 			/* check if service already exists */
 			ArrayList<String> services = HistorianService.getServicesFromSystem(systemName);
@@ -257,7 +244,6 @@ public class DataManagerController {
 		int sigCnt = 0;
 		while(it.hasNext()){
 			String par = (String)it.next();
-			System.out.println("Key: " + par + " value: " + params.getFirst(par) + "("+("sig"+sigCnt)+")");
 			if (par.equals("count")) {
 				count = Integer.parseInt(params.getFirst(par));
 			} else if (par.equals("sig"+sigCnt)) {
@@ -291,14 +277,9 @@ public class DataManagerController {
 	@PathVariable(value="serviceName", required=true) String serviceName,
 	@RequestBody Vector<SenML> sml
 	) {
-		System.out.println("DataManager:Put:Historian/"+systemName+"/"+serviceName);
-		//Iterator entry = sml.iterator();
-		//while (entry.hasNext()) { 
-            	  //System.out.println(entry.next().toString()); 
-      		//} 
+		logger.debug("DataManager:Put:Historian/"+systemName+"/"+serviceName);
 
 		boolean statusCode = HistorianService.createEndpoint(systemName, serviceName);
-		logger.info("Historian PUT for system '"+systemName+"', service '"+serviceName+"'"); 
 
 		if (validateSenML(sml) == false) {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Invalid SenML");
@@ -308,20 +289,6 @@ public class DataManagerController {
 		if(head.getBt() == null)
 			head.setBt((double)System.currentTimeMillis() / 1000.0);
 
-		String bu = head.getBu();
-		for(SenML s: sml) {
-			/*if (s.getBu() != null) {
-				bu = s.getBu();
-			}*/
-			//if (s.getU() == null && s.getBu() != null) {
-			//	s.setU(bu);
-			//}
-			//System.out.println("object" + s.toString());
-			//if(s.getT() == null)
-			//	s.setT(s.getBt());
-			//else if (s.getT() < 268435456) //2**28
-			//	s.setT(s.getT() + s.getBt()); // if it was a relative ts, make it absolut
-		} 
 		statusCode = HistorianService.updateEndpoint(serviceName, sml);
 
 		String jsonret = "{\"x\": 0}";
@@ -337,7 +304,6 @@ public class DataManagerController {
 	})
 	@GetMapping(value= "/proxy", produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public String proxyS() {
-		//System.out.println("DataManager::proxy/");
 		Gson gson = new Gson();
 
 		List<String> pes = ProxyService.getAllEndpoints();
@@ -361,11 +327,9 @@ public class DataManagerController {
 	@ResponseBody public String proxySystemGet(
 			@PathVariable(value="systemName", required=true) String systemName
 		) {
-		//System.out.println("DataManager:Get:proxy/"+systemName);
 
 		List<ProxyElement> pes = ProxyService.getEndpoints(systemName);
 		if (pes.size() == 0) {
-			//logger.debug("proxy GET to systemName: " + systemName + " not found");
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "System not found");
 		}
 
@@ -394,7 +358,6 @@ public class DataManagerController {
 			@PathVariable(value="systemName", required=true) String systemName,
 			@RequestBody String requestBody
 		) {
-		System.out.println("DataManager:Put:proxy/"+systemName);
 		JsonParser parser= new JsonParser();
 		JsonObject obj = null;
 		try {
@@ -436,11 +399,9 @@ public class DataManagerController {
 					JsonObject answer = new JsonObject();
 					answer.addProperty("createResult", "Already exists");
 					String jsonStr = gson.toJson(answer);
-					//return Response.status(Status.CONFLICT).entity(jsonStr).type(MediaType.APPLICATION_JSON).build();
 					throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "createResult: Already exists");
 				}
 			}
-			//logger.info("Not found, create it: " + srvName);
 
 			/* create the service */
 			boolean ret = ProxyService.addEndpoint(new ProxyElement(systemName, srvName));
@@ -453,8 +414,6 @@ public class DataManagerController {
 			String srvName = obj.get("srvName").getAsString();
 			String srvType = obj.get("srvType").getAsString();
 			logger.info("Delete Service: "+srvName+" of type: "+srvType+" for: " + systemName);
-
-			/* check if service already exists */
 		}
 
 		return "";
@@ -472,22 +431,17 @@ public class DataManagerController {
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName
 			) {
-			System.out.println("DataManager:Get:Proxy/"+systemName+"/"+serviceName);
 
 			int statusCode = 0;
 			ProxyElement pe = ProxyService.getEndpoint(serviceName);
 			if (pe == null) {
 				logger.info("proxy GET to serviceName: " + serviceName + " not found");
-				//return Response.status(Status.NOT_FOUND).build();
 				throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Service not found");
 			}
 
 			Iterator i = pe.msg.iterator();
 			String senml = "";
-			/*while (i.hasNext()) {
-				senml += ((i.next().toString())+"\n");
-				System.out.println("\t"+senml);
-			}*/
+
 			return pe.msg.toString();
 			}
 
@@ -514,7 +468,6 @@ public class DataManagerController {
 		}
 
 		boolean statusCode = ProxyService.updateEndpoint(systemName, serviceName, sml);
-		//logger.info("putData/SenML returned with status code: " + statusCode + " from: " + sml.get(0).getBn() + " at: " + sml.get(0).getBt());
 
 		int ret = 0;
 		if (statusCode == false)
@@ -542,7 +495,6 @@ public class DataManagerController {
 	      buc++;
 	  }
 
-	System.out.println("bnc: "+bnc+", btc: "+btc+", buc: "+buc);
 
 	  /* bu can only exist once. bt can only exist one, bu can exist 0 or 1 times */
 	  if (bnc != 1 || btc != 1 || buc > 1)
@@ -565,7 +517,6 @@ public class DataManagerController {
 	  entry = sml.iterator();
 	  while (entry.hasNext()) {
 	    o = (SenML)entry.next();
-	    System.out.println(o.toString()); 
 
 	    int value_count = 0;
 	    if (o.getV() != null)
