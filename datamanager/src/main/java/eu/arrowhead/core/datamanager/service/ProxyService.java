@@ -20,7 +20,6 @@ public class ProxyService {
 
     static {
 	endpoints = new ArrayList<>();
-
     }
 
 

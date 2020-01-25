@@ -56,18 +56,12 @@ public class DataManagerApplicationInitListener extends ApplicationInitListener 
 			ex.printStackTrace();
 		}
 		HistorianService.Init(prop);
-
-		System.out.println("Init here");
-
-
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected void customDestroy() {				
 		logger.debug("customDestroy started...");
-
-
 	}
 
 }

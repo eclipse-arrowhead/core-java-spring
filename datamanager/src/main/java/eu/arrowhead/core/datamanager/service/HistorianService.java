@@ -31,6 +31,8 @@ public class HistorianService {
 	 private static String dbPassword;
 	 private static Properties props = null;
 
+	 private static final Logger logger = LogManager.getLogger(DataManagerDriver.class);
+
 	 static {
 
 	}
