@@ -1,5 +1,59 @@
 package eu.arrowhead.common.dto.internal;
 
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloud;
+import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloud;
+import eu.arrowhead.common.database.entity.AuthorizationIntraCloudInterfaceConnection;
+import eu.arrowhead.common.database.entity.ChoreographerAction;
+import eu.arrowhead.common.database.entity.ChoreographerActionActionStepConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlan;
+import eu.arrowhead.common.database.entity.ChoreographerActionPlanActionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerActionStep;
+import eu.arrowhead.common.database.entity.ChoreographerActionStepServiceDefinitionConnection;
+import eu.arrowhead.common.database.entity.ChoreographerNextActionStep;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
+import eu.arrowhead.common.database.entity.CloudGatewayRelay;
+import eu.arrowhead.common.database.entity.Device;
+import eu.arrowhead.common.database.entity.DeviceRegistry;
+import eu.arrowhead.common.database.entity.EventType;
+import eu.arrowhead.common.database.entity.ForeignSystem;
+import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.database.entity.ServiceDefinition;
+import eu.arrowhead.common.database.entity.ServiceInterface;
+import eu.arrowhead.common.database.entity.ServiceRegistry;
+import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
+import eu.arrowhead.common.database.entity.Subscription;
+import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
+import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.entity.SystemRegistry;
+import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.ChoreographerNextActionStepResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.DeviceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.DeviceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
+import eu.arrowhead.common.dto.shared.EventDTO;
+import eu.arrowhead.common.dto.shared.EventPublishRequestDTO;
+import eu.arrowhead.common.dto.shared.EventTypeResponseDTO;
+import eu.arrowhead.common.dto.shared.PreferredProviderDataDTO;
+import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionListResponseDTO;
+import eu.arrowhead.common.dto.shared.SubscriptionResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemQueryResultDTO;
+import eu.arrowhead.common.dto.shared.SystemRegistryResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,16 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import eu.arrowhead.common.database.entity.*;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.dto.shared.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.util.Assert;
-
-import eu.arrowhead.common.Utilities;
 
 public class DTOConverter {
 	

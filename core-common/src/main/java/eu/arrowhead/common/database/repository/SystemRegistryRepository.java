@@ -24,7 +24,7 @@ public interface SystemRegistryRepository extends RefreshableRepository<SystemRe
 
     Optional<SystemRegistry> findBySystemAndDevice(final System systemDb, final Device deviceDb);
 
-	List<SystemRegistry> findAllBySystem(final List<System> systems);
+	List<SystemRegistry> findAllBySystemIsIn(final List<System> systems);
 
-    Page<SystemRegistry> findAllBySystem(final List<System> systemList, final PageRequest pageRequest);
+    Page<SystemRegistry> findAllBySystemIsIn(final List<System> systemList, final PageRequest pageRequest);
 }

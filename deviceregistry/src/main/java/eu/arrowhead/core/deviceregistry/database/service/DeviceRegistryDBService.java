@@ -288,7 +288,7 @@ public class DeviceRegistryDBService
                                                            params.getValidatedSize(),
                                                            params.getValidatedDirection(),
                                                            validatedSortField);
-            final Page<DeviceRegistry> deviceRegistryPage = deviceRegistryRepository.findAllByDevice(devices, pageRequest);
+            final Page<DeviceRegistry> deviceRegistryPage = deviceRegistryRepository.findAllByDeviceIsIn(devices, pageRequest);
             return DTOConverter.convertDeviceRegistryListToDeviceRegistryListResponseDTO(deviceRegistryPage);
         }
         catch (final Exception ex)
@@ -537,7 +537,7 @@ public class DeviceRegistryDBService
                 }
             }
 
-            registryList = deviceRegistryRepository.findAllByDevice(devices);
+            registryList = deviceRegistryRepository.findAllByDeviceIsIn(devices);
             unfilteredHits = registryList.size();
 
             if (Utilities.notEmpty(form.getAddressRequirement()))

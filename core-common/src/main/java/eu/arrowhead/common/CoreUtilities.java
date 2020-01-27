@@ -73,7 +73,7 @@ public class CoreUtilities {
 		
 		//=================================================================================================
 		// members
-		private static final int MAX_BATCH_SIZE = 200;
+		private static final int MAX_BATCH_SIZE = Integer.MAX_VALUE;
 
 		private final int validatedPage;
 		private final int validatedSize;

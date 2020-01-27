@@ -18,6 +18,6 @@ public interface DeviceRegistryRepository extends RefreshableRepository<DeviceRe
 
     //-------------------------------------------------------------------------------------------------
     Optional<DeviceRegistry> findByDevice(final Device device);
-    Page<DeviceRegistry> findAllByDevice(final List<Device> devices, final PageRequest pageRequest);
-    List<DeviceRegistry> findAllByDevice(final List<Device> devices);
+    Page<DeviceRegistry> findAllByDeviceIsIn(final List<Device> devices, final PageRequest pageRequest);
+    List<DeviceRegistry> findAllByDeviceIsIn(final List<Device> devices);
 }

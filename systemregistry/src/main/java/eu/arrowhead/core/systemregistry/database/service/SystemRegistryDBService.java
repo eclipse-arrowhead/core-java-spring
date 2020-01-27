@@ -630,7 +630,7 @@ public class SystemRegistryDBService
         final PageRequest pageRequest = PageRequest.of(pageParameters.getValidatedPage(), pageParameters.getValidatedSize(),
                                                        pageParameters.getValidatedDirection(), sortField);
 
-        final Page<SystemRegistry> systemRegistries = systemRegistryRepository.findAllBySystem(systemList, pageRequest);
+        final Page<SystemRegistry> systemRegistries = systemRegistryRepository.findAllBySystemIsIn(systemList, pageRequest);
         return DTOConverter.convertSystemRegistryListToSystemRegistryListResponseDTO(systemRegistries);
     }
 
@@ -683,7 +683,7 @@ public class SystemRegistryDBService
                 throw new InvalidParameterException("System Name must not be null");
             }
 
-            registryList = systemRegistryRepository.findAllBySystem(systems);
+            registryList = systemRegistryRepository.findAllBySystemIsIn(systems);
             unfilteredHits = registryList.size();
 
             if (Utilities.notEmpty(form.getDeviceNameRequirements()))

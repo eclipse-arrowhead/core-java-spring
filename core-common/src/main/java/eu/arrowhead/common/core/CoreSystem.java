@@ -7,10 +7,30 @@ import org.springframework.util.Assert;
 import java.util.Collections;
 import java.util.List;
 
-import static eu.arrowhead.common.core.CoreSystemService.*;
+import static eu.arrowhead.common.core.CoreSystemService.AUTH_CONTROL_INTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.AUTH_CONTROL_INTRA_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.AUTH_CONTROL_SUBSCRIPTION_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.AUTH_PUBLIC_KEY_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_REGISTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.DEVICE_REGISTRY_UNREGISTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.EVENT_PUBLISH_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.EVENT_SUBSCRIBE_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY;
+import static eu.arrowhead.common.core.CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION;
+import static eu.arrowhead.common.core.CoreSystemService.GATEWAY_CONSUMER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.GATEWAY_PROVIDER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.ONBOARDING_SERVICE_WITH_NAME;
+import static eu.arrowhead.common.core.CoreSystemService.ORCHESTRATION_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.SERVICE_REGISTRY_REGISTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.SERVICE_REGISTRY_UNREGISTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_REGISTER_SERVICE;
+import static eu.arrowhead.common.core.CoreSystemService.SYSTEM_REGISTRY_UNREGISTER_SERVICE;
 
-public enum CoreSystem
-{
+public enum CoreSystem {
 
     //=================================================================================================
     // elements
@@ -20,12 +40,12 @@ public enum CoreSystem
     DEVICE_REGISTRY(Defaults.DEFAULT_DEVICE_REGISTRY_PORT, List.of(DEVICE_REGISTRY_REGISTER_SERVICE, DEVICE_REGISTRY_UNREGISTER_SERVICE)),
     ONBOARDING(Defaults.DEFAULT_ONBOARDING_PORT, List.of(ONBOARDING_SERVICE_WITH_NAME)),
     AUTHORIZATION(Defaults.DEFAULT_AUTHORIZATION_PORT, List.of(AUTH_CONTROL_INTRA_SERVICE, AUTH_CONTROL_INTER_SERVICE,
-                                                               AUTH_TOKEN_GENERATION_SERVICE, AUTH_PUBLIC_KEY_SERVICE,
-                                                               AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
+            AUTH_TOKEN_GENERATION_SERVICE, AUTH_PUBLIC_KEY_SERVICE,
+            AUTH_CONTROL_SUBSCRIPTION_SERVICE)),
     ORCHESTRATOR(Defaults.DEFAULT_ORCHESTRATOR_PORT, List.of(ORCHESTRATION_SERVICE)),
     GATEKEEPER(Defaults.DEFAULT_GATEKEEPER_PORT, List.of(GATEKEEPER_GLOBAL_SERVICE_DISCOVERY, GATEKEEPER_INTER_CLOUD_NEGOTIATION)),
     EVENT_HANDLER(Defaults.DEFAULT_EVENT_HANDLER_PORT, List.of(EVENT_PUBLISH_SERVICE, EVENT_SUBSCRIBE_SERVICE,
-                                                               EVENT_UNSUBSCRIBE_SERVICE, EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
+            EVENT_UNSUBSCRIBE_SERVICE, EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
     GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(GATEWAY_PUBLIC_KEY_SERVICE, GATEWAY_PROVIDER_SERVICE, GATEWAY_CONSUMER_SERVICE)),
     CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of()), // TODO: add services
     CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of()); // TODO: add services
@@ -40,18 +60,23 @@ public enum CoreSystem
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    private CoreSystem(final int defaultPort, final List<CoreSystemService> services)
-    {
+    public int getDefaultPort() {
+        return defaultPort;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public List<CoreSystemService> getServices() {
+        return services;
+    }
+
+
+    //=================================================================================================
+    // constructors
+
+    //-------------------------------------------------------------------------------------------------
+    private CoreSystem(final int defaultPort, final List<CoreSystemService> services) {
         Assert.isTrue(defaultPort > CommonConstants.SYSTEM_PORT_RANGE_MIN && defaultPort < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Default port is invalid.");
         this.services = services != null ? Collections.unmodifiableList(services) : List.of();
         this.defaultPort = defaultPort;
     }
-
-    //-------------------------------------------------------------------------------------------------
-    public int getDefaultPort() { return defaultPort; }
-
-    //=================================================================================================
-    // assistant methods
-
-    public List<CoreSystemService> getServices() { return services; }
 }
