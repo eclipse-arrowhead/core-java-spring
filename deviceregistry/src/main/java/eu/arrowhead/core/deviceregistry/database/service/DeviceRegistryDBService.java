@@ -884,10 +884,10 @@ public class DeviceRegistryDBService
     //-------------------------------------------------------------------------------------------------
     private Device mergeDevice(final DeviceRequestDTO request, final Device device)
     {
-        final String name = Utilities.firstNotNull(request.getDeviceName(), device.getDeviceName());
-        final String address = Utilities.firstNotNull(request.getAddress(), device.getAddress());
-        final String macAddress = Utilities.firstNotNull(request.getDeviceName(), device.getDeviceName());
-        final String authenticationInfo = Utilities.firstNotNull(request.getAuthenticationInfo(), device.getAuthenticationInfo());
+        final String name = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
+        final String address = Utilities.firstNotNullIfExists(request.getAddress(), device.getAddress());
+        final String macAddress = Utilities.firstNotNullIfExists(request.getDeviceName(), device.getDeviceName());
+        final String authenticationInfo = Utilities.firstNotNullIfExists(request.getAuthenticationInfo(), device.getAuthenticationInfo());
         return findOrCreateDevice(name, address, macAddress, authenticationInfo);
     }
 

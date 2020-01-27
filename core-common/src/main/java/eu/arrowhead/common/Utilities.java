@@ -501,21 +501,21 @@ public class Utilities {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static String firstNotNull(final String first, final String second) {
+    public static String firstNotNullIfExists(final String first, final String second) {
         return Utilities.notEmpty(first) ? Utilities.lowerCaseTrim(first) : Utilities.lowerCaseTrim(second);
     }
 
     //-------------------------------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    public static <T> T firstNotNull(final T first, final T second) {
+    public static <T> T firstNotNullIfExists(final T first, final T second) {
         if (first instanceof String && second instanceof String) {
-            return (T) firstNotNull((String) first, (String) second);
+            return (T) firstNotNullIfExists((String) first, (String) second);
         }
         return Objects.nonNull(first) ? first : second;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public static String firstNotNull(final String... args) {
+    public static String firstNotNullIfExists(final String... args) {
         for (final String candidate : args) {
             if (Utilities.notEmpty(candidate)) {
                 return Utilities.lowerCaseTrim(candidate);
