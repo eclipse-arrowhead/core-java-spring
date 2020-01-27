@@ -39,6 +39,7 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.SenML;
+import eu.arrowhead.common.dto.shared.SigML;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.core.datamanager.service.DataManagerService;
@@ -66,49 +67,6 @@ public class DataManagerController {
 	
 	//=================================================================================================
 	// members
-	
-	/*private static final String PATH_VARIABLE_ID = "id";
-
-	private static final String EVENT_HANDLER_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/subscriptions";
-	private static final String EVENTHANLER_BY_ID_MGMT_URI = EVENT_HANDLER_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-	
-	private static final String GET_EVENT_HANDLER_MGMT_DESCRIPTION = "Return requested Subscription entries by the given parameters";
-	private static final String GET_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE = "Subscription entries returned";
-	private static final String GET_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE = "Could not retrieve Subscription entries";
-	
-	private static final String GET_EVENT_HANDLER_BY_ID_MGMT_DESCRIPTION = "Return requested Subscription entry by the given id";
-	private static final String GET_EVENT_HANDLER_BY_ID_MGMT_HTTP_200_MESSAGE = "Subscription entriy returned";
-	private static final String GET_EVENT_HANDLER_BY_ID_MGMT_HTTP_400_MESSAGE = "Could not retrieve Subscription entry";
-	
-	private static final String DELETE_EVENT_HANDLER_MGMT_DESCRIPTION = "Delete requested Subscription entry by the given id";
-	private static final String DELETE_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE = "Subscription entriy deleted";
-	private static final String DELETE_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE = "Could not delete Subscription entry";
-	
-	private static final String PUT_EVENT_HANDLER_MGMT_DESCRIPTION = "Update requested Subscription entry by the given id and parameters";
-	private static final String PUT_EVENT_HANDLER_MGMT_HTTP_200_MESSAGE = "Updated Subscription entry returned";
-	private static final String PUT_EVENT_HANDLER_MGMT_HTTP_400_MESSAGE = "Could not update Subscription entry";	
-	
-	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION = "Subcribtion to the events specified in requested Subscription ";
-	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful subscription.";
-	private static final String POST_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful subscription.";
-	
-	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_DESCRIPTION = "Unsubcribtion from the events specified in requested Subscription ";
-	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_200_MESSAGE = "Successful unsubscription.";
-	private static final String DELETE_EVENT_HANDLER_SUBSCRIPTION_HTTP_400_MESSAGE = "Unsuccessful unsubscription.";
-	
-	private static final String POST_EVENT_HANDLER_PUBLISH_DESCRIPTION = "Publish event"; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_200_MESSAGE = "Publish event success"; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_HTTP_400_MESSAGE = "Publish event not success"; 
-
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_DESCRIPTION = "Publish authorization change event "; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_200_MESSAGE = "Publish authorization change event success"; 
-	private static final String POST_EVENT_HANDLER_PUBLISH_AUTH_UPDATE_HTTP_400_MESSAGE = "Publish authorization change event not success"; 
-	
-	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
-	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
-	private static final String WRONG_FORMAT_ERROR_MESSAGE = " is in wrong format. ";*/
-
 	private final Logger logger = LogManager.getLogger(DataManagerController.class);
 	
 	@Autowired
@@ -227,7 +185,7 @@ public class DataManagerController {
 	}
 
 	@GetMapping(value= "/historian/{system}/{service}")//CommonConstants.DM_HISTORIAN_URI)
-	@ResponseBody public String historianServiceGet(
+	@ResponseBody public List<SenML> historianServiceGet(
 		@PathVariable(value="system", required=true) String systemName,
 		@PathVariable(value="service", required=true) String serviceName,
 		@RequestParam MultiValueMap<String, String> params
@@ -257,7 +215,7 @@ public class DataManagerController {
 		}
 		logger.info("getData requested with count: " + count);
 
-		Vector<SenML> ret = null;
+		List<SenML> ret = null;
 
 		if(signals.size() == 0) {
 			ret = HistorianService.fetchEndpoint(serviceName, from, to, count, null);
@@ -265,14 +223,12 @@ public class DataManagerController {
 			ret = HistorianService.fetchEndpoint(serviceName, from, to, count, signals);
 		}
 
-		if (ret == null)
-			return "[\"bn\": \""+serviceName+"\"]";
-
-		return ret.toString();
+		return ret;
 	}
 
+
 	@PutMapping(value= "/historian/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)//CommonConstants.DM_HISTORIAN_URI)
-	@ResponseBody public String historianServicePut(
+	@ResponseBody public SigML historianServicePut(
 	@PathVariable(value="systemName", required=true) String systemName,
 	@PathVariable(value="serviceName", required=true) String serviceName,
 	@RequestBody Vector<SenML> sml
@@ -291,8 +247,9 @@ public class DataManagerController {
 
 		statusCode = HistorianService.updateEndpoint(serviceName, sml);
 
-		String jsonret = "{\"x\": 0}";
-		return jsonret;
+		SigML ret = new SigML(0);
+		//String jsonret = "{\"x\": 0}";
+		return ret;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -303,7 +260,7 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= "/proxy", produces=MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String proxyS() {
+	@ResponseBody public String proxyServices() {
 		Gson gson = new Gson();
 
 		List<String> pes = ProxyService.getAllEndpoints();
