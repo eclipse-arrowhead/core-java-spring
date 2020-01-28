@@ -36,13 +36,13 @@ public class QoSIntraPingMeasurement {
 	private ZonedDateTime lastAccessAt;
 	
 	@Column(nullable = true)
-	private int minResponseTime;
+	private Integer minResponseTime;
 
 	@Column(nullable = true)
-	private int maxResponseTime;
+	private Integer maxResponseTime;
 
 	@Column(nullable = true)
-	private int meanResponseTime;
+	private Integer meanResponseTime;
 	
 	@Column(nullable = false)
 	private long sent;
@@ -89,9 +89,9 @@ public class QoSIntraPingMeasurement {
 	public QoSIntraMeasurement getMeasurement() { return measurement; }
 	public boolean isAccessible() { return accessible; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
-	public int getMinResponseTime() { return minResponseTime; }
-	public int getMaxResponseTime() { return maxResponseTime; }
-	public int getMeanResponseTime() { return meanResponseTime; }
+	public Integer getMinResponseTime() { return minResponseTime; }
+	public Integer getMaxResponseTime() { return maxResponseTime; }
+	public Integer getMeanResponseTime() { return meanResponseTime; }
 	public long getSent() { return sent; }
 	public long getReceived() { return received; }
 	public ZonedDateTime getCountStartedAt() { return countStartedAt; }
@@ -105,9 +105,9 @@ public class QoSIntraPingMeasurement {
 	public void setMeasurement(final QoSIntraMeasurement measurement) { this.measurement = measurement; }
 	public void setAccessible(final boolean accessible) { this.accessible = accessible; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
-	public void setMinResponseTime(final int minResponseTime) { this.minResponseTime = minResponseTime; }
-	public void setMaxResponseTime(final int maxResponseTime) { this.maxResponseTime = maxResponseTime; }
-	public void setMeanResponseTime(final int meanResponseTime) { this.meanResponseTime = meanResponseTime; }
+	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
+	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }
+	public void setMeanResponseTime(final Integer meanResponseTime) { this.meanResponseTime = meanResponseTime; }
 	public void setSent(final long sent) { this.sent = sent; }
 	public void setReceived(final long received) { this.received = received; }
 	public void setCountStartedAt(final ZonedDateTime countStartedAt) { this.countStartedAt = countStartedAt; }
