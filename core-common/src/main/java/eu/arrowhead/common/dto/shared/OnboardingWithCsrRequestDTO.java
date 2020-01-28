@@ -7,8 +7,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
-public class OnboardingWithCsrRequestDTO implements Serializable
-{
+public class OnboardingWithCsrRequestDTO implements Serializable {
 
     //=================================================================================================
     // members

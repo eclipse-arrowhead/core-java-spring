@@ -2,8 +2,8 @@ package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
 
-public class OnboardingWithCsrResponseDTO implements Serializable
-{
+public class OnboardingWithCsrResponseDTO implements Serializable {
+
     //=================================================================================================
     // members
 

@@ -502,7 +502,7 @@ public class Utilities {
 
     //-------------------------------------------------------------------------------------------------
     public static String firstNotNullIfExists(final String first, final String second) {
-        return Utilities.notEmpty(first) ? Utilities.lowerCaseTrim(first) : Utilities.lowerCaseTrim(second);
+        return Utilities.notEmpty(first) ? first : second;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -518,7 +518,7 @@ public class Utilities {
     public static String firstNotNullIfExists(final String... args) {
         for (final String candidate : args) {
             if (Utilities.notEmpty(candidate)) {
-                return Utilities.lowerCaseTrim(candidate);
+                return candidate;
             }
         }
 

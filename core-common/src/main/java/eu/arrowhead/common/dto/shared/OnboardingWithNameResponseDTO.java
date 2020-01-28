@@ -1,9 +1,12 @@
 package eu.arrowhead.common.dto.shared;
 
-public class OnboardingWithNameResponseDTO
-{
+import java.io.Serializable;
+
+public class OnboardingWithNameResponseDTO implements Serializable {
+
     //=================================================================================================
     // members
+    private static final long serialVersionUID = 1L;
     private ServiceEndpoint deviceRegistry;
     private ServiceEndpoint systemRegistry;
     private ServiceEndpoint serviceRegistry;

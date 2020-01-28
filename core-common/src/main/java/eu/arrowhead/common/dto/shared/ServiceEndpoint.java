@@ -2,10 +2,14 @@ package eu.arrowhead.common.dto.shared;
 
 import eu.arrowhead.common.core.CoreSystemService;
 
+import java.io.Serializable;
 import java.net.URI;
 
-public class ServiceEndpoint
-{
+public class ServiceEndpoint implements Serializable {
+
+    //=================================================================================================
+    // members
+    private static final long serialVersionUID = 1L;
 
     private final CoreSystemService system;
     private final URI uri;

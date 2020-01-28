@@ -21,8 +21,8 @@ PKG_NAME="arrowhead-onboarding"
 
 case "$1" in
     remove)
-        systemctl stop ${PKG_NAME}.service
-		systemctl disable ${PKG_NAME}.service
+      systemctl stop ${PKG_NAME}.service
+		  systemctl disable ${PKG_NAME}.service
     ;;
 
     upgrade|deconfigure)

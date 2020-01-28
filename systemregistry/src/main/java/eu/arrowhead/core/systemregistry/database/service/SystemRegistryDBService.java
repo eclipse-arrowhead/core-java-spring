@@ -160,7 +160,6 @@ public class SystemRegistryDBService
         }
         final String validatedAddress = validateParamString(address);
 
-
         try
         {
             final Optional<System> systemOptional = systemRepository.findById(validatedSystemId);
@@ -1085,7 +1084,6 @@ public class SystemRegistryDBService
 
         final String validatedName = Utilities.lowerCaseTrim(name);
         final String validatedAddress = Utilities.lowerCaseTrim(address);
-        final String validatedAuthenticationInfo = Utilities.lowerCaseTrim(authenticationInfo);
 
         final Optional<System> optSystem = systemRepository.findBySystemNameAndAddressAndPort(validatedName, validatedAddress, port);
         System provider;
@@ -1093,17 +1091,17 @@ public class SystemRegistryDBService
         if (optSystem.isPresent())
         {
             provider = optSystem.get();
-            if (!Objects.equals(validatedAuthenticationInfo, provider.getAuthenticationInfo()) ||
+            if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo()) ||
                     !Objects.equals(validatedAddress, provider.getAddress()))
             { // authentication info or system has changed
-                provider.setAuthenticationInfo(validatedAuthenticationInfo);
+                provider.setAuthenticationInfo(authenticationInfo);
                 provider.setAddress(validatedAddress);
                 provider = systemRepository.saveAndFlush(provider);
             }
         }
         else
         {
-            provider = createSystem(validatedName, validatedAddress, port, validatedAuthenticationInfo);
+            provider = createSystem(validatedName, validatedAddress, port, authenticationInfo);
         }
         return provider;
     }
@@ -1124,7 +1122,6 @@ public class SystemRegistryDBService
         final String validateName = Utilities.lowerCaseTrim(deviceName);
         final String validateAddress = Utilities.lowerCaseTrim(address);
         final String validatedMacAddress = Utilities.lowerCaseTrim(macAddress);
-        final String validatedAuthenticationInfo = Utilities.lowerCaseTrim(authenticationInfo);
 
         final Optional<Device> optProvider = deviceRepository.findByDeviceNameAndMacAddress(validateName, validatedMacAddress);
         Device provider;
@@ -1132,17 +1129,17 @@ public class SystemRegistryDBService
         if (optProvider.isPresent())
         {
             provider = optProvider.get();
-            if (!Objects.equals(validatedAuthenticationInfo, provider.getAuthenticationInfo()) ||
+            if (!Objects.equals(authenticationInfo, provider.getAuthenticationInfo()) ||
                     !Objects.equals(validateAddress, provider.getAddress()))
             { // authentication info or provider has changed
-                provider.setAuthenticationInfo(validatedAuthenticationInfo);
+                provider.setAuthenticationInfo(authenticationInfo);
                 provider.setAddress(validateAddress);
                 provider = deviceRepository.saveAndFlush(provider);
             }
         }
         else
         {
-            provider = createDevice(validateName, validateAddress, validatedMacAddress, validatedAuthenticationInfo);
+            provider = createDevice(validateName, validateAddress, validatedMacAddress, authenticationInfo);
         }
         return provider;
     }
@@ -1151,7 +1148,7 @@ public class SystemRegistryDBService
     private Device createDevice(final String name, final String address, final String macAddress, final String authenticationInfo)
     {
         final Device device = new Device(name, address, macAddress, authenticationInfo);
-        return deviceRepository.save(device);
+        return deviceRepository.saveAndFlush(device);
     }
 
     //-------------------------------------------------------------------------------------------------

@@ -51,8 +51,7 @@ import java.util.regex.Pattern;
 )
 @RestController
 @RequestMapping(CommonConstants.DEVICE_REGISTRY_URI)
-public class DeviceRegistryController
-{
+public class DeviceRegistryController {
 
     //=================================================================================================
     // members
@@ -111,8 +110,8 @@ public class DeviceRegistryController
     private static final String DEVICE_REGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
     private static final String DEVICE_REGISTRY_MGMT_BY_DEVICE_NAME_URI = CoreCommonConstants.MGMT_URI + "/devicename" + "/{" + PATH_VARIABLE_DEVICE_NAME + "}";
 
-    private static final String MAC_ADDRESS_PATTERN = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
-    private final Pattern macAddressPattern = Pattern.compile(MAC_ADDRESS_PATTERN);
+    private static final String MAC_ADDRESS_PATTERN_STRING = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
+    public static final Pattern MAC_ADDRESS_PATTERN = Pattern.compile(MAC_ADDRESS_PATTERN_STRING);
 
     private final Logger logger = LogManager.getLogger(DeviceRegistryController.class);
     private final DeviceRegistryDBService deviceRegistryDBService;
@@ -159,7 +158,7 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return devices by request parameters", response = DeviceListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Return devices by given request parameters", response = DeviceListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICES_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICES_HTTP_400_MESSAGE),
@@ -173,10 +172,14 @@ public class DeviceRegistryController
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-        logger.debug("getDevices started ...");
+        logger.debug("New DeviceList get request received with page: {} and item_per page: {}", page, size);
 
-        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
-        return deviceRegistryDBService.getDeviceEntries(pageParameters, sortField);
+        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities
+                .validatePageParameters(page, size, direction, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
+        final DeviceListResponseDTO deviceListResponseDTO = deviceRegistryDBService.getDeviceEntries(pageParameters, sortField);
+        logger.debug("DeviceList with page: {} and item_per page: {} successfully retrieved", page, size);
+
+        return deviceListResponseDTO;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -195,7 +198,8 @@ public class DeviceRegistryController
 
         checkDeviceRequest(dto, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
 
-        final DeviceResponseDTO responseDTO = deviceRegistryDBService.createDeviceDto(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
+        final DeviceResponseDTO responseDTO = deviceRegistryDBService
+                .createDeviceDto(dto.getDeviceName(), dto.getAddress(), dto.getMacAddress(), dto.getAuthenticationInfo());
         logger.debug("{} successfully registered.", responseDTO);
 
         return responseDTO;
@@ -266,30 +270,6 @@ public class DeviceRegistryController
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return requested device by the given parameters", response = DeviceListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICES_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_DEVICES_HTTP_400_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = DEVICES_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public DeviceListResponseDTO getDeviceListByRequestParameters(
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-            @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-        logger.debug("New DeviceList get request received with page: {} and item_per page: {}", page, size);
-
-        final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.DEVICE_REGISTRY_URI + DEVICES_URI);
-        final DeviceListResponseDTO deviceListResponseDTO = deviceRegistryDBService.getDeviceEntries(pageParameters, sortField);
-        logger.debug("DeviceList with page: {} and item_per page: {} successfully retrieved", page, size);
-
-        return deviceListResponseDTO;
-    }
-
-    //-------------------------------------------------------------------------------------------------
     @ApiOperation(value = "Return requested device registry entries by the given parameters", response = DeviceRegistryListResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = GET_DEVICE_REGISTRY_HTTP_200_MESSAGE),
@@ -306,12 +286,13 @@ public class DeviceRegistryController
             @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CoreCommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
         logger.debug("New Device Registry get request received with page: {} and item_per page: {}", page, size);
 
-        final CoreUtilities.ValidatedPageParams params = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.DEVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI);
-        final DeviceRegistryListResponseDTO systemRegistryEntriesResponse = deviceRegistryDBService
+        final CoreUtilities.ValidatedPageParams params = CoreUtilities
+                .validatePageParameters(page, size, direction, CommonConstants.DEVICE_REGISTRY_URI + CoreCommonConstants.MGMT_URI);
+        final DeviceRegistryListResponseDTO deviceRegistryEntriesResponse = deviceRegistryDBService
                 .getDeviceRegistryEntries(params, sortField);
         logger.debug("Device Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 
-        return systemRegistryEntriesResponse;
+        return deviceRegistryEntriesResponse;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -328,12 +309,13 @@ public class DeviceRegistryController
         logger.debug("New Device Registry get request received with deviceId: {}", id);
 
         if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICE_REGISTRY_MGMT_BY_ID_URI);
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST,
+                                          CommonConstants.DEVICE_REGISTRY_URI + DEVICE_REGISTRY_MGMT_BY_ID_URI);
         }
-        final DeviceRegistryResponseDTO systemRegistryEntryByIdResponse = deviceRegistryDBService.getDeviceRegistryById(id);
+        final DeviceRegistryResponseDTO deviceRegistryEntryByIdResponse = deviceRegistryDBService.getDeviceRegistryById(id);
         logger.debug("Device Registry entry with deviceId: {} successfully retrieved", id);
 
-        return systemRegistryEntryByIdResponse;
+        return deviceRegistryEntryByIdResponse;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -361,11 +343,11 @@ public class DeviceRegistryController
         }
 
         final CoreUtilities.ValidatedPageParams pageParameters = CoreUtilities.validatePageParameters(page, size, direction, origin);
-        final DeviceRegistryListResponseDTO systemRegistryEntries = deviceRegistryDBService
+        final DeviceRegistryListResponseDTO deviceRegistryEntries = deviceRegistryDBService
                 .getDeviceRegistryEntriesByDeviceName(deviceName, pageParameters, sortField);
         logger.debug("Device Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
 
-        return systemRegistryEntries;
+        return deviceRegistryEntries;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -381,7 +363,8 @@ public class DeviceRegistryController
         logger.debug("New Device Registry delete request received with deviceId: {}", id);
 
         if (id < 1) {
-            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.DEVICE_REGISTRY_URI + DEVICE_REGISTRY_MGMT_BY_ID_URI);
+            throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST,
+                                          CommonConstants.DEVICE_REGISTRY_URI + DEVICE_REGISTRY_MGMT_BY_ID_URI);
         }
 
         deviceRegistryDBService.removeDeviceRegistryEntryById(id);
@@ -425,7 +408,8 @@ public class DeviceRegistryController
         checkDeviceRegistryUpdateRequest(id, request, CoreCommonConstants.MGMT_URI);
 
         final DeviceRegistryResponseDTO response = deviceRegistryDBService.updateDeviceRegistryById(id, request);
-        logger.debug("Device Registry entry {} is successfully updated with device {} and device {}", id, request.getDevice().getDeviceName(), request.getDevice());
+        logger.debug("Device Registry entry {} is successfully updated with device {} and device {}", id, request.getDevice().getDeviceName(),
+                     request.getDevice());
 
         return response;
     }
@@ -528,16 +512,16 @@ public class DeviceRegistryController
     @PostMapping(path = CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_DTO_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DeviceResponseDTO queryRegistryByDeviceDTO(@RequestBody final DeviceRequestDTO request) {
-        logger.debug("Device query by systemRequestDTO request received");
+        logger.debug("Device query by DeviceRequestDTO request received");
 
         checkDeviceRequest(request, CommonConstants.DEVICE_REGISTRY_URI + CoreCommonConstants.OP_DEVICE_REGISTRY_QUERY_BY_DEVICE_ID_URI);
 
-        final String systemName = request.getDeviceName();
+        final String deviceName = request.getDeviceName();
         final String macAddress = request.getMacAddress();
 
-        final DeviceResponseDTO result = deviceRegistryDBService.getDeviceDtoByNameAndMacAddress(systemName, macAddress);
+        final DeviceResponseDTO result = deviceRegistryDBService.getDeviceDtoByNameAndMacAddress(deviceName, macAddress);
 
-        logger.debug("Return device by name: {}, macAddress: {}", systemName, macAddress);
+        logger.debug("Return device by name: {}, macAddress: {}", deviceName, macAddress);
         return result;
     }
 
@@ -617,33 +601,30 @@ public class DeviceRegistryController
             try {
                 Utilities.parseUTCStringToLocalZonedDateTime(request.getEndOfValidity().trim());
             } catch (final DateTimeParseException ex) {
-                throw new BadPayloadException("End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.",
+                throw new BadPayloadException(
+                        "End of validity is specified in the wrong format. Please provide UTC time using " + Utilities.getDatetimePattern() + " pattern.",
                         HttpStatus.SC_BAD_REQUEST, origin);
             }
         }
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void checkUnregisterDeviceParameters(final String systemName, final String macAddress)
-    {
+    private void checkUnregisterDeviceParameters(final String deviceName, final String macAddress) {
         // parameters can't be null, but can be empty
         logger.debug("checkUnregisterDeviceParameters started...");
 
         final String origin = CommonConstants.DEVICE_REGISTRY_URI + CommonConstants.OP_DEVICE_REGISTRY_UNREGISTER_URI;
 
-        if (Utilities.isEmpty(systemName))
-        {
+        if (Utilities.isEmpty(deviceName)) {
             throw new BadPayloadException("Name of the device is blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        if (Utilities.isEmpty(macAddress))
-        {
+        if (Utilities.isEmpty(macAddress)) {
             throw new BadPayloadException("MAC Address of the device is blank", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        final Matcher matcher = macAddressPattern.matcher(macAddress);
-        if (matcher.matches())
-        {
+        final Matcher matcher = MAC_ADDRESS_PATTERN.matcher(macAddress);
+        if (!matcher.matches()) {
             throw new BadPayloadException("Unrecognized format of MAC Address", HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
@@ -675,11 +656,14 @@ public class DeviceRegistryController
 
             if (Utilities.notEmpty(device.getDeviceName())) {
                 needChange = true;
-            } else if (Utilities.notEmpty(device.getAddress())) {
+            }
+            else if (Utilities.notEmpty(device.getAddress())) {
                 needChange = true;
-            } else if (Utilities.notEmpty(device.getMacAddress())) {
+            }
+            else if (Utilities.notEmpty(device.getMacAddress())) {
                 needChange = true;
-            } else if (Utilities.notEmpty(device.getAuthenticationInfo())) {
+            }
+            else if (Utilities.notEmpty(device.getAuthenticationInfo())) {
                 needChange = true;
             }
         }
@@ -692,7 +676,7 @@ public class DeviceRegistryController
             needChange = true;
         }
 
-        if (request.getVersion() <= 0) {
+        if (request.getVersion() != null && request.getVersion() > 0) {
             needChange = true;
         }
 

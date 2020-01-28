@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SystemRegistryRepository extends RefreshableRepository<SystemRegistry, Long>
-{
+public interface SystemRegistryRepository extends RefreshableRepository<SystemRegistry, Long> {
 
     //=================================================================================================
     // methods
@@ -24,7 +23,7 @@ public interface SystemRegistryRepository extends RefreshableRepository<SystemRe
 
     Optional<SystemRegistry> findBySystemAndDevice(final System systemDb, final Device deviceDb);
 
-	List<SystemRegistry> findAllBySystemIsIn(final List<System> systems);
+    List<SystemRegistry> findAllBySystemIsIn(final List<System> systems);
 
     Page<SystemRegistry> findAllBySystemIsIn(final List<System> systemList, final PageRequest pageRequest);
 }

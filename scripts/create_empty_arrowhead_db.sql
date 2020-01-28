@@ -17,10 +17,15 @@ CREATE USER IF NOT EXISTS 'system_registry'@'localhost' IDENTIFIED BY 'Kh12Hhgax
 CREATE USER IF NOT EXISTS 'system_registry'@'%' IDENTIFIED BY 'Kh12Hhgaxzo7haf';
 source system_registry_privileges.sql
 
--- Deviec Registry
+-- Device Registry
 CREATE USER IF NOT EXISTS 'device_registry'@'localhost' IDENTIFIED BY 'iooHU87hNGUalht';
 CREATE USER IF NOT EXISTS 'device_registry'@'%' IDENTIFIED BY 'iooHU87hNGUalht';
 source device_registry_privileges.sql
+
+-- Onboarding controller
+CREATE USER IF NOT EXISTS 'onboarding'@'localhost' IDENTIFIED BY 'JKgh1as5f6oi7aV';
+CREATE USER IF NOT EXISTS 'onboarding'@'%' IDENTIFIED BY 'JKgh1as5f6oi7aV';
+source onboarding_privileges.sql
 
 -- Authorization
 CREATE USER IF NOT EXISTS 'authorization'@'localhost' IDENTIFIED BY 'hqZFUkuHxhekio3';
