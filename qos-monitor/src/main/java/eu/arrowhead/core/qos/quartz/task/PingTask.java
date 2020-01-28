@@ -2,8 +2,10 @@ package eu.arrowhead.core.qos.quartz.task;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
@@ -33,6 +36,7 @@ import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
+import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
@@ -48,7 +52,7 @@ public class PingTask implements Job {
 	//=================================================================================================
 	// members
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-	private static final int TIMES_TO_REPEAT = 10;
+	private static final int TIMES_TO_REPEAT = 2;
 	private static final int REST_BETWEEN_PINGS_MILLSEC = 1000;
 
 	protected Logger logger = LogManager.getLogger(PingTask.class);
@@ -58,6 +62,9 @@ public class PingTask implements Job {
 	
 	@Autowired
 	private QoSIntraMeasurementPingRepository qoSIntraMeasurementPingRepository;
+	
+	@Autowired
+	private SystemRepository systemRepository;
 	
 	@Autowired
 	private HttpService httpService;
@@ -73,7 +80,7 @@ public class PingTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: ping  task");
 
-		Set<SystemResponseDTO> systems = getSystemsToMessure();
+		final Set<SystemResponseDTO> systems = getSystemsToMessure();
 		for (final SystemResponseDTO systemResponseDTO : systems) {
 
 			pingSystem(systemResponseDTO);
@@ -81,6 +88,84 @@ public class PingTask implements Job {
 		}
 
 		logger.debug("Finished: ping  task");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class) 
+	public QoSIntraMeasurement createMeasurement(final System system,final QoSMeasurementType ping,final ZonedDateTime aroundNow) {
+		logger.debug("createMeasurement started...");
+
+		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
+		measurement.setSystem(system);
+		measurement.setMeasurementType(QoSMeasurementType.PING);
+
+	 	qoSIntraMeasurementRepository.saveAndFlush(measurement);
+	 	//qoSIntraMeasurementRepository.refresh(measurement);
+
+	 	return measurement;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class) 
+	private QoSIntraPingMeasurement createPingMeasurement(final QoSIntraMeasurement measurementParam,
+	final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+		logger.debug("pingSystem started...");
+
+		 final boolean available = calculateAvailable(responseList);
+		 final int maxResponseTime = calculateMaxResponseTime(responseList);
+		 final int minResponseTime = calculateMinResponseTime(responseList);
+		 final int meanResponseTime = calculateMeanResponseTime(responseList);
+		 final ZonedDateTime countStartedAt = aroundNow;
+		 
+		 long sent = 0;
+		 long sentAll = 0;
+		 long received = 0;
+		 long receivedAll = 0;
+
+		 final int sentInThisPing = getSentInThisPing(responseList);
+		 final int receivedInThisPing = getReceivedInThisPing(responseList);
+
+		final QoSIntraMeasurement measurement ;
+		final Optional<QoSIntraMeasurement> meOptional = qoSIntraMeasurementRepository.findById(measurementParam.getId());
+		if (meOptional.isPresent()) {
+			measurement = meOptional.get();
+		}else {
+			throw new ArrowheadException("Could not find measurment in DB");
+		}
+
+		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
+
+		sent = pingMeasurement.getSent();
+		sentAll = pingMeasurement.getSentAll();
+		received = pingMeasurement.getReceived();
+		receivedAll = pingMeasurement.getReceivedAll();
+
+		pingMeasurement.setMeasurement(measurement);
+		pingMeasurement.setAvailable(available);
+		pingMeasurement.setMaxResponseTime(maxResponseTime);
+		pingMeasurement.setMinResponseTime(minResponseTime);
+		pingMeasurement.setMeanResponseTime(meanResponseTime);
+		pingMeasurement.setCountStartedAt(countStartedAt);
+		pingMeasurement.setLastAccessAt(ZonedDateTime.now());//calculateLastAccessAt(responseList, pingMeasurement, aroundNow));
+		pingMeasurement.setSent(sent + sentInThisPing);
+		pingMeasurement.setSentAll(sentAll + sentInThisPing);
+		pingMeasurement.setReceived(received + receivedInThisPing);
+		pingMeasurement.setReceivedAll(receivedAll + getReceivedInThisPing(responseList));
+
+		qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
+		//qoSIntraMeasurementPingRepository.refresh(pingMeasurement);
+
+		return pingMeasurement;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	public void updateMeasurement(ZonedDateTime aroundNow,final QoSIntraMeasurement measurement) {
+
+	 	measurement.setLastMeasurementAt(aroundNow);
+	 	//qoSIntraMeasurementRepository.refresh(measurement);
+	 	qoSIntraMeasurementRepository.saveAndFlush(measurement);
+
 	}
 
 	//=================================================================================================
@@ -97,55 +182,90 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void pingSystem(final SystemResponseDTO systemResponseDTO ) {
+	public void pingSystem(final SystemResponseDTO systemResponseDTO ) {
 		logger.debug("pingSystem started...");
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
 
 		if (systemResponseDTO == null || Utilities.isEmpty(systemResponseDTO.getAddress())) {
 			throw new InvalidParameterException("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 
-		final System system = new System();
-		system.setSystemName(systemResponseDTO.getSystemName());
-		system.setAddress(systemResponseDTO.getAddress());
-		system.setPort(systemResponseDTO.getPort());
+		final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(
+				systemResponseDTO.getSystemName(),
+				systemResponseDTO.getAddress(),
+				systemResponseDTO.getPort());
+		final System system;
+		if (systemOptional.isPresent()) {
+
+			system = systemOptional.get();
+		}else {
+			throw new ArrowheadException("Requested system is not in DB");
+		}
 
 		final String address = systemResponseDTO.getAddress();
 
 		final List<IcmpPingResponse> responseList = getPingResponseList(address);
-		// TODO continue implementation
-		//final boolean accesible = calculateAccessible(responseList);
-		//final int maxResponseTime = calculateMaxResponseTime(responseList);
-		//final int minResponseTime = calculateMinResponseTime(responseList);
-		//final int meanResponseTime = calculateMeanResponseTime(responseList);
-		//
-        //
-		//final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
-		//if (qoSIntraMeasurementOptional.isEmpty()) {
-        //
-		//	final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, QoSMeasurementType.PING, ZonedDateTime.now());
-		//	qoSIntraMeasurementRepository.saveAndFlush(measurement);
-        //
-		//	final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
-		//	if (pingMeasurementOptional.isEmpty()) {
-		//		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
-		//		pingMeasurement.setMeasurement(measurement);
-        //
-		//		pingMeasurement.setAccessible(accessible);
-		//		pingMeasurement.setMaxResponseTime(maxResponseTime);
-		//		pingMeasurement.setMinResponseTime(minResponseTime);
-		//		pingMeasurement.setMeanResponseTime(meanResponseTime);
-		//		pingMeasurement.setCountStartedAt(countStartedAt);
-		//		pingMeasurement.setLastAccessAt(lastAccessAt);
-		//		pingMeasurement.setSent(sent);
-		//		pingMeasurement.setSentAll(sentAll);
-		//		pingMeasurement.setReceived(received);
-		//		pingMeasurement.setReceivedAll(receivedAll);
-		//		pingMeasurement.setUpdatedAt(updatedAt);
-		//		
-		//	}
-		//}
 
+		 final boolean available = calculateAvailable(responseList);
+		 final int maxResponseTime = calculateMaxResponseTime(responseList);
+		 final int minResponseTime = calculateMinResponseTime(responseList);
+		 final int meanResponseTime = calculateMeanResponseTime(responseList);
+		 final ZonedDateTime countStartedAt = aroundNow;
 
+		 final int sentInThisPing = getSentInThisPing(responseList);
+		 final int receivedInThisPing = getReceivedInThisPing(responseList);
+
+		 final QoSIntraMeasurement measurement;
+		 final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+		 if (qoSIntraMeasurementOptional.isEmpty()) {
+			measurement = createMeasurement(system, QoSMeasurementType.PING, aroundNow);
+		 }else {
+			 measurement = qoSIntraMeasurementOptional.get();
+		}
+
+		 final QoSIntraPingMeasurement pingMeasurement;
+		 final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
+		 if (pingMeasurementOptional.isEmpty()) {
+
+			pingMeasurement = createPingMeasurement(measurement, responseList, aroundNow);
+
+			pingMeasurement.setMeasurement(measurement);
+			pingMeasurement.setAvailable(available);
+			pingMeasurement.setMaxResponseTime(maxResponseTime);
+			pingMeasurement.setMinResponseTime(minResponseTime);
+			pingMeasurement.setMeanResponseTime(meanResponseTime);
+			pingMeasurement.setCountStartedAt(countStartedAt);
+			pingMeasurement.setLastAccessAt(calculateLastAccessAt(responseList, pingMeasurement, aroundNow));
+			pingMeasurement.setSent(pingMeasurement.getSent() + sentInThisPing);
+			pingMeasurement.setSentAll(pingMeasurement.getSentAll() + sentInThisPing);
+			pingMeasurement.setReceived(pingMeasurement.getReceived() + receivedInThisPing);
+			pingMeasurement.setReceivedAll(pingMeasurement.getReceivedAll() + getReceivedInThisPing(responseList));
+
+		 	qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
+		 	//qoSIntraMeasurementPingRepository.refresh(pingMeasurement);
+
+		 }else {
+			pingMeasurement = pingMeasurementOptional.get();
+
+			pingMeasurement.setMeasurement(measurement);
+			pingMeasurement.setAvailable(available);
+			pingMeasurement.setMaxResponseTime(maxResponseTime);
+			pingMeasurement.setMinResponseTime(minResponseTime);
+			pingMeasurement.setMeanResponseTime(meanResponseTime);
+			pingMeasurement.setCountStartedAt(countStartedAt);
+			pingMeasurement.setLastAccessAt(calculateLastAccessAt(responseList, pingMeasurement, aroundNow));
+			pingMeasurement.setSent(pingMeasurement.getSent() + sentInThisPing);
+			pingMeasurement.setSentAll(pingMeasurement.getSentAll() + sentInThisPing);
+			pingMeasurement.setReceived(pingMeasurement.getReceived() + receivedInThisPing);
+			pingMeasurement.setReceivedAll(pingMeasurement.getReceivedAll() + getReceivedInThisPing(responseList));
+
+			qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
+			//qoSIntraMeasurementPingRepository.refresh(pingMeasurement);
+
+		}
+
+		 updateMeasurement(aroundNow, measurement);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -202,4 +322,103 @@ public class PingTask implements Job {
 
 		return responseList;
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int getReceivedInThisPing(final List<IcmpPingResponse> responseList) {
+		logger.debug("getReceivedInThisPing started...");
+		
+		int countReceived = 0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			if (icmpPingResponse.getSuccessFlag()) {
+
+				++ countReceived;
+			}
+		}
+		return countReceived;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int getSentInThisPing(final List<IcmpPingResponse> responseList) {
+		logger.debug("getSentInThisPing started...");
+
+		return responseList.size();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private ZonedDateTime calculateLastAccessAt(final List<IcmpPingResponse> responseList, final QoSIntraPingMeasurement pingMeasurement, final ZonedDateTime aroundNow) {
+		logger.debug("calculateLastAccessAt started...");
+
+		ZonedDateTime accessedAt = null;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			if (icmpPingResponse.getSuccessFlag()) {
+				accessedAt = aroundNow;
+				break;
+			}
+		}
+
+		if (accessedAt == null) {
+			if (pingMeasurement.getLastAccessAt() == null) {
+				accessedAt = null;
+			}else {
+				accessedAt = pingMeasurement.getLastAccessAt();
+			}
+		}
+
+		return accessedAt;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int calculateMeanResponseTime(final List<IcmpPingResponse> responseList) {
+		logger.debug("calculateMeanResponseTime started...");
+
+		final double mean = responseList.
+				stream().
+				mapToLong(IcmpPingResponse::getDuration).
+				average().
+				getAsDouble();
+ 
+		return (int) Math.round(mean);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int calculateMinResponseTime(final List<IcmpPingResponse> responseList) {
+		logger.debug("calculateMinResponseTime started...");
+
+		final IcmpPingResponse responseWithMinDuration = responseList.
+				stream().
+				min(Comparator.comparing(IcmpPingResponse::getDuration)).
+				orElseThrow(NoSuchElementException::new);
+ 
+		return (int)responseWithMinDuration.getDuration();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int calculateMaxResponseTime(final List<IcmpPingResponse> responseList) {
+		logger.debug("calculateMaxResponseTime started...");
+
+		final IcmpPingResponse responseWithMaxDuration = responseList.
+				stream().
+				max(Comparator.comparing(IcmpPingResponse::getDuration)).
+				orElseThrow(NoSuchElementException::new);
+ 
+		return (int) responseWithMaxDuration.getDuration();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean calculateAvailable(final List<IcmpPingResponse> responseList) {
+		logger.debug("calculateAvailable started...");
+		
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			if (icmpPingResponse.getSuccessFlag()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 }

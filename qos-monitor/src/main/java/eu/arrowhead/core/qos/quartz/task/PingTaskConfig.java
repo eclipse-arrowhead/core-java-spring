@@ -33,7 +33,7 @@ public class PingTaskConfig {
 	@Value(CoreCommonConstants.$PING_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
-	private static final int SCHEDULER_DELAY = 7;
+	private static final int SCHEDULER_DELAY = 1;
 	
 	private static final String NAME_OF_TRIGGER = "Intra_Cloud_Ping_Task_Trigger";
 	private static final String NAME_OF_TASK = "Intra_Cloud_Ping_Task_Detail";	
