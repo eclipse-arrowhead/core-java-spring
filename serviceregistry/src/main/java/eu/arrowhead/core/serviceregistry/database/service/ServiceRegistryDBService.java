@@ -290,7 +290,7 @@ public class ServiceRegistryDBService {
 			if (find.isPresent()) {
 				return find.get();
 			} else {
-				throw new InvalidParameterException("Service definition with id of '" + id + "' not exists");
+				throw new InvalidParameterException("Service definition with id of '" + id + "' does not exist");
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -388,7 +388,7 @@ public class ServiceRegistryDBService {
 				serviceDefinitionEntry.setServiceDefinition(validatedServiceDefinition);
 				return serviceDefinitionRepository.saveAndFlush(serviceDefinitionEntry);
 			} else {
-				throw new InvalidParameterException("Service definition with id of '" + id + "' not exists");
+				throw new InvalidParameterException("Service definition with id of '" + id + "' does not exist");
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -415,7 +415,7 @@ public class ServiceRegistryDBService {
 
 		try {
 			if (!serviceDefinitionRepository.existsById(id)) {
-				throw new InvalidParameterException("Service Definition with id '" + id + "' not exists");
+				throw new InvalidParameterException("Service Definition with id '" + id + "' does not exist");
 			}
 			
 			serviceDefinitionRepository.deleteById(id);
@@ -437,7 +437,7 @@ public class ServiceRegistryDBService {
 			if (find.isPresent()) {
 				return find.get();
 			} else {
-				throw new InvalidParameterException("Service Registry with id of '" + id + "' not exists");
+				throw new InvalidParameterException("Service Registry with id of '" + id + "' does not exist");
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -589,7 +589,7 @@ public class ServiceRegistryDBService {
 			if (srEntryOptional.isPresent()) {
 				srEntry = srEntryOptional.get();
 			} else {
-				throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
+				throw new InvalidParameterException("Service Registry entry with id '" + id + "' does not exist");
 			}
 			
 			final String validatedServiceDefinition = request.getServiceDefinition().toLowerCase().trim();
@@ -630,7 +630,7 @@ public class ServiceRegistryDBService {
 			if (srEntryOptional.isPresent()) {
 				srEntry = srEntryOptional.get();
 			} else {
-				throw new InvalidParameterException("Service Registry entry with id '" + id + "' not exists");
+				throw new InvalidParameterException("Service Registry entry with id '" + id + "' does not exist");
 			}
 			
 			final String validatedServiceDefinition = !Utilities.isEmpty(request.getServiceDefinition()) ? request.getServiceDefinition().toLowerCase().trim() :
@@ -858,7 +858,7 @@ public class ServiceRegistryDBService {
 		
 		try {
 			if (!serviceRegistryRepository.existsById(id)) {
-				throw new InvalidParameterException("Service Registry entry with id '" + id + "' does not exists");
+				throw new InvalidParameterException("Service Registry entry with id '" + id + "' does not exist");
 			}
 			
 			serviceRegistryRepository.deleteById(id);

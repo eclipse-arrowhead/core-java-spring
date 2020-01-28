@@ -119,7 +119,7 @@ public class SystemRegistryController {
     private static final String DEVICE_MAC_ADDRESS_NULL_ERROR_MESSAGE = " Device MAC address must have value ";
 
     private static final String SYSTEM_REGISTRY_MGMT_BY_ID_URI = CoreCommonConstants.MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
-    private static final String PATH_VARIABLE_SYSTEM_NAME = "systenName";
+    private static final String PATH_VARIABLE_SYSTEM_NAME = "systemName";
     private static final String SYSTEM_REGISTRY_MGMT_BY_SYSTEM_NAME_URI = CoreCommonConstants.MGMT_URI + "/systemname" + "/{" + PATH_VARIABLE_SYSTEM_NAME + "}";
     private static final String GET_SYSTEM_REGISTRY_HTTP_200_MESSAGE = "System Registry entries returned";
     private static final String GET_SYSTEM_REGISTRY_HTTP_400_MESSAGE = "Could not retrieve system registry entries";
@@ -885,7 +885,7 @@ public class SystemRegistryController {
             needChange = true;
         }
 
-        if (request.getVersion() <= 0) {
+        if (request.getVersion() != null && request.getVersion() > 0) {
             needChange = true;
         }
 

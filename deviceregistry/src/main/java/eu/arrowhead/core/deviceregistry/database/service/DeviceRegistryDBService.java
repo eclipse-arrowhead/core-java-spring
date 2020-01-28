@@ -132,7 +132,7 @@ public class DeviceRegistryDBService {
 
         try {
             final Page<Device> devices = deviceRepository.findAll(PageRequest.of(pageParams.getValidatedPage(), pageParams.getValidatedSize(),
-                                                                                 pageParams.getValidatedDirection(), validatedSortField));
+                    pageParams.getValidatedDirection(), validatedSortField));
             return DTOConverter.convertDeviceEntryListToDeviceListResponseDTO(devices);
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
@@ -225,9 +225,9 @@ public class DeviceRegistryDBService {
 
         try {
             final PageRequest pageRequest = PageRequest.of(params.getValidatedPage(),
-                                                           params.getValidatedSize(),
-                                                           params.getValidatedDirection(),
-                                                           validatedSortField);
+                    params.getValidatedSize(),
+                    params.getValidatedDirection(),
+                    validatedSortField);
             final Page<DeviceRegistry> deviceRegistryPage = deviceRegistryRepository.findAll(pageRequest);
             return DTOConverter.convertDeviceRegistryListToDeviceRegistryListResponseDTO(deviceRegistryPage);
         } catch (final Exception ex) {
@@ -252,9 +252,9 @@ public class DeviceRegistryDBService {
             final List<Device> devices = deviceRepository.findByDeviceName(Utilities.lowerCaseTrim(deviceName));
 
             final PageRequest pageRequest = PageRequest.of(params.getValidatedPage(),
-                                                           params.getValidatedSize(),
-                                                           params.getValidatedDirection(),
-                                                           validatedSortField);
+                    params.getValidatedSize(),
+                    params.getValidatedDirection(),
+                    validatedSortField);
             final Page<DeviceRegistry> deviceRegistryPage = deviceRegistryRepository.findAllByDeviceIsIn(devices, pageRequest);
             return DTOConverter.convertDeviceRegistryListToDeviceRegistryListResponseDTO(deviceRegistryPage);
         } catch (final Exception ex) {
@@ -278,7 +278,7 @@ public class DeviceRegistryDBService {
 
         try {
             if (!deviceRegistryRepository.existsById(id)) {
-                throw new InvalidParameterException("Device Registry entry with id '" + id + "' does not exists");
+                throw new InvalidParameterException("Device Registry entry with id '" + id + "' does not exist");
             }
 
             deviceRegistryRepository.deleteById(id);
@@ -332,7 +332,7 @@ public class DeviceRegistryDBService {
             final DeviceRegistry updateDrEntry;
 
             final Optional<DeviceRegistry> drEntryOptional = deviceRegistryRepository.findById(id);
-            drEntry = drEntryOptional.orElseThrow(() -> new InvalidParameterException("Device Registry entry with id '" + id + "' not exists"));
+            drEntry = drEntryOptional.orElseThrow(() -> new InvalidParameterException("Device Registry entry with id '" + id + "' does not exist"));
 
             final Device deviceDb = findOrCreateDevice(request.getDevice());
 
@@ -367,7 +367,7 @@ public class DeviceRegistryDBService {
             final DeviceRegistry updateDrEntry;
 
             final Optional<DeviceRegistry> drEntryOptional = deviceRegistryRepository.findById(id);
-            drEntry = drEntryOptional.orElseThrow(() -> new InvalidParameterException("System Registry entry with id '" + id + "' not exists"));
+            drEntry = drEntryOptional.orElseThrow(() -> new InvalidParameterException("System Registry entry with id '" + id + "' does not exist"));
 
             final Device deviceDb = mergeDevice(request.getDevice(), drEntry.getDevice());
 
@@ -413,7 +413,7 @@ public class DeviceRegistryDBService {
         final DeviceRegistry deviceRegistry = optionalDeviceRegistry.orElseThrow(
                 () -> new InvalidParameterException(
                         "Device Registry entry for System with name '" + deviceName +
-                                "' and MAC address '" + macAddress + "' does not exists"));
+                                "' and MAC address '" + macAddress + "' does not exist"));
 
         deviceRegistryRepository.delete(deviceRegistry);
         deviceRegistryRepository.flush();
@@ -445,12 +445,10 @@ public class DeviceRegistryDBService {
                 if (optionalDevice.isPresent()) {
                     devices = new ArrayList<>();
                     devices.add(optionalDevice.get());
-                }
-                else {
+                } else {
                     return DTOConverter.convertDeviceRegistryListToDeviceQueryResultDTO(List.of());
                 }
-            }
-            else {
+            } else {
                 devices = deviceRepository.findByDeviceName(deviceName);
 
                 if (devices.isEmpty()) {
@@ -471,8 +469,7 @@ public class DeviceRegistryDBService {
             // filter on version
             if (Objects.nonNull(form.getVersionRequirement())) {
                 registryList.removeIf(e -> Objects.equals(form.getVersionRequirement(), e.getVersion()));
-            }
-            else if (Objects.nonNull(form.getMinVersionRequirement()) || Objects.nonNull(form.getMaxVersionRequirement())) {
+            } else if (Objects.nonNull(form.getMinVersionRequirement()) || Objects.nonNull(form.getMaxVersionRequirement())) {
                 final int minVersion = form.getMinVersionRequirement() == null ? 1 : form.getMinVersionRequirement();
                 final int maxVersion = form.getMaxVersionRequirement() == null ? Integer.MAX_VALUE : form.getMaxVersionRequirement();
 
@@ -483,15 +480,15 @@ public class DeviceRegistryDBService {
             if (form.getMetadataRequirements() != null && !form.getMetadataRequirements().isEmpty()) {
                 final Map<String, String> requiredMetadata = normalizeMetadata(form.getMetadataRequirements());
                 registryList.removeIf(e ->
-                                      {
-                                          final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
-                                          if (Objects.isNull(metadata)) {
-                                              // we have requirements but no metadata -> remove
-                                              return true;
-                                          }
+                {
+                    final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
+                    if (Objects.isNull(metadata)) {
+                        // we have requirements but no metadata -> remove
+                        return true;
+                    }
 
-                                          return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
-                                      });
+                    return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
+                });
             }
 
             logger.debug("Potential system providers after filtering: {}", registryList.size());
@@ -536,7 +533,7 @@ public class DeviceRegistryDBService {
     private Device getDeviceByNameAndMacAddress(final String deviceName, final String macAddress) {
         final Optional<Device> optionalDevice = deviceRepository.findByDeviceNameAndMacAddress(deviceName, macAddress);
         return optionalDevice.orElseThrow(() -> new InvalidParameterException(
-                "Device entry with name '" + deviceName + "' and MAC address '" + macAddress + "' does not exists"));
+                "Device entry with name '" + deviceName + "' and MAC address '" + macAddress + "' does not exist"));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -549,11 +546,11 @@ public class DeviceRegistryDBService {
         final Map<String, String> map = new HashMap<>();
 
         metadata.forEach((k, v) ->
-                         {
-                             if (Objects.nonNull(v)) {
-                                 map.put(k.trim(), v.trim());
-                             }
-                         });
+        {
+            if (Objects.nonNull(v)) {
+                map.put(k.trim(), v.trim());
+            }
+        });
 
         return map;
     }
@@ -586,8 +583,7 @@ public class DeviceRegistryDBService {
 
         if (Utilities.isEmpty(macAddress)) {
             throw new InvalidParameterException("MAC address is null or empty");
-        }
-        else {
+        } else {
             final Matcher matcher = DeviceRegistryController.MAC_ADDRESS_PATTERN.matcher(address);
             if (!matcher.matches()) {
                 throw new InvalidParameterException("Unrecognized format of MAC Address");
@@ -623,7 +619,7 @@ public class DeviceRegistryDBService {
         logger.debug("getDeviceRegistryEntryById started...");
         try {
             final Optional<DeviceRegistry> systemRegistry = deviceRegistryRepository.findById(id);
-            return systemRegistry.orElseThrow(() -> new InvalidParameterException("System Registry with id of '" + id + "' not exists"));
+            return systemRegistry.orElseThrow(() -> new InvalidParameterException("System Registry with id of '" + id + "' does not exist"));
         } catch (final InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
@@ -635,9 +631,9 @@ public class DeviceRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private Device findOrCreateDevice(DeviceRequestDTO requestDeviceDto) {
         return findOrCreateDevice(requestDeviceDto.getDeviceName(),
-                                  requestDeviceDto.getAddress(),
-                                  requestDeviceDto.getMacAddress(),
-                                  requestDeviceDto.getAuthenticationInfo());
+                requestDeviceDto.getAddress(),
+                requestDeviceDto.getMacAddress(),
+                requestDeviceDto.getAuthenticationInfo());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -658,8 +654,7 @@ public class DeviceRegistryDBService {
                 provider.setAddress(validateAddress);
                 provider = deviceRepository.saveAndFlush(provider);
             }
-        }
-        else {
+        } else {
             provider = createDevice(validateName, validateAddress, validatedMacAddress, authenticationInfo);
         }
         return provider;
@@ -730,9 +725,9 @@ public class DeviceRegistryDBService {
             final Optional<DeviceRegistry> find = deviceRegistryRepository.findByDevice(deviceDb);
             if (find.isPresent()) {
                 throw new InvalidParameterException("System Registry entry with provider: (" +
-                                                            deviceDb.getDeviceName() + ", " +
-                                                            deviceDb.getMacAddress() +
-                                                            ") already exists.");
+                        deviceDb.getDeviceName() + ", " +
+                        deviceDb.getMacAddress() +
+                        ") already exists.");
             }
         } catch (final InvalidParameterException ex) {
             throw ex;
