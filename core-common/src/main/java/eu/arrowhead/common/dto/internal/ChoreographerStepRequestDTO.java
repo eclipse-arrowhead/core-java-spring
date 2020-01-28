@@ -14,6 +14,7 @@ public class ChoreographerStepRequestDTO implements Serializable {
     private String serviceName;
     private String metadata;
     private String parameters;
+    private int quantity;
     private List<String> nextStepNames;
 
     //=================================================================================================
@@ -23,19 +24,21 @@ public class ChoreographerStepRequestDTO implements Serializable {
 	public ChoreographerStepRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ChoreographerStepRequestDTO(final String name, final String serviceName, final List<String> nextStepNames) {
+	public ChoreographerStepRequestDTO(final String name, final String serviceName, final List<String> nextStepNames, final int quantity) {
         this.name = name;
         this.serviceName = serviceName;
         this.nextStepNames = nextStepNames;
+        this.quantity = quantity;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerStepRequestDTO(String name, String serviceName, String metadata, String parameters, List<String> nextStepNames) {
+    public ChoreographerStepRequestDTO(final String name, final String serviceName, final String metadata, final String parameters, final List<String> nextStepNames, final int quantity) {
         this.name = name;
         this.serviceName = serviceName;
         this.metadata = metadata;
         this.parameters = parameters;
         this.nextStepNames = nextStepNames;
+        this.quantity = quantity;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -44,6 +47,7 @@ public class ChoreographerStepRequestDTO implements Serializable {
 	public List<String> getNextStepNames() { return nextStepNames; }
     public String getMetadata() { return metadata; }
     public String getParameters() { return parameters; }
+    public int getQuantity() { return quantity; }
 
     //-------------------------------------------------------------------------------------------------
 	public void setName(final String name) { this.name = name; }
@@ -51,4 +55,5 @@ public class ChoreographerStepRequestDTO implements Serializable {
     public void setNextStepNames(final List<String> nextStepNames) { this.nextStepNames = nextStepNames; }
     public void setMetadata(String metadata) { this.metadata = metadata; }
     public void setParameters(String parameters) { this.parameters = parameters; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

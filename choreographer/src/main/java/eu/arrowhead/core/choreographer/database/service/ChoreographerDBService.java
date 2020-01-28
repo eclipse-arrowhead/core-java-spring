@@ -1,15 +1,20 @@
 package eu.arrowhead.core.choreographer.database.service;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
+import eu.arrowhead.common.database.entity.ChoreographerWorklog;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepRepository;
+import eu.arrowhead.common.database.repository.ChoreographerWorklogRepository;
 import eu.arrowhead.common.dto.internal.ChoreographerActionRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerStepRequestDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -26,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort.Direction;
 
+import javax.jms.Session;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +57,12 @@ public class ChoreographerDBService {
     @Autowired
     private ChoreographerStepNextStepConnectionRepository choreographerStepNextStepConnectionRepository;
 
+    @Autowired
+    private ChoreographerSessionRepository choreographerSessionRepository;
+
+    @Autowired
+    private ChoreographerWorklogRepository choreographerWorklogRepository;
+
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
     
     //=================================================================================================
@@ -58,7 +70,7 @@ public class ChoreographerDBService {
 
     //-------------------------------------------------------------------------------------------------
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerStep createStep(final String name, final String serviceName, final String metadata, final String parameters, final long actionId) {
+    public ChoreographerStep createStep(final String name, final String serviceName, final String metadata, final String parameters, final int quantity, final long actionId) {
         logger.debug("createStep started...");
 
         try {
@@ -84,7 +96,7 @@ public class ChoreographerDBService {
         try {
             final Optional<ChoreographerAction> actionOptional = choreographerActionRepository.findById(actionId);
             if (actionOptional.isPresent()) {
-                return choreographerStepRepository.saveAndFlush(new ChoreographerStep(name, serviceName, metadata, parameters, actionOptional.get()));
+                return choreographerStepRepository.saveAndFlush(new ChoreographerStep(name, serviceName, metadata, parameters, actionOptional.get(), quantity));
             } else {
                 throw new InvalidParameterException("Action with given ID doesn't exist.");
             }
@@ -177,7 +189,7 @@ public class ChoreographerDBService {
 
             if (steps != null && !steps.isEmpty()) {
             	for (final ChoreographerStepRequestDTO step : steps) {
-                    actionEntry.getStepEntries().add(createStep(step.getName(), step.getServiceName(), step.getMetadata(), step.getParameters(), actionEntry.getId()));
+                    actionEntry.getStepEntries().add(createStep(step.getName(), step.getServiceName(), step.getMetadata(), step.getParameters(), step.getQuantity(), actionEntry.getId()));
             	}
 
             	for (final ChoreographerStepRequestDTO step : steps) {
@@ -384,6 +396,55 @@ public class ChoreographerDBService {
             choreographerPlanRepository.deleteById(id);
             choreographerPlanRepository.flush();
         } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerSession initiateSession(final long planId) {
+        logger.debug("createSession started...");
+
+        try {
+            final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findById(planId);
+            if (planOptional.isPresent()) {
+                ChoreographerSession sessionEntry = choreographerSessionRepository.saveAndFlush(new ChoreographerSession(planOptional.get(), "Initiated"));
+                createWorklog(sessionEntry.getId(), "Initiated", "Initiated running plan with ID of " + planId + ".");
+                return sessionEntry;
+            } else {
+                throw new InvalidParameterException("Can't initiate session because the plan with the given ID doesn't exist.");
+            }
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerWorklog createWorklog(final long sessionId, final String status, final String message) {
+        logger.debug("createWorklog started...");
+
+        try {
+            if (Utilities.isEmpty(status)) {
+                throw new InvalidParameterException("Status is null or blank.");
+            }
+
+            if (Utilities.isEmpty(message)) {
+                throw new InvalidParameterException("Message is null or blank.");
+            }
+
+            final Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
+            if (sessionOptional.isPresent()) {
+                return choreographerWorklogRepository.saveAndFlush(new ChoreographerWorklog(sessionOptional.get(), status, message));
+            } else {
+                throw new InvalidParameterException("Session with given ID doesn't exist!");
+            }
+        } catch (InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);

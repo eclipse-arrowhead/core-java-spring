@@ -21,7 +21,6 @@ public class ChoreographerPlanRequestDTO implements Serializable {
 	public ChoreographerPlanRequestDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-
     public ChoreographerPlanRequestDTO(String name, String firstActionName, List<ChoreographerActionRequestDTO> actions) {
         this.name = name;
         this.firstActionName = firstActionName;

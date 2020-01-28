@@ -300,6 +300,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_step` (
   `service_name` varchar(255) NOT NULL,
   `metadata` text,
   `parameters` text,
+  `quantity` int(20) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -331,11 +332,13 @@ CREATE TABLE IF NOT EXISTS `choreographer_session` (
 CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `step_id` bigint(20) NOT NULL,
+  `session_id` bigint(20) NOT NULL,
   `status` varchar(255) NOT NULL,
   `message` text,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  CONSTRAINT `running_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`)
+  CONSTRAINT `running_step` FOREIGN KEY (`step_id`) REFERENCES `choreographer_step` (`id`),
+  CONSTRAINT `running_step_session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `choreographer_worklog` (

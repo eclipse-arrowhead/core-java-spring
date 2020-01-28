@@ -34,6 +34,9 @@ public class ChoreographerStep {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String parameters;
 
+    @Column(nullable = false)
+    private int quantity;
+
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
 
@@ -68,14 +71,14 @@ public class ChoreographerStep {
 
     //-------------------------------------------------------------------------------------------------
 
-    public ChoreographerStep(String name, String serviceName, String metadata, String parameters, ChoreographerAction action) {
+    public ChoreographerStep(String name, String serviceName, String metadata, String parameters, ChoreographerAction action, int quantity) {
         this.name = name;
         this.serviceName = serviceName;
         this.metadata = metadata;
         this.parameters = parameters;
         this.action = action;
+        this.quantity = quantity;
     }
-
 
     //-------------------------------------------------------------------------------------------------
 
@@ -91,6 +94,7 @@ public class ChoreographerStep {
     public Set<ChoreographerStepNextStepConnection> getNextSteps() { return nextSteps; }
     public Set<ChoreographerStepNextStepConnection> getSteps() { return steps; }
     public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
+    public int getQuantity() { return quantity; }
     //-------------------------------------------------------------------------------------------------
 
     public void setId(long id) { this.id = id; }
@@ -105,6 +109,7 @@ public class ChoreographerStep {
     public void setNextSteps(Set<ChoreographerStepNextStepConnection> nextSteps) { this.nextSteps = nextSteps; }
     public void setSteps(Set<ChoreographerStepNextStepConnection> actionSteps) { this.steps = actionSteps; }
     public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
     //-------------------------------------------------------------------------------------------------
 	@PrePersist

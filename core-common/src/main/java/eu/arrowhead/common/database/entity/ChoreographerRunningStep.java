@@ -28,6 +28,10 @@ public class ChoreographerRunningStep {
     @JoinColumn(name = "stepId", referencedColumnName = "id", nullable = false)
     private ChoreographerStep step;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sessionId", referencedColumnName = "id", nullable = false)
+    private ChoreographerSession session;
+
     //=================================================================================================
     // methods
 
@@ -35,10 +39,11 @@ public class ChoreographerRunningStep {
     public ChoreographerRunningStep() {}
 
     //=================================================================================================
-    public ChoreographerRunningStep(String status, String message, ChoreographerStep step) {
+    public ChoreographerRunningStep(String status, String message, ChoreographerStep step, ChoreographerSession session) {
         this.status = status;
         this.message = message;
         this.step = step;
+        this.session = session;
     }
 
     //=================================================================================================
@@ -47,6 +52,7 @@ public class ChoreographerRunningStep {
     public String getMessage() { return message; }
     public ZonedDateTime getStartedAt() { return startedAt; }
     public ChoreographerStep getStep() { return step; }
+    public ChoreographerSession getSession() { return session; }
 
     //=================================================================================================
 
@@ -55,6 +61,7 @@ public class ChoreographerRunningStep {
     public void setMessage(String message) { this.message = message; }
     public void setStartedAt(ZonedDateTime startedAt) { this.startedAt = startedAt; }
     public void setStep(ChoreographerStep step) { this.step = step; }
+    public void setSession(ChoreographerSession session) { this.session = session; }
 
     //-------------------------------------------------------------------------------------------------
     @PrePersist

@@ -26,6 +26,37 @@ public class ChoreographerWorklog {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sessionId", referencedColumnName = "id", nullable = false)
-    private ChoreographerStep session;
+    private ChoreographerSession session;
 
+    //=================================================================================================
+    // methods
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerWorklog() {}
+
+    //-------------------------------------------------------------------------------------------------
+    public ChoreographerWorklog(ChoreographerSession session, String status, String message) {
+        this.session = session;
+        this.status = status;
+        this.message = message;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public long getId() { return id; }
+    public String getStatus() { return status; }
+    public String getMessage() { return message; }
+    public ZonedDateTime getEntryDate() { return entryDate; }
+    public ChoreographerSession getSession() { return session; }
+
+    //-------------------------------------------------------------------------------------------------
+
+    public void setId(long id) { this.id = id; }
+    public void setStatus(String status) { this.status = status; }
+    public void setMessage(String message) { this.message = message; }
+    public void setEntryDate(ZonedDateTime entryDate) { this.entryDate = entryDate; }
+    public void setSession(ChoreographerSession session) { this.session = session; }
+
+    //-------------------------------------------------------------------------------------------------
+    @PrePersist
+    public void onCreate() { this.entryDate = ZonedDateTime.now(); }
 }

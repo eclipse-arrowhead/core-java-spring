@@ -593,6 +593,7 @@ public class DTOConverter {
 				step.getMetadata(),
 				step.getParameters(),
 				collectNextStepsFromStep(step.getNextSteps()),
+				step.getQuantity(),
 				Utilities.convertZonedDateTimeToUTCString(step.getCreatedAt()),
 				Utilities.convertZonedDateTimeToUTCString(step.getUpdatedAt()));
 	}
