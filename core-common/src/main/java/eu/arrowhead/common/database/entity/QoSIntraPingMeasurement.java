@@ -17,24 +17,24 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "qos_intra_ping_measurement")
 public class QoSIntraPingMeasurement {
-	
+
 	//=================================================================================================
 	// members
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSIntraMeasurement measurement;
-	
+
 	@Column(nullable = false)
-	private boolean accessible = false;
-	
+	private boolean available = false;
+
 	@Column(nullable = true)
 	private ZonedDateTime lastAccessAt;
-	
+
 	@Column(nullable = true)
 	private int minResponseTime;
 
@@ -70,7 +70,7 @@ public class QoSIntraPingMeasurement {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSIntraPingMeasurement() {}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {
@@ -87,7 +87,7 @@ public class QoSIntraPingMeasurement {
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public QoSIntraMeasurement getMeasurement() { return measurement; }
-	public boolean isAccessible() { return accessible; }
+	public boolean isAvailable() { return available; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
 	public int getMinResponseTime() { return minResponseTime; }
 	public int getMaxResponseTime() { return maxResponseTime; }
@@ -103,7 +103,7 @@ public class QoSIntraPingMeasurement {
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setMeasurement(final QoSIntraMeasurement measurement) { this.measurement = measurement; }
-	public void setAccessible(final boolean accessible) { this.accessible = accessible; }
+	public void setAccessible(final boolean available) { this.available = available; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final int minResponseTime) { this.minResponseTime = minResponseTime; }
 	public void setMaxResponseTime(final int maxResponseTime) { this.maxResponseTime = maxResponseTime; }
