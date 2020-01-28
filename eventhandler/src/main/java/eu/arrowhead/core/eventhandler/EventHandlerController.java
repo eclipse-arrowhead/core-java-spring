@@ -141,7 +141,8 @@ public class EventHandlerController {
 				
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.EVENT_HANDLER_URI + EVENT_HANDLER_MGMT_URI);
 		final SubscriptionListResponseDTO subscriptionsResponse = eventHandlerDBService.getSubscriptionsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
-																												 validParameters.getValidatedDirection(), sortField);
+																												 validParameters.getValidatedDirection(),
+																												 sortField);
 		
 		logger.debug("Subscriptions  with page: {} and item_per page: {} retrieved successfully", page, size);
 		return subscriptionsResponse;
