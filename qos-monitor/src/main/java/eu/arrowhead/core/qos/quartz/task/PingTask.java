@@ -89,9 +89,22 @@ public class PingTask implements Job {
 		logger.debug("Finished: ping  task");
 	}
 
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private Set<SystemResponseDTO> getSystemsToMessure() {
+		logger.debug("getSystemToMessure started...");
+
+		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
+		final Set<SystemResponseDTO> systemList = serviceRegistryListResponseDTO.getData().stream().map(ServiceRegistryResponseDTO::getProvider).collect(Collectors.toSet());
+
+		return systemList;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class) 
-	public QoSIntraMeasurement createMeasurement(final System system,final QoSMeasurementType ping,final ZonedDateTime aroundNow) {
+	private QoSIntraMeasurement createMeasurement(final System system,final QoSMeasurementType ping,final ZonedDateTime aroundNow) {
 		logger.debug("createMeasurement started...");
 
 		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
@@ -105,10 +118,10 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = ArrowheadException.class) 
+	@Transactional (rollbackFor = ArrowheadException.class)
 	private QoSIntraPingMeasurement createPingMeasurement(final QoSIntraMeasurement measurementParam,
 	final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
-		logger.debug("pingSystem started...");
+		logger.debug("createPingMeasurement started...");
 
 		final boolean available = calculateAvailable(responseList);
 		final int maxResponseTime = calculateMaxResponseTime(responseList);
@@ -168,28 +181,15 @@ public class PingTask implements Job {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public void updateMeasurement(ZonedDateTime aroundNow,final QoSIntraMeasurement measurement) {
+	private void updateMeasurement(ZonedDateTime aroundNow,final QoSIntraMeasurement measurement) {
 
 	 	measurement.setLastMeasurementAt(aroundNow);
 	 	qoSIntraMeasurementRepository.saveAndFlush(measurement);
 
 	}
 
-	//=================================================================================================
-	// assistant methods
-
 	//-------------------------------------------------------------------------------------------------
-	private Set<SystemResponseDTO> getSystemsToMessure() {
-		logger.debug("getSystemToMessure started...");
-
-		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
-		final Set<SystemResponseDTO> systemList = serviceRegistryListResponseDTO.getData().stream().map(ServiceRegistryResponseDTO::getProvider).collect(Collectors.toSet());
-
-		return systemList;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	public void pingSystem(final SystemResponseDTO systemResponseDTO ) {
+	private void pingSystem(final SystemResponseDTO systemResponseDTO ) {
 		logger.debug("pingSystem started...");
 
 		final ZonedDateTime aroundNow = ZonedDateTime.now();
