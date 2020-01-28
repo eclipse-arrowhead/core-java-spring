@@ -106,7 +106,7 @@ public class DataManagerController {
 			) {
 		Gson gson = new Gson();
 
-		ArrayList<String> systems = HistorianService.getSystems();
+		ArrayList<String> systems = historianService.getSystems();
 		JsonObject answer = new JsonObject();
 		JsonElement systemlist = gson.toJsonTree(systems);
 		answer.add("systems", systemlist);
@@ -147,7 +147,7 @@ public class DataManagerController {
 
 		String op = obj.get("op").getAsString();
 		if(op.equals("list")) {
-			ArrayList<String> services = HistorianService.getServicesFromSystem(systemName);
+			ArrayList<String> services = historianService.getServicesFromSystem(systemName);
 			Gson gson = new Gson();
 			JsonObject answer = new JsonObject();
 			JsonElement servicelist = gson.toJsonTree(services);
@@ -160,7 +160,7 @@ public class DataManagerController {
 			String srvType = obj.get("srvType").getAsString();
 
 			/* check if service already exists */
-			ArrayList<String> services = HistorianService.getServicesFromSystem(systemName);
+			ArrayList<String> services = historianService.getServicesFromSystem(systemName);
 			for (String srv: services) {
 				if(srv.equals(srvName)){
 					logger.info("  service:" +srv + " already exists");
@@ -173,7 +173,7 @@ public class DataManagerController {
 			}
 
 			/* create the service */
-			boolean ret = HistorianService.addServiceForSystem(systemName, srvName, srvType);
+			boolean ret = historianService.addServiceForSystem(systemName, srvName, srvType);
 			if (ret==true){
 				return "{\"x\": 0}"; //Response.status(Status.CREATED).entity("{}").type(MediaType.APPLICATION_JSON).build();
 			} else {
@@ -218,9 +218,9 @@ public class DataManagerController {
 		List<SenML> ret = null;
 
 		if(signals.size() == 0) {
-			ret = HistorianService.fetchEndpoint(serviceName, from, to, count, null);
+			ret = historianService.fetchEndpoint(serviceName, from, to, count, null);
 		} else {
-			ret = HistorianService.fetchEndpoint(serviceName, from, to, count, signals);
+			ret = historianService.fetchEndpoint(serviceName, from, to, count, signals);
 		}
 
 		return ret;
@@ -235,7 +235,7 @@ public class DataManagerController {
 	) {
 		logger.debug("DataManager:Put:Historian/"+systemName+"/"+serviceName);
 
-		boolean statusCode = HistorianService.createEndpoint(systemName, serviceName);
+		boolean statusCode = historianService.createEndpoint(systemName, serviceName);
 
 		if (validateSenML(sml) == false) {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Invalid SenML");
@@ -245,7 +245,7 @@ public class DataManagerController {
 		if(head.getBt() == null)
 			head.setBt((double)System.currentTimeMillis() / 1000.0);
 
-		statusCode = HistorianService.updateEndpoint(serviceName, sml);
+		statusCode = historianService.updateEndpoint(serviceName, sml);
 
 		SigML ret = new SigML(0);
 		//String jsonret = "{\"x\": 0}";
@@ -263,7 +263,7 @@ public class DataManagerController {
 	@ResponseBody public String proxyServices() {
 		Gson gson = new Gson();
 
-		List<String> pes = ProxyService.getAllEndpoints();
+		List<String> pes = proxyService.getAllEndpoints();
 		JsonObject answer = new JsonObject();
 		JsonElement systemlist = gson.toJsonTree(pes);
 		answer.add("systems", systemlist);
@@ -285,7 +285,7 @@ public class DataManagerController {
 			@PathVariable(value="systemName", required=true) String systemName
 		) {
 
-		List<ProxyElement> pes = ProxyService.getEndpoints(systemName);
+		List<ProxyElement> pes = proxyService.getEndpoints(systemName);
 		if (pes.size() == 0) {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "System not found");
 		}
@@ -325,7 +325,7 @@ public class DataManagerController {
 
 		String op = obj.get("op").getAsString();
 		if(op.equals("list")){
-			List<ProxyElement> pes = ProxyService.getEndpoints(systemName);
+			List<ProxyElement> pes = proxyService.getEndpoints(systemName);
 			if (pes.size() == 0) {
 				logger.debug("proxy GET to systemName: " + systemName + " not found");
 				throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "System not found");
@@ -348,7 +348,7 @@ public class DataManagerController {
 			logger.info("Create Service: "+srvName+" of type: "+srvType+" for: " + systemName);
 
 			/* check if service already exists */
-			ArrayList<ProxyElement> services = ProxyService.getEndpoints(systemName);
+			ArrayList<ProxyElement> services = proxyService.getEndpoints(systemName);
 			for (ProxyElement srv: services) {
 				logger.info("PE: " + srv.serviceName);
 				if(srv.serviceName.equals(srvName)){
@@ -361,7 +361,7 @@ public class DataManagerController {
 			}
 
 			/* create the service */
-			boolean ret = ProxyService.addEndpoint(new ProxyElement(systemName, srvName));
+			boolean ret = proxyService.addEndpoint(new ProxyElement(systemName, srvName));
 			if (ret==true){
 				throw new ResponseStatusException(org.springframework.http.HttpStatus.CREATED, "createResult: Created");
 			} else { 
@@ -390,7 +390,7 @@ public class DataManagerController {
 			) {
 
 			int statusCode = 0;
-			ProxyElement pe = ProxyService.getEndpoint(serviceName);
+			ProxyElement pe = proxyService.getEndpoint(serviceName);
 			if (pe == null) {
 				logger.info("proxy GET to serviceName: " + serviceName + " not found");
 				throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Service not found");
@@ -415,7 +415,7 @@ public class DataManagerController {
 			@PathVariable(value="serviceName", required=true) String serviceName,
 			@RequestBody Vector<SenML> sml
 			) {
-		ProxyElement pe = ProxyService.getEndpoint(serviceName);
+		ProxyElement pe = proxyService.getEndpoint(serviceName);
 		if (pe == null) {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Service not found");
 		}
@@ -424,7 +424,7 @@ public class DataManagerController {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Invalid SenML");
 		}
 
-		boolean statusCode = ProxyService.updateEndpoint(systemName, serviceName, sml);
+		boolean statusCode = proxyService.updateEndpoint(systemName, serviceName, sml);
 
 		int ret = 0;
 		if (statusCode == false)

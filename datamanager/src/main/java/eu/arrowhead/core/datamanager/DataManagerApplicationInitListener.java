@@ -1,10 +1,7 @@
 package eu.arrowhead.core.datamanager;
 
 import java.util.List;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -46,16 +43,8 @@ public class DataManagerApplicationInitListener extends ApplicationInitListener 
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	protected void customInit(final ContextRefreshedEvent event) {				
-		Properties prop = null;
-		logger.debug("customInit started...");
-		try (InputStream input = new FileInputStream("application.properties")) {
-			prop = new Properties();
-			prop.load(input);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		HistorianService.Init(prop);
+	protected void customInit(final ContextRefreshedEvent event) {
+		logger.debug("customInit started...");	
 	}
 
 	//-------------------------------------------------------------------------------------------------
