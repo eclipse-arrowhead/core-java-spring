@@ -35,7 +35,7 @@ public class CountRestarterTaskConfig {
 	private static final String CRONE_EXPRESSION_MIDNIGHT_EVERY_DAY= "0 0 0 ? * * *";
 	
 	private static final String NAME_OF_TRIGGER = "Counter_Restart_Task_Trigger";
-	private static final String NAME_OF_TASK = "Counter_Restart_Task_Detail";	
+	private static final String NAME_OF_TASK = "Counter_Restart_Task_Detail";
 	
 	//=================================================================================================
 	// methods
