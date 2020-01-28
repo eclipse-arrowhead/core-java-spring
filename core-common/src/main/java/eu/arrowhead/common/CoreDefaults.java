@@ -51,6 +51,8 @@ public class CoreDefaults {
 	public static final boolean DEFAULT_CLOUD_PING_TTL_SCHEDULED = false;
 	public static final int DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES = 10;
 	
+	public static final int DEFAULT_QOS_RESERVATION_CHECK_INTERVAL = 60; // in seconds
+	
 	//=================================================================================================
 	// assistant methods
 	
