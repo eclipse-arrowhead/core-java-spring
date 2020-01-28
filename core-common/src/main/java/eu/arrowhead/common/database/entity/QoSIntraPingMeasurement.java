@@ -29,34 +29,34 @@ public class QoSIntraPingMeasurement {
 	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSIntraMeasurement measurement;
 	
-	@Column(nullable = false)
-	private boolean accessible = false;
+	@Column(name = "available", nullable = false)
+	private boolean available = false;
 	
-	@Column(nullable = true)
+	@Column(name = "last_access_at", nullable = true)
 	private ZonedDateTime lastAccessAt;
 	
-	@Column(nullable = true)
-	private int minResponseTime;
+	@Column(name = "min_response_time", nullable = true)
+	private Integer minResponseTime;
 
-	@Column(nullable = true)
-	private int maxResponseTime;
+	@Column(name = "max_response_time", nullable = true)
+	private Integer maxResponseTime;
 
-	@Column(nullable = true)
-	private int meanResponseTime;
+	@Column(name = "mean_response_time", nullable = true)
+	private Integer meanResponseTime;
 	
-	@Column(nullable = false)
+	@Column(name = "sent", nullable = false)
 	private long sent;
 
-	@Column(nullable = false)
+	@Column(name = "received", nullable = false)
 	private long received;
 	
-	@Column(nullable = true)
+	@Column(name = "count_started_at", nullable = true)
 	private ZonedDateTime countStartedAt;
 
-	@Column(nullable = false)
+	@Column(name = "sent_all", nullable = false)
 	private long sentAll;
 
-	@Column(nullable = false)
+	@Column(name = "received_all", nullable = false)
 	private long receivedAll;
 
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -87,11 +87,11 @@ public class QoSIntraPingMeasurement {
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public QoSIntraMeasurement getMeasurement() { return measurement; }
-	public boolean isAccessible() { return accessible; }
+	public boolean isAvailable() { return available; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
-	public int getMinResponseTime() { return minResponseTime; }
-	public int getMaxResponseTime() { return maxResponseTime; }
-	public int getMeanResponseTime() { return meanResponseTime; }
+	public Integer getMinResponseTime() { return minResponseTime; }
+	public Integer getMaxResponseTime() { return maxResponseTime; }
+	public Integer getMeanResponseTime() { return meanResponseTime; }
 	public long getSent() { return sent; }
 	public long getReceived() { return received; }
 	public ZonedDateTime getCountStartedAt() { return countStartedAt; }
@@ -103,11 +103,11 @@ public class QoSIntraPingMeasurement {
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setMeasurement(final QoSIntraMeasurement measurement) { this.measurement = measurement; }
-	public void setAccessible(final boolean accessible) { this.accessible = accessible; }
+	public void setAvailable(final boolean available) { this.available = available; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
-	public void setMinResponseTime(final int minResponseTime) { this.minResponseTime = minResponseTime; }
-	public void setMaxResponseTime(final int maxResponseTime) { this.maxResponseTime = maxResponseTime; }
-	public void setMeanResponseTime(final int meanResponseTime) { this.meanResponseTime = meanResponseTime; }
+	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
+	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }
+	public void setMeanResponseTime(final Integer meanResponseTime) { this.meanResponseTime = meanResponseTime; }
 	public void setSent(final long sent) { this.sent = sent; }
 	public void setReceived(final long received) { this.received = received; }
 	public void setCountStartedAt(final ZonedDateTime countStartedAt) { this.countStartedAt = countStartedAt; }
