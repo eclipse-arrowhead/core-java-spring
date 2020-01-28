@@ -2,10 +2,8 @@ package eu.arrowhead.core.qos.quartz.task;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,23 +50,24 @@ public class PingTask implements Job {
 	//=================================================================================================
 	// members
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-	private static final int TIMES_TO_REPEAT = 2;
+	private static final int TIMES_TO_REPEAT = 35;
+	private static final int PING_TIME_OUT = 5000;
 	private static final int REST_BETWEEN_PINGS_MILLSEC = 1000;
 
 	protected Logger logger = LogManager.getLogger(PingTask.class);
-	
+
 	@Autowired
 	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
-	
+
 	@Autowired
 	private QoSIntraMeasurementPingRepository qoSIntraMeasurementPingRepository;
-	
+
 	@Autowired
 	private SystemRepository systemRepository;
-	
+
 	@Autowired
 	private HttpService httpService;
-	
+
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 
@@ -111,19 +110,25 @@ public class PingTask implements Job {
 	final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("pingSystem started...");
 
-		 final boolean available = calculateAvailable(responseList);
-		 final int maxResponseTime = calculateMaxResponseTime(responseList);
-		 final int minResponseTime = calculateMinResponseTime(responseList);
-		 final int meanResponseTime = calculateMeanResponseTime(responseList);
-		 final ZonedDateTime countStartedAt = aroundNow;
-		 
-		 long sent = 0;
-		 long sentAll = 0;
-		 long received = 0;
-		 long receivedAll = 0;
+		final boolean available = calculateAvailable(responseList);
+		final int maxResponseTime = calculateMaxResponseTime(responseList);
+		final int minResponseTime = calculateMinResponseTime(responseList);
+		final int meanResponseTimeWithTimeout = calculateMeanResponseTimeWithTimeout(responseList);
+		final int meanResponseTimeWithOutTimeout = calculateMeanResponseTimeWithoutTimeout(responseList);
+		final int jitterWithTimeout = calculateJitterWithTimeout(responseList);
+		final int jitterWithoutTimeout = calculateJitterWithoutTimeout(responseList);
+		
+		final ZonedDateTime countStartedAt = aroundNow;
 
-		 final int sentInThisPing = getSentInThisPing(responseList);
-		 final int receivedInThisPing = getReceivedInThisPing(responseList);
+		long sent = 0;
+		long sentAll = 0;
+		long received = 0;
+		long receivedAll = 0;
+
+		final int sentInThisPing = getSentInThisPing(responseList);
+		final int receivedInThisPing = getReceivedInThisPing(responseList);
+
+		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 1 : ((double)receivedInThisPing / (double)sentInThisPing) * 100);
 
 		final QoSIntraMeasurement measurement ;
 		final Optional<QoSIntraMeasurement> meOptional = qoSIntraMeasurementRepository.findById(measurementParam.getId());
@@ -144,16 +149,19 @@ public class PingTask implements Job {
 		pingMeasurement.setAvailable(available);
 		pingMeasurement.setMaxResponseTime(maxResponseTime);
 		pingMeasurement.setMinResponseTime(minResponseTime);
-		pingMeasurement.setMeanResponseTime(meanResponseTime);
+		pingMeasurement.setMeanResponseTimeWithoutTimeout(meanResponseTimeWithOutTimeout);
+		pingMeasurement.setMeanResponseTimeWithTimeout(meanResponseTimeWithTimeout);
+		pingMeasurement.setJitterWithoutTimeout(jitterWithoutTimeout);
+		pingMeasurement.setJitterWithTimeout(jitterWithTimeout);
+		pingMeasurement.setLostPerMeasurementPercent(lostPerMeasurementPercent);
 		pingMeasurement.setCountStartedAt(countStartedAt);
-		pingMeasurement.setLastAccessAt(ZonedDateTime.now());//calculateLastAccessAt(responseList, pingMeasurement, aroundNow));
+		pingMeasurement.setLastAccessAt(calculateLastAccessAt(responseList, pingMeasurement, aroundNow));
 		pingMeasurement.setSent(sent + sentInThisPing);
 		pingMeasurement.setSentAll(sentAll + sentInThisPing);
 		pingMeasurement.setReceived(received + receivedInThisPing);
 		pingMeasurement.setReceivedAll(receivedAll + getReceivedInThisPing(responseList));
 
 		qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
-		//qoSIntraMeasurementPingRepository.refresh(pingMeasurement);
 
 		return pingMeasurement;
 	}
@@ -163,7 +171,6 @@ public class PingTask implements Job {
 	public void updateMeasurement(ZonedDateTime aroundNow,final QoSIntraMeasurement measurement) {
 
 	 	measurement.setLastMeasurementAt(aroundNow);
-	 	//qoSIntraMeasurementRepository.refresh(measurement);
 	 	qoSIntraMeasurementRepository.saveAndFlush(measurement);
 
 	}
@@ -207,52 +214,47 @@ public class PingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = getPingResponseList(address);
 
-		 final boolean available = calculateAvailable(responseList);
-		 final int maxResponseTime = calculateMaxResponseTime(responseList);
-		 final int minResponseTime = calculateMinResponseTime(responseList);
-		 final int meanResponseTime = calculateMeanResponseTime(responseList);
-		 final ZonedDateTime countStartedAt = aroundNow;
+		final boolean available = calculateAvailable(responseList);
+		final int maxResponseTime = calculateMaxResponseTime(responseList);
+		final int minResponseTime = calculateMinResponseTime(responseList);
+		final int meanResponseTimeWithTimeout = calculateMeanResponseTimeWithTimeout(responseList);
+		final int meanResponseTimeWithOutTimeout = calculateMeanResponseTimeWithoutTimeout(responseList);
+		final int jitterWithTimeout = calculateJitterWithTimeout(responseList);
+		final int jitterWithoutTimeout = calculateJitterWithoutTimeout(responseList);
 
-		 final int sentInThisPing = getSentInThisPing(responseList);
-		 final int receivedInThisPing = getReceivedInThisPing(responseList);
+		final ZonedDateTime countStartedAt = aroundNow;
 
-		 final QoSIntraMeasurement measurement;
-		 final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
-		 if (qoSIntraMeasurementOptional.isEmpty()) {
+		final int sentInThisPing = getSentInThisPing(responseList);
+		final int receivedInThisPing = getReceivedInThisPing(responseList);
+		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 1 : 100 - ((double)receivedInThisPing / (double)sentInThisPing) * 100);
+
+		final QoSIntraMeasurement measurement;
+		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+		if (qoSIntraMeasurementOptional.isEmpty()) {
 			measurement = createMeasurement(system, QoSMeasurementType.PING, aroundNow);
-		 }else {
+		}else {
 			 measurement = qoSIntraMeasurementOptional.get();
 		}
 
-		 final QoSIntraPingMeasurement pingMeasurement;
-		 final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
-		 if (pingMeasurementOptional.isEmpty()) {
+		final QoSIntraPingMeasurement pingMeasurement;
+		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
+		if (pingMeasurementOptional.isEmpty()) {
 
 			pingMeasurement = createPingMeasurement(measurement, responseList, aroundNow);
+			qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
 
-			pingMeasurement.setMeasurement(measurement);
-			pingMeasurement.setAvailable(available);
-			pingMeasurement.setMaxResponseTime(maxResponseTime);
-			pingMeasurement.setMinResponseTime(minResponseTime);
-			pingMeasurement.setMeanResponseTime(meanResponseTime);
-			pingMeasurement.setCountStartedAt(countStartedAt);
-			pingMeasurement.setLastAccessAt(calculateLastAccessAt(responseList, pingMeasurement, aroundNow));
-			pingMeasurement.setSent(pingMeasurement.getSent() + sentInThisPing);
-			pingMeasurement.setSentAll(pingMeasurement.getSentAll() + sentInThisPing);
-			pingMeasurement.setReceived(pingMeasurement.getReceived() + receivedInThisPing);
-			pingMeasurement.setReceivedAll(pingMeasurement.getReceivedAll() + getReceivedInThisPing(responseList));
-
-		 	qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
-		 	//qoSIntraMeasurementPingRepository.refresh(pingMeasurement);
-
-		 }else {
+		}else {
 			pingMeasurement = pingMeasurementOptional.get();
 
 			pingMeasurement.setMeasurement(measurement);
 			pingMeasurement.setAvailable(available);
 			pingMeasurement.setMaxResponseTime(maxResponseTime);
 			pingMeasurement.setMinResponseTime(minResponseTime);
-			pingMeasurement.setMeanResponseTime(meanResponseTime);
+			pingMeasurement.setMeanResponseTimeWithoutTimeout(meanResponseTimeWithOutTimeout);
+			pingMeasurement.setMeanResponseTimeWithTimeout(meanResponseTimeWithTimeout);
+			pingMeasurement.setJitterWithoutTimeout(jitterWithoutTimeout);
+			pingMeasurement.setJitterWithTimeout(jitterWithTimeout);
+			pingMeasurement.setLostPerMeasurementPercent(lostPerMeasurementPercent);
 			pingMeasurement.setCountStartedAt(countStartedAt);
 			pingMeasurement.setLastAccessAt(calculateLastAccessAt(responseList, pingMeasurement, aroundNow));
 			pingMeasurement.setSent(pingMeasurement.getSent() + sentInThisPing);
@@ -261,7 +263,6 @@ public class PingTask implements Job {
 			pingMeasurement.setReceivedAll(pingMeasurement.getReceivedAll() + getReceivedInThisPing(responseList));
 
 			qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
-			//qoSIntraMeasurementPingRepository.refresh(pingMeasurement);
 
 		}
 
@@ -326,7 +327,7 @@ public class PingTask implements Job {
 	//-------------------------------------------------------------------------------------------------
 	private int getReceivedInThisPing(final List<IcmpPingResponse> responseList) {
 		logger.debug("getReceivedInThisPing started...");
-		
+
 		int countReceived = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
@@ -370,15 +371,39 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private int calculateMeanResponseTime(final List<IcmpPingResponse> responseList) {
+	private int calculateMeanResponseTimeWithoutTimeout(final List<IcmpPingResponse> responseList) {
 		logger.debug("calculateMeanResponseTime started...");
 
-		final double mean = responseList.
-				stream().
-				mapToLong(IcmpPingResponse::getDuration).
-				average().
-				getAsDouble();
+		final double mean;
+		long sum = 0;
+		int count = 0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+			if (icmpPingResponse.getSuccessFlag()) {
+				sum += icmpPingResponse.getDuration();
+				++count;
+			}
+		}
  
+		mean = (double)sum / (double)count;
+		return (int) Math.round(mean);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int calculateMeanResponseTimeWithTimeout(final List<IcmpPingResponse> responseList) {
+		logger.debug("calculateMeanResponseTime started...");
+
+		final double mean;
+		long sum = 0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			if (!icmpPingResponse.getSuccessFlag()) {
+				sum += PING_TIME_OUT;
+			}else {
+				sum += icmpPingResponse.getDuration();
+			}
+		}
+ 
+		mean = (double)sum / (double)responseList.size();
 		return (int) Math.round(mean);
 	}
 
@@ -386,30 +411,40 @@ public class PingTask implements Job {
 	private int calculateMinResponseTime(final List<IcmpPingResponse> responseList) {
 		logger.debug("calculateMinResponseTime started...");
 
-		final IcmpPingResponse responseWithMinDuration = responseList.
-				stream().
-				min(Comparator.comparing(IcmpPingResponse::getDuration)).
-				orElseThrow(NoSuchElementException::new);
+		int min = PING_TIME_OUT;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			if (icmpPingResponse.getSuccessFlag()) {
+				if(icmpPingResponse.getDuration() < min) {
+					min = (int) icmpPingResponse.getDuration();
+				}
+			}
+		}
  
-		return (int)responseWithMinDuration.getDuration();
+		return min;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private int calculateMaxResponseTime(final List<IcmpPingResponse> responseList) {
 		logger.debug("calculateMaxResponseTime started...");
 
-		final IcmpPingResponse responseWithMaxDuration = responseList.
-				stream().
-				max(Comparator.comparing(IcmpPingResponse::getDuration)).
-				orElseThrow(NoSuchElementException::new);
- 
-		return (int) responseWithMaxDuration.getDuration();
+		int max = 0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			if (icmpPingResponse.getSuccessFlag()) {
+				if(icmpPingResponse.getDuration() > max) {
+					max = (int) icmpPingResponse.getDuration();
+				}
+			}
+		}
+
+		return max;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private boolean calculateAvailable(final List<IcmpPingResponse> responseList) {
 		logger.debug("calculateAvailable started...");
-		
+
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
 			if (icmpPingResponse.getSuccessFlag()) {
@@ -421,4 +456,50 @@ public class PingTask implements Job {
 		return false;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	private int calculateJitterWithTimeout(final List<IcmpPingResponse> responseList) {
+		logger.debug("calculateJitterWithTimeout started...");
+
+		final int meanResponseTimeWithTimeout = calculateMeanResponseTimeWithTimeout(responseList);
+		int sumOfDiffs = 0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			final int duration;
+			if (!icmpPingResponse.getSuccessFlag()) {
+				duration = PING_TIME_OUT + 1;
+			}else {
+				duration = (int) icmpPingResponse.getDuration();
+			}
+			sumOfDiffs += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
+
+		}
+
+		final int jitter = (int) Math.sqrt(sumOfDiffs / responseList.size());
+
+		return jitter;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private int calculateJitterWithoutTimeout(final List<IcmpPingResponse> responseList) {
+		logger.debug("calculateJitterWithoutTimeout started...");
+
+		final int meanResponseTimeWithTimeout = calculateMeanResponseTimeWithoutTimeout(responseList);
+		int sumOfDiffs = 0;
+		int count = 0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			final int duration;
+			if (icmpPingResponse.getSuccessFlag()) {
+				duration = (int) icmpPingResponse.getDuration();
+				sumOfDiffs += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
+
+				++ count;
+			}
+
+		}
+
+		final int jitter = (int) Math.sqrt(sumOfDiffs / count);
+
+		return jitter;
+	}
 }
