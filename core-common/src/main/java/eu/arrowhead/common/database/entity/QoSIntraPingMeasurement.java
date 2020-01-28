@@ -17,14 +17,14 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "qos_intra_ping_measurement")
 public class QoSIntraPingMeasurement {
-	
+
 	//=================================================================================================
 	// members
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSIntraMeasurement measurement;
@@ -70,7 +70,7 @@ public class QoSIntraPingMeasurement {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSIntraPingMeasurement() {}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {

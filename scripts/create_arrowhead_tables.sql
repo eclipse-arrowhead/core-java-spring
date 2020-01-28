@@ -365,4 +365,3 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 	UNIQUE KEY `unique_measurement` (`measurement_id`)
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-

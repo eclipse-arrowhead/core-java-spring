@@ -14,18 +14,25 @@ import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.exception.BadPayloadException;
 
 public class OrchestrationFormRequestDTO implements Serializable {
+	
+	public static final String QOS_REQUIREMENT_MINIMUM_RESPONSE_TIME = "qosMinRespTime"; // in milliseconds
+	public static final String QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS = "qosMaxRecentPacketLoss"; // in percent, for example 20% is 20
+	public static final String QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS = "qosMaxPacketLost"; // in percent
+	
+	public static final String QOS_COMMAND_EXCLUSIVITY = "qosExclusivity"; // in seconds
 
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = -3595427649312358521L;
-
+	private static final long serialVersionUID = 5875552294338921238L;
+	
 	private SystemRequestDTO requesterSystem;
 	private CloudRequestDTO requesterCloud;
 	private ServiceQueryFormDTO requestedService;
 	private OrchestrationFlags orchestrationFlags = new OrchestrationFlags();
 	private List<PreferredProviderDataDTO> preferredProviders = new ArrayList<>();
 	private Map<String,String> commands = new HashMap<>();
+	private Map<String,String> qosRequirements = new HashMap<>();
 	
 	//=================================================================================================
 	// methods
@@ -40,18 +47,32 @@ public class OrchestrationFormRequestDTO implements Serializable {
 	public OrchestrationFlags getOrchestrationFlags() { return orchestrationFlags; }
 	public List<PreferredProviderDataDTO> getPreferredProviders() { return preferredProviders; }
 	public Map<String,String> getCommands() { return commands; }
-	
+	public Map<String,String> getQosRequirements() { return qosRequirements; }
+
 	//-------------------------------------------------------------------------------------------------	
 	public void setRequesterSystem(final SystemRequestDTO requesterSystem) { this.requesterSystem = requesterSystem; }
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
 	public void setRequestedService(final ServiceQueryFormDTO requestedService) { this.requestedService = requestedService; }
 	public void setOrchestrationFlags(final Map<String,Boolean> orchestrationFlags) { this.orchestrationFlags = new OrchestrationFlags(orchestrationFlags); }
-	public void setCommands(final Map<String,String> commands) { this.commands = commands; }
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setCommands(final Map<String,String> commands) { 
+		if (commands != null) {
+			this.commands = commands;
+		}
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setPreferredProviders(final List<PreferredProviderDataDTO> preferredProviders) {
 		if (preferredProviders != null) {
 			this.preferredProviders = preferredProviders;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void setQosRequirements(final Map<String,String> qosRequirements) {
+		if (qosRequirements != null) {
+			this.qosRequirements = qosRequirements;
 		}
 	}
 	
@@ -91,7 +112,8 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		this.requestedService = builder.requestedService;
 		this.orchestrationFlags = builder.orchestrationFlags;
 		this.preferredProviders = builder.preferredProviders;
-		this.commands = builder.commands;
+		this.setCommands(builder.commands);
+		this.setQosRequirements(builder.qosRequirements);
 	}
 	
 	//=================================================================================================
@@ -109,6 +131,7 @@ public class OrchestrationFormRequestDTO implements Serializable {
 		private final OrchestrationFlags orchestrationFlags = new OrchestrationFlags();
 		private List<PreferredProviderDataDTO> preferredProviders = new ArrayList<>();
 		private Map<String,String> commands = new HashMap<>();
+		private Map<String,String> qosRequirements = new HashMap<>();
 
 		//=================================================================================================
 		// methods
@@ -166,6 +189,24 @@ public class OrchestrationFormRequestDTO implements Serializable {
 			
 			return this;
 
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder qosRequirements(final Map<String,String> qosRequirements) {
+			this.qosRequirements = qosRequirements;
+			return this;
+		}
+		
+		//-------------------------------------------------------------------------------------------------
+		public Builder qosRequirement(final String key, final String value) {
+			Assert.isTrue(key != null && !key.isBlank(), "Key is null or blank");
+			
+			if (this.qosRequirements == null) {
+				this.qosRequirements = new HashMap<>();
+			}
+			this.qosRequirements.put(key, value);
+			
+			return this;
 		}
 		
 		//-------------------------------------------------------------------------------------------------
