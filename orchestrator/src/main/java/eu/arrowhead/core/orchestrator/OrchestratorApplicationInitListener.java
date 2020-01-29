@@ -21,6 +21,9 @@ import eu.arrowhead.core.orchestrator.matchmaking.DefaultInterCloudProviderMatch
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.RandomIntraCloudProviderMatchmaker;
+import eu.arrowhead.core.qos.manager.QoSManager;
+import eu.arrowhead.core.qos.manager.impl.DummyQoSManager;
+import eu.arrowhead.core.qos.manager.impl.QoSManagerImpl;
 
 @Component
 public class OrchestratorApplicationInitListener extends ApplicationInitListener {
@@ -30,6 +33,9 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
+	
+	@Value(CoreCommonConstants.$QOS_ENABLED_WD)
+	private boolean qosEnabled;
 	
 	//=================================================================================================
 	// methods
@@ -50,6 +56,12 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	@Bean(CoreCommonConstants.CLOUD_MATCHMAKER)
 	public CloudMatchmakingAlgorithm getCloudMatchmaker() {
 		return new DefaultCloudMatchmaker();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CoreCommonConstants.QOS_MANAGER)
+	public QoSManager getQoSManager() {
+		return qosEnabled ? new QoSManagerImpl() : new DummyQoSManager();
 	}
 
 	//=================================================================================================

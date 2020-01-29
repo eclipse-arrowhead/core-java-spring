@@ -116,6 +116,9 @@ public class CoreCommonConstants {
 	
 	public static final int TOP_PRIORITY = 1;
 	
+	public static final String QOS_MANAGER = "qosManager";
+	public static final String QOS_ENABLED = "enable_qos";
+	public static final String $QOS_ENABLED_WD = "${" + QOS_ENABLED + ":" + CoreDefaults.DEFAULT_QOS_ENABLED + "}";
 	public static final String QOS_RESERVATION_CHECK_INTERVAL = "qos_reservation_check_interval"; // in minutes
 	public static final String $QOS_RESERVATION_CHECK_INTERVAL_WS = "${" + QOS_RESERVATION_CHECK_INTERVAL + ":" + CoreDefaults.DEFAULT_QOS_RESERVATION_CHECK_INTERVAL + "}";
 	

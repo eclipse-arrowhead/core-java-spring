@@ -116,7 +116,12 @@ public class OrchestratorService {
 
 		logger.debug("externalServiceRequest finished with {} service providers.", queryData.size());
 		
-		return compileOrchestrationResponse(queryData, request);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+
+		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+	    orList = orchestratorDriver.generateAuthTokens(request, orList);
+
+	    return new OrchestrationResponseDTO(orList);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -167,7 +172,12 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
-		return compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
+		
+	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+	    orList = orchestratorDriver.generateAuthTokens(orchestrationFormRequestDTO, orList);
+	    
+	    return new OrchestrationResponseDTO(orList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -258,19 +268,25 @@ public class OrchestratorService {
 			}
 		}
 
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		
 		// If matchmaking is requested, we pick out 1 ServiceRegistryEntry entity from the list.
 		if (flags.get(Flag.MATCHMAKING)) {
 			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
 			// set additional parameters here if you use a different matchmaking algorithm
-			final ServiceRegistryResponseDTO selected = intraCloudProviderMatchmaker.doMatchmaking(queryData, params);
-			queryData.clear();
-			queryData.add(selected);
+			final OrchestrationResultDTO selected = intraCloudProviderMatchmaker.doMatchmaking(orList, params);
+			orList.clear();
+			orList.add(selected);
 		}
 
 		// all the filtering is done
 		logger.debug("dynamicOrchestration finished with {} service providers.", queryData.size());
 		
-		return compileOrchestrationResponse(queryData, request);
+
+		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+	    orList = orchestratorDriver.generateAuthTokens(request, orList);
+
+	    return new OrchestrationResponseDTO(orList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -397,7 +413,7 @@ public class OrchestratorService {
 	
 	
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationResponseDTO compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
+	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
 		logger.debug("compileOrchestrationResponse started...");
 		
 		List<OrchestrationResultDTO> orList = new ArrayList<>(srList.size());
@@ -412,12 +428,9 @@ public class OrchestratorService {
 			orList.add(result);
 		}
 		
-	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
-	    orList = orchestratorDriver.generateAuthTokens(request, orList);
-		
 	    logger.debug("compileOrchestrationResponse creates {} orchestration forms", orList.size());
 
-		return new OrchestrationResponseDTO(orList);
+		return orList;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -721,7 +734,11 @@ public class OrchestratorService {
 		final Long providerSystemId = orchestratorStore.getProviderSystemId();
 		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : authorizedLocalServiceRegistryEntries) {
 			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-				return compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);							
+				List<OrchestrationResultDTO> orList = compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);
+			    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+			    orList = orchestratorDriver.generateAuthTokens(request, orList);
+
+			    return new OrchestrationResponseDTO(orList);
 			}
 		}
 		

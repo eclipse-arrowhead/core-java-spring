@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +22,7 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckRequestDTO;
 import eu.arrowhead.common.dto.internal.AuthorizationIntraCloudCheckResponseDTO;
@@ -68,8 +70,19 @@ public class OrchestratorDriver {
 	@Value(CoreCommonConstants.$AUTH_TOKEN_TTL_IN_MINUTES_WD)
 	private int tokenDuration;
 	
+	@Value(CoreCommonConstants.$QOS_ENABLED_WD)
+	private boolean qosEnabled;
+	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@PostConstruct
+	public void init() {
+		if (qosEnabled) {
+			tokenDuration = CoreDefaults.DEFAULT_AUTH_TOKEN_TTL_IN_MINUTES_WITH_QOS_ENABLED;
+		}
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	// The two boolean parameters override the corresponding settings in the form

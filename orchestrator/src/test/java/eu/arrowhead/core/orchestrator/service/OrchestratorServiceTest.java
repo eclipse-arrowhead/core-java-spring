@@ -637,19 +637,26 @@ public class OrchestratorServiceTest {
 																				    requestedService(serviceForm).
 																				    flag(Flag.MATCHMAKING, true).
 																					build();
+		final ServiceDefinitionResponseDTO serviceDefinitionResponseDTO = new ServiceDefinitionResponseDTO(3, "service", null, null);
+		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null);
 		final ServiceRegistryResponseDTO srEntry = new ServiceRegistryResponseDTO();
 		srEntry.setProvider(new SystemResponseDTO(1, "a", "b", 3, null, null, null));
+		srEntry.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry.setInterfaces(List.of(serviceInterfaceResponseDTO));
 		final ServiceRegistryResponseDTO srEntry2 = new ServiceRegistryResponseDTO();
 		srEntry2.setProvider(new SystemResponseDTO(2, "d", "e", 6, null, null, null));
-		srEntry2.setServiceDefinition(new ServiceDefinitionResponseDTO(3, "service", null, null));
-		srEntry2.setInterfaces(List.of(new ServiceInterfaceResponseDTO(4, "HTTP-SECURE-JSON", null, null)));
+		srEntry2.setServiceDefinition(serviceDefinitionResponseDTO);
+		srEntry2.setInterfaces(List.of(serviceInterfaceResponseDTO));
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
 		srResult.getServiceQueryData().add(srEntry2);
 		
+		final OrchestrationResultDTO convertedSrEntry2 = new OrchestrationResultDTO(srEntry2.getProvider(), srEntry2.getServiceDefinition(), srEntry2.getServiceUri(), 
+																					srEntry2.getSecure(), srEntry2.getMetadata(), srEntry2.getInterfaces(), srEntry2.getVersion());
+		
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
-		when(intraCloudProviderMatchmaker.doMatchmaking(any(), any(IntraCloudProviderMatchmakingParameters.class))).thenReturn(srEntry2);
+		when(intraCloudProviderMatchmaker.doMatchmaking(any(), any(IntraCloudProviderMatchmakingParameters.class))).thenReturn(convertedSrEntry2);
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
