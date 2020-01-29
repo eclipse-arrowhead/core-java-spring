@@ -111,10 +111,10 @@ public class PingTask implements Job {
 		measurement.setSystem(system);
 		measurement.setMeasurementType(QoSMeasurementType.PING);
 
-	 	qoSIntraMeasurementRepository.saveAndFlush(measurement);
-	 	//qoSIntraMeasurementRepository.refresh(measurement);
+		qoSIntraMeasurementRepository.saveAndFlush(measurement);
+		//qoSIntraMeasurementRepository.refresh(measurement);
 
-	 	return measurement;
+		return measurement;
 	}
 
 	//-------------------------------------------------------------------------------------------------

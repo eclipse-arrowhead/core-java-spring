@@ -28,20 +28,22 @@ public class QoSMonitorController {
 	//=================================================================================================
 	// members
 
-    private final Logger logger = LogManager.getLogger(QoSMonitorController.class);
+	private final Logger logger = LogManager.getLogger(QoSMonitorController.class);
 
-    //=================================================================================================
+	//=================================================================================================
 	// methods
 
-    //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-    @ApiResponses(value = {
-            @ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-    })
-    @GetMapping(path = CommonConstants.ECHO_URI)
-    public String echoService() {
-        return "Got it!";
-    }
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return an echo message with the purpose of testing the core service availability", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses(value = {
+		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.ECHO_URI)
+	public String echoService() {
+		logger.debug("echoService started...");
+
+		return "Got it!";
+	}
 }

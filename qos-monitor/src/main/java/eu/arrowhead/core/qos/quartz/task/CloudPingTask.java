@@ -19,7 +19,7 @@ public class CloudPingTask implements Job {
 
 	//=================================================================================================
 	// methods
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {

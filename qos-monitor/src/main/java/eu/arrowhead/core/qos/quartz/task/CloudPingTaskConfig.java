@@ -23,21 +23,21 @@ public class CloudPingTaskConfig {
 	// members
 
 	protected Logger logger = LogManager.getLogger(CloudPingTaskConfig.class);
-	
+
 	@Autowired
-    private ApplicationContext applicationContext; //NOSONAR
-	
+	private ApplicationContext applicationContext; //NOSONAR
+
 	@Value(CoreCommonConstants.$CLOUD_PING_TTL_SCHEDULED_WD)
 	private boolean ttlScheduled;
-	
+
 	@Value(CoreCommonConstants.$CLOUD_PING_TTL_INTERVAL_WD)
 	private int ttlInterval;
-	
+
 	private static final int SCHEDULER_DELAY = 5;
-	
+
 	private static final String NAME_OF_TRIGGER = "Cloud_Ping_Task_Trigger";
-	private static final String NAME_OF_TASK = "Cloud_Ping_Task_Detail";	
-	
+	private static final String NAME_OF_TASK = "Cloud_Ping_Task_Detail";
+
 	//=================================================================================================
 	// methods
 
@@ -48,39 +48,39 @@ public class CloudPingTaskConfig {
 		jobFactory.setApplicationContext(applicationContext);
 		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
-		if (ttlScheduled) {			
+		if (ttlScheduled) {	
 			schedulerFactory.setJobFactory(jobFactory);
-	        schedulerFactory.setJobDetails(cloudPingTaskDetails().getObject());
-	        schedulerFactory.setTriggers(cloudPingTaskTrigger().getObject());
-	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-	        logger.info("Cloud ping task adjusted with ttl interval: {} minutes", ttlInterval);
+			schedulerFactory.setJobDetails(cloudPingTaskDetails().getObject());
+			schedulerFactory.setTriggers(cloudPingTaskTrigger().getObject());
+			schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+			logger.info("Cloud ping task adjusted with ttl interval: {} minutes", ttlInterval);
 		} else {
 			logger.info("Cloud ping task is not adjusted");
 		}
-		
-		return schedulerFactory;        
-    }
-	
+
+		return schedulerFactory;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public SimpleTriggerFactoryBean cloudPingTaskTrigger() {
+	public SimpleTriggerFactoryBean cloudPingTaskTrigger() {
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
 		trigger.setJobDetail(cloudPingTaskDetails().getObject());
-        trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
-        trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        trigger.setName(NAME_OF_TRIGGER);
-        
-        return trigger;
-    }
-	
+		trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
+		trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
+		trigger.setName(NAME_OF_TRIGGER);
+
+		return trigger;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public JobDetailFactoryBean cloudPingTaskDetails() {
+	public JobDetailFactoryBean cloudPingTaskDetails() {
 		final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
 		jobDetailFactory.setJobClass(PingTask.class);
-        jobDetailFactory.setName(NAME_OF_TASK);
-        jobDetailFactory.setDurability(true);
-        
-        return jobDetailFactory;
-    }
+		jobDetailFactory.setName(NAME_OF_TASK);
+		jobDetailFactory.setDurability(true);
+
+		return jobDetailFactory;
+	}
 }
