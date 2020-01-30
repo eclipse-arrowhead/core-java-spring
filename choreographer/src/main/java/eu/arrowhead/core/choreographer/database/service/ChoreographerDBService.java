@@ -463,7 +463,8 @@ public class ChoreographerDBService {
             final Optional<ChoreographerPlan> planOptional = choreographerPlanRepository.findById(planId);
             if (planOptional.isPresent()) {
                 ChoreographerSession sessionEntry = choreographerSessionRepository.saveAndFlush(new ChoreographerSession(planOptional.get(), "Initiated"));
-                createWorklog(sessionEntry.getId(), "Initiated", "Initiated running plan with ID of " + planId + ".");
+                String worklogMessage = "Plan with ID of " + planId + " started running with session ID of " + sessionEntry.getId() + ".";
+                createWorklog(worklogMessage, "");
                 return sessionEntry;
             } else {
                 throw new InvalidParameterException("Can't initiate session because the plan with the given ID doesn't exist.");
@@ -477,24 +478,37 @@ public class ChoreographerDBService {
     }
 
     @Transactional(rollbackFor = ArrowheadException.class)
-    public ChoreographerWorklog createWorklog(final long sessionId, final String status, final String message) {
+    public ChoreographerSession finalizeSession(final long sessionId) {
+        logger.debug("finalizeSession started...");
+
+        try {
+            Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
+            if (sessionOptional.isPresent()) {
+                ChoreographerSession session = sessionOptional.get();
+                session.setStatus("Done");
+                createWorklog("Session with ID of " + sessionId + " finished successfully.", "");
+                return choreographerSessionRepository.saveAndFlush(session);
+            } else {
+                throw new InvalidParameterException("Session with given ID doesn't exist.");
+            }
+        } catch (InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerWorklog createWorklog(final String message, final String exception) {
         logger.debug("createWorklog started...");
 
         try {
-            if (Utilities.isEmpty(status)) {
-                throw new InvalidParameterException("Status is null or blank.");
-            }
-
             if (Utilities.isEmpty(message)) {
                 throw new InvalidParameterException("Message is null or blank.");
             }
 
-            final Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
-            if (sessionOptional.isPresent()) {
-                return choreographerWorklogRepository.saveAndFlush(new ChoreographerWorklog(sessionOptional.get(), status, message));
-            } else {
-                throw new InvalidParameterException("Session with given ID doesn't exist!");
-            }
+            return choreographerWorklogRepository.saveAndFlush(new ChoreographerWorklog(message, exception));
         } catch (InvalidParameterException ex) {
             throw ex;
         } catch (final Exception ex) {

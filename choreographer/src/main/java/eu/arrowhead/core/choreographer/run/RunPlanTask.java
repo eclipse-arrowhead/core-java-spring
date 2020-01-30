@@ -61,6 +61,7 @@ public class RunPlanTask extends Thread {
             }
             currentAction = currentAction.getNextAction();
         }
+        choreographerDBService.finalizeSession(session.getId());
     }
 
     //=================================================================================================

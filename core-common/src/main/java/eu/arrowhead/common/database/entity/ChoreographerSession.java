@@ -31,10 +31,6 @@ public class ChoreographerSession {
 
     @OneToMany(mappedBy = "session", fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<ChoreographerWorklog> worklogs = new HashSet<>();
-
-    @OneToMany(mappedBy = "session", fetch = FetchType.LAZY, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<ChoreographerRunningStep> runningSteps = new HashSet<>();
 
     //=================================================================================================
@@ -54,7 +50,6 @@ public class ChoreographerSession {
     public ChoreographerPlan getPlan() { return plan; }
     public String getStatus() { return status; }
     public ZonedDateTime getStartedAt() { return startedAt; }
-    public Set<ChoreographerWorklog> getWorklogs() { return worklogs; }
     public Set<ChoreographerRunningStep> getRunningSteps() { return runningSteps; }
 
     //=================================================================================================
@@ -62,7 +57,6 @@ public class ChoreographerSession {
     public void setPlan(ChoreographerPlan plan) { this.plan = plan; }
     public void setStatus(String status) { this.status = status; }
     public void setStartedAt(ZonedDateTime startedAt) { this.startedAt = startedAt; }
-    public void setWorklogs(Set<ChoreographerWorklog> worklogs) { this.worklogs = worklogs; }
     public void setRunningSteps(Set<ChoreographerRunningStep> runningSteps) { this.runningSteps = runningSteps; }
 
     //-------------------------------------------------------------------------------------------------

@@ -15,46 +15,39 @@ public class ChoreographerWorklog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(length = CoreDefaults.VARCHAR_BASIC, nullable = false)
-    private String status;
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    private String message;
-
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime entryDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sessionId", referencedColumnName = "id", nullable = false)
-    private ChoreographerSession session;
+    @Column(columnDefinition = "TEXT")
+    private String message;
+
+    @Column(columnDefinition = "TEXT")
+    private String exception;
 
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerWorklog() {}
+    public ChoreographerWorklog() {
+    }
 
     //-------------------------------------------------------------------------------------------------
-    public ChoreographerWorklog(ChoreographerSession session, String status, String message) {
-        this.session = session;
-        this.status = status;
+    public ChoreographerWorklog(final String message, final String exception) {
         this.message = message;
+        this.exception = exception;
     }
 
     //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
-    public String getStatus() { return status; }
-    public String getMessage() { return message; }
     public ZonedDateTime getEntryDate() { return entryDate; }
-    public ChoreographerSession getSession() { return session; }
+    public String getMessage() { return message; }
+    public String getException() { return exception; }
 
     //-------------------------------------------------------------------------------------------------
-
     public void setId(long id) { this.id = id; }
-    public void setStatus(String status) { this.status = status; }
-    public void setMessage(String message) { this.message = message; }
     public void setEntryDate(ZonedDateTime entryDate) { this.entryDate = entryDate; }
-    public void setSession(ChoreographerSession session) { this.session = session; }
+    public void setMessage(String message) { this.message = message; }
+    public void setException(String exception) { this.exception = exception; }
 
     //-------------------------------------------------------------------------------------------------
     @PrePersist

@@ -343,10 +343,8 @@ CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
 
 CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `session_id` bigint(20) NOT NULL,
   `entry_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `status` varchar(255) NOT NULL,
   `message` text,
-  PRIMARY KEY (`id`),
-  CONSTRAINT `session` FOREIGN KEY (`session_id`) REFERENCES `choreographer_session` (`id`)
+  `exception` text,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
