@@ -97,7 +97,7 @@ public class CoreCommonConstants {
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
 	
     public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
-    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" +CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
+    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
@@ -117,6 +117,14 @@ public class CoreCommonConstants {
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
+	
+	public static final String QOS_MANAGER = "qosManager";
+	public static final String QOS_ENABLED = "enable_qos";
+	public static final String $QOS_ENABLED_WD = "${" + QOS_ENABLED + ":" + CoreDefaults.DEFAULT_QOS_ENABLED + "}";
+	public static final String QOS_RESERVATION_CHECK_INTERVAL = "qos_reservation_check_interval"; // in seconds
+	public static final String $QOS_RESERVATION_CHECK_INTERVAL_WD = "${" + QOS_RESERVATION_CHECK_INTERVAL + ":" + CoreDefaults.DEFAULT_QOS_RESERVATION_CHECK_INTERVAL + "}";
+	public static final String QOS_RESERVATION_TEMP_LOCK_DURATION = "qos_reservation_temp_lock_duration"; // in seconds
+	public static final String $QOS_RESERVATION_TEMP_LOCK_DURATION_WD = "${" + QOS_RESERVATION_TEMP_LOCK_DURATION + ":" + CoreDefaults.DEFAULT_QOS_TEMPORARY_LOCK_DURATION + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 

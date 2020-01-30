@@ -48,5 +48,10 @@
     "name": "enable_qos",
     "type": "java.lang.Boolean",
     "description": "A description for 'enable_qos'"
+  },
+  {
+    "name": "qos_reservation_check_interval",
+    "type": "java.lang.Integer",
+    "description": "A description for 'qos_reservation_check_interval'"
   }
 ]}

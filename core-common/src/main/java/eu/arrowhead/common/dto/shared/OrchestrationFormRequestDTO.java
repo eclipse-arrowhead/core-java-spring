@@ -15,9 +15,11 @@ import eu.arrowhead.common.exception.BadPayloadException;
 
 public class OrchestrationFormRequestDTO implements Serializable {
 	
-	public static final String QOS_REQUIREMENT_MINIMUM_RESPONSE_TIME = "qosMinRespTime"; // in milliseconds
+	public static final String QOS_REQUIREMENT_MAXIMUM_RESPONSE_TIME_THRESHOLD = "qosMaxRespTimeThreshold"; // in milliseconds, it means the maximum value of the maximum response time
+	public static final String QOS_REQUIREMENT_AVERAGE_RESPONSE_TIME_THRESHOLD = "qosAvgRespTime"; // in milliseconds, it means the maximum value of the average (mean) response time 
+	public static final String QOS_REQUIREMENT_JITTER_THRESHOLD = "qosJitterThreshold"; // in milliseconds, it mean the maximum acceptable jitter
 	public static final String QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS = "qosMaxRecentPacketLoss"; // in percent, for example 20% is 20
-	public static final String QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS = "qosMaxPacketLost"; // in percent
+ 	public static final String QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS = "qosMaxPacketLost"; // in percent
 	
 	public static final String QOS_COMMAND_EXCLUSIVITY = "qosExclusivity"; // in seconds
 
@@ -97,6 +99,10 @@ public class OrchestrationFormRequestDTO implements Serializable {
             if (preferredProviders.isEmpty()) {
                 throw new BadPayloadException("There is no valid preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true");
             }
+        }
+        
+        if (orchestrationFlags.get(Flag.ENABLE_QOS) && commands.containsKey(QOS_COMMAND_EXCLUSIVITY) && !orchestrationFlags.get(Flag.MATCHMAKING)) {
+        	throw new BadPayloadException("Exclusive service orchestration is only possible when \"" + Flag.MATCHMAKING + "\" is set to true");
         }
 
         return this;

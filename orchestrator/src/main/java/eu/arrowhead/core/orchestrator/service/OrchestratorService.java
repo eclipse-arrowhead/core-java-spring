@@ -54,6 +54,7 @@ import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingA
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingParameters;
+import eu.arrowhead.core.qos.manager.QoSManager;
 
 @Service
 public class OrchestratorService {
@@ -85,8 +86,14 @@ public class OrchestratorService {
 	@Resource(name = CoreCommonConstants.CLOUD_MATCHMAKER)
 	private CloudMatchmakingAlgorithm cloudMatchmaker;
 	
+	@Resource(name = CoreCommonConstants.QOS_MANAGER)
+	private QoSManager qosManager;
+	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
+	
+	@Value(CoreCommonConstants.$QOS_ENABLED_WD)
+	private boolean qosEnabled;
 	
 	//=================================================================================================
 	// methods
@@ -116,10 +123,19 @@ public class OrchestratorService {
 
 		logger.debug("externalServiceRequest finished with {} service providers.", queryData.size());
 		
-		return compileOrchestrationResponse(queryData, request);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // to reduce the number of results before token generation
+
+		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+	    orList = orchestratorDriver.generateAuthTokens(request, orList);
+	    
+	    orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
+
+	    return new OrchestrationResponseDTO(orList);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
+	//TODO: handle qos (inter)
 	public OrchestrationResponseDTO triggerInterCloud(final OrchestrationFormRequestDTO request) {
 		logger.debug("triggerInterCloud started ...");
 		
@@ -167,7 +183,15 @@ public class OrchestratorService {
 			return new OrchestrationResponseDTO(); // empty response
 		}
 		
-		return compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
+		orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO.getRequesterSystem()); // to reduce the number of results before token generation
+
+	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+	    orList = orchestratorDriver.generateAuthTokens(orchestrationFormRequestDTO, orList);
+	
+	    orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
+
+	    return new OrchestrationResponseDTO(orList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
@@ -191,7 +215,11 @@ public class OrchestratorService {
 		
 		final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries = getAuthorizedServiceRegistryEntries(entryList, orchestrationFormRequestDTO);
         
-		return getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, authorizedLocalServiceRegistryEntries);
+		final OrchestrationResponseDTO result = getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, authorizedLocalServiceRegistryEntries);
+		
+		final List<OrchestrationResultDTO> orList = qosManager.filterReservedProviders(result.getResponse(), orchestrationFormRequestDTO.getRequesterSystem());
+		
+		return new OrchestrationResponseDTO(orList); 
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -258,19 +286,50 @@ public class OrchestratorService {
 			}
 		}
 
+		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+		
+		final boolean needReservation = qosEnabled && flags.get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
+		
+		if (needReservation) {
+			//TODO: temporary locking (if caller wants exclusivity)
+ 		} 
+		
+		if (flags.get(Flag.ENABLE_QOS)) {
+			//TODO: filter by QoS Requirements (removing temporary lock if needed)
+		}
+		
+		if (!needReservation) {
+			orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+		}
+		
+		if (qosEnabled) {
+			// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+		    orList = orchestratorDriver.generateAuthTokens(request, orList);
+			if (!needReservation) {
+				orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+			}
+		}
+		
 		// If matchmaking is requested, we pick out 1 ServiceRegistryEntry entity from the list.
 		if (flags.get(Flag.MATCHMAKING)) {
 			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
 			// set additional parameters here if you use a different matchmaking algorithm
-			final ServiceRegistryResponseDTO selected = intraCloudProviderMatchmaker.doMatchmaking(queryData, params);
-			queryData.clear();
-			queryData.add(selected);
+			final OrchestrationResultDTO selected = intraCloudProviderMatchmaker.doMatchmaking(orList, params);
+			//TODO: remove temporary locks and change lock on the selected
+			orList.clear();
+			orList.add(selected);
 		}
 
 		// all the filtering is done
 		logger.debug("dynamicOrchestration finished with {} service providers.", queryData.size());
 		
-		return compileOrchestrationResponse(queryData, request);
+		if (!qosEnabled) {
+			// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+			orList = orchestratorDriver.generateAuthTokens(request, orList);
+		}
+
+	    return new OrchestrationResponseDTO(orList);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -397,7 +456,7 @@ public class OrchestratorService {
 	
 	
 	//-------------------------------------------------------------------------------------------------
-	private OrchestrationResponseDTO compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
+	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
 		logger.debug("compileOrchestrationResponse started...");
 		
 		List<OrchestrationResultDTO> orList = new ArrayList<>(srList.size());
@@ -412,12 +471,9 @@ public class OrchestratorService {
 			orList.add(result);
 		}
 		
-	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
-	    orList = orchestratorDriver.generateAuthTokens(request, orList);
-		
 	    logger.debug("compileOrchestrationResponse creates {} orchestration forms", orList.size());
 
-		return new OrchestrationResponseDTO(orList);
+		return orList;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -721,7 +777,11 @@ public class OrchestratorService {
 		final Long providerSystemId = orchestratorStore.getProviderSystemId();
 		for (final ServiceRegistryResponseDTO serviceRegistryResponseDTO : authorizedLocalServiceRegistryEntries) {
 			if (serviceRegistryResponseDTO.getProvider().getId() == providerSystemId) {
-				return compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);							
+				List<OrchestrationResultDTO> orList = compileOrchestrationResponse(List.of(serviceRegistryResponseDTO), request);
+			    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+			    orList = orchestratorDriver.generateAuthTokens(request, orList);
+
+			    return new OrchestrationResponseDTO(orList);
 			}
 		}
 		

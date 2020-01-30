@@ -408,3 +408,21 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 	CONSTRAINT `fk_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_intra_ping_measurement_log` (`id`) ON DELETE CASCADE
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- QoS Manager
+
+CREATE TABLE IF NOT EXISTS `qos_reservation` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`reserved_provider_id` bigint(20) NOT NULL,
+	`reserved_service_id` bigint(20) NOT NULL,
+	`consumer_system_name` varchar(255) NOT NULL,
+	`consumer_address` varchar(255) NOT NULL,
+	`consumer_port` int(11) NOT NULL,
+	`reserved_to` timestamp NOT NULL,
+	`temporary_lock` int(1) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_reserved_provider` FOREIGN KEY (`reserved_provider_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_reserved_provider_and_service` (`reserved_provider_id`, `reserved_service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
