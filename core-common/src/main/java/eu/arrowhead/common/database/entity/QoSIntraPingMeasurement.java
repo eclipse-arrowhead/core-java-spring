@@ -28,13 +28,13 @@ public class QoSIntraPingMeasurement {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSIntraMeasurement measurement;
-	
+
 	@Column(name = "available", nullable = false)
 	private boolean available = false;
-	
+
 	@Column(name = "last_access_at", nullable = true)
 	private ZonedDateTime lastAccessAt;
-	
+
 	@Column(name = "min_response_time", nullable = true)
 	private Integer minResponseTime;
 
@@ -61,7 +61,7 @@ public class QoSIntraPingMeasurement {
 
 	@Column(name = "received", nullable = false)
 	private long received;
-	
+
 	@Column(name = "count_started_at", nullable = true)
 	private ZonedDateTime countStartedAt;
 
@@ -73,10 +73,10 @@ public class QoSIntraPingMeasurement {
 
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
-	
+
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
-	
+
 	//=================================================================================================
 	// methods
 
@@ -89,7 +89,7 @@ public class QoSIntraPingMeasurement {
 		this.createdAt = ZonedDateTime.now();
 		this.updatedAt = this.createdAt;
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
 	public void onUpdate() {
