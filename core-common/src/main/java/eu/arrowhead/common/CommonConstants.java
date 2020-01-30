@@ -167,6 +167,7 @@ public class CommonConstants {
 	
 	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
 	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
+	public static final long CONVERSION_SECOND_TO_MINUTE = 60;
 
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";

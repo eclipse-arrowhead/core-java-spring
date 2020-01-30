@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -54,6 +56,7 @@ import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingA
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingParameters;
+import eu.arrowhead.core.qos.manager.impl.DummyQoSManager;
 
 @RunWith(SpringRunner.class)
 public class OrchestratorServiceTest {
@@ -81,6 +84,12 @@ public class OrchestratorServiceTest {
 	
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@Before
+	public void setUp() {
+		ReflectionTestUtils.setField(testingObject, CoreCommonConstants.QOS_MANAGER, new DummyQoSManager());
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)

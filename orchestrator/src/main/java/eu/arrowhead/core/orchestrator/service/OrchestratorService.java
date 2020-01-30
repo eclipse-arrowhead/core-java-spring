@@ -54,6 +54,7 @@ import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingA
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingParameters;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingParameters;
+import eu.arrowhead.core.qos.manager.QoSManager;
 
 @Service
 public class OrchestratorService {
@@ -85,8 +86,14 @@ public class OrchestratorService {
 	@Resource(name = CoreCommonConstants.CLOUD_MATCHMAKER)
 	private CloudMatchmakingAlgorithm cloudMatchmaker;
 	
+	@Resource(name = CoreCommonConstants.QOS_MANAGER)
+	private QoSManager qosManager;
+	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gateKeeperIsPresent;
+	
+	@Value(CoreCommonConstants.$QOS_ENABLED_WD)
+	private boolean qosEnabled;
 	
 	//=================================================================================================
 	// methods
@@ -117,14 +124,18 @@ public class OrchestratorService {
 		logger.debug("externalServiceRequest finished with {} service providers.", queryData.size());
 		
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		orList = qosManager.filterReservedProviders(orList, request); // to reduce the number of results before token generation
 
 		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 	    orList = orchestratorDriver.generateAuthTokens(request, orList);
+	    
+	    orList = qosManager.filterReservedProviders(orList, request); // token generation can be slow, so we have to check for new reservations
 
 	    return new OrchestrationResponseDTO(orList);
 	}
 
 	//-------------------------------------------------------------------------------------------------	
+	//TODO: handle qos (inter)
 	public OrchestrationResponseDTO triggerInterCloud(final OrchestrationFormRequestDTO request) {
 		logger.debug("triggerInterCloud started ...");
 		
@@ -173,10 +184,13 @@ public class OrchestratorService {
 		}
 		
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
-		
+		orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO); // to reduce the number of results before token generation
+
 	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 	    orList = orchestratorDriver.generateAuthTokens(orchestrationFormRequestDTO, orList);
-	    
+	
+	    orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO); // token generation can be slow, so we have to check for new reservations
+
 	    return new OrchestrationResponseDTO(orList);
 	}
 	
@@ -269,12 +283,36 @@ public class OrchestratorService {
 		}
 
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
+		orList = qosManager.filterReservedProviders(orList, request);
+		
+		final boolean needReservation = qosEnabled && flags.get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
+		
+		if (needReservation) {
+			//TODO: temporary locking (if caller wants exclusivity)
+ 		} 
+		
+		if (flags.get(Flag.ENABLE_QOS)) {
+			//TODO: filter by QoS Requirements (removing temporary lock if needed)
+		}
+		
+		if (!needReservation) {
+			orList = qosManager.filterReservedProviders(orList, request);
+		}
+		
+		if (qosEnabled) {
+			// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+		    orList = orchestratorDriver.generateAuthTokens(request, orList);
+			if (!needReservation) {
+				orList = qosManager.filterReservedProviders(orList, request);
+			}
+		}
 		
 		// If matchmaking is requested, we pick out 1 ServiceRegistryEntry entity from the list.
 		if (flags.get(Flag.MATCHMAKING)) {
 			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
 			// set additional parameters here if you use a different matchmaking algorithm
 			final OrchestrationResultDTO selected = intraCloudProviderMatchmaker.doMatchmaking(orList, params);
+			//TODO: remove temporary locks and change lock on the selected
 			orList.clear();
 			orList.add(selected);
 		}
@@ -282,9 +320,10 @@ public class OrchestratorService {
 		// all the filtering is done
 		logger.debug("dynamicOrchestration finished with {} service providers.", queryData.size());
 		
-
-		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
-	    orList = orchestratorDriver.generateAuthTokens(request, orList);
+		if (!qosEnabled) {
+			// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
+			orList = orchestratorDriver.generateAuthTokens(request, orList);
+		}
 
 	    return new OrchestrationResponseDTO(orList);
 	}

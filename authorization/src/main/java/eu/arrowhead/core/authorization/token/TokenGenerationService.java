@@ -78,21 +78,17 @@ public class TokenGenerationService {
 		final Map<SystemRequestDTO,PublicKey> publicKeys = getProviderPublicKeys(request.getProviders());
 		final Map<SystemRequestDTO,Map<String,String>> result = new HashMap<>(publicKeys.size());
 		final String consumerInfo = generateConsumerInfo(request.getConsumer(), request.getConsumerCloud());
-		final Map<String,String> signedJWTs = new HashMap<>();
 		
 		for (final TokenGenerationProviderDTO provider : request.getProviders()) {
 			final SystemRequestDTO providerSystem = provider.getProvider();
 			if (publicKeys.containsKey(providerSystem)) {
 				for (final String intf : provider.getServiceInterfaces()) {
-					String signedJWT = signedJWTs.get(intf);
-					if (signedJWT == null) {
-						try {
-							signedJWT = generateSignedJWT(consumerInfo, request.getService(), intf, request.getDuration());
-							signedJWTs.put(intf, signedJWT);
-						} catch (final JoseException ex) {
-							logger.error("Problem occured when trying to sign JWT token", ex);
-							throw new ArrowheadException("Token generation failed"); // if there is a problem here, all calling cause the same problem 
-						}
+					String signedJWT;
+					try {
+						signedJWT = generateSignedJWT(consumerInfo, request.getService(), intf, provider.getTokenDuration() < 0 ? null: provider.getTokenDuration());
+					} catch (final JoseException ex) {
+						logger.error("Problem occured when trying to sign JWT token", ex);
+						throw new ArrowheadException("Token generation failed"); // if there is a problem here, all calling cause the same problem 
 					}
 					
 					try {
@@ -284,7 +280,7 @@ public class TokenGenerationService {
 		claims.setIssuedAtToNow();
 		claims.setNotBeforeMinutesInThePast(1);
 		if (duration != null) {
-			claims.setExpirationTimeMinutesInTheFuture(duration.floatValue());
+			claims.setExpirationTimeMinutesInTheFuture(duration.floatValue() / CommonConstants.CONVERSION_SECOND_TO_MINUTE);
 		}
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_CONSUMER_ID, consumerInfo);
 		claims.setStringClaim(CommonConstants.JWT_CLAIM_SERVICE_ID, service.toLowerCase());

@@ -15,4 +15,5 @@ public interface QoSReservationRepository extends RefreshableRepository<QoSReser
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<QoSReservation> findAllByReservedToLessThanEqual(final ZonedDateTime threshold);
+	public List<QoSReservation> findAllByConsumerSystemNameNotOrConsumerAddressNotOrConsumerPortNot(final String consumerSystemName, final String consumerAddress, final int consumerPort);
 }

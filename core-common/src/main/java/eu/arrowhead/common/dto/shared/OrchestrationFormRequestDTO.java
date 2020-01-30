@@ -100,6 +100,10 @@ public class OrchestrationFormRequestDTO implements Serializable {
                 throw new BadPayloadException("There is no valid preferred provider, but \"" + Flag.ONLY_PREFERRED + "\" is set to true");
             }
         }
+        
+        if (orchestrationFlags.get(Flag.ENABLE_QOS) && commands.containsKey(QOS_COMMAND_EXCLUSIVITY) && !orchestrationFlags.get(Flag.MATCHMAKING)) {
+        	throw new BadPayloadException("Exclusive service orchestration is only possible when \"" + Flag.MATCHMAKING + "\" is set to true");
+        }
 
         return this;
     }

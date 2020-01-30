@@ -59,6 +59,8 @@ public class OrchestratorDriver {
 	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
+	private static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
+	
 	private static final Logger logger = LogManager.getLogger(OrchestratorDriver.class);
 	
 	@Autowired
@@ -137,8 +139,7 @@ public class OrchestratorDriver {
 		
 		final UriComponents tokenGenerationUri = getAuthTokenGenerationUri();
 		for (final TokenGenHelper helper : tokenGenHelperList) {
-			final TokenGenerationRequestDTO payload = new TokenGenerationRequestDTO(request.getRequesterSystem(), request.getRequesterCloud(), helper.getProviders(), helper.getService(),
-																				    tokenDuration > 0 ? tokenDuration : null);
+			final TokenGenerationRequestDTO payload = new TokenGenerationRequestDTO(request.getRequesterSystem(), request.getRequesterCloud(), helper.getProviders(), helper.getService());
 			final ResponseEntity<TokenGenerationResponseDTO> response = httpService.sendRequest(tokenGenerationUri, HttpMethod.POST, TokenGenerationResponseDTO.class, payload);
 			
 			final TokenGenerationResponseDTO tokenGenerationResult = response.getBody();
@@ -328,7 +329,17 @@ public class OrchestratorDriver {
 	private TokenGenerationProviderDTO createTokenGenerationProvider(final OrchestrationResultDTO result) {
 		logger.debug("createTokenGenerationProvider started...");
 		
-		return new TokenGenerationProviderDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(result.getProvider()),
+		int tokenDuration = this.tokenDuration;
+		if (result.getMetadata() != null && result.getMetadata().containsKey(KEY_CALCULATED_SERVICE_TIME_FRAME)) {
+			try {
+				tokenDuration = Integer.parseInt(result.getMetadata().get(KEY_CALCULATED_SERVICE_TIME_FRAME));
+			} catch (final NumberFormatException ex) {
+				logger.debug(ex.getMessage());
+				logger.trace("Stacktracke:", ex);
+			}
+		}
+		
+		return new TokenGenerationProviderDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(result.getProvider()), tokenDuration,
 											  convertServiceInterfaceListToServiceInterfaceNameList(result.getInterfaces()));
 	}
 	
