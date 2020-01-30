@@ -54,6 +54,7 @@ public class CoreDefaults {
 	
 	public static final boolean DEFAULT_QOS_ENABLED = false;
 	public static final int DEFAULT_QOS_RESERVATION_CHECK_INTERVAL = 60; // in seconds
+	public static final int DEFAULT_QOS_TEMPORARY_LOCK_DURATION = 60; // in seconds
 	
 	//=================================================================================================
 	// assistant methods

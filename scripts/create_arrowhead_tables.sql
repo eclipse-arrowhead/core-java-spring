@@ -353,7 +353,11 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 	`last_access_at` timestamp DEFAULT NULL,
 	`min_response_time` int(11) DEFAULT NULL,
 	`max_response_time` int(11) DEFAULT NULL,
-	`mean_response_time` int(11) NULL DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
 	`sent` bigint(20) NOT NULL DEFAULT 0,
 	`received` bigint(20) NOT NULL DEFAULT 0,
 	`count_started_at` timestamp,
@@ -364,4 +368,22 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 	CONSTRAINT `fk_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_measurement` (`measurement_id`)
 	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- QoS Manager
+
+CREATE TABLE IF NOT EXISTS `qos_reservation` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`reserved_service_id` bigint(20) NOT NULL,
+	`consumer_cloud_id` bigint(20),
+	`consumer_system_name` varchar(255) NOT NULL,
+	`consumer_address` varchar(255) NOT NULL,
+	`consumer_port` int(11) NOT NULL,
+	`reserved_to` timestamp NOT NULL,
+	`temporary_lock` int(1) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_registry` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_consumer_cloud` FOREIGN KEY (`consumer_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_reserved_service` (`reserved_service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

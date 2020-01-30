@@ -38,7 +38,9 @@ public class QoSReservation {
 	private String consumerAddress;
 	private int consumerPort;
 	
-	private ZonedDateTime reservedTo; 
+	private ZonedDateTime reservedTo;
+	
+	private boolean temporaryLock = false;
 
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdAt;
@@ -54,13 +56,14 @@ public class QoSReservation {
 	
 	//-------------------------------------------------------------------------------------------------
 	public QoSReservation(final ServiceRegistry reservedService, final Cloud consumerCloud, final String consumerSystemName, final String consumerAddress, final int consumerPort, 
-						  final ZonedDateTime reservedTo) {
+						  final ZonedDateTime reservedTo, final boolean temporaryLock) {
 		this.reservedService = reservedService;
 		this.consumerCloud = consumerCloud;
 		this.consumerSystemName = consumerSystemName;
 		this.consumerAddress = consumerAddress;
 		this.consumerPort = consumerPort;
 		this.reservedTo = reservedTo;
+		this.temporaryLock = temporaryLock;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -84,6 +87,7 @@ public class QoSReservation {
 	public String getConsumerAddress() { return consumerAddress; }
 	public int getConsumerPort() { return consumerPort; }
 	public ZonedDateTime getReservedTo() { return reservedTo; }
+	public boolean isTemporaryLock() { return temporaryLock; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
@@ -95,6 +99,7 @@ public class QoSReservation {
 	public void setConsumerAddress(final String consumerAddress) { this.consumerAddress = consumerAddress; }
 	public void setConsumerPort(final int consumerPort) { this.consumerPort = consumerPort; }
 	public void setReservedTo(final ZonedDateTime reservedTo) { this.reservedTo = reservedTo; }
+	public void setTemporaryLock(final boolean temporaryLock) { this.temporaryLock = temporaryLock; }
 	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
