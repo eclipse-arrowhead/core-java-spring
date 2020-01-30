@@ -69,11 +69,19 @@ public class RunPlanTask extends Thread {
     //-------------------------------------------------------------------------------------------------
     public void runAction(final ChoreographerAction action) throws InterruptedException {
         Set<ChoreographerStep> currentSteps = new HashSet<>(action.getFirstStepEntries());
-        for (ChoreographerStep firstStep : currentSteps) {
+        /*for (ChoreographerStep firstStep : currentSteps) {
             for (int i = 0; i < firstStep.getQuantity(); i++) {
                 runFirstStep(firstStep);
             }
-        }
+        }*/
+
+        currentSteps.parallelStream().forEach(firstStep -> {
+            try {
+                runFirstStep(firstStep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
 
         while(!currentSteps.isEmpty()) {
             Set<ChoreographerStep> stepsToAdd = new HashSet<>();
