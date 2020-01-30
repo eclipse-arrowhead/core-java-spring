@@ -5,11 +5,13 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.ChoreographerAction;
 import eu.arrowhead.common.database.entity.ChoreographerPlan;
+import eu.arrowhead.common.database.entity.ChoreographerRunningStep;
 import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.database.entity.ChoreographerStep;
 import eu.arrowhead.common.database.entity.ChoreographerStepNextStepConnection;
 import eu.arrowhead.common.database.entity.ChoreographerWorklog;
 import eu.arrowhead.common.database.repository.ChoreographerActionRepository;
+import eu.arrowhead.common.database.repository.ChoreographerRunningStepRepository;
 import eu.arrowhead.common.database.repository.ChoreographerSessionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerStepNextStepConnectionRepository;
 import eu.arrowhead.common.database.repository.ChoreographerPlanRepository;
@@ -31,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort.Direction;
 
-import javax.jms.Session;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -40,8 +41,6 @@ import java.util.Set;
 
 @Service
 public class ChoreographerDBService {
-
-
 	//=================================================================================================
 	// members
 
@@ -62,6 +61,9 @@ public class ChoreographerDBService {
 
     @Autowired
     private ChoreographerWorklogRepository choreographerWorklogRepository;
+
+    @Autowired
+    private ChoreographerRunningStepRepository choreographerRunningStepRepository;
 
     private final Logger logger = LogManager.getLogger(ChoreographerDBService.class);
     
@@ -368,6 +370,55 @@ public class ChoreographerDBService {
                 return actionPlanOpt.get();
             } else {
                 throw new InvalidParameterException("Choreographer Action Plan with id of '" + id + "' doesn't exist!");
+            }
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerRunningStep registerRunningStep(final long stepId, final long sessionId, final String status, final String message) {
+        try {
+            if (Utilities.isEmpty(status)) {
+                throw new InvalidParameterException("Status is null or blank.");
+            }
+
+            if (Utilities.isEmpty(message)) {
+                throw new InvalidParameterException("Message is null or blank.");
+            }
+
+            final Optional<ChoreographerStep> stepOptional = choreographerStepRepository.findById(stepId);
+            final Optional<ChoreographerSession> sessionOptional = choreographerSessionRepository.findById(sessionId);
+
+            if (stepOptional.isPresent() && sessionOptional.isPresent()) {
+                return choreographerRunningStepRepository.saveAndFlush(new ChoreographerRunningStep(status, message, stepOptional.get(), sessionOptional.get()));
+            } else {
+                throw new InvalidParameterException("Step or Session with given id(s) not found!");
+            }
+        } catch (final InvalidParameterException ex) {
+            throw ex;
+        } catch (final Exception ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+        }
+    }
+
+    @Transactional(rollbackFor = ArrowheadException.class)
+    public ChoreographerRunningStep setRunningStepToDone(final long runningStepId) {
+        try {
+            final Optional<ChoreographerRunningStep> runningStepOptional = choreographerRunningStepRepository.findById(runningStepId);
+
+            if (runningStepOptional.isPresent()) {
+                ChoreographerRunningStep runningStepToChange = runningStepOptional.get();
+                runningStepToChange.setStatus("Done");
+                runningStepToChange.setMessage("Step execution is done.");
+                return choreographerRunningStepRepository.saveAndFlush(runningStepToChange);
+            } else {
+                throw new InvalidParameterException("Running step with given ID doesn't exist.");
             }
         } catch (final InvalidParameterException ex) {
             throw ex;

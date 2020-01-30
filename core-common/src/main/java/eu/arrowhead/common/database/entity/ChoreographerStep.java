@@ -51,7 +51,8 @@ public class ChoreographerStep {
     @JoinColumn(name = "actionId", referencedColumnName = "id", nullable = false)
     private ChoreographerAction action;
 
-    @OneToMany (mappedBy = "stepEntry", fetch = FetchType.LAZY, orphanRemoval = true)
+    // SHOULD BE LAZY
+    @OneToMany (mappedBy = "stepEntry", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete (action = OnDeleteAction.CASCADE)
     private Set<ChoreographerStepNextStepConnection> nextSteps = new HashSet<>();
 

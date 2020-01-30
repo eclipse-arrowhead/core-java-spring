@@ -7,11 +7,13 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
+import eu.arrowhead.common.database.entity.ChoreographerSession;
 import eu.arrowhead.common.dto.internal.ChoreographerPlanRequestDTO;
 import eu.arrowhead.common.dto.internal.ChoreographerRunPlanRequestDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerPlanResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.choreographer.database.service.ChoreographerDBService;
+import eu.arrowhead.core.choreographer.run.RunPlanTask;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -20,6 +22,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.http.MediaType;
@@ -63,6 +66,9 @@ public class ChoreographerController {
 
     @Autowired
     private ChoreographerDBService choreographerDBService;
+
+    @Autowired
+    private ApplicationContext applicationContext;
     
     //=================================================================================================
 	// methods
@@ -178,7 +184,10 @@ public class ChoreographerController {
     @ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
     @ResponseBody public void startPlan(@RequestBody final List<ChoreographerRunPlanRequestDTO> requests) {
         for (final ChoreographerRunPlanRequestDTO request : requests) {
-            choreographerDBService.initiateSession(request.getId());
+            ChoreographerSession session = choreographerDBService.initiateSession(request.getId());
+            RunPlanTask task = new RunPlanTask(choreographerDBService.getPlanById(request.getId()), session);
+            applicationContext.getAutowireCapableBeanFactory().autowireBean(task);
+            task.start();
         }
     }
 
