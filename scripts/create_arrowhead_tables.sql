@@ -374,8 +374,8 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 
 CREATE TABLE IF NOT EXISTS `qos_reservation` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`reserved_provider_id` bigint(20) NOT NULL,
 	`reserved_service_id` bigint(20) NOT NULL,
-	`consumer_cloud_id` bigint(20),
 	`consumer_system_name` varchar(255) NOT NULL,
 	`consumer_address` varchar(255) NOT NULL,
 	`consumer_port` int(11) NOT NULL,
@@ -383,7 +383,7 @@ CREATE TABLE IF NOT EXISTS `qos_reservation` (
 	`temporary_lock` int(1) NOT NULL DEFAULT 0,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_registry` (`id`) ON DELETE CASCADE,
-	CONSTRAINT `fk_consumer_cloud` FOREIGN KEY (`consumer_cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
-	UNIQUE KEY `unique_reserved_service` (`reserved_service_id`)
+	CONSTRAINT `fk_reserved_provider` FOREIGN KEY (`reserved_provider_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_reserved_provider_and_service` (`reserved_provider_id`, `reserved_service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

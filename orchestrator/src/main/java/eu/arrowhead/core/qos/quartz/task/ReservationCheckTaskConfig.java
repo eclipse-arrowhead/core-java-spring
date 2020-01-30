@@ -26,7 +26,7 @@ public class ReservationCheckTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value(CoreCommonConstants.$QOS_RESERVATION_CHECK_INTERVAL_WS)
+	@Value(CoreCommonConstants.$QOS_RESERVATION_CHECK_INTERVAL_WD)
 	private int interval;
 	
 	private static final int SCHEDULER_DELAY = 19;

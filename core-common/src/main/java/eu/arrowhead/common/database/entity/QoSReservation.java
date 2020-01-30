@@ -4,19 +4,16 @@ import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "qos_reservation")
+@Table(name = "qos_reservation", uniqueConstraints = @UniqueConstraint(columnNames = { "reservedProviderId", "reservedServiceId" }) )
 public class QoSReservation {
 	
 	//=================================================================================================
@@ -26,13 +23,8 @@ public class QoSReservation {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "reservedServiceId", referencedColumnName = "id", nullable = false, unique = true)
-	private ServiceRegistry reservedService;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "consumerCloudId", referencedColumnName = "id", nullable = true)
-	private Cloud consumerCloud;
+	private long reservedProviderId;
+	private long reservedServiceId;
 	
 	private String consumerSystemName;
 	private String consumerAddress;
@@ -55,10 +47,10 @@ public class QoSReservation {
 	public QoSReservation() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSReservation(final ServiceRegistry reservedService, final Cloud consumerCloud, final String consumerSystemName, final String consumerAddress, final int consumerPort, 
+	public QoSReservation(final long reservedProviderId, final long reservedServiceId, final String consumerSystemName, final String consumerAddress, final int consumerPort,
 						  final ZonedDateTime reservedTo, final boolean temporaryLock) {
-		this.reservedService = reservedService;
-		this.consumerCloud = consumerCloud;
+		this.reservedProviderId = reservedProviderId;
+		this.reservedServiceId = reservedServiceId;
 		this.consumerSystemName = consumerSystemName;
 		this.consumerAddress = consumerAddress;
 		this.consumerPort = consumerPort;
@@ -81,8 +73,8 @@ public class QoSReservation {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public ServiceRegistry getReservedService() { return reservedService; }
-	public Cloud getConsumerCloud() { return consumerCloud; }
+	public long getReservedProviderId() { return reservedProviderId; }
+	public long getReservedServiceId() { return reservedServiceId; }
 	public String getConsumerSystemName() { return consumerSystemName; }
 	public String getConsumerAddress() { return consumerAddress; }
 	public int getConsumerPort() { return consumerPort; }
@@ -93,8 +85,8 @@ public class QoSReservation {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setReservedService(final ServiceRegistry reservedService) { this.reservedService = reservedService; }
-	public void setConsumerCloud(final Cloud consumerCloud) { this.consumerCloud = consumerCloud; }
+	public void setReservedProviderId(final long reservedProviderId) { this.reservedProviderId = reservedProviderId; }
+	public void setReservedServiceId(final int reservedServiceId) { this.reservedServiceId = reservedServiceId; }
 	public void setConsumerSystemName(final String consumerSystemName) { this.consumerSystemName = consumerSystemName; }
 	public void setConsumerAddress(final String consumerAddress) { this.consumerAddress = consumerAddress; }
 	public void setConsumerPort(final int consumerPort) { this.consumerPort = consumerPort; }

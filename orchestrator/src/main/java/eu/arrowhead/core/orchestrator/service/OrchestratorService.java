@@ -124,12 +124,12 @@ public class OrchestratorService {
 		logger.debug("externalServiceRequest finished with {} service providers.", queryData.size());
 		
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
-		orList = qosManager.filterReservedProviders(orList, request); // to reduce the number of results before token generation
+		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // to reduce the number of results before token generation
 
 		// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 	    orList = orchestratorDriver.generateAuthTokens(request, orList);
 	    
-	    orList = qosManager.filterReservedProviders(orList, request); // token generation can be slow, so we have to check for new reservations
+	    orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
 
 	    return new OrchestrationResponseDTO(orList);
 	}
@@ -184,12 +184,12 @@ public class OrchestratorService {
 		}
 		
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(crossCheckedEntryList, orchestrationFormRequestDTO);
-		orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO); // to reduce the number of results before token generation
+		orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO.getRequesterSystem()); // to reduce the number of results before token generation
 
 	    // Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 	    orList = orchestratorDriver.generateAuthTokens(orchestrationFormRequestDTO, orList);
 	
-	    orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO); // token generation can be slow, so we have to check for new reservations
+	    orList = qosManager.filterReservedProviders(orList, orchestrationFormRequestDTO.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
 
 	    return new OrchestrationResponseDTO(orList);
 	}
@@ -217,7 +217,7 @@ public class OrchestratorService {
         
 		final OrchestrationResponseDTO result = getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, authorizedLocalServiceRegistryEntries);
 		
-		final List<OrchestrationResultDTO> orList = qosManager.filterReservedProviders(result.getResponse(), orchestrationFormRequestDTO);
+		final List<OrchestrationResultDTO> orList = qosManager.filterReservedProviders(result.getResponse(), orchestrationFormRequestDTO.getRequesterSystem());
 		
 		return new OrchestrationResponseDTO(orList); 
 	}
@@ -287,7 +287,7 @@ public class OrchestratorService {
 		}
 
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
-		orList = qosManager.filterReservedProviders(orList, request);
+		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 		
 		final boolean needReservation = qosEnabled && flags.get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
 		
@@ -300,14 +300,14 @@ public class OrchestratorService {
 		}
 		
 		if (!needReservation) {
-			orList = qosManager.filterReservedProviders(orList, request);
+			orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 		}
 		
 		if (qosEnabled) {
 			// Generate the authorization tokens if it is requested based on the service security (modifies the orList)
 		    orList = orchestratorDriver.generateAuthTokens(request, orList);
 			if (!needReservation) {
-				orList = qosManager.filterReservedProviders(orList, request);
+				orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 			}
 		}
 		
