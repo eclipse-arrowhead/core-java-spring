@@ -215,7 +215,11 @@ public class OrchestratorService {
 		
 		final List<ServiceRegistryResponseDTO> authorizedLocalServiceRegistryEntries = getAuthorizedServiceRegistryEntries(entryList, orchestrationFormRequestDTO);
         
-		return getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, authorizedLocalServiceRegistryEntries);
+		final OrchestrationResponseDTO result = getHighestPriorityCurrentlyWorkingStoreEntryFromEntryList(orchestrationFormRequestDTO, entryList, authorizedLocalServiceRegistryEntries);
+		
+		final List<OrchestrationResultDTO> orList = qosManager.filterReservedProviders(result.getResponse(), orchestrationFormRequestDTO);
+		
+		return new OrchestrationResponseDTO(orList); 
 	}
 
 	//-------------------------------------------------------------------------------------------------	
