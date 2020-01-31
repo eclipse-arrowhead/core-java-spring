@@ -11,5 +11,5 @@ public interface QoSIntraPingMeasurementLogRepository extends RefreshableReposit
 
 	//=================================================================================================
 	// methods
-	Optional<QoSIntraPingMeasurementLog> findByMeasuredAt(final ZonedDateTime aroundNow);
+	public Optional<QoSIntraPingMeasurementLog> findByMeasuredAt(final ZonedDateTime timeStamp);
 }
