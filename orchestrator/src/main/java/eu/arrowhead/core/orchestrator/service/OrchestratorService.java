@@ -296,7 +296,7 @@ public class OrchestratorService {
  		} 
 		
 		if (flags.get(Flag.ENABLE_QOS)) {
-			//TODO: filter by QoS Requirements (removing temporary lock if needed)
+			orList = qosManager.verifyServices(orList, request);
 		}
 		
 		if (!needReservation) {

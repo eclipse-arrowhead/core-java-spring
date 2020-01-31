@@ -10,11 +10,13 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
+import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSReservationDBService;
 import eu.arrowhead.core.qos.manager.QoSManager;
+import eu.arrowhead.core.qos.manager.QoSVerifier;
 
 public class QoSManagerImpl implements QoSManager {
 	
@@ -25,6 +27,8 @@ public class QoSManagerImpl implements QoSManager {
 
 	@Autowired
 	private QoSReservationDBService qosReservationDBService;
+	
+	private List<QoSVerifier> verifiers = List.of(); // TODO: add verifier here
 
 	//=================================================================================================
 	// methods
@@ -57,7 +61,7 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> reserveProvidersTemporarily(List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
+	public List<OrchestrationResultDTO> reserveProvidersTemporarily(final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
 		logger.debug("reserveProvidersTemporarily started ...");
 		
 		Assert.notNull(orList, "'orList' is null.");
@@ -87,7 +91,7 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public void confirmReservation(OrchestrationResultDTO selected, List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
+	public void confirmReservation(final OrchestrationResultDTO selected, final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
 		logger.debug("confirmReservation started ...");
 		
 		Assert.notNull(selected, "'selected' is null.");
@@ -104,6 +108,31 @@ public class QoSManagerImpl implements QoSManager {
 				qosReservationDBService.removeTemporaryLock(dto);
 			}
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<OrchestrationResultDTO> verifyServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+		logger.debug("verifyServices started ...");
+		
+		final List<OrchestrationResultDTO> result = new ArrayList<>();
+		for (final OrchestrationResultDTO dto : orList) {
+			final boolean needLockRelease = request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
+			for (final QoSVerifier verifier : verifiers) {
+				final boolean verified = verifier.verify(dto, request.getQosRequirements(), request.getCommands());
+				if (!verified) {
+					if (needLockRelease) {
+						qosReservationDBService.removeTemporaryLock(dto);
+					}
+					logger.debug("{} exclude result: {}/{}", verifier.getClass().getName(), dto.getProvider().getId(), dto.getService().getId());
+					break;
+				}
+			}
+			
+			result.add(dto);
+		}
+		
+		return result;
 	}
 	
 	//=================================================================================================
