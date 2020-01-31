@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponents;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -142,13 +143,13 @@ public class PingTask implements Job {
 		final int meanResponseTimeWithOutTimeout = calculateMeanResponseTimeWithoutTimeout(responseList);
 		final int jitterWithTimeout = calculateJitterWithTimeout(responseList);
 		final int jitterWithoutTimeout = calculateJitterWithoutTimeout(responseList);
-		
+
 		final ZonedDateTime countStartedAt = aroundNow;
 
-		long sent = 0;
-		long sentAll = 0;
-		long received = 0;
-		long receivedAll = 0;
+		final long sent = 0;
+		final long sentAll = 0;
+		final long received = 0;
+		final long receivedAll = 0;
 
 		final int sentInThisPing = getSentInThisPing(responseList);
 		final int receivedInThisPing = getReceivedInThisPing(responseList);
@@ -156,19 +157,14 @@ public class PingTask implements Job {
 		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 1 : ((double)receivedInThisPing / (double)sentInThisPing) * 100);
 
 		final QoSIntraMeasurement measurement ;
-		final Optional<QoSIntraMeasurement> meOptional = qoSIntraMeasurementRepository.findById(measurementParam.getId());
-		if (meOptional.isPresent()) {
-			measurement = meOptional.get();
+		final Optional<QoSIntraMeasurement> measurementOptional = qoSIntraMeasurementRepository.findById(measurementParam.getId());
+		if (measurementOptional.isPresent()) {
+			measurement = measurementOptional.get();
 		}else {
 			throw new ArrowheadException("Could not find measurment in DB");
 		}
 
 		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
-
-		sent = pingMeasurement.getSent();
-		sentAll = pingMeasurement.getSentAll();
-		received = pingMeasurement.getReceived();
-		receivedAll = pingMeasurement.getReceivedAll();
 
 		pingMeasurement.setMeasurement(measurement);
 		pingMeasurement.setAvailable(available);
@@ -193,7 +189,7 @@ public class PingTask implements Job {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	private void updateMeasurement(ZonedDateTime aroundNow,final QoSIntraMeasurement measurement) {
+	private void updateMeasurement(final ZonedDateTime aroundNow,final QoSIntraMeasurement measurement) {
 
 	 	measurement.setLastMeasurementAt(aroundNow);
 	 	qoSIntraMeasurementRepository.saveAndFlush(measurement);
@@ -226,6 +222,19 @@ public class PingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = getPingResponseList(address);
 
+		final QoSIntraMeasurement measurement = getMeasurement(system, aroundNow);
+		handelPingMeasurement(address, measurement, responseList, aroundNow);
+
+		updateMeasurement(aroundNow, measurement);
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	private void handelPingMeasurement(final String address, final QoSIntraMeasurement measurement,
+			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+		logger.debug("handelPingMeasurement started...");
+
 		final boolean available = calculateAvailable(responseList);
 		final int maxResponseTime = calculateMaxResponseTime(responseList);
 		final int minResponseTime = calculateMinResponseTime(responseList);
@@ -233,20 +242,13 @@ public class PingTask implements Job {
 		final int meanResponseTimeWithoutTimeout = calculateMeanResponseTimeWithoutTimeout(responseList);
 		final int jitterWithTimeout = calculateJitterWithTimeout(responseList);
 		final int jitterWithoutTimeout = calculateJitterWithoutTimeout(responseList);
-
 		final ZonedDateTime countStartedAt = aroundNow;
 
 		final int sentInThisPing = getSentInThisPing(responseList);
 		final int receivedInThisPing = getReceivedInThisPing(responseList);
-		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 1 : 100 - ((double)receivedInThisPing / (double)sentInThisPing) * 100);
 
-		final QoSIntraMeasurement measurement;
-		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
-		if (qoSIntraMeasurementOptional.isEmpty()) {
-			measurement = createMeasurement(system, QoSMeasurementType.PING, aroundNow);
-		}else {
-			 measurement = qoSIntraMeasurementOptional.get();
-		}
+		Assert.isTrue(sentInThisPing > 0, "Sent in this Ping value must be greater than zero");
+		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ( (double)receivedInThisPing / (double)sentInThisPing ) * 100);
 
 		final QoSIntraPingMeasurement pingMeasurement;
 		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
@@ -257,48 +259,11 @@ public class PingTask implements Job {
 
 			if(LOG_MEASUREMENT) {
 
-				final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
-				measurementLog.setMeasurementType(QoSMeasurementType.PING);
-				measurementLog.setMeasuredSystemAddress(address);
-				measurementLog.setAvailable(available);
-				measurementLog.setMinResponseTime(minResponseTime);
-				measurementLog.setMaxResponseTime(maxResponseTime);
-				measurementLog.setMeanResponseTimeWithoutTimeout(meanResponseTimeWithoutTimeout);
-				measurementLog.setMeanResponseTimeWithTimeout(meanResponseTimeWithTimeout);
-				measurementLog.setJitterWithoutTimeout(jitterWithoutTimeout);
-				measurementLog.setJitterWithTimeout(jitterWithTimeout);
-				measurementLog.setLostPerMeasurementPercent(lostPerMeasurementPercent);
-				measurementLog.setSent(sentInThisPing);
-				measurementLog.setReceived(receivedInThisPing);
-				measurementLog.setMeasuredAt(aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = logMeasurementToDB(address, pingMeasurement, aroundNow);
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSIntraPingMeasurementLogRepository.saveAndFlush(measurementLog);
+				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
-				if(LOG_MEASUREMENT_DETAILS) {
-
-					final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = new ArrayList<>(responseList.size());
-
-					for (final IcmpPingResponse icmpPingResponse : responseList) {
-	
-						final QoSIntraPingMeasurementLogDetails measurementLogDetails = new QoSIntraPingMeasurementLogDetails();
-						measurementLogDetails.setMeasurementLog(measurementLogSaved);
-						measurementLogDetails.setMeasuredSystemAddress(address);
-						measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
-						measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
-						measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
-						measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
-						measurementLogDetails.setSize(icmpPingResponse.getSize());
-						measurementLogDetails.setTtl(icmpPingResponse.getTtl());
-						measurementLogDetails.setRtt(icmpPingResponse.getRtt());
-						measurementLogDetails.setDuration((int) icmpPingResponse.getDuration());
-						measurementLogDetails.setMeasuredAt(aroundNow);
-	
-						measurementLogDetailsList.add(measurementLogDetails);
-					}
-
-					qoSIntraPingMeasurementLogDetailsRepository.saveAll(measurementLogDetailsList);
-					qoSIntraPingMeasurementLogDetailsRepository.flush();
-
+					logMeasurementDetailsToDB(address, measurementLogSaved, responseList, aroundNow);
 				}
 
 			}
@@ -326,56 +291,84 @@ public class PingTask implements Job {
 
 			if(LOG_MEASUREMENT) {
 
-				final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
-				measurementLog.setMeasurementType(QoSMeasurementType.PING);
-				measurementLog.setMeasuredSystemAddress(address);
-				measurementLog.setAvailable(available);
-				measurementLog.setMinResponseTime(minResponseTime);
-				measurementLog.setMaxResponseTime(maxResponseTime);
-				measurementLog.setMeanResponseTimeWithoutTimeout(meanResponseTimeWithoutTimeout);
-				measurementLog.setMeanResponseTimeWithTimeout(meanResponseTimeWithTimeout);
-				measurementLog.setJitterWithoutTimeout(jitterWithoutTimeout);
-				measurementLog.setJitterWithTimeout(jitterWithTimeout);
-				measurementLog.setLostPerMeasurementPercent(lostPerMeasurementPercent);
-				measurementLog.setSent(sentInThisPing);
-				measurementLog.setReceived(receivedInThisPing);
-				measurementLog.setMeasuredAt(aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = logMeasurementToDB(address, pingMeasurement, aroundNow);
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSIntraPingMeasurementLogRepository.saveAndFlush(measurementLog);
+				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
-				if(LOG_MEASUREMENT_DETAILS) {
-
-					final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = new ArrayList<>(responseList.size());
-
-					for (final IcmpPingResponse icmpPingResponse : responseList) {
-	
-						final QoSIntraPingMeasurementLogDetails measurementLogDetails = new QoSIntraPingMeasurementLogDetails();
-						measurementLogDetails.setMeasurementLog(measurementLogSaved);
-						measurementLogDetails.setMeasuredSystemAddress(address);
-						measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
-						measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
-						measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
-						measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
-						measurementLogDetails.setSize(icmpPingResponse.getSize());
-						measurementLogDetails.setTtl(icmpPingResponse.getTtl());
-						measurementLogDetails.setRtt(icmpPingResponse.getRtt());
-						measurementLogDetails.setDuration((int) icmpPingResponse.getDuration());
-						measurementLogDetails.setMeasuredAt(aroundNow);
-	
-						measurementLogDetailsList.add(measurementLogDetails);
-					}
-
-					qoSIntraPingMeasurementLogDetailsRepository.saveAll(measurementLogDetailsList);
-					qoSIntraPingMeasurementLogDetailsRepository.flush();
-
+					logMeasurementDetailsToDB(address, measurementLogSaved, responseList, aroundNow);
 				}
-
 			}
 		}
+	}
 
-		 updateMeasurement(aroundNow, measurement);
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	private QoSIntraMeasurement getMeasurement(final System system, final ZonedDateTime aroundNow) {
+		logger.debug("getMeasurement started...");
+		
+		final QoSIntraMeasurement measurement;
+		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+		if (qoSIntraMeasurementOptional.isEmpty()) {
+			measurement = createMeasurement(system, QoSMeasurementType.PING, aroundNow);
+		}else {
+			 measurement = qoSIntraMeasurementOptional.get();
+		}
+		return measurement;
+	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	private void logMeasurementDetailsToDB(final String address, final QoSIntraPingMeasurementLog measurementLogSaved,
+			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+		logger.debug("logMeasurementDetailsToDB started...");
 
+		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = new ArrayList<>(responseList.size());
+
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			final QoSIntraPingMeasurementLogDetails measurementLogDetails = new QoSIntraPingMeasurementLogDetails();
+			measurementLogDetails.setMeasurementLog(measurementLogSaved);
+			measurementLogDetails.setMeasuredSystemAddress(address);
+			measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
+			measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
+			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
+			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
+			measurementLogDetails.setSize(icmpPingResponse.getSize());
+			measurementLogDetails.setTtl(icmpPingResponse.getTtl());
+			measurementLogDetails.setRtt(icmpPingResponse.getRtt());
+			measurementLogDetails.setDuration((int) icmpPingResponse.getDuration());
+			measurementLogDetails.setMeasuredAt(aroundNow);
+
+			measurementLogDetailsList.add(measurementLogDetails);
+		}
+
+		qoSIntraPingMeasurementLogDetailsRepository.saveAll(measurementLogDetailsList);
+		qoSIntraPingMeasurementLogDetailsRepository.flush();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	private QoSIntraPingMeasurementLog logMeasurementToDB(final String address, final QoSIntraPingMeasurement pingMeasurement, final ZonedDateTime aroundNow) {
+		logger.debug("logMeasurementToDB started...");
+
+		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
+		measurementLog.setMeasurementType(QoSMeasurementType.PING);
+		measurementLog.setMeasuredSystemAddress(address);
+		measurementLog.setAvailable(pingMeasurement.isAvailable());
+		measurementLog.setMinResponseTime(pingMeasurement.getMinResponseTime());
+		measurementLog.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
+		measurementLog.setMeanResponseTimeWithoutTimeout(pingMeasurement.getMeanResponseTimeWithoutTimeout());
+		measurementLog.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
+		measurementLog.setJitterWithoutTimeout(pingMeasurement.getJitterWithoutTimeout());
+		measurementLog.setJitterWithTimeout(pingMeasurement.getJitterWithTimeout());
+		measurementLog.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
+		measurementLog.setSent(pingMeasurement.getSent());
+		measurementLog.setReceived(pingMeasurement.getReceived());
+		measurementLog.setMeasuredAt(aroundNow);
+
+		final QoSIntraPingMeasurementLog measurementLogSaved = qoSIntraPingMeasurementLogRepository.saveAndFlush(measurementLog);
+
+		return measurementLogSaved;
 	}
 
 	//-------------------------------------------------------------------------------------------------
