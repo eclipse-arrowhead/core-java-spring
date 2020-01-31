@@ -10,15 +10,15 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 	private static final long serialVersionUID = -1645860899758857162L;
 
 	private boolean available;
-	private int maxResponseTime;
-	private int minResponseTime;
-	private int meanResponseTimeWithTimeout;
-	private int meanResponseTimeWithOutTimeout;
-	private int jitterWithTimeout;
-	private int jitterWithoutTimeout;
-	private int sentInThisPing;
-	private int receivedInThisPing;
-	private int lostPerMeasurementPercent;
+	private Integer maxResponseTime;
+	private Integer minResponseTime;
+	private Integer meanResponseTimeWithTimeout;
+	private Integer meanResponseTimeWithoutTimeout;
+	private Integer jitterWithTimeout;
+	private Integer jitterWithoutTimeout;
+	private Integer sentInThisPing;
+	private Integer receivedInThisPing;
+	private Integer lostPerMeasurementPercent;
 
 	//=================================================================================================
 	// methods
@@ -27,15 +27,15 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 	public PingMeasurementCalculationsDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public PingMeasurementCalculationsDTO(final boolean available, final int maxResponseTime, final int minResponseTime,
-			final int meanResponseTimeWithTimeout, final int meanResponseTimeWithOutTimeout, final int jitterWithTimeout,
-			final int jitterWithoutTimeout, final int sentInThisPing, final int receivedInThisPing, final int lostPerMeasurementPercent) {
+	public PingMeasurementCalculationsDTO(final boolean available, final Integer maxResponseTime, final Integer minResponseTime,
+			final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout,
+			final Integer jitterWithoutTimeout, final Integer sentInThisPing, final Integer receivedInThisPing, final Integer lostPerMeasurementPercent) {
 
 		this.available = available;
 		this.maxResponseTime = maxResponseTime;
 		this.minResponseTime = minResponseTime;
 		this.meanResponseTimeWithTimeout = meanResponseTimeWithTimeout;
-		this.meanResponseTimeWithOutTimeout = meanResponseTimeWithOutTimeout;
+		this.meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeout;
 		this.jitterWithTimeout = jitterWithTimeout;
 		this.jitterWithoutTimeout = jitterWithoutTimeout;
 		this.sentInThisPing = sentInThisPing;
@@ -45,26 +45,26 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 
 	//-------------------------------------------------------------------------------------------------
 	public boolean isAvailable() { return available; }
-	public int getMaxResponseTime() { return maxResponseTime; }
-	public int getMinResponseTime() { return minResponseTime; }
-	public int getMeanResponseTimeWithTimeout() { return meanResponseTimeWithTimeout; }
-	public int getMeanResponseTimeWithOutTimeout() { return meanResponseTimeWithOutTimeout; }
-	public int getJitterWithTimeout() { return jitterWithTimeout; }
-	public int getJitterWithoutTimeout() { return jitterWithoutTimeout; }
-	public int getSentInThisPing() { return sentInThisPing; }
-	public int getReceivedInThisPing() { return receivedInThisPing; }
-	public int getLostPerMeasurementPercent() { return lostPerMeasurementPercent; }
+	public Integer getMaxResponseTime() { return maxResponseTime; }
+	public Integer getMinResponseTime() { return minResponseTime; }
+	public Integer getMeanResponseTimeWithTimeout() { return meanResponseTimeWithTimeout; }
+	public Integer getMeanResponseTimeWithoutTimeout() { return meanResponseTimeWithoutTimeout; }
+	public Integer getJitterWithTimeout() { return jitterWithTimeout; }
+	public Integer getJitterWithoutTimeout() { return jitterWithoutTimeout; }
+	public Integer getSentInThisPing() { return sentInThisPing; }
+	public Integer getReceivedInThisPing() { return receivedInThisPing; }
+	public Integer getLostPerMeasurementPercent() { return lostPerMeasurementPercent; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setAvailable(final boolean available) { this.available = available; }
-	public void setMaxResponseTime(final int maxResponseTime) { this.maxResponseTime = maxResponseTime; }
-	public void setMinResponseTime(final int minResponseTime) { this.minResponseTime = minResponseTime; }
-	public void setMeanResponseTimeWithTimeout(final int meanResponseTimeWithTimeout) { this.meanResponseTimeWithTimeout = meanResponseTimeWithTimeout; }
-	public void setMeanResponseTimeWithOutTimeout(final int meanResponseTimeWithOutTimeout) { this.meanResponseTimeWithOutTimeout = meanResponseTimeWithOutTimeout; }
-	public void setJitterWithTimeout(final int jitterWithTimeout) { this.jitterWithTimeout = jitterWithTimeout; }
-	public void setJitterWithoutTimeout(final int jitterWithoutTimeout) { this.jitterWithoutTimeout = jitterWithoutTimeout; }
-	public void setSentInThisPing(final int sentInThisPing) { this.sentInThisPing = sentInThisPing; }
-	public void setReceivedInThisPing(final int receivedInThisPing) { this.receivedInThisPing = receivedInThisPing; }
-	public void setLostPerMeasurementPercent(final int lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
+	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }
+	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
+	public void setMeanResponseTimeWithTimeout(final Integer meanResponseTimeWithTimeout) { this.meanResponseTimeWithTimeout = meanResponseTimeWithTimeout; }
+	public void setMeanResponseTimeWithoutTimeout(final Integer meanResponseTimeWithoutTimeout) { this.meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeout; }
+	public void setJitterWithTimeout(final Integer jitterWithTimeout) { this.jitterWithTimeout = jitterWithTimeout; }
+	public void setJitterWithoutTimeout(final Integer jitterWithoutTimeout) { this.jitterWithoutTimeout = jitterWithoutTimeout; }
+	public void setSentInThisPing(final Integer sentInThisPing) { this.sentInThisPing = sentInThisPing; }
+	public void setReceivedInThisPing(final Integer receivedInThisPing) { this.receivedInThisPing = receivedInThisPing; }
+	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
 
 }
