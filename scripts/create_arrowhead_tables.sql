@@ -372,7 +372,6 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
 
 CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-	`measurement_type` varchar(255) NOT NULL,
 	`measured_system_address` varchar(255) NOT NULL,
 	`available` int(1) NOT NULL DEFAULT 0,
 	`min_response_time` int(11) DEFAULT NULL,
@@ -393,7 +392,6 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log` (
 CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`measurement_log_id` bigint(20) NOT NULL,
-	`measured_system_address` varchar(255) NOT NULL,
 	`success_flag` int(1) NOT NULL DEFAULT 0,
 	`timeout_flag` int(1) NOT NULL DEFAULT 0,
 	`error_message` varchar(255) NOT NULL,

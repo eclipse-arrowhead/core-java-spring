@@ -29,9 +29,6 @@ public class QoSIntraPingMeasurementLogDetails {
 	@JoinColumn(name = "measurement_log_id", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSIntraPingMeasurementLog measurementLog;
 
-	@Column(name = "measured_system_address", nullable = false)
-	private String measuredSystemAddress;
-
 	@Column(name = "success_flag", nullable = false)
 	private boolean successFlag = false;
 
@@ -86,7 +83,6 @@ public class QoSIntraPingMeasurementLogDetails {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSIntraPingMeasurementLog getMeasurementLog() { return measurementLog; }
-	public String getMeasuredSystemAddress() { return measuredSystemAddress; }
 	public boolean isSuccessFlag() { return successFlag; }
 	public boolean isTimeoutFlag() { return timeoutFlag; }
 	public String getErrorMessage() { return errorMessage; }
@@ -99,7 +95,6 @@ public class QoSIntraPingMeasurementLogDetails {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setMeasurementLog(QoSIntraPingMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
-	public void setMeasuredSystemAddress(String measuredSystemAddress) { this.measuredSystemAddress = measuredSystemAddress; }
 	public void setSuccessFlag(boolean successFlag) { this.successFlag = successFlag; }
 	public void setTimeoutFlag(boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
 	public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }

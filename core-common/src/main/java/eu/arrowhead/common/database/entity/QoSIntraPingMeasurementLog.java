@@ -27,10 +27,6 @@ public class QoSIntraPingMeasurementLog {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@Column(nullable = false, columnDefinition = "varchar(" + CoreDefaults.VARCHAR_BASIC + ")")
-	@Enumerated(EnumType.STRING)
-	private QoSMeasurementType measurementType;
-
 	@Column(name = "measured_system_address", nullable = false)
 	private String measuredSystemAddress;
 
@@ -93,7 +89,6 @@ public class QoSIntraPingMeasurementLog {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSMeasurementType getMeasurementType() { return measurementType; }
 	public String getMeasuredSystemAddress() { return measuredSystemAddress; }
 	public boolean isAvailable() { return available; }
 	public Integer getMinResponseTime() { return minResponseTime; }
@@ -108,7 +103,6 @@ public class QoSIntraPingMeasurementLog {
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setMeasurementType(final QoSMeasurementType measurementType) { this.measurementType = measurementType; }
 	public void setMeasuredSystemAddress(final String measuredSystemAddress) { this.measuredSystemAddress = measuredSystemAddress; }
 	public void setAvailable(final boolean available) { this.available = available; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
