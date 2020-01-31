@@ -11,7 +11,6 @@ public class DummyQoSManager implements QoSManager {
 	//=================================================================================================
 	// methods
 
-
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<OrchestrationResultDTO> filterReservedProviders(final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
@@ -22,5 +21,11 @@ public class DummyQoSManager implements QoSManager {
 	@Override
 	public List<OrchestrationResultDTO> reserveProvidersTemporarily(final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
 		return orList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void confirmReservation(final OrchestrationResultDTO selected, final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
+		// intentionally do nothing
 	}
 }

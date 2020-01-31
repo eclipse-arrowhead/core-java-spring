@@ -55,8 +55,9 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> reserveProvidersTemporarily(List<OrchestrationResultDTO> orList, SystemRequestDTO requester) {
+	public List<OrchestrationResultDTO> reserveProvidersTemporarily(List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
 		Assert.notNull(orList, "'orList' is null.");
+		Assert.notNull(requester, "'requester' is null.");
 		Assert.isTrue(!Utilities.isEmpty(requester.getSystemName()),  "Requester system's name is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(requester.getAddress()),  "Requester system's address is null or empty.");
 		Assert.notNull(requester.getPort(), "Requester system's port is null.");
@@ -78,6 +79,25 @@ public class QoSManagerImpl implements QoSManager {
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void confirmReservation(OrchestrationResultDTO selected, List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
+		Assert.notNull(selected, "'selected' is null.");
+		Assert.notEmpty(orList, "'orList' is null or empty.");
+		Assert.notNull(requester, "'requester' is null.");
+		Assert.isTrue(!Utilities.isEmpty(requester.getSystemName()),  "Requester system's name is null or empty.");
+		Assert.isTrue(!Utilities.isEmpty(requester.getAddress()),  "Requester system's address is null or empty.");
+		Assert.notNull(requester.getPort(), "Requester system's port is null.");
+		
+		for (final OrchestrationResultDTO dto : orList) {
+			if (dto.getProvider().getId() == selected.getProvider().getId() && dto.getService().getId() == selected.getProvider().getId()) {
+				qosReservationDBService.extendReservation(selected, requester);
+			} else {
+				qosReservationDBService.removeTemporaryLock(dto);
+			}
+		}
 	}
 	
 	//=================================================================================================

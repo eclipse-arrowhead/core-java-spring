@@ -292,7 +292,7 @@ public class OrchestratorService {
 		final boolean needReservation = qosEnabled && flags.get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
 		
 		if (needReservation) {
-			//TODO: temporary locking (if caller wants exclusivity)
+			orList = qosManager.reserveProvidersTemporarily(orList, request.getRequesterSystem());
  		} 
 		
 		if (flags.get(Flag.ENABLE_QOS)) {
@@ -316,7 +316,9 @@ public class OrchestratorService {
 			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
 			// set additional parameters here if you use a different matchmaking algorithm
 			final OrchestrationResultDTO selected = intraCloudProviderMatchmaker.doMatchmaking(orList, params);
-			//TODO: remove temporary locks and change lock on the selected
+			if (needReservation) {
+				qosManager.confirmReservation(selected, orList, request.getRequesterSystem());
+			}
 			orList.clear();
 			orList.add(selected);
 		}
