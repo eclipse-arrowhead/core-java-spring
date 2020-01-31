@@ -328,7 +328,6 @@ public class PingTask implements Job {
 
 			final QoSIntraPingMeasurementLogDetails measurementLogDetails = new QoSIntraPingMeasurementLogDetails();
 			measurementLogDetails.setMeasurementLog(measurementLogSaved);
-			measurementLogDetails.setMeasuredSystemAddress(address);
 			measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
 			measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
 			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
@@ -352,7 +351,6 @@ public class PingTask implements Job {
 		logger.debug("logMeasurementToDB started...");
 
 		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
-		measurementLog.setMeasurementType(QoSMeasurementType.PING);
 		measurementLog.setMeasuredSystemAddress(address);
 		measurementLog.setAvailable(pingMeasurement.isAvailable());
 		measurementLog.setMinResponseTime(pingMeasurement.getMinResponseTime());
