@@ -44,6 +44,8 @@ public class QoSReservationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public int releaseObsoleteReservations() {
+		logger.debug("releaseObsoleteReservations started ...");
+		
 		try {
 			final ZonedDateTime now = ZonedDateTime.now();
 			final List<QoSReservation> obsoletes = qosReservationRepository.findAllByReservedToLessThanEqual(now);
@@ -59,6 +61,8 @@ public class QoSReservationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public List<QoSReservation> getAllReservationsExceptMine(final String systemName, final String address, final int port) {
+		logger.debug("getAllReservationsExceptMine started ...");
+		
 		Assert.isTrue(!Utilities.isEmpty(systemName), "'systemName' is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(address), "'address' is null or empty.");
 		
@@ -71,6 +75,8 @@ public class QoSReservationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void applyTemporaryLock(final String systemName, final String address, final int port, final OrchestrationResultDTO dto) {
+		logger.debug("applyTemporaryLock started ...");
+		
 		Assert.isTrue(!Utilities.isEmpty(systemName), "'systemName' is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(address), "'address' is null or empty.");
 		Assert.notNull(dto, "'dto' is null.");
@@ -90,6 +96,8 @@ public class QoSReservationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void removeTemporaryLock(final OrchestrationResultDTO dto) {
+		logger.debug("removeTemporaryLock started ...");
+		
 		Assert.notNull(dto, "'dto' is null.");
 		Assert.notNull(dto.getProvider(), "Provider is null.");
 		Assert.notNull(dto.getService(), "Service is null.");
@@ -113,6 +121,8 @@ public class QoSReservationDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional(rollbackFor = ArrowheadException.class)
 	public void extendReservation(final OrchestrationResultDTO reserved, final SystemRequestDTO requester) {
+		logger.debug("extendReservation started ...");
+		
 		Assert.notNull(reserved, "'reserved' is null.");
 		Assert.notNull(reserved.getProvider(), "Provider is null.");
 		Assert.notNull(reserved.getService(), "Service is null.");
@@ -145,6 +155,8 @@ public class QoSReservationDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private ZonedDateTime getReservationTime(final OrchestrationResultDTO dto) {
+		logger.debug("getReservationTime started ...");
+		
 		final ZonedDateTime time = ZonedDateTime.now();
 		
 		int seconds = maxReservationDuration;

@@ -32,6 +32,8 @@ public class QoSManagerImpl implements QoSManager {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<OrchestrationResultDTO> filterReservedProviders(final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
+		logger.debug("filterReservedProviders started ...");
+		
 		Assert.notNull(orList, "'orList' is null.");
 		Assert.notNull(requester, "Requester system is null.");
 		Assert.isTrue(!Utilities.isEmpty(requester.getSystemName()),  "Requester system's name is null or empty.");
@@ -56,6 +58,8 @@ public class QoSManagerImpl implements QoSManager {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<OrchestrationResultDTO> reserveProvidersTemporarily(List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
+		logger.debug("reserveProvidersTemporarily started ...");
+		
 		Assert.notNull(orList, "'orList' is null.");
 		Assert.notNull(requester, "'requester' is null.");
 		Assert.isTrue(!Utilities.isEmpty(requester.getSystemName()),  "Requester system's name is null or empty.");
@@ -84,6 +88,8 @@ public class QoSManagerImpl implements QoSManager {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void confirmReservation(OrchestrationResultDTO selected, List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {
+		logger.debug("confirmReservation started ...");
+		
 		Assert.notNull(selected, "'selected' is null.");
 		Assert.notEmpty(orList, "'orList' is null or empty.");
 		Assert.notNull(requester, "'requester' is null.");
@@ -105,6 +111,8 @@ public class QoSManagerImpl implements QoSManager {
 
 	//-------------------------------------------------------------------------------------------------
 	private boolean isReserved(final OrchestrationResultDTO dto, final List<QoSReservation> reservations) {
+		logger.debug("isReserved started ...");
+		
 		for (final QoSReservation reservation : reservations) {
 			if (reservation.getReservedProviderId() == dto.getProvider().getId() && reservation.getReservedServiceId() == dto.getService().getId()) {
 				return true;
