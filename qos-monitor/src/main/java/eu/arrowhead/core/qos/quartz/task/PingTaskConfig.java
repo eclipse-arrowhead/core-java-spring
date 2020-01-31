@@ -27,9 +27,6 @@ public class PingTaskConfig {
 	@Autowired
 	private ApplicationContext applicationContext; //NOSONAR
 
-	@Value(CoreCommonConstants.$PING_TTL_SCHEDULED_WD)
-	private boolean ttlScheduled;
-
 	@Value(CoreCommonConstants.$PING_TTL_INTERVAL_WD)
 	private int ttlInterval;
 
@@ -48,16 +45,13 @@ public class PingTaskConfig {
 		jobFactory.setApplicationContext(applicationContext);
 
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
-		if (ttlScheduled) {			
-			schedulerFactory.setJobFactory(jobFactory);
-			schedulerFactory.setJobDetails(intraCloudPingTaskDetails().getObject());
-			schedulerFactory.setTriggers(intraCloudPingTaskTrigger().getObject());
-			schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-			logger.info("Pin task adjusted with ttl interval: {} minutes", ttlInterval);
-		} else {
-			logger.info("Ping task is not adjusted");
-		}
-		
+
+		schedulerFactory.setJobFactory(jobFactory);
+		schedulerFactory.setJobDetails(intraCloudPingTaskDetails().getObject());
+		schedulerFactory.setTriggers(intraCloudPingTaskTrigger().getObject());
+		schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+		logger.info("Ping task adjusted with ttl interval: {} minutes", ttlInterval);
+
 		return schedulerFactory;
 	}
 
