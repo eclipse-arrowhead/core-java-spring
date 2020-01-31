@@ -25,6 +25,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponents;
+
+import com.rabbitmq.client.impl.AMQImpl.Basic.Qos;
+
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
@@ -47,6 +50,8 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
+import eu.arrowhead.core.qos.database.service.QoSDatabaseService;
+import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 
 @Component
 @DisallowConcurrentExecution
@@ -65,19 +70,7 @@ public class PingTask implements Job {
 	protected Logger logger = LogManager.getLogger(PingTask.class);
 
 	@Autowired
-	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
-
-	@Autowired
-	private QoSIntraMeasurementPingRepository qoSIntraMeasurementPingRepository;
-
-	@Autowired
-	private QoSIntraPingMeasurementLogRepository qoSIntraPingMeasurementLogRepository;
-
-	@Autowired
-	private QoSIntraPingMeasurementLogDetailsRepository qoSIntraPingMeasurementLogDetailsRepository;
-
-	@Autowired
-	private SystemRepository systemRepository;
+	private QoSDatabaseService qoSDatabaseService;
 
 	@Autowired
 	private HttpService httpService;
@@ -93,7 +86,7 @@ public class PingTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: ping  task");
 
-		final Set<SystemResponseDTO> systems = getSystemsToMessure();
+		final Set<SystemResponseDTO> systems = getSystemsToMeasure();
 		for (final SystemResponseDTO systemResponseDTO : systems) {
 
 			pingSystem(systemResponseDTO);
@@ -107,7 +100,7 @@ public class PingTask implements Job {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private Set<SystemResponseDTO> getSystemsToMessure() {
+	private Set<SystemResponseDTO> getSystemsToMeasure() {
 		logger.debug("getSystemToMessure started...");
 
 		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
@@ -117,24 +110,11 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = ArrowheadException.class) 
-	private QoSIntraMeasurement createMeasurement(final System system,final QoSMeasurementType ping,final ZonedDateTime aroundNow) {
-		logger.debug("createMeasurement started...");
-
-		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
-		measurement.setSystem(system);
-		measurement.setMeasurementType(QoSMeasurementType.PING);
-
-		qoSIntraMeasurementRepository.saveAndFlush(measurement);
-
-		return measurement;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = ArrowheadException.class)
 	private QoSIntraPingMeasurement createPingMeasurement(final QoSIntraMeasurement measurementParam,
 	final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("createPingMeasurement started...");
+
+		final PingMeasurementCalculationsDTO calculations = calculatePingMeasurementValues(responseList);
 
 		final boolean available = calculateAvailable(responseList);
 		final int maxResponseTime = calculateMaxResponseTime(responseList);
@@ -154,7 +134,7 @@ public class PingTask implements Job {
 		final int sentInThisPing = getSentInThisPing(responseList);
 		final int receivedInThisPing = getReceivedInThisPing(responseList);
 
-		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 1 : ((double)receivedInThisPing / (double)sentInThisPing) * 100);
+		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 0 : 100 - ((double)receivedInThisPing / (double)sentInThisPing) * 100);
 
 		final QoSIntraMeasurement measurement ;
 		final Optional<QoSIntraMeasurement> measurementOptional = qoSIntraMeasurementRepository.findById(measurementParam.getId());
@@ -186,14 +166,72 @@ public class PingTask implements Job {
 
 		return pingMeasurement;
 	}
-
 	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = ArrowheadException.class)
-	private void updateMeasurement(final ZonedDateTime aroundNow,final QoSIntraMeasurement measurement) {
+	private PingMeasurementCalculationsDTO calculatePingMeasurementValues(List<IcmpPingResponse> responseList) {
+		logger.debug("calculatePingMeasurementValues started...");
 
-	 	measurement.setLastMeasurementAt(aroundNow);
-	 	qoSIntraMeasurementRepository.saveAndFlush(measurement);
+		final int sentInThisPing = responseList.size();
+		Assert.isTrue(sentInThisPing > 0, "Sent in this Ping value must be greater than zero");
 
+		boolean available = false;
+		int receivedInThisPing = 0;
+		long maxResponseTime = 0;
+		long minResponseTime = Integer.MAX_VALUE;
+		double sumOfDurationForMeanResponseTimeWithTimeout = 0;
+		double sumOfDurationForMeanResponseTimeWithoutTimeout = 0;
+		int meanResponseTimeWithoutTimeoutMembersCount = 0;
+
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			
+			if (successFlag) {
+				available = true;
+				++receivedInThisPing;
+				final long duration = icmpPingResponse.getDuration();
+
+				if (duration > maxResponseTime) {
+					maxResponseTime = duration;
+				}
+
+				if (duration < minResponseTime) {
+					minResponseTime = duration;
+				}
+
+				sumOfDurationForMeanResponseTimeWithoutTimeout += duration;
+				++meanResponseTimeWithoutTimeoutMembersCount;
+
+			}else {
+				sumOfDurationForMeanResponseTimeWithTimeout += PING_TIME_OUT;
+			}
+		}
+
+		int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 0 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
+
+		final double meanResponseTimeWithTimeout = sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
+		final double meanResponseTimeWithoutTimeout = sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
+
+		double sumOfDiffsForJitterWithTimeout = 0;
+		double sumOfDiffsForJitterWithoutTimeout =0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			final boolean successFlag = icmpPingResponse.getSuccessFlag();
+			final double duration;
+			if (successFlag) {
+				 duration = icmpPingResponse.getDuration();
+				 sumOfDiffsForJitterWithoutTimeout += Math.pow(duration, meanResponseTimeWithoutTimeout);
+			}else {
+				duration = PING_TIME_OUT + 1;
+			}
+
+			sumOfDiffsForJitterWithTimeout += Math.pow(duration, meanResponseTimeWithTimeout);
+		}
+		double jitterWithTimeout = Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
+		double jitterWithoutTimeout =  Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
+
+		final PingMeasurementCalculationsDTO calculations = new PingMeasurementCalculationsDTO();
+		//TODO fill calculation setters ...
+		return calculations;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -206,23 +244,11 @@ public class PingTask implements Job {
 			throw new InvalidParameterException("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 
-		final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(
-				systemResponseDTO.getSystemName(),
-				systemResponseDTO.getAddress(),
-				systemResponseDTO.getPort());
-		final System system;
-		if (systemOptional.isPresent()) {
-
-			system = systemOptional.get();
-		}else {
-			throw new ArrowheadException("Requested system is not in DB");
-		}
-
 		final String address = systemResponseDTO.getAddress();
 
 		final List<IcmpPingResponse> responseList = getPingResponseList(address);
 
-		final QoSIntraMeasurement measurement = getMeasurement(system, aroundNow);
+		final QoSIntraMeasurement measurement = qoSDatabaseService.getMeasurement(systemResponseDTO, aroundNow);
 		handelPingMeasurement(address, measurement, responseList, aroundNow);
 
 		updateMeasurement(aroundNow, measurement);
@@ -230,7 +256,6 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = ArrowheadException.class)
 	private void handelPingMeasurement(final String address, final QoSIntraMeasurement measurement,
 			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("handelPingMeasurement started...");
@@ -299,21 +324,6 @@ public class PingTask implements Job {
 				}
 			}
 		}
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = ArrowheadException.class)
-	private QoSIntraMeasurement getMeasurement(final System system, final ZonedDateTime aroundNow) {
-		logger.debug("getMeasurement started...");
-		
-		final QoSIntraMeasurement measurement;
-		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
-		if (qoSIntraMeasurementOptional.isEmpty()) {
-			measurement = createMeasurement(system, QoSMeasurementType.PING, aroundNow);
-		}else {
-			 measurement = qoSIntraMeasurementOptional.get();
-		}
-		return measurement;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -412,7 +422,7 @@ public class PingTask implements Job {
 			for (int count = 0; count < TIMES_TO_REPEAT; count ++) {
 				final IcmpPingResponse response = IcmpPingUtil.executePingRequest (request);
 				final String formattedResponse = IcmpPingUtil.formatResponse (response);
-				logger.info(formattedResponse);
+				logger.debug(formattedResponse);
 
 				responseList.add(response);
 				Thread.sleep (REST_BETWEEN_PINGS_MILLSEC);
