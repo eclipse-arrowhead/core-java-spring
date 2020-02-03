@@ -138,7 +138,7 @@ public class PingTask implements Job {
 			}
 		}
 
-		int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 0 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
+		int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
 
 		final double meanResponseTimeWithTimeout = sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
 		final double meanResponseTimeWithoutTimeout = sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
