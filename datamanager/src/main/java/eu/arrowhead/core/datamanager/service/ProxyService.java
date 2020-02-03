@@ -16,19 +16,16 @@ import java.util.Vector;
 
 @Service
 public class ProxyService {
-    private static List<ProxyElement> endpoints = new ArrayList<>();
+    private List<ProxyElement> endpoints = new ArrayList<>();
 
     static {
+    }
+
+    public ProxyService() {
 	endpoints = new ArrayList<>();
     }
 
-
-    /**
-     * @fn static List<ProxyElement> getAllEndpoints()
-     * @brief Fetches all endpoints and returns a list
-     *
-     */
-    public static List<String> getAllEndpoints() {
+    public List<String> getAllEndpoints() {
 	List<String> res = new ArrayList<>();
 	Iterator<ProxyElement> epi = endpoints.iterator();
 
@@ -40,12 +37,7 @@ public class ProxyService {
     }
 
 
-    /**
-     * @fn static List<ProxyElement> getEndpoints(String systemName)
-     * @brief Fetches all service endpoints that belongs to a specific system
-     *
-     */
-    public static ArrayList<ProxyElement> getEndpoints(String systemName) {
+    public ArrayList<ProxyElement> getEndpoints(String systemName) {
 	ArrayList<ProxyElement> res = new ArrayList<>();
 	Iterator<ProxyElement> epi = endpoints.iterator();
 
@@ -59,15 +51,24 @@ public class ProxyService {
 	return res;
     }
 
+    public ArrayList<String> getEndpointsNames(String systemName) {
+	ArrayList<String> res = new ArrayList<>();
+	Iterator<ProxyElement> epi = endpoints.iterator();
 
-    /**
-     * @fn static boolean addEndpoint(ProxyElement e)
-     * @brief Adds a newly created Proxy endpoint
-     *
-     */
-    public static boolean addEndpoint(ProxyElement e) {
+	while (epi.hasNext()) {
+	    ProxyElement pe = epi.next();
+	    if (systemName.equals(pe.systemName)) {
+		res.add(pe.serviceName);
+	    }
+	}
+
+	return res;
+    }
+
+
+    public boolean addEndpoint(ProxyElement e) {
 	for(ProxyElement tmp: endpoints) {
-	    if (tmp.serviceName.equals(e.serviceName)) // already exists
+	    if (tmp.serviceName.equals(e.serviceName))
 		return false;
 	}
 
@@ -76,12 +77,7 @@ public class ProxyService {
     }
 
 
-    /**
-     * @fn static ProxyElement getEndpoint(String serviceName)
-     * @brief Searches for a Proxy endpoint
-     *
-     */
-    public static ProxyElement getEndpoint(String serviceName) {
+    public ProxyElement getEndpoint(String serviceName) {
 	Iterator<ProxyElement> epi = endpoints.iterator();
 
 	while (epi.hasNext()) {
@@ -95,12 +91,7 @@ public class ProxyService {
     }
 
 
-    /**
-     * @fn static boolean updateEndpoint(String serviceName, Vector<SenML> msg)
-     * @brief Updates a Proxy endpoint
-     *
-     */
-    public static boolean updateEndpoint(String systemName, String serviceName, Vector<SenML> msg) {
+    public boolean updateEndpoint(String systemName, String serviceName, Vector<SenML> msg) {
 	Iterator<ProxyElement> epi = endpoints.iterator();
 
 	while (epi.hasNext()) {
@@ -113,4 +104,16 @@ public class ProxyService {
 	return false;
     }
 
+    public boolean deleteEndpoint(String serviceName) {
+	Iterator<ProxyElement> epi = endpoints.iterator();
+
+	while (epi.hasNext()) {
+	    ProxyElement pe = epi.next();
+	    if (serviceName.equals(pe.serviceName)) {
+		    epi.remove();
+		    return true;
+	    }
+	}
+	return false;
+    }
 }

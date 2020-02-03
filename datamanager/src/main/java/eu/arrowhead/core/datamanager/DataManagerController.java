@@ -40,6 +40,9 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.SenML;
 import eu.arrowhead.common.dto.shared.SigML;
+import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
+import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
+import eu.arrowhead.common.dto.shared.DataManagerOperationDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.core.datamanager.service.DataManagerService;
@@ -102,17 +105,13 @@ public class DataManagerController {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE)
 	})
 	@GetMapping(value= "/historian")
-	@ResponseBody public String historianS(
+	@ResponseBody public DataManagerSystemsResponseDTO historianSystems(
 			) {
-		Gson gson = new Gson();
+		DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
 
 		ArrayList<String> systems = historianService.getSystems();
-		JsonObject answer = new JsonObject();
-		JsonElement systemlist = gson.toJsonTree(systems);
-		answer.add("systems", systemlist);
-
-		String jsonStr = gson.toJson(answer);
-		return jsonStr;
+		ret.setSystems(systems);
+		return ret;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -123,68 +122,56 @@ public class DataManagerController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= "/historian/{systemName}")
-	@ResponseBody public String historianSystemGet(
+	@ResponseBody public DataManagerServicesResponseDTO historianSystemGet(
 		@PathVariable(value="systemName", required=true) String systemName
 		) {
 		logger.debug("DataManager:GET:Historian/"+systemName);
-		return historianSystemPut(systemName, "{\"op\": \"list\"}");
+
+		DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
+		ArrayList<String> services = historianService.getServicesFromSystem(systemName);
+		ret.setServices(services);
+
+		return ret;
 	}
 
 	@PutMapping(value= "/historian/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String historianSystemPut(
+	@ResponseBody public ResponseEntity<DataManagerServicesResponseDTO> historianSystemPut(
 			@PathVariable(value="systemName", required=true) String systemName,
-			@RequestBody String requestBody
+			@RequestBody DataManagerOperationDTO req
 		) {
 		logger.debug("DataManager:PUT:Historian/"+systemName);
 
-		JsonParser parser= new JsonParser();
-		JsonObject obj = null;
-		try {
-			obj = parser.parse(requestBody).getAsJsonObject();
-		} catch(Exception je){
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "malformed request");
-		}
-
-		String op = obj.get("op").getAsString();
+		String op = req.getOp();
 		if(op.equals("list")) {
+			DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
 			ArrayList<String> services = historianService.getServicesFromSystem(systemName);
-			Gson gson = new Gson();
-			JsonObject answer = new JsonObject();
-			JsonElement servicelist = gson.toJsonTree(services);
-			answer.add("services", servicelist);
-			String jsonStr = gson.toJson(answer);
+			ret.setServices(services);
+			return new ResponseEntity<DataManagerServicesResponseDTO>(ret, org.springframework.http.HttpStatus.OK);
 
-			return jsonStr;
 		} else if(op.equals("create")){
-			String srvName = obj.get("srvName").getAsString();
-			String srvType = obj.get("srvType").getAsString();
+			String serviceName = req.getServiceName();
+			String srvType = req.getServiceType();
 
-			/* check if service already exists */
 			ArrayList<String> services = historianService.getServicesFromSystem(systemName);
 			for (String srv: services) {
-				if(srv.equals(srvName)){
+				if(srv.equals(serviceName)){
 					logger.info("  service:" +srv + " already exists");
-					Gson gson = new Gson();
-					JsonObject answer = new JsonObject();
-					answer.addProperty("createResult", "Already exists");
-					String jsonStr = gson.toJson(answer);
-					throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, jsonStr);
+					throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT);
 				}
 			}
 
-			/* create the service */
-			boolean ret = historianService.addServiceForSystem(systemName, srvName, srvType);
+			boolean ret = historianService.addServiceForSystem(systemName, serviceName, srvType);
 			if (ret==true){
-				return "{\"x\": 0}"; //Response.status(Status.CREATED).entity("{}").type(MediaType.APPLICATION_JSON).build();
+				return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.OK);
 			} else {
-				throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "{\"x\": -1, \"xs\":\"Could not create service\"}");
+				return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
 		}
-		return "{\"x\": -1, \"xs\": \"Unknown command\"}"; //make this a real object!
+		return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@GetMapping(value= "/historian/{system}/{service}")//CommonConstants.DM_HISTORIAN_URI)
+	@GetMapping(value= "/historian/{system}/{service}")
 	@ResponseBody public List<SenML> historianServiceGet(
 		@PathVariable(value="system", required=true) String systemName,
 		@PathVariable(value="service", required=true) String serviceName,
@@ -238,7 +225,7 @@ public class DataManagerController {
 		boolean statusCode = historianService.createEndpoint(systemName, serviceName);
 
 		if (validateSenML(sml) == false) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Invalid SenML");
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		SenML head = sml.firstElement();
@@ -248,7 +235,6 @@ public class DataManagerController {
 		statusCode = historianService.updateEndpoint(serviceName, sml);
 
 		SigML ret = new SigML(0);
-		//String jsonret = "{\"x\": 0}";
 		return ret;
 	}
 
@@ -260,16 +246,13 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= "/proxy", produces=MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String proxyServices() {
-		Gson gson = new Gson();
+	@ResponseBody public DataManagerSystemsResponseDTO proxyServices() {
+		DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
 
-		List<String> pes = proxyService.getAllEndpoints();
-		JsonObject answer = new JsonObject();
-		JsonElement systemlist = gson.toJsonTree(pes);
-		answer.add("systems", systemlist);
+		List<String> systems = proxyService.getAllEndpoints();
+		ret.setSystems(systems);
 
-		String jsonStr = gson.toJson(answer);
-		return jsonStr;
+		return ret;
 	}
 
 
@@ -281,26 +264,14 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= "/proxy/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String proxySystemGet(
+	@ResponseBody public DataManagerServicesResponseDTO proxySystemGet(
 			@PathVariable(value="systemName", required=true) String systemName
 		) {
 
-		List<ProxyElement> pes = proxyService.getEndpoints(systemName);
-		if (pes.size() == 0) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "System not found");
-		}
-
-		ArrayList<String> systems= new ArrayList<String>();
-		for (ProxyElement pe: pes) {
-			systems.add(pe.serviceName);
-		}
-
-		Gson gson = new Gson();
-		JsonObject answer = new JsonObject();
-		JsonElement servicelist = gson.toJsonTree(systems);
-		answer.add("services", servicelist);
-		String jsonStr = gson.toJson(answer);
-		return jsonStr;
+		DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
+		ArrayList<String> services = proxyService.getEndpointsNames(systemName);
+		ret.setServices(services);
+		return ret;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -311,69 +282,27 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(value= "/proxy/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public String proxySystemPut(
+	@ResponseBody public DataManagerServicesResponseDTO proxySystemPut(
 			@PathVariable(value="systemName", required=true) String systemName,
-			@RequestBody String requestBody
+			@RequestBody DataManagerOperationDTO req
 		) {
-		JsonParser parser= new JsonParser();
-		JsonObject obj = null;
-		try {
-			obj = parser.parse(requestBody).getAsJsonObject();
-		} catch(Exception je){
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "malformed request");
-		}
 
-		String op = obj.get("op").getAsString();
+		String op = req.getOp();
 		if(op.equals("list")){
-			List<ProxyElement> pes = proxyService.getEndpoints(systemName);
-			if (pes.size() == 0) {
-				logger.debug("proxy GET to systemName: " + systemName + " not found");
-				throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "System not found");
-			}
+			ArrayList<String> services = proxyService.getEndpointsNames(systemName);
 
-			ArrayList<String> systems= new ArrayList<String>();
-			for (ProxyElement pe: pes) {
-				systems.add(pe.serviceName);
-			}
-
-			Gson gson = new Gson();
-			JsonObject answer = new JsonObject();
-			JsonElement servicelist = gson.toJsonTree(systems);
-			answer.add("services", servicelist);
-			String jsonStr = gson.toJson(answer);
-			return jsonStr;
-		} else if(op.equals("create")){
-			String srvName = obj.get("srvName").getAsString();
-			String srvType = obj.get("srvType").getAsString();
-			logger.info("Create Service: "+srvName+" of type: "+srvType+" for: " + systemName);
-
-			/* check if service already exists */
-			ArrayList<ProxyElement> services = proxyService.getEndpoints(systemName);
-			for (ProxyElement srv: services) {
-				logger.info("PE: " + srv.serviceName);
-				if(srv.serviceName.equals(srvName)){
-					Gson gson = new Gson();
-					JsonObject answer = new JsonObject();
-					answer.addProperty("createResult", "Already exists");
-					String jsonStr = gson.toJson(answer);
-					throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "createResult: Already exists");
-				}
-			}
-
-			/* create the service */
-			boolean ret = proxyService.addEndpoint(new ProxyElement(systemName, srvName));
-			if (ret==true){
-				throw new ResponseStatusException(org.springframework.http.HttpStatus.CREATED, "createResult: Created");
-			} else { 
-				throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "createResult: Already exists");
-			}
-		} else if(op.equals("delete")){ //NOT SUPPORTED YET
-			String srvName = obj.get("srvName").getAsString();
-			String srvType = obj.get("srvType").getAsString();
-			logger.info("Delete Service: "+srvName+" of type: "+srvType+" for: " + systemName);
+			DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
+			ret.setServices(services);
+			return ret;
+		} else if(op.equals("delete")) {
+			String serviceName = req.getServiceName();
+			String serviceType = req.getServiceType();
+			logger.info("Delete Service: "+serviceName+" of type: "+serviceType+" for: " + systemName);
+			proxyService.deleteEndpoint(serviceName);
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return "";
+		throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	//-------------------------------------------------------------------------------------------------
@@ -383,23 +312,19 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(value= "/proxy/{systemName}/{serviceName}")//CommonConstants.DM_PROXY_URI)
-	@ResponseBody public String proxyServiceGet(
+	@GetMapping(value= "/proxy/{systemName}/{serviceName}")
+	@ResponseBody public Vector<SenML> proxyServiceGet(
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName
 			) {
-
 			int statusCode = 0;
 			ProxyElement pe = proxyService.getEndpoint(serviceName);
 			if (pe == null) {
 				logger.info("proxy GET to serviceName: " + serviceName + " not found");
-				throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Service not found");
+				throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND);
 			}
 
-			Iterator i = pe.msg.iterator();
-			String senml = "";
-
-			return pe.msg.toString();
+			return pe.msg;
 			}
 
 	//-------------------------------------------------------------------------------------------------
@@ -409,30 +334,30 @@ public class DataManagerController {
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PutMapping(value= "/proxy/{systemName}/{serviceName}")//CommonConstants.DM_PROXY_URI)
-	@ResponseBody public String proxyPut(
+	@PutMapping(value= "/proxy/{systemName}/{serviceName}")
+	@ResponseBody public void proxyPut(
 			@PathVariable(value="systemName", required=true) String systemName,
 			@PathVariable(value="serviceName", required=true) String serviceName,
 			@RequestBody Vector<SenML> sml
 			) {
+		if (validateSenML(sml) == false) {
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 		ProxyElement pe = proxyService.getEndpoint(serviceName);
 		if (pe == null) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Service not found");
+			boolean ret = proxyService.addEndpoint(new ProxyElement(systemName, serviceName));
+			if (ret==true){
+				throw new ResponseStatusException(org.springframework.http.HttpStatus.CREATED);
+			} else { 
+				throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT);
+			}
 		}
 
-		if (validateSenML(sml) == false) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Invalid SenML");
-		}
-
-		boolean statusCode = proxyService.updateEndpoint(systemName, serviceName, sml);
-
-		int ret = 0;
-		if (statusCode == false)
-			ret = 1;
-		String jsonret = "{\"rc\": "+ret+"}";
-		return jsonret;
+		proxyService.updateEndpoint(systemName, serviceName, sml);
 	}
-	
+
+
 	//=================================================================================================
 	// assistant methods
 
