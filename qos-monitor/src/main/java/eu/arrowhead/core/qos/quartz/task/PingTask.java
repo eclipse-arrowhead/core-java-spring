@@ -1,6 +1,5 @@
 package eu.arrowhead.core.qos.quartz.task;
 
-import java.net.UnknownHostException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,14 +192,14 @@ public class PingTask implements Job {
 		final List<IcmpPingResponse> responseList = getPingResponseList(address);
 
 		final QoSIntraMeasurement measurement = qoSDatabaseService.getMeasurement(systemResponseDTO, aroundNow);
-		handelPingMeasurement(measurement, responseList, aroundNow);
+		handlePingMeasurement(measurement, responseList, aroundNow);
 
 		qoSDatabaseService.updateMeasurement(aroundNow, measurement);
 
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void handelPingMeasurement(final QoSIntraMeasurement measurement,
+	private void handlePingMeasurement(final QoSIntraMeasurement measurement,
 			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("handelPingMeasurement started...");
 
