@@ -23,12 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponents;
-
-import com.rabbitmq.client.impl.AMQImpl.Basic.Qos;
-
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -36,15 +32,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
-import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLogDetails;
-import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository;
-import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
-import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetailsRepository;
-import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
-import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
-import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -301,182 +289,4 @@ public class PingTask implements Job {
 		return responseList;
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	private int getReceivedInThisPing(final List<IcmpPingResponse> responseList) {
-		logger.debug("getReceivedInThisPing started...");
-
-		int countReceived = 0;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			if (icmpPingResponse.getSuccessFlag()) {
-
-				++ countReceived;
-			}
-		}
-		return countReceived;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private int getSentInThisPing(final List<IcmpPingResponse> responseList) {
-		logger.debug("getSentInThisPing started...");
-
-		return responseList.size();
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private ZonedDateTime calculateLastAccessAt(final List<IcmpPingResponse> responseList, final QoSIntraPingMeasurement pingMeasurement, final ZonedDateTime aroundNow) {
-		logger.debug("calculateLastAccessAt started...");
-
-		ZonedDateTime accessedAt = null;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			if (icmpPingResponse.getSuccessFlag()) {
-				accessedAt = aroundNow;
-				break;
-			}
-		}
-
-		if (accessedAt == null) {
-			if (pingMeasurement.getLastAccessAt() == null) {
-				accessedAt = null;
-			}else {
-				accessedAt = pingMeasurement.getLastAccessAt();
-			}
-		}
-
-		return accessedAt;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private int calculateMeanResponseTimeWithoutTimeout(final List<IcmpPingResponse> responseList) {
-		logger.debug("calculateMeanResponseTime started...");
-
-		final double mean;
-		long sum = 0;
-		int count = 0;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-			if (icmpPingResponse.getSuccessFlag()) {
-				sum += icmpPingResponse.getDuration();
-				++count;
-			}
-		}
- 
-		mean = (double)sum / (double)count;
-		return (int) Math.round(mean);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private int calculateMeanResponseTimeWithTimeout(final List<IcmpPingResponse> responseList) {
-		logger.debug("calculateMeanResponseTime started...");
-
-		final double mean;
-		long sum = 0;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			if (!icmpPingResponse.getSuccessFlag()) {
-				sum += PING_TIME_OUT;
-			}else {
-				sum += icmpPingResponse.getDuration();
-			}
-		}
- 
-		mean = (double)sum / (double)responseList.size();
-		return (int) Math.round(mean);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private int calculateMinResponseTime(final List<IcmpPingResponse> responseList) {
-		logger.debug("calculateMinResponseTime started...");
-
-		int min = PING_TIME_OUT;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			if (icmpPingResponse.getSuccessFlag()) {
-				if(icmpPingResponse.getDuration() < min) {
-					min = (int) icmpPingResponse.getDuration();
-				}
-			}
-		}
- 
-		return min;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private int calculateMaxResponseTime(final List<IcmpPingResponse> responseList) {
-		logger.debug("calculateMaxResponseTime started...");
-
-		int max = 0;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			if (icmpPingResponse.getSuccessFlag()) {
-				if(icmpPingResponse.getDuration() > max) {
-					max = (int) icmpPingResponse.getDuration();
-				}
-			}
-		}
-
-		return max;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private boolean calculateAvailable(final List<IcmpPingResponse> responseList) {
-		logger.debug("calculateAvailable started...");
-
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			if (icmpPingResponse.getSuccessFlag()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private int calculateJitterWithTimeout(final List<IcmpPingResponse> responseList) {
-		logger.debug("calculateJitterWithTimeout started...");
-
-		final int meanResponseTimeWithTimeout = calculateMeanResponseTimeWithTimeout(responseList);
-		int sumOfDiffs = 0;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			final int duration;
-			if (!icmpPingResponse.getSuccessFlag()) {
-				duration = PING_TIME_OUT + 1;
-			}else {
-				duration = (int) icmpPingResponse.getDuration();
-			}
-			sumOfDiffs += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
-
-		}
-
-		final int jitter = (int) Math.sqrt(sumOfDiffs / responseList.size());
-
-		return jitter;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private int calculateJitterWithoutTimeout(final List<IcmpPingResponse> responseList) {
-		logger.debug("calculateJitterWithoutTimeout started...");
-
-		final int meanResponseTimeWithTimeout = calculateMeanResponseTimeWithoutTimeout(responseList);
-		int sumOfDiffs = 0;
-		int count = 0;
-		for (final IcmpPingResponse icmpPingResponse : responseList) {
-
-			final int duration;
-			if (icmpPingResponse.getSuccessFlag()) {
-				duration = (int) icmpPingResponse.getDuration();
-				sumOfDiffs += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
-
-				++ count;
-			}
-
-		}
-
-		final int jitter = (int) Math.sqrt(sumOfDiffs / count);
-
-		return jitter;
-	}
 }
