@@ -121,7 +121,7 @@ public class QoSDatabaseService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraPingMeasurement createPingMeasurement(final QoSIntraMeasurement measurementParam,
+	public void createPingMeasurement(final QoSIntraMeasurement measurementParam,
 	final List<IcmpPingResponse> responseList,final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("createPingMeasurement started...");
 
@@ -144,7 +144,9 @@ public class QoSDatabaseService {
 		pingMeasurement.setReceivedAll(calculations.getReceivedInThisPing());
 
 		try {
-			return qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
+
+			qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
+
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -166,7 +168,7 @@ public class QoSDatabaseService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraPingMeasurementLog logMeasurementToDB(final String address, final QoSIntraPingMeasurement pingMeasurement, final ZonedDateTime aroundNow) {
+	public QoSIntraPingMeasurementLog logMeasurementToDB(final String address, final PingMeasurementCalculationsDTO pingMeasurement, final ZonedDateTime aroundNow) {
 		logger.debug("logMeasurementToDB started...");
 
 		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
@@ -179,8 +181,8 @@ public class QoSDatabaseService {
 		measurementLog.setJitterWithoutTimeout(pingMeasurement.getJitterWithoutTimeout());
 		measurementLog.setJitterWithTimeout(pingMeasurement.getJitterWithTimeout());
 		measurementLog.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
-		measurementLog.setSent(pingMeasurement.getSent());
-		measurementLog.setReceived(pingMeasurement.getReceived());
+		measurementLog.setSent(pingMeasurement.getSentInThisPing());
+		measurementLog.setReceived(pingMeasurement.getReceivedInThisPing());
 		measurementLog.setMeasuredAt(aroundNow);
 
 		try {
@@ -228,7 +230,7 @@ public class QoSDatabaseService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraPingMeasurement updatePingMeasurement(final QoSIntraMeasurement measurement,
+	public void updatePingMeasurement(final QoSIntraMeasurement measurement,
 			final PingMeasurementCalculationsDTO calculations, final QoSIntraPingMeasurement pingMeasurement,final ZonedDateTime aroundNow) {
 		logger.debug("updatePingMeasurement started...");
 
@@ -249,7 +251,9 @@ public class QoSDatabaseService {
 		pingMeasurement.setReceivedAll(pingMeasurement.getReceivedAll() + calculations.getReceivedInThisPing());
 
 		try {
-			return qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
+
+			qoSIntraMeasurementPingRepository.saveAndFlush(pingMeasurement);
+
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

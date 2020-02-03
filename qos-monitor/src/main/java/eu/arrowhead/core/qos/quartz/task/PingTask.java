@@ -204,16 +204,15 @@ public class PingTask implements Job {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList);
-		final QoSIntraPingMeasurement pingMeasurement;
 		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional =  qoSDatabaseService.getPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
 
-			pingMeasurement = qoSDatabaseService.createPingMeasurement(measurement, responseList, calculationsDTO, aroundNow);
+			qoSDatabaseService.createPingMeasurement(measurement, responseList, calculationsDTO, aroundNow);
 
 			if(LOG_MEASUREMENT) {
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDatabaseService.logMeasurementToDB(measurement.getSystem().getAddress(), pingMeasurement, aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDatabaseService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
 				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
@@ -222,11 +221,12 @@ public class PingTask implements Job {
 			}
 
 		}else {
-			pingMeasurement = qoSDatabaseService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
+
+			qoSDatabaseService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
 			if(LOG_MEASUREMENT) {
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDatabaseService.logMeasurementToDB(measurement.getSystem().getAddress(), pingMeasurement, aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDatabaseService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
 				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
