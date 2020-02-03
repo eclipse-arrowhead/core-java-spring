@@ -3,9 +3,12 @@ package eu.arrowhead.core.qos.manager.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
@@ -17,6 +20,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSReservationDBService;
 import eu.arrowhead.core.qos.manager.QoSManager;
 import eu.arrowhead.core.qos.manager.QoSVerifier;
+import eu.arrowhead.core.qos.manager.QoSVerifiers;
 
 public class QoSManagerImpl implements QoSManager {
 	
@@ -28,10 +32,20 @@ public class QoSManagerImpl implements QoSManager {
 	@Autowired
 	private QoSReservationDBService qosReservationDBService;
 	
-	private List<QoSVerifier> verifiers = List.of(); // TODO: add verifier here
+	@Autowired
+	private ApplicationContext appContext;
+	
+	private List<QoSVerifier> verifiers = new ArrayList<>(2);
 
 	//=================================================================================================
 	// methods
+	
+	//-------------------------------------------------------------------------------------------------
+	@PostConstruct
+	public void init() {
+		verifiers.add(appContext.getBean(QoSVerifiers.SERVICE_TIME_VERIFIER, QoSVerifier.class));
+		//TODO: add verifiers here
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

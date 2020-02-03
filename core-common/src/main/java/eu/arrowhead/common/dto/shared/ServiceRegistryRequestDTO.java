@@ -9,6 +9,8 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 	
+	public static final String KEY_RECOMMENDED_ORCHESTRATION_TIME = "recommendedOrchestrationTime"; // in seconds
+	
 	private static final long serialVersionUID = -3805773665976065056L;
 	
 	private String serviceDefinition;
