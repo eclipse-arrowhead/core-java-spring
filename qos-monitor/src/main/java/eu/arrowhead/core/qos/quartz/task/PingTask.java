@@ -131,6 +131,7 @@ public class PingTask implements Job {
 				}
 
 				sumOfDurationForMeanResponseTimeWithoutTimeout += duration;
+				sumOfDurationForMeanResponseTimeWithTimeout += duration;
 				++meanResponseTimeWithoutTimeoutMembersCount;
 
 			}else {
