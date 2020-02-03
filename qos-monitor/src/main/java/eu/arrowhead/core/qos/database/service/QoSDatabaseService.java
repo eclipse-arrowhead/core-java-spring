@@ -9,10 +9,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.icmp4j.IcmpPingResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
@@ -23,9 +28,13 @@ import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.internal.DTOConverter;
+import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 
 @Service
@@ -33,6 +42,15 @@ public class QoSDatabaseService {
 
 	//=================================================================================================
 	// members
+
+	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
+	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field  is not available.";
+	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
+	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
+	private static final String NULL_ERROR_MESSAGE = " is null";
+	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
+	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
+	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 
 	@Autowired
 	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
@@ -106,7 +124,7 @@ public class QoSDatabaseService {
 
 			system = systemOptional.get();
 		}else {
-			throw new ArrowheadException("Requested system is not in DB");
+			throw new ArrowheadException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
 		}
 
 		final QoSIntraMeasurement measurement;
@@ -269,6 +287,80 @@ public class QoSDatabaseService {
 		measurement.setLastMeasurementAt(aroundNow);
 		try {
 			qoSIntraMeasurementRepository.saveAndFlush(measurement);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public PingMeasurementListResponseDTO getPingMeasurementResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getPingMeasurementResponse started...");
+
+		return DTOConverter.convertQoSIntraPingMeasurementPageToPingMeasurementListResponseDTO(getPingMeasurementPage(page, size, direction, sortField));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public Page<QoSIntraPingMeasurement> getPingMeasurementPage(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getPingMeasurementPage started...");
+
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+
+		if (!QoSIntraPingMeasurement.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException(validatedSortField + NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE);
+		}
+
+		try {
+			return qoSIntraMeasurementPingRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public PingMeasurementResponseDTO getPingMeasurementBySystemIdResponse(final long id) {
+		logger.debug("getPingMeasurementBySystemIdResponse started ...");
+
+		return DTOConverter.convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(getPingMeasurementById(id));
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public QoSIntraPingMeasurement getPingMeasurementById(final long id) {
+		logger.debug("getPingMeasurementById started ...");
+
+		if (id < 1) {
+			throw new InvalidParameterException("SubscriberSystemId" + LESS_THAN_ONE_ERROR_MESSAGE);
+		}
+
+		final System system;
+		final Optional<System> systemOptional = systemRepository.findById(id);
+		if (systemOptional.isPresent()) {
+			system = systemOptional.get();
+		}else {
+			throw new ArrowheadException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
+		}
+
+		final QoSIntraMeasurement measurement;
+		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+		if (qoSIntraMeasurementOptional.isEmpty()) {
+			throw new InvalidParameterException("QoSIntraMeasurement with system id of '" + id + "' not exists");
+		}else {
+			 measurement = qoSIntraMeasurementOptional.get();
+		}
+
+		try {
+			final Optional<QoSIntraPingMeasurement> measurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
+			if (measurementOptional.isPresent()) {
+				return measurementOptional.get();
+			} else {
+				throw new InvalidParameterException("PingMeasurement with id of '" + id + "' not exists");
+			}
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

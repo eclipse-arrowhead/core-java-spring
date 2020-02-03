@@ -110,6 +110,7 @@ public class CommonConstants {
 	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
 	
 	public static final String QOS_MONITOR_URI = "/qosmonitor";
+	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
