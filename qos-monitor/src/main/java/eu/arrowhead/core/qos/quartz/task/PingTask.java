@@ -1,5 +1,6 @@
 package eu.arrowhead.core.qos.quartz.task;
 
+import java.net.UnknownHostException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -279,11 +280,22 @@ public class PingTask implements Job {
 			request.setPacketSize(PING_POCKET_SIZE);
 
 			for (int count = 0; count < TIMES_TO_REPEAT; count ++) {
-				final IcmpPingResponse response = IcmpPingUtil.executePingRequest (request);
-				final String formattedResponse = IcmpPingUtil.formatResponse (response);
-				logger.debug(formattedResponse);
+				IcmpPingResponse response;
+				try {
+					response = IcmpPingUtil.executePingRequest (request);
+					final String formattedResponse = IcmpPingUtil.formatResponse (response);
+					logger.debug(formattedResponse);
 
-				responseList.add(response);
+					responseList.add(response);
+				} catch (final Exception ex) {
+					response = new IcmpPingResponse();
+					response.setErrorMessage(ex.getMessage());
+					response.setSuccessFlag(false);
+					response.setThrowable(ex);
+
+					responseList.add(response);
+				}
+
 				Thread.sleep (REST_BETWEEN_PINGS_MILLSEC);
 			}
 		} catch ( final InterruptedException | IllegalArgumentException ex) {
