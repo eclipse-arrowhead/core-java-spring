@@ -50,6 +50,7 @@ public class PingTask implements Job {
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 	private static final int TIMES_TO_REPEAT = 35;
 	private static final int PING_TIME_OUT = 5000;
+	private static final int PING_POCKET_SIZE = 32;
 	private static final int REST_BETWEEN_PINGS_MILLSEC = 1000;
 
 	private static final boolean LOG_MEASUREMENT = true;
@@ -150,12 +151,12 @@ public class PingTask implements Job {
 			final double duration;
 			if (successFlag) {
 				 duration = icmpPingResponse.getDuration();
-				 sumOfDiffsForJitterWithoutTimeout += Math.pow(duration, meanResponseTimeWithoutTimeout);
+				 sumOfDiffsForJitterWithoutTimeout += Math.pow( (duration - meanResponseTimeWithoutTimeout), 2);
 			}else {
 				duration = PING_TIME_OUT + 1;
 			}
 
-			sumOfDiffsForJitterWithTimeout += Math.pow(duration, meanResponseTimeWithTimeout);
+			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
 		double jitterWithTimeout = Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
 		double jitterWithoutTimeout =  Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
@@ -273,6 +274,8 @@ public class PingTask implements Job {
 		try {
 			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest ();
 			request.setHost (address);
+			request.setTimeout(PING_TIME_OUT);
+			request.setPacketSize(PING_POCKET_SIZE);
 
 			for (int count = 0; count < TIMES_TO_REPEAT; count ++) {
 				final IcmpPingResponse response = IcmpPingUtil.executePingRequest (request);
