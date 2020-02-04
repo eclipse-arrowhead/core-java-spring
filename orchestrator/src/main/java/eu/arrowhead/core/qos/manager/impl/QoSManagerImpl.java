@@ -44,6 +44,7 @@ public class QoSManagerImpl implements QoSManager {
 	@PostConstruct
 	public void init() {
 		verifiers.add(appContext.getBean(QoSVerifiers.SERVICE_TIME_VERIFIER, QoSVerifier.class));
+		verifiers.add(appContext.getBean(QoSVerifiers.PING_REQUIREMENTS_VERIFIER, QoSVerifier.class));
 		//TODO: add verifiers here
 	}
 
