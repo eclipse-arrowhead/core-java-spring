@@ -281,7 +281,7 @@ public class PingTask implements Job {
 			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest ();
 			request.setHost (address);
 			request.setTimeout(pingMeasurementProperties.getTimeout());
-			request.setPacketSize(pingMeasurementProperties.getPocketSize());
+			request.setPacketSize(pingMeasurementProperties.getPacketSize());
 
 			for (int count = 0; count < pingMeasurementProperties.getTimeToRepeat(); count ++) {
 				IcmpPingResponse response;

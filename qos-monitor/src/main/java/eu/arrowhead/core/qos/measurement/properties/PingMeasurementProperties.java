@@ -12,7 +12,7 @@ public class PingMeasurementProperties {
 
 	private int timeToRepeat;
 	private int timeout;
-	private int pocketSize;
+	private int packetSize;
 	private int rest;
 
 	//=================================================================================================
@@ -26,20 +26,20 @@ public class PingMeasurementProperties {
 
 		this.timeToRepeat = timeToRepeat;
 		this.timeout = timeout;
-		this.pocketSize = pocketSize;
+		this.packetSize = pocketSize;
 		this.rest = rest;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public int getTimeToRepeat() { return timeToRepeat; }
 	public int getTimeout() { return timeout; }
-	public int getPocketSize() { return pocketSize; }
+	public int getPacketSize() { return packetSize; }
 	public int getRest() { return rest; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setTimeToRepeat(final int timeToRepeat) { this.timeToRepeat = timeToRepeat; }
 	public void setTimeout(final int timeout) { this.timeout = timeout; }
-	public void setPocketSize(final int pocketSize) { this.pocketSize = pocketSize; }
+	public void setPacketSize(final int packetSize) { this.packetSize = packetSize; }
 	public void setRest(final int rest) { this.rest = rest; }
 
 }

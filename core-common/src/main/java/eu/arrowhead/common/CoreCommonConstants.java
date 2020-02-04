@@ -155,10 +155,10 @@ public class CoreCommonConstants {
 	public static final String $EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD = "${" + EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + "}";
 	public static final String EVENT_PUBLISHING_EXPRESS_EXECUTOR = "eventPublishingExpressExecutor";
 
-	public static final String PING_TTL_INTERVAL = "ping_ttl_interval";
+	public static final String PING_TTL_INTERVAL = "ping_ttl_interval_minutes";
 	public static final String $PING_TTL_INTERVAL_WD = "${" + PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_PING_TTL_INTERVAL_MINUTES + "}";
 	
-	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval";
+	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval_minutes";
 	public static final String $CLOUD_PING_TTL_INTERVAL_WD = "${" + CLOUD_PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES + "}";
 
 	//=================================================================================================
