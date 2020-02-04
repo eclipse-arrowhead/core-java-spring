@@ -13,7 +13,7 @@ RELAY_HOST=${5}
 RELAY_IP=${6}
 
 RELAY_STORE="${RELAY_NAME}/${RELAY_NAME}.p12"
-RELAY_TRUSTSTORE="${RELAY_NAME}/${RELAY_NAME}-truststore.p12"
+RELAY_TRUSTSTORE="${RELAY_NAME}/${RELAY_NAME}_truststore.p12"
 
 echo "Generating certificate for '${RELAY_NAME}'" >&2
 mkdir ${RELAY_NAME}
