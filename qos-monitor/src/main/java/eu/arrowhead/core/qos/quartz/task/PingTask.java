@@ -75,6 +75,11 @@ public class PingTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: ping  task");
 
+		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
+
+			return;
+		}
+
 		final Set<SystemResponseDTO> systems = getSystemsToMeasure();
 		for (final SystemResponseDTO systemResponseDTO : systems) {
 
