@@ -38,7 +38,7 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.qos.database.service.QoSDatabaseService;
+import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 
@@ -59,7 +59,7 @@ public class PingTask implements Job {
 	private PingMeasurementProperties pingMeasurementProperties;
 
 	@Autowired
-	private QoSDatabaseService qoSDatabaseService;
+	private QoSDBService qoSDBService;
 
 	@Autowired
 	private HttpService httpService;
@@ -191,10 +191,10 @@ public class PingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = getPingResponseList(address);
 
-		final QoSIntraMeasurement measurement = qoSDatabaseService.getMeasurement(systemResponseDTO, aroundNow);
+		final QoSIntraMeasurement measurement = qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
 		handlePingMeasurement(measurement, responseList, aroundNow);
 
-		qoSDatabaseService.updateMeasurement(aroundNow, measurement);
+		qoSDBService.updateMeasurement(aroundNow, measurement);
 
 	}
 
@@ -204,33 +204,33 @@ public class PingTask implements Job {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList);
-		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional =  qoSDatabaseService.getPingMeasurementByMeasurement(measurement);
+		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional =  qoSDBService.getPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
 
-			qoSDatabaseService.createPingMeasurement(measurement, responseList, calculationsDTO, aroundNow);
+			qoSDBService.createPingMeasurement(measurement, responseList, calculationsDTO, aroundNow);
 
 			if(LOG_MEASUREMENT) {
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDatabaseService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
 				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
-					qoSDatabaseService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
 
 		}else {
 
-			qoSDatabaseService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
+			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
 			if(LOG_MEASUREMENT) {
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDatabaseService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
 				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
-					qoSDatabaseService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
 		}

@@ -9,7 +9,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import eu.arrowhead.core.qos.database.service.QoSDatabaseService;
+import eu.arrowhead.core.qos.database.service.QoSDBService;
 
 @Component
 @DisallowConcurrentExecution
@@ -21,7 +21,7 @@ public class CountRestarterTask implements Job {
 	protected Logger logger = LogManager.getLogger(CountRestarterTask.class);
 
 	@Autowired
-	private QoSDatabaseService qoSDatabaseService;
+	private QoSDBService qoSDBService;
 
 	//=================================================================================================
 	// methods
@@ -31,7 +31,7 @@ public class CountRestarterTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: count restarter task");
 
-		qoSDatabaseService.updateCountStartedAt();
+		qoSDBService.updateCountStartedAt();
 
 		logger.debug("Finished: count restarter task");
 	}

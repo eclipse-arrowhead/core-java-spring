@@ -38,7 +38,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 
 @Service
-public class QoSDatabaseService {
+public class QoSDBService {
 
 	//=================================================================================================
 	// members
@@ -62,7 +62,7 @@ public class QoSDatabaseService {
 	@Autowired
 	private SystemRepository systemRepository;
 
-	protected Logger logger = LogManager.getLogger(QoSDatabaseService.class);
+	protected Logger logger = LogManager.getLogger(QoSDBService.class);
 	//=================================================================================================
 	// methods
 

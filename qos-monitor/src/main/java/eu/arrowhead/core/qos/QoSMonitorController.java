@@ -24,7 +24,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
-import eu.arrowhead.core.qos.database.service.QoSDatabaseService;
+import eu.arrowhead.core.qos.database.service.QoSDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -62,7 +62,7 @@ public class QoSMonitorController {
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 
 	@Autowired
-	private QoSDatabaseService qoSDatabaseService;
+	private QoSDBService qoSDBService;
 
 	private final Logger logger = LogManager.getLogger(QoSMonitorController.class);
 
@@ -100,7 +100,7 @@ public class QoSMonitorController {
 		logger.debug("New getMeasurements get request recieved with page: {} and item_per page: {}", page, size);
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI);
-		final PingMeasurementListResponseDTO measurementResponse = qoSDatabaseService.getPingMeasurementResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+		final PingMeasurementListResponseDTO measurementResponse = qoSDBService.getPingMeasurementResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																												 validParameters.getValidatedDirecion(), sortField);
 
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -124,7 +124,7 @@ public class QoSMonitorController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
-		final eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO pingMeasurementResponse = qoSDatabaseService.getPingMeasurementBySystemIdResponse(id);
+		final eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO pingMeasurementResponse = qoSDBService.getPingMeasurementBySystemIdResponse(id);
 
 		logger.debug("PingMeasurement entry with system id: {} successfully retrieved", id);
 		return pingMeasurementResponse;
@@ -147,7 +147,7 @@ public class QoSMonitorController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
-		final PingMeasurementResponseDTO pingMeasurementResponse = qoSDatabaseService.getPingMeasurementBySystemIdResponse(id);
+		final PingMeasurementResponseDTO pingMeasurementResponse = qoSDBService.getPingMeasurementBySystemIdResponse(id);
 
 		logger.debug("PingMeasurement entry with system id: {} successfully retrieved", id);
 		return pingMeasurementResponse;
