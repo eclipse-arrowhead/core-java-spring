@@ -4,17 +4,12 @@ import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-
-import eu.arrowhead.common.CoreDefaults;
-import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 
 @Entity
 @Table(name = "qos_intra_ping_measurement_log")
@@ -114,6 +109,6 @@ public class QoSIntraPingMeasurementLog {
 	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
 	public void setSent(final long sent) { this.sent = sent; }
 	public void setReceived(final long received) { this.received = received; }
-	public void setMeasuredAt(ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
+	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
 
 }
