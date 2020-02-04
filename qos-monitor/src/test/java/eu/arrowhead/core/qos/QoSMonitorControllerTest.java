@@ -87,7 +87,7 @@ public class QoSMonitorControllerTest {
 	public void echoTest() throws Exception {
 		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.ECHO_URI)
 					.accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk());		
+					.andExpect(status().isOk());
 	}
 
 	//=================================================================================================
