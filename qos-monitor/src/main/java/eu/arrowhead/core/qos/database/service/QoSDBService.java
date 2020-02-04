@@ -366,7 +366,8 @@ public class QoSDBService {
 				return measurementOptional.get();
 
 			} else {
-				throw new InvalidParameterException("PingMeasurement with system id of '" + id + "' not exists");
+
+				return null;
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
