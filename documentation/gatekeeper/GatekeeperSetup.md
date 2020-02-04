@@ -93,11 +93,11 @@ After you have the necessary certificate and trust store you have to install the
     <sslContext keyStore="file:${activemq.base}/conf/relay1.p12"
                 keyStorePassword="123456"
                 keyStoreKeyPassword="123456"
-                trustStore="file:${activemq.base}/conf/relay-truststore.p12"
+                trustStore="file:${activemq.base}/conf/relay1_truststore.p12"
                 trustStorePassword="123456" />
  </sslContext>
 ```
-- In the lines above we assume that the certificate file named `relay1.p12`, the trust store file named `relay-truststore.p12` and all the passwords are `123456`. If this is not true, please adjust the settings accordingly.
+- In the lines above we assume that the certificate file named `relay1.p12`, the trust store file named `relay1_truststore.p12` and all the passwords are `123456`. If this is not true, please adjust the settings accordingly.
 
 #### 1.2.3 Configuring transport connector
 
