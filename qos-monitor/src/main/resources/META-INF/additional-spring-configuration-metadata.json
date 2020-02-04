@@ -48,5 +48,15 @@
     "name": "ping_ttl_interval",
     "type": "java.lang.String",
     "description": "A description for 'ping_ttl_interval'"
+  },
+  {
+    "name": "ping.pocket_size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'ping.pocket_size'"
+  },
+  {
+    "name": "ping.time_to_repeat",
+    "type": "java.lang.Integer",
+    "description": "A description for 'ping.time_to_repeat'"
   }
 ]}

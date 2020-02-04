@@ -46,11 +46,6 @@ public class QoSDatabaseService {
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
 	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field  is not available.";
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
-	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
-	private static final String NULL_ERROR_MESSAGE = " is null";
-	private static final String VIOLATES_UNIQUE_CONSTRAINT = " violates uniqueConstraint rules";
-	private static final String IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE = " is further in the past than the tolerated time difference";
-	private static final String INVALID_TYPE_ERROR_MESSAGE = " is not valid.";
 
 	@Autowired
 	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
@@ -220,10 +215,12 @@ public class QoSDatabaseService {
 
 		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = new ArrayList<>(responseList.size());
 
+		int measurementSequenece = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
 			final QoSIntraPingMeasurementLogDetails measurementLogDetails = new QoSIntraPingMeasurementLogDetails();
 			measurementLogDetails.setMeasurementLog(measurementLogSaved);
+			measurementLogDetails.setMeasurementSequeneceNumber( measurementSequenece++ );
 			measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
 			measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
 			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
@@ -325,12 +322,12 @@ public class QoSDatabaseService {
 	public PingMeasurementResponseDTO getPingMeasurementBySystemIdResponse(final long id) {
 		logger.debug("getPingMeasurementBySystemIdResponse started ...");
 
-		return DTOConverter.convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(getPingMeasurementById(id));
+		return DTOConverter.convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(getPingMeasurementBySystemId(id));
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSIntraPingMeasurement getPingMeasurementById(final long id) {
-		logger.debug("getPingMeasurementById started ...");
+	public QoSIntraPingMeasurement getPingMeasurementBySystemId(final long id) {
+		logger.debug("getPingMeasurementBySystemId started ...");
 
 		if (id < 1) {
 			throw new InvalidParameterException("SubscriberSystemId" + LESS_THAN_ONE_ERROR_MESSAGE);
@@ -355,9 +352,11 @@ public class QoSDatabaseService {
 		try {
 			final Optional<QoSIntraPingMeasurement> measurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
 			if (measurementOptional.isPresent()) {
+
 				return measurementOptional.get();
+
 			} else {
-				throw new InvalidParameterException("PingMeasurement with id of '" + id + "' not exists");
+				throw new InvalidParameterException("PingMeasurement with system id of '" + id + "' not exists");
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
