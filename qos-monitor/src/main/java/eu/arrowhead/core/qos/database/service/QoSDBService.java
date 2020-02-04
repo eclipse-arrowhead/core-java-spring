@@ -322,7 +322,16 @@ public class QoSDBService {
 	public PingMeasurementResponseDTO getPingMeasurementBySystemIdResponse(final long id) {
 		logger.debug("getPingMeasurementBySystemIdResponse started ...");
 
-		return DTOConverter.convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(getPingMeasurementBySystemId(id));
+		final QoSIntraPingMeasurement pingMeausrement = getPingMeasurementBySystemId(id);
+		if (pingMeausrement == null ) {
+
+			final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+			response.setId( null );
+
+			return response;
+		}
+
+		return DTOConverter.convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(pingMeausrement);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -344,7 +353,8 @@ public class QoSDBService {
 		final QoSIntraMeasurement measurement;
 		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
 		if (qoSIntraMeasurementOptional.isEmpty()) {
-			throw new InvalidParameterException("QoSIntraMeasurement with system id of '" + id + "' not exists");
+
+			return null;
 		}else {
 			 measurement = qoSIntraMeasurementOptional.get();
 		}

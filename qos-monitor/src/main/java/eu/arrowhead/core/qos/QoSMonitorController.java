@@ -124,9 +124,17 @@ public class QoSMonitorController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
-		final eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO pingMeasurementResponse = qoSDBService.getPingMeasurementBySystemIdResponse(id);
+		final PingMeasurementResponseDTO pingMeasurementResponse = qoSDBService.getPingMeasurementBySystemIdResponse(id);
 
-		logger.debug("PingMeasurement entry with system id: {} successfully retrieved", id);
+		if (pingMeasurementResponse.getId() == null) {
+
+			logger.debug("PingMeasurement entry with system id: {} is not available.", id);
+
+		}else {
+
+			logger.debug("PingMeasurement entry with system id: {} successfully retrieved.", id);
+		}
+
 		return pingMeasurementResponse;
 	}
 

@@ -10,7 +10,7 @@ public class PingMeasurementResponseDTO  implements Serializable {
 
 	private static final long serialVersionUID = 4436693629791850816L;
 
-	private long id;
+	private Long id;
 	private QoSIntraMeasurementResponseDTO measurement;
 	private boolean available = false;
 	private ZonedDateTime lastAccessAt;
@@ -36,7 +36,7 @@ public class PingMeasurementResponseDTO  implements Serializable {
 	public PingMeasurementResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public long getId() { return id; }
+	public Long getId() { return id; }
 	public QoSIntraMeasurementResponseDTO getMeasurement() { return measurement; }
 	public boolean isAvailable() {return available; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
@@ -56,7 +56,7 @@ public class PingMeasurementResponseDTO  implements Serializable {
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setId(final long id) { this.id = id; }
+	public void setId(final Long id) { this.id = id; }
 	public void setMeasurement(final QoSIntraMeasurementResponseDTO measurement) { this.measurement = measurement; }
 	public void setAvailable(final boolean available) { this.available = available; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
