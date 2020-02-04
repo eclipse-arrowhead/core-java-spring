@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -30,6 +31,13 @@ public class ServiceTimeVerifier implements QoSVerifier {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public boolean verify(final OrchestrationResultDTO result, final Map<String,String> qosRequirements, final Map<String,String> commands) {
+		logger.debug("verify started...");
+		Assert.notNull(result, "'result' is null.");
+		Assert.notNull(result.getMetadata(), "'result.getMetadata()' is null.");
+		Assert.notNull(result.getWarnings(), "'result.getWarnings()' is null.");
+		Assert.notNull(commands, "'commands' is null.");
+		
+		
 		int recommendedTime = -1; // no restrictions
 		if (result.getMetadata().containsKey(ServiceRegistryRequestDTO.KEY_RECOMMENDED_ORCHESTRATION_TIME)) {
 			try {
