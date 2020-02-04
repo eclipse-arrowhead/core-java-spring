@@ -90,9 +90,9 @@ public class QoSMonitorControllerTest {
 		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isOk())
-				   .andReturn();
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andReturn();
 
 		final PingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementResponseDTO.class);
 		assertEquals(requestedId, responseBody.getId());
