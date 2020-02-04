@@ -29,6 +29,9 @@ public class QoSIntraPingMeasurementLogDetails {
 	@JoinColumn(name = "measurement_log_id", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSIntraPingMeasurementLog measurementLog;
 
+	@Column(name = "measurement_sequenece_number", nullable = false)
+	private int measurementSequeneceNumber;
+
 	@Column(name = "success_flag", nullable = false)
 	private boolean successFlag = false;
 
@@ -83,6 +86,7 @@ public class QoSIntraPingMeasurementLogDetails {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSIntraPingMeasurementLog getMeasurementLog() { return measurementLog; }
+	public int getMeasurementSequeneceNumber() { return measurementSequeneceNumber; }
 	public boolean isSuccessFlag() { return successFlag; }
 	public boolean isTimeoutFlag() { return timeoutFlag; }
 	public String getErrorMessage() { return errorMessage; }
@@ -94,15 +98,16 @@ public class QoSIntraPingMeasurementLogDetails {
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setMeasurementLog(QoSIntraPingMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
-	public void setSuccessFlag(boolean successFlag) { this.successFlag = successFlag; }
-	public void setTimeoutFlag(boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
-	public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
-	public void setThrowable(String throwable) { this.throwable = throwable; }
-	public void setSize(Integer size) { this.size = size; }
-	public void setRtt(Integer rtt) { this.rtt = rtt; }
-	public void setTtl(Integer ttl) { this.ttl = ttl; }
-	public void setDuration(Integer duration) { this.duration = duration; }
-	public void setMeasuredAt(ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
+	public void setMeasurementLog(final QoSIntraPingMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
+	public void setMeasurementSequeneceNumber(final int measurementSequeneceNumber) { this.measurementSequeneceNumber = measurementSequeneceNumber; }
+	public void setSuccessFlag(final boolean successFlag) { this.successFlag = successFlag; }
+	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
+	public void setErrorMessage(final String errorMessage) { this.errorMessage = errorMessage; }
+	public void setThrowable(final String throwable) { this.throwable = throwable; }
+	public void setSize(final Integer size) { this.size = size; }
+	public void setRtt(final Integer rtt) { this.rtt = rtt; }
+	public void setTtl(final Integer ttl) { this.ttl = ttl; }
+	public void setDuration(final Integer duration) { this.duration = duration; }
+	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
 
 }

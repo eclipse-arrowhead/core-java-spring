@@ -40,6 +40,7 @@ import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDatabaseService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
+import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
 
 @Component
 @DisallowConcurrentExecution
@@ -48,15 +49,14 @@ public class PingTask implements Job {
 	//=================================================================================================
 	// members
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-	private static final int TIMES_TO_REPEAT = 35;
-	private static final int PING_TIME_OUT = 5000;
-	private static final int PING_POCKET_SIZE = 32;
-	private static final int REST_BETWEEN_PINGS_MILLSEC = 1000;
 
 	private static final boolean LOG_MEASUREMENT = true;
 	private static final boolean LOG_MEASUREMENT_DETAILS = true;
 
 	protected Logger logger = LogManager.getLogger(PingTask.class);
+
+	@Autowired
+	private PingMeasurementProperties pingMeasurementProperties;
 
 	@Autowired
 	private QoSDatabaseService qoSDatabaseService;
@@ -99,7 +99,7 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementCalculationsDTO calculatePingMeasurementValues(List<IcmpPingResponse> responseList) {
+	private PingMeasurementCalculationsDTO calculatePingMeasurementValues(final List<IcmpPingResponse> responseList) {
 		logger.debug("calculatePingMeasurementValues started...");
 
 		final int sentInThisPing = responseList.size();
@@ -116,7 +116,7 @@ public class PingTask implements Job {
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
 			final boolean successFlag = icmpPingResponse.getSuccessFlag();
-			
+
 			if (successFlag) {
 				available = true;
 				++receivedInThisPing;
@@ -135,11 +135,11 @@ public class PingTask implements Job {
 				++meanResponseTimeWithoutTimeoutMembersCount;
 
 			}else {
-				sumOfDurationForMeanResponseTimeWithTimeout += PING_TIME_OUT;
+				sumOfDurationForMeanResponseTimeWithTimeout += pingMeasurementProperties.getTimeout();
 			}
 		}
 
-		int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
+		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
 
 		final double meanResponseTimeWithTimeout = sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
 		final double meanResponseTimeWithoutTimeout = sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
@@ -154,13 +154,13 @@ public class PingTask implements Job {
 				 duration = icmpPingResponse.getDuration();
 				 sumOfDiffsForJitterWithoutTimeout += Math.pow( (duration - meanResponseTimeWithoutTimeout), 2);
 			}else {
-				duration = PING_TIME_OUT + 1;
+				duration = pingMeasurementProperties.getTimeout() + 1;
 			}
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
-		double jitterWithTimeout = Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
-		double jitterWithoutTimeout =  Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
+		final double jitterWithTimeout = Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
+		final double jitterWithoutTimeout =  Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
 
 		final PingMeasurementCalculationsDTO calculations = new PingMeasurementCalculationsDTO();
 		calculations.setAvailable(available);
@@ -271,14 +271,14 @@ public class PingTask implements Job {
 	private List<IcmpPingResponse> getPingResponseList(final String address) {
 		logger.debug("getPingResponseList started...");
 
-		final List<IcmpPingResponse> responseList = new ArrayList<>(TIMES_TO_REPEAT);
+		final List<IcmpPingResponse> responseList = new ArrayList<>(pingMeasurementProperties.getTimeToRepeat());
 		try {
 			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest ();
 			request.setHost (address);
-			request.setTimeout(PING_TIME_OUT);
-			request.setPacketSize(PING_POCKET_SIZE);
+			request.setTimeout(pingMeasurementProperties.getTimeout());
+			request.setPacketSize(pingMeasurementProperties.getPocketSize());
 
-			for (int count = 0; count < TIMES_TO_REPEAT; count ++) {
+			for (int count = 0; count < pingMeasurementProperties.getTimeToRepeat(); count ++) {
 				IcmpPingResponse response;
 				try {
 					response = IcmpPingUtil.executePingRequest (request);
@@ -295,7 +295,7 @@ public class PingTask implements Job {
 					responseList.add(response);
 				}
 
-				Thread.sleep (REST_BETWEEN_PINGS_MILLSEC);
+				Thread.sleep (pingMeasurementProperties.getRest());
 			}
 		} catch ( final InterruptedException | IllegalArgumentException ex) {
 			logger.debug("" + ex.getMessage());

@@ -392,6 +392,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log` (
 CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`measurement_log_id` bigint(20) NOT NULL,
+	`measurement_sequenece_number` int(3) NOT NULL,
 	`success_flag` int(1) NOT NULL DEFAULT 0,
 	`timeout_flag` int(1) NOT NULL DEFAULT 0,
 	`error_message` varchar(255) NOT NULL,
