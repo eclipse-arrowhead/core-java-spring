@@ -31,6 +31,7 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -393,6 +394,42 @@ public class OrchestratorDriverTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testDoInterCloudNegotiationsNullRequest() {
 		orchestratorDriver.doInterCloudNegotiation(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPingMeasurementUriNotFound() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(false);
+		
+		orchestratorDriver.getPingMeasurement(1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPingMeasurementUriWrongType() {
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn("invalid");
+		
+		orchestratorDriver.getPingMeasurement(1);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPingMeasurementOk() {
+		final int systemId = 23;
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + 
+				 									  CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX).expand(systemId);
+		Assert.assertTrue(uri.toString().contains("/ping/measurement/23"));
+		
+		final PingMeasurementResponseDTO responseDTO = new PingMeasurementResponseDTO();
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(PingMeasurementResponseDTO.class))).thenReturn(new ResponseEntity<PingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final PingMeasurementResponseDTO result = orchestratorDriver.getPingMeasurement(systemId);
+		
+		Assert.assertNotNull(result);
+		Assert.assertFalse(result.hasRecord());
 	}
 	
 	//=================================================================================================
