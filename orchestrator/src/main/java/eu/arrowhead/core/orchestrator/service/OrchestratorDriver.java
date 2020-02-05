@@ -362,7 +362,7 @@ public class OrchestratorDriver {
 				tokenDuration = Integer.parseInt(result.getMetadata().get(KEY_CALCULATED_SERVICE_TIME_FRAME));
 			} catch (final NumberFormatException ex) {
 				logger.debug(ex.getMessage());
-				logger.trace("Stacktracke:", ex);
+				logger.trace("Stacktrace:", ex);
 			}
 		}
 		

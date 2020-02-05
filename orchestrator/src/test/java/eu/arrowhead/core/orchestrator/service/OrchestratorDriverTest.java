@@ -5,18 +5,21 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
@@ -166,6 +169,89 @@ public class OrchestratorDriverTest {
 		orchestratorDriver.generateAuthTokens(request, List.of(dto));
 		
 		Assert.assertEquals("ABCDE", dto.getAuthorizationTokens().get(dto.getInterfaces().get(0).getInterfaceName()));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateAuthTokensTokenNoCalculatedServiceTimeFrame() {
+		ReflectionTestUtils.setField(orchestratorDriver, "tokenDuration", 1001);
+		
+		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		final UriComponents tokenUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8445, "/token");
+		final Map<String,String> tokenMap = Map.of(dto.getInterfaces().get(0).getInterfaceName(), "ABCDE");
+		final TokenDataDTO tokenDataDTO = new TokenDataDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(dto.getProvider()), tokenMap);
+		final TokenGenerationResponseDTO responseDTO = new TokenGenerationResponseDTO();
+		responseDTO.setTokenData(List.of(tokenDataDTO));
+
+		final ArgumentCaptor<TokenGenerationRequestDTO> captor = ArgumentCaptor.forClass(TokenGenerationRequestDTO.class);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(tokenUri);
+		when(httpService.sendRequest(eq(tokenUri), eq(HttpMethod.POST), eq(TokenGenerationResponseDTO.class), captor.capture())).
+																												thenReturn(new ResponseEntity<TokenGenerationResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(new SystemRequestDTO());
+		
+		orchestratorDriver.generateAuthTokens(request, List.of(dto));
+		
+		final TokenGenerationRequestDTO requestDTO = captor.getValue();
+		Assert.assertEquals(1001, requestDTO.getProviders().get(0).getTokenDuration());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateAuthTokensTokenInvalidCalculatedServiceTimeFrame() {
+		ReflectionTestUtils.setField(orchestratorDriver, "tokenDuration", 1000);
+		
+		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		dto.getMetadata().put(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME, "300invalid");
+		final UriComponents tokenUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8445, "/token");
+		final Map<String,String> tokenMap = Map.of(dto.getInterfaces().get(0).getInterfaceName(), "ABCDE");
+		final TokenDataDTO tokenDataDTO = new TokenDataDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(dto.getProvider()), tokenMap);
+		final TokenGenerationResponseDTO responseDTO = new TokenGenerationResponseDTO();
+		responseDTO.setTokenData(List.of(tokenDataDTO));
+
+		final ArgumentCaptor<TokenGenerationRequestDTO> captor = ArgumentCaptor.forClass(TokenGenerationRequestDTO.class);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(tokenUri);
+		when(httpService.sendRequest(eq(tokenUri), eq(HttpMethod.POST), eq(TokenGenerationResponseDTO.class), captor.capture())).
+																												thenReturn(new ResponseEntity<TokenGenerationResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(new SystemRequestDTO());
+		
+		orchestratorDriver.generateAuthTokens(request, List.of(dto));
+		
+		final TokenGenerationRequestDTO requestDTO = captor.getValue();
+		Assert.assertEquals(1000, requestDTO.getProviders().get(0).getTokenDuration());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGenerateAuthTokensTokenValidCalculatedServiceTimeFrame() {
+		ReflectionTestUtils.setField(orchestratorDriver, "tokenDuration", 1000);
+		
+		final OrchestrationResultDTO dto = getOrchestrationResultDTO(1);
+		dto.getMetadata().put(OrchestratorDriver.KEY_CALCULATED_SERVICE_TIME_FRAME, "300");
+		final UriComponents tokenUri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8445, "/token");
+		final Map<String,String> tokenMap = Map.of(dto.getInterfaces().get(0).getInterfaceName(), "ABCDE");
+		final TokenDataDTO tokenDataDTO = new TokenDataDTO(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(dto.getProvider()), tokenMap);
+		final TokenGenerationResponseDTO responseDTO = new TokenGenerationResponseDTO();
+		responseDTO.setTokenData(List.of(tokenDataDTO));
+
+		final ArgumentCaptor<TokenGenerationRequestDTO> captor = ArgumentCaptor.forClass(TokenGenerationRequestDTO.class);
+		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
+		when(arrowheadContext.get(any(String.class))).thenReturn(tokenUri);
+		when(httpService.sendRequest(eq(tokenUri), eq(HttpMethod.POST), eq(TokenGenerationResponseDTO.class), captor.capture())).
+																												thenReturn(new ResponseEntity<TokenGenerationResponseDTO>(responseDTO, HttpStatus.OK));
+		
+		final OrchestrationFormRequestDTO request = new OrchestrationFormRequestDTO();
+		request.setRequesterSystem(new SystemRequestDTO());
+		
+		orchestratorDriver.generateAuthTokens(request, List.of(dto));
+		
+		final TokenGenerationRequestDTO requestDTO = captor.getValue();
+		Assert.assertEquals(300, requestDTO.getProviders().get(0).getTokenDuration());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -442,7 +528,7 @@ public class OrchestratorDriverTest {
 		final List<ServiceInterfaceResponseDTO> intfs = new ArrayList<>(1);
 		intfs.add(new ServiceInterfaceResponseDTO(1, "HTTP-SECURE-JSON", null, null));
 		
-		return new OrchestrationResultDTO(provider, service, "/uri" + index, ServiceSecurityType.TOKEN, null, intfs, null);
+		return new OrchestrationResultDTO(provider, service, "/uri" + index, ServiceSecurityType.TOKEN, new HashMap<>(), intfs, null);
 	}
 
 	//-------------------------------------------------------------------------------------------------
