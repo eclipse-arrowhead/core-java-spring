@@ -213,7 +213,7 @@ public class PingTask implements Job {
 
 		if (pingMeasurementOptional.isEmpty()) {
 
-			qoSDBService.createPingMeasurement(measurement, responseList, calculationsDTO, aroundNow);
+			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
 
 			if(LOG_MEASUREMENT) {
 
