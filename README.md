@@ -3327,7 +3327,7 @@ __ServiceRequestForm__ is the input
       "string"
     ],
     "securityRequirements": [
-      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+      "NOT_SECURE", "CERTIFICATE", "TOKEN"
     ],
     "metadataRequirements": {
       "additionalProp1": "string",
