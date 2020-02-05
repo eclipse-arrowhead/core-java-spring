@@ -143,6 +143,16 @@ public class QoSDBService {
 	public void createPingMeasurement(final QoSIntraMeasurement measurementParam, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("createPingMeasurement started...");
 
+		if (measurementParam == null) {
+			throw new InvalidParameterException("QoSIntraMeasurement" + NULL_ERROR_MESSAGE);
+		}
+		if (calculations == null) {
+			throw new InvalidParameterException("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE);
+		}
+		if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
 		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
 
 		pingMeasurement.setMeasurement(measurementParam);

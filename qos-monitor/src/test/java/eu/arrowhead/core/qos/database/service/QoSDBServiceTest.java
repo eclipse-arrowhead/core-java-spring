@@ -475,7 +475,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
 
-		qoSDBService.createPingMeasurement(measurementParam, responseList, calculations, aroundNow);
+		qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
 
 		verify(qoSIntraMeasurementPingRepository, times(1)).saveAndFlush(any());
 
