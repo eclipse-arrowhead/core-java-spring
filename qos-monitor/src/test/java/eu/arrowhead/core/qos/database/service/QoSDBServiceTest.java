@@ -3,6 +3,8 @@ package eu.arrowhead.core.qos.database.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -12,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.hibernate.HibernateException;
 import org.junit.Test;
@@ -30,7 +33,9 @@ import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 
 @RunWith(SpringRunner.class)
@@ -71,7 +76,7 @@ public class QoSDBServiceTest {
 	@Test
 	public void testUpdateCountStartedAt() {
 
-		final ZonedDateTime testStartedAt = ZonedDateTime.now();
+		final ZonedDateTime testStartedAt = ZonedDateTime.now().minusMinutes(1);
 		final List<QoSIntraPingMeasurement> measurementList = getQosIntraPingMeasurementListForTest();
 		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
 
@@ -100,7 +105,7 @@ public class QoSDBServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testUpdateCountStartedAtFlushThrowDatabaseException() {
 
-		final ZonedDateTime testStartedAt = ZonedDateTime.now();
+		final ZonedDateTime testStartedAt = ZonedDateTime.now().minusMinutes(1);;
 		final List<QoSIntraPingMeasurement> measurementList = getQosIntraPingMeasurementListForTest();
 		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
 
@@ -122,6 +127,7 @@ public class QoSDBServiceTest {
 
 			final List<QoSIntraPingMeasurement> captured = valueCapture.getValue();
 			assertEquals(measurementList.size(), captured.size());
+
 			for (final QoSIntraPingMeasurement qoSIntraPingMeasurement : captured) {
 
 				assertEquals(0, qoSIntraPingMeasurement.getSent());
@@ -139,7 +145,7 @@ public class QoSDBServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testUpdateCountStartedAtSaveAllThrowDatabaseException() {
 
-		final ZonedDateTime testStartedAt = ZonedDateTime.now();
+		final ZonedDateTime testStartedAt = ZonedDateTime.now().minusMinutes(1);
 		final List<QoSIntraPingMeasurement> measurementList = getQosIntraPingMeasurementListForTest();
 		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
 
@@ -161,6 +167,7 @@ public class QoSDBServiceTest {
 
 			final List<QoSIntraPingMeasurement> captured = valueCapture.getValue();
 			assertEquals(measurementList.size(), captured.size());
+
 			for (final QoSIntraPingMeasurement qoSIntraPingMeasurement : captured) {
 
 				assertEquals(0, qoSIntraPingMeasurement.getSent());
@@ -198,6 +205,76 @@ public class QoSDBServiceTest {
 
 			throw ex;
 		}
+
+	}
+
+	//=================================================================================================
+	// Tests of createMeasurement
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCreateMeasurement() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final System system = getSystemForTest();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final ArgumentCaptor<QoSIntraMeasurement> valueCapture = ArgumentCaptor.forClass(QoSIntraMeasurement.class);
+
+		when(qoSIntraMeasurementRepository.saveAndFlush(valueCapture.capture())).thenReturn(measurement);
+
+		qoSDBService.createMeasurement(system, QoSMeasurementType.PING, aroundNow);
+
+		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
+
+		final QoSIntraMeasurement captured = valueCapture.getValue();
+		assertEquals(system.getId(), captured.getSystem().getId());
+		assertEquals(QoSMeasurementType.PING, captured.getMeasurementType());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreateMeasurementSaveAndFlushThrowException() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final System system = getSystemForTest();
+
+		final ArgumentCaptor<QoSIntraMeasurement> valueCapture = ArgumentCaptor.forClass(QoSIntraMeasurement.class);
+
+		when(qoSIntraMeasurementRepository.saveAndFlush(valueCapture.capture())).thenThrow(HibernateException.class);
+
+		qoSDBService.createMeasurement(system, QoSMeasurementType.PING, aroundNow);
+
+		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
+
+		final QoSIntraMeasurement captured = valueCapture.getValue();
+		assertEquals(system.getId(), captured.getSystem().getId());
+		assertEquals(QoSMeasurementType.PING, captured.getMeasurementType());
+
+	}
+
+	//=================================================================================================
+	// Tests of getMeasurement
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetMeasurement() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
+		final System system = getSystemForTest();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final ArgumentCaptor<QoSIntraMeasurement> valueCapture = ArgumentCaptor.forClass(QoSIntraMeasurement.class);
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+
+		qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
+
+		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
 
 	}
 
@@ -259,5 +336,11 @@ public class QoSDBServiceTest {
 				"authenticationInfo");
 
 		return system;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private SystemResponseDTO getSystemResponseDTOForTest() {
+
+		return DTOConverter.convertSystemToSystemResponseDTO(getSystemForTest());
 	}
 }

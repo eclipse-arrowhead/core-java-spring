@@ -89,7 +89,7 @@ public class QoSDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraMeasurement createMeasurement(final System system,final QoSMeasurementType ping,final ZonedDateTime aroundNow) {
+	public QoSIntraMeasurement createMeasurement(final System system, final QoSMeasurementType ping, final ZonedDateTime aroundNow) {
 		logger.debug("createMeasurement started...");
 
 		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
@@ -102,6 +102,7 @@ public class QoSDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+
 		return measurement;
 	}
 
