@@ -130,11 +130,13 @@ public class QoSManagerImpl implements QoSManager {
 	public List<OrchestrationResultDTO> verifyServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
 		logger.debug("verifyServices started ...");
 		
+		final boolean needLockRelease = request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
+
 		final List<OrchestrationResultDTO> result = new ArrayList<>();
 		for (final OrchestrationResultDTO dto : orList) {
-			final boolean needLockRelease = request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
+			boolean verified = true;
 			for (final QoSVerifier verifier : verifiers) {
-				final boolean verified = verifier.verify(dto, request.getQosRequirements(), request.getCommands());
+				verified = verifier.verify(dto, request.getQosRequirements(), request.getCommands());
 				if (!verified) {
 					if (needLockRelease) {
 						qosReservationDBService.removeTemporaryLock(dto);
@@ -144,7 +146,9 @@ public class QoSManagerImpl implements QoSManager {
 				}
 			}
 			
-			result.add(dto);
+			if (verified) {
+				result.add(dto);
+			}
 		}
 		
 		return result;
