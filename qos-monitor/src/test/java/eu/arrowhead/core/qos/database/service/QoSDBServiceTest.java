@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.hibernate.HibernateException;
+import org.icmp4j.IcmpPingResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -37,6 +38,8 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 
 @RunWith(SpringRunner.class)
 public class QoSDBServiceTest {
@@ -64,6 +67,8 @@ public class QoSDBServiceTest {
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
 	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field  is not available.";
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
+	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
+	private static final String NULL_ERROR_MESSAGE = " is null";
 
 	//=================================================================================================
 	// methods
@@ -320,6 +325,162 @@ public class QoSDBServiceTest {
 		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetMeasurementNullRequestParameter() {
+
+		final System system = getSystemForTest();
+		final SystemResponseDTO systemResponseDTO = null;
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+
+		try {
+
+			qoSDBService.getMeasurement(systemResponseDTO);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("SystemRequestDTO" + NULL_ERROR_MESSAGE));
+
+			verify(systemRepository, times(0)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetMeasurementSystemNameIsNullSystemResponseDTOParameter() {
+
+		final System system = getSystemForTest();
+		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
+		systemResponseDTO.setSystemName(null);
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+
+		try {
+
+			qoSDBService.getMeasurement(systemResponseDTO);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("System name" + EMPTY_OR_NULL_ERROR_MESSAGE));
+
+			verify(systemRepository, times(0)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetMeasurementSystemNameIsEmptySystemResponseDTOParameter() {
+
+		final System system = getSystemForTest();
+		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
+		systemResponseDTO.setSystemName("   ");
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+
+		try {
+
+			qoSDBService.getMeasurement(systemResponseDTO);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("System name" + EMPTY_OR_NULL_ERROR_MESSAGE));
+
+			verify(systemRepository, times(0)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetMeasurementSystemAddressIsNullSystemResponseDTOParameter() {
+
+		final System system = getSystemForTest();
+		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
+		systemResponseDTO.setAddress(null);
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+
+		try {
+
+			qoSDBService.getMeasurement(systemResponseDTO);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("System address" + EMPTY_OR_NULL_ERROR_MESSAGE));
+
+			verify(systemRepository, times(0)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetMeasurementSystemAddressIsEmptySystemResponseDTOParameter() {
+
+		final System system = getSystemForTest();
+		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
+		systemResponseDTO.setAddress("   ");
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+
+		try {
+
+			qoSDBService.getMeasurement(systemResponseDTO);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("System address" + EMPTY_OR_NULL_ERROR_MESSAGE));
+
+			verify(systemRepository, times(0)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+
+			throw ex;
+		}
+	}
+
+	//=================================================================================================
+	// Tests of createMeasurement
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCreatePingMeasurement() {
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		final QoSIntraMeasurement measurementParam = getQoSIntraMeasurementForTest();
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		qoSDBService.createPingMeasurement(measurementParam, responseList, calculations, aroundNow);
+
+		verify(qoSIntraMeasurementPingRepository, times(1)).saveAndFlush(any());
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -329,31 +490,38 @@ public class QoSDBServiceTest {
 		final int sizeOfMeasurementList = 3;
 		final List<QoSIntraPingMeasurement> qoSIntraPingMeasurementList = new ArrayList<>(sizeOfMeasurementList);
 
-		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
-
 		for (int i = 0; i < sizeOfMeasurementList; i++) {
 
-			final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
-			pingMeasurement.setMeasurement(measurement);
-			pingMeasurement.setAvailable(true);
-			pingMeasurement.setMaxResponseTime(1);
-			pingMeasurement.setMinResponseTime(1);
-			pingMeasurement.setMeanResponseTimeWithoutTimeout(1);
-			pingMeasurement.setMeanResponseTimeWithTimeout(1);
-			pingMeasurement.setJitterWithoutTimeout(1);
-			pingMeasurement.setJitterWithTimeout(1);
-			pingMeasurement.setLostPerMeasurementPercent(0);
-			pingMeasurement.setCountStartedAt(ZonedDateTime.now());
-			pingMeasurement.setLastAccessAt(ZonedDateTime.now());
-			pingMeasurement.setSent(35);
-			pingMeasurement.setSentAll(35);
-			pingMeasurement.setReceived(35);
-			pingMeasurement.setReceivedAll(35);
-
-			qoSIntraPingMeasurementList.add(pingMeasurement);
+			qoSIntraPingMeasurementList.add(getQosIntraPingMeasurementForTest());
 		}
 
 		return qoSIntraPingMeasurementList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private QoSIntraPingMeasurement getQosIntraPingMeasurementForTest() {
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
+
+		pingMeasurement.setMeasurement(measurement);
+		pingMeasurement.setAvailable(true);
+		pingMeasurement.setMaxResponseTime(1);
+		pingMeasurement.setMinResponseTime(1);
+		pingMeasurement.setMeanResponseTimeWithoutTimeout(1);
+		pingMeasurement.setMeanResponseTimeWithTimeout(1);
+		pingMeasurement.setJitterWithoutTimeout(1);
+		pingMeasurement.setJitterWithTimeout(1);
+		pingMeasurement.setLostPerMeasurementPercent(0);
+		pingMeasurement.setCountStartedAt(ZonedDateTime.now());
+		pingMeasurement.setLastAccessAt(ZonedDateTime.now());
+		pingMeasurement.setSent(35);
+		pingMeasurement.setSentAll(35);
+		pingMeasurement.setReceived(35);
+		pingMeasurement.setReceivedAll(35);
+
+		return pingMeasurement;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -384,5 +552,50 @@ public class QoSDBServiceTest {
 	private SystemResponseDTO getSystemResponseDTOForTest() {
 
 		return DTOConverter.convertSystemToSystemResponseDTO(getSystemForTest());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private List<IcmpPingResponse> getResponseListForTest() {
+
+		final int sizeOfList = 3;
+		final List<IcmpPingResponse> responseList = new ArrayList<>(3);
+
+		for (int i = 0; i < sizeOfList; i++) {
+			responseList.add(getIcmpResponseForTest());
+		}
+
+		return responseList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private IcmpPingResponse getIcmpResponseForTest() {
+
+		final IcmpPingResponse response = new IcmpPingResponse();
+		response.setDuration(1);
+		response.setRtt(1);
+		response.setSuccessFlag(true);
+		response.setTimeoutFlag(false);
+		response.setSize(32);
+		response.setTtl(64);
+
+		return response;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private PingMeasurementCalculationsDTO getCalculationsForTest() {
+
+		final PingMeasurementCalculationsDTO calculatiions = new PingMeasurementCalculationsDTO(
+				true,//available,
+				1,//maxResponseTime,
+				1,//minResponseTime,
+				1,//meanResponseTimeWithTimeout,
+				1,//meanResponseTimeWithoutTimeout,
+				1,//jitterWithTimeout,
+				1,//jitterWithoutTimeout,
+				35,//sentInThisPing,
+				35,//receivedInThisPing,
+				0);//lostPerMeasurementPercent);
+
+		return calculatiions;
 	}
 }
