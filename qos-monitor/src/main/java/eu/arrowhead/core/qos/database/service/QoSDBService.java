@@ -186,6 +186,10 @@ public class QoSDBService {
 	public Optional<QoSIntraPingMeasurement> getPingMeasurementByMeasurement(final QoSIntraMeasurement measurement) {
 		logger.debug("getPingMeasurementByMeasurement started...");
 
+		if (measurement == null) {
+			throw new InvalidParameterException("QoSIntraMeasurement" + NULL_ERROR_MESSAGE);
+		}
+
 		try {
 			return qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
 		} catch (final Exception ex) {

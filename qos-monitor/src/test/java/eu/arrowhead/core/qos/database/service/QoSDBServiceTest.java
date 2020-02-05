@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -469,7 +470,6 @@ public class QoSDBServiceTest {
 		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
 
 		final QoSIntraMeasurement measurementParam = getQoSIntraMeasurementForTest();
-		final List<IcmpPingResponse> responseList = getResponseListForTest();
 		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
 		final ZonedDateTime aroundNow = ZonedDateTime.now();
 
@@ -481,6 +481,124 @@ public class QoSDBServiceTest {
 
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePingMeasurementWithNullMeasurementParameter() {
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		final QoSIntraMeasurement measurementParam = null;
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		try {
+
+			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("QoSIntraMeasurement" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePingMeasurementWithNullCalculationsParameter() {
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		final QoSIntraMeasurement measurementParam = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = null;//getCalculationsForTest();
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		try {
+
+			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testCreatePingMeasurementWithNullAroundNowParameter() {
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		final QoSIntraMeasurement measurementParam = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final ZonedDateTime aroundNow = null;//ZonedDateTime.now();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		try {
+
+			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("ZonedDateTime" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).saveAndFlush(any());
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreatePingMeasurementSaveAndFlushThrowsDatabseException() {
+
+		final QoSIntraMeasurement measurementParam = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenThrow(HibernateException.class);
+
+		try {
+
+			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraMeasurementPingRepository, times(1)).saveAndFlush(any());
+			throw ex;
+		}
+
+	}
+
+	//=================================================================================================
+	// Tests of getPingMeasurementByMeasurement
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPingMeasurementByMeasurement() {
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		final QoSIntraMeasurement measurementParam = getQoSIntraMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		qoSDBService.getPingMeasurementByMeasurement(measurementParam);
+
+		verify(qoSIntraMeasurementPingRepository, times(1)).findByMeasurement(any());
+
+	}
+
+	
 	//=================================================================================================
 	// assistant methods
 
