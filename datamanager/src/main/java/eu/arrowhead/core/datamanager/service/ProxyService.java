@@ -25,15 +25,30 @@ public class ProxyService {
 	endpoints = new ArrayList<>();
     }
 
-    public List<String> getAllEndpoints() {
+    public List<String> getAllSystems() {
 	List<String> res = new ArrayList<>();
 	Iterator<ProxyElement> epi = endpoints.iterator();
 
 	while (epi.hasNext()) {
 	    ProxyElement pe = epi.next();
-	    res.add(pe.systemName);
+
+
+	    if (!systemExists(res, pe.systemName))
+	    	res.add(pe.systemName);
 	}
 	return res;
+    }
+
+    private boolean systemExists(List <String> systems, String systemName) {
+	    Iterator<String> sysi = systems.iterator();
+	    while (sysi.hasNext()) {
+		    String tmpsys = sysi.next();
+		    if (tmpsys.equals(systemName))
+			return true;
+	    }
+
+
+	    return false;
     }
 
 

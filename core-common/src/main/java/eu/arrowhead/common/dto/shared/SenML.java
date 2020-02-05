@@ -1,8 +1,12 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+//import javax.validation.Valid;
+//import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import com.google.gson.Gson;
 
@@ -10,6 +14,7 @@ import eu.arrowhead.common.CommonConstants;
 
 //https://tools.ietf.org/html/rfc8428
 
+@JsonInclude(Include.NON_NULL)
 public class SenML implements Serializable {
 
   //=================================================================================================

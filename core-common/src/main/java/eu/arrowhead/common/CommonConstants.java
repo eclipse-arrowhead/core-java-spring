@@ -119,7 +119,9 @@ public class CommonConstants {
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
+	public static final String SWAGGER_HTTP_400_MESSAGE = "Bad request";
 	public static final String SWAGGER_HTTP_401_MESSAGE = "You are not authorized";
+	public static final String SWAGGER_HTTP_409_MESSAGE = "Request caused a conflict";
 	public static final String SWAGGER_HTTP_500_MESSAGE = "Core service is not available";
 
 	public static final String REQUEST_PARAM_TOKEN = "token";

@@ -39,7 +39,7 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.SenML;
-import eu.arrowhead.common.dto.shared.SigML;
+//import eu.arrowhead.common.dto.shared.SigML;
 import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
 import eu.arrowhead.common.dto.shared.DataManagerOperationDTO;
@@ -148,7 +148,7 @@ public class DataManagerController {
 			ret.setServices(services);
 			return new ResponseEntity<DataManagerServicesResponseDTO>(ret, org.springframework.http.HttpStatus.OK);
 
-		} else if(op.equals("create")){
+		/*} else if(op.equals("create")){
 			String serviceName = req.getServiceName();
 			String srvType = req.getServiceType();
 
@@ -165,7 +165,7 @@ public class DataManagerController {
 				return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.OK);
 			} else {
 				return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
-			}
+			}*/
 
 		}
 		return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
@@ -214,8 +214,14 @@ public class DataManagerController {
 	}
 
 
-	@PutMapping(value= "/historian/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)//CommonConstants.DM_HISTORIAN_URI)
-	@ResponseBody public SigML historianServicePut(
+	//-------------------------------------------------------------------------------------------------
+	@ApiResponses (value = {
+		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PutMapping(value= "/historian/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public void historianServicePut(
 	@PathVariable(value="systemName", required=true) String systemName,
 	@PathVariable(value="serviceName", required=true) String serviceName,
 	@RequestBody Vector<SenML> sml
@@ -225,34 +231,59 @@ public class DataManagerController {
 		boolean statusCode = historianService.createEndpoint(systemName, serviceName);
 
 		if (validateSenML(sml) == false) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
 		}
 
 		SenML head = sml.firstElement();
 		if(head.getBt() == null)
-			head.setBt((double)System.currentTimeMillis() / 1000.0);
+			head.setBt((double)System.currentTimeMillis() / 1000);
 
 		statusCode = historianService.updateEndpoint(serviceName, sml);
+		if (statusCode == false)
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 
-		SigML ret = new SigML(0);
-		return ret;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Test interface for the Proxy service", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Start interface for the Proxy service", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= "/proxy", produces=MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerSystemsResponseDTO proxyServices() {
+	@ResponseBody public DataManagerSystemsResponseDTO proxyServicesGet() {
 		DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
 
-		List<String> systems = proxyService.getAllEndpoints();
+		List<String> systems = proxyService.getAllSystems();
 		ret.setSystems(systems);
 
 		return ret;
+	}
+
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Start interface for the Proxy service", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses (value = {
+		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PutMapping(value= "/proxy", produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ResponseEntity<DataManagerSystemsResponseDTO> proxySystemsPut(
+			@RequestBody DataManagerOperationDTO req
+		) {
+		logger.debug("DataManager:PUT:Proxy");
+		String op = req.getOp();
+		if(op.equals("list")) {
+			DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
+			List<String> systems = proxyService.getAllSystems();
+			ret.setSystems(systems);
+			return new ResponseEntity<DataManagerSystemsResponseDTO>(ret, org.springframework.http.HttpStatus.OK);
+		} else if (op.equals("delete")) {
+		}
+
+		throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
 	}
 
 
@@ -309,8 +340,7 @@ public class DataManagerController {
 	@ApiOperation(value = "Interface to get a system's last service data", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE)
 	})
 	@GetMapping(value= "/proxy/{systemName}/{serviceName}")
 	@ResponseBody public Vector<SenML> proxyServiceGet(
@@ -318,6 +348,7 @@ public class DataManagerController {
 			@PathVariable(value="serviceName", required=true) String serviceName
 			) {
 			int statusCode = 0;
+
 			ProxyElement pe = proxyService.getEndpoint(serviceName);
 			if (pe == null) {
 				logger.info("proxy GET to serviceName: " + serviceName + " not found");
@@ -328,10 +359,12 @@ public class DataManagerController {
 			}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to update a system's last service data", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Interface to update a system's last data", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+		@ApiResponse(code = HttpStatus.SC_CONFLICT, message = CoreCommonConstants.SWAGGER_HTTP_409_MESSAGE),
 		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PutMapping(value= "/proxy/{systemName}/{serviceName}")
@@ -341,20 +374,21 @@ public class DataManagerController {
 			@RequestBody Vector<SenML> sml
 			) {
 		if (validateSenML(sml) == false) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
 		}
 
 		ProxyElement pe = proxyService.getEndpoint(serviceName);
 		if (pe == null) {
 			boolean ret = proxyService.addEndpoint(new ProxyElement(systemName, serviceName));
 			if (ret==true){
+				proxyService.updateEndpoint(systemName, serviceName, sml);
 				throw new ResponseStatusException(org.springframework.http.HttpStatus.CREATED);
 			} else { 
-				throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT);
+				throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 			}
+		} else {
+			proxyService.updateEndpoint(systemName, serviceName, sml);
 		}
-
-		proxyService.updateEndpoint(systemName, serviceName, sml);
 	}
 
 
