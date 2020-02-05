@@ -134,6 +134,13 @@ public class DataManagerController {
 		return ret;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Interface to interact with system object that is active in the Historian service", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
 	@PutMapping(value= "/historian/{systemName}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public ResponseEntity<DataManagerServicesResponseDTO> historianSystemPut(
 			@PathVariable(value="systemName", required=true) String systemName,
@@ -171,6 +178,13 @@ public class DataManagerController {
 		return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Interface to get sensor data from a service", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
 	@GetMapping(value= "/historian/{system}/{service}")
 	@ResponseBody public List<SenML> historianServiceGet(
 		@PathVariable(value="system", required=true) String systemName,
@@ -228,11 +242,13 @@ public class DataManagerController {
 	) {
 		logger.debug("DataManager:Put:Historian/"+systemName+"/"+serviceName);
 
-		boolean statusCode = historianService.createEndpoint(systemName, serviceName);
-
 		if (validateSenML(sml) == false) {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
 		}
+
+		boolean statusCode = historianService.createEndpoint(systemName, serviceName);
+		if (statusCode == false)
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 
 		SenML head = sml.firstElement();
 		if(head.getBt() == null)
@@ -243,6 +259,7 @@ public class DataManagerController {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 
 	}
+
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Start interface for the Proxy service", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
