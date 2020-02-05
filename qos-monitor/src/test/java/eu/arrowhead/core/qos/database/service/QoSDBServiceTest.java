@@ -117,7 +117,7 @@ public class QoSDBServiceTest {
 
 			qoSDBService.updateCountStartedAt();
 
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 
 			assertEquals(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex.getMessage());
 
@@ -157,7 +157,7 @@ public class QoSDBServiceTest {
 
 			qoSDBService.updateCountStartedAt();
 
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 
 			assertEquals(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex.getMessage());
 
@@ -195,7 +195,7 @@ public class QoSDBServiceTest {
 
 			qoSDBService.updateCountStartedAt();
 
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 
 			assertEquals(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG, ex.getMessage());
 
@@ -266,8 +266,6 @@ public class QoSDBServiceTest {
 		final System system = getSystemForTest();
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 
-		final ArgumentCaptor<QoSIntraMeasurement> valueCapture = ArgumentCaptor.forClass(QoSIntraMeasurement.class);
-
 		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
 		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
 
@@ -276,6 +274,53 @@ public class QoSDBServiceTest {
 		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
 
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetMeasurementRequestedSystemNotInDB() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.ofNullable(null));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+
+		try {
+
+			qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertEquals("Requested system" + NOT_IN_DB_ERROR_MESSAGE, ex.getMessage());
+
+			verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetMeasurementMeasurementNotInDB() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
+		final System system = getSystemForTest();
+
+		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.ofNullable(null));
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		when(qoSIntraMeasurementRepository.saveAndFlush(any())).thenReturn(measurement);
+
+		qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
+
+		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
+		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
+		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
 	}
 
 	//=================================================================================================
