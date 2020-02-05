@@ -598,7 +598,50 @@ public class QoSDBServiceTest {
 
 	}
 
-	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetPingMeasurementByMeasurementWithNullMeasurementParameter() {
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		final QoSIntraMeasurement measurementParam = null;//getQoSIntraMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		try {
+
+			qoSDBService.getPingMeasurementByMeasurement(measurementParam);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("QoSIntraMeasurement" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).findByMeasurement(any());
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPingMeasurementByMeasurementFindByMeasurementThrowsException() {
+
+		final QoSIntraMeasurement measurementParam = getQoSIntraMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenThrow(HibernateException.class);
+
+		try {
+
+			qoSDBService.getPingMeasurementByMeasurement(measurementParam);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraMeasurementPingRepository, times(1)).findByMeasurement(any());
+			throw ex;
+		}
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
