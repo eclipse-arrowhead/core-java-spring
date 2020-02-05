@@ -29,8 +29,8 @@ import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetails
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -46,6 +46,8 @@ public class QoSDBService {
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
 	private static final String NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE = " sortable field  is not available.";
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
+	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
+	private static final String NULL_ERROR_MESSAGE = " is null";
 
 	@Autowired
 	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
@@ -108,16 +110,17 @@ public class QoSDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraMeasurement getMeasurement(final SystemResponseDTO systemResponseDTO, final ZonedDateTime aroundNow) {
+	public QoSIntraMeasurement getMeasurement(final SystemResponseDTO systemResponseDTO) {
 		logger.debug("getMeasurement started...");
 
+		validateSystemResponseDTO(systemResponseDTO);
+
+		final System system;
 		final Optional<System> systemOptional = systemRepository.findBySystemNameAndAddressAndPort(
 				systemResponseDTO.getSystemName(),
 				systemResponseDTO.getAddress(),
 				systemResponseDTO.getPort());
-		final System system;
 		if (systemOptional.isPresent()) {
-
 			system = systemOptional.get();
 		}else {
 			throw new ArrowheadException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
@@ -126,10 +129,12 @@ public class QoSDBService {
 		final QoSIntraMeasurement measurement;
 		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
 		if (qoSIntraMeasurementOptional.isEmpty()) {
+			final ZonedDateTime aroundNow = ZonedDateTime.now();
 			measurement = createMeasurement(system, QoSMeasurementType.PING, aroundNow);
 		}else {
 			 measurement = qoSIntraMeasurementOptional.get();
 		}
+
 		return measurement;
 	}
 
@@ -377,5 +382,26 @@ public class QoSDBService {
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
 	}
+
+	//=================================================================================================
+	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateSystemResponseDTO(final SystemResponseDTO systemResponseDTO) {
+		logger.debug("validateSystemRequestDTO started...");
+
+		if (systemResponseDTO == null) {
+			throw new InvalidParameterException("SystemRequestDTO" + NULL_ERROR_MESSAGE);
+		}
+
+		if (Utilities.isEmpty(systemResponseDTO.getSystemName())) {
+			throw new InvalidParameterException("System name" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+
+		if (Utilities.isEmpty(systemResponseDTO.getAddress())) {
+			throw new InvalidParameterException("System address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+
+	}	
 
 }

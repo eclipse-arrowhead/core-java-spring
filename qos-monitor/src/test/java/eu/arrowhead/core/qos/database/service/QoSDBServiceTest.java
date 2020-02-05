@@ -3,8 +3,8 @@ package eu.arrowhead.core.qos.database.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -261,7 +261,6 @@ public class QoSDBServiceTest {
 	@Test
 	public void testGetMeasurement() {
 
-		final ZonedDateTime aroundNow = ZonedDateTime.now();
 		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
 		final System system = getSystemForTest();
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
@@ -269,7 +268,7 @@ public class QoSDBServiceTest {
 		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
 		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
 
-		qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
+		qoSDBService.getMeasurement(systemResponseDTO);
 
 		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
@@ -280,7 +279,6 @@ public class QoSDBServiceTest {
 	@Test(expected = ArrowheadException.class)
 	public void testGetMeasurementRequestedSystemNotInDB() {
 
-		final ZonedDateTime aroundNow = ZonedDateTime.now();
 		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 
@@ -289,7 +287,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
+			qoSDBService.getMeasurement(systemResponseDTO);
 
 		} catch (final Exception ex) {
 
@@ -306,7 +304,6 @@ public class QoSDBServiceTest {
 	@Test
 	public void testGetMeasurementMeasurementNotInDB() {
 
-		final ZonedDateTime aroundNow = ZonedDateTime.now();
 		final SystemResponseDTO systemResponseDTO = getSystemResponseDTOForTest();
 		final System system = getSystemForTest();
 
@@ -316,7 +313,7 @@ public class QoSDBServiceTest {
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 		when(qoSIntraMeasurementRepository.saveAndFlush(any())).thenReturn(measurement);
 
-		qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
+		qoSDBService.getMeasurement(systemResponseDTO);
 
 		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());

@@ -196,7 +196,7 @@ public class PingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = getPingResponseList(address);
 
-		final QoSIntraMeasurement measurement = qoSDBService.getMeasurement(systemResponseDTO, aroundNow);
+		final QoSIntraMeasurement measurement = qoSDBService.getMeasurement(systemResponseDTO);
 		handlePingMeasurement(measurement, responseList, aroundNow);
 
 		qoSDBService.updateMeasurement(aroundNow, measurement);
