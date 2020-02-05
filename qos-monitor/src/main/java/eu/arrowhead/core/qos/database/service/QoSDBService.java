@@ -140,8 +140,7 @@ public class QoSDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public void createPingMeasurement(final QoSIntraMeasurement measurementParam,
-	final List<IcmpPingResponse> responseList,final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
+	public void createPingMeasurement(final QoSIntraMeasurement measurementParam, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("createPingMeasurement started...");
 
 		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
