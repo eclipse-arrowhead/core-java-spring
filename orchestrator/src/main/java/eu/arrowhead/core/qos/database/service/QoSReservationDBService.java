@@ -84,7 +84,8 @@ public class QoSReservationDBService {
 		Assert.notNull(dto.getService(), "Service is null.");
 		
 		final ZonedDateTime reservedTo = ZonedDateTime.now().plusSeconds(lockDuration);
-		final QoSReservation reservation = new QoSReservation(dto.getProvider().getId(), dto.getService().getId(), systemName, address, port, reservedTo, true);
+		final QoSReservation reservation = new QoSReservation(dto.getProvider().getId(), dto.getService().getId(), systemName.trim().toLowerCase(), address.trim().toLowerCase(), port,
+															  reservedTo, true);
 		try {
 			qosReservationRepository.saveAndFlush(reservation);
 		} catch (final Exception ex) {
@@ -134,7 +135,8 @@ public class QoSReservationDBService {
 		final Optional<QoSReservation> optReservation = qosReservationRepository.findByReservedProviderIdAndReservedServiceId(reserved.getProvider().getId(), reserved.getService().getId());
 		QoSReservation reservation;
 		if (optReservation.isEmpty()) { // maybe temporary lock is expired and removed
-			reservation = new QoSReservation(reserved.getProvider().getId(), reserved.getService().getId(), requester.getSystemName(), requester.getAddress(), requester.getPort(),
+			reservation = new QoSReservation(reserved.getProvider().getId(), reserved.getService().getId(), requester.getSystemName().trim().toLowerCase(), 
+											 requester.getAddress().trim().toLowerCase(), requester.getPort(),
 											 null, false);
 		} else {
 			reservation = optReservation.get();
