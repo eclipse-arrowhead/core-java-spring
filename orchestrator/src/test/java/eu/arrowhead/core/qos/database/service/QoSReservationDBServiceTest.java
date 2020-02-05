@@ -26,7 +26,6 @@ import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceDefinitionResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
-import junit.framework.Assert;
 
 @RunWith(SpringRunner.class)
 public class QoSReservationDBServiceTest {
