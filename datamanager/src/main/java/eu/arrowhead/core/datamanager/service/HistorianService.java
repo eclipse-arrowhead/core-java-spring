@@ -202,7 +202,7 @@ public class HistorianService {
 
 
   public boolean updateEndpoint(String serviceName, Vector<SenML> msg) {
-    boolean ret = false;
+    boolean ret = true;
 
     double maxTs = maxTs(msg);
     double minTs = minTs(msg);
@@ -214,7 +214,7 @@ public class HistorianService {
       int sid = serviceToID(serviceName, conn);
       if (sid != -1) {
 	Statement stmt = conn.createStatement();
-	String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg, datastored) VALUES("+sid+", "+msg.get(0).getBt()+","+minTs+", "+maxTs+", '"+msg.toString()+"',NOW());"; //how to escape?
+	String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg, datastored) VALUES("+sid+", "+msg.get(0).getBt()+","+minTs+", "+maxTs+", '"+msg.toString()+"',NOW());";
 	int mid = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 	ResultSet rs = stmt.getGeneratedKeys();
 	rs.next();
@@ -242,16 +242,16 @@ public class HistorianService {
 	    unit = "'"+m.getU()+"'";
 	  String value = null;
 	  if (m.getV() != null)
-	    value = "'"+m.getV()+"'";
+	    value = ""+m.getV()+"";
 	  String stringvalue = null;
 	  if (m.getVs() != null)
 	    stringvalue = "'"+m.getVs()+"'";
 	  String boolvalue = null;
 	  if (m.getVb() != null)
-	    boolvalue = "'"+m.getVb()+"'";
+	    boolvalue = ""+m.getVb()+"";
 
 	  if (n != null) {
-	    sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, sv, bv) VALUES("+sid+", "+mid+", '"+n+"', " + t +", "+unit+", "+value+", "+stringvalue+", "+boolvalue+");";
+	    sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, sv, vb) VALUES("+sid+", "+mid+", '"+n+"', " + t +", "+unit+", "+value+", "+stringvalue+", "+boolvalue+");";
 	    stmt = conn.createStatement();
 	    stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 	    rs = stmt.getGeneratedKeys();
@@ -269,7 +269,8 @@ public class HistorianService {
     } finally {
       try{
 	closeConnection(conn);
-      } catch(Exception e){}
+      } catch(Exception e){
+      }
 
     }
 
@@ -305,6 +306,7 @@ public class HistorianService {
 	sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND n IN ("+signalss+") AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
       else
 	sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
+
       ResultSet rs = stmt.executeQuery(sql);
 
       Vector<SenML> messages = new Vector<SenML>();
@@ -319,6 +321,7 @@ public class HistorianService {
 	msg.setN(rs.getString("n"));
 	msg.setU(rs.getString("u"));
 	msg.setV(rs.getDouble("v"));
+	msg.setVb(rs.getBoolean("vb"));
 
 	messages.add(msg);
 	count--;
@@ -348,7 +351,8 @@ public class HistorianService {
     } finally {
       try {
 	closeConnection(conn);
-      } catch(Exception e){}
+      } catch(Exception e){
+      }
 
     }
 

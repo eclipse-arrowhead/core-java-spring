@@ -246,18 +246,15 @@ public class DataManagerController {
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
 		}
 
-		boolean statusCode = historianService.createEndpoint(systemName, serviceName);
-		if (statusCode == false)
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+		historianService.createEndpoint(systemName, serviceName);
 
 		SenML head = sml.firstElement();
 		if(head.getBt() == null)
 			head.setBt((double)System.currentTimeMillis() / 1000);
 
-		statusCode = historianService.updateEndpoint(serviceName, sml);
+		boolean statusCode = historianService.updateEndpoint(serviceName, sml);
 		if (statusCode == false)
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
-
 	}
 
 
