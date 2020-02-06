@@ -394,7 +394,16 @@ public class QoSDBService {
 		}
 
 		final System system;
-		final Optional<System> systemOptional = systemRepository.findById(id);
+		final Optional<System> systemOptional;
+		try {
+
+			systemOptional = systemRepository.findById(id);
+
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+
 		if (systemOptional.isPresent()) {
 			system = systemOptional.get();
 		}else {
@@ -402,7 +411,15 @@ public class QoSDBService {
 		}
 
 		final QoSIntraMeasurement measurement;
-		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional;
+		try {
+
+			qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 		if (qoSIntraMeasurementOptional.isEmpty()) {
 
 			return null;
