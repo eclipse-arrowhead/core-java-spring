@@ -1181,6 +1181,29 @@ public class QoSDBServiceTest {
 	}
 
 	//=================================================================================================
+	// Tests of updateMeasurement
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testUpdateMeasurement() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final ArgumentCaptor<QoSIntraMeasurement> valueCapture = ArgumentCaptor.forClass( QoSIntraMeasurement.class);
+
+		when(qoSIntraMeasurementRepository.saveAndFlush(valueCapture.capture())).thenReturn(measurement);
+
+		qoSDBService.updateMeasurement(aroundNow, measurement);
+
+		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
+
+		final QoSIntraMeasurement captured = valueCapture.getValue();
+		assertTrue( aroundNow == captured.getLastMeasurementAt());
+
+	}
+
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
