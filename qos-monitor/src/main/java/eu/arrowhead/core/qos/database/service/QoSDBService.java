@@ -326,6 +326,12 @@ public class QoSDBService {
 	public void updateMeasurement(final ZonedDateTime aroundNow, final QoSIntraMeasurement measurement) {
 		logger.debug("updateMeasurement started...");
 
+		if (measurement == null) {
+			throw new InvalidParameterException("QoSIntraMeasurement" + NULL_ERROR_MESSAGE);
+		} else if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
 		measurement.setLastMeasurementAt(aroundNow);
 		try {
 			qoSIntraMeasurementRepository.saveAndFlush(measurement);
