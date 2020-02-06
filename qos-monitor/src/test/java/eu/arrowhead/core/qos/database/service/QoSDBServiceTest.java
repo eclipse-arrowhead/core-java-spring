@@ -1,6 +1,7 @@
 package eu.arrowhead.core.qos.database.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -29,6 +30,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
+import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
@@ -787,6 +789,41 @@ public class QoSDBServiceTest {
 			verify(qoSIntraPingMeasurementLogRepository, times(1)).saveAndFlush(any());
 
 			throw ex;
+		}
+
+	}
+
+	//=================================================================================================
+	// Tests of logMeasurementDetailsToDB
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void testLogMeasurementDetailsToDB() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+		final QoSIntraPingMeasurementLog measurementLogSaved = new QoSIntraPingMeasurementLog();
+
+		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
+		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = List.of(new QoSIntraPingMeasurementLogDetails());
+
+		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(valueCapture.capture())).thenReturn(measurementLogDetailsList);
+		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+
+		verify(qoSIntraPingMeasurementLogDetailsRepository, times(1)).saveAll(any());
+		verify(qoSIntraPingMeasurementLogDetailsRepository, times(1)).flush();
+
+		final List<QoSIntraPingMeasurementLogDetails> captured = valueCapture.getValue();
+		assertEquals(responseList.size(), captured.size());
+		for (final QoSIntraPingMeasurementLogDetails qoSIntraPingMeasurementLogDetails : captured) {
+
+			assertNotNull(qoSIntraPingMeasurementLogDetails.getMeasurementLog());
+			assertNotNull(qoSIntraPingMeasurementLogDetails.isSuccessFlag());
+			assertNotNull(qoSIntraPingMeasurementLogDetails.getMeasuredAt());
+			
 		}
 
 	}
