@@ -1203,6 +1203,80 @@ public class QoSDBServiceTest {
 
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testUpdateMeasurementSaveAndFlushThrowsException() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final ArgumentCaptor<QoSIntraMeasurement> valueCapture = ArgumentCaptor.forClass( QoSIntraMeasurement.class);
+
+		when(qoSIntraMeasurementRepository.saveAndFlush(valueCapture.capture())).thenThrow(HibernateException.class);
+
+		try {
+
+			qoSDBService.updateMeasurement(aroundNow, measurement);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
+
+			final QoSIntraMeasurement captured = valueCapture.getValue();
+			assertTrue( aroundNow == captured.getLastMeasurementAt());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdateMeasurementWithNullMeasurementParameter() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = null;//getQoSIntraMeasurementForTest();
+
+		when(qoSIntraMeasurementRepository.saveAndFlush(any())).thenReturn(measurement);
+
+		try {
+
+			qoSDBService.updateMeasurement(aroundNow, measurement);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("QoSIntraMeasurement" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdateMeasurementWithNullAroundNowParameter() {
+
+		final ZonedDateTime aroundNow = null;//ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(qoSIntraMeasurementRepository.saveAndFlush(any())).thenReturn(measurement);
+
+		try {
+
+			qoSDBService.updateMeasurement(aroundNow, measurement);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("ZonedDateTime" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
