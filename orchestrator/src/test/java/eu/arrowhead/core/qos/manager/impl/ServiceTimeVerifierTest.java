@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
@@ -21,7 +20,7 @@ public class ServiceTimeVerifierTest {
 	//=================================================================================================
 	// members
 	
-	private ServiceTimeVerifier verfier = new ServiceTimeVerifier();
+	private final ServiceTimeVerifier verfier = new ServiceTimeVerifier();
 
 	//=================================================================================================
 	// methods
