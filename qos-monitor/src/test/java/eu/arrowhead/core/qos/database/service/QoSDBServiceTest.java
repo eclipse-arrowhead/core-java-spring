@@ -653,11 +653,141 @@ public class QoSDBServiceTest {
 		final ZonedDateTime aroundNow = ZonedDateTime.now();
 		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
 
-		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(QoSIntraPingMeasurementLog.class);
+		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
+
+		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(measurementLog);
 
 		qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
 
 		verify(qoSIntraPingMeasurementLogRepository, times(1)).saveAndFlush(any());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementToDBWithNullAddressParameter() {
+
+		final String address = null;//"address";
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
+
+		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(measurementLog);
+
+		try {
+
+			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("Address" + EMPTY_OR_NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementToDBWithEmptyAddressParameter() {
+
+		final String address = "   ";//"address";
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
+
+		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(measurementLog);
+
+		try {
+
+			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("Address" + EMPTY_OR_NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementToDBWithNullAroundNowParameter() {
+
+		final String address = "address";
+		final ZonedDateTime aroundNow = null;//ZonedDateTime.now();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
+
+		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(measurementLog);
+
+		try {
+
+			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("ZonedDateTime" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementToDBWithNullCalculationsParameter() {
+
+		final String address = "address";
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final PingMeasurementCalculationsDTO calculations = null;//getCalculationsForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
+
+		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(measurementLog);
+
+		try {
+
+			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testLogMeasurementToDBSaveAndFlushThrowException() {
+
+		final String address = "address";
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+
+		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenThrow(HibernateException.class);
+
+		try {
+
+			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraPingMeasurementLogRepository, times(1)).saveAndFlush(any());
+
+			throw ex;
+		}
 
 	}
 
