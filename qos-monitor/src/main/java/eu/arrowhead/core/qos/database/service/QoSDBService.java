@@ -390,7 +390,7 @@ public class QoSDBService {
 		logger.debug("getPingMeasurementBySystemId started ...");
 
 		if (id < 1) {
-			throw new InvalidParameterException("SubscriberSystemId" + LESS_THAN_ONE_ERROR_MESSAGE);
+			throw new InvalidParameterException("SystemId" + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 
 		final System system;
