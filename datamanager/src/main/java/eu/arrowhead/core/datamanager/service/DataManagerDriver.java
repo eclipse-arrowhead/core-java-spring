@@ -39,14 +39,10 @@ public class DataManagerDriver {
 	// members
 	private static final Logger logger = LogManager.getLogger(DataManagerDriver.class);
 	
-
-	
 	
 	//=================================================================================================
 	// methods
 
-	
-	
 	
 	
 	//=================================================================================================
