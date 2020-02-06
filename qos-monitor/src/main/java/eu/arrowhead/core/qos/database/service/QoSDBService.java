@@ -200,21 +200,21 @@ public class QoSDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraPingMeasurementLog logMeasurementToDB(final String address, final PingMeasurementCalculationsDTO pingMeasurement, final ZonedDateTime aroundNow) {
+	public QoSIntraPingMeasurementLog logMeasurementToDB(final String address, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("logMeasurementToDB started...");
 
 		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
 		measurementLog.setMeasuredSystemAddress(address);
-		measurementLog.setAvailable(pingMeasurement.isAvailable());
-		measurementLog.setMinResponseTime(pingMeasurement.getMinResponseTime());
-		measurementLog.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
-		measurementLog.setMeanResponseTimeWithoutTimeout(pingMeasurement.getMeanResponseTimeWithoutTimeout());
-		measurementLog.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
-		measurementLog.setJitterWithoutTimeout(pingMeasurement.getJitterWithoutTimeout());
-		measurementLog.setJitterWithTimeout(pingMeasurement.getJitterWithTimeout());
-		measurementLog.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
-		measurementLog.setSent(pingMeasurement.getSentInThisPing());
-		measurementLog.setReceived(pingMeasurement.getReceivedInThisPing());
+		measurementLog.setAvailable(calculations.isAvailable());
+		measurementLog.setMinResponseTime(calculations.getMinResponseTime());
+		measurementLog.setMaxResponseTime(calculations.getMaxResponseTime());
+		measurementLog.setMeanResponseTimeWithoutTimeout(calculations.getMeanResponseTimeWithoutTimeout());
+		measurementLog.setMeanResponseTimeWithTimeout(calculations.getMeanResponseTimeWithTimeout());
+		measurementLog.setJitterWithoutTimeout(calculations.getJitterWithoutTimeout());
+		measurementLog.setJitterWithTimeout(calculations.getJitterWithTimeout());
+		measurementLog.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
+		measurementLog.setSent(calculations.getSentInThisPing());
+		measurementLog.setReceived(calculations.getReceivedInThisPing());
 		measurementLog.setMeasuredAt(aroundNow);
 
 		try {
