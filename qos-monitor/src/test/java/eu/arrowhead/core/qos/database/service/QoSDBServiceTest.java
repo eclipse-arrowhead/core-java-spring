@@ -1364,7 +1364,7 @@ public class QoSDBServiceTest {
 		final int page = 0;
 		final int size = 0;
 		final Direction direction = Direction.ASC;
-		final String sortField = "invalid_sort_field";
+		final String sortField = CommonConstants.COMMON_FIELD_NAME_ID;
 
 		when(qoSIntraMeasurementPingRepository.findAll(any(PageRequest.class))).thenThrow(HibernateException.class);
 
