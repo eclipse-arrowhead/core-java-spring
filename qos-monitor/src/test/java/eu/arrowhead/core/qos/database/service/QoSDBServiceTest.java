@@ -2,9 +2,11 @@ package eu.arrowhead.core.qos.database.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -1376,6 +1378,217 @@ public class QoSDBServiceTest {
 
 			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
 			verify(qoSIntraMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
+
+			throw ex;
+		}
+
+	}
+
+	//=================================================================================================
+	// Tests of getPingMeasurementBySystemId
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPingMeasurementBySystemId() {
+
+		final long id = 1L;
+		final System system = getSystemForTest();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		qoSDBService.getPingMeasurementBySystemId(id);
+
+		verify(systemRepository, times(1)).findById(anyLong());
+		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
+		verify(qoSIntraMeasurementPingRepository, times(1)).findByMeasurement(any());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPingMeasurementBySystemIdNoPingMeasurementInDB() {
+
+		final long id = 1L;
+		final System system = getSystemForTest();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.ofNullable(null));
+
+		final QoSIntraPingMeasurement response = qoSDBService.getPingMeasurementBySystemId(id);
+
+		assertNull(response);
+
+		verify(systemRepository, times(1)).findById(anyLong());
+		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
+		verify(qoSIntraMeasurementPingRepository, times(1)).findByMeasurement(any());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPingMeasurementBySystemIdNoMeasurementInDB() {
+
+		final long id = 1L;
+		final System system = getSystemForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.ofNullable(null));
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		final QoSIntraPingMeasurement response = qoSDBService.getPingMeasurementBySystemId(id);
+
+		assertNull(response);
+
+		verify(systemRepository, times(1)).findById(anyLong());
+		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
+		verify(qoSIntraMeasurementPingRepository, times(0)).findByMeasurement(any());
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetPingMeasurementBySystemIdNoSystemInDB() {
+
+		final long id = 1L;
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		try {
+
+			qoSDBService.getPingMeasurementBySystemId(id);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("Requested system" + NOT_IN_DB_ERROR_MESSAGE));
+			verify(systemRepository, times(1)).findById(anyLong());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+			verify(qoSIntraMeasurementPingRepository, times(0)).findByMeasurement(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetPingMeasurementBySystemIdWithInvalidIdParameter() {
+
+		final long id = -1L;
+		final System system = getSystemForTest();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		try {
+
+			qoSDBService.getPingMeasurementBySystemId(id);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("SystemId" + LESS_THAN_ONE_ERROR_MESSAGE));
+			verify(systemRepository, times(0)).findById(anyLong());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+			verify(qoSIntraMeasurementPingRepository, times(0)).findByMeasurement(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPingMeasurementBySystemIdFindByIdThrowsException() {
+
+		final long id = 1L;
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(systemRepository.findById(anyLong())).thenThrow(HibernateException.class);
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		try {
+
+			qoSDBService.getPingMeasurementBySystemId(id);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(systemRepository, times(1)).findById(anyLong());
+			verify(qoSIntraMeasurementRepository, times(0)).findBySystemAndMeasurementType(any(), any());
+			verify(qoSIntraMeasurementPingRepository, times(0)).findByMeasurement(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPingMeasurementBySystemIdFindBySystemAndMeasurementTypeThrowsException() {
+
+		final long id = 1L;
+		final System system = getSystemForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenThrow(HibernateException.class);
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
+
+		try {
+
+			qoSDBService.getPingMeasurementBySystemId(id);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(systemRepository, times(1)).findById(anyLong());
+			verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
+			verify(qoSIntraMeasurementPingRepository, times(0)).findByMeasurement(any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPingMeasurementBySystemIdFindByMeasurementThrowsException() {
+
+		final long id = 1L;
+		final System system = getSystemForTest();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		when(systemRepository.findById(anyLong())).thenReturn(Optional.of(system));
+		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
+		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenThrow(HibernateException.class);
+
+		try {
+
+			qoSDBService.getPingMeasurementBySystemId(id);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(systemRepository, times(1)).findById(anyLong());
+			verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
+			verify(qoSIntraMeasurementPingRepository, times(1)).findByMeasurement(any());
 
 			throw ex;
 		}
