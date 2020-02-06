@@ -1024,6 +1024,36 @@ public class QoSDBServiceTest {
 	}
 
 	//=================================================================================================
+	// Tests of updatePingMeasurement
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void testUpdatePingMeasurement() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		calculations.setAvailable(true);
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+		pingMeasurement.setAvailable(true);
+
+		final ArgumentCaptor<QoSIntraPingMeasurement> valueCapture = ArgumentCaptor.forClass(QoSIntraPingMeasurement.class);
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(valueCapture.capture())).thenReturn(pingMeasurement);
+		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+
+		verify(qoSIntraMeasurementPingRepository, times(1)).saveAndFlush(any());
+
+		final QoSIntraPingMeasurement captured = valueCapture.getValue();
+		assertTrue( calculations.isAvailable() == captured.isAvailable());
+
+	}
+
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
