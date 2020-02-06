@@ -1027,7 +1027,6 @@ public class QoSDBServiceTest {
 	// Tests of updatePingMeasurement
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void testUpdatePingMeasurement() {
 
@@ -1042,7 +1041,6 @@ public class QoSDBServiceTest {
 		final ArgumentCaptor<QoSIntraPingMeasurement> valueCapture = ArgumentCaptor.forClass(QoSIntraPingMeasurement.class);
 
 		when(qoSIntraMeasurementPingRepository.saveAndFlush(valueCapture.capture())).thenReturn(pingMeasurement);
-		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
 
 		qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
 
@@ -1051,6 +1049,135 @@ public class QoSDBServiceTest {
 		final QoSIntraPingMeasurement captured = valueCapture.getValue();
 		assertTrue( calculations.isAvailable() == captured.isAvailable());
 
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testUpdatePingMeasurementSaveAndFlushThrowsException() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		calculations.setAvailable(true);
+
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+		pingMeasurement.setAvailable(true);
+
+		final ArgumentCaptor<QoSIntraPingMeasurement> valueCapture = ArgumentCaptor.forClass(QoSIntraPingMeasurement.class);
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(valueCapture.capture())).thenThrow(HibernateException.class);
+
+		try {
+
+			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraMeasurementPingRepository, times(1)).saveAndFlush(any());
+
+			final QoSIntraPingMeasurement captured = valueCapture.getValue();
+			assertTrue( calculations.isAvailable() == captured.isAvailable());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdatePingMeasurementWithNullMeasurementParameter() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = null;//getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		try {
+
+			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("QoSIntraMeasurement" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdatePingMeasurementWithNullCalculationsParameter() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = null;//getCalculationsForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		try {
+
+			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdatePingMeasurementWithNullPingMeasurementParameter() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final QoSIntraPingMeasurement pingMeasurement = null;//getQosIntraPingMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		try {
+
+			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("QoSIntraPingMeasurement" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testUpdatePingMeasurementWithNullAroundNowParameter() {
+
+		final ZonedDateTime aroundNow = null;//ZonedDateTime.now();
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+		final QoSIntraPingMeasurement pingMeasurement = getQosIntraPingMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
+
+		try {
+
+			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("ZonedDateTime" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).saveAndFlush(any());
+
+			throw ex;
+		}
 	}
 
 	//=================================================================================================
