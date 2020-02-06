@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.criteria.CriteriaBuilder.In;
+
 import org.hibernate.HibernateException;
 import org.icmp4j.IcmpPingResponse;
 import org.junit.Test;
@@ -24,9 +26,16 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.database.entity.OrchestratorStore;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
@@ -1278,6 +1287,102 @@ public class QoSDBServiceTest {
 	}
 
 	//=================================================================================================
+	// Tests of getPingMeasurementResponse
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPingMeasurementResponse() {
+
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = CommonConstants.COMMON_FIELD_NAME_ID;
+
+		final Page<QoSIntraPingMeasurement> pageResponse =  getPageOfPingMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.findAll(any(PageRequest.class))).thenReturn(pageResponse);
+
+		qoSDBService.getPingMeasurementResponse(page, size, direction, sortField);
+
+		verify(qoSIntraMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
+
+	}
+
+	//=================================================================================================
+	// Tests of getPingMeasurementPage
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPingMeasurementPage() {
+
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = CommonConstants.COMMON_FIELD_NAME_ID;
+
+		final Page<QoSIntraPingMeasurement> pageResponse =  getPageOfPingMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.findAll(any(PageRequest.class))).thenReturn(pageResponse);
+
+		qoSDBService.getPingMeasurementPage(page, size, direction, sortField);
+
+		verify(qoSIntraMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testGetPingMeasurementPageWithInvalidSortField() {
+
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = "invalid_sort_field";
+
+		final Page<QoSIntraPingMeasurement> pageResponse =  getPageOfPingMeasurementForTest();
+
+		when(qoSIntraMeasurementPingRepository.findAll(any(PageRequest.class))).thenReturn(pageResponse);
+
+		try {
+
+			qoSDBService.getPingMeasurementPage(page, size, direction, sortField);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE));
+			verify(qoSIntraMeasurementPingRepository, times(0)).findAll(any(PageRequest.class));
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testGetPingMeasurementPagefindAllThrowsException() {
+
+		final int page = 0;
+		final int size = 0;
+		final Direction direction = Direction.ASC;
+		final String sortField = "invalid_sort_field";
+
+		when(qoSIntraMeasurementPingRepository.findAll(any(PageRequest.class))).thenThrow(HibernateException.class);
+
+		try {
+
+			qoSDBService.getPingMeasurementPage(page, size, direction, sortField);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
+
+			throw ex;
+		}
+
+	}
+
+	//=================================================================================================
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
@@ -1393,5 +1498,21 @@ public class QoSDBServiceTest {
 				0);//lostPerMeasurementPercent);
 
 		return calculatiions;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private PageImpl<QoSIntraMeasurement> getPageOfMeasurementForTest() {
+
+		final List<QoSIntraMeasurement> meausrementList = List.of(getQoSIntraMeasurementForTest());
+
+		return new PageImpl<QoSIntraMeasurement>(meausrementList);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private PageImpl<QoSIntraPingMeasurement> getPageOfPingMeasurementForTest() {
+
+		final List<QoSIntraPingMeasurement> pingMeausrementList = getQosIntraPingMeasurementListForTest();
+
+		return new PageImpl<QoSIntraPingMeasurement>(pingMeausrementList);
 	}
 }
