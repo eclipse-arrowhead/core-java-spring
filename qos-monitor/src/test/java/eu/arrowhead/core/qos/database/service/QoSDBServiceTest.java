@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
+import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
@@ -638,6 +639,25 @@ public class QoSDBServiceTest {
 			verify(qoSIntraMeasurementPingRepository, times(1)).findByMeasurement(any());
 			throw ex;
 		}
+
+	}
+
+	//=================================================================================================
+	// Tests of logMeasurementToDB
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testLogMeasurementToDB() {
+
+		final String address = "address";
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final PingMeasurementCalculationsDTO calculations = getCalculationsForTest();
+
+		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(QoSIntraPingMeasurementLog.class);
+
+		qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+
+		verify(qoSIntraPingMeasurementLogRepository, times(1)).saveAndFlush(any());
 
 	}
 
