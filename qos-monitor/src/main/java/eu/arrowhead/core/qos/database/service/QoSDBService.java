@@ -240,6 +240,14 @@ public class QoSDBService {
 			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("logMeasurementDetailsToDB started...");
 
+		if (responseList == null || responseList.isEmpty()) {
+			throw new InvalidParameterException("List<IcmpPingResponse>" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		} else if (measurementLogSaved == null) {
+			throw new InvalidParameterException("QoSIntraPingMeasurementLog" + NULL_ERROR_MESSAGE);
+		} else if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
 		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = new ArrayList<>(responseList.size());
 
 		int measurementSequenece = 0;
