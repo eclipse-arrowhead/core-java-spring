@@ -828,6 +828,201 @@ public class QoSDBServiceTest {
 
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementDetailsToDBWithNullResponseListParameter() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final List<IcmpPingResponse> responseList = null;//getResponseListForTest();
+		final QoSIntraPingMeasurementLog measurementLogSaved = new QoSIntraPingMeasurementLog();
+
+		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = List.of(new QoSIntraPingMeasurementLogDetails());
+
+		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(any())).thenReturn(measurementLogDetailsList);
+		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		try {
+
+			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("List<IcmpPingResponse>" + EMPTY_OR_NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).saveAll(any());
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).flush();
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementDetailsToDBWithEmptyResponseListParameter() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final List<IcmpPingResponse> responseList = List.of();//getResponseListForTest();
+		final QoSIntraPingMeasurementLog measurementLogSaved = new QoSIntraPingMeasurementLog();
+
+		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = List.of(new QoSIntraPingMeasurementLogDetails());
+
+		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(any())).thenReturn(measurementLogDetailsList);
+		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		try {
+
+			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("List<IcmpPingResponse>" + EMPTY_OR_NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).saveAll(any());
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).flush();
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementDetailsToDBWithNullMeasurementLogSavedParameter() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+		final QoSIntraPingMeasurementLog measurementLogSaved = null;//new QoSIntraPingMeasurementLog();
+
+		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = List.of(new QoSIntraPingMeasurementLogDetails());
+
+		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(any())).thenReturn(measurementLogDetailsList);
+		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		try {
+
+			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("QoSIntraPingMeasurementLog" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).saveAll(any());
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).flush();
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = InvalidParameterException.class)
+	public void testLogMeasurementDetailsToDBWithNullAroundNowParameter() {
+
+		final ZonedDateTime aroundNow = null;//ZonedDateTime.now();
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+		final QoSIntraPingMeasurementLog measurementLogSaved = new QoSIntraPingMeasurementLog();
+
+		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = List.of(new QoSIntraPingMeasurementLogDetails());
+
+		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(any())).thenReturn(measurementLogDetailsList);
+		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		try {
+
+			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains("ZonedDateTime" + NULL_ERROR_MESSAGE));
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).saveAll(any());
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).flush();
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = ArrowheadException.class)
+	public void testLogMeasurementDetailsToDBSaveAllThrowsException() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+		final QoSIntraPingMeasurementLog measurementLogSaved = new QoSIntraPingMeasurementLog();
+
+		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
+
+		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(valueCapture.capture())).thenThrow(HibernateException.class);
+		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		try {
+
+			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(1)).saveAll(any());
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(0)).flush();
+
+			final List<QoSIntraPingMeasurementLogDetails> captured = valueCapture.getValue();
+			assertEquals(responseList.size(), captured.size());
+			for (final QoSIntraPingMeasurementLogDetails qoSIntraPingMeasurementLogDetails : captured) {
+
+				assertNotNull(qoSIntraPingMeasurementLogDetails.getMeasurementLog());
+				assertNotNull(qoSIntraPingMeasurementLogDetails.isSuccessFlag());
+				assertNotNull(qoSIntraPingMeasurementLogDetails.getMeasuredAt());
+				
+			}
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test(expected = ArrowheadException.class)
+	public void testLogMeasurementDetailsToDBFlushThrowsException() {
+
+		final ZonedDateTime aroundNow = ZonedDateTime.now();
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+		final QoSIntraPingMeasurementLog measurementLogSaved = new QoSIntraPingMeasurementLog();
+
+		final ArgumentCaptor<List> valueCapture = ArgumentCaptor.forClass(List.class);
+		final List<QoSIntraPingMeasurementLogDetails> measurementLogDetailsList = List.of(new QoSIntraPingMeasurementLogDetails());
+
+		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(valueCapture.capture())).thenReturn(measurementLogDetailsList);
+		doThrow(HibernateException.class).when(qoSIntraPingMeasurementLogDetailsRepository).flush();
+
+		try {
+
+			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+
+		} catch (final Exception ex) {
+
+			assertTrue(ex.getMessage().contains(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(1)).saveAll(any());
+			verify(qoSIntraPingMeasurementLogDetailsRepository, times(1)).flush();
+
+			final List<QoSIntraPingMeasurementLogDetails> captured = valueCapture.getValue();
+			assertEquals(responseList.size(), captured.size());
+			for (final QoSIntraPingMeasurementLogDetails qoSIntraPingMeasurementLogDetails : captured) {
+
+				assertNotNull(qoSIntraPingMeasurementLogDetails.getMeasurementLog());
+				assertNotNull(qoSIntraPingMeasurementLogDetails.isSuccessFlag());
+				assertNotNull(qoSIntraPingMeasurementLogDetails.getMeasuredAt());
+				
+			}
+
+			throw ex;
+		}
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
