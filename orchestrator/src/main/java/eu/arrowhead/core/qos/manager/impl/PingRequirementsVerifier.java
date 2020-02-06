@@ -23,7 +23,8 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	//=================================================================================================
 	// members
 	
-	private static final boolean verifyNotMeasuredSystem = true; // result of verify if a system has no ping records
+	@Value(CoreCommonConstants.$QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT)
+	private boolean verifyNotMeasuredSystem; // result of verify if a system has no ping records
 	
 	@Value(CoreCommonConstants.$QOS_PING_MEASUREMENT_CACHE_THRESHOLD_WD)
 	private int pingMeasurementCacheThreshold;
@@ -180,7 +181,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		final String valueStr = qosRequirements.get(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD);
 		try {
 			final int value = Integer.parseInt(valueStr);
-			if (value <= 0) {
+			if (value < 0) {
 				throw new InvalidParameterException(OrchestrationFormRequestDTO.QOS_REQUIREMENT_JITTER_THRESHOLD + " has invalid value: " + valueStr);
 			}
 			
@@ -197,7 +198,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		final String valueStr = qosRequirements.get(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS);
 		try {
 			final int value = Integer.parseInt(valueStr);
-			if (value <= 0) {
+			if (value < 0) {
 				throw new InvalidParameterException(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS + " has invalid value: " + valueStr);
 			}
 			
@@ -214,7 +215,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		final String valueStr = qosRequirements.get(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS);
 		try {
 			final int value = Integer.parseInt(valueStr);
-			if (value <= 0) {
+			if (value < 0) {
 				throw new InvalidParameterException(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS + " has invalid value: " + valueStr);
 			}
 			
@@ -245,6 +246,13 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	//-------------------------------------------------------------------------------------------------
 	private PingMeasurementResponseDTO getPingMeasurementFromQoSMonitor(final long systemId) {
 		logger.debug("getPingMeasurementFromQoSMonitor started...");
-		return orchestrationDriver.getPingMeasurement(systemId);
+		
+		final PingMeasurementResponseDTO measurement = orchestrationDriver.getPingMeasurement(systemId);
+		
+		if (measurement.hasRecord() && measurement.isAvailable()) { // only caching when there are some data
+			pingMeasurementCache.put(systemId, measurement);
+		}
+		
+		return measurement;
 	}
 }
