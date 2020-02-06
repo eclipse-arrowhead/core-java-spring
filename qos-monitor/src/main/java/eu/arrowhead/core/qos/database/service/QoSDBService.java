@@ -398,44 +398,28 @@ public class QoSDBService {
 		try {
 
 			systemOptional = systemRepository.findById(id);
+			if (systemOptional.isPresent()) {
+				system = systemOptional.get();
+			}else {
+				throw new InvalidParameterException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
+			}
 
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
+			final QoSIntraMeasurement measurement;
+			final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+			if (qoSIntraMeasurementOptional.isEmpty()) {
+	
+				return null;
+			}else {
+				 measurement = qoSIntraMeasurementOptional.get();
+			}
 
-		if (systemOptional.isPresent()) {
-			system = systemOptional.get();
-		}else {
-			throw new ArrowheadException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
-		}
-
-		final QoSIntraMeasurement measurement;
-		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional;
-		try {
-
-			qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
-
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-		if (qoSIntraMeasurementOptional.isEmpty()) {
-
-			return null;
-		}else {
-			 measurement = qoSIntraMeasurementOptional.get();
-		}
-
-		try {
 			final Optional<QoSIntraPingMeasurement> measurementOptional = qoSIntraMeasurementPingRepository.findByMeasurement(measurement);
-			if (measurementOptional.isPresent()) {
-
-				return measurementOptional.get();
-
-			} else {
+			if (measurementOptional.isEmpty()) {
 
 				return null;
+			} else {
+
+				return measurementOptional.get();
 			}
 		} catch (final InvalidParameterException ex) {
 			throw ex;
