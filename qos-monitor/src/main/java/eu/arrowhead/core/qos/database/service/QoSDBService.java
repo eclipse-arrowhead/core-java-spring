@@ -203,6 +203,14 @@ public class QoSDBService {
 	public QoSIntraPingMeasurementLog logMeasurementToDB(final String address, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("logMeasurementToDB started...");
 
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		} else if (calculations == null) {
+			throw new InvalidParameterException("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE);
+		} else if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
 		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
 		measurementLog.setMeasuredSystemAddress(address);
 		measurementLog.setAvailable(calculations.isAvailable());
