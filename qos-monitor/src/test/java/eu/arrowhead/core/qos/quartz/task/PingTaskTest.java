@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -118,10 +119,7 @@ public class PingTaskTest {
 
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
-		when(pingMeasurementProperties.getTimeToRepeat()).thenReturn(TIME_TO_REPEAT_PING);
-		when(pingMeasurementProperties.getPacketSize()).thenReturn(32);
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getRest()).thenReturn(1000);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
@@ -145,6 +143,17 @@ public class PingTaskTest {
 		verify(logger, atLeastOnce()).debug(any(String.class));
 		final List<String> debugMessages = debugValueCapture.getAllValues();
 		assertNotNull(debugMessages);
+
+		verify(arrowheadContext, times(2)).containsKey(anyString());
+		verify(arrowheadContext, times(1)).get(anyString());
+		verify(httpService, times(1)).sendRequest(any(), any(), any());
+		verify(pingMeasurementProperties, times(1)).getTimeout();
+		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
+		verify(qoSDBService, atLeastOnce()).getMeasurement(any());
+
+		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
 	}
 
 	//=================================================================================================
@@ -237,7 +246,18 @@ public class PingTaskTest {
 
 		final List<IcmpPingResponse> responseList = new ArrayList<>();
 		for (int i = 0; i < TIME_TO_REPEAT_PING; i++) {
-			responseList.add(getIcmpPingResponse());
+
+			if (i%2 == 0) {
+				final IcmpPingResponse pingResponse = getIcmpPingResponse();
+				pingResponse.setSuccessFlag(false);
+				pingResponse.setTimeoutFlag(true);
+				pingResponse.setRtt(0);
+				pingResponse.setDuration(0);
+
+				responseList.add(pingResponse);
+			}else {
+				responseList.add(getIcmpPingResponse());
+			}
 		}
 
 		return responseList;
