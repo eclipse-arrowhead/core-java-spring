@@ -41,6 +41,7 @@ import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
+import eu.arrowhead.core.qos.service.PingService;
 
 @Component
 @DisallowConcurrentExecution
@@ -57,6 +58,9 @@ public class PingTask implements Job {
 
 	@Autowired
 	private PingMeasurementProperties pingMeasurementProperties;
+
+	@Autowired
+	private PingService pingService;
 
 	@Autowired
 	private QoSDBService qoSDBService;
@@ -203,7 +207,7 @@ public class PingTask implements Job {
 
 		final String address = systemResponseDTO.getAddress();
 
-		final List<IcmpPingResponse> responseList = getPingResponseList(address);
+		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
 
 		final QoSIntraMeasurement measurement = qoSDBService.getMeasurement(systemResponseDTO);
 		handlePingMeasurement(measurement, responseList, aroundNow);
@@ -281,43 +285,6 @@ public class PingTask implements Job {
 		}
 
 		throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> getPingResponseList(final String address) {
-		logger.debug("getPingResponseList started...");
-
-		final List<IcmpPingResponse> responseList = new ArrayList<>(pingMeasurementProperties.getTimeToRepeat());
-		try {
-			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest ();
-			request.setHost (address);
-			request.setTimeout(pingMeasurementProperties.getTimeout());
-			request.setPacketSize(pingMeasurementProperties.getPacketSize());
-
-			for (int count = 0; count < pingMeasurementProperties.getTimeToRepeat(); count ++) {
-				IcmpPingResponse response;
-				try {
-					response = IcmpPingUtil.executePingRequest (request);
-					final String formattedResponse = IcmpPingUtil.formatResponse (response);
-					logger.debug(formattedResponse);
-
-					responseList.add(response);
-				} catch (final Exception ex) {
-					response = new IcmpPingResponse();
-					response.setErrorMessage(ex.getMessage());
-					response.setSuccessFlag(false);
-					response.setThrowable(ex);
-
-					responseList.add(response);
-				}
-
-				Thread.sleep (pingMeasurementProperties.getRest());
-			}
-		} catch ( final InterruptedException | IllegalArgumentException ex) {
-			logger.debug("" + ex.getMessage());
-		}
-
-		return responseList;
 	}
 
 }
