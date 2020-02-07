@@ -64,12 +64,11 @@ public class HistorianService {
   int serviceToID(String systemName, String serviceName, Connection conn) {
     int id=-1;
 
-    Statement stmt = null;
+    PreparedStatement stmt;
     try {
-      stmt = conn.createStatement();
-      String sql;
-      sql = "SELECT id FROM dmhist_services WHERE system_name='"+systemName+"' AND service_name='"+serviceName+"' LIMIT 1;";
-      ResultSet rs = stmt.executeQuery(sql);
+      String sql = "SELECT id FROM dmhist_services WHERE system_name='"+systemName+"' AND service_name='"+serviceName+"' LIMIT 1;";
+      stmt = conn.prepareStatement(sql);
+      ResultSet rs = stmt.executeQuery();
 
       rs.next();
       id  = rs.getInt("id");
@@ -91,10 +90,10 @@ public class HistorianService {
     Connection conn = null;
     try {
       conn = getConnection();
-      Statement stmt = conn.createStatement();
       String sql = "SELECT DISTINCT(system_name) FROM dmhist_services;";
+      PreparedStatement stmt = conn.prepareStatement(sql);
 
-      ResultSet rs = stmt.executeQuery(sql);
+      ResultSet rs = stmt.executeQuery();
       while(rs.next() == true) {
 	ret.add(rs.getString(1));
       }
@@ -156,10 +155,10 @@ public class HistorianService {
     Connection conn = null;
     try {
       conn = getConnection();
-      Statement stmt = conn.createStatement();
       String sql = "SELECT DISTINCT(service_name) FROM dmhist_services WHERE system_name='"+systemName+"';";
+      PreparedStatement stmt = conn.prepareStatement(sql);
 
-      ResultSet rs = stmt.executeQuery(sql);
+      ResultSet rs = stmt.executeQuery();
       while(rs.next() == true) {
 	ret.add(rs.getString(1));
       }
@@ -341,15 +340,14 @@ public class HistorianService {
       if (to == -1)
 	  to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that we created in the future
 
-      Statement stmt = conn.createStatement();
-
       String sql = "";
       if (signals != null)
 	  sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND n IN ("+signalss+") AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
       else
 	  sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
 
-      ResultSet rs = stmt.executeQuery(sql);
+      PreparedStatement stmt = conn.prepareStatement(sql);
+      ResultSet rs = stmt.executeQuery();
 
       Vector<SenML> messages = new Vector<SenML>();
       SenML hdr = new SenML();
