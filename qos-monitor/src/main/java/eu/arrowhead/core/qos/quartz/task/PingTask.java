@@ -1,6 +1,5 @@
 package eu.arrowhead.core.qos.quartz.task;
 
-import java.net.http.HttpConnectTimeoutException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.apache.http.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.icmp4j.IcmpPingRequest;
@@ -262,9 +260,11 @@ public class PingTask implements Job {
 
 			return response.getBody();
 
-		} catch (ClassCastException ex) {
-			throw new ArrowheadException("QoS Mointor can't find Service Registry Query All  URI.");
-		}
+		} catch (final Throwable ex) {
+
+			logger.debug("Exception:", ex.getMessage());
+			return null;
+		} 
 
 	}
 
