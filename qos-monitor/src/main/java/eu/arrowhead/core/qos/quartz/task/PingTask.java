@@ -1,7 +1,6 @@
 package eu.arrowhead.core.qos.quartz.task;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,9 +11,7 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.icmp4j.IcmpPingRequest;
 import org.icmp4j.IcmpPingResponse;
-import org.icmp4j.IcmpPingUtil;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -123,6 +120,8 @@ public class PingTask implements Job {
 		final int sentInThisPing = responseList.size();
 		Assert.isTrue(sentInThisPing > 0, "Sent in this Ping value must be greater than zero");
 
+		final int timeout = pingMeasurementProperties.getTimeout() + 1;
+
 		boolean available = false;
 		int receivedInThisPing = 0;
 		long maxResponseTime = 0;
@@ -153,7 +152,7 @@ public class PingTask implements Job {
 				++meanResponseTimeWithoutTimeoutMembersCount;
 
 			}else {
-				sumOfDurationForMeanResponseTimeWithTimeout += pingMeasurementProperties.getTimeout();
+				sumOfDurationForMeanResponseTimeWithTimeout += timeout;
 			}
 		}
 
@@ -172,7 +171,7 @@ public class PingTask implements Job {
 				 duration = icmpPingResponse.getDuration();
 				 sumOfDiffsForJitterWithoutTimeout += Math.pow( (duration - meanResponseTimeWithoutTimeout), 2);
 			}else {
-				duration = pingMeasurementProperties.getTimeout() + 1;
+				duration = timeout;
 			}
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
