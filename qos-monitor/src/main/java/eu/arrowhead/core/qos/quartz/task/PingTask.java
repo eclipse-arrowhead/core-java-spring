@@ -264,6 +264,10 @@ public class PingTask implements Job {
 
 			return response.getBody();
 
+		} catch (final ArrowheadException ex) {
+
+			throw ex;
+
 		} catch (final Throwable ex) {
 
 			logger.debug("Exception:", ex.getMessage());
@@ -280,11 +284,11 @@ public class PingTask implements Job {
 			try {
 				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL);
 			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("QoS Mointor can't find Service Registry Query All  URI.");
+				throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
 			}
+		}else {
+			throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
 		}
-
-		throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
 	}
 
 }
