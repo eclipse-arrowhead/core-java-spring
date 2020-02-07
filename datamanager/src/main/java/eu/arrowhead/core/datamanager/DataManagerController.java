@@ -154,26 +154,6 @@ public class DataManagerController {
 			ArrayList<String> services = historianService.getServicesFromSystem(systemName);
 			ret.setServices(services);
 			return new ResponseEntity<DataManagerServicesResponseDTO>(ret, org.springframework.http.HttpStatus.OK);
-
-		/*} else if(op.equals("create")){
-			String serviceName = req.getServiceName();
-			String srvType = req.getServiceType();
-
-			ArrayList<String> services = historianService.getServicesFromSystem(systemName);
-			for (String srv: services) {
-				if(srv.equals(serviceName)){
-					logger.info("  service:" +srv + " already exists");
-					throw new ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT);
-				}
-			}
-
-			boolean ret = historianService.addServiceForSystem(systemName, serviceName, srvType);
-			if (ret==true){
-				return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.OK);
-			} else {
-				return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
-			}*/
-
 		}
 		return new ResponseEntity<DataManagerServicesResponseDTO>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -192,7 +172,7 @@ public class DataManagerController {
 		@PathVariable(value="service", required=true) String serviceName,
 		@RequestParam MultiValueMap<String, String> params
 		) {
-		logger.info("DataManager:Get:Historian/"+systemName+"/"+serviceName);
+		//logger.info("DataManager:Get:Historian/"+systemName+"/"+serviceName);
 
 		int statusCode = 0;
 		
@@ -215,7 +195,7 @@ public class DataManagerController {
 				to = Long.parseLong(params.getFirst(par));
 			}
 		}
-		logger.info("getData requested with count: " + count);
+		//logger.info("getData requested with count: " + count);
 
 		List<SenML> ret = null;
 
