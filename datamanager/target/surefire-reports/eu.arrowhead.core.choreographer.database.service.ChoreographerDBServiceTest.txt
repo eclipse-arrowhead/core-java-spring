@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: eu.arrowhead.core.choreographer.database.service.ChoreographerDBServiceTest
--------------------------------------------------------------------------------
-Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.604 s - in eu.arrowhead.core.choreographer.database.service.ChoreographerDBServiceTest

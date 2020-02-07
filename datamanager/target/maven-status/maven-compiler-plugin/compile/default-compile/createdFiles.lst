@@ -1,8 +1,0 @@
-META-INF/spring-configuration-metadata.json
-eu/arrowhead/core/choreographer/security/ChoreographerAccessControlFilter.class
-eu/arrowhead/core/choreographer/swagger/ChoreographerSwaggerConfig.class
-eu/arrowhead/core/choreographer/database/service/ChoreographerDBService.class
-eu/arrowhead/core/choreographer/ChoreographerController.class
-eu/arrowhead/core/choreographer/ChoreographerMain.class
-eu/arrowhead/core/choreographer/ChoreographerApplicationInitListener.class
-eu/arrowhead/core/choreographer/security/ChoreographerSecurityConfig.class
