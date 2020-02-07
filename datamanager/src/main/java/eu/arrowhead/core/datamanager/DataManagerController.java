@@ -183,6 +183,7 @@ public class DataManagerController {
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(value= "/historian/{system}/{service}")
@@ -219,10 +220,13 @@ public class DataManagerController {
 		List<SenML> ret = null;
 
 		if(signals.size() == 0) {
-			ret = historianService.fetchEndpoint(serviceName, from, to, count, null);
+			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, count, null);
 		} else {
-			ret = historianService.fetchEndpoint(serviceName, from, to, count, signals);
+			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, count, signals);
 		}
+
+		if (ret == null)
+			throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND);
 
 		return ret;
 	}
@@ -252,7 +256,7 @@ public class DataManagerController {
 		if(head.getBt() == null)
 			head.setBt((double)System.currentTimeMillis() / 1000);
 
-		boolean statusCode = historianService.updateEndpoint(serviceName, sml);
+		boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
 		if (statusCode == false)
 			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
 	}

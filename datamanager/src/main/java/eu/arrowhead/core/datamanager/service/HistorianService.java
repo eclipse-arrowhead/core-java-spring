@@ -20,11 +20,13 @@ import java.util.*;
 import java.util.Vector;
 import java.util.Properties;
 
-import java.sql.DriverManager;
+import java.sql.*;
+/*import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.SQLException;*/
 
 
 @Service
@@ -59,14 +61,14 @@ public class HistorianService {
   }
 
 
-  int serviceToID(String serviceName, Connection conn) {
+  int serviceToID(String systemName, String serviceName, Connection conn) {
     int id=-1;
 
     Statement stmt = null;
     try {
       stmt = conn.createStatement();
       String sql;
-      sql = "SELECT id FROM dmhist_services WHERE service_name='"+serviceName+"' LIMIT 1;";
+      sql = "SELECT id FROM dmhist_services WHERE system_name='"+systemName+"' AND service_name='"+serviceName+"' LIMIT 1;";
       ResultSet rs = stmt.executeQuery(sql);
 
       rs.next();
@@ -90,7 +92,7 @@ public class HistorianService {
     try {
       conn = getConnection();
       Statement stmt = conn.createStatement();
-      String sql = "SELECT DISTINCT(service_name) FROM dmhist_services;";
+      String sql = "SELECT DISTINCT(system_name) FROM dmhist_services;";
 
       ResultSet rs = stmt.executeQuery(sql);
       while(rs.next() == true) {
@@ -115,13 +117,19 @@ public class HistorianService {
     Connection conn = null;
     try {
       conn = getConnection();
-      int id = serviceToID(serviceName, conn);
+      int id = serviceToID(systemName, serviceName, conn);
       if (id != -1) {
 	return false; //already exists
       } else {
-	Statement stmt = conn.createStatement();
-	String sql = "INSERT INTO dmhist_services(system_name, service_name, service_type) VALUES(\""+systemName+"\", \""+serviceName+"\", \""+serviceType+"\");";
-	int mid = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+	//Statement stmt = conn.createStatement();
+	//String sql = "INSERT INTO dmhist_services(system_name, service_name, service_type) VALUES(\""+systemName+"\", \""+serviceName+"\", \""+serviceType+"\");";
+	String sql = "INSERT INTO dmhist_services(system_name, service_name, service_type) " + 
+		"VALUES(?, ?, ?);";
+	PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	stmt.setString (1, systemName);
+	stmt.setString (2, serviceName);
+	stmt.setString (3, serviceType);
+	stmt.executeUpdate();
 	ResultSet rs = stmt.getGeneratedKeys();
 	rs.next();
 	id = rs.getInt(1);
@@ -173,13 +181,18 @@ public class HistorianService {
     Connection conn = null;
     try {
       conn = getConnection();
-      int id = serviceToID(serviceName, conn);
+      int id = serviceToID(systemName, serviceName, conn);
       if (id != -1) {
 	return true; //already exists
       } else {
-	Statement stmt = conn.createStatement();
-	String sql = "INSERT INTO dmhist_services(system_name, service_name) VALUES(\""+systemName+"\", \""+serviceName+"\");"; //bug: check name for SQL injection!
-	int mid = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+	//Statement stmt = conn.createStatement();
+	//String sql = "INSERT INTO dmhist_services(system_name, service_name) VALUES(\""+systemName+"\", \""+serviceName+"\");"; //bug: check name for SQL injection!
+	String sql = "INSERT INTO dmhist_services(system_name, service_name) "+
+		"VALUES(?,?);";
+	PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	stmt.setString (1, systemName);
+	stmt.setString (2, serviceName);
+	stmt.executeUpdate();
 	ResultSet rs = stmt.getGeneratedKeys();
 	rs.next();
 	id = rs.getInt(1);
@@ -201,9 +214,10 @@ public class HistorianService {
   }
 
 
-  public boolean updateEndpoint(String serviceName, Vector<SenML> msg) {
+  public boolean updateEndpoint(String systemName, String serviceName, Vector<SenML> msg) {
     boolean ret = true;
 
+    double bt = msg.get(0).getBt();
     double maxTs = maxTs(msg);
     double minTs = minTs(msg);
     //logger.debug("bt(msg): "+(msg.get(0).getBt())+", minTs(msg): "+minTs+", maxTs(msg): " + maxTs);
@@ -211,11 +225,23 @@ public class HistorianService {
     Connection conn = null;
     try {
       conn = getConnection();
-      int sid = serviceToID(serviceName, conn);
+      int sid = serviceToID(systemName, serviceName, conn);
       if (sid != -1) {
-	Statement stmt = conn.createStatement();
-	String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg, datastored) VALUES("+sid+", "+msg.get(0).getBt()+","+minTs+", "+maxTs+", '"+msg.toString()+"',NOW());";
-	int mid = stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+	//Statement stmt = conn.createStatement();
+	//String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg, datastored) VALUES("+sid+", "+msg.get(0).getBt()+","+minTs+", "+maxTs+", '"+msg.toString()+"',NOW());";
+	String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg) " +
+		"VALUES(?, ?, ?, ?, ?)";
+	//System.out.println("sql=" + sql);
+	PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	stmt.setLong(1, sid);
+	stmt.setDouble(2, (long)bt);
+	stmt.setDouble(3, (long)minTs);
+	stmt.setDouble(4, (long)maxTs);
+	stmt.setString(5, msg.toString());
+	//stmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
+
+	int mid = stmt.executeUpdate();
+	//System.out.println("mid=" + mid);
 	ResultSet rs = stmt.getGeneratedKeys();
 	rs.next();
 	mid = rs.getInt(1);
@@ -223,7 +249,7 @@ public class HistorianService {
 	stmt.close();
 
 	// that was the entire message, now insert each individual JSON object in the message
-	double bt = msg.get(0).getBt();
+	//double bt = msg.get(0).getBt();
 	String bu = msg.get(0).getBu();
 	for (SenML m : msg) {
 	  double t = 0;
@@ -236,7 +262,7 @@ public class HistorianService {
 	  if (m.getU() == null)
 	    m.setU(bu);
 
-	  String n = m.getN();
+	  /*String n = m.getN();
 	  String unit = null;
 	  if (m.getU() != null)
 	    unit = "'"+m.getU()+"'";
@@ -248,12 +274,26 @@ public class HistorianService {
 	    stringvalue = "'"+m.getVs()+"'";
 	  String boolvalue = null;
 	  if (m.getVb() != null)
-	    boolvalue = ""+m.getVb()+"";
+	    boolvalue = ""+m.getVb()+"";*/
 
-	  if (n != null) {
-	    sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, sv, vb) VALUES("+sid+", "+mid+", '"+n+"', " + t +", "+unit+", "+value+", "+stringvalue+", "+boolvalue+");";
-	    stmt = conn.createStatement();
-	    stmt.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+	  if (m.getN() != null) {
+	    sql = "INSERT INTO dmhist_entries(sid, mid, n, t, u, v, sv, vb) " + 
+		    //"VALUES("+sid+", "+mid+", '"+n+"', " + t +", "+unit+", "+value+", "+stringvalue+", "+boolvalue+");";
+		    "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+	    //stmt = conn.createStatement();
+	    stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	    stmt.setInt(1, sid);
+	    stmt.setInt(2, mid);
+	    stmt.setString(3, m.getN());
+	    stmt.setDouble(4, t);
+	    stmt.setString(5, m.getU());
+	    stmt.setDouble(6, m.getV());
+	    stmt.setString(7, m.getVs());
+	    if (m.getVb() != null)
+	    	stmt.setBoolean(8, m.getVb());
+	    else
+	    	stmt.setNull(8, java.sql.Types.BOOLEAN);
+	    stmt.executeUpdate();
 	    rs = stmt.getGeneratedKeys();
 	    rs.close();
 	    stmt.close();
@@ -266,6 +306,7 @@ public class HistorianService {
       }
     } catch (SQLException e) {
       ret = false;
+      //System.out.println("Exception: " + e.toString() + "\n" + e.getStackTrace());
     } finally {
       try{
 	closeConnection(conn);
@@ -278,34 +319,35 @@ public class HistorianService {
   }
 
 
-  public Vector<SenML> fetchEndpoint(String serviceName, long from, long to, int count, Vector<String> signals) {
+  public Vector<SenML> fetchEndpoint(String systemName, String serviceName, long from, long to, int count, Vector<String> signals) {
     Connection conn = null;
     try {
       conn = getConnection();
-      int id = serviceToID(serviceName, conn);
+      int id = serviceToID(systemName, serviceName, conn);
       if (id == -1)
 	return null;
 
       String signalss = "";
       if (signals != null) {
-	for (String sig: signals) {
-	  signalss += ("'"+sig + "',");
-	}
-	signalss = signalss.substring(0, signalss.length()-1); //remove last ','
+	  signalss = String.join(", ", signals);
+	  /*for (String sig: signals) {
+	      signalss += ("'"+sig + "',");
+	  }*/
+	  signalss = signalss.substring(0, signalss.length()-1); 
       }
 
       if (from == -1)
-	from = 0;                                       //1970-01-01
+	  from = 0;                                       //1970-01-01
       if (to == -1)
-	to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // now()
+	  to = 1000 + (long)(System.currentTimeMillis() / 1000.0); // current timestamp - not ok to insert data that we created in the future
 
       Statement stmt = conn.createStatement();
 
       String sql = "";
       if (signals != null)
-	sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND n IN ("+signalss+") AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
+	  sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND n IN ("+signalss+") AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
       else
-	sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
+	  sql = "SELECT * FROM dmhist_entries WHERE sid="+id+" AND t >= "+from+" AND t <= "+to+" ORDER BY t DESC;";
 
       ResultSet rs = stmt.executeQuery(sql);
 
@@ -321,7 +363,9 @@ public class HistorianService {
 	msg.setN(rs.getString("n"));
 	msg.setU(rs.getString("u"));
 	msg.setV(rs.getDouble("v"));
-	msg.setVb(rs.getBoolean("vb"));
+	Boolean foo = rs.getBoolean("vb");
+	if (!rs.wasNull())
+	    msg.setVb(rs.getBoolean("vb"));
 
 	messages.add(msg);
 	count--;
@@ -330,7 +374,6 @@ public class HistorianService {
       rs.close();
       stmt.close();
 
-      // if no data, was found, just return the header element
       if (messages.size() == 1)
 	return messages;
 
@@ -348,6 +391,7 @@ public class HistorianService {
 
     } catch (SQLException e) {
       logger.debug(e.toString());
+      System.out.println(e.toString());
     } finally {
       try {
 	closeConnection(conn);
