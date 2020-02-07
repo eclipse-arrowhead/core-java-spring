@@ -707,8 +707,6 @@ public class PingTaskTest {
 
 		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
 
-		final List<IcmpPingResponse> responseList = getResponseListForTest();
-
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 
 		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
@@ -777,7 +775,7 @@ public class PingTaskTest {
 
 		final List<IcmpPingResponse> responseList = getResponseListForTest();
 
-		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+		//final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 
 		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
 
