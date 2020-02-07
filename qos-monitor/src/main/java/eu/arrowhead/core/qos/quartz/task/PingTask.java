@@ -1,5 +1,6 @@
 package eu.arrowhead.core.qos.quartz.task;
 
+import java.net.http.HttpConnectTimeoutException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.http.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.icmp4j.IcmpPingRequest;
@@ -81,6 +83,11 @@ public class PingTask implements Job {
 		}
 
 		final Set<SystemResponseDTO> systems = getSystemsToMeasure();
+		if (systems == null) {
+
+			return;
+		}
+
 		for (final SystemResponseDTO systemResponseDTO : systems) {
 
 			pingSystem(systemResponseDTO);
@@ -98,6 +105,10 @@ public class PingTask implements Job {
 		logger.debug("getSystemToMessure started...");
 
 		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
+		if(serviceRegistryListResponseDTO == null || serviceRegistryListResponseDTO.getData() == null ||  serviceRegistryListResponseDTO.getData().isEmpty()) {
+
+			return null;
+		}
 		final Set<SystemResponseDTO> systemList = serviceRegistryListResponseDTO.getData().stream().map(ServiceRegistryResponseDTO::getProvider).collect(Collectors.toSet());
 
 		return systemList;
@@ -251,7 +262,7 @@ public class PingTask implements Job {
 
 			return response.getBody();
 
-		} catch (final ClassCastException ex) {
+		} catch (ClassCastException ex) {
 			throw new ArrowheadException("QoS Mointor can't find Service Registry Query All  URI.");
 		}
 
