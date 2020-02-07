@@ -74,10 +74,11 @@ public class PingTask implements Job {
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		logger.debug("STARTED: ping  task");
+		logger.debug("STARTED: ping task");
 
 		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
 
+			logger.debug("Finished: ping task can not run if server is in standalon mode");
 			return;
 		}
 
@@ -93,7 +94,7 @@ public class PingTask implements Job {
 
 		}
 
-		logger.debug("Finished: ping  task");
+		logger.debug("Finished: ping task success");
 	}
 
 	//=================================================================================================
