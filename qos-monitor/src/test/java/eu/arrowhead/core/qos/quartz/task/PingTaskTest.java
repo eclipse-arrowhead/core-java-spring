@@ -2,6 +2,7 @@ package eu.arrowhead.core.qos.quartz.task;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -48,6 +49,8 @@ import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceSecurityType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.measurement.properties.PingMeasurementProperties;
@@ -83,6 +86,8 @@ public class PingTaskTest {
 
 	final static int TIME_TO_REPEAT_PING = 3;
 
+	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
+
 	//=================================================================================================
 	// methods
 
@@ -95,6 +100,8 @@ public class PingTaskTest {
 
 	//=================================================================================================
 	// Tests of execute
+
+	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testExecuteMeasurementIsInDB() {
 
@@ -137,25 +144,694 @@ public class PingTaskTest {
 			pingTask.execute(jobExecutionContext);
 
 		} catch (final JobExecutionException ex) {
-			assertTrue(false);
+			fail();
 		}
 
 		verify(logger, atLeastOnce()).debug(any(String.class));
 		final List<String> debugMessages = debugValueCapture.getAllValues();
 		assertNotNull(debugMessages);
 
-		verify(arrowheadContext, times(2)).containsKey(anyString());
-		verify(arrowheadContext, times(1)).get(anyString());
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
 		verify(qoSDBService, atLeastOnce()).getMeasurement(any());
 
 		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).updatePingMeasurement(any(), any(), any(), any());
 		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
 		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteMeasurementIsNotInDB() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		}
+
+		verify(logger, atLeastOnce()).debug(any(String.class));
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		assertNotNull(debugMessages);
+
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+		verify(httpService, times(1)).sendRequest(any(), any(), any());
+		verify(pingMeasurementProperties, times(1)).getTimeout();
+		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
+		verify(qoSDBService, atLeastOnce()).getMeasurement(any());
+
+		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteServerIsInStandalonMode() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(true);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		}
+
+		verify(logger, atLeastOnce()).debug(any(String.class));
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		assertNotNull(debugMessages);
+
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(0)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+		verify(arrowheadContext, times(0)).get(CoreCommonConstants.SR_QUERY_ALL);
+		verify(httpService, times(0)).sendRequest(any(), any(), any());
+		verify(pingMeasurementProperties, times(0)).getTimeout();
+		verify(pingService, times(0)).getPingResponseList(anyString());
+		verify(qoSDBService,times(0)).getMeasurement(any());
+
+		verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+		verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteNoSystemsToMeasure() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = new ServiceRegistryListResponseDTO();
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		}
+
+		verify(logger, atLeastOnce()).debug(any(String.class));
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		assertNotNull(debugMessages);
+
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+		verify(httpService, times(1)).sendRequest(any(), any(), any());
+		verify(pingMeasurementProperties, times(0)).getTimeout();
+		verify(pingService, times(0)).getPingResponseList(anyString());
+		verify(qoSDBService,times(0)).getMeasurement(any());
+
+		verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+		verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+	}
+
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteHttpServiceThrowsException() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		//final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+		//final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenThrow(NullPointerException.class);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+
+			fail();
+		}
+
+		verify(logger, atLeastOnce()).debug(any(String.class));
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		assertNotNull(debugMessages);
+
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+		verify(httpService, times(1)).sendRequest(any(), any(), any());
+		verify(pingMeasurementProperties, times(0)).getTimeout();
+		verify(pingService, times(0)).getPingResponseList(anyString());
+		verify(qoSDBService,times(0)).getMeasurement(any());
+
+		verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+		verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testExecuteServiceRegistryUriNotInContext() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(false);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final ArrowheadException ex) {
+
+			assertTrue(ex.getMessage().contains("QoS Mointor can't find Service Registry Query All URI."));
+
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+			verify(arrowheadContext, times(0)).get(CoreCommonConstants.SR_QUERY_ALL);
+			verify(httpService, times(0)).sendRequest(any(), any(), any());
+			verify(pingMeasurementProperties, times(0)).getTimeout();
+			verify(pingService, times(0)).getPingResponseList(anyString());
+			verify(qoSDBService,times(0)).getMeasurement(any());
+
+			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testExecuteServiceRegistryUriContextValueNotUriType() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenThrow(ClassCastException.class);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final ArrowheadException ex) {
+
+			assertTrue(ex.getMessage().contains("QoS Mointor can't find Service Registry Query All URI."));
+
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+			verify(httpService, times(0)).sendRequest(any(), any(), any());
+			verify(pingMeasurementProperties, times(0)).getTimeout();
+			verify(pingService, times(0)).getPingResponseList(anyString());
+			verify(qoSDBService,times(0)).getMeasurement(any());
+
+			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testExecuteSystemToMeasureHasNullAddressParameter() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOWithNullSystemAddressForTest();
+
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final InvalidParameterException ex) {
+
+			assertTrue(ex.getMessage().contains("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE));
+
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+			verify(httpService, times(1)).sendRequest(any(), any(), any());
+			verify(pingMeasurementProperties, times(0)).getTimeout();
+			verify(pingService, times(0)).getPingResponseList(anyString());
+			verify(qoSDBService,times(0)).getMeasurement(any());
+
+			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testExecuteSystemToMeasureHasEmptyAddressParameter() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOWithEmptySystemAddressForTest();
+
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final InvalidParameterException ex) {
+
+			assertTrue(ex.getMessage().contains("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE));
+
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+			verify(httpService, times(1)).sendRequest(any(), any(), any());
+			verify(pingMeasurementProperties, times(0)).getTimeout();
+			verify(pingService, times(0)).getPingResponseList(anyString());
+			verify(qoSDBService,times(0)).getMeasurement(any());
+
+			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testExecuteGetPingResponseListThrowsException() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenThrow(ArrowheadException.class);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final ArrowheadException ex) {
+
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+			verify(httpService, times(1)).sendRequest(any(), any(), any());
+			verify(pingService, times(1)).getPingResponseList(anyString());
+			verify(pingMeasurementProperties, times(0)).getTimeout();
+			verify(qoSDBService,times(0)).getMeasurement(any());
+
+			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+
+			throw ex;
+		}
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testExecuteGetMeasurementThrowsException() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenThrow(ArrowheadException.class);//thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final ArrowheadException ex) {
+
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+			verify(httpService, times(1)).sendRequest(any(), any(), any());
+			verify(pingService, times(1)).getPingResponseList(anyString());
+			verify(qoSDBService,times(1)).getMeasurement(any());
+			verify(pingMeasurementProperties, times(0)).getTimeout();
+
+			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+
+			throw ex;
+		}
+
+	}
 	//=================================================================================================
 	// assistant methods
 
@@ -177,6 +853,40 @@ public class PingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceRegistryListResponseDTOWithNullSystemAddressForTest() {
+
+		final int sizeOfResponse = 3;
+		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = new ServiceRegistryListResponseDTO();
+		final List<ServiceRegistryResponseDTO> responseList = new ArrayList<>(sizeOfResponse);
+
+		for (int i = 0; i < sizeOfResponse; i++) {
+			responseList.add(getServiceRegistryResponseDTOWithNullSystemAddressForTest());
+		}
+
+		serviceRegistryListResponseDTO.setCount(sizeOfResponse);
+		serviceRegistryListResponseDTO.setData(responseList);
+
+		return serviceRegistryListResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceRegistryListResponseDTOWithEmptySystemAddressForTest() {
+
+		final int sizeOfResponse = 3;
+		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = new ServiceRegistryListResponseDTO();
+		final List<ServiceRegistryResponseDTO> responseList = new ArrayList<>(sizeOfResponse);
+
+		for (int i = 0; i < sizeOfResponse; i++) {
+			responseList.add(getServiceRegistryResponseDTOWithEmptySystemAddressForTest());
+		}
+
+		serviceRegistryListResponseDTO.setCount(sizeOfResponse);
+		serviceRegistryListResponseDTO.setData(responseList);
+
+		return serviceRegistryListResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public ServiceRegistryResponseDTO getServiceRegistryResponseDTOForTest() {
 
 		final ServiceRegistryResponseDTO serviceRegistryResponseDTO = new ServiceRegistryResponseDTO();
@@ -184,6 +894,46 @@ public class PingTaskTest {
 		serviceRegistryResponseDTO.setId(1L);
 		serviceRegistryResponseDTO.setServiceDefinition(getServiceDefinitionResponseDTOForTest());
 		serviceRegistryResponseDTO.setProvider(getSystemResponseDTOForTest());
+		serviceRegistryResponseDTO.setServiceUri("serviceUri");
+		serviceRegistryResponseDTO.setEndOfValidity(null);
+		serviceRegistryResponseDTO.setSecure(ServiceSecurityType.CERTIFICATE);
+		serviceRegistryResponseDTO.setMetadata(null);
+		serviceRegistryResponseDTO.setVersion(1);
+		serviceRegistryResponseDTO.setInterfaces(List.of(getServiceInterfaceResponseDTOForTest()));
+		serviceRegistryResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+		serviceRegistryResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return serviceRegistryResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryResponseDTO getServiceRegistryResponseDTOWithNullSystemAddressForTest() {
+
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO = new ServiceRegistryResponseDTO();
+
+		serviceRegistryResponseDTO.setId(1L);
+		serviceRegistryResponseDTO.setServiceDefinition(getServiceDefinitionResponseDTOForTest());
+		serviceRegistryResponseDTO.setProvider(getSystemResponseDTOWithNullAddressForTest());
+		serviceRegistryResponseDTO.setServiceUri("serviceUri");
+		serviceRegistryResponseDTO.setEndOfValidity(null);
+		serviceRegistryResponseDTO.setSecure(ServiceSecurityType.CERTIFICATE);
+		serviceRegistryResponseDTO.setMetadata(null);
+		serviceRegistryResponseDTO.setVersion(1);
+		serviceRegistryResponseDTO.setInterfaces(List.of(getServiceInterfaceResponseDTOForTest()));
+		serviceRegistryResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+		serviceRegistryResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
+
+		return serviceRegistryResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryResponseDTO getServiceRegistryResponseDTOWithEmptySystemAddressForTest() {
+
+		final ServiceRegistryResponseDTO serviceRegistryResponseDTO = new ServiceRegistryResponseDTO();
+
+		serviceRegistryResponseDTO.setId(1L);
+		serviceRegistryResponseDTO.setServiceDefinition(getServiceDefinitionResponseDTOForTest());
+		serviceRegistryResponseDTO.setProvider(getSystemResponseDTOWithEmptyAddressForTest());
 		serviceRegistryResponseDTO.setServiceUri("serviceUri");
 		serviceRegistryResponseDTO.setEndOfValidity(null);
 		serviceRegistryResponseDTO.setSecure(ServiceSecurityType.CERTIFICATE);
@@ -219,6 +969,46 @@ public class PingTaskTest {
 				"authenticationInfo");
 
 		return system;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private System getSystemWithNullAddressForTest() {
+
+		final System system = new System(
+				"testSystem",
+				null,
+				12345,
+				"authenticationInfo");
+
+		return system;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private SystemResponseDTO getSystemResponseDTOWithNullAddressForTest() {
+
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(getSystemWithNullAddressForTest());
+
+		return systemResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private System getSystemWithEmptyAddressForTest() {
+
+		final System system = new System(
+				"testSystem",
+				"   ",
+				12345,
+				"authenticationInfo");
+
+		return system;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private SystemResponseDTO getSystemResponseDTOWithEmptyAddressForTest() {
+
+		final SystemResponseDTO systemResponseDTO = DTOConverter.convertSystemToSystemResponseDTO(getSystemWithEmptyAddressForTest());
+
+		return systemResponseDTO;
 	}
 
 	//-------------------------------------------------------------------------------------------------
