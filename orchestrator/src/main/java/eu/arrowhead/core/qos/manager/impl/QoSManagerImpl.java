@@ -45,7 +45,7 @@ public class QoSManagerImpl implements QoSManager {
 	public void init() {
 		verifiers.add(appContext.getBean(QoSVerifiers.SERVICE_TIME_VERIFIER, QoSVerifier.class));
 		verifiers.add(appContext.getBean(QoSVerifiers.PING_REQUIREMENTS_VERIFIER, QoSVerifier.class));
-		//TODO: add verifiers here
+		//TODO: add further verifiers here
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -130,6 +130,9 @@ public class QoSManagerImpl implements QoSManager {
 	public List<OrchestrationResultDTO> verifyServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
 		logger.debug("verifyServices started ...");
 		
+		Assert.notNull(orList, "'orList' is null.");
+		Assert.notNull(request, "'request' is null.");
+
 		final boolean needLockRelease = request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
 
 		final List<OrchestrationResultDTO> result = new ArrayList<>();
