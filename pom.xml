@@ -32,6 +32,7 @@
 	    <module>gateway</module>
 	    <module>choreographer</module>
 	    <module>deb-installer</module>
+	    <module>docker-all</module>
   	</modules>
   	
 	<properties>
