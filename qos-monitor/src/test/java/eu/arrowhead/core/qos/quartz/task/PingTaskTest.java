@@ -830,6 +830,77 @@ public class PingTaskTest {
 		}
 
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testExecuteWithEmptyResponseList() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getEmptyResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final IllegalArgumentException ex) {
+
+			assertTrue(ex.getMessage().contains("Sent in this Ping value must be greater than zero"));
+
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+			verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+			verify(httpService, times(1)).sendRequest(any(), any(), any());
+			verify(pingService, times(1)).getPingResponseList(anyString());
+			verify(qoSDBService,times(1)).getMeasurement(any());
+			verify(pingMeasurementProperties, times(0)).getTimeout();
+
+			verify(qoSDBService, times(0)).getPingMeasurementByMeasurement(any());
+			verify(qoSDBService, times(0)).createPingMeasurement(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementToDB(any(), any(), any());
+			verify(qoSDBService, times(0)).logMeasurementDetailsToDB(any(), any(), any());
+
+			throw ex;
+		}
+
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -1047,6 +1118,14 @@ public class PingTaskTest {
 				responseList.add(getIcmpPingResponse());
 			}
 		}
+
+		return responseList;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private List<IcmpPingResponse> getEmptyResponseListForTest() {
+
+		final List<IcmpPingResponse> responseList = List.of();
 
 		return responseList;
 	}
