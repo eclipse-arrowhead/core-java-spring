@@ -223,7 +223,7 @@ public class QoSMonitorControllerTest {
 	}
 
 	//=================================================================================================
-	// Test of getManagementPingMeasurementBySystemId
+	// Test of getPingMeasurementBySystemIdResponse
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
