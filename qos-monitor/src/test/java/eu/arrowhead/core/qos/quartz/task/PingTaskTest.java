@@ -1120,7 +1120,7 @@ public class PingTaskTest {
 		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
 		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
 
-		final List<IcmpPingResponse> responseList = get100LongResponseListWithIncementingResponseTimeForTest();
+		final List<IcmpPingResponse> responseList = get100LongResponseListWithIncementingResponseTimeAnd10PercentLossForTest();
 
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 
@@ -1189,7 +1189,7 @@ public class PingTaskTest {
 		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
 		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
 
-		final List<IcmpPingResponse> responseList = get100LongResponseListWithIncementingResponseTimeForTest();
+		final List<IcmpPingResponse> responseList = get100LongResponseListWithIncementingResponseTimeAnd10PercentLossForTest();
 
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 
@@ -1229,7 +1229,7 @@ public class PingTaskTest {
 
 		final PingMeasurementCalculationsDTO calculations = calculationsValueCapture.getValue();
 		assertNotNull(calculations);
-		assertTrue(100 == calculations.getMaxResponseTime());
+		assertTrue(90 == calculations.getMaxResponseTime());
 
 		verify(logger, atLeastOnce()).debug(any(String.class));
 		final List<String> debugMessages = debugValueCapture.getAllValues();
@@ -1471,16 +1471,25 @@ public class PingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> get100LongResponseListWithIncementingResponseTimeForTest() {
+	private List<IcmpPingResponse> get100LongResponseListWithIncementingResponseTimeAnd10PercentLossForTest() {
 
 		final List<IcmpPingResponse> responseList = new ArrayList<>();
-		for (int i = 1; i < 101; i++) {
+		for (int i = 1; i < 91; i++) {
 
 			final IcmpPingResponse pingResponse = getIcmpPingResponse();
 			pingResponse.setSuccessFlag(true);
 			pingResponse.setTimeoutFlag(false);
 			pingResponse.setRtt(i);
 			pingResponse.setDuration(i);
+
+			responseList.add(pingResponse);
+		}
+
+		for (int i = 0; i < 10; i++) {
+
+			final IcmpPingResponse pingResponse = getIcmpPingResponse();
+			pingResponse.setSuccessFlag(false);
+			pingResponse.setTimeoutFlag(true);
 
 			responseList.add(pingResponse);
 		}
