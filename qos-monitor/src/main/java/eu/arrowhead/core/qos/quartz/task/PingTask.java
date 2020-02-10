@@ -123,7 +123,6 @@ public class PingTask implements Job {
 
 		final int timeout = pingMeasurementProperties.getTimeout() + 1;
 
-
 		int receivedInThisPing = 0;
 		long maxResponseTime = 0;
 		long minResponseTime = Integer.MAX_VALUE;
