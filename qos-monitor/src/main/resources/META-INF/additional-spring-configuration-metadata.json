@@ -58,5 +58,10 @@
     "name": "ping_ttl_interval_minutes",
     "type": "java.lang.String",
     "description": "A description for 'ping_ttl_interval_minutes'"
+  },
+  {
+    "name": "ping.available_from_success_percet",
+    "type": "java.lang.Integer",
+    "description": "A description for 'ping.available_from_success_percet'"
   }
 ]}

@@ -123,20 +123,21 @@ public class PingTask implements Job {
 
 		final int timeout = pingMeasurementProperties.getTimeout() + 1;
 
-		boolean available = false;
+
 		int receivedInThisPing = 0;
 		long maxResponseTime = 0;
 		long minResponseTime = Integer.MAX_VALUE;
 		double sumOfDurationForMeanResponseTimeWithTimeout = 0;
 		double sumOfDurationForMeanResponseTimeWithoutTimeout = 0;
 		int meanResponseTimeWithoutTimeoutMembersCount = 0;
+		int availableCount = 0;
 
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
 			final boolean successFlag = icmpPingResponse.getSuccessFlag();
 
 			if (successFlag) {
-				available = true;
+				++availableCount;
 				++receivedInThisPing;
 				final long duration = icmpPingResponse.getDuration();
 
@@ -157,6 +158,7 @@ public class PingTask implements Job {
 			}
 		}
 
+		final boolean available = calculateAvailable(sentInThisPing, availableCount);
 		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
 
 		final double meanResponseTimeWithTimeout = sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
@@ -289,6 +291,24 @@ public class PingTask implements Job {
 		}else {
 			throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
 		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean calculateAvailable(final int sentInThisPing, final int availableCount) {
+		logger.debug("calculateAvailable started...");
+
+		final boolean available;
+		final int availableFromSuccessPercent = pingMeasurementProperties.getAvailableFromSuccessPercet();
+		final double availablePercent = 100 - ((sentInThisPing - availableCount) / (double)sentInThisPing) * 100 ;
+
+		if (availableFromSuccessPercent < Math.round(availablePercent)) {
+
+			available = true;
+		}else {
+			available = false;
+		}
+
+		return available;
 	}
 
 }
