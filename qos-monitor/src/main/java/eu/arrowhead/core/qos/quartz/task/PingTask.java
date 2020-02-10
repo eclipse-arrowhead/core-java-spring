@@ -223,7 +223,7 @@ public class PingTask implements Job {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList);
-		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional =  qoSDBService.getPingMeasurementByMeasurement(measurement);
+		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
 
