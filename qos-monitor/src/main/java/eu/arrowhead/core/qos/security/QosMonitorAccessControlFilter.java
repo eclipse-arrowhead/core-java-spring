@@ -33,7 +33,7 @@ public class QosMonitorAccessControlFilter extends CoreSystemAccessControlFilter
 		} else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT)) {
+		} else if (requestTarget.contains(CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT)) {
 			// Only the specified core systems can use these methods
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForGetMeasurements, requestTarget);
 		}
