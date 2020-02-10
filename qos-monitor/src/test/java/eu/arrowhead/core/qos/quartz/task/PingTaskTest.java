@@ -96,7 +96,7 @@ public class PingTaskTest {
 	//-------------------------------------------------------------------------------------------------
 	@Before
 	public void setUp() throws Exception {
-		logger = mock(Logger.class);		
+		logger = mock(Logger.class);
 		ReflectionTestUtils.setField(pingTask, "logger", logger);
 	}
 
