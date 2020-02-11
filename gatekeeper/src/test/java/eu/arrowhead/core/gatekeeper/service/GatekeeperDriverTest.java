@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.exception.ArrowheadException;
 
 @RunWith(SpringRunner.class)
@@ -36,6 +37,7 @@ public class GatekeeperDriverTest {
 	@Test(expected = ArrowheadException.class)
 	public void testOnApplicationEventNoCommonName() {
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)).thenReturn(false);
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -44,6 +46,7 @@ public class GatekeeperDriverTest {
 	public void testOnApplicationEventCommonNameWrongType() {
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME)).thenReturn(new Object());
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -53,6 +56,7 @@ public class GatekeeperDriverTest {
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_COMMON_NAME)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME)).thenReturn("gatekeeper.testcloud2.aitia.arrowhead.eu");
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(false);
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -63,6 +67,7 @@ public class GatekeeperDriverTest {
 		when(arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME)).thenReturn("gatekeeper.testcloud2.aitia.arrowhead.eu");
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY)).thenReturn("not a public key");
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -79,6 +84,7 @@ public class GatekeeperDriverTest {
 			public String getAlgorithm() { return null; }
 		});
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(false);
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -96,6 +102,7 @@ public class GatekeeperDriverTest {
 		});
 		when(arrowheadContext.containsKey(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn(true);
 		when(arrowheadContext.get(CommonConstants.SERVER_PRIVATE_KEY)).thenReturn("not a private key");
+		
 		testingObject.onApplicationEvent(null);
 	}
 	
@@ -117,7 +124,10 @@ public class GatekeeperDriverTest {
 			public byte[] getEncoded() { return null; }
 			public String getAlgorithm() { return null;	}
 		});
+		ReflectionTestUtils.setField(testingObject, "sslProps", new SSLProperties());
+		
 		testingObject.onApplicationEvent(null);
+		
 		final Object relayClient = ReflectionTestUtils.getField(testingObject, "relayClient");
 		Assert.assertNotNull(relayClient);
 	}

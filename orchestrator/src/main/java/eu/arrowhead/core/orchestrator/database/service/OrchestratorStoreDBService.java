@@ -262,36 +262,29 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestratorStore> getOrchestratorStoresByConsumerIdAndServiceDefinition(final long consumerSystemId,
-			final String serviceDefinitionName) {
+	public List<OrchestratorStore> getOrchestratorStoresByConsumerIdAndServiceDefinition(final long consumerSystemId, final String serviceDefinitionName) {
 		logger.debug("getOrchestratorStoresByConsumerIdAndServiceDefinition started...");
 		
-		if ( consumerSystemId < 1) {
+		if (consumerSystemId < 1) {
 			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		if ( Utilities.isEmpty(serviceDefinitionName)) {
+		if (Utilities.isEmpty(serviceDefinitionName)) {
 			throw new InvalidParameterException("ServiceDefinitionId " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
 		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
-		if ( consumerOption.isEmpty() ) {
+		if (consumerOption.isEmpty()) {
 			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
-		if ( serviceDefinitionOption.isEmpty() ) {
+		if (serviceDefinitionOption.isEmpty()) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		try {		
-			
-			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(
-					consumerOption.get(), 
-					serviceDefinitionOption.get(),
-					Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY)
-					);			
-			
+			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinition(consumerOption.get(), serviceDefinitionOption.get(), Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY));			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -299,46 +292,40 @@ public class OrchestratorStoreDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<OrchestratorStore> getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(final long consumerSystemId,
-			final String serviceDefinitionName, final String serviceInterfaceName) {
+	public List<OrchestratorStore> getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(final long consumerSystemId, final String serviceDefinitionName,
+																											final String serviceInterfaceName) {
 		logger.debug("getOrchestratorStoresByConsumerIdAndServiceDefinition started...");
 		
-		if ( consumerSystemId < 1) {
+		if (consumerSystemId < 1) {
 			throw new InvalidParameterException("ConsumerSystemId " + LESS_THAN_ONE_ERROR_MESSAGE);
 		}
 		
-		if ( Utilities.isEmpty(serviceDefinitionName)) {
+		if (Utilities.isEmpty(serviceDefinitionName)) {
 			throw new InvalidParameterException("ServiceDefinitionName " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
-		if ( Utilities.isEmpty(serviceInterfaceName)) {
+		if (Utilities.isEmpty(serviceInterfaceName)) {
 			throw new InvalidParameterException("ServiceInterface " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
 		
 		final Optional<System> consumerOption = systemRepository.findById(consumerSystemId);
-		if ( consumerOption.isEmpty() ) {
+		if (consumerOption.isEmpty()) {
 			throw new InvalidParameterException("ConsumerSystemId " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceDefinition> serviceDefinitionOption = serviceDefinitionRepository.findByServiceDefinition(serviceDefinitionName.toLowerCase().trim());
-		if ( serviceDefinitionOption.isEmpty() ) {
+		if (serviceDefinitionOption.isEmpty()) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		final Optional<ServiceInterface> serviceInterfaceOption = serviceInterfaceRepository.findByInterfaceName(serviceInterfaceName);
-		if ( serviceInterfaceOption.isEmpty() ) {
+		if (serviceInterfaceOption.isEmpty()) {
 			throw new InvalidParameterException("ServiceDefinitionName " + NOT_IN_DB_ERROR_MESSAGE);
 		}
 		
 		try {		
-			
-			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(
-					consumerOption.get(), 
-					serviceDefinitionOption.get(),
-					serviceInterfaceOption.get(),
-					Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY)
-					);			
-			
+			return orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(consumerOption.get(),	serviceDefinitionOption.get(), serviceInterfaceOption.get(),
+																											  Sort.by(CoreCommonConstants.SORT_FIELD_PRIORITY));			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -447,13 +434,13 @@ public class OrchestratorStoreDBService {
 				throw new InvalidParameterException("OrchestratorStoreRequestDTOList " + EMPTY_OR_NULL_ERROR_MESSAGE);
 			}
 			
-			final Map<Long, Integer> modifiedPriorityMap = request.getPriorityMap();
+			final Map<Long,Integer> modifiedPriorityMap = request.getPriorityMap();
 			final List<OrchestratorStore> orchestratorStoreList = getInvolvedOrchestratorStoreListByPriorityMap(modifiedPriorityMap);	
-			
 			final System consumerSystemForPriorityMapValidation = orchestratorStoreList.get(0).getConsumerSystem();
 			final ServiceDefinition serviceDefinitionForPriorityMapValidation = orchestratorStoreList.get(0).getServiceDefinition();	
 			final ServiceInterface serviceInterfaceForPriorityMapValidation = orchestratorStoreList.get(0).getServiceInterface();
-			validateModifiedPriorityMapSize(consumerSystemForPriorityMapValidation,	serviceDefinitionForPriorityMapValidation, serviceInterfaceForPriorityMapValidation, modifiedPriorityMap.size());	
+			validateModifiedPriorityMapSize(consumerSystemForPriorityMapValidation,	serviceDefinitionForPriorityMapValidation, serviceInterfaceForPriorityMapValidation, modifiedPriorityMap.size());
+			
 			refreshOrchestratorStoreListByModifiedPriorityMap(orchestratorStoreList, modifiedPriorityMap);
 		} catch (final InvalidParameterException ex) {
 			throw ex;
@@ -649,13 +636,11 @@ public class OrchestratorStoreDBService {
 		if (Utilities.isEmpty(cloudRequestDTO.getOperator())) {
 			throw new InvalidParameterException("Cloud.Operator " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
-		
 		final String operator = cloudRequestDTO.getOperator().trim().toLowerCase();
 		
 		if (Utilities.isEmpty(cloudRequestDTO.getName())) {
 			throw new InvalidParameterException("Cloud.Name " + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
-		
 		final String cloudName = cloudRequestDTO.getName().trim().toLowerCase();
 		
 		final Optional<Cloud> cloudOptional = cloudRepository.findByOperatorAndName(operator, cloudName);
@@ -745,8 +730,7 @@ public class OrchestratorStoreDBService {
 		logger.debug("validateModifiedPriorityMapSize started...");
 		
 		final List<OrchestratorStore> orchestratorStoreList = orchestratorStoreRepository.findAllByConsumerSystemAndServiceDefinitionAndServiceInterface(anyConsumerSystemForValidation,
-																																						 anyServiceDefinition,
-																																						 anyServiceInterface);
+																																						 anyServiceDefinition, anyServiceInterface);
 		if (orchestratorStoreList.isEmpty()) {
 			throw new InvalidParameterException("Priorities for consumerSystemId: " + anyConsumerSystemForValidation.getId() + ", serviceDefinitionId: " + anyServiceDefinition.getId() + 
 											    "and serviceInterfaceId: " + anyServiceInterface.getId() + NOT_IN_DB_ERROR_MESSAGE);
@@ -821,7 +805,6 @@ public class OrchestratorStoreDBService {
 		final List<OrchestratorStore> updatedOrchestratorStoreEntryList = new ArrayList<>();
 		for (final OrchestratorStore orchestratorStoreInList : orchestratorStoreList) {
 			final int actualPriority = orchestratorStoreInList.getPriority();
-			
 			if (actualPriority > priority) {
 				orchestratorStoreInList.setPriority(actualPriority - 1);
 				updatedOrchestratorStoreEntryList.add(orchestratorStoreInList);
@@ -946,7 +929,7 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreResponseDTO> getOrchestratorDTOListFromPage(final Page<OrchestratorStore> orchestratorStorePage) {
 		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList<>(orchestratorStorePage.getNumberOfElements());
-		for (OrchestratorStore orchestratorStore : orchestratorStorePage.getContent()) {
+		for (final OrchestratorStore orchestratorStore : orchestratorStorePage.getContent()) {
 			if (orchestratorStore.isForeign()) {
 				orchestratorStoreResponseDTOList.add(getForeignResponseDTO(orchestratorStore));
 			} else {
@@ -960,7 +943,7 @@ public class OrchestratorStoreDBService {
 	//-------------------------------------------------------------------------------------------------
 	private List<OrchestratorStoreResponseDTO> getOrchestratorDTOListFromList(final List<OrchestratorStore> orchestratorStoreList) {
 		final List<OrchestratorStoreResponseDTO> orchestratorStoreResponseDTOList = new ArrayList<>(orchestratorStoreList.size());
-		for (OrchestratorStore orchestratorStore : orchestratorStoreList) {
+		for (final OrchestratorStore orchestratorStore : orchestratorStoreList) {
 			if (orchestratorStore.isForeign()) {
 				orchestratorStoreResponseDTOList.add(getForeignResponseDTO(orchestratorStore));
 			} else {

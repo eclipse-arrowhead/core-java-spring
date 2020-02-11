@@ -27,10 +27,10 @@ public class SubscriptionEndOfValidityCheckTaskConfig {
 	@Autowired
     private ApplicationContext applicationContext; //NOSONAR
 	
-	@Value( CoreCommonConstants.$EVENT_HANDLER_TTL_SCHEDULED_WD )
+	@Value(CoreCommonConstants.$EVENT_HANDLER_TTL_SCHEDULED_WD)
 	private boolean ttlScheduled;
 	
-	@Value( CoreCommonConstants.$EVENT_HANDLER_TTL_INTERVAL_WD )
+	@Value(CoreCommonConstants.$EVENT_HANDLER_TTL_INTERVAL_WD)
 	private int ttlInterval;
 	
 	private static final int SCHEDULER_DELAY = 17;
@@ -44,23 +44,18 @@ public class SubscriptionEndOfValidityCheckTaskConfig {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
 	public SchedulerFactoryBean servicesEndOfValidityCheckSheduler() {
-		
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
 		
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
 		if (ttlScheduled) {			
-	        
 			schedulerFactory.setJobFactory(jobFactory);
 	        schedulerFactory.setJobDetails(eventFilterEndOfValidityCheckTaskDetail().getObject());
 	        schedulerFactory.setTriggers(eventFilterEndOfValidityCheckTaskTrigger().getObject());
 	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
 	        logger.info("Subscription end of validity task adjusted with ttl interval: {} minutes", ttlInterval);
-		
 		} else {
-			
 			logger.info("Subscription end of validity task is not adjusted");
-		
 		}
 		
 		return schedulerFactory;        
@@ -69,9 +64,7 @@ public class SubscriptionEndOfValidityCheckTaskConfig {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
     public SimpleTriggerFactoryBean eventFilterEndOfValidityCheckTaskTrigger() {
-		
 		final SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-		
 		trigger.setJobDetail(eventFilterEndOfValidityCheckTaskDetail().getObject());
         trigger.setRepeatInterval(ttlInterval * CommonConstants.CONVERSION_MILLISECOND_TO_MINUTE);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
@@ -83,9 +76,7 @@ public class SubscriptionEndOfValidityCheckTaskConfig {
 	//-------------------------------------------------------------------------------------------------
 	@Bean
     public JobDetailFactoryBean eventFilterEndOfValidityCheckTaskDetail() {
-        
 		final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-        
 		jobDetailFactory.setJobClass(SubscriptionEndOfValidityCheckTask.class);
         jobDetailFactory.setName(NAME_OF_TASK);
         jobDetailFactory.setDurability(true);

@@ -39,10 +39,10 @@ public class PublishingQueueWatcherTask extends Thread {
 	@Resource(name = CoreCommonConstants.EVENT_PUBLISHING_QUEUE)
 	private PublishingQueue publishingQueue;
 	
-	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
+	@Value(CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
 	private long timeStampTolerance;
 	
-	@Value( CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD )
+	@Value(CoreCommonConstants.$EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD)
 	private int maxExpressSubscribers;
 	
 	@Resource(name = CoreCommonConstants.EVENT_PUBLISHING_EXPRESS_EXECUTOR)
@@ -61,25 +61,17 @@ public class PublishingQueueWatcherTask extends Thread {
 		
 		interrupted = Thread.currentThread().isInterrupted();
 		
-		while ( !interrupted ) {
-			
+		while (!interrupted) {
 			try {
-				
 				publishEventFromQueue();
-				
-			} catch ( final InterruptedException ex ) {
-				
+			} catch (final InterruptedException ex) {
 				interrupted = true;
-			
-			} catch ( final Throwable ex) {
-				
-				logger.debug( ex.getMessage() );
+			} catch (final Throwable ex) {
+				logger.debug(ex.getMessage());
 			}
-			
 		}
 		
 		expressExecutor.shutdownExecutionNow();
-
 	}
 
 	//-------------------------------------------------------------------------------------------------	
@@ -90,46 +82,40 @@ public class PublishingQueueWatcherTask extends Thread {
 	}
 	
 	//=================================================================================================
-	//Assistant methods
+	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
 	private void publishEventFromQueue() throws InterruptedException {
 		logger.debug("PublishingQueueWatcherTask.publishEventFromQueue started...");
 		
 		final EventPublishStartDTO eventPublishStartDTO = publishingQueue.take();
-		validateEventPublishStartDTO( eventPublishStartDTO );
+		validateEventPublishStartDTO(eventPublishStartDTO);
 		
 		final EventPublishRequestDTO request = eventPublishStartDTO.getRequest();
 		final Set<Subscription> involvedSubscriptions = eventPublishStartDTO.getInvolvedSubscriptions();
 		
-		if ( involvedSubscriptions.size() < maxExpressSubscribers ) {
-			
-			expressExecutor.execute( request, involvedSubscriptions );
-		
-		}else { 
-			
-			final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor( request, involvedSubscriptions, httpService);			
+		if (involvedSubscriptions.size() < maxExpressSubscribers) {
+			expressExecutor.execute(request, involvedSubscriptions);
+		} else { 
+			final PublishRequestExecutor publishRequestExecutor = new PublishRequestExecutor(request, involvedSubscriptions, httpService);			
 			publishRequestExecutor.execute();
 		}
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------	
 	private void validateEventPublishStartDTO(final EventPublishStartDTO eventPublishStartDTO) {
 		logger.debug("PublishingQueueWatcherTask.validateEventPublishStartDTO started...");
 		
-		if ( eventPublishStartDTO == null ) {
-			
-			throw new InvalidParameterException( "EventPublishStartDTO" + NULL_PARAMETER_ERROR_MESSAGE );
+		if (eventPublishStartDTO == null) {
+			throw new InvalidParameterException("EventPublishStartDTO" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		checkPublishRequestDTO( eventPublishStartDTO.getRequest() );
-		checkInvolvedSubscriptions( eventPublishStartDTO.getInvolvedSubscriptions() );
-		
+		checkPublishRequestDTO(eventPublishStartDTO.getRequest());
+		checkInvolvedSubscriptions(eventPublishStartDTO.getInvolvedSubscriptions());
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void checkPublishRequestDTO( final EventPublishRequestDTO request ) {
+	private void checkPublishRequestDTO(final EventPublishRequestDTO request) {
 		logger.debug("checkPublishRequestDTO started...");
 		
 		if (request == null) {
@@ -144,14 +130,12 @@ public class PublishingQueueWatcherTask extends Thread {
 			throw new InvalidParameterException("Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		ckeckTimeStamp( request.getTimeStamp() );	
-		checkSystemRequestDTO( request.getSource() );
-		
+		ckeckTimeStamp(request.getTimeStamp());	
+		checkSystemRequestDTO(request.getSource());
 	}
 	
-	
 	//-------------------------------------------------------------------------------------------------
-	private void ckeckTimeStamp( final String timeStampString ) {
+	private void ckeckTimeStamp(final String timeStampString) {
 		logger.debug("ckeckTimeStamp started...");
 		
 		if (Utilities.isEmpty(timeStampString)) {
@@ -162,24 +146,18 @@ public class PublishingQueueWatcherTask extends Thread {
 		final ZonedDateTime timeStamp;
 
 		try {
-			
 			timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(timeStampString);
-		
 		} catch (final DateTimeParseException ex) {
-			
 			throw new InvalidParameterException("TimeStamp" + INVALID_TYPE_ERROR_MESSAGE);
 		}
 		
-		if (timeStamp.isAfter(now.plusSeconds( timeStampTolerance ))) {
-			
+		if (timeStamp.isAfter(now.plusSeconds(timeStampTolerance))) {
 			throw new InvalidParameterException("TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE);
 		}
 		
-		if (timeStamp.isBefore(now.minusSeconds( timeStampTolerance ))) {
-			
+		if (timeStamp.isBefore(now.minusSeconds(timeStampTolerance))) {
 			throw new InvalidParameterException("TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -209,14 +187,12 @@ public class PublishingQueueWatcherTask extends Thread {
 	
 	//-------------------------------------------------------------------------------------------------
 	private void checkInvolvedSubscriptions(final Set<Subscription> involvedSubscriptions) {
-		
-		if ( involvedSubscriptions == null ) {
+		if (involvedSubscriptions == null) {
 			throw new InvalidParameterException("involvedSubscriptions" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		if ( involvedSubscriptions.isEmpty() ) {
+		if (involvedSubscriptions.isEmpty()) {
 			throw new InvalidParameterException("involvedSubscriptions" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
-		
 	}
 }

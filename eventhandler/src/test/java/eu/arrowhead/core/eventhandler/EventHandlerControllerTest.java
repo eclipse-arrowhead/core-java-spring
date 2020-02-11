@@ -68,10 +68,9 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void echoTest() throws Exception {
-
 		this.mockMvc.perform(get(CommonConstants.EVENT_HANDLER_URI + CommonConstants.ECHO_URI)
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());		
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());		
 	}
 	
 	//=================================================================================================
@@ -80,603 +79,511 @@ public class EventHandlerControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionTest() throws Exception {
-		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOForTest()))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOForTest()))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isOk())
+											 .andReturn();
+		Assert.assertNotNull(result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullEventTypeTest() throws Exception {
-		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithNullEventTypeForTest()))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithNullEventTypeForTest()))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithEmptyEventTypeTest() throws Exception {
-		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithEmptyEventTypeForTest()))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(getSubscriptionRequestDTOWithEmptyEventTypeForTest()))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullSubscriberSystemTest() throws Exception {
-
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSubscriberSystem( null );
+		request.setSubscriberSystem(null);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes(request))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System is null."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullSubscriberSystemNameTest() throws Exception {
-
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setSystemName( null );
+		request.getSubscriberSystem().setSystemName(null);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System name is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithEmptySubscriberSystemNameTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setSystemName( "   " );
+		request.getSubscriberSystem().setSystemName("   ");
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System name is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullSubscriberSystemAddressTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setAddress( null );
+		request.getSubscriberSystem().setAddress(null);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System address is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithEmptySubscriberSystemAddressTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setAddress( "   " );
+		request.getSubscriberSystem().setAddress("   ");
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+										 	 .andExpect(status().isBadRequest())
+										 	 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System address is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullSubscriberSystemPortTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setPort( null );
+		request.getSubscriberSystem().setPort(null);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
 		
-		Assert.assertNotNull( result );
+		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System port is null."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithInvalidSubscriberSystemPortTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.getSubscriberSystem().setPort( -1 );
+		request.getSubscriberSystem().setPort(-1);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System port must be between"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullNotifyUriTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setNotifyUri( null );
+		request.setNotifyUri(null);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.NotifyUri is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithEmptyNotifyUriTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setNotifyUri( "   " );
+		request.setNotifyUri("   ");
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.NotifyUri is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void subscriptionWithNullMatchMetaDataTest() throws Exception {
-		
-		final SubscriptionRequestDTO request = getSubscriptionRequestWithNullMetaDataDTOForTest();
-		
-		doNothing().when(eventHandlerService).subscribe(any());
-		
-		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
-		
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test
 	public void subscriptionWithMetaDataTrueButNullFilterMetaDataTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setMatchMetaData( true );
-		request.setFilterMetaData( null );
+		request.setMatchMetaData(true);
+		request.setFilterMetaData(null);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+										 	 .andExpect(status().isBadRequest())
+										 	 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.MatchMetaData is true but Request.FilterMetaData is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithMetaDataTrueButEmptyFilterMetaDataTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setMatchMetaData( true );
-		request.setFilterMetaData( new HashMap<String, String>( 0 ) );
+		request.setMatchMetaData(true);
+		request.setFilterMetaData(new HashMap<>(0));
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.MatchMetaData is true but Request.FilterMetaData is null or blank."));
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithNullSourcesTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSources( null );
+		request.setSources(null);
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isOk())
+											 .andReturn();
+		Assert.assertNotNull(result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithEmptySourcesTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSources( Set.of() );
+		request.setSources(Set.of());
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isOk())
+											 .andReturn();
+		Assert.assertNotNull(result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithSourcesWithValidSourceTest() throws Exception {
-		
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSources( Set.of( getSystemRequestDTO() ) );
+		request.setSources(Set.of(getSystemRequestDTO()));
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											.contentType(MediaType.APPLICATION_JSON)
+											.content(objectMapper.writeValueAsBytes(request))
+											.accept(MediaType.APPLICATION_JSON))
+											.andExpect(status().isOk())
+											.andReturn();
+		Assert.assertNotNull(result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void subscriptionWithSourcesWithInValidSourceTest() throws Exception {
-		
 		final SystemRequestDTO invalidSource = getSystemRequestDTO();
-		invalidSource.setSystemName( null );
-		
+		invalidSource.setSystemName(null);
 		final SubscriptionRequestDTO request = getSubscriptionRequestDTOForTest();
-		request.setSources( Set.of( invalidSource ) );
+		request.setSources(Set.of(invalidSource));
 		
 		doNothing().when(eventHandlerService).subscribe(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System name is null or blank."));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void unsubscriptionIsOkTest() throws Exception {
-		
 		final String queryStr = createQueryStringForUnregister("s", "x", "a", 1);
-		doNothing().when( eventHandlerService ).unsubscribe(any(), any(), any(), anyInt() );
+		doNothing().when(eventHandlerService).unsubscribe(any(), any(), any(), anyInt() );
 
-		deleteSubscription( queryStr, status().isOk() );
-
+		deleteSubscription(queryStr, status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void publishTest() throws Exception {
-		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isOk())
+											 .andReturn();
+		Assert.assertNotNull(result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void publishNullEventTypeTest() throws Exception {
-		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setEventType( null );
+		request.setEventType(null);
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType is null or blank."));	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void publishEmptyEventTypeTest() throws Exception {
-		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setEventType( "   " );
+		request.setEventType("   ");
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.EventType is null or blank."));	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void publishNullTimeStampTest() throws Exception {
-		
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp( null );
+		request.setTimeStamp(null);
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-		
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(request))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void publishEmptyTimeStampTest() throws Exception {
-
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setTimeStamp( "   " );
+		request.setTimeStamp("   ");
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isOk())
+											 .andReturn();
+		Assert.assertNotNull(result);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public  void publishInvalidSourceTest() throws Exception {
-		
+	public void publishInvalidSourceTest() throws Exception {
 		final SystemRequestDTO systemRequestDTO = getSystemRequestDTO();
-		systemRequestDTO.setSystemName( null );
-		
+		systemRequestDTO.setSystemName(null);
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setSource( systemRequestDTO );
+		request.setSource(systemRequestDTO);
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("System name is null or blank."));	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void publishNullPayloadTest() throws Exception {
-
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setPayload( null );
+		request.setPayload(null);
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+										 	 .contentType(MediaType.APPLICATION_JSON)
+										 	 .content(objectMapper.writeValueAsBytes(request))
+										 	 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.Payload is null or blank."));	
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void publishEmptyPayloadTest() throws Exception {
-
 		final EventPublishRequestDTO request = getEventPublishRequestDTOForTest();
-		request.setPayload( "   " );
+		request.setPayload("   ");
 		
 		doNothing().when(eventHandlerService).publishResponse(any());
 		
 		final MvcResult result = this.mockMvc.perform(post(CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsBytes( request ))
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andReturn();
-		
-		Assert.assertNotNull( result );
+											 .contentType(MediaType.APPLICATION_JSON)
+											 .content(objectMapper.writeValueAsBytes(request))
+											 .accept(MediaType.APPLICATION_JSON))
+											 .andExpect(status().isBadRequest())
+											 .andReturn();
+		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResolvedException().getMessage().contains("Request.Payload is null or blank."));	
 	}
 	
 	//=================================================================================================
-	//Assistant methods
+	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
 	private SubscriptionRequestDTO getSubscriptionRequestDTOForTest() {
-		
 		return new SubscriptionRequestDTO(
 				"eventType", 
 				getSystemRequestDTO(), 
-				null, //filterMetaData
+				null, // filterMetaData
 				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
+				false, // matchMetaData
+				null, // startDate
+				null, // endDate, 
+				null); // sources
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
-	private SubscriptionRequestDTO getSubscriptionRequestWithNullMetaDataDTOForTest() {
-		
-		return new SubscriptionRequestDTO(
-				"eventType", 
-				getSystemRequestDTO(), 
-				null, //filterMetaData
-				"notifyUri", 
-				null, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
-	}
-
-	//-------------------------------------------------------------------------------------------------	
 	private SubscriptionRequestDTO getSubscriptionRequestDTOWithNullEventTypeForTest() {
-		
 		return new SubscriptionRequestDTO(
-				null, //EventType
+				null, // eventType
 				getSystemRequestDTO(), 
-				null, //filterMetaData
+				null, // filterMetaData
 				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
+				false, // matchMetaData
+				null, // startDate
+				null, // endDate, 
+				null); //sources
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	private SubscriptionRequestDTO getSubscriptionRequestDTOWithEmptyEventTypeForTest() {
-		
 		return new SubscriptionRequestDTO(
-				"   ", //EventType
+				"   ", // eventType
 				getSystemRequestDTO(), 
-				null, //filterMetaData
+				null, // filterMetaData
 				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
+				false, // matchMetaData
+				null, // startDate
+				null, // endDate, 
+				null); // sources
 	}
 
 	//-------------------------------------------------------------------------------------------------	
 	private SystemRequestDTO getSystemRequestDTO() {
-		
 		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
 		systemRequestDTO.setSystemName("systemName");
 		systemRequestDTO.setAddress("localhost");
@@ -687,11 +594,10 @@ public class EventHandlerControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------		
 	private EventPublishRequestDTO getEventPublishRequestDTOForTest() {
-		
 		return new EventPublishRequestDTO(
 				"eventType", 
-				getSystemRequestDTO(), //source, 
-				null, //metaData, 
+				getSystemRequestDTO(), // source, 
+				null, // metaData, 
 				"payload", 
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 	}
@@ -700,19 +606,19 @@ public class EventHandlerControllerTest {
 	private String createQueryStringForUnregister(final String eventType, final String subscriberName, final String subscriberAddress, final Integer subscriberPort) {
 		final StringBuilder sb = new StringBuilder();
 		
-		if ( eventType != null) {
+		if (eventType != null) {
 			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE).append("=").append( eventType ).append("&");
 		}                               
 		                                
-		if ( subscriberName != null) {      
+		if (subscriberName != null) {      
 			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_SYSTEM_NAME).append("=").append( subscriberName ).append("&");
 		}                                
 		                                 
-		if ( subscriberAddress != null) {   
+		if (subscriberAddress != null) {   
 			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_ADDRESS).append("=").append( subscriberAddress ).append("&");
 		}                                
 		                                 
-		if ( subscriberPort != null) {      
+		if (subscriberPort != null) {      
 			sb.append(CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_SUBSCRIBER_PORT).append("=").append( subscriberPort.intValue()).append("&");
 		}
 		
@@ -727,5 +633,4 @@ public class EventHandlerControllerTest {
 						   .andExpect(matcher)
 						   .andReturn();
 	}
-
 }

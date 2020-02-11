@@ -90,6 +90,7 @@ public class GatewayControllerTest {
 	@Test
 	public void testGetPublicKeyNotSecure() throws Exception {
 		assumeFalse(secure);
+		
 		final MvcResult result = getPublicKey(status().isInternalServerError());
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
@@ -122,6 +123,7 @@ public class GatewayControllerTest {
 	@Test
 	public void testGetPublicKeyOk() throws Exception {
 		assumeTrue(secure);
+		
 		getPublicKey(status().isOk());
 	}
 	

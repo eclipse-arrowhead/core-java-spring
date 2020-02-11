@@ -271,9 +271,11 @@ public class OrchestratorServiceTest {
 		srEntry.setProvider(new SystemResponseDTO());
 		final ServiceQueryResultDTO srResult = new ServiceQueryResultDTO();
 		srResult.getServiceQueryData().add(srEntry);
+		
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		
 		final OrchestrationResponseDTO response = testingObject.externalServiceRequest(request);
+		
 		Assert.assertEquals(0, response.getResponse().size());
 	}
 	
@@ -563,6 +565,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(new ServiceQueryResultDTO());
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		
 		Assert.assertEquals(0, result.getResponse().size());
 	}
 	
@@ -588,6 +591,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(List.of());
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		
 		Assert.assertEquals(0, result.getResponse().size());
 	}
 	
@@ -616,6 +620,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		
 		Assert.assertEquals(0, result.getResponse().size());
 	}
 
@@ -648,6 +653,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		
 		Assert.assertEquals(1, result.getResponse().size());
 		Assert.assertEquals(2, result.getResponse().get(0).getProvider().getId());
 	}
@@ -683,6 +689,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		
 		Assert.assertEquals(2, result.getResponse().size());
 		Assert.assertEquals(1, result.getResponse().get(0).getProvider().getId());
 		Assert.assertEquals(2, result.getResponse().get(1).getProvider().getId());
@@ -715,6 +722,7 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
 		
 		final OrchestrationResponseDTO result = testingObject.dynamicOrchestration(request);
+		
 		Assert.assertEquals(1, result.getResponse().size());
 		Assert.assertEquals(1, result.getResponse().get(0).getProvider().getId());
 		Assert.assertEquals(1, result.getResponse().get(0).getWarnings().size());
@@ -1110,9 +1118,7 @@ public class OrchestratorServiceTest {
 				
 		when(orchestratorDriver.queryServiceRegistryBySystemId(anyLong())).thenReturn(systemResponseDTO);
 		when(orchestratorStoreDBService.getAllTopPriorityOrchestratorStoreEntriesByConsumerSystemId(anyLong())).thenReturn(entryList);
-		
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
@@ -1196,12 +1202,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
-		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
+ 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of(orchestratorStoreForeign));
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1278,12 +1281,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of(orchestratorStoreForeign));
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1360,12 +1360,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of(orchestratorStoreForeign));
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1443,12 +1440,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of(orchestratorStoreForeign));
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1527,12 +1521,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of(orchestratorStoreForeign));
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1610,12 +1601,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of(orchestratorStoreForeign));
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1691,12 +1679,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of(orchestratorStoreForeign));
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1775,12 +1760,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn( null );
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	
@@ -1788,7 +1770,6 @@ public class OrchestratorServiceTest {
 		
 		Assert.assertNotNull(result);
 		Assert.assertTrue(result.getResponse().isEmpty());
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -1861,12 +1842,9 @@ public class OrchestratorServiceTest {
 		when(orchestratorDriver.queryServiceRegistry(any(ServiceQueryFormDTO.class), anyBoolean(), anyBoolean())).thenReturn(srResult);
 		when(orchestratorDriver.queryAuthorization(any(SystemRequestDTO.class), any())).thenReturn(srResult.getServiceQueryData());
 		when(orchestratorDriver.generateAuthTokens(any(OrchestrationFormRequestDTO.class), any())).thenCallRealMethod();
-     		
 		when(orchestratorStoreDBService.getForeignResponseDTO( any( OrchestratorStore.class ) )).thenReturn(foreignStoreEntry);
 		when(orchestratorDriver.queryServiceRegistryBySystemRequestDTO(any(SystemRequestDTO.class))).thenReturn(systemResponseDTO);
-		
 		when(orchestratorStoreDBService.getOrchestratorStoresByConsumerIdAndServiceDefinitionAndServiceInterface(anyLong(), any(), any())).thenReturn(List.of());
-		
 		when(orchestratorDriver.doInterCloudNegotiation(any(ICNRequestFormDTO.class))).thenReturn(icnResultDTO);
 		when(interCloudProviderMatchmaker.doMatchmaking(any(InterCloudProviderMatchmakingParameters.class))).thenReturn(new OrchestrationResponseDTO(List.of(orchestrationResultDTO)));
 	

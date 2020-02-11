@@ -45,7 +45,7 @@ public class EventHandlerService {
 	
 	private static final Logger logger = LogManager.getLogger(EventHandlerService.class);
 	
-	@Value( CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD )
+	@Value(CoreCommonConstants.$TIME_STAMP_TOLERANCE_SECONDS_WD)
 	private long timeStampTolerance;
 	
 	@Resource(name = CommonConstants.EVENT_METADATA_FILTER)
@@ -61,102 +61,92 @@ public class EventHandlerService {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public void subscribe( final SubscriptionRequestDTO request) {
+	public void subscribe(final SubscriptionRequestDTO request) {
 		logger.debug("subscribe started ...");
 		
-		checkSubscriptionRequestDTO( request );
+		checkSubscriptionRequestDTO(request);
 		
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();
-		
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
 		eventHandlerDBService.registerSubscription(request, authorizedPublishers);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void unsubscribe( final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort) {
+	public void unsubscribe(final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort) {
 		logger.debug("unsubscribe started ...");
 			
 		checkUnsubscribeParameters(eventType, subscriberName, subscriberAddress, subscriberPort);
 		
 		final SystemRequestDTO subscriberSystem = new SystemRequestDTO();
-		subscriberSystem.setSystemName( subscriberName );
-		subscriberSystem.setAddress( subscriberAddress );
-		subscriberSystem.setPort(  subscriberPort );
+		subscriberSystem.setSystemName(subscriberName);
+		subscriberSystem.setAddress(subscriberAddress);
+		subscriberSystem.setPort(subscriberPort);
 		
-		eventHandlerDBService.deleteSubscription( eventType, subscriberSystem );
-		
+		eventHandlerDBService.deleteSubscription(eventType, subscriberSystem);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public void publishResponse(final EventPublishRequestDTO request) {
 		logger.debug("publishResponse started ...");
 		
-		checkPublishRequestDTO( request );
+		checkPublishRequestDTO(request);
 		
 		final Set<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptions(request);
-		if ( involvedSubscriptions.isEmpty() ) {
-			
+		if (involvedSubscriptions.isEmpty()) {
 			return;
 		}
 		
 		filterInvolvedSubscriptionsBySubscriptionParameters(involvedSubscriptions, request);
-		if ( involvedSubscriptions.isEmpty() ) {
-			
+		if (involvedSubscriptions.isEmpty()) {
 			return;
 		}
 		
 		eventHandlerDriver.publishEvent(request, involvedSubscriptions);
-
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public void publishSubscriberAuthorizationUpdateResponse(final EventPublishRequestDTO request) {
 		logger.debug("publishSubscriberAuthorizationUpdateResponse started ...");
 		
-		validateAuthorizationUpdateEventType( request.getEventType() );
-		final Long subscriberSystemId = validateAuthorizationUpdatePayload( request.getPayload() );
+		validateAuthorizationUpdateEventType(request.getEventType());
+		final Long subscriberSystemId = validateAuthorizationUpdatePayload(request.getPayload());
 		
-		final List<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId( subscriberSystemId );
-		if ( involvedSubscriptions.isEmpty() ) {
-			
+		final List<Subscription> involvedSubscriptions = eventHandlerDBService.getInvolvedSubscriptionsBySubscriberSystemId(subscriberSystemId);
+		if (involvedSubscriptions.isEmpty()) {
 			return;
 		}		
 
-		final SystemRequestDTO subscriber = DTOConverter.convertSystemToSystemRequestDTO( involvedSubscriptions.get(0).getSubscriberSystem() );		
+		final SystemRequestDTO subscriber = DTOConverter.convertSystemToSystemRequestDTO(involvedSubscriptions.get(0).getSubscriberSystem());		
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 		
-		eventHandlerDBService.updateSubscriberAuthorization( involvedSubscriptions, authorizedPublishers );
-		
+		eventHandlerDBService.updateSubscriberAuthorization(involvedSubscriptions, authorizedPublishers);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public SubscriptionResponseDTO updateSubscriptionResponse(final long id, final SubscriptionRequestDTO subscriptionRequestDTO) {
 		logger.debug("updateSubscriptionResponse started ...");
 		
-		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO( updateSubscription( id, subscriptionRequestDTO ) );
-
+		return DTOConverter.convertSubscriptionToSubscriptionResponseDTO(updateSubscription(id, subscriptionRequestDTO));
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
 	public Subscription updateSubscription(final long id, final SubscriptionRequestDTO request) {
 		logger.debug("updateSubscription started ...");
 		
-		checkSubscriptionRequestDTO( request );
+		checkSubscriptionRequestDTO(request);
 		
 		final SystemRequestDTO subscriber = request.getSubscriberSystem();	
 		final Set<SystemResponseDTO> authorizedPublishers = eventHandlerDriver.getAuthorizedPublishers(subscriber);
 
 		return eventHandlerDBService.updateSubscription(id, request, authorizedPublishers);
 	}
-	
 
 	//=================================================================================================
 	// assistant methods
-
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkPublishRequestDTO( final EventPublishRequestDTO request ) {
+	private void checkPublishRequestDTO(final EventPublishRequestDTO request) {
 		logger.debug("checkPublishRequestDTO started...");
 		
 		if (request == null) {
@@ -171,42 +161,34 @@ public class EventHandlerService {
 			throw new InvalidParameterException("Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		ckeckTimeStamp( request.getTimeStamp() );	
-		checkSystemRequestDTO( request.getSource() );
-		
+		ckeckTimeStamp(request.getTimeStamp());	
+		checkSystemRequestDTO(request.getSource());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void ckeckTimeStamp( final String timeStampString ) {
+	private void ckeckTimeStamp(final String timeStampString) {
 		logger.debug("ckeckTimeStamp started...");
 		
 		if (Utilities.isEmpty(timeStampString)) {
 			throw new InvalidParameterException("TimeStamp" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		
 		final ZonedDateTime now = ZonedDateTime.now();
 		final ZonedDateTime timeStamp;
 
 		try {
-			
 			timeStamp = Utilities.parseUTCStringToLocalZonedDateTime(timeStampString);
-		
 		} catch (final DateTimeParseException ex) {
-			
 			throw new InvalidParameterException("TimeStamp" + INVALID_TYPE_ERROR_MESSAGE);
 		}
 		
-		if (timeStamp.isAfter(now.plusSeconds( timeStampTolerance ))) {
-			
+		if (timeStamp.isAfter(now.plusSeconds(timeStampTolerance))) {
 			throw new InvalidParameterException("TimeStamp" + IS_AFTER_TOLERATED_DIFF_ERROR_MESSAGE);
 		}
 		
-		if (timeStamp.isBefore(now.minusSeconds( timeStampTolerance ))) {
-			
+		if (timeStamp.isBefore(now.minusSeconds(timeStampTolerance))) {
 			throw new InvalidParameterException("TimeStamp" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
 		}
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -233,9 +215,8 @@ public class EventHandlerService {
 			throw new InvalidParameterException("FilterMetaData should not be empty if MatchMetaData is true");
 		}
 		
-		checkSystemRequestDTO( request.getSubscriberSystem());
-		validateDateLimits( request );
-
+		checkSystemRequestDTO(request.getSubscriberSystem());
+		validateDateLimits(request);
 	}	
 	
 	//-------------------------------------------------------------------------------------------------
@@ -269,48 +250,39 @@ public class EventHandlerService {
 		
 		final ZonedDateTime now  = ZonedDateTime.now();
 		
-		final ZonedDateTime start = Utilities.parseUTCStringToLocalZonedDateTime( request.getStartDate() );
-		final ZonedDateTime end = Utilities.parseUTCStringToLocalZonedDateTime( request.getEndDate() );
+		final ZonedDateTime start = Utilities.parseUTCStringToLocalZonedDateTime(request.getStartDate());
+		final ZonedDateTime end = Utilities.parseUTCStringToLocalZonedDateTime(request.getEndDate());
 		
-		if ( start != null ) {
-			
-			if ( !start.isAfter( now.minusSeconds( timeStampTolerance )) ) {
-				
+		if (start != null) {
+			if (!start.isAfter(now.minusSeconds(timeStampTolerance))) {
 				throw new InvalidParameterException("Start Date" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
 			}
 		}
 		
-		if ( end != null ) {
-			
-			if ( !end.isAfter( now.minusSeconds( timeStampTolerance )) ) {
-				
+		if (end != null) {
+			if (!end.isAfter(now.minusSeconds(timeStampTolerance))) {
 				throw new InvalidParameterException("End Date" + IS_BEFORE_TOLERATED_DIFF_ERROR_MESSAGE);
 			}
 		}
 		
-		if ( start != null && end != null ) {
-			
-			if ( end.isBefore( start ) || !end.isAfter( start ) ) {
-				
+		if (start != null && end != null) {
+			if (end.isBefore(start) || !end.isAfter(start)) {
 				throw new InvalidParameterException("Start Date sould be before End Date");
-
 			}			
 		}
-		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	private void validateAuthorizationUpdateEventType(final String eventType) {
 		logger.debug("validateAuthorizationUpdateEventType started...");
 		
-		if (Utilities.isEmpty( eventType )) {
+		if (Utilities.isEmpty(eventType)) {
 			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		if (!eventType.equalsIgnoreCase( CoreCommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE)) {
+		if (!eventType.equalsIgnoreCase(CoreCommonConstants.EVENT_TYPE_SUBSCRIBER_AUTH_UPDATE)) {
 			throw new InvalidParameterException("EventType" + INVALID_TYPE_ERROR_MESSAGE);
 		}
-		
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -318,11 +290,8 @@ public class EventHandlerService {
 		logger.debug("validateAuthorizationUpdatePayload started...");
 		
 		try {
-			final Long id = Long.parseLong(payload);
-			
-			return id;
+			return Long.parseLong(payload);
 		} catch (final NumberFormatException ex) {
-			
 			throw new InvalidParameterException("Payload" + INVALID_TYPE_ERROR_MESSAGE);
 		}
 	}
@@ -332,9 +301,9 @@ public class EventHandlerService {
 	private void filterInvolvedSubscriptionsBySubscriptionParameters(final Set<Subscription> involvedSubscriptions, final EventPublishRequestDTO request) {
 		logger.debug("filterInvolvedSubscriptionsBySubscriptionParameters started...");
 		
-		filterInvolvedSubscriptionsByStartDate( involvedSubscriptions, request );
-		filterInvolvedSubscriptionsByEndDate( involvedSubscriptions, request );
-		filterInvolvedSubscriptionsByMetaData( involvedSubscriptions, request );
+		filterInvolvedSubscriptionsByStartDate(involvedSubscriptions, request);
+		filterInvolvedSubscriptionsByEndDate(involvedSubscriptions, request);
+		filterInvolvedSubscriptionsByMetaData(involvedSubscriptions, request);
 		
 	}
 
@@ -347,18 +316,14 @@ public class EventHandlerService {
 		
 		final Set<Subscription> subscriptionsToRemove = new HashSet<>();
 		for (final Subscription subscription : involvedSubscriptions) {
-			
-			if ( subscription.isMatchMetaData() ) {
-				
-				if ( !callMetaDataFilter(subscription.getFilterMetaData(), requestMetadata) ) {
-					
-					subscriptionsToRemove.add( subscription );
+			if (subscription.isMatchMetaData()) {
+				if (!callMetaDataFilter(subscription.getFilterMetaData(), requestMetadata)) {
+					subscriptionsToRemove.add(subscription);
 				}				
 			}
 		}
 		
-		involvedSubscriptions.removeAll( subscriptionsToRemove );
-
+		involvedSubscriptions.removeAll(subscriptionsToRemove);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -370,18 +335,14 @@ public class EventHandlerService {
 		
 		final Set<Subscription> subscriptionsToRemove = new HashSet<>();
 		for (final Subscription subscription : involvedSubscriptions) {
-			
-			if ( subscription.getEndDate() != null ) {
-				
-				if ( timeStamp.isAfter( subscription.getEndDate().plusSeconds( timeStampTolerance ))) {
-					
-					subscriptionsToRemove.add( subscription );
+			if (subscription.getEndDate() != null) {
+				if (timeStamp.isAfter(subscription.getEndDate().plusSeconds(timeStampTolerance))) {
+					subscriptionsToRemove.add(subscription);
 				}				
 			}
 		}
 		
-		involvedSubscriptions.removeAll( subscriptionsToRemove );
-
+		involvedSubscriptions.removeAll(subscriptionsToRemove);
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -393,56 +354,48 @@ public class EventHandlerService {
 		
 		final Set<Subscription> subscriptionsToRemove = new HashSet<>();
 		for (final Subscription subscription : involvedSubscriptions) {
-			
-			if ( subscription.getStartDate() != null ) {
-				
-				if ( subscription.getStartDate().isBefore( timeStamp.minusSeconds( timeStampTolerance ))) {
-					
-					subscriptionsToRemove.add( subscription );
+			if (subscription.getStartDate() != null) {
+				if (subscription.getStartDate().isBefore(timeStamp.minusSeconds(timeStampTolerance))) {
+					subscriptionsToRemove.add(subscription);
 				}				
 			}
 		}
 		
-		involvedSubscriptions.removeAll( subscriptionsToRemove );
-
+		involvedSubscriptions.removeAll(subscriptionsToRemove);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private boolean callMetaDataFilter(final String filterMetaData,
-			final Map<String, String> eventMetadata) {
+	private boolean callMetaDataFilter(final String filterMetaData, final Map<String, String> eventMetadata) {
 		logger.debug("callMetaDataFilter started...");
 		
-		if ( Utilities.isEmpty( filterMetaData ) || eventMetadata == null || eventMetadata.isEmpty() ) {
-			
+		if (Utilities.isEmpty(filterMetaData) || eventMetadata == null || eventMetadata.isEmpty()) {
 			return false;
 		}
 		
 		final Map<String, String> metaDataFilterMap = Utilities.text2Map(filterMetaData);
-		
 		final MetadataFilteringParameters filterParameters = new MetadataFilteringParameters(metaDataFilterMap, eventMetadata);
 		
-		return metadataFilter.doFiltering( filterParameters );
+		return metadataFilter.doFiltering(filterParameters);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void checkUnsubscribeParameters( final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort) {
+	private void checkUnsubscribeParameters(final String eventType, final String subscriberName, final String subscriberAddress, final int subscriberPort) {
 		logger.debug("checkUnsubscribeParameters started...");
 		
-		if ( Utilities.isEmpty( eventType ) ) {
-			throw new InvalidParameterException( "EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE );
+		if (Utilities.isEmpty(eventType)) {
+			throw new InvalidParameterException("EventType" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		if ( Utilities.isEmpty( subscriberName ) ) {
-			throw new InvalidParameterException( "SubscriberName" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE );
+		if (Utilities.isEmpty(subscriberName)) {
+			throw new InvalidParameterException("SubscriberName" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		if ( Utilities.isEmpty( subscriberAddress ) ) {
-			throw new InvalidParameterException( "SubscriberAddress" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE );
+		if (Utilities.isEmpty(subscriberAddress)) {
+			throw new InvalidParameterException("SubscriberAddress" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		if ( subscriberPort < 1) {
+		if (subscriberPort < 1) {
 			throw new InvalidParameterException( "System port" + LESS_THAN_ONE_ERROR_MESSAGE );
 		}
-		
 	}
 }

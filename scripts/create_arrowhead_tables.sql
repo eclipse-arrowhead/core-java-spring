@@ -333,3 +333,4 @@ CREATE TABLE IF NOT EXISTS `choreographer_next_action_step` (
   CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+

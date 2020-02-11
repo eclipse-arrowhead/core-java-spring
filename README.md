@@ -19,8 +19,10 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
-4. [How to Contribute](#howtocontribute)
-5. [Documentation](#documentation) 
+4. [Gatekeeper and Gateway Setup with ActiveMQ Relay](#setupgatekeeper_and_gateway)
+5. [Continuous Integration / Continuous Delivery](#ci_cd)
+6. [How to Contribute](#howtocontribute)
+7. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -47,7 +49,31 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
            * [Private](#orchestrator_endpoints_private)
            * [Management](#orchestrator_endpoints_management)     
            * [Removed Endpoints](#orchestrator_removed)
- 
+    4. [EventHandler](#event_handler)
+       * [System Design Description Overview](#event_handler_sdd)
+       * [Services and Use Cases](#event_handler_usecases)  
+       * [Service Description Overview](#event_handler_provided_services)
+       * [Endpoints](#event_handler_endpoints)
+           * [Client](#event_handler_endpoints_client)
+           * [Management](#event_handler_endpoints_management)
+           * [Private](#event_handler_endpoints_private)
+           * [Removed Endpoints](#event_handler_removed)
+    5. [Gatekeeper](#gatekeeper)
+       * [System Design Description Overview](#gatekeeper_sdd)
+       * [Services and Use Cases](#gatekeeper_usecases)  
+       * [Endpoints](#gatekeeper_endpoints)
+		   * [Client](#gatekeeper_endpoints_client)
+           * [Private](#gatekeeper_endpoints_private)
+           * [Management](#gatekeeper_endpoints_mgmt)     
+           * [Removed Endpoints](#gatekeeper_removed)
+    6. [Gateway](#gateway)
+       * [System Design Description Overview](#gateway_sdd)
+       * [Services and Use Cases](#gateway_usecases)  
+       * [Endpoints](#gateway_endpoints)
+	       * [Client](#gateway_endpoints_client)
+           * [Private](#gateway_endpoints_private)
+           * [Management](#gateway_endpoints_mgmt)
+	
 <a name="quickstart" />
 
 ## Quick Start Guide
@@ -74,6 +100,14 @@ Here, we provide brief instructions on how to install and run both Docker and co
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
 <a name="quickstart_examples" />
+Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
+Don't forget to copy the `initSQL.sh` script next to the docker-compose file and execute it! On the first run it initializes the Database!<br />
+Example copy command which does this for you, execute from the project root directory.
+```
+cp scripts/initSQL.sh docker/
+cd docker
+./initSQL.sh
+```
 
 #### Examples
 
@@ -86,6 +120,8 @@ In particular, each folder contains its own `README.md` file with more instructi
 <a name="quickstart_dockerguide" />
 
 #### Docker Guide
+=======
+> **Note:** Don't forget to set `domain.name` and `domain.port` properties!
 
 Example Docker Compose file is located [here](docker/docker-compose.yml). The interesting part is the volumes section. 
 Format is /path/on/your/local/machine:/path/inside/docker/container
@@ -136,6 +172,8 @@ A: Probably you missed to copy the init SQL script next to the compose file, or 
 The Debian installer files are located in the deb-installer/package/arrowhead-installers-4.1.3 folder. 
 Please follow this guide to install them: [Debian Installer Guide](documentation/deb-installer/DEBIAN-INSTALL.md)
 
+> **Note:** Preferred installation mode for Raspberry Pi.
+
 <a name="quickstart_compile" />
 
 ### Compile source code and manually install MySQL and Maven.
@@ -154,7 +192,7 @@ Verify that you have Java (```java -version```), Maven (```mvn -version```), MyS
 Pull this code and enter the directory. 
 ```git clone https://github.com/arrowhead-f/core-java-spring.git```
 
-Run the MySQL script which is in the ```scripts``` folder. If you won't run this script first, the project won't build. 
+Got to the ```scripts``` folder, execute ```mysql -u root -p < create_empty_arrowhead_db.sql``` MySQL script. If you won't run this script first, the project won't build. 
 
 ```cd core-java-spring```
 
@@ -372,8 +410,53 @@ New payload - you can easily map the old fields to the new ones.
 
 ## Certificates
 
-Placeholder
- 
+Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The Arrowhead trust chain consists of three level:
+1) Master certificate: `arrowhead.eu`
+2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
+3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
+The certificate naming convetion have strict rules:
+* The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
+* A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
+* A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
+
+The trust chain is created by issuing the cloud certificate from the master certificate and the client certificate from the cloud certificate. With other words, the **cloud certificate is signed by the master certificate's private key** and the **client certificate is signed by the cloud certificate's private key** which makes the whole chain trustworthy.
+
+### The Key-Store
+
+The Key-Store is intended to store the certificates and/or key-pair certificates. Key-pair certificates are contain the certificate chain with some additinal data, such as the private-public keys, which are necessary for the secure operation. Certificates located in this store (without the keys) will be attached to the outcoming HTTPS requests. Arrowhead Framework is designed for handling the `p12` type of Key-Stores.
+
+*(**Note:** When you creating a new key-pair certificate, then the `key-password` and the `key-store-password` must be the same.)*
+
+### The Trust-Store
+
+The Trust-Store is containing those certificates, what the web-server considers as trusted ones. Arrowhead Framework is designed for handling the `p12` type of Trust-Stores. Typically your Trust-Store should contain only the cloud certificate, which ensures that only those incoming HTTPS requests are authorized to access, which are having this certificate within their certificate chain.
+
+### How to create my own certificates?
+Currently Arrowhead community have the possibility to create only "self signed" certifications. See the tutorials:
+* [Create Arrowhead Cloud Self Signed Certificate](documentation/certificates/create_cloud_certificate.pdf)
+* [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
+* [Create Trust Store](documentation/certificates/create_trust_store.pdf)
+
+### System Operator Certificate
+
+The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
+SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser (for example if you want to access the Swagger or use the Management Tool in secure mode.
+* [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
+* [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
+* [Import SysOp Certificate (Linux)](documentation/certificates/import_sysop_certificate_linux.pdf)
+
+<a name="setupgatekeeper_and_gateway" /> 
+
+## Gatekeeper and Gateway Setup with ActiveMQ Relay
+
+Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
+
+<a name="ci_cd" />
+
+## Continuous Integration / Continuous Delivery
+
+Arrowhead's CI/CD pipeline is based on the work of Haris Isakovic and Peter Ketcher from TU Wien. Thank you for providing this amazing guide and countless hours of help setting it up properly.
+[CI/CD Tutorial for Arrowhead Framework](documentation/ci_cd/Arrowhead_CICD.pdf)
 
 <a name="howtocontribute" />
 
@@ -663,6 +746,9 @@ Returns a __ServiceQueryList__
 
 <a name="serviceregistry_endpoints_post_register" />
 
+###### Query activity diagram
+![Alt text](documentation/images/post_service_registry_query_activity_uml.png)
+
 ### Register
 ```
 POST /serviceregistry/register
@@ -780,7 +866,10 @@ Returns a __ServiceRegistryEntry__
             Service Registry object did contain an  "udp" flag beside the interface definition.
             
 <a name="serviceregistry_delete_unregister" />
-            
+
+###### Register activity diagram
+![Alt text](documentation/images/post_service_registry_register_activity_uml.png)
+
 ### Unregister 
 ```
 DELETE /serviceregistry/unregister
@@ -801,7 +890,10 @@ Query params:
 > **Note:** 4.1.2 version: PUT /serviceregistry/remove <br />
             In this version the input was a JSON object with many unnecessary information.
             
-<a name="serviceregistry_endpoints_post_query_system" />            
+<a name="serviceregistry_endpoints_post_query_system" />
+
+###### Unregister activity diagram
+![Alt text](documentation/images/delete_service_registry_unregister_activity_uml.png)
             
 ### Query System            
 ```
@@ -1345,7 +1437,7 @@ GET /serviceregistry/mgmt/grouped
 
 Returns all Service Registry Entries grouped for the purpose of the Management Tools' Service Registry view:
 * autoCompleteData
-* servicesGroupedByServiceDefinitionAndInterface
+* servicesGroupedByServiceDefinition
 * servicesGroupedBySystems
 
 <a name="datastructures_serviceregistrygrouped" />
@@ -1379,11 +1471,10 @@ Returns a __ServiceRegistryGrouped__
       }
     ]
   },
-  "servicesGroupedByServiceDefinitionAndInterface": [
+  "servicesGroupedByServiceDefinition": [
     {
       "serviceDefinitionId": 0,
       "serviceDefinition": "string",
-      "interfaceName": "string",
       "providerServices": [
         {
           "id": 0,
@@ -2161,12 +2252,12 @@ There endpoints are mainly used by the Management Tool and Cloud Administrators.
 | Function | URL subpath | Method | Input | Output |
 | -------- | ----------- | ------ | ----- | ------ |
 | [Get all Intracloud rules](#authorization_endpoints_getintracloud) | /mgmt/intracloud | GET | - | [IntracloudRuleList](#datastructures_intracloud_list) |
-| [Add Intercloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
-| [Get an Intercloud rule by ID](#authorization_endpoints_get_intracloud_id) | /mgmt/intracloud/{id} | GET | IntracloudRuleID | [IntracloudRule](#datastructures_intracloud_rule) |
+| [Add Intracloud rules](#authorization_endpoints_post_intracloud) | /mgmt/intracloud | POST | [IntracloudRuleForm](#datastructures_intracloud_rule_form) | [IntracloudRuleList](#datastructures_intracloud_list) |
+| [Get an Intracloud rule by ID](#authorization_endpoints_get_intracloud_id) | /mgmt/intracloud/{id} | GET | IntracloudRuleID | [IntracloudRule](#datastructures_intracloud_rule) |
 | [Delete an Intracloud rule by ID](#authorization_endpoints_delete_intracloud_id) | /mgmt/intracloud/{id} | DELETE | IntracloudRuleID | - |
 | [Get all Intercloud rules](#authorization_endpoinds_get_intercloud) | /mgmt/intercloud | GET | - | [IntercloudRuleList](#datastructures_intercloud_list) |
-| [Add Intercloud rules](#authorization_endpoints_post_intercloud) | /mgmt/intercloud | POST | [IntercloudRuleForm](#datastructures_intercloud_rule_form) | IntercloudRule |
-| [Get an Intercloud rule by ID](#authorization_endpoints_get_intercloud_id) | /mgmt/intercloud/{id} | GET | IntercloudRuleID | IntercloudRule |
+| [Add Intercloud rules](#authorization_endpoints_post_intercloud) | /mgmt/intercloud | POST | [IntercloudRuleForm](#datastructures_intercloud_rule_form) | [IntercloudRuleList](#datastructures_intercloud_list) |
+| [Get an Intercloud rule by ID](#authorization_endpoints_get_intercloud_id) | /mgmt/intercloud/{id} | GET | IntercloudRuleID | [IntercloudRuleList](#datastructures_intercloud_list) |
 | [Delete an Intercloud rule by ID](#authorization_endpoints_delete_intercloud_id) | /mgmt/intercloud/{id} | DELETE | IntercloudRuleID | - |
 
 <a name="authorization_removed" />
@@ -2549,7 +2640,7 @@ Returns an __IntracloudRuleList__
             
 <a name="authorization_endpoints_post_intracloud" />
 
-### Add Intercloud rules
+### Add Intracloud rules
 ```
 POST /authorization/mgmt/intracloud
 ```                        
@@ -2825,7 +2916,7 @@ Returns an __IntercloudRuleList__
             This version always returned all records in an array of JSON objects. The objects did not contain
             any time information. Access didn't depend on provider and interface.   
             
-<a name=""  />
+<a name="authorization_endpoints_post_intercloud" />
 
 ### Add Intercloud rules
 ```
@@ -3025,7 +3116,7 @@ The primary purpose for the Orchestrator System is to provide Application System
 
 * Accessibility information details of a Service provider (e.g network address and port),
 * Details of the Service instance within the provider System (e.g. base URL, IDD specification and other metadata),
-* item Authorization-related information (e.g. access token and signature),
+* Authorization-related information (e.g. access token and signature),
 * Additional information that is necessary for establishing connection.
 
 This orchestration rule information can reach the given Application System (consumer) in two different ways: the System itself can request it ("pull") or the Orchestrator itself can update the System when it is needed ("push method"). However, in both cases, there shall be an underlying, hidden process ("orchestration process"), which ensures the consistence of state between the various Core Systems.
@@ -3245,7 +3336,7 @@ __ServiceRequestForm__ is the input
       "string"
     ],
     "securityRequirements": [
-      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+      "NOT_SECURE", "CERTIFICATE", "TOKEN"
     ],
     "metadataRequirements": {
       "additionalProp1": "string",
@@ -3283,7 +3374,6 @@ __ServiceRequestForm__ is the input
 | `requestedService` | Requested Service | no |
 | `preferredProviders` | Preferred Providers | no |
 | `orchestrationFlags` | Orchestration Flags | no |
-
 
 Orchestrator can be used in two ways. The first one uses predefined rules (coming from the
 Orchestrator Store DB) to find the appropriate providers for the consumer. The second option is the
@@ -3412,6 +3502,9 @@ Returns an __Orchestration Response__
 
 <a name="orchrestrator_endpoints_get_oschestration_id" />
 
+###### Orchestration activity diagram
+![Alt text](documentation/images/post_orchestration_activity_uml.png)
+
 ### Start store Orchestration by ID
 ```
 GET /orchestrator/rchestration/{id}
@@ -3493,6 +3586,9 @@ Returns an __Orchestration Response__
 > * `TTL_UNKNOWN` (the provider does not specified expiration time)
 
 <a name="orchestrator_endpoints_get_store" />
+
+###### Store Orchestration activity diagram
+![Alt text](documentation/images/post_store_orchestration_activity_uml.png)
 
 ### Get all Store Entries 
 ```
@@ -4109,3 +4205,2046 @@ __PriorityList__ is the input
 
 > **Note:** 4.1.2 version: PUT /orchestrator/mgmt/store/priorities<br />
             Same as the new version
+
+<a name="event_handler" />
+
+# Event Handler
+
+<a name="event_handler_sdd" />
+
+## System Design Description Overview
+
+The purpose of Event Handler supporting core system is providing authorized publish-subscribe messaging system to the Arrowhead Framework.
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH Event Handler`
+![Alt text](/documentation/eventhandler/overview.png)
+
+<a name="event_handler_sysd" />
+
+## System Design Overview
+![Alt text](/documentation/eventhandler/sysd/event_handler_controller.jpg)
+
+<a name="event_handler_provided_services" />
+
+## Provided services
+
+The Event Handler provides the following services:
+* [Echo](#eventhandler_endpoints_get_echo)
+* [Publish](#eventhandler_endpoints_post_publish)
+* [Subscribe](#eventhandler_endpoints_post_subscribe)
+* [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe)
+* [AuthUpdate](#eventhandler_endpoints_post_auth_update)
+
+<a name="event_handler_consumed_services" />
+
+## Consumed services
+
+The Event Handler consumes the following services:
+* CheckAuthorizationSubscription private service from the Authorization core system
+* Notification service from the subscriber client system
+
+<a name="event_handler_usecases" />
+
+## Use cases
+
+The Event Handler has the following use cases:
+* [Publish Event](documentation/eventhandler/use_cases/EH_use_case_1.md)
+![Alt text](/documentation/eventhandler/use_cases/PublishEvent.png)
+* [Register Subscription](documentation/eventhandler/use_cases/EH_use_case_2.md)
+![Alt text](/documentation/eventhandler/use_cases/RegisterSubscription.png)
+* [Unregister Subscription](documentation/eventhandler/use_cases/EH_use_case_3.md)
+![Alt text](/documentation/eventhandler/use_cases/Unsubscribe.png)
+* [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_4.md)
+![Alt text](/documentation/authorization/SubscriptionAuthUpdate.png)
+![Alt text](/documentation/eventhandler/use_cases/PublishAuthUpdate.png)
+
+<a name="event_handler_endpoints" />
+
+## Endpoints
+
+<a name="event_handler_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#eventhandler_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Subscribe](#eventhandler_endpoints_post_subscribe) | /subscribe | POST    | -    | OK     |
+| [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
+| [Publish](#eventhandler_endpoints_post_publish) | /publish | POST    | -    | OK     |
+
+<a name="event_handler_endpoints_management" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /mgmt/subscriptions | GET | direction && item_per_page && page && sort_field | [Subscription list response](#eventhandler_subscription_list_response) |
+| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /mgmt/subscriptions/{id} | GET | id | [Subscription response](#eventhandler_subscription_response) |
+| [Update subscription](#eventhandler_endpoints_put_subscription) | /mgmt/subscriptions/{id} | PUT | id && Subscription request| Subscription response |
+| [Delete subscription](#eventhandler_endpoints_delete_subscription) | /mgmt/subscriptions/{id} | DELETE | id | OK |
+
+<a name="event_handler_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [AuthorizationUpdate](#eventhandler_endpoints_post_auth_update) | /publish/authupdate | POST    | -    | OK     |
+
+<a name="eventhandler_endpoints_get_echo" />
+
+### Echo 
+```
+GET /eventhandler/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="eventhandler_endpoints_post_subscribe" />
+
+### Subscribe 
+```
+POST /eventhandler/subscribe
+```
+
+Creates a subscription record specified by parameters.
+
+<a name="datastructures_subscriptionrequest" />
+
+__SubscriptionRequest__ is the input.
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The received event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_subscription_response" />
+
+__SubscriptionRequest__ output:
+
+```json
+
+{
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+
+```
+
+<a name="eventhandler_endpoints_delete_unsubscribe" />
+
+### Unsubscribe 
+```
+DELETE /eventhandler/unsubscribe
+```
+Removes the subscription record specified by parameters.
+
+<a name="datastructures_eventhandlerunsubscriberequest" />
+
+__Unsubscribe query parameters__ are the input :
+`https://eventhandler_ip:unsubscribe_port/eventhandler/unsubscribe?address=`192.168.0.1`&event_type=`EVENT_TYPE_1`&port=`9009`&system_name=`test_consumer`
+
+| __Unsubscribe__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `event_type` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+| `system_name` | The name of the system. | mandatory | max. length = 255 |
+
+<a name="eventhandler_endpoints_post_publish" />
+
+### Publish
+```
+POST /eventhandler/publish
+```
+
+Start the publishing process to deliver the event to the subscribers.
+
+<a name="eventhandler_endpoints_publish" />
+
+__PublishRequest__ is the input:
+
+```json
+{
+  "eventType": "string",
+  "metaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "source": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "timeStamp": "string"
+}
+```
+
+| __PublishRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | max. length = 255 |
+| `metaData` |  The "key - value" pairs for event filtering. | optional | max.length = 65535 |
+| `payload` | String representation of the event. | mandatory | not defined |
+| `source` |   Details of the publisher system. | mandatory | as in system |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_endpoints_get_subscription_list" />
+
+### Get subscriptions
+
+```
+GET /mgmt/eventhandler/subscriptions
+```
+
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
+
+| __Get subscriptions__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
+| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
+| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
+| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
+
+<a name="eventhandler_subscription_list_response" />
+
+__Get subscriptions query parameters__  the output :
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+<a name="eventhandler_endpoints_get_subscription" />
+
+### Get subscription by id
+
+```
+GET /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+<a name="eventhandler_subscription_response" />
+
+__Get subscription by id__  the output :
+
+```json
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+```
+
+<a name="eventhandler_endpoints_put_subscription" />
+
+### Update subscription
+
+```
+PUT /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Update subscription request__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Update subscription__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The received event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+<a name="eventhandler_endpoints_delete_subscription" />
+
+### Delete subscription
+
+```
+DELETE /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Delete subscription parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+<a name="eventhandler_endpoints_post_auth_update" />
+
+### Publish Auth Update <br />
+        
+This service can only be used by other core services, therefore this is not part of the public API.    
+
+# Gatekeeper 
+ 
+<a name="gatekeeper_sdd" />
+ 
+## System Design Description Overview
+
+This supporting core system has the purpose of providing inter-Cloud servicing capabilities in the Arrowhead Framework by its following services:
+
+- Global Service Discovery (GSD)
+- Inter-Cloud Negotiation (ICN)
+
+These Services are part of the inter-Cloud orchestration process, but the Gatekeeper is only available for the other core systems. Gatekeeper is the only one core system which has the functionality of discovering other Clouds via Relay systems. Neighbor Clouds and Relay systems are stored in the MySQL database of this module.  
+During the inter-Cloud orchestration, the Global Service Discovery is the first process which aims to collect the known clouds with providers serving the specified service. After GSD, the Inter Cloud Negotiation process steps in place with the purpose of establishing the way of collaboration. Working together with the Orchestrators of both Clouds, at the end a servicing instace can be created.
+
+![Alt text](documentation/images/gatekeeper_overview.png)
+
+> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
+
+<a name="gatekeeper_usecases" />
+
+## Services and Use Cases
+
+Use case 1: *Global Service Discovery request*
+
+| Name | Description |
+| ---- | --------- |
+| ID | GSD-1 |
+| Brief Description | The Gatekeeper is tasked to find a Service in other Local Clouds |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Relays used by the Gatekeeper <br/>- The Gatekeeper instances of another Clouds |
+| Preconditions | Orchestration process was started by an Application System. |
+| Main Flow | - The Orchestrator consumes the GSD Initialization Service of its local Gatekeeper. <br/>- Gatekeeper collects the preferred or neighbor Clouds and one of its Relays. <br/>- The Gatekeeper queries the other Gatekeepers via the Relays. <br/>- These Gatekeepers verify whether they could facilitate this request or not. <br/>- The requester Gatekeeper collects these answers and respond via the GSD Initialization Service to its Orchestrator |
+| Postconditions | The Orchestrator has a list of other Local Clouds that can provide the Service we are looking for.  |
+
+Use case 2: *Inter-Cloud Negotiation request*
+
+| Name | Description |
+| ---- | --------- |
+| ID | ICN-1 |
+| Brief Description | The Gatekeeper is tasked to start negotiating with another Cloud. |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Relays used by the Gatekeeper <br/>- The Gatekeeper instances of another Clouds <br/>- The other Orchestrator from the second Cloud|
+| Preconditions | Orchestration process was started by an Application System. The GSD process has ended, the requester Orchestrator has chosen a partnering Cloud, where it wants to connect to. |
+| Main Flow | - The Orchestrator consumes the ICN Initialization Service of its local Gatekeeper. <br/>- The Gatekeeper consumes the other Gatekeeper's ICN Proposal service via an Relay.<br/>- The secondary Gatekeeper validates the AuthorizationControl and requests Orchestration from its own Orchestrator <br/>- The secondary Orhestrator responds to the secondary Gatekeeper with an Orchestration result. <br/>- The secondary Gatekeeper responds to the primary, requester Gatekeeper. <br/>- Additional administrative tasks are executed (e.g. configuration of the Gateway modules) <br/>- The primary, requester Orchestrator is receiving the response via the ICN initialization service. |
+
+<a name="gatekeeper_endpoints" />
+
+## Endpoints
+
+<a name="gatekeeper_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#gatekeeper_endpoints_get_echo)     | /echo       | GET    | -     | OK     |
+
+<a name="gatekeeper_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+|[Init GSD](#gatekeeper_endpoints_post_init_gsd)|/gatekeeper/init_gsd|POST|[GSDQueryForm](#datastructures_gsdqueryform)|[GSDQueryResult](#datastructures_gsdqueryresult)|
+|[Init ICN](#gatekeeper_endpoints_post_init_icn)|/gatekeeper/init_icn|POST|[ICNRequestForm](#datastructures_icnrequestform)|[ICNResult](#datastructures_icnresult)|
+
+<a name="gatekeeper_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get all Cloud entries](#gatekeeper_endpoints_get_all_cloud) | /mgmgt/clouds | GET | - | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse) |
+| [Get Cloud by ID](#gatekeeper_endpoints_get_cloud_by_id) | /mgmgt/clouds/{id} | GET | cloudId | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse) |
+| [Register Clouds](#gatekeeper_endpoints_register_clouds) | /mgmgt/clouds | POST | [CloudRequest list](#datastructures_cloudrequestlist) | [CloudWithRelaysListResponse](#datastructures_cloudwithrelayslistresponse2) |
+| [Update Cloud](#gatekeeper_endpoints_update_cloud) | /mgmgt/clouds/{id} | PUT | [CloudRequest](#datastructures_cloudrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse2) |
+| [Assign Relays to Cloud](#gatekeeper_endpoints_assign_relays_to_cloud) | /mgmgt/clouds/assign | POST | [CloudRelaysAssignmentRequest](#datastructures_cloudrelaysassignmentrequest) | [CloudWithRelaysResponse](#datastructures_cloudwithrelaysresponse3) |
+| [Delete Cloud](#gatekeeper_endpoints_delete_cloud) | /mgmgt/clouds/{id} | DELETE | cloudId | - |
+| [Get all Relay entries](#gatekeeper_endpoints_get_all_relay) | /mgmgt/relays | GET | - | [RelayListResponse](#datastructures_relaylistresponse) |
+| [Get Relay by ID](#gatekeeper_endpoints_get_relay_by_id) | /mgmgt/relays/{id} | GET | relayId | [RelayResponse](#datastructures_relayresponse) |
+| [Get Relay by Address and Port](#gatekeeper_endpoints_get_relay_by_address_and_port) | /mgmgt/relays/{address}/{port} | GET | address, port | [RelayResponse](#datastructures_relayresponse2) |
+| [Register Relays](#gatekeeper_endpoints_register_relays) | /mgmgt/relays | POST | [RelayRequest list](#datastructures_relayrequestlist) | [RelayListResponse](#datastructures_relaylistresponse2) |
+| [Update Relay](#gatekeeper_endpoints_update_relay) | /mgmgt/relays/{id} | PUT | [RelayRequest](#datastructures_relayrequest) | [RelayResponse](#datastructures_relayresponse3) |
+| [Delete Relay](#gatekeeper_endpoints_delete_relay) | /mgmgt/relays/{id} | DELETE | relayId | - |
+
+<a name="gatekeeper_removed" />
+
+### Removed Endpoints <br />
+
+The following endpoints no longer exist:
+* `GET /gatekeeper/mgmt/neighborhood/operator/{operator}/cloudname/{cloudName}`
+* `DELETE /gatekeeper/mgmt/neighborhood/operator/{operator}/cloudname/{cloudName}`
+* `GET /gatekeeper/mgmt/brokers/brokername/{brokerName}`
+* `GET /gatekeeper/mgmt/brokers/address/{address}`
+
+<a name="gatekeeper_endpoints_get_echo" />
+
+### Echo 
+```
+GET /gatekeeper/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="gatekeeper_endpoints_post_init_gsd" />
+
+### Init GSD 
+```
+POST /gatekeeper/init_gsd
+```
+
+Returns the result of Global Service Discovery.
+
+<a name="datastructures_gsdqueryform" />
+
+__GSDQueryForm__ is the input
+
+```json
+{
+  "requestedService": {
+	"serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+	"securityRequirements": [
+      "NOT_SECURE"
+    ],
+	"versionRequirement": 0,
+    "maxVersionRequirement": 0,
+    "minVersionRequirement": 0,
+    "pingProviders": true,
+	"metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    }
+  },
+  "preferredClouds": [
+    {
+	  "name": "string",
+      "operator": "string",
+	  "neighbor": true,
+      "secure": true,
+      "authenticationInfo": "string",
+      "gatekeeperRelayIds": [
+        0
+      ],
+      "gatewayRelayIds": [
+        0
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `requestedService` | Object describes the requested service | yes |
+| `serviceDefinitionRequirement` | Service Definition | yes |
+| `interfaceRequirements` | List of interfaces | no |
+| `securityRequirements` | List of required security levels | no |
+| `versionRequirement` | Version of the Service | no |
+| `maxVersionRequirement` | Maximum version of the Service | no |
+| `minVersionRequirement` | Minimum version of the Service | no |
+| `pingProviders` | Whether or not the providers should be pinged | no |
+| `metadataRequirements` | Metadata | no |
+| `preferredClouds` | List of preferred clouds | no |
+
+<a name="datastructures_gsdqueryresult" />
+
+__GSDQueryResult__ is the output
+
+```json
+{
+  "results": [
+    {
+      "providerCloud": {
+	    "id": 0,
+		"name": "string",
+		"operator": "string",
+        "authenticationInfo": "string",        
+        "neighbor": true,        
+        "ownCloud": true,
+        "secure": true,
+		"createdAt": "string",
+        "updatedAt": "string"
+      },
+	  "requiredServiceDefinition": "string",
+	  "availableInterfaces": [
+        "string"
+      ],
+      "serviceMetadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+	   "numOfProviders": 0
+    }
+  ],
+  "unsuccessfulRequests": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `results` | List of result objects |
+| `providerCloud` | Cloud where the result coming from |
+| `requiredServiceDefinition` | Service Definition |
+| `availableInterfaces` | List of available interfaces |
+| `serviceMetadata` | Metadata |
+| `numOfProviders` | Number of providers serving the service within the cloud |
+| `unsuccessfulRequests` | Number of clouds not responded |
+
+<a name="gatekeeper_endpoints_post_init_icn" />
+
+### Init ICN 
+```
+POST /gatekeeper/init_icn
+```
+
+Returns the result of Inter-Cloud Negotiation.
+
+<a name="datastructures_icnrequestform" />
+
+__ICNRequestForm__ is the input
+
+```json
+{
+  "targetCloudId": 0,
+  "requestedService": {
+    "serviceDefinitionRequirement": "string",
+    "interfaceRequirements": [
+      "string"
+    ],
+    "securityRequirements": [
+      "NOT_SECURE"
+    ],
+	"versionRequirement": 0,
+    "maxVersionRequirement": 0,
+    "minVersionRequirement": 0,
+    "pingProviders": true,	
+	"metadataRequirements": {
+      "additionalProp1": "string",
+      "additionalProp2": "string",
+      "additionalProp3": "string"
+    }
+  },
+  "preferredSystems": [
+    {
+      "systemName": "string",
+	  "address": "string",
+	  "port": 0,
+      "authenticationInfo": "string"
+    }
+  ],
+  "requesterSystem": {
+	"systemName": "string",
+    "address": "string",
+	"port": 0,
+    "authenticationInfo": "string"
+  },
+  "negotiationFlags": {
+    "additionalProp1": true,
+    "additionalProp2": true,
+    "additionalProp3": true
+  }
+}
+```
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `targetCloudId` | Local ID of the target cloud | yes |
+| `requestedService` | Object describes the requested service | yes |
+| `serviceDefinitionRequirement` | Service Definition | yes |
+| `interfaceRequirements` | List of interfaces | no |
+| `securityRequirements` | List of required security levels | no |
+| `versionRequirement` | Version of the Service | no |
+| `maxVersionRequirement` | Maximum version of the Service | no |
+| `minVersionRequirement` | Minimum version of the Service | no |
+| `pingProviders` | Whether or not the providers should be pinged | no |
+| `metadataRequirements` | Metadata | no |
+| `preferredSystems` | List of perferred systems | no |
+| `requesterSystem` | Requester Cloud details (Own cloud) | yes |
+| `negotiationFlags` | Orchestration flags | no |
+
+<a name="datastructures_icnresult" />
+
+__ICNResult__ is the output
+
+```json
+{
+  "response": [
+    {
+      "service": {
+	    "id": 0,       
+        "serviceDefinition": "string",
+		"createdAt": "string", 
+        "updatedAt": "string"
+      },
+	  "serviceUri": "string",
+	  "provider": {
+	    "id": 0,
+		"systemName": "string",
+        "address": "string",
+		"port": 0,
+        "authenticationInfo": "string",
+        "createdAt": "string",        
+        "updatedAt": "string"
+      },
+	  "interfaces": [
+        {
+          "id": 0,
+          "interfaceName": "string",
+		  "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],      
+      "secure": "NOT_SECURE",     
+      "version": 0,
+	  "metadata": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+	  "authorizationTokens": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "warnings": [
+        "FROM_OTHER_CLOUD"
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `results` | List of result objects |
+| `service` | Required service |
+| `serviceUri` | URI of the service |
+| `provider` | Provider details |
+| `interfaces` | List of available interfaces |
+| `secure` | Level of security |
+| `version` | Version number |
+| `metadata` | Service metadata |
+| `authorizationTokens` | Authorization Tokens per interfaces |
+| `warnings` | Warnings |
+
+<a name="gatekeeper_endpoints_get_all_cloud" />
+
+### Get all Cloud entries 
+```
+GET /gatekeeper/mgmgt/clouds
+```
+
+Returns Cloud entries by the given paging parameters. If `page` and `item_per_page` are
+not defined, no paging is involved.             
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+
+<a name="datastructures_cloudwithrelayslistresponse" />
+
+__CloudWithRelaysListRespone__ is the output.
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+	  "id": 0,
+      "name": "string",
+	  "operator": "string",
+      "neighbor": true,      
+      "ownCloud": true,
+      "secure": true,
+      "authenticationInfo": "string",
+      "createdAt": "string",
+	  "updatedAt": "string",
+      "gatekeeperRelays": [
+        {
+          "id": 0,
+		  "address": "string",
+          "port": 0,		            
+          "exclusive": true,
+          "secure": true,
+          "type": "GATEKEEPER_RELAY",
+		  "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "gatewayRelays": [
+        {
+          "id": 0,
+		  "address": "string",
+          "port": 0,		            
+          "exclusive": true,
+          "secure": true,
+          "type": "GATEWAY_RELAY",
+		  "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
+| `gatewayRelays` | List of Relays uesd by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_get_cloud_by_id" />
+
+### Get Cloud by ID 
+```
+GET /gatekeeper/mgmgt/clouds/{id}
+```
+
+Returns the Cloud Entry specified by the ID path parameter.
+
+<a name="datastructures_cloudwithrelaysresponse" />
+
+__CloudWithRelaysResponse__ is the output.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,      
+  "ownCloud": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "gatekeeperRelays": [
+      {
+       "id": 0,
+       "address": "string",
+       "port": 0,		            
+       "exclusive": true,
+       "secure": true,
+       "type": "GATEKEEPER_RELAY",
+       "createdAt": "string",
+       "updatedAt": "string"
+      }
+    ],
+    "gatewayRelays": [
+      {
+        "id": 0,
+	"address": "string",
+        "port": 0,		            
+        "exclusive": true,
+        "secure": true,
+        "type": "GATEWAY_RELAY",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays used by Gatekeeper |
+| `gatewayRelays` | List of Relays used by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_register_clouds" />
+
+### Register Clouds 
+```
+POST /gatekeeper/mgmgt/clouds
+```
+
+Returns created Cloud entries.
+
+<a name="datastructures_cloudrequestlist" />
+
+__CloudRequest__ list is the input.
+
+```json
+[
+  {   
+    "name": "string",
+    "operator": "string",
+    "neighbor": true,    
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  }
+]
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `secure` | Whether or not it is a secured Cloud |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelayIds` | List of Relay IDs used by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs used by Gateway |
+
+<a name="datastructures_cloudwithrelayslistresponse2" />
+
+__CloudWithRelaysListResponse__ is the output.
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "id": 0,
+      "name": "string",
+      "operator": "string",
+      "neighbor": true,      
+      "ownCloud": true,
+      "secure": true,
+      "authenticationInfo": "string",
+      "createdAt": "string",
+      "updatedAt": "string",
+      "gatekeeperRelays": [
+        {
+          "id": 0,
+	  "address": "string",
+          "port": 0,		            
+          "exclusive": true,
+          "secure": true,
+          "type": "GATEKEEPER_RELAY",
+	  "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "gatewayRelays": [
+        {
+          "id": 0,
+	  "address": "string",
+          "port": 0,		            
+          "exclusive": true,
+          "secure": true,
+          "type": "GATEWAY_RELAY",
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
+| `gatewayRelays` | List of Relays uesd by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_update_cloud" />
+
+### Update Cloud
+```
+PUT /gatekeeper/mgmgt/clouds/{id}
+```
+
+Returns updated Cloud entry specified by the ID path parameter.
+
+<a name="datastructures_cloudrequest" />
+
+__CloudRequest__ is the input.
+
+```json
+{
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "gatekeeperRelayIds": [
+    0
+  ],
+  "gatewayRelayIds": [
+    0
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `secure` | Whether or not it is a secured Cloud |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelayIds` | List of Relay IDs used by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs used by Gateway |
+
+<a name="datastructures_cloudwithrelaysresponse2" />
+
+__CloudWithRelaysResponse__ is the output.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,      
+  "ownCloud": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "gatekeeperRelays": [
+      {
+       "id": 0,
+       "address": "string",
+       "port": 0,		            
+       "exclusive": true,
+       "secure": true,
+       "type": "GATEKEEPER_RELAY",
+       "createdAt": "string",
+       "updatedAt": "string"
+      }
+    ],
+    "gatewayRelays": [
+      {
+        "id": 0,
+	"address": "string",
+        "port": 0,		            
+        "exclusive": true,
+        "secure": true,
+        "type": "GATEWAY_RELAY",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays uesd by Gatekeeper |
+| `gatewayRelays` | List of Relays uesd by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_assign_relays_to_cloud" />
+
+### Assign Relays to Cloud
+```
+POST /gatekeeper/mgmgt/clouds/assign
+```
+
+Returns updated Cloud entry.
+
+<a name="datastructures_cloudrelaysassignmentrequest" />
+
+__CloudRelaysAssignmentRequest__ is the input.
+
+```json
+{
+  "cloudId": 0,
+  "gatekeeperRelayIds": [
+    0
+  ],
+  "gatewayRelayIds": [
+    0
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `cloudId` |ID of the cloud |
+| `gatekeeperRelayIds` | List of Relay IDs used by Gatekeeper |
+| `gatewayRelayIds` | List of Relay IDs used by Gateway |
+
+<a name="datastructures_cloudwithrelaysresponse3" />
+
+__CloudWithRelaysResponse__ is the output.
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "operator": "string",
+  "neighbor": true,      
+  "ownCloud": true,
+  "secure": true,
+  "authenticationInfo": "string",
+  "createdAt": "string",
+  "updatedAt": "string",
+  "gatekeeperRelays": [
+      {
+       "id": 0,
+       "address": "string",
+       "port": 0,		            
+       "exclusive": true,
+       "secure": true,
+       "type": "GATEKEEPER_RELAY",
+       "createdAt": "string",
+       "updatedAt": "string"
+      }
+    ],
+    "gatewayRelays": [
+      {
+        "id": 0,
+	"address": "string",
+        "port": 0,		            
+        "exclusive": true,
+        "secure": true,
+        "type": "GATEWAY_RELAY",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `name` | Name of the cloud |
+| `operator` | Operator of the cloud |
+| `neighbor` | Whether or not it is a neighbor Cloud |
+| `ownCloud` | Whether or not it is the own Cloud |
+| `secure` | Whether or not it is a secured Cloud/Relay |
+| `authenticationInfo` | Base64 encoded public key of the Cloud |
+| `gatekeeperRelays` | List of Relays used by Gatekeeper |
+| `gatewayRelays` | List of Relays used by Gateway |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_delete_cloud" />
+
+### Delete Cloud
+```
+DELETE /gatekeeper/mgmgt/clouds/{id}
+```
+
+Remove requested Cloud entry
+
+<a name="gatekeeper_endpoints_get_all_relay" />
+
+### Get all Relay entries 
+```
+GET /gatekeeper/mgmgt/relays
+```
+
+Returns Relay entries by the given paging parameters. If `page` and `item_per_page` are
+not defined, no paging is involved.             
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+| `sort_field` | sorts by the given column | no |
+| `direction` | direction of sorting | no |
+
+> **Note:** Default value for `sort_field` is `id`. All possible values are: 
+> * `id`
+> * `createdAt`
+> * `updatedAt`
+
+> **Note:** Default value for `direction` is `ASC`. All possible values are:
+> * `ASC`
+> * `DESC` 
+
+
+<a name="datastructures_relaylistresponse" />
+
+__RelayListResponse__ is the output.
+
+```json
+{
+  "count": 0,
+  "data": [
+    {      
+      "id": 0,
+      "address": "string",
+      "port": 0,
+      "exclusive": true,
+      "secure": true,
+      "type": "GATEKEEPER_RELAY",
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_get_relay_by_id" />
+
+### Get Relay by ID 
+```
+GET /gatekeeper/mgmgt/relays/{id}
+```
+
+Returns the Relay Entry specified by the ID path parameter.
+
+<a name="datastructures_relayresponse" />
+
+__RelayResponse__ is the output.
+
+```json
+{      
+  "id": 0,
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_get_relay_by_address_and_port" />
+
+### Get Relay by Address and Port 
+```
+GET /gatekeeper/mgmgt/relays/{address}/{port}
+```
+
+Returns the Relay Entry specified by the address and port path parameter.
+
+<a name="datastructures_relayresponse2" />
+
+__RelayResponse__ is the output.
+
+```json
+{      
+  "id": 0,
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_register_relays" />
+
+### Register Relays
+```
+POST /gatekeeper/mgmgt/relays
+```
+<a name="datastructures_relayrequestlist" />
+
+__RelayRequest__ list is the input
+
+```json
+[
+ {      
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+ }
+]
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="datastructures_relaylistresponse2" />
+
+__RelayListResponse__ is the output.
+
+```json
+{
+  "count": 0,
+  "data": [
+    {      
+      "id": 0,
+      "address": "string",
+      "port": 0,
+      "exclusive": true,
+      "secure": true,
+      "type": "GATEKEEPER_RELAY",
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_update_relay" />
+
+### Update Relay
+```
+PUT /gatekeeper/mgmgt/relays/{id}
+```
+
+Returns updated Relay entry specified by the ID path parameter.
+
+<a name="datastructures_relayrequest" />
+
+__RelayRequest__ is the input.
+
+```json
+{      
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="datastructures_relayresponse3" />
+
+__RelayResponse__ is the output.
+
+```json
+{      
+  "id": 0,
+  "address": "string",
+  "port": 0,
+  "exclusive": true,
+  "secure": true,
+  "type": "GATEKEEPER_RELAY",
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the Relay |
+| `address` | Host of the Relay |
+| `port` | Port of the Relay |
+| `exclusive` | Whether or not is is a not public Relay |
+| `secure` | Whether or not it is a secured Relay |
+| `type` | Type of the Relay (Possible values: 'GENERAL_RELAY, 'GATEKEEPER_RELAY', 'GATEWAY_RELAY') |
+
+<a name="gatekeeper_endpoints_delete_relay" />
+
+### Delete Relay
+```
+DELETE /gatekeeper/mgmgt/relays/{id}
+```
+
+Remove requested Relay entry.
+
+# Gateway
+ 
+<a name="gateway_sdd" />
+ 
+## System Design Description Overview
+
+This supporting core system has the purpose of establishing a secured datapath - if required - between a consumer and a provider located in different clouds by its following services:
+
+- Connect to Consumer
+- Connect to Provider
+
+These Services are part of the Inter-Cloud Negotiation (ICN) process initiated by the requester cloud's Gatekeeper. During the ICN process, when a Gateway is required by one of the cloud, then the Gatekeepers in both cloud establish a new datapath to their application systems and ensure the data exchange via a Relay system.
+
+![Alt text](documentation/images/gateway_overview.png)
+
+> Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
+
+<a name="gateway_usecases" />
+
+## Services and Use Cases
+
+Use case 1: *Connect to Consumer*
+
+| Name | Description |
+| ---- | --------- |
+| ID | Connect-To-Consumer |
+| Brief Description | The Gateway is tasked to connect to the Consumer and mediate between the Relay and the Consumer. |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Arrowhead compliant ActiveMQ Relay |
+| Preconditions | Inter-Cloud orchestration process was started by a consuming Application System. |
+| Main Flow | - The Gatekeeper sends a ConnectToConsumerRequest to the Gateway. <br/>- The Gateway internally creates a new ActiveSession object. <br/>- The Gateway starts a new thread. <br/>- The Gateway creates a sslServerSocket. <br/>- The Consumer connects to the port of the serverSocket. <br/>- The Gateway gets the request from the Consumer through the SSLSocket forwards it to the Relay. <br/>- The Gateway gets the response from the Provider via the Relay, decrypts and forwards it to the Consumer through the socket. <br/>- The Gateway checks the control messages from the Relay and if a "close" message is received, than close the session. |
+
+Use case 2: *Connect to Provider*
+
+| Name | Description |
+| ---- | --------- |
+| ID | Connect-To-Provider |
+| Brief Description | The Gateway is tasked to connect to the Provider and mediate between the Relay and the Provider. |
+| Primary Actors | Gatekeeper |
+| Secondary Actors | - Arrowhead compliant ActiveMQ Relay |
+| Preconditions | Inter-Cloud orchestration process was started by a consuming Application System. |
+| Main Flow | - The Gatekeeper sends a ConnectToProviderRequest to the Gateway. <br/>- The Gateway internally creates a new ActiveSession object with new queues for a choosen Relay. <br/>- The Gateway starts a new thread. <br/>- The Gateway creates a sslServerSocket. <br/>- The Gateway gets the request from the Consumer through the Relay. <br/>-  The Gateway gets the response from the Provider via the SSLSocket, then encrypts and forwards it to the Relay. <br/>- The Gateway checks the control messages from the Relay and if a "close" message is received, than close the session. |
+
+<a name="gateway_endpoints" />
+
+## Endpoints
+
+<a name="gateway_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#gateway_endpoints_get_echo) | /echo | GET    | -    | OK     |
+
+<a name="gateway_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Connect To Consumer](#gateway_endpoints_connect_to_consumer) | /connect_consumer | POST    | [GatewayConsumerConnectionRequest](#datastructures_gatewayconsumerconnectionrequest) | Server Port number |
+| [Connect To Provider](#gateway_endpoints_connect_to_provider) | /connect_provider | POST    | [GatewayProviderConnectionRequest](#datastructures_gatewayproviderconnectionrequest) | [GatewayProviderConnectionResponse](#datastructures_gatewayproviderconnectionresponse) |
+| [Get Public Key](#gateway_endpoints_get_public_key) | /publickey | GET    | - | Public Key string |
+
+<a name="gateway_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get Active Sessions](#gateway_endpoints_get_active_sessions) | /mgmgt/sessions | GET | - | [ActiveSessionList](#datastructures_activesessionlist) |
+| [Close Session](#gateway_endpoints_close_session) | /mgmgt/sessions/close | POST | [ActiveSession](#datastructures_activesession) | OK |
+
+<a name="gateway_endpoints_get_echo" />
+
+### Echo 
+```
+GET /gateway/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="gateway_endpoints_connect_to_consumer" />
+
+### Connect To Consumer 
+```
+POST /gateway/connect_consumer
+```
+
+Creates a ServerSocket between the given Relay and Consumer and return the ServerSocket port.
+
+<a name="datastructures_gatewayconsumerconnectionrequest" />
+
+__GatewayConsumerConnectionRequest__ is the input.
+
+```json
+{
+  "consumer": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"    
+  },
+  "consumerCloud": {    
+    "name": "string",
+    "operator": "string",
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "provider": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "providerCloud": {
+    "name": "string",
+    "operator": "string",
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "providerGWPublicKey": "string",
+  "peerName": "string",
+  "queueId": "string",
+  "relay": {
+    "address": "string",
+    "port": 0,
+    "exclusive": true,
+    "secure": true,
+    "type": "string"
+  },
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `consumer` | Consumer Application System |
+| `consumerCloud` | Cloud of Consumer Application System |
+| `provider` | Provider Application System |
+| `providerCloud` | Cloud of Provider Application System |
+| `providerGWPublicKey` | Base64 encoded public key of provider cloud's Gateway |
+| `peerName` | Server Common Name of provider cloud's Gateway |
+| `queueId` | ID of the message queue in the Relay created by the provider |
+| `relay` | Messaging Relay system |
+| `serviceDefinition` | Definition of the service. |
+
+<a name="gateway_endpoints_connect_to_provider" />
+
+### Connect To Provider 
+```
+POST /gateway/connect_provider
+```
+
+Creates a Socket and Message queue between the given Relay and Provider and returns the necessary connection information.
+
+<a name="datastructures_gatewayproviderconnectionrequest" />
+
+__GatewayProviderConnectionRequest__ is the input.
+
+```json
+{
+  "consumer": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"    
+  },
+  "consumerCloud": {    
+    "name": "string",
+    "operator": "string",
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "provider": {
+    "systemName": "string",
+    "address": "string",
+    "port": 0,
+    "authenticationInfo": "string"
+  },
+  "providerCloud": {
+    "name": "string",
+    "operator": "string",
+    "neighbor": true,
+    "secure": true,
+    "authenticationInfo": "string",
+    "gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "consumerGWPublicKey": "string",
+  "relay": {
+    "address": "string",
+    "port": 0,
+    "exclusive": true,
+    "secure": true,
+    "type": "string"
+  },
+  "serviceDefinition": "string"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `consumer` | Consumer Application System |
+| `consumerCloud` | Cloud of Consumer Application System |
+| `provider` | Provider Application System |
+| `providerCloud` | Cloud of Provider Application System |
+| `consumerGWPublicKey` | Base64 encoded public key of consumer cloud's Gateway |
+| `relay` | Messaging Relay system |
+| `serviceDefinition` | Definition of the service. |
+
+<a name="datastructures_gatewayproviderconnectionresponse" />
+
+__GatewayProviderConnectionResponse__ is the output.
+
+```json
+{
+  "peerName": "string",
+  "queueId": "string",
+  "providerGWPublicKey": "string"  
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `peerName` | Server Common Name of provider cloud's Gateway |
+| `queueId` | ID of the message queue in the Relay created by the provider |
+| `providerGWPublicKey` | Base64 encoded public key of provider cloud's Gateway |
+
+<a name="gateway_endpoints_get_public_key" />
+
+### Get Public Key
+```
+GET /gateway/publickey
+```
+
+Returns the public key of the Gateway core service as a Base64 encoded text.
+
+<a name="gateway_endpoints_get_active_sessions" />
+
+### Get Active Sessions
+```
+GET /gateway/mgmgt/sessions
+```
+Returns active Gateway sessions by the given paging parameters. If `page` and `item_per_page` are
+not defined, no paging is involved.             
+
+Query params:
+
+| Field | Description | Mandatory |
+| ----- | ----------- | --------- |
+| `page` | zero based page index | no |
+| `item_per_page` | maximum number of items returned | no |
+
+<a name="datastructures_activesessionlist" />
+
+__ActiveSessionList__ is the output.
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+      "queueId": "string",
+	  "peerName": "string",
+	  "consumer": {
+        "systemName": "string",
+		"address": "string",
+        "port": 0,
+		"authenticationInfo": "string"        
+      },
+      "consumerCloud": {
+        "name": "string",
+		"operator": "string",
+		"authenticationInfo": "string",        
+        "neighbor": true,        
+        "secure": true,
+		"gatekeeperRelayIds": [
+          0
+        ],
+        "gatewayRelayIds": [
+          0
+        ]
+      },      
+      "provider": {
+        "systemName": "string",
+		"address": "string",
+        "port": 0,
+		"authenticationInfo": "string"
+      },
+      "providerCloud": {
+        "name": "string",
+		"operator": "string",
+		"authenticationInfo": "string",        
+        "neighbor": true,        
+        "secure": true,
+		"gatekeeperRelayIds": [
+          0
+        ],
+        "gatewayRelayIds": [
+          0
+        ]
+      },
+	  "serviceDefinition": "string",
+      "relay": {
+        "address": "string",
+		"port": 0,
+        "exclusive": true,        
+        "secure": true,
+        "type": "GATEWAY_RELAY"
+      },
+      "requestQueue": "string",
+	  "requestControlQueue": "string",
+      "responseQueue": "string",
+      "responseControlQueue": "string",      
+      "sessionStartedAt": "string",
+	  "consumerServerSocketPort": 0
+    }
+  ]
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `queueId` | ID of the message queue in the Relay created by the provider |
+| `peerName` | Server Common Name of provider cloud's Gateway |
+| `consumer` | Consumer Application System |
+| `consumerCloud` | Cloud of Consumer Application System |
+| `provider` | Provider Application System |
+| `providerCloud` | Cloud of Provider Application System |
+| `serviceDefinition` | Definition of the service. |
+| `relay` | Messaging Relay system |
+| `requestQueue` | request messaging queue through the the Relay |
+| `requestControlQueue` | control queue of request messaging through the the Relay |
+| `responseQueue` | response messaging queue through the the Relay |
+| `responseControlQueue` | control queue of response messaging through the the Relay |
+| `sessionStartedAt` | Time stamp of session start |
+| `consumerServerSocketPort` | Port number delegated to consumer connection |
+
+<a name="gateway_endpoints_close_session" />
+
+### Close Session
+```
+POST /gateway/mgmgt/sessions/close
+```
+
+Closing the requested active gateway session.
+
+<a name="datastructures_activesession" />
+
+__ActiveSession__ is the output.
+
+```json
+{
+  "queueId": "string",
+  "peerName": "string",
+	"consumer": {
+    "systemName": "string",
+	"address": "string",
+    "port": 0,
+	"authenticationInfo": "string"        
+  },
+  "consumerCloud": {
+    "name": "string",
+	"operator": "string",
+	"authenticationInfo": "string",        
+    "neighbor": true,        
+    "secure": true,
+	"gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },      
+  "provider": {
+    "systemName": "string",
+	"address": "string",
+    "port": 0,
+	"authenticationInfo": "string"
+  },
+  "providerCloud": {
+    "name": "string",
+	"operator": "string",
+	"authenticationInfo": "string",        
+    "neighbor": true,        
+    "secure": true,
+	"gatekeeperRelayIds": [
+      0
+    ],
+    "gatewayRelayIds": [
+      0
+    ]
+  },
+  "serviceDefinition": "string",
+  "relay": {
+    "address": "string",
+	"port": 0,
+    "exclusive": true,        
+    "secure": true,
+    "type": "GATEWAY_RELAY"
+  },
+  "requestQueue": "string",
+  "requestControlQueue": "string",
+  "responseQueue": "string",
+  "responseControlQueue": "string",      
+  "sessionStartedAt": "string",
+  "consumerServerSocketPort": 0
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `queueId` | ID of the message queue in the Relay created by the provider |
+| `peerName` | Server Common Name of provider cloud's Gateway |
+| `consumer` | Consumer Application System |
+| `consumerCloud` | Cloud of Consumer Application System |
+| `provider` | Provider Application System |
+| `providerCloud` | Cloud of Provider Application System |
+| `serviceDefinition` | Definition of the service. |
+| `relay` | Messaging Relay system |
+| `requestQueue` | request messaging queue through the the Relay |
+| `requestControlQueue` | control queue of request messaging through the the Relay |
+| `responseQueue` | response messaging queue through the the Relay |
+| `responseControlQueue` | control queue of response messaging through the the Relay |
+| `sessionStartedAt` | Time stamp of session start |
+

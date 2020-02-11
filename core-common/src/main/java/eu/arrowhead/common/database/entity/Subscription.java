@@ -24,7 +24,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"eventTypeId", "systemId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "eventTypeId", "systemId" }))
 public class Subscription {
 
 	//=================================================================================================
@@ -80,9 +80,8 @@ public class Subscription {
 	public Subscription() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Subscription(final EventType eventType, final System subscriberSystem, final String filterMetaData,
-			final String notifyUri, final boolean matchMetaData, final boolean onlyPredefinedPublishers, final ZonedDateTime startDate, final ZonedDateTime endDate) {
-
+	public Subscription(final EventType eventType, final System subscriberSystem, final String filterMetaData, final String notifyUri, final boolean matchMetaData,
+					    final boolean onlyPredefinedPublishers, final ZonedDateTime startDate, final ZonedDateTime endDate) {
 		this.eventType = eventType;
 		this.subscriberSystem = subscriberSystem;
 		this.filterMetaData = filterMetaData;
@@ -102,7 +101,9 @@ public class Subscription {
 
 	//-------------------------------------------------------------------------------------------------
 	@PreUpdate
-	public void onUpdate() { this.updatedAt = ZonedDateTime.now(); }
+	public void onUpdate() { 
+		this.updatedAt = ZonedDateTime.now();
+	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	public long getId() { return id; }
@@ -119,20 +120,18 @@ public class Subscription {
 	public Set<SubscriptionPublisherConnection> getPublisherConnections() {	return publisherConnections; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setId( final long id) { this.id = id; }
-	public void setEventType( final EventType eventType) {	this.eventType = eventType;	}
-	public void setSubscriberSystem( final System subscriberSystem) { this.subscriberSystem = subscriberSystem; }
-	public void setFilterMetaData( final String filterMetaData) { this.filterMetaData = filterMetaData; }
-	public void setNotifyUri( final String notifyUri) { this.notifyUri = notifyUri; }
-	public void setMatchMetaData( final boolean matchMetaData) { this.matchMetaData = matchMetaData; }
+	public void setId(final long id) { this.id = id; }
+	public void setEventType(final EventType eventType) {	this.eventType = eventType;	}
+	public void setSubscriberSystem(final System subscriberSystem) { this.subscriberSystem = subscriberSystem; }
+	public void setFilterMetaData(final String filterMetaData) { this.filterMetaData = filterMetaData; }
+	public void setNotifyUri(final String notifyUri) { this.notifyUri = notifyUri; }
+	public void setMatchMetaData(final boolean matchMetaData) { this.matchMetaData = matchMetaData; }
 	public void setOnlyPredefinedPublishers( final boolean onlyPredefinedPublishers) { this.onlyPredefinedPublishers = onlyPredefinedPublishers; }
-	public void setStartDate( final ZonedDateTime startDate) { this.startDate = startDate; }
-	public void setEndDate( final ZonedDateTime endDate) { this.endDate = endDate; }
-	public void setCreatedAt( final ZonedDateTime createdAt) { this.createdAt = createdAt; }
-	public void setUpdatedAt( final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
-	public void setPublisherConnections(final Set<SubscriptionPublisherConnection> publisherConnections) {
-		this.publisherConnections = publisherConnections;
-	}
+	public void setStartDate(final ZonedDateTime startDate) { this.startDate = startDate; }
+	public void setEndDate(final ZonedDateTime endDate) { this.endDate = endDate; }
+	public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public void setPublisherConnections(final Set<SubscriptionPublisherConnection> publisherConnections) { this.publisherConnections = publisherConnections; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override

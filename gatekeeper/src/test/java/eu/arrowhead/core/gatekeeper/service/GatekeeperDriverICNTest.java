@@ -1,6 +1,7 @@
 package eu.arrowhead.core.gatekeeper.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -124,8 +125,7 @@ public class GatekeeperDriverICNTest {
 	public void testSendICNProposalRelayProblem() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
-
-		when(relayClient.createConnection(any(String.class), anyInt())).thenThrow(JMSException.class);
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenThrow(JMSException.class);
 		
 		testingObject.sendICNProposal(new Cloud(), new ICNProposalRequestDTO());
 	}
@@ -135,8 +135,7 @@ public class GatekeeperDriverICNTest {
 	public void testSendICNProposalNoAcknowledgement() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
-		
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(null);
 		
 		final Cloud targetCloud = new Cloud("aitia", "testcloud2", true, true, false, "abcd");
@@ -148,8 +147,7 @@ public class GatekeeperDriverICNTest {
 	public void testSendICNProposalNoResponse() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
-		
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(gaResult);
 		when(relayClient.sendRequestAndReturnResponse(any(Session.class), any(GeneralAdvertisementResult.class), any())).thenReturn(null);
@@ -163,8 +161,7 @@ public class GatekeeperDriverICNTest {
 	public void testSendICNProposalEverythingOK() throws JMSException {
 		final Relay relay = new Relay("localhost", 12345, false, false, RelayType.GATEKEEPER_RELAY);
 		when(gatekeeperMatchmaker.doMatchmaking(any(RelayMatchmakingParameters.class))).thenReturn(relay);
-		
-		when(relayClient.createConnection(any(String.class), anyInt())).thenReturn(getTestSession());
+		when(relayClient.createConnection(any(String.class), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		final GeneralAdvertisementResult gaResult = new GeneralAdvertisementResult(getTestMessageConsumer(), "gatekeeper.testcloud1.aitia.arrowhead.eu", getDummyPublicKey(), "1234");
 		when(relayClient.publishGeneralAdvertisement(any(Session.class), any(String.class), any(String.class))).thenReturn(gaResult);
 		final GatekeeperRelayResponse response = new GatekeeperRelayResponse("1234", CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL, new ICNProposalResponseDTO());
@@ -172,6 +169,7 @@ public class GatekeeperDriverICNTest {
 		
 		final Cloud targetCloud = new Cloud("aitia", "testcloud2", true, true, false, "abcd");
 		final ICNProposalResponseDTO result = testingObject.sendICNProposal(targetCloud, new ICNProposalRequestDTO());
+		
 		Assert.assertNotNull(result);
 	}
 	
@@ -185,6 +183,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testQueryOrchestratorURINotFound() {
 		when(arrowheadContext.containsKey(CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		
 		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
 	}
 	
@@ -194,6 +193,7 @@ public class GatekeeperDriverICNTest {
 		final String key = CoreSystemService.ORCHESTRATION_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn("abcd");
+		
 		testingObject.queryOrchestrator(new OrchestrationFormRequestDTO());
 	}
 	
@@ -214,12 +214,12 @@ public class GatekeeperDriverICNTest {
 	public void testQueryAuthorizationBasedOnOchestrationResponseOrchestrationResponseEmpty() {
 		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO());
 	}
-
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class) 
 	public void testQueryAuthorizationBasedOnOchestrationResponseURINotFound() {
 		when(arrowheadContext.containsKey(CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		
 		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 	}
 	
@@ -229,6 +229,7 @@ public class GatekeeperDriverICNTest {
 		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn("1234");
+		
 		testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(List.of(new OrchestrationResultDTO())));
 	}
 	
@@ -238,12 +239,12 @@ public class GatekeeperDriverICNTest {
 		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
-		
 		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = new ResponseEntity<>(new AuthorizationInterCloudCheckResponseDTO(), HttpStatus.OK);
 		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(AuthorizationInterCloudCheckResponseDTO.class), any(AuthorizationInterCloudCheckRequestDTO.class)))
 																																												.thenReturn(response);
 		
 		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), new OrchestrationResponseDTO(getTestOrchestrationResults()));
+		
 		Assert.assertTrue(authorizedResponse.getResponse().isEmpty());
 	}
 	
@@ -253,14 +254,15 @@ public class GatekeeperDriverICNTest {
 		final String key = CoreSystemService.AUTH_CONTROL_INTER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 		when(arrowheadContext.containsKey(key)).thenReturn(true);
 		when(arrowheadContext.get(key)).thenReturn(Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "/a"));
-		
 		final ResponseEntity<AuthorizationInterCloudCheckResponseDTO> response = new ResponseEntity<>(getTestAuthorizationCheckResponse(), HttpStatus.OK);
 		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(AuthorizationInterCloudCheckResponseDTO.class), any(AuthorizationInterCloudCheckRequestDTO.class)))
 																																												.thenReturn(response);
 		
 		final OrchestrationResponseDTO orchestrationResponse = new OrchestrationResponseDTO(getTestOrchestrationResults());
 		Assert.assertEquals(2, orchestrationResponse.getResponse().size());
+		
 		final OrchestrationResponseDTO authorizedResponse = testingObject.queryAuthorizationBasedOnOchestrationResponse(new CloudRequestDTO(), orchestrationResponse);
+		
 		Assert.assertEquals(1, authorizedResponse.getResponse().size());
 		Assert.assertEquals(2, authorizedResponse.getResponse().get(0).getProvider().getId());
 		Assert.assertEquals(1, authorizedResponse.getResponse().get(0).getInterfaces().size());
@@ -271,6 +273,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testQueryGatewayPublicKeyURINotFound() {
 		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		
 		testingObject.queryGatewayPublicKey();
 	}
 	
@@ -279,6 +282,7 @@ public class GatekeeperDriverICNTest {
 	public void testQueryGatewayPublicKeyURIWrongType() {
 		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
 		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not an URI");
+		
 		testingObject.queryGatewayPublicKey();
 	}
 	
@@ -644,6 +648,7 @@ public class GatekeeperDriverICNTest {
 	@Test(expected = ArrowheadException.class)
 	public void testGetGatewayHostURINotFound() {
 		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(false);
+		
 		testingObject.getGatewayHost();
 	}
 	
@@ -652,6 +657,7 @@ public class GatekeeperDriverICNTest {
 	public void testGetGatewayHostURIWrongType() {
 		when(arrowheadContext.containsKey(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn(true);
 		when(arrowheadContext.get(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX)).thenReturn("not an URI");
+		
 		testingObject.getGatewayHost();
 	}
 	

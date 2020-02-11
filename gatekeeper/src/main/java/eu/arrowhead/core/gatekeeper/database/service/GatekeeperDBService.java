@@ -663,7 +663,6 @@ public class GatekeeperDBService {
 		}
 		
 		secure = secure == null ? false : secure;
-		
 		if (secure && Utilities.isEmpty(authenticationInfo)) {
 			throw new InvalidParameterException("Secure cloud without authenticationInfo is denied");
 		}
@@ -862,15 +861,14 @@ public class GatekeeperDBService {
 	private List<Relay> deleteUnnecessaryGatekeeperRelayConnectionsAndGetValidatedAdditionalRelays(final Cloud cloud, final List<Long> gatekeeperRealyIds) {
 		logger.debug("deleteUnnecessaryGatekeeperRelayConnectionsAndGetAdditionallyRelayIds started...");
 		
-		final Set<Long> relaysConnToKeep = new HashSet<>();
+		final Set<Long> relaysToKeep = new HashSet<>();
 		final Set<Long> relaysConnToDelete = new HashSet<>();
 		final Set<Long> relaysToAssign = new HashSet<>();
 		for (final CloudGatekeeperRelay relayConn : cloud.getGatekeeperRelays()) {
 			boolean relayConnToRemove = true;
 			for (final Long dtoRelayId : gatekeeperRealyIds) {
 				if (relayConn.getRelay().getId() == dtoRelayId) {
-					
-					relaysConnToKeep.add(relayConn.getId());
+					relaysToKeep.add(relayConn.getRelay().getId());
 					relayConnToRemove = false;
 					break;
 				} 
@@ -879,15 +877,14 @@ public class GatekeeperDBService {
 			if (relayConnToRemove) {
 				relaysConnToDelete.add(relayConn.getId());
 			}
-			
 		}
 		
 		relaysToAssign.addAll(gatekeeperRealyIds);
-		relaysToAssign.removeAll(relaysConnToKeep);
+		relaysToAssign.removeAll(relaysToKeep);
 		
 		final List<Relay> validatedRelaysToAdd = collectAndValidateGatekeeperRelays(relaysToAssign);
 		
-		if (relaysConnToKeep.isEmpty() &&  validatedRelaysToAdd.isEmpty()) {
+		if (relaysToKeep.isEmpty() && validatedRelaysToAdd.isEmpty()) {
 			throw new InvalidParameterException("Cloud can't exist without gatekeeper Relay");
 		}
 		
@@ -901,28 +898,30 @@ public class GatekeeperDBService {
 	private List<Relay> deleteUnnecessaryGatewayRelayConnectionsAndGetValidatedAdditionalRelays(final Cloud cloud, final List<Long> gatewayRealyIds) {
 		logger.debug("deleteUnnecessaryGatewayRelayConnectionsAndGetAdditionallyRelayIds started...");
 		
-		final Set<Long> relaysConnToKeep = new HashSet<>();
+		final Set<Long> relaysToKeep = new HashSet<>();
 		final Set<Long> relaysConnToDelete = new HashSet<>();
 		final Set<Long> relaysToAssign = new HashSet<>();
 		for (final CloudGatewayRelay relayConn : cloud.getGatewayRelays()) {
 			boolean relayConnToRemove = true;
-			for (final Long dtoRelayId : gatewayRealyIds) {
-				if (relayConn.getRelay().getId() == dtoRelayId) {
-					
-					relaysConnToKeep.add(relayConn.getId());
-					relayConnToRemove = false;
-					break;
-				} 
+			if (gatewayRealyIds != null && !gatewayRealyIds.isEmpty()) {				
+				for (final Long dtoRelayId : gatewayRealyIds) {
+					if (relayConn.getRelay().getId() == dtoRelayId) {
+						relaysToKeep.add(relayConn.getRelay().getId());
+						relayConnToRemove = false;
+						break;
+					} 
+				}
 			}
 			
 			if (relayConnToRemove) {
 				relaysConnToDelete.add(relayConn.getId());
 			}
-			
 		}
 		
-		relaysToAssign.addAll(gatewayRealyIds);
-		relaysToAssign.removeAll(relaysConnToKeep);
+		if (gatewayRealyIds != null && !gatewayRealyIds.isEmpty()) {
+			relaysToAssign.addAll(gatewayRealyIds);
+		}
+		relaysToAssign.removeAll(relaysToKeep);
 		
 		final List<CloudGatewayRelay> entriesToDelete = cloudGatewayRelayRepository.findAllById(relaysConnToDelete);
 		cloudGatewayRelayRepository.deleteInBatch(entriesToDelete);

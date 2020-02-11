@@ -10,6 +10,9 @@ import java.time.ZonedDateTime;
 @Table (uniqueConstraints = @UniqueConstraint(columnNames = {"actionPlanId", "actionId"}))
 public class ChoreographerActionPlanActionConnection {
 
+	//=================================================================================================
+	// members
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -29,62 +32,43 @@ public class ChoreographerActionPlanActionConnection {
 
     @Column (nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private ZonedDateTime updatedAt;
+    
+    //=================================================================================================
+	// methods
 
+    //-------------------------------------------------------------------------------------------------
     public ChoreographerActionPlanActionConnection() {}
 
-    public ChoreographerActionPlanActionConnection(final ChoreographerActionPlan actionPlanEntry, final ChoreographerAction actionEntry) {
+    //-------------------------------------------------------------------------------------------------
+	public ChoreographerActionPlanActionConnection(final ChoreographerActionPlan actionPlanEntry, final ChoreographerAction actionEntry) {
         this.actionPlanEntry = actionPlanEntry;
         this.actionEntry = actionEntry;
     }
 
-    @PrePersist
+    //-------------------------------------------------------------------------------------------------
+	@PrePersist
     public void onCreate() {
         this.createdAt = ZonedDateTime.now();
         this.updatedAt = this.createdAt;
     }
 
-    @PreUpdate
+    //-------------------------------------------------------------------------------------------------
+	@PreUpdate
     public void onUpdate() {
         this.updatedAt = ZonedDateTime.now();
     }
 
-    public long getId() {
-        return id;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public long getId() { return id; }
+	public ChoreographerActionPlan getActionPlanEntry() { return actionPlanEntry; }
+	public ChoreographerAction getActionEntry() { return actionEntry; }
+	public ZonedDateTime getCreatedAt() { return createdAt; }
+	public ZonedDateTime getUpdatedAt() { return updatedAt; }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public ChoreographerActionPlan getActionPlanEntry() {
-        return actionPlanEntry;
-    }
-
-    public void setActionPlanEntry(ChoreographerActionPlan actionPlanEntry) {
-        this.actionPlanEntry = actionPlanEntry;
-    }
-
-    public ChoreographerAction getActionEntry() {
-        return actionEntry;
-    }
-
-    public void setActionEntry(ChoreographerAction actionEntry) {
-        this.actionEntry = actionEntry;
-    }
-
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public ZonedDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(ZonedDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    //-------------------------------------------------------------------------------------------------
+	public void setId(final long id) { this.id = id; }
+    public void setActionPlanEntry(final ChoreographerActionPlan actionPlanEntry) { this.actionPlanEntry = actionPlanEntry; }
+    public void setActionEntry(final ChoreographerAction actionEntry) { this.actionEntry = actionEntry; }
+    public void setCreatedAt(final ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(final ZonedDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

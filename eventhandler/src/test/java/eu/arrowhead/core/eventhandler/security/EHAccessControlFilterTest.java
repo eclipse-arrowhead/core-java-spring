@@ -105,7 +105,7 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testMgmtSubscriptionsCertificateSysop() throws Exception {
-		this.mockMvc.perform(get( EVENT_HANDLER_MGMT_URI )
+		this.mockMvc.perform(get(EVENT_HANDLER_MGMT_URI)
 				    .secure(true)
 					.with(x509("certificates/valid.pem"))
 					.accept(MediaType.APPLICATION_JSON))
@@ -115,7 +115,7 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testMgmtSubscriptionsCertificateNotSysop() throws Exception {
-		this.mockMvc.perform(get( EVENT_HANDLER_MGMT_URI )
+		this.mockMvc.perform(get(EVENT_HANDLER_MGMT_URI)
 				    .secure(true)
 					.with(x509("certificates/provider.pem"))
 					.accept(MediaType.TEXT_PLAIN))
@@ -125,11 +125,11 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPublishAuthUpdateCertificateAuthorization() throws Exception {
-		this.mockMvc.perform(post( EVENT_HANDLER_PUBLISH_AUTH_UPDATE_URI )
+		this.mockMvc.perform(post(EVENT_HANDLER_PUBLISH_AUTH_UPDATE_URI)
 				    .secure(true)
 					.with(x509("certificates/authorization.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
-					.content( objectMapper.writeValueAsBytes( getEventPublishRequestDTOForTest() ) )
+					.content(objectMapper.writeValueAsBytes(getEventPublishRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -137,11 +137,11 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPublishAuthUpdateCertificateNotAuthorization() throws Exception {
-		this.mockMvc.perform(post( EVENT_HANDLER_PUBLISH_AUTH_UPDATE_URI )
+		this.mockMvc.perform(post(EVENT_HANDLER_PUBLISH_AUTH_UPDATE_URI)
 				    .secure(true)
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
-					.content( objectMapper.writeValueAsBytes( getEventPublishRequestDTOForTest() ) )
+					.content(objectMapper.writeValueAsBytes( getEventPublishRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}
@@ -149,11 +149,11 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPublishCertificatePublisher() throws Exception {
-		this.mockMvc.perform(post( EVENT_HANDLER_PUBLISH_URI )
+		this.mockMvc.perform(post(EVENT_HANDLER_PUBLISH_URI)
 				    .secure(true)
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
-					.content( objectMapper.writeValueAsBytes( getEventPublishRequestDTOForTest() ) )
+					.content(objectMapper.writeValueAsBytes( getEventPublishRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -161,11 +161,11 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testPublishCertificateNotPublisher() throws Exception {
-		this.mockMvc.perform(post( EVENT_HANDLER_PUBLISH_URI )
+		this.mockMvc.perform(post(EVENT_HANDLER_PUBLISH_URI)
 				    .secure(true)
 					.with(x509("certificates/authorization.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
-					.content( objectMapper.writeValueAsBytes( getEventPublishRequestDTOForTest() ) )
+					.content(objectMapper.writeValueAsBytes( getEventPublishRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}
@@ -173,11 +173,11 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testSubscribeCertificateSubscriber() throws Exception {
-		this.mockMvc.perform(post( EVENT_HANDLER_SUBSCRIBE_URI )
+		this.mockMvc.perform(post(EVENT_HANDLER_SUBSCRIBE_URI)
 				    .secure(true)
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
-					.content( objectMapper.writeValueAsBytes( getSubscriptionRequestDTOForTest() ) )
+					.content(objectMapper.writeValueAsBytes( getSubscriptionRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -185,21 +185,20 @@ public class EHAccessControlFilterTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testSubscribeCertificateNotSubscriber() throws Exception {
-		this.mockMvc.perform(post( EVENT_HANDLER_SUBSCRIBE_URI )
+		this.mockMvc.perform(post(EVENT_HANDLER_SUBSCRIBE_URI)
 				    .secure(true)
 					.with(x509("certificates/authorization.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
-					.content( objectMapper.writeValueAsBytes( getSubscriptionRequestDTOForTest() ) )
+					.content(objectMapper.writeValueAsBytes( getSubscriptionRequestDTOForTest()))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}
 	
 	//=================================================================================================
-	//Assistant methods
+	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------	
 	private SystemRequestDTO getSystemRequestDTO() {
-		
 		final SystemRequestDTO systemRequestDTO = new SystemRequestDTO();
 		systemRequestDTO.setSystemName("client-demo-provider");
 		systemRequestDTO.setAddress("localhost");
@@ -210,26 +209,19 @@ public class EHAccessControlFilterTest {
 
 	//-------------------------------------------------------------------------------------------------		
 	private EventPublishRequestDTO getEventPublishRequestDTOForTest() {
-		
-		return new EventPublishRequestDTO(
-				"eventType", 
-				getSystemRequestDTO(), //source, 
-				null, //metaData, 
-				"payload", 
-				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusSeconds(1)));
+		return new EventPublishRequestDTO("eventType", getSystemRequestDTO(), null, "payload", Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now().plusSeconds(1)));
 	}
 	
 	//-------------------------------------------------------------------------------------------------	
 	private SubscriptionRequestDTO getSubscriptionRequestDTOForTest() {
-		
 		return new SubscriptionRequestDTO(
 				"eventType", 
 				getSystemRequestDTO(), 
-				null, //filterMetaData
+				null, // filterMetaData
 				"notifyUri", 
-				false, //matchMetaData
-				null, //startDate
-				null, //endDate, 
-				null); //sources)
+				false, // matchMetaData
+				null, // startDate
+				null, // endDate 
+				null); // sources
 	}
 }

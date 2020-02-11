@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -14,4 +15,5 @@ public interface SystemRepository extends RefreshableRepository<System,Long> {
 
 	//-------------------------------------------------------------------------------------------------
 	public Optional<System> findBySystemNameAndAddressAndPort(final String systemName, final String address, final int port);
+	public List<System> findBySystemName(final String systemName);
 }

@@ -156,15 +156,15 @@ public class GatekeeperService {
 		validateGSDPollRequestDTO(request);
 				
 		// Querying Service Registry core system
-		final ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceReistryQuery(request.getRequestedService());
+		final ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceRegistryQuery(request.getRequestedService());
 		
 		if (srQueryResult.getServiceQueryData() == null || srQueryResult.getServiceQueryData().isEmpty()) {
 			return new GSDPollResponseDTO();
 		}
 		
 		// Querying Authorization core system
-		final Map<Long, List<Long>> authorizedProviderIdsWithInterfaceIdList = gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(srQueryResult.getServiceQueryData(), request.getRequesterCloud(), 
-																																 	  request.getRequestedService().getServiceDefinitionRequirement());
+		final Map<Long,List<Long>> authorizedProviderIdsWithInterfaceIdList = gatekeeperDriver.sendInterCloudAuthorizationCheckQuery(srQueryResult.getServiceQueryData(), request.getRequesterCloud(), 
+																																 	 request.getRequestedService().getServiceDefinitionRequirement());
 		if (authorizedProviderIdsWithInterfaceIdList.isEmpty()) {
 			return new GSDPollResponseDTO();
 		}
@@ -564,5 +564,4 @@ public class GatekeeperService {
 		
 		return gatewayMatchmaker.doMatchmaking(relayMMParams);
 	}
-
 }

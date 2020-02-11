@@ -17,6 +17,9 @@ public class SubscriptionListResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
+	public SubscriptionListResponseDTO() {}
+	
+	//-------------------------------------------------------------------------------------------------
 	public SubscriptionListResponseDTO(final List<SubscriptionResponseDTO> data, final long count) {
 		this.data = data;
 		this.count = count;

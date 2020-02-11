@@ -38,9 +38,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -51,6 +54,7 @@ import eu.arrowhead.core.gateway.relay.GatewayRelayClientFactory;
 import eu.arrowhead.core.gateway.relay.ProviderSideRelayInfo;
 
 @RunWith(SpringRunner.class)
+@SpringBootTest
 public class ActiveMQGatewayRelayClientTest {
 	
 	//=================================================================================================
@@ -61,6 +65,9 @@ public class ActiveMQGatewayRelayClientTest {
 	private PrivateKey otherPrivateKey;
 	
 	private ActiveMQGatewayRelayClient testObject;
+	
+	@Autowired
+	private SSLProperties sslProps;
 	
 	//=================================================================================================
 	// methods
@@ -78,7 +85,7 @@ public class ActiveMQGatewayRelayClientTest {
 		keystore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/gateway.p12"), "123456".toCharArray());
 		final PrivateKey clientPrivateKey = Utilities.getPrivateKey(keystore, "123456");
 		
-		testObject = new ActiveMQGatewayRelayClient("gateway.testcloud2.aitia.arrowhead.eu", clientPrivateKey);
+		testObject = new ActiveMQGatewayRelayClient("gateway.testcloud2.aitia.arrowhead.eu", clientPrivateKey, sslProps);
 		
 		final KeyStore keystore2 = KeyStore.getInstance("PKCS12");
 		keystore2.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("certificates/authorization.p12"), "123456".toCharArray());
@@ -88,49 +95,55 @@ public class ActiveMQGatewayRelayClientTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameNull() {
-		GatewayRelayClientFactory.createGatewayRelayClient(null, null);
+		GatewayRelayClientFactory.createGatewayRelayClient(null, null, null);
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorServerCommonNameEmpty() {
-		GatewayRelayClientFactory.createGatewayRelayClient(" ", null);
+		GatewayRelayClientFactory.createGatewayRelayClient(" ", null, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorPrivateKeyNull() {
-		GatewayRelayClientFactory.createGatewayRelayClient("gateway.testcloud2.aitia.arrowhead.eu", null);
+		GatewayRelayClientFactory.createGatewayRelayClient("gateway.testcloud2.aitia.arrowhead.eu", null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorSSLPropertiesNull() {
+		GatewayRelayClientFactory.createGatewayRelayClient("gateway.testcloud2.aitia.arrowhead.eu", otherPrivateKey, null);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionHostNull() throws JMSException {
-		testObject.createConnection(null, 42);
+		testObject.createConnection(null, 42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionHostEmpty() throws JMSException {
-		testObject.createConnection("\n", 42);
+		testObject.createConnection("\n", 42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionPortTooLow() throws JMSException {
-		testObject.createConnection("localhost", -42);
+		testObject.createConnection("localhost", -42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testCreateConnectionPortTooHigh() throws JMSException {
-		testObject.createConnection("localhost", 420000);
+		testObject.createConnection("localhost", 420000, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = JMSException.class)
 	public void testCreateConnectionfailed() throws JMSException {
-		testObject.createConnection("invalid.address.dafafasdasdfgf.qq", 42);
+		testObject.createConnection("invalid.address.dafafasdasdfgf.qq", 42, false);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -149,6 +162,7 @@ public class ActiveMQGatewayRelayClientTest {
 	@Test
 	public void testInitializeProviderSideRelayOK() throws JMSException {
 		final ProviderSideRelayInfo result = testObject.initializeProviderSideRelay(getTestSession(), getTestMessageListener());
+		
 		Assert.assertEquals(48, result.getQueueId().length());
 		Assert.assertEquals("gateway.testcloud2.aitia.arrowhead.eu", result.getPeerName());
 	}
@@ -193,6 +207,7 @@ public class ActiveMQGatewayRelayClientTest {
 	@Test
 	public void testInitializeConsumerSideRelayOk() throws JMSException {
 		final ConsumerSideRelayInfo result = testObject.initializeConsumerSideRelay(getTestSession(), getTestMessageListener(), "gateway.testcloud1.aitia.arrowhead.eu", "12sfsdfsdfasddasd234");
+		
 		Assert.assertNotNull(result);
 		Assert.assertNotNull(result.getMessageSender());
 	}
@@ -231,6 +246,7 @@ public class ActiveMQGatewayRelayClientTest {
 	@Test
 	public void testInitializeControlRelayOk() throws JMSException {
 		final ControlRelayInfo result = testObject.initializeControlRelay(getTestSession(), "gateway.testcloud1.aitia.arrowhead.eu", "12sfsdfsdfasddasd234");
+		
 		Assert.assertNotNull(result);
 		Assert.assertNotNull(result.getControlRequestMessageSender());
 		Assert.assertNotNull(result.getControlResponseMessageSender());
@@ -314,7 +330,8 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText(encoded);
 		
-		byte[] result = testObject.getBytesFromMessage(msg, otherPublicKey);
+		final byte[] result = testObject.getBytesFromMessage(msg, otherPublicKey);
+		
 		Assert.assertArrayEquals(input, result);
 	}
 	
@@ -387,6 +404,7 @@ public class ActiveMQGatewayRelayClientTest {
 	public void testHandleCloseControlMessageInvalidCommand() throws JMSException {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("EXIT abcd");
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -395,6 +413,7 @@ public class ActiveMQGatewayRelayClientTest {
 	public void testHandleCloseControlMessageMissingQueueId() throws JMSException {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE");
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -404,6 +423,7 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE abcd");
 		msg.setJMSDestination(new ActiveMQTopic());
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -413,6 +433,7 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE efgh");
 		msg.setJMSDestination(new ActiveMQQueue("blabla-abcd-CONTROL"));
+		
 		testObject.handleCloseControlMessage(msg, getTestSession());
 	}
 	
@@ -422,6 +443,7 @@ public class ActiveMQGatewayRelayClientTest {
 		final ActiveMQTextMessage msg = new ActiveMQTextMessage();
 		msg.setText("CLOSE abcd");
 		msg.setJMSDestination(new ActiveMQQueue("blabla-abcd-CONTROL"));
+		
 		try {
 			testObject.handleCloseControlMessage(msg, getTestSession());
 		} catch (final Exception ex) {

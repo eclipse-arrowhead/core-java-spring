@@ -16,6 +16,7 @@ import javax.jms.TextMessage;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,7 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.exception.AuthException;
@@ -40,6 +42,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	// members
 	
 	private static final String TCP = "tcp";
+	private static final String SSL = "ssl";
 	private static final String CLOSE_COMMAND = "CLOSE ";
 	
 	private static final int CLIENT_ID_LENGTH = 16;
@@ -48,34 +51,33 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	private static final Logger logger = LogManager.getLogger(ActiveMQGatewayRelayClient.class);
 	
 	private final String serverCommonName;
+	private final SSLProperties sslProps;
 	private final RelayCryptographer cryptographer;
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public ActiveMQGatewayRelayClient(final String serverCommonName, final PrivateKey privateKey) {
+	public ActiveMQGatewayRelayClient(final String serverCommonName, final PrivateKey privateKey, final SSLProperties sslProps) {
 		Assert.isTrue(!Utilities.isEmpty(serverCommonName), "Common name is null or blank.");
 		Assert.notNull(privateKey, "Private key is null.");
+		Assert.notNull(sslProps, "SSL properties object is null.");
 		
 		this.serverCommonName = serverCommonName;
 		this.cryptographer = new RelayCryptographer(privateKey);
+		this.sslProps = sslProps;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings("squid:S2095")
+	@SuppressWarnings({ "squid:S2095", "resource" })
 	@Override
-	public Session createConnection(final String host, final int port) throws JMSException {
+	public Session createConnection(final String host, final int port, final boolean secure) throws JMSException {
 		logger.debug("createConnection started...");
 		
 		Assert.isTrue(!Utilities.isEmpty(host), "Host is null or blank.");
 		Assert.isTrue(port > CommonConstants.SYSTEM_PORT_RANGE_MIN && port < CommonConstants.SYSTEM_PORT_RANGE_MAX, "Port is invalid.");
 		
-		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
-		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
-		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
-		final Connection connection = connectionFactory.createConnection();
-		connectionFactory.setClientID(null);
+		final Connection connection = secure ? createSSLConnection(host, port) : createTCPConnection(host, port);
 		
 		try {
 			connection.start();
@@ -86,6 +88,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 			throw ex;
 		}
 	}
+
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
@@ -289,6 +292,45 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	
 	//=================================================================================================
 	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private Connection createTCPConnection(final String host, final int port) throws JMSException {
+		final UriComponents uri = Utilities.createURI(TCP, host, port, null);
+		final ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(uri.toUri());
+		connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
+		final Connection connection = connectionFactory.createConnection();
+		connectionFactory.setClientID(null);
+
+		return connection;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Connection createSSLConnection(final String host, final int port) throws JMSException {
+		final UriComponents uri = Utilities.createURI(SSL, host, port, null);
+		final ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory(uri.toUri());
+		try {
+			connectionFactory.setClientID(RandomStringUtils.randomAlphanumeric(CLIENT_ID_LENGTH));
+			connectionFactory.setKeyStoreType(sslProps.getKeyStoreType());
+			connectionFactory.setKeyStore(sslProps.getKeyStore().getURI().toString());
+			connectionFactory.setKeyStorePassword(sslProps.getKeyStorePassword());
+			connectionFactory.setKeyStoreKeyPassword(sslProps.getKeyPassword());
+			connectionFactory.setTrustStoreType(sslProps.getKeyStoreType());
+			connectionFactory.setTrustStore(sslProps.getTrustStore().getURI().toString());
+			connectionFactory.setTrustStorePassword(sslProps.getTrustStorePassword());
+			
+			final Connection connection = connectionFactory.createConnection();
+			connectionFactory.setClientID(null);
+			
+			return connection;
+		} catch (final JMSException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage());
+			logger.debug("Stacktrace: ", ex);
+			throw new JMSException("Error while creating SSL connection: " + ex.getMessage());
+		}
+	}
+
 	
 	//-------------------------------------------------------------------------------------------------
 	private String parseCommand(final String command) {

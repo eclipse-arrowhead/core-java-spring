@@ -182,6 +182,7 @@ public class TokenGenerationService {
 	//-------------------------------------------------------------------------------------------------
 	private void checkSystemDTO(final SystemRequestDTO dto) {
 		logger.debug("checkSystemDTO started...");
+		
 		if (Utilities.isEmpty(dto.getSystemName())) {
 			throw new InvalidParameterException("System name is null or blank.");
 		}
@@ -190,6 +191,7 @@ public class TokenGenerationService {
 	//-------------------------------------------------------------------------------------------------
 	private String generateConsumerInfo(final SystemRequestDTO consumer, final CloudRequestDTO consumerCloud) {
 		logger.debug("generateConsumerInfo started...");
+		
 		final StringBuilder sb = new StringBuilder(consumer.getSystemName());
 		if (consumerCloud != null) {
 			sb.append(".").append(consumerCloud.getName().trim()).append(".").append(consumerCloud.getOperator().trim());
@@ -208,6 +210,7 @@ public class TokenGenerationService {
 	//-------------------------------------------------------------------------------------------------
 	private void initOwnCloudInfo() {
 		logger.debug("initOwnCloudInfo started...");
+		
 		try {
 			final Cloud ownCloud = commonDBService.getOwnCloud(sslEnabled);
 			ownCloudName = ownCloud.getName();
@@ -231,6 +234,7 @@ public class TokenGenerationService {
 	//-------------------------------------------------------------------------------------------------
 	private Map<SystemRequestDTO,PublicKey> getProviderPublicKeys(final List<TokenGenerationProviderDTO> providers) {
 		logger.debug("getProviderPublicKeys started...");
+		
 		final Map<SystemRequestDTO,PublicKey> result = new HashMap<>();
 		
 		for (final TokenGenerationProviderDTO provider : providers) {
@@ -253,6 +257,8 @@ public class TokenGenerationService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String generateSignedJWT(final String consumerInfo, final String service, final String intf, final Integer duration) throws JoseException {
+		logger.debug("generateSignedJWT started...");
+		
 		final JwtClaims claims = generateTokenPayload(consumerInfo, service, intf, duration);
 		final JsonWebSignature jws = new JsonWebSignature();
 		jws.setPayload(claims.toJson());
@@ -270,6 +276,8 @@ public class TokenGenerationService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private JwtClaims generateTokenPayload(final String consumerInfo, final String service, final String intf, final Integer duration) {
+		logger.debug("generateTokenPayload started...");
+		
 		final JwtClaims claims = new JwtClaims();
 		claims.setGeneratedJwtId();
 		claims.setIssuer(CommonConstants.CORE_SYSTEM_AUTHORIZATION);
@@ -287,6 +295,7 @@ public class TokenGenerationService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private String encryptSignedJWT(final String signedJWT, final PublicKey providerKey) throws JoseException {
+		logger.debug("encryptSignedJWT started...");
 		final JsonWebEncryption jwe = new JsonWebEncryption();
 		jwe.setAlgorithmHeaderValue(CommonConstants.JWE_KEY_MANAGEMENT_ALG);
 		jwe.setEncryptionMethodHeaderParameter(CommonConstants.JWE_ENCRYPTION_ALG);
