@@ -60,7 +60,8 @@ public enum CoreSystemService {
 
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystemService(final String serviceDefinition, final String serviceUri) {
-		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), serviceUri);
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "Service definition is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(serviceUri), "Service URI is null or blank");
 		
 		this.serviceDefinition = serviceDefinition;
 		this.serviceUri = serviceUri;
