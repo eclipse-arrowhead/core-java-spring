@@ -65,7 +65,7 @@ public class AuthorizationDBServiceIntraCloudTest {
 	// methods
 	
 	//=================================================================================================
-	//Tests of getAuthorizationIntraCloudEntries
+	// Tests of getAuthorizationIntraCloudEntries
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
@@ -82,7 +82,7 @@ public class AuthorizationDBServiceIntraCloudTest {
 	}
 
 	//=================================================================================================
-	//Tests of getAuthorizationIntraCloudEntryById
+	// Tests of getAuthorizationIntraCloudEntryById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -92,7 +92,7 @@ public class AuthorizationDBServiceIntraCloudTest {
 	}
 	
 	//=================================================================================================
-	//Tests of removeAuthorizationIntraCloudEntryById
+	// Tests of removeAuthorizationIntraCloudEntryById
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
@@ -102,7 +102,7 @@ public class AuthorizationDBServiceIntraCloudTest {
 	}
 	
 	//=================================================================================================
-	//Tests of createBulkAuthorizationIntraCloud
+	// Tests of createBulkAuthorizationIntraCloud
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)

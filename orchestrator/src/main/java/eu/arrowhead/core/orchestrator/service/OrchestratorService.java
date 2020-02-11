@@ -291,6 +291,9 @@ public class OrchestratorService {
 
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+		if (orList.isEmpty()) {
+			return new OrchestrationResponseDTO();
+		}
 		
 		final boolean needReservation = qosEnabled && flags.get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
 		
@@ -300,10 +303,16 @@ public class OrchestratorService {
 		
 		if (flags.get(Flag.ENABLE_QOS)) {
 			orList = qosManager.verifyServices(orList, request);
+			if (orList.isEmpty()) {
+				return new OrchestrationResponseDTO();
+			}
 		}
 		
 		if (!needReservation) {
 			orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+			if (orList.isEmpty()) {
+				return new OrchestrationResponseDTO();
+			}
 		}
 		
 		if (qosEnabled) {
@@ -311,6 +320,9 @@ public class OrchestratorService {
 		    orList = orchestratorDriver.generateAuthTokens(request, orList);
 			if (!needReservation) {
 				orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+				if (orList.isEmpty()) {
+					return new OrchestrationResponseDTO();
+				}
 			}
 		}
 		
