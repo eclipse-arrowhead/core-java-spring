@@ -41,7 +41,7 @@ public class ServiceRegistryRequestDTO implements Serializable {
 	public void setServiceUri(final String serviceUri) { this.serviceUri = serviceUri; }
 	public void setEndOfValidity(final String endOfValidity) { this.endOfValidity = endOfValidity; }
 	public void setSecure(final String secure) { this.secure = secure; }
-	public void setMetadata(Map<String,String> metadata) { this.metadata = metadata; }
+	public void setMetadata(final Map<String,String> metadata) { this.metadata = metadata; }
 	public void setVersion(final Integer version) { this.version = version; }
 	public void setInterfaces(final List<String> interfaces) { this.interfaces = interfaces; }
 } 

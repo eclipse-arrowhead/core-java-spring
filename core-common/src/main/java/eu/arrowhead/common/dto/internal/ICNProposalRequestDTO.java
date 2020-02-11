@@ -80,7 +80,7 @@ public class ICNProposalRequestDTO implements Serializable {
 	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
 	public void setRequesterSystem(final SystemRequestDTO requesterSystem) { this.requesterSystem = requesterSystem; }
 	public void setGatewayIsPresent(final boolean gatewayIsPresent) { this.gatewayIsPresent = gatewayIsPresent; }
-	public void setConsumerGatewayPublicKey(String consumerGatewayPublicKey) { this.consumerGatewayPublicKey = consumerGatewayPublicKey; }
+	public void setConsumerGatewayPublicKey(final String consumerGatewayPublicKey) { this.consumerGatewayPublicKey = consumerGatewayPublicKey; }
 	
 	//-------------------------------------------------------------------------------------------------
 	public void setPreferredSystems(final List<SystemRequestDTO> preferredSystems) {

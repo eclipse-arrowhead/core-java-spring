@@ -22,8 +22,8 @@ public class PreferredProviderDataDTO implements Serializable {
 	public CloudRequestDTO getProviderCloud() { return providerCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setProviderSystem(SystemRequestDTO providerSystem) { this.providerSystem = providerSystem; }
-	public void setProviderCloud(CloudRequestDTO providerCloud) { this.providerCloud = providerCloud; }
+	public void setProviderSystem(final SystemRequestDTO providerSystem) { this.providerSystem = providerSystem; }
+	public void setProviderCloud(final CloudRequestDTO providerCloud) { this.providerCloud = providerCloud; }
 	
 	//-------------------------------------------------------------------------------------------------
 	@JsonIgnore
