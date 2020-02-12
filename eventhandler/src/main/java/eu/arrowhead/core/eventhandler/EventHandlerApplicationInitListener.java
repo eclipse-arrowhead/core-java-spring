@@ -108,11 +108,11 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 				break;
 			} catch (final Exception ex) {
 				++retry;
-				logger.info("Unsuccessful update SubscriberAuthorizations. Trys left: " + (max_retry - retry) );
+				logger.info("Unsuccessful update SubscriberAuthorizations. Tries left: " + (max_retry - retry) );
 				
 				if (retry == max_retry) {
 					
-					logger.info("EventHandler could not start becouse of unsuccessful Subscribers Authorization: " + ex);
+					logger.info("EventHandler could not start because of unsuccessful Subscribers Authorization: " + ex);
 					throw ex;
 				
 				}else {
