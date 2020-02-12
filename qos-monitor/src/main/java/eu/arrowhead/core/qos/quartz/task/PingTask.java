@@ -300,7 +300,7 @@ public class PingTask implements Job {
 		final int availableFromSuccessPercent = pingMeasurementProperties.getAvailableFromSuccessPercet();
 		final double availablePercent = 100 - ((sentInThisPing - availableCount) / (double)sentInThisPing) * 100 ;
 
-		if (availableFromSuccessPercent < Math.round(availablePercent)) {
+		if (availableFromSuccessPercent <= Math.round(availablePercent)) {
 
 			available = true;
 		}else {
