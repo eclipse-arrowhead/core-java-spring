@@ -30,7 +30,7 @@ services:
     depends_on:
       - mysql
     volumes:
-      - ./core_system_config/authorizaton.properties:/authorization/application.properties
+      - ./core_system_config/authorization.properties:/authorization/application.properties
     ports:
       - 8445:8445
 
