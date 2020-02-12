@@ -669,7 +669,6 @@ public class AuthorizationController {
 		if (provider.getTokenDuration() <= 0) {
 			provider.setTokenDuration(-1);
 		}
-
 	}
 
 	//-------------------------------------------------------------------------------------------------

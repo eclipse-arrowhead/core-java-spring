@@ -67,7 +67,7 @@ public class OrchestratorService {
 	private static final String LESS_THAN_ONE_ERROR_MESSAGE= " must be greater than zero.";
 	private static final String MORE_THAN_ONE_ERROR_MESSAGE= " must not have more than one element.";
 	
-	private static final int EXPIRING_TIME_IN_MINUTES = 2;
+	public static final int EXPIRING_TIME_IN_MINUTES = 2;
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorService.class);
 	
@@ -94,6 +94,9 @@ public class OrchestratorService {
 	
 	@Value(CoreCommonConstants.$QOS_ENABLED_WD)
 	private boolean qosEnabled;
+	
+	@Value(CoreCommonConstants.$QOS_MAX_RESERVATION_DURATION_WD)
+	private int maxReservationDuration; // in seconds
 	
 	//=================================================================================================
 	// methods
@@ -288,19 +291,28 @@ public class OrchestratorService {
 
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+		if (orList.isEmpty()) {
+			return new OrchestrationResponseDTO();
+		}
 		
 		final boolean needReservation = qosEnabled && flags.get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
 		
 		if (needReservation) {
-			//TODO: temporary locking (if caller wants exclusivity)
+			orList = qosManager.reserveProvidersTemporarily(orList, request.getRequesterSystem());
  		} 
 		
 		if (flags.get(Flag.ENABLE_QOS)) {
-			//TODO: filter by QoS Requirements (removing temporary lock if needed)
+			orList = qosManager.verifyServices(orList, request);
+			if (orList.isEmpty()) {
+				return new OrchestrationResponseDTO();
+			}
 		}
 		
 		if (!needReservation) {
 			orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+			if (orList.isEmpty()) {
+				return new OrchestrationResponseDTO();
+			}
 		}
 		
 		if (qosEnabled) {
@@ -308,6 +320,9 @@ public class OrchestratorService {
 		    orList = orchestratorDriver.generateAuthTokens(request, orList);
 			if (!needReservation) {
 				orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
+				if (orList.isEmpty()) {
+					return new OrchestrationResponseDTO();
+				}
 			}
 		}
 		
@@ -316,7 +331,9 @@ public class OrchestratorService {
 			final IntraCloudProviderMatchmakingParameters params = new IntraCloudProviderMatchmakingParameters(localProviders);
 			// set additional parameters here if you use a different matchmaking algorithm
 			final OrchestrationResultDTO selected = intraCloudProviderMatchmaker.doMatchmaking(orList, params);
-			//TODO: remove temporary locks and change lock on the selected
+			if (needReservation) {
+				qosManager.confirmReservation(selected, orList, request.getRequesterSystem());
+			}
 			orList.clear();
 			orList.add(selected);
 		}
@@ -360,6 +377,17 @@ public class OrchestratorService {
 		}
 		
 		request.validateCrossParameterConstraints();
+		
+		if (qosEnabled && request.getOrchestrationFlags().get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY)) {
+			try {
+				final int exclusivityTime = Integer.parseInt(request.getCommands().get(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY));
+				if (exclusivityTime <= 0 || exclusivityTime > maxReservationDuration) {
+					throw new InvalidParameterException("Exclusivity time must be specified in seconds. Valid interval: [1, " + maxReservationDuration + "].");
+				}
+			} catch (final NumberFormatException ex) {
+				throw new InvalidParameterException("Exclusivity time is in the wrong format.");
+			}
+		}
 		
 		// Requested service
 		checkRequestedServiceForm(request.getRequestedService());

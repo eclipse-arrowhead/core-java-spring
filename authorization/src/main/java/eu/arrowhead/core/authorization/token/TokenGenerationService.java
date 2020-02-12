@@ -44,6 +44,7 @@ public class TokenGenerationService {
 
 	private final Logger logger = LogManager.getLogger(TokenGenerationService.class);
 	
+	private static final String DOT = ".";
 	private static final String JWT_CONTENT_TYPE = "JWT";
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
@@ -170,7 +171,7 @@ public class TokenGenerationService {
 		
 		for (final String intf : provider.getServiceInterfaces()) {
 			if (!interfaceNameVerifier.isValid(intf)) {
-				throw new InvalidParameterException("Specified interface name is not valid: " + intf + ".");
+				throw new InvalidParameterException("Specified interface name is not valid: " + intf + DOT);
 			}
 		}
 	}
@@ -190,14 +191,14 @@ public class TokenGenerationService {
 		
 		final StringBuilder sb = new StringBuilder(consumer.getSystemName());
 		if (consumerCloud != null) {
-			sb.append(".").append(consumerCloud.getName().trim()).append(".").append(consumerCloud.getOperator().trim());
+			sb.append(DOT).append(consumerCloud.getName().trim()).append(DOT).append(consumerCloud.getOperator().trim());
 		} else {
 			// need to use own cloud information
 			if (Utilities.isEmpty(ownCloudName)) {
 				initOwnCloudInfo();
 			}
 			
-			sb.append(".").append(ownCloudName).append(".").append(ownCloudOperator);
+			sb.append(DOT).append(ownCloudName).append(DOT).append(ownCloudOperator);
 		}
 		
 		return sb.toString().toLowerCase();

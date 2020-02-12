@@ -128,9 +128,9 @@ public class QoSIntraPingMeasurement {
 	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }
 	public void setMeanResponseTimeWithoutTimeout(final Integer meanResponseTimeWithoutTimeout) { this.meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeout; }
 	public void setMeanResponseTimeWithTimeout(final Integer meanResponseTimeWithTimeout) { this.meanResponseTimeWithTimeout = meanResponseTimeWithTimeout; }
-	public void setJitterWithTimeout(Integer jitterWithTimeout) { this.jitterWithTimeout = jitterWithTimeout; }
-	public void setJitterWithoutTimeout(Integer jitterWithoutTimeout) { this.jitterWithoutTimeout = jitterWithoutTimeout; }
-	public void setLostPerMeasurementPercent(Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
+	public void setJitterWithTimeout(final Integer jitterWithTimeout) { this.jitterWithTimeout = jitterWithTimeout; }
+	public void setJitterWithoutTimeout(final Integer jitterWithoutTimeout) { this.jitterWithoutTimeout = jitterWithoutTimeout; }
+	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
 	public void setSent(final long sent) { this.sent = sent; }
 	public void setReceived(final long received) { this.received = received; }
 	public void setCountStartedAt(final ZonedDateTime countStartedAt) { this.countStartedAt = countStartedAt; }

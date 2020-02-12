@@ -3,6 +3,8 @@ package eu.arrowhead.common.dto.internal;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class PingMeasurementResponseDTO  implements Serializable {
 
 	//=================================================================================================
@@ -54,6 +56,12 @@ public class PingMeasurementResponseDTO  implements Serializable {
 	public long getReceivedAll() { return receivedAll; }
 	public ZonedDateTime getCreatedAt() { return createdAt; }
 	public ZonedDateTime getUpdatedAt() { return updatedAt; }
+	
+	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
+	public boolean hasRecord() {
+		return id != null;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final Long id) { this.id = id; }

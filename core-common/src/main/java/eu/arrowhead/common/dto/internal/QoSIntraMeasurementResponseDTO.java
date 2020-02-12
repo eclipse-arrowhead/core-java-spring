@@ -27,8 +27,8 @@ public class QoSIntraMeasurementResponseDTO implements Serializable {
 	public QoSIntraMeasurementResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSIntraMeasurementResponseDTO(final long id, final SystemResponseDTO system, final QoSMeasurementType measurementType,
-			final ZonedDateTime lastMeasurementAt, final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
+	public QoSIntraMeasurementResponseDTO(final long id, final SystemResponseDTO system, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt, 
+										  final ZonedDateTime createdAt, final ZonedDateTime updatedAt) {
 
 		this.id = id;
 		this.system = system;

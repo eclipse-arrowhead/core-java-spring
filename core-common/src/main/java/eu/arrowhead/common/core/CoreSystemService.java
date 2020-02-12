@@ -29,11 +29,15 @@ public enum CoreSystemService {
 	GATEWAY_PROVIDER_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_PROVIDER, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI),
 	GATEWAY_CONSUMER_SERVICE(CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_CONSUMER, CommonConstants.GATEWAY_URI + CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI),
 	
-	//Eventhandler services
+	// Eventhandler services
 	EVENT_PUBLISH_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH),
 	EVENT_SUBSCRIBE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_SUBSCRIBE),
 	EVENT_UNSUBSCRIBE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_UNSUBSCRIBE),
-	EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE);
+	EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CommonConstants.CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, CommonConstants.EVENT_HANDLER_URI + CommonConstants.OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
+	
+	// QoS Monitor services
+	QOS_MONITOR_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + 
+										 CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX);
 	
 	//TODO: additional services 
 	
@@ -56,7 +60,8 @@ public enum CoreSystemService {
 
 	//-------------------------------------------------------------------------------------------------
 	private CoreSystemService(final String serviceDefinition, final String serviceUri) {
-		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), serviceUri);
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "Service definition is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(serviceUri), "Service URI is null or blank");
 		
 		this.serviceDefinition = serviceDefinition;
 		this.serviceUri = serviceUri;

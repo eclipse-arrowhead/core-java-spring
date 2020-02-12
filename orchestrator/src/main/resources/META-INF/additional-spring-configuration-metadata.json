@@ -53,5 +53,10 @@
     "name": "qos_reservation_check_interval",
     "type": "java.lang.Integer",
     "description": "A description for 'qos_reservation_check_interval'"
+  },
+  {
+    "name": "qos_ping_measurement_cache_threshold",
+    "type": "java.lang.Integer",
+    "description": "A description for 'qos_ping_measurement_cache_threshold'"
   }
 ]}

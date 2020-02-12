@@ -32,6 +32,7 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
@@ -58,8 +59,9 @@ public class OrchestratorDriver {
 	private static final String AUTH_INTRA_CHECK_URI_KEY = CoreSystemService.AUTH_CONTROL_INTRA_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_GSD_URI_KEY = CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_INIT_ICN_URI_KEY = CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOS_MONITOR_PING_MEASUREMENT_URI_KEY = CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
-	private static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
+	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 	
 	private static final Logger logger = LogManager.getLogger(OrchestratorDriver.class);
 	
@@ -180,14 +182,23 @@ public class OrchestratorDriver {
 		return response.getBody();
 	}
 
-	
 	//-------------------------------------------------------------------------------------------------
-	public GSDQueryResultDTO doGlobalServiceDiscovery(final GSDQueryFormDTO gsdForm ) {
+	public GSDQueryResultDTO doGlobalServiceDiscovery(final GSDQueryFormDTO gsdForm) {
 		logger.debug("doGlobalServiceDiscovery started...");
 		Assert.notNull(gsdForm, "GSDPollRequestDTO is null.");
 		
 		final UriComponents gsdUri = getGatekeeperGSDUri();
 		final ResponseEntity<GSDQueryResultDTO> response = httpService.sendRequest(gsdUri, HttpMethod.POST, GSDQueryResultDTO.class, gsdForm);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public PingMeasurementResponseDTO getPingMeasurement(final long systemId) {
+		logger.debug("getPingMeasurement started...");
+		
+		final UriComponents pingUri = getQosMonitorPingMeasurementUri(systemId);
+		final ResponseEntity<PingMeasurementResponseDTO> response = httpService.sendRequest(pingUri, HttpMethod.GET, PingMeasurementResponseDTO.class);
 		
 		return response.getBody();
 	}
@@ -301,6 +312,22 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQosMonitorPingMeasurementUri(final long id) {
+		logger.debug("getQosMonitorPingMeasurementUri started...");
+		
+		if (arrowheadContext.containsKey(QOS_MONITOR_PING_MEASUREMENT_URI_KEY)) {
+			try {
+				final UriComponents uri = (UriComponents) arrowheadContext.get(QOS_MONITOR_PING_MEASUREMENT_URI_KEY);
+				return uri.expand(id);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Orchestrator can't find QoS Monitor ping/measurement URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Orchestrator can't find gatekeeper init_icn URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private List<TokenGenHelper> convertOrchestrationResultListToTokenGenHelperList(final List<OrchestrationResultDTO> orList) {
 		logger.debug("convertOrchestrationResultListToTokenGenHelperList started...");
 		
@@ -335,7 +362,7 @@ public class OrchestratorDriver {
 				tokenDuration = Integer.parseInt(result.getMetadata().get(KEY_CALCULATED_SERVICE_TIME_FRAME));
 			} catch (final NumberFormatException ex) {
 				logger.debug(ex.getMessage());
-				logger.trace("Stacktracke:", ex);
+				logger.trace("Stacktrace:", ex);
 			}
 		}
 		

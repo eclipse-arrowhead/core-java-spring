@@ -125,6 +125,12 @@ public class CoreCommonConstants {
 	public static final String $QOS_RESERVATION_CHECK_INTERVAL_WD = "${" + QOS_RESERVATION_CHECK_INTERVAL + ":" + CoreDefaults.DEFAULT_QOS_RESERVATION_CHECK_INTERVAL + "}";
 	public static final String QOS_RESERVATION_TEMP_LOCK_DURATION = "qos_reservation_temp_lock_duration"; // in seconds
 	public static final String $QOS_RESERVATION_TEMP_LOCK_DURATION_WD = "${" + QOS_RESERVATION_TEMP_LOCK_DURATION + ":" + CoreDefaults.DEFAULT_QOS_TEMPORARY_LOCK_DURATION + "}";
+	public static final String QOS_MAX_RESERVATION_DURATION = "qos_maximum_reservation_duration"; // in seconds
+	public static final String $QOS_MAX_RESERVATION_DURATION_WD = "${" + QOS_MAX_RESERVATION_DURATION + ":" + CoreDefaults.DEFAULT_QOS_MAX_RESERVATION_DURATION + "}";
+	public static final String QOS_PING_MEASUREMENT_CACHE_THRESHOLD = "qos_ping_measurement_cache_threshold"; // in seconds
+	public static final String $QOS_PING_MEASUREMENT_CACHE_THRESHOLD_WD = "${" + QOS_PING_MEASUREMENT_CACHE_THRESHOLD + ":" + CoreDefaults.DEFAULT_QOS_PING_MEASUREMENT_CACHE_THRESHOLD + "}";
+	public static final String QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = "qos_not_measured_system_verify_result"; // result of verify if a system has no measurement records
+	public static final String $QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = "${" + QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT + ":" + CoreDefaults.DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
