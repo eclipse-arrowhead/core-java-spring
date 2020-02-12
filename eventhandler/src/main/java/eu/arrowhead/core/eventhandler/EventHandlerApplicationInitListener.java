@@ -106,7 +106,7 @@ public class EventHandlerApplicationInitListener extends ApplicationInitListener
 				updateSubscriberAuthorizations();
 				logger.info("SubscriberAuthorizations are up to date.");
 				break;
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				++retry;
 				logger.info("Unsuccessful update SubscriberAuthorizations. Trys left: " + (max_retry - retry) );
 				
