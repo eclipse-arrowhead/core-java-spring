@@ -100,6 +100,7 @@ Here, we provide brief instructions on how to install and run both Docker and co
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
 <a name="quickstart_examples" />
+
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
 Don't forget to copy the `initSQL.sh` script next to the docker-compose file and execute it! On the first run it initializes the Database!<br />
 Example copy command which does this for you, execute from the project root directory.
