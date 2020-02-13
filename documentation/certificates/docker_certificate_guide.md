@@ -4,7 +4,7 @@
 1. You have certificates for **all** your core systems. If not, follow the [Certificate guide](/README.md#certificates) first.
 
 
-##Steps
+## Steps
 1. [Check you have all the necessary certificates](#step01)
 2. [Edit your property file](#step02)
 3. [Overwrite the Secure Mode properties](#step03) 
@@ -71,7 +71,7 @@ In the image you can see two examples. I'll explain the first one.
 
 `- ./tmit_certs/service_registry.p12:/serviceregistry/service_registry.p12`
 
-In [Step 1](#step1) we saw that our certificates were inside a folder called `tmit_certs`. We are mounting the `service_registry.p12` file from the `tmit_certs` folder to the host machine inside the Docker Container into the `serviceregistry` folder under the name of `service_registry.p12`
+In [Step 1](#step1) we saw that our certificates were inside a folder called `tmit_certs`. We are mounting the `service_registry.p12` file from the `tmit_certs` folder on the host machine inside the Docker Container into the `serviceregistry` folder under the name of `service_registry.p12`
 
 > **Note:** The certificate name you specified in [Step 3](#step03) **MUST** match the `inside_certificate.name` specified in [Step 5](#step05), otherwise it won't work. 
 
