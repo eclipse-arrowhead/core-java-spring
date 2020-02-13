@@ -132,7 +132,7 @@ If you change your config you have to restart the appropriate container
 
 `docker restart <containerName>`
 
-<a name="quickstart_dockercommands" />`
+<a name="quickstart_dockercommands" />
 
 ##### Handy Docker Commands
  
