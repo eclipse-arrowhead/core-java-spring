@@ -403,7 +403,7 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
 1) Master certificate: `arrowhead.eu`
 2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
 3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
-The certificate naming convetion have strict rules:
+The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
@@ -429,8 +429,16 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 ### System Operator Certificate
 
 The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
-SysOp certificate allows the client to use the management endpoints of the Arrowhed Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser.
-* [Import SysOp Certificate (Windows 10)](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/import_sysop_certificate_win10.pdf)
+SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser.
+* [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
+
+### Include certificate in Docker container
+
+The following guide describes step by step, how to include your own certificates into a Docker container.
+
+* [How to include certificate in Docker](documentation/certificates/docker_certificate_guide.md)
+
+
 
 <a name="setupgatekeeper_and_gateway" /> 
 
