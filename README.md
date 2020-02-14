@@ -6452,40 +6452,40 @@ __Get ping measurements by system id mgmt path parameter__ the input :
 __Ping Measurment response by system id__ the output :
 
 ```json
-	{
+{
+	"id": 1,
+	"measurement": {
 		"id": 1,
-		"measurement": {
-			"id": 1,
-			"system": {
-				"id": 5,
-				"systemName": "testsystem",
-				"address": "testsystem.ai",
-				"port": 12345,
-				"createdAt": "2020-02-04 09:38:56",
-				"updatedAt": "2020-02-04 09:38:56"
-			},
-			"measurementType": "PING",
-			"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
-			"createdAt": "2020-02-04T10:42:04+01:00",
-			"updatedAt": "2020-02-14T10:48:47+01:00"
+		"system": {
+			"id": 5,
+			"systemName": "testsystem",
+			"address": "testsystem.ai",
+			"port": 12345,
+			"createdAt": "2020-02-04 09:38:56",
+			"updatedAt": "2020-02-04 09:38:56"
 		},
-		"available": true,
-		"lastAccessAt": "2020-02-14T10:48:10+01:00",
-		"minResponseTime": 15,
-		"maxResponseTime": 26,
-		"meanResponseTimeWithTimeout": 18,
-		"meanResponseTimeWithoutTimeout": 18,
-		"jitterWithTimeout": 3,
-		"jitterWithoutTimeout": 3,
-		"lostPerMeasurementPercent": 0,
-		"sent": 12075,
-		"received": 12070,
-		"countStartedAt": "2020-02-07T00:00:00+01:00",
-		"sentAll": 63175,
-		"receivedAll": 56721,
-		"createdAt": "2020-02-14T10:48:47+01:00",
+		"measurementType": "PING",
+		"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
+		"createdAt": "2020-02-04T10:42:04+01:00",
 		"updatedAt": "2020-02-14T10:48:47+01:00"
-	}
+	},
+	"available": true,
+	"lastAccessAt": "2020-02-14T10:48:10+01:00",
+	"minResponseTime": 15,
+	"maxResponseTime": 26,
+	"meanResponseTimeWithTimeout": 18,
+	"meanResponseTimeWithoutTimeout": 18,
+	"jitterWithTimeout": 3,
+	"jitterWithoutTimeout": 3,
+	"lostPerMeasurementPercent": 0,
+	"sent": 12075,
+	"received": 12070,
+	"countStartedAt": "2020-02-07T00:00:00+01:00",
+	"sentAll": 63175,
+	"receivedAll": 56721,
+	"createdAt": "2020-02-14T10:48:47+01:00",
+	"updatedAt": "2020-02-14T10:48:47+01:00"
+}
 ```
 
 | Field | Description |
