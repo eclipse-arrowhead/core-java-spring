@@ -6360,12 +6360,12 @@ __PingMeasurement list response__ the output :
 			"measurement": {
 				"id": 1,
 				"system": {
-				"id": 5,
-				"systemName": "testsystem",
-				"address": "testsystem.ai",
-				"port": 12345,
-				"createdAt": "2020-02-04 09:38:56",
-				"updatedAt": "2020-02-04 09:38:56"
+					"id": 5,
+					"systemName": "testsystem",
+					"address": "testsystem.ai",
+					"port": 12345,
+					"createdAt": "2020-02-04 09:38:56",
+					"updatedAt": "2020-02-04 09:38:56"
 				},
 				"measurementType": "PING",
 				"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
@@ -6457,12 +6457,12 @@ __Ping Measurment response by system id__ the output :
 		"measurement": {
 			"id": 1,
 			"system": {
-			"id": 5,
-			"systemName": "testsystem",
-			"address": "testsystem.ai",
-			"port": 12345,
-			"createdAt": "2020-02-04 09:38:56",
-			"updatedAt": "2020-02-04 09:38:56"
+				"id": 5,
+				"systemName": "testsystem",
+				"address": "testsystem.ai",
+				"port": 12345,
+				"createdAt": "2020-02-04 09:38:56",
+				"updatedAt": "2020-02-04 09:38:56"
 			},
 			"measurementType": "PING",
 			"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
