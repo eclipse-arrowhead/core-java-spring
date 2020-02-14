@@ -67,6 +67,8 @@ The QoS Monitor has the following use cases:
 | [Get ping measurements mgmt](#qos_monitor_endpoints_get_ping_measurements_list) | /mgmt/ping/measurements | GET | direction && item_per_page && page && sort_field | [PingMeasurement list response](#qos_monitor_ping_measurement_list_response) |
 | [Get ping measurements by system id mgmt](#qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id) | /mgmt/ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
 
+<a name="qos_monitor_endpoints_private" />
+
 ### Private endpoint description<br />
 
 | Function | URL subpath | Method | Input | Output |
@@ -207,3 +209,9 @@ __Ping Measurment response by system id__ the output :
 		"updatedAt": "2020-02-14T10:48:47+01:00"
 	}
 ```
+
+<a name="qos_monitor_endpoints_get_ping_measurement_by_system_id" />
+
+### Get ping measurements by system id 
+
+For private endpoints no detailed description available.
