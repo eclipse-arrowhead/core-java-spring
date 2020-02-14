@@ -1,3 +1,4 @@
+
 # Arrowhead Framework 4.1.3
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
@@ -6393,6 +6394,40 @@ __PingMeasurement list response__ the output :
 }
 ```
 
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `id` | ID of the ping measurement |
+| `measurement.id` | ID of the measurement |
+| `measurement.system.id` | ID of the measured system |
+| `measurement.system.systemName` | Name of the measured system |
+| `measurement.system.address` | Address of the measured system |
+| `measurement.system.port` | Port of the measured system |
+| `measurement.system.createdAt` | Date of creation of the measured system |
+| `measurement.system.updatedAt` | Date of update of the measured system |
+| `measurement.measurementType` | Type of the measurement |
+| `measurement.lastMeasurementAt` | Time of the last measurement |
+| `measurement.createdAt` | Date of creation of the measurement |
+| `measurement.updatedAt` | Date of update of the measurement |
+| `available` | Boolean value of the systems calculated availability|
+| `lastAccessAt` | TimeStamp value of the systems last known availability|
+| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
+| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
+| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
+| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
+| `sent` | Integer value of sent pings in measurement|
+| `received` | Integer value of received pings in measurement|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `sentAll` | Integer value of sent pings since ping measurement created|
+| `receivedAll` | Integer value of received pings since ping measurement created|
+| `createdAt` | Date of creation of the ping measurement |
+| `updatedAt` | Date of update of the ping measurement |
+
 <a name="qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id" />
 
 ### Get ping measurements by system id mgmt
@@ -6452,6 +6487,38 @@ __Ping Measurment response by system id__ the output :
 		"updatedAt": "2020-02-14T10:48:47+01:00"
 	}
 ```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the ping measurement |
+| `measurement.id` | ID of the measurement |
+| `measurement.system.id` | ID of the measured system |
+| `measurement.system.systemName` | Name of the measured system |
+| `measurement.system.address` | Address of the measured system |
+| `measurement.system.port` | Port of the measured system |
+| `measurement.system.createdAt` | Date of creation of the measured system |
+| `measurement.system.updatedAt` | Date of update of the measured system |
+| `measurement.measurementType` | Type of the measurement |
+| `measurement.lastMeasurementAt` | Time of the last measurement |
+| `measurement.createdAt` | Date of creation of the measurement |
+| `measurement.updatedAt` | Date of update of the measurement |
+| `available` | Boolean value of the systems calculated availability|
+| `lastAccessAt` | TimeStamp value of the systems last known availability|
+| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
+| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
+| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
+| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
+| `sent` | Integer value of sent pings in measurement|
+| `received` | Integer value of received pings in measurement|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `sentAll` | Integer value of sent pings since ping measurement created|
+| `receivedAll` | Integer value of received pings since ping measurement created|
+| `createdAt` | Date of creation of the ping measurement |
+| `updatedAt` | Date of update of the ping measurement |
 
 <a name="qos_monitor_endpoints_get_ping_measurement_by_system_id" />
 
