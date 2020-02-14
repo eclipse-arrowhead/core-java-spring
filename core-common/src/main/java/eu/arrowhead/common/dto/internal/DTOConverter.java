@@ -666,7 +666,7 @@ public class DTOConverter {
 		pingMeasurementResponseDTO.setAvailable(pingMeasurement.isAvailable());
 		pingMeasurementResponseDTO.setLastAccessAt(pingMeasurement.getLastAccessAt());
 		pingMeasurementResponseDTO.setMinResponseTime(pingMeasurement.getMinResponseTime());
-		pingMeasurementResponseDTO.setMaxResponseTime(pingMeasurement.getMinResponseTime());
+		pingMeasurementResponseDTO.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
 		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
 		pingMeasurementResponseDTO.setMeanResponseTimeWithoutTimeout(pingMeasurement.getMeanResponseTimeWithoutTimeout());
 		pingMeasurementResponseDTO.setJitterWithTimeout(pingMeasurement.getJitterWithTimeout());
