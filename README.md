@@ -6302,7 +6302,7 @@ The QoS Monitor has the following use cases:
 | -------- | ----------- | ------ | ----- | ------ |
 | [Echo](#qos_monitor_endpoints_get_echo) | /echo | GET    | -    | OK     |
 
-<a name="qos_monitor_endpoints_management" />
+<a name="qos_monitor_endpoints_mgmt" />
 
 ### Management endpoint description<br />
 
