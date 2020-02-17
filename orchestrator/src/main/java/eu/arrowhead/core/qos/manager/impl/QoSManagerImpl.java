@@ -117,7 +117,8 @@ public class QoSManagerImpl implements QoSManager {
 		Assert.notNull(requester.getPort(), "Requester system's port is null.");
 		
 		for (final OrchestrationResultDTO dto : orList) {
-			if (dto.getProvider().getId() == selected.getProvider().getId() && dto.getService().getId() == selected.getProvider().getId()) {
+			
+			if (dto.getProvider().getId() == selected.getProvider().getId() && dto.getService().getId() == selected.getService().getId()) {
 				qosReservationDBService.extendReservation(selected, requester);
 			} else {
 				qosReservationDBService.removeTemporaryLock(dto);
