@@ -216,7 +216,7 @@ public class CommonConstants {
 		
 	public static final String EVENT_METADATA_FILTER = "metadataFilter";
 
-	public static final String LOCALHOST = "localhost";
+	public static final String LOCALHOST = "127.0.0.1";
 	public static final int HTTP_PORT = 8080;
 
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE_REQUEST_PARAM_EVENT_TYPE = "event_type";

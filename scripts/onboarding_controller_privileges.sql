@@ -1,8 +1,30 @@
 USE `arrowhead`;
 REVOKE ALL, GRANT OPTION FROM 'onboarding'@'localhost';
-
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'onboarding'@'localhost';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gateway_relay` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'onboarding'@'localhost';
+
 REVOKE ALL, GRANT OPTION FROM 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`system_` TO 'onboarding'@'%';
 GRANT ALL PRIVILEGES ON `arrowhead`.`logs` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gatekeeper_relay` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`cloud_gateway_relay` TO 'onboarding'@'localhost';
+GRANT ALL PRIVILEGES ON `arrowhead`.`relay` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_inter_cloud` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`authorization_intra_cloud` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_definition` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_interface` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry` TO 'onboarding'@'%';
+GRANT ALL PRIVILEGES ON `arrowhead`.`service_registry_interface_connection` TO 'onboarding'@'%';
 
 FLUSH PRIVILEGES;

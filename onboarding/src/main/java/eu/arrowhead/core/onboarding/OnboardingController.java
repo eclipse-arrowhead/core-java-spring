@@ -72,7 +72,7 @@ public class OnboardingController
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CommonConstants.ECHO_URI)
-    public String echoDevice()
+    public String echoOnboarding()
     {
         return "Got it!";
     }
