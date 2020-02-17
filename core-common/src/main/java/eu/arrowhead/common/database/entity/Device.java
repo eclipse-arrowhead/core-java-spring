@@ -46,10 +46,10 @@ public class Device
 	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
 	private String address;
 
-	@Column(nullable = false, length = CoreDefaults.VARCHAR_BASIC)
+	@Column(nullable = false, unique = true, length = CoreDefaults.VARCHAR_BASIC)
 	private String macAddress;
 
-	@Column(nullable = false, length = CoreDefaults.VARCHAR_EXTENDED)
+	@Column(nullable = true, length = CoreDefaults.VARCHAR_EXTENDED)
 	private String authenticationInfo;
 
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

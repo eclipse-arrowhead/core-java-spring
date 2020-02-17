@@ -59,7 +59,7 @@ public class System {
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	private ZonedDateTime updatedAt;
 	
-	@OneToMany(mappedBy = "system_", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "system", fetch = FetchType.LAZY, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Set<ServiceRegistry> serviceRegistryEntries = new HashSet<>();
 	

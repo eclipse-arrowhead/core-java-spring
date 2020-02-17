@@ -9,13 +9,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class SRSwaggerConfig extends DefaultSwaggerConfig {
+public class DeviceRegistrySwaggerConfig extends DefaultSwaggerConfig {
 	
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------
-	public SRSwaggerConfig() {
+	public DeviceRegistrySwaggerConfig() {
 		super(CommonConstants.CORE_SYSTEM_DEVICE_REGISTRY);
 	}
 	

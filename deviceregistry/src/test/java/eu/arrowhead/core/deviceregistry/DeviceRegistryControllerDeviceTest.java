@@ -257,10 +257,6 @@ public class DeviceRegistryControllerDeviceTest {
     }
 
     @Test
-    public void updateDevice() {
-    }
-
-    @Test
     public void updateDeviceRequest() throws Exception {
         final DeviceRequestDTO dto = new DeviceRequestDTO("device", "address", "macAddress", "authenticationInfo");
         when(deviceRegistryDBService.updateDeviceByIdResponse(eq(VALID_DEVICE_ID), anyString(), anyString(), anyString(), anyString())).thenReturn(VALID_DEVICE);
