@@ -491,7 +491,10 @@ public class OrchestratorService {
 		for (final ServiceRegistryResponseDTO entry : srList) {
 			final OrchestrationResultDTO result = new OrchestrationResultDTO(entry.getProvider(), entry.getServiceDefinition(), entry.getServiceUri(), entry.getSecure(), entry.getMetadata(), 
 																			 entry.getInterfaces(), entry.getVersion());
-			
+
+			if(result.getMetadata() == null ) {
+				result.setMetadata( new HashMap<String, String>());
+			}
 			if (request.getOrchestrationFlags().get(Flag.OVERRIDE_STORE)) {
 				final List<OrchestratorWarnings> warnings = calculateOrchestratorWarnings(entry);
 				result.setWarnings(warnings);
