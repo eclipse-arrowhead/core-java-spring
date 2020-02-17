@@ -121,7 +121,7 @@ In particular, each folder contains its own `README.md` file with more instructi
 <a name="quickstart_dockerguide" />
 
 #### Docker Guide
-=======
+
 > **Note:** Don't forget to set `domain.name` and `domain.port` properties!
 
 Example Docker Compose file is located [here](docker/docker-compose.yml). The interesting part is the volumes section. 
@@ -437,6 +437,14 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 * [Create Arrowhead Cloud Self Signed Certificate](documentation/certificates/create_cloud_certificate.pdf)
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
+
+If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
+
+> **Note:** Basic scripting knowledge is required!
+
+* lib_certs.sh - Certificate generation code
+* mk_certs.sh - Usage example
+* rm_certs.sh - Delete generated certs 
 
 ### System Operator Certificate
 
