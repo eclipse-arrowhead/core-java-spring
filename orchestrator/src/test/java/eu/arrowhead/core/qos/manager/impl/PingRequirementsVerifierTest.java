@@ -563,7 +563,7 @@ public class PingRequirementsVerifierTest {
 		provider.setId(2);
 		result.setProvider(provider);
 		final Map<String,String> qosRequirements = new HashMap<>();
-		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "30");
+		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_RECENT_PACKET_LOSS, "85");
 		
 		final boolean verified = verifier.verify(result, qosRequirements, null);
 		Assert.assertTrue(verified);
@@ -661,7 +661,7 @@ public class PingRequirementsVerifierTest {
 		provider.setId(2);
 		result.setProvider(provider);
 		final Map<String,String> qosRequirements = new HashMap<>();
-		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "30");
+		qosRequirements.put(OrchestrationFormRequestDTO.QOS_REQUIREMENT_MAXIMUM_PACKET_LOSS, "85");
 		
 		final boolean verified = verifier.verify(result, qosRequirements, null);
 		Assert.assertTrue(verified);
