@@ -76,6 +76,11 @@ Type: password
 Default:
 Description: MySQL password for Event Handler system (leave empty for random). 
 
+Template: arrowhead-core-common/mysql_password_qos
+Type: password
+Default:
+Description: MySQL password for Qos Monitor system (leave empty for random). 
+
 Template: arrowhead-core-common/mysql_password_gk
 Type: password
 Default:
