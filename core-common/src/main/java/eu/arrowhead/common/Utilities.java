@@ -377,6 +377,30 @@ public class Utilities {
     }
 	
 	//-------------------------------------------------------------------------------------------------
+	public static X509Certificate getCloudCertFromKeyStore(final KeyStore keystore) {
+		Assert.notNull(keystore, "Key store is not defined.");
+
+		try {
+			final Enumeration<String> enumeration = keystore.aliases();
+			while (enumeration.hasMoreElements()) {
+				final String alias = enumeration.nextElement();
+				final String[] aliasParts = alias.split("\\.");
+				if (aliasParts.length == 3 && aliasParts[1].equals(AH_MASTER_NAME) && aliasParts[2].equals(AH_MASTER_SUFFIX)) {
+					return (X509Certificate) keystore.getCertificate(alias);
+				}
+			}
+
+			final String errorMsg = "Getting the cloud cert from keystore failed. " +
+					"Cannot find alias in the following format: {cloudname}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
+			logger.error(errorMsg);
+			throw new ServiceConfigurationError(errorMsg);
+		} catch (final KeyStoreException | NoSuchElementException ex) {
+			logger.error("Getting the cloud cert from keystore failed...", ex);
+			throw new ServiceConfigurationError("Getting the cloud cert from keystore failed...", ex);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public static PrivateKey getPrivateKey(final KeyStore keystore, final String keyPass) {
 		Assert.notNull(keystore, "Key store is not defined.");
 		Assert.notNull(keyPass, "Password is not defined.");
@@ -404,6 +428,24 @@ public class Utilities {
 	    return privateKey;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public static PrivateKey getPrivateKey(final KeyStore keystore, final String alias, final String keyPass) {
+		Assert.notNull(keystore, "Key store is not defined.");
+		Assert.notNull(keyPass, "Password is not defined.");
+
+		try {
+			PrivateKey privateKey = (PrivateKey) keystore.getKey(alias, keyPass.toCharArray());
+			if (privateKey != null) {
+				return privateKey;
+			} else {
+				throw new ServiceConfigurationError("Getting the private key failed, key store aliases do not identify a key.");
+			}
+		} catch (final KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
+			logger.error("Getting the private key from key store failed...", ex);
+			throw new ServiceConfigurationError("Getting the private key from key store failed...", ex);
+		}
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public static PublicKey getPublicKeyFromBase64EncodedString(final String encodedKey) {
 		Assert.isTrue(!isEmpty(encodedKey), "Encoded key is null or blank");

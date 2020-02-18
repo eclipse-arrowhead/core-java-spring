@@ -14,8 +14,9 @@ public class CommonConstants {
 	// members
 	
 	public static final String BASE_PACKAGE = "eu.arrowhead";
-	
+
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
+	public static final String CORE_SYSTEM_CERTIFICATE_AUTHORITY = "Certificate Authority";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_GATEKEEPER = "Gatekeeper";
@@ -48,6 +49,7 @@ public class CommonConstants {
 	public static final String SERVER_COMMON_NAME = "server.common.name";
 	public static final String SERVER_PUBLIC_KEY = "server.public.key";
 	public static final String SERVER_PRIVATE_KEY = "server.private.key";
+	public static final String SERVER_CERTIFICATE = "server.certificate";
 	
 	public static final String HTTPS = "https";
 	public static final String HTTP = "http";
@@ -77,7 +79,11 @@ public class CommonConstants {
 	public static final String OP_AUTH_INTRA_CHECK_URI = "/intracloud/check";
 	public static final String OP_AUTH_INTER_CHECK_URI = "/intercloud/check";
 	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
-	
+
+	public static final String CERTIFICATE_AUTHRORITY_URI = "/certificate-authority";
+	public static final String OP_CA_CLOUD_COMMON_NAME_URI = "/name";
+	public static final String OP_CA_SIGN_CERTIFICATE_URI = "/sign";
+
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
 	public static final String OP_ORCH_PROCESS = "/orchestration";
 	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";

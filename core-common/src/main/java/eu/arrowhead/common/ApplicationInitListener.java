@@ -187,12 +187,15 @@ public abstract class ApplicationInitListener {
 		logger.debug("obtainKeys started...");
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-		
-		publicKey = Utilities.getFirstCertFromKeyStore(keyStore).getPublicKey();
+
+		final X509Certificate serverCertificate = Utilities.getFirstCertFromKeyStore(keyStore);
+		publicKey = serverCertificate.getPublicKey();
 		context.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
-		
+
 		final PrivateKey privateKey = Utilities.getPrivateKey(keyStore, sslProperties.getKeyPassword());
 		context.put(CommonConstants.SERVER_PRIVATE_KEY, privateKey);
+
+		context.put(CommonConstants.SERVER_CERTIFICATE, serverCertificate);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
