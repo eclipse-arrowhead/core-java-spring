@@ -283,7 +283,7 @@ public class QoSDBServiceTest {
 		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
 		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
 
-		qoSDBService.getMeasurement(systemResponseDTO);
+		qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
@@ -302,7 +302,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		} catch (final Exception ex) {
 
@@ -328,7 +328,7 @@ public class QoSDBServiceTest {
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 		when(qoSIntraMeasurementRepository.saveAndFlush(any())).thenReturn(measurement);
 
-		qoSDBService.getMeasurement(systemResponseDTO);
+		qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
@@ -348,7 +348,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		} catch (final Exception ex) {
 
@@ -375,7 +375,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		} catch (final Exception ex) {
 
@@ -402,7 +402,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		} catch (final Exception ex) {
 
@@ -429,7 +429,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		} catch (final Exception ex) {
 
@@ -456,7 +456,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
 
 		} catch (final Exception ex) {
 

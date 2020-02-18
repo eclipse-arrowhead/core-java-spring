@@ -110,7 +110,7 @@ public class QoSDBService {
 
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraMeasurement getMeasurement(final SystemResponseDTO systemResponseDTO) {
+	public QoSIntraMeasurement getOrCreateMeasurement(final SystemResponseDTO systemResponseDTO) {
 		logger.debug("getMeasurement started...");
 
 		validateSystemResponseDTO(systemResponseDTO);
