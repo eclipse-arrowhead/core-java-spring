@@ -25,9 +25,6 @@ public class CountRestarterTaskConfig {
 	@Autowired
 	private ApplicationContext applicationContext; //NOSONAR
 
-	@Value(CoreCommonConstants.$PING_TTL_INTERVAL_WD)
-	private int ttlInterval;
-
 	private static final int SCHEDULER_DELAY = 7;
 	private static final String CRON_EXPRESSION_MIDNIGHT_EVERY_DAY= "0 0 0 ? * * *";
 	private static final String NAME_OF_TRIGGER = "Counter_Restart_Task_Trigger";
@@ -49,7 +46,7 @@ public class CountRestarterTaskConfig {
 		schedulerFactory.setTriggers(counterRestartTaskTrigger().getObject());
 		schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
 
-		logger.info("CountRestarterTask task adjusted with ttl interval: {} minutes", ttlInterval);
+		logger.info("CountRestarterTask task adjusted.");
 
 		return schedulerFactory;
 	}
