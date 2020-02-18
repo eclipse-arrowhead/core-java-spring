@@ -17,7 +17,7 @@ public class PingMeasurementProperties {
 	private int timeout;
 	private int packetSize;
 	private int rest;
-	private int availableFromSuccessPercet;
+	private int availableFromSuccessPercent;
 	//=================================================================================================
 	// methods
 
@@ -31,7 +31,7 @@ public class PingMeasurementProperties {
 		this.timeout = timeout;
 		this.packetSize = pocketSize;
 		this.rest = rest;
-		this.availableFromSuccessPercet = availableFromSuccessPercet;
+		this.availableFromSuccessPercent = availableFromSuccessPercet;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -39,14 +39,14 @@ public class PingMeasurementProperties {
 	public int getTimeout() { return timeout; }
 	public int getPacketSize() { return packetSize; }
 	public int getRest() { return rest; }
-	public int getAvailableFromSuccessPercet() { return availableFromSuccessPercet; }
+	public int getAvailableFromSuccessPercet() { return availableFromSuccessPercent; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setTimeToRepeat(final int timeToRepeat) { this.timeToRepeat = timeToRepeat; }
 	public void setTimeout(final int timeout) { this.timeout = timeout; }
 	public void setPacketSize(final int packetSize) { this.packetSize = packetSize; }
 	public void setRest(final int rest) { this.rest = rest; }
-	public void setAvailableFromSuccessPercet(final int availableFromSuccessPercet) { this.availableFromSuccessPercet = availableFromSuccessPercet; }
+	public void setAvailableFromSuccessPercet(final int availableFromSuccessPercet) { this.availableFromSuccessPercent = availableFromSuccessPercet; }
 
 	//-------------------------------------------------------------------------------------------------
 	@PostConstruct
@@ -56,7 +56,7 @@ public class PingMeasurementProperties {
 		Assert.isTrue(timeout >= 0 && timeout < 10000, "timeout must be greater than or equal 0 and not greater than 10 000");
 		Assert.isTrue((packetSize == 32 || packetSize == 56 || packetSize == 64), "packetSize has to be 32 or 56 or 64");
 		Assert.isTrue(rest >= 0 && rest <= 10000, "rest must be greater than 0 and not greater than 10 000");
-		Assert.isTrue(availableFromSuccessPercet > 0 && availableFromSuccessPercet <= 100, "availableFromSuccessPercet must be greater than 0 and not greater than 100");
+		Assert.isTrue(availableFromSuccessPercent > 0 && availableFromSuccessPercent <= 100, "availableFromSuccessPercent must be greater than 0 and not greater than 100");
 
 	}
 }
