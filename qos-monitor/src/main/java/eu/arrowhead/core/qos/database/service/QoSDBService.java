@@ -123,7 +123,7 @@ public class QoSDBService {
 		if (systemOptional.isPresent()) {
 			system = systemOptional.get();
 		}else {
-			throw new ArrowheadException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
+			throw new InvalidParameterException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
 		}
 
 		final QoSIntraMeasurement measurement;
