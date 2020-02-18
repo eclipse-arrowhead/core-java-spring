@@ -493,7 +493,7 @@ public class OrchestratorService {
 																			 entry.getInterfaces(), entry.getVersion());
 
 			if(result.getMetadata() == null ) {
-				result.setMetadata( new HashMap<String, String>());
+				result.setMetadata( new HashMap<>());
 			}
 			if (request.getOrchestrationFlags().get(Flag.OVERRIDE_STORE)) {
 				final List<OrchestratorWarnings> warnings = calculateOrchestratorWarnings(entry);
