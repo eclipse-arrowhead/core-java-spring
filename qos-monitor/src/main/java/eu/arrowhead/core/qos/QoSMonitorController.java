@@ -84,7 +84,7 @@ public class QoSMonitorController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_DESCRIPTION, response = Page.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_DESCRIPTION, response = PingMeasurementListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_HTTP_400_MESSAGE),
