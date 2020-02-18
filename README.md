@@ -6422,7 +6422,6 @@ __PingMeasurement list response__ the output :
 | `sent` | Integer value of sent pings in measurement|
 | `received` | Integer value of received pings in measurement|
 | `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
-| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
 | `sentAll` | Integer value of sent pings since ping measurement created|
 | `receivedAll` | Integer value of received pings since ping measurement created|
 | `createdAt` | Date of creation of the ping measurement |
@@ -6513,7 +6512,6 @@ __Ping Measurment response by system id__ the output :
 | `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
 | `sent` | Integer value of sent pings in measurement|
 | `received` | Integer value of received pings in measurement|
-| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
 | `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
 | `sentAll` | Integer value of sent pings since ping measurement created|
 | `receivedAll` | Integer value of received pings since ping measurement created|
