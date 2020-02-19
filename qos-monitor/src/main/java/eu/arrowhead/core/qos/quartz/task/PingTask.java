@@ -102,7 +102,7 @@ public class PingTask implements Job {
 
 	//-------------------------------------------------------------------------------------------------
 	private Set<SystemResponseDTO> getSystemsToMeasure() {
-		logger.debug("getSystemToMessure started...");
+		logger.debug("getSystemToMeasure started...");
 
 		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
 		if(serviceRegistryListResponseDTO == null || serviceRegistryListResponseDTO.getData() == null ||  serviceRegistryListResponseDTO.getData().isEmpty()) {
