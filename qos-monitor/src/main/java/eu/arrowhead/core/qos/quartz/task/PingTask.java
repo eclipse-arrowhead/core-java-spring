@@ -269,13 +269,10 @@ public class PingTask implements Job {
 
 		} catch (final ArrowheadException ex) {
 
+			logger.debug("Exception: " + ex.getMessage());
 			throw ex;
 
-		} catch (final Throwable ex) {
-
-			logger.debug("Exception:", ex.getMessage());
-			return null;
-		} 
+		}
 
 	}
 
