@@ -48,6 +48,8 @@ public class PingTask implements Job {
 	// members
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 
+	private static final int INVALID_CALCULATION_VALUE = -1;
+
 	private static final boolean LOG_MEASUREMENT = true;
 	private static final boolean LOG_MEASUREMENT_DETAILS = true;
 
@@ -160,8 +162,8 @@ public class PingTask implements Job {
 		final boolean available = calculateAvailable(sentInThisPing, availableCount);
 		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
 
-		final double meanResponseTimeWithTimeout = responseList.size() < 1 ? 0 : sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
-		final double meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeoutMembersCount < 1 ? 0 : sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
+		final double meanResponseTimeWithTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
+		final double meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
 
 		double sumOfDiffsForJitterWithTimeout = 0;
 		double sumOfDiffsForJitterWithoutTimeout =0;
@@ -178,8 +180,8 @@ public class PingTask implements Job {
 
 			sumOfDiffsForJitterWithTimeout += Math.pow( (duration - meanResponseTimeWithTimeout), 2);
 		}
-		final double jitterWithTimeout = Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
-		final double jitterWithoutTimeout =  Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
+		final double jitterWithTimeout = meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithTimeout / meanResponseTimeWithoutTimeoutMembersCount);
+		final double jitterWithoutTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : Math.sqrt(sumOfDiffsForJitterWithoutTimeout / responseList.size());
 
 		final PingMeasurementCalculationsDTO calculations = new PingMeasurementCalculationsDTO();
 		calculations.setAvailable(available);
