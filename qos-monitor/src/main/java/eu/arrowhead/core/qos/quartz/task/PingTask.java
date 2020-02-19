@@ -96,7 +96,7 @@ public class PingTask implements Job {
 			final String address = systemResponseDTO.getAddress();
 			if (pingCache.containsKey(address)) {
 
-				pingSystem(systemResponseDTO, pingCache.get(address));
+				copyCalculationsToPingMeasurement(systemResponseDTO, pingCache.get(address));
 
 			}else {
 
@@ -234,8 +234,8 @@ public class PingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void pingSystem(final SystemResponseDTO systemResponseDTO, final PingMeasurementCalculationsDTO calculationsDTO) {
-		logger.debug("pingSystem started...");
+	private void copyCalculationsToPingMeasurement(final SystemResponseDTO systemResponseDTO, final PingMeasurementCalculationsDTO calculationsDTO) {
+		logger.debug("copyCalculationsToPingMeasurement started...");
 
 		final ZonedDateTime aroundNow = calculationsDTO.getMeasuredAt();
 
