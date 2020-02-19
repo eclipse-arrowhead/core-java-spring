@@ -25,13 +25,13 @@ public class PingMeasurementProperties {
 	public PingMeasurementProperties() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public PingMeasurementProperties(final int timeToRepeat, final int timeout, final int pocketSize, final int rest, final int availableFromSuccessPercet) {
+	public PingMeasurementProperties(final int timeToRepeat, final int timeout, final int pocketSize, final int rest, final int availableFromSuccessPercent) {
 
 		this.timeToRepeat = timeToRepeat;
 		this.timeout = timeout;
 		this.packetSize = pocketSize;
 		this.rest = rest;
-		this.availableFromSuccessPercent = availableFromSuccessPercet;
+		this.availableFromSuccessPercent = availableFromSuccessPercent;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -39,14 +39,14 @@ public class PingMeasurementProperties {
 	public int getTimeout() { return timeout; }
 	public int getPacketSize() { return packetSize; }
 	public int getRest() { return rest; }
-	public int getAvailableFromSuccessPercet() { return availableFromSuccessPercent; }
+	public int getAvailableFromSuccessPercent() { return availableFromSuccessPercent; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setTimeToRepeat(final int timeToRepeat) { this.timeToRepeat = timeToRepeat; }
 	public void setTimeout(final int timeout) { this.timeout = timeout; }
 	public void setPacketSize(final int packetSize) { this.packetSize = packetSize; }
 	public void setRest(final int rest) { this.rest = rest; }
-	public void setAvailableFromSuccessPercet(final int availableFromSuccessPercet) { this.availableFromSuccessPercent = availableFromSuccessPercet; }
+	public void setAvailableFromSuccessPercent(final int availableFromSuccessPercent) { this.availableFromSuccessPercent = availableFromSuccessPercent; }
 
 	//-------------------------------------------------------------------------------------------------
 	@PostConstruct
