@@ -160,8 +160,8 @@ public class PingTask implements Job {
 		final boolean available = calculateAvailable(sentInThisPing, availableCount);
 		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
 
-		final double meanResponseTimeWithTimeout = sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
-		final double meanResponseTimeWithoutTimeout = sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
+		final double meanResponseTimeWithTimeout = responseList.size() < 1 ? 0 : sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
+		final double meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeoutMembersCount < 1 ? 0 : sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
 
 		double sumOfDiffsForJitterWithTimeout = 0;
 		double sumOfDiffsForJitterWithoutTimeout =0;
