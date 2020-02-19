@@ -295,18 +295,10 @@ public class PingTask implements Job {
 	private boolean calculateAvailable(final int sentInThisPing, final int availableCount) {
 		logger.debug("calculateAvailable started...");
 
-		final boolean available;
 		final int availableFromSuccessPercent = pingMeasurementProperties.getAvailableFromSuccessPercet();
 		final double availablePercent = 100 - ((sentInThisPing - availableCount) / (double)sentInThisPing) * 100 ;
 
-		if (availableFromSuccessPercent <= Math.round(availablePercent)) {
-
-			available = true;
-		}else {
-			available = false;
-		}
-
-		return available;
+		return availableFromSuccessPercent <= Math.round(availablePercent);
 	}
 
 }
