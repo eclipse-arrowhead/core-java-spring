@@ -1,6 +1,7 @@
 package eu.arrowhead.core.qos.dto;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 
 public class PingMeasurementCalculationsDTO implements Serializable{
 
@@ -19,6 +20,7 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 	private Integer sentInThisPing;
 	private Integer receivedInThisPing;
 	private Integer lostPerMeasurementPercent;
+	private ZonedDateTime measuredAt;
 
 	//=================================================================================================
 	// methods
@@ -29,7 +31,8 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 	//-------------------------------------------------------------------------------------------------
 	public PingMeasurementCalculationsDTO(final boolean available, final Integer maxResponseTime, final Integer minResponseTime,
 			final Integer meanResponseTimeWithTimeout, final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout,
-			final Integer jitterWithoutTimeout, final Integer sentInThisPing, final Integer receivedInThisPing, final Integer lostPerMeasurementPercent) {
+			final Integer jitterWithoutTimeout, final Integer sentInThisPing, final Integer receivedInThisPing, final Integer lostPerMeasurementPercent,
+			final ZonedDateTime measuredAt) {
 
 		this.available = available;
 		this.maxResponseTime = maxResponseTime;
@@ -41,6 +44,7 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 		this.sentInThisPing = sentInThisPing;
 		this.receivedInThisPing = receivedInThisPing;
 		this.lostPerMeasurementPercent = lostPerMeasurementPercent;
+		this.measuredAt = measuredAt;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -54,6 +58,7 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 	public Integer getSentInThisPing() { return sentInThisPing; }
 	public Integer getReceivedInThisPing() { return receivedInThisPing; }
 	public Integer getLostPerMeasurementPercent() { return lostPerMeasurementPercent; }
+	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setAvailable(final boolean available) { this.available = available; }
@@ -66,5 +71,6 @@ public class PingMeasurementCalculationsDTO implements Serializable{
 	public void setSentInThisPing(final Integer sentInThisPing) { this.sentInThisPing = sentInThisPing; }
 	public void setReceivedInThisPing(final Integer receivedInThisPing) { this.receivedInThisPing = receivedInThisPing; }
 	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
+	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
 
 }

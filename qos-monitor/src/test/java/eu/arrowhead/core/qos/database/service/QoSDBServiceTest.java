@@ -1704,7 +1704,8 @@ public class QoSDBServiceTest {
 				1,//jitterWithoutTimeout,
 				35,//sentInThisPing,
 				35,//receivedInThisPing,
-				0);//lostPerMeasurementPercent);
+				0,
+				ZonedDateTime.now());//lostPerMeasurementPercent);
 
 		return calculatiions;
 	}

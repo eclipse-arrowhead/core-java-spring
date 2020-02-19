@@ -865,7 +865,7 @@ public class PingTaskTest {
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getAvailableFromSuccessPercet()).thenReturn(1);
+		when(pingMeasurementProperties.getAvailableFromSuccessPercent()).thenReturn(1);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
@@ -934,7 +934,7 @@ public class PingTaskTest {
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getAvailableFromSuccessPercet()).thenReturn(32);
+		when(pingMeasurementProperties.getAvailableFromSuccessPercent()).thenReturn(32);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
@@ -1004,7 +1004,7 @@ public class PingTaskTest {
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getAvailableFromSuccessPercet()).thenReturn(100);
+		when(pingMeasurementProperties.getAvailableFromSuccessPercent()).thenReturn(100);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
@@ -1074,7 +1074,7 @@ public class PingTaskTest {
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getAvailableFromSuccessPercet()).thenReturn(100);
+		when(pingMeasurementProperties.getAvailableFromSuccessPercent()).thenReturn(100);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
@@ -1144,7 +1144,7 @@ public class PingTaskTest {
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getAvailableFromSuccessPercet()).thenReturn(1);
+		when(pingMeasurementProperties.getAvailableFromSuccessPercent()).thenReturn(1);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
@@ -1214,7 +1214,7 @@ public class PingTaskTest {
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getAvailableFromSuccessPercet()).thenReturn(1);
+		when(pingMeasurementProperties.getAvailableFromSuccessPercent()).thenReturn(1);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 
@@ -1284,7 +1284,7 @@ public class PingTaskTest {
 		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
 
 		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
-		when(pingMeasurementProperties.getAvailableFromSuccessPercet()).thenReturn(34);
+		when(pingMeasurementProperties.getAvailableFromSuccessPercent()).thenReturn(34);
 
 		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
 

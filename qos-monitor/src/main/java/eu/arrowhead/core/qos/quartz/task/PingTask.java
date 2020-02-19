@@ -1,10 +1,10 @@
 package eu.arrowhead.core.qos.quartz.task;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -84,15 +84,26 @@ public class PingTask implements Job {
 			return;
 		}
 
-		final Set<SystemResponseDTO> systems = getSystemsToMeasure();
-		if (systems == null) {
+		final List<SystemResponseDTO> systems = getSystemsToMeasure();
+		if (systems == null || systems.isEmpty()) {
 
 			return;
 		}
 
+		final HashMap<String, PingMeasurementCalculationsDTO> pingCache = new HashMap<String, PingMeasurementCalculationsDTO>(systems.size());
 		for (final SystemResponseDTO systemResponseDTO : systems) {
 
-			pingSystem(systemResponseDTO);
+			final String address = systemResponseDTO.getAddress();
+			if (pingCache.containsKey(address)) {
+
+				pingSystem(systemResponseDTO, pingCache.get(address));
+
+			}else {
+
+				final PingMeasurementCalculationsDTO calculations = pingSystem(systemResponseDTO);
+				pingCache.put(address, calculations);
+
+			}
 
 		}
 
@@ -103,7 +114,7 @@ public class PingTask implements Job {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private Set<SystemResponseDTO> getSystemsToMeasure() {
+	private List<SystemResponseDTO> getSystemsToMeasure() {
 		logger.debug("getSystemToMeasure started...");
 
 		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = queryServiceRegistryAll();
@@ -111,13 +122,13 @@ public class PingTask implements Job {
 
 			return null;
 		}
-		final Set<SystemResponseDTO> systemList = serviceRegistryListResponseDTO.getData().stream().map(ServiceRegistryResponseDTO::getProvider).collect(Collectors.toSet());
+		final List<SystemResponseDTO> systemList = serviceRegistryListResponseDTO.getData().stream().map(ServiceRegistryResponseDTO::getProvider).collect(Collectors.toList());
 
 		return systemList;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementCalculationsDTO calculatePingMeasurementValues(final List<IcmpPingResponse> responseList) {
+	private PingMeasurementCalculationsDTO calculatePingMeasurementValues(final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("calculatePingMeasurementValues started...");
 
 		final int sentInThisPing = responseList.size();
@@ -194,12 +205,13 @@ public class PingTask implements Job {
 		calculations.setSentInThisPing(sentInThisPing);
 		calculations.setReceivedInThisPing(receivedInThisPing);
 		calculations.setLostPerMeasurementPercent(lostPerMeasurementPercent);
+		calculations.setMeasuredAt(aroundNow);
 
 		return calculations;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void pingSystem(final SystemResponseDTO systemResponseDTO ) {
+	private PingMeasurementCalculationsDTO pingSystem(final SystemResponseDTO systemResponseDTO ) {
 		logger.debug("pingSystem started...");
 
 		final ZonedDateTime aroundNow = ZonedDateTime.now();
@@ -213,18 +225,37 @@ public class PingTask implements Job {
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
 
 		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateMeasurement(systemResponseDTO);
-		handlePingMeasurement(measurement, responseList, aroundNow);
+		final PingMeasurementCalculationsDTO calculationsDTO = handlePingMeasurement(measurement, responseList, aroundNow);
+
+		qoSDBService.updateMeasurement(aroundNow, measurement);
+
+		return calculationsDTO;
+
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void pingSystem(final SystemResponseDTO systemResponseDTO, final PingMeasurementCalculationsDTO calculationsDTO) {
+		logger.debug("pingSystem started...");
+
+		final ZonedDateTime aroundNow = calculationsDTO.getMeasuredAt();
+
+		if (systemResponseDTO == null || Utilities.isEmpty(systemResponseDTO.getAddress())) {
+			throw new InvalidParameterException("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
+		}
+
+		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+		handlePingMeasurement(measurement, aroundNow, calculationsDTO);
 
 		qoSDBService.updateMeasurement(aroundNow, measurement);
 
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private void handlePingMeasurement(final QoSIntraMeasurement measurement,
+	private PingMeasurementCalculationsDTO handlePingMeasurement(final QoSIntraMeasurement measurement,
 			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("handelPingMeasurement started...");
 
-		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList);
+		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList, aroundNow);
 		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
@@ -255,6 +286,26 @@ public class PingTask implements Job {
 				}
 			}
 		}
+
+		return calculationsDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void handlePingMeasurement(final QoSIntraMeasurement measurement, final ZonedDateTime aroundNow, final PingMeasurementCalculationsDTO calculationsDTO) {
+		logger.debug("handelPingMeasurement started...");
+
+		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getPingMeasurementByMeasurement(measurement);
+
+		if (pingMeasurementOptional.isEmpty()) {
+
+			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
+
+		}else {
+
+			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
+
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -295,7 +346,7 @@ public class PingTask implements Job {
 	private boolean calculateAvailable(final int sentInThisPing, final int availableCount) {
 		logger.debug("calculateAvailable started...");
 
-		final int availableFromSuccessPercent = pingMeasurementProperties.getAvailableFromSuccessPercet();
+		final int availableFromSuccessPercent = pingMeasurementProperties.getAvailableFromSuccessPercent();
 		final double availablePercent = 100 - ((sentInThisPing - availableCount) / (double)sentInThisPing) * 100 ;
 
 		return availableFromSuccessPercent <= Math.round(availablePercent);
