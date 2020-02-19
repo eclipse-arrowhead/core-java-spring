@@ -60,8 +60,8 @@
     "description": "A description for 'ping_ttl_interval_minutes'"
   },
   {
-    "name": "ping.available_from_success_percet",
+    "name": "ping.available_from_success_percent",
     "type": "java.lang.Integer",
-    "description": "A description for 'ping.available_from_success_percet'"
+    "description": "A description for 'ping.available_from_success_percent'"
   }
 ]}
