@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -222,6 +223,134 @@ public class PingTaskTest {
 		verify(httpService, times(1)).sendRequest(any(), any(), any());
 		verify(pingMeasurementProperties, times(1)).getTimeout();
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
+		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+
+		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteWhenMultiplySystemHasSameAddressPingOnlyCalledOnce() {
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOForTest();
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getOrCreateMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		}
+
+		verify(logger, atLeastOnce()).debug(any(String.class));
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		assertNotNull(debugMessages);
+
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+		verify(httpService, times(1)).sendRequest(any(), any(), any());
+		verify(pingMeasurementProperties, times(1)).getTimeout();
+		verify(pingService, times(1)).getPingResponseList(anyString());
+		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
+
+		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
+		verify(qoSDBService, atLeastOnce()).createPingMeasurement(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementToDB(any(), any(), any());
+		verify(qoSDBService, atLeastOnce()).logMeasurementDetailsToDB(any(), any(), any());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testExecuteWhenMultiplySystemHasDifferentAddressPingCalledMultiplyTimes() {
+
+		final int NUMBER_OF_PROVIDERS = 10;
+
+		final UriComponents uri = Utilities.createURI("HTTPS", "localhost", 12345, "serviceregistry");
+
+		final ServiceRegistryListResponseDTO serviceRegistryResponse = getServiceRegistryListResponseDTOWithDifferentProviderAddressForTest(10);
+		final ResponseEntity<ServiceRegistryListResponseDTO> httpResponse = new ResponseEntity<ServiceRegistryListResponseDTO>(serviceRegistryResponse, HttpStatus.OK);
+
+		final List<IcmpPingResponse> responseList = getResponseListForTest();
+
+		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
+
+		final QoSIntraPingMeasurementLog measurementLog = getOrCreateMeasurementLogForTest();
+
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
+		doNothing().when(logger).debug( debugValueCapture.capture());
+
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(httpResponse);
+
+		when(pingMeasurementProperties.getTimeout()).thenReturn(5000);
+
+		when(pingService.getPingResponseList(anyString())).thenReturn(responseList);
+
+		when(qoSDBService.getOrCreateMeasurement(any(SystemResponseDTO.class))).thenReturn(measurement);
+
+		//in handleMeasurement
+		when(qoSDBService.getPingMeasurementByMeasurement(any(QoSIntraMeasurement.class))).thenReturn(Optional.ofNullable(null));
+		doNothing().when(qoSDBService).createPingMeasurement(any(), any(), any());
+		//doNothing().when(qoSDBService).updatePingMeasurement(any(), any(), any(), any());
+		when(qoSDBService.logMeasurementToDB(any(), any(), any())).thenReturn(measurementLog);
+		doNothing().when(qoSDBService).logMeasurementDetailsToDB(any(), any(), any());
+
+		try {
+
+			pingTask.execute(jobExecutionContext);
+
+		} catch (final JobExecutionException ex) {
+			fail();
+		}
+
+		verify(logger, atLeastOnce()).debug(any(String.class));
+		final List<String> debugMessages = debugValueCapture.getAllValues();
+		assertNotNull(debugMessages);
+
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SR_QUERY_ALL);
+		verify(arrowheadContext, times(1)).get(CoreCommonConstants.SR_QUERY_ALL);
+		verify(httpService, times(1)).sendRequest(any(), any(), any());
+		verify(pingMeasurementProperties, times(NUMBER_OF_PROVIDERS)).getTimeout();
+		verify(pingService, times(NUMBER_OF_PROVIDERS)).getPingResponseList(anyString());
 		verify(qoSDBService, atLeastOnce()).getOrCreateMeasurement(any());
 
 		verify(qoSDBService, atLeastOnce()).getPingMeasurementByMeasurement(any());
@@ -1888,6 +2017,26 @@ public class PingTaskTest {
 
 		for (int i = 0; i < sizeOfResponse; i++) {
 			responseList.add(getServiceRegistryResponseDTOForTest());
+		}
+
+		serviceRegistryListResponseDTO.setCount(sizeOfResponse);
+		serviceRegistryListResponseDTO.setData(responseList);
+
+		return serviceRegistryListResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public ServiceRegistryListResponseDTO getServiceRegistryListResponseDTOWithDifferentProviderAddressForTest(final int numberOfProviders) {
+
+		final int sizeOfResponse = numberOfProviders;
+		final ServiceRegistryListResponseDTO serviceRegistryListResponseDTO = new ServiceRegistryListResponseDTO();
+		final List<ServiceRegistryResponseDTO> responseList = new ArrayList<>(sizeOfResponse);
+
+		for (int i = 0; i < sizeOfResponse; i++) {
+			final ServiceRegistryResponseDTO response = getServiceRegistryResponseDTOForTest();
+			response.getProvider().setAddress("address" + i);
+
+			responseList.add(response);
 		}
 
 		serviceRegistryListResponseDTO.setCount(sizeOfResponse);
