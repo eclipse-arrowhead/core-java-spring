@@ -139,14 +139,12 @@ public class PingTask implements Job {
 		double sumOfDurationForMeanResponseTimeWithTimeout = 0;
 		double sumOfDurationForMeanResponseTimeWithoutTimeout = 0;
 		int meanResponseTimeWithoutTimeoutMembersCount = 0;
-		int availableCount = 0;
 
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
 			final boolean successFlag = icmpPingResponse.getSuccessFlag();
 
 			if (successFlag) {
-				++availableCount;
 				++receivedInThisPing;
 				final long duration = icmpPingResponse.getDuration();
 
@@ -162,19 +160,19 @@ public class PingTask implements Job {
 				sumOfDurationForMeanResponseTimeWithTimeout += duration;
 				++meanResponseTimeWithoutTimeoutMembersCount;
 
-			}else {
+			} else {
 				sumOfDurationForMeanResponseTimeWithTimeout += timeout;
 			}
 		}
 
-		final boolean available = calculateAvailable(sentInThisPing, availableCount);
+		final boolean available = calculateAvailable(sentInThisPing, receivedInThisPing);
 		final int lostPerMeasurementPercent = (int) (receivedInThisPing == 0 ? 100 : 100 - ((double)receivedInThisPing / sentInThisPing) * 100);
 
 		final double meanResponseTimeWithTimeout = responseList.size() < 1 ? INVALID_CALCULATION_VALUE : sumOfDurationForMeanResponseTimeWithTimeout / responseList.size();
 		final double meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeoutMembersCount < 1 ? INVALID_CALCULATION_VALUE : sumOfDurationForMeanResponseTimeWithoutTimeout / meanResponseTimeWithoutTimeoutMembersCount;
 
 		double sumOfDiffsForJitterWithTimeout = 0;
-		double sumOfDiffsForJitterWithoutTimeout =0;
+		double sumOfDiffsForJitterWithoutTimeout = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
 			final boolean successFlag = icmpPingResponse.getSuccessFlag();
@@ -182,7 +180,7 @@ public class PingTask implements Job {
 			if (successFlag) {
 				 duration = icmpPingResponse.getDuration();
 				 sumOfDiffsForJitterWithoutTimeout += Math.pow( (duration - meanResponseTimeWithoutTimeout), 2);
-			}else {
+			} else {
 				duration = timeout;
 			}
 
@@ -259,11 +257,11 @@ public class PingTask implements Job {
 
 			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
 
-			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
+			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
 
 				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
-				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
+				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 
 					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
@@ -297,7 +295,7 @@ public class PingTask implements Job {
 
 			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
 
-		}else {
+		} else {
 
 			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
@@ -334,7 +332,7 @@ public class PingTask implements Job {
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
 			}
-		}else {
+		} else {
 			throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
 		}
 	}
