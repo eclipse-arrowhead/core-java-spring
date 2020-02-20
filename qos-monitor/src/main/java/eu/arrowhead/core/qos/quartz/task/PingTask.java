@@ -262,25 +262,25 @@ public class PingTask implements Job {
 
 			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
 
-			if(LOG_MEASUREMENT) {
+			if (LOG_MEASUREMENT) {
 
 				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
-				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
+				if (LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
 					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
 
-		}else {
+		} else {
 
 			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
-			if(LOG_MEASUREMENT) {
+			if (LOG_MEASUREMENT) {
 
 				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
-				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
+				if (LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
 
 					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
