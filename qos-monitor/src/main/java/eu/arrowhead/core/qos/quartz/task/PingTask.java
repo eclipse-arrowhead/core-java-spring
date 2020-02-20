@@ -90,7 +90,7 @@ public class PingTask implements Job {
 			return;
 		}
 
-		final HashMap<String, PingMeasurementCalculationsDTO> pingCache = new HashMap<String, PingMeasurementCalculationsDTO>(systems.size());
+		final HashMap<String, PingMeasurementCalculationsDTO> pingCache = new HashMap<>(systems.size());
 		for (final SystemResponseDTO systemResponseDTO : systems) {
 
 			final String address = systemResponseDTO.getAddress();
