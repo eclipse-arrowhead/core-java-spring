@@ -98,6 +98,9 @@ public class PingTaskTest {
 	public void setUp() throws Exception {
 		logger = mock(Logger.class);
 		ReflectionTestUtils.setField(pingTask, "logger", logger);
+
+		when(pingMeasurementProperties.getLogMeasurementsToDB()).thenReturn(true);
+		when(pingMeasurementProperties.getLogMeasurementsDetailsToDB()).thenReturn(true);
 	}
 
 	//=================================================================================================
