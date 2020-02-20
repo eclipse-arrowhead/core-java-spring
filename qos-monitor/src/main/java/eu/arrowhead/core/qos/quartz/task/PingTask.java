@@ -51,7 +51,7 @@ public class PingTask implements Job {
 	private static final int INVALID_CALCULATION_VALUE = -1;
 
 	private static final boolean LOG_MEASUREMENT = true;
-	private static final boolean LOG_MEASUREMENT_DETAILS = true;
+	private static final boolean LOG_MEASUREMENT_DETAILS = false;
 
 	protected Logger logger = LogManager.getLogger(PingTask.class);
 

@@ -196,7 +196,6 @@ public class QoSDBServiceTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(expected = ArrowheadException.class)
 	public void testUpdateCountStartedAtFindAllThrowDatabaseException() {
 
@@ -836,7 +835,6 @@ public class QoSDBServiceTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(expected = InvalidParameterException.class)
 	public void testLogMeasurementDetailsToDBWithNullResponseListParameter() {
 
@@ -865,7 +863,6 @@ public class QoSDBServiceTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(expected = InvalidParameterException.class)
 	public void testLogMeasurementDetailsToDBWithEmptyResponseListParameter() {
 
@@ -894,7 +891,6 @@ public class QoSDBServiceTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(expected = InvalidParameterException.class)
 	public void testLogMeasurementDetailsToDBWithNullMeasurementLogSavedParameter() {
 
@@ -923,7 +919,6 @@ public class QoSDBServiceTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(expected = InvalidParameterException.class)
 	public void testLogMeasurementDetailsToDBWithNullAroundNowParameter() {
 
@@ -1711,6 +1706,7 @@ public class QoSDBServiceTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("unused")
 	private PageImpl<QoSIntraMeasurement> getPageOfMeasurementForTest() {
 
 		final List<QoSIntraMeasurement> meausrementList = List.of(getQoSIntraMeasurementForTest());

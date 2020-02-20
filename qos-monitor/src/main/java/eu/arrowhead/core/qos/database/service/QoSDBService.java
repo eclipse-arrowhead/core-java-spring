@@ -65,6 +65,7 @@ public class QoSDBService {
 	private SystemRepository systemRepository;
 
 	protected Logger logger = LogManager.getLogger(QoSDBService.class);
+	
 	//=================================================================================================
 	// methods
 
