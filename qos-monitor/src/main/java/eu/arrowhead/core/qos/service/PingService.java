@@ -41,8 +41,8 @@ public class PingService {
 
 		final List<IcmpPingResponse> responseList = new ArrayList<>(pingMeasurementProperties.getTimeToRepeat());
 		try {
-			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest ();
-			request.setHost (address);
+			final IcmpPingRequest request = IcmpPingUtil.createIcmpPingRequest();
+			request.setHost(address);
 			request.setTimeout(pingMeasurementProperties.getTimeout());
 			request.setPacketSize(pingMeasurementProperties.getPacketSize());
 
@@ -50,7 +50,7 @@ public class PingService {
 				IcmpPingResponse response;
 				try {
 					response = IcmpPingUtil.executePingRequest (request);
-					final String formattedResponse = IcmpPingUtil.formatResponse (response);
+					final String formattedResponse = IcmpPingUtil.formatResponse(response);
 					logger.debug(formattedResponse);
 
 					responseList.add(response);
@@ -63,13 +63,12 @@ public class PingService {
 					responseList.add(response);
 				}
 
-				Thread.sleep (pingMeasurementProperties.getRest());
+				Thread.sleep(pingMeasurementProperties.getRest());
 			}
-		} catch ( final InterruptedException | IllegalArgumentException ex) {
+		} catch (final InterruptedException | IllegalArgumentException ex) {
 			logger.debug("" + ex.getMessage());
 		}
 
 		return responseList;
 	}
-
 }

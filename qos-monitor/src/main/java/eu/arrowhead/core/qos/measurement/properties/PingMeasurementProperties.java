@@ -20,6 +20,7 @@ public class PingMeasurementProperties {
 	private int availableFromSuccessPercent;
 	private boolean logMeasurementsToDB;
 	private boolean logMeasurementsDetailsToDB;
+	
 	//=================================================================================================
 	// methods
 
@@ -48,6 +49,7 @@ public class PingMeasurementProperties {
 	public int getAvailableFromSuccessPercent() { return availableFromSuccessPercent; }
 	public boolean getLogMeasurementsToDB() { return logMeasurementsToDB; }
 	public boolean getLogMeasurementsDetailsToDB() {return logMeasurementsDetailsToDB; }
+	
 	//-------------------------------------------------------------------------------------------------
 	public void setTimeToRepeat(final int timeToRepeat) { this.timeToRepeat = timeToRepeat; }
 	public void setTimeout(final int timeout) { this.timeout = timeout; }
@@ -66,6 +68,5 @@ public class PingMeasurementProperties {
 		Assert.isTrue((packetSize == 32 || packetSize == 56 || packetSize == 64), "packetSize has to be 32 or 56 or 64");
 		Assert.isTrue(rest >= 0 && rest <= 10000, "rest must be greater than 0 and not greater than 10 000");
 		Assert.isTrue(availableFromSuccessPercent > 0 && availableFromSuccessPercent <= 100, "availableFromSuccessPercent must be greater than 0 and not greater than 100");
-
 	}
 }
