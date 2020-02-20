@@ -71,7 +71,7 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
-	6. [QoS Monitor](#qos_monitor)
+	6. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
        * [System Design Description Overview](#qos_monitor_sdd)
        * [Services and Use Cases](#qos_monitor_usecases)  
        * [Endpoints](#qos_monitor_endpoints)
@@ -6244,13 +6244,13 @@ __ActiveSession__ is the output.
 
 <a name="qos_monitor" />
 
-# QOS MONITOR
+# QOS MONITOR (QUALITY OF SERVICE MONITOR)
 
 <a name="qos_monitor_sdd" />
 
 ## System Design Description Overview
 
-The purpose of QoS Monitor supporting core system is providing qos measurements to the QoS Manager.
+The purpose of QoS Monitor supporting core system is providing QoS (Quality of Service) measurements to the QoS Manager (which is part of the Orchestrator core system).
 
 ![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
