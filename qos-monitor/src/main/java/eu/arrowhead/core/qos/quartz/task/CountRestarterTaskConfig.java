@@ -21,21 +21,15 @@ public class CountRestarterTaskConfig {
 	// members
 
 	protected Logger logger = LogManager.getLogger(CountRestarterTaskConfig.class);
-	
+
 	@Autowired
-    private ApplicationContext applicationContext; //NOSONAR
-	
-	@Value(CoreCommonConstants.$PING_TTL_SCHEDULED_WD)
-	private boolean ttlScheduled;
-	
-	@Value(CoreCommonConstants.$PING_TTL_INTERVAL_WD)
-	private int ttlInterval;
-	
+	private ApplicationContext applicationContext; //NOSONAR
+
 	private static final int SCHEDULER_DELAY = 7;
-	
+	private static final String CRON_EXPRESSION_MIDNIGHT_EVERY_DAY= "0 0 0 ? * * *";
 	private static final String NAME_OF_TRIGGER = "Counter_Restart_Task_Trigger";
-	private static final String NAME_OF_TASK = "Counter_Restart_Task_Detail";	
-	
+	private static final String NAME_OF_TASK = "Counter_Restart_Task_Detail";
+
 	//=================================================================================================
 	// methods
 
@@ -44,41 +38,39 @@ public class CountRestarterTaskConfig {
 	public SchedulerFactoryBean counterRestarterTaskSheduler() {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
-		
+
 		final SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
-		if (ttlScheduled) {			
-			schedulerFactory.setJobFactory(jobFactory);
-	        schedulerFactory.setJobDetails(counterRestartTaskDetails().getObject());
-	        schedulerFactory.setTriggers(counterRestartTaskTrigger().getObject());
-	        schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
-	        logger.info("Pin task adjusted with ttl interval: {} minutes", ttlInterval);
-		} else {
-			logger.info("Ping task is not adjusted");
-		}
-		
-		return schedulerFactory;        
-    }
+
+		schedulerFactory.setJobFactory(jobFactory);
+		schedulerFactory.setJobDetails(counterRestartTaskDetails().getObject());
+		schedulerFactory.setTriggers(counterRestartTaskTrigger().getObject());
+		schedulerFactory.setStartupDelay(SCHEDULER_DELAY);
+
+		logger.info("CountRestarterTask task adjusted.");
+
+		return schedulerFactory;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public CronTriggerFactoryBean counterRestartTaskTrigger() {
-		
+	public CronTriggerFactoryBean counterRestartTaskTrigger() {
+
 		CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
 		trigger.setJobDetail(counterRestartTaskDetails().getObject());
-		trigger.setCronExpression("0/30 * * ? * * *");
-        trigger.setName(NAME_OF_TRIGGER);
-        
-        return trigger;
-    }
-	
+		trigger.setCronExpression(CRON_EXPRESSION_MIDNIGHT_EVERY_DAY);
+		trigger.setName(NAME_OF_TRIGGER);
+
+		return trigger;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-    public JobDetailFactoryBean counterRestartTaskDetails() {
+	public JobDetailFactoryBean counterRestartTaskDetails() {
 		final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
 		jobDetailFactory.setJobClass(CountRestarterTask.class);
-        jobDetailFactory.setName(NAME_OF_TASK);
-        jobDetailFactory.setDurability(true);
-        
-        return jobDetailFactory;
-    }
+		jobDetailFactory.setName(NAME_OF_TASK);
+		jobDetailFactory.setDurability(true);
+
+		return jobDetailFactory;
+	}
 }

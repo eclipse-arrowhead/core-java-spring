@@ -85,7 +85,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		
 		if (hasRecentPacketLossThreshold(qosRequirements)) {
 			final double threshold = getRecentPacketLossThreshold(qosRequirements);
-			final double recentPacketLoss = measurement.getReceived() / (double) measurement.getSent();
+			final double recentPacketLoss = 1 - measurement.getReceived() / (double) measurement.getSent();
 			if (recentPacketLoss > threshold) {
 				logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", result.getProvider().getSystemName(), result.getProvider().getId());
 				return false;
@@ -94,7 +94,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 		
 		if (hasPacketLossThreshold(qosRequirements)) {
 			final double threshold = getPacketLossThreshold(qosRequirements);
-			final double packetLoss = measurement.getReceivedAll() / (double) measurement.getSentAll();
+			final double packetLoss = 1 - measurement.getReceivedAll() / (double) measurement.getSentAll();
 			if (packetLoss > threshold) {
 				logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", result.getProvider().getSystemName(), result.getProvider().getId());
 				return false;
