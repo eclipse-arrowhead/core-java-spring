@@ -269,7 +269,7 @@ public class PingTask implements Job {
 				}
 			}
 
-		}else {
+		} else {
 
 			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
