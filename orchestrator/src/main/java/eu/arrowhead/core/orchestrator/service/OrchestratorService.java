@@ -124,7 +124,6 @@ public class OrchestratorService {
 			queryData = removeNonPreferred(queryData, localProviders);
 		}
 
-		logger.debug("externalServiceRequest finished with {} service providers.", queryData.size());
 		
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // to reduce the number of results before token generation
@@ -133,6 +132,8 @@ public class OrchestratorService {
 	    orList = orchestratorDriver.generateAuthTokens(request, orList);
 	    
 	    orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem()); // token generation can be slow, so we have to check for new reservations
+	    
+	    logger.debug("externalServiceRequest finished with {} service providers.", orList.size());
 
 	    return new OrchestrationResponseDTO(orList);
 	}

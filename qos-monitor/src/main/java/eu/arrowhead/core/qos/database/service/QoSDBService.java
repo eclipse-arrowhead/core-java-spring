@@ -123,7 +123,7 @@ public class QoSDBService {
 				systemResponseDTO.getPort());
 		if (systemOptional.isPresent()) {
 			system = systemOptional.get();
-		}else {
+		} else {
 			throw new InvalidParameterException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
 		}
 
@@ -401,7 +401,7 @@ public class QoSDBService {
 			systemOptional = systemRepository.findById(id);
 			if (systemOptional.isPresent()) {
 				system = systemOptional.get();
-			}else {
+			} else {
 				throw new InvalidParameterException("Requested system" + NOT_IN_DB_ERROR_MESSAGE);
 			}
 
@@ -410,7 +410,7 @@ public class QoSDBService {
 			if (qoSIntraMeasurementOptional.isEmpty()) {
 	
 				return null;
-			}else {
+			} else {
 				 measurement = qoSIntraMeasurementOptional.get();
 			}
 
@@ -448,7 +448,5 @@ public class QoSDBService {
 		if (Utilities.isEmpty(systemResponseDTO.getAddress())) {
 			throw new InvalidParameterException("System address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
-
 	}	
-
 }
