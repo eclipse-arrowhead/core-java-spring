@@ -50,13 +50,13 @@ public class QoSMonitorController {
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entries returned";
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entries";
 
-	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_DESCRIPTION = "Return requested Ping-Measurements entries by system id.";
-	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entrie returned";
-	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entrie";
+	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_DESCRIPTION = "Return requested Ping-Measurement entry by system id.";
+	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entry returned";
+	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entry";
 
-	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_DESCRIPTION = "Return requested Ping-Measurements entries by system id.";
-	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_200_MESSAGE = "Ping-Measurement entrie returned";
-	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entrie";
+	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_DESCRIPTION = "Return requested Ping-Measurement entry by system id.";
+	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_200_MESSAGE = "Ping-Measurement entry returned";
+	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entry";
 
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 
