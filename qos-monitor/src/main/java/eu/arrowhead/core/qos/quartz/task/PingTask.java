@@ -50,9 +50,6 @@ public class PingTask implements Job {
 
 	private static final int INVALID_CALCULATION_VALUE = -1;
 
-	private static final boolean LOG_MEASUREMENT = true;
-	private static final boolean LOG_MEASUREMENT_DETAILS = false;
-
 	protected Logger logger = LogManager.getLogger(PingTask.class);
 
 	@Autowired
@@ -262,11 +259,11 @@ public class PingTask implements Job {
 
 			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
 
-			if(LOG_MEASUREMENT) {
+			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
 
 				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
-				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
+				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 
 					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
@@ -276,11 +273,11 @@ public class PingTask implements Job {
 
 			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
-			if(LOG_MEASUREMENT) {
+			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
 
 				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
-				if(LOG_MEASUREMENT_DETAILS && measurementLogSaved != null) {
+				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 
 					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}

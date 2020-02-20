@@ -18,6 +18,8 @@ public class PingMeasurementProperties {
 	private int packetSize;
 	private int rest;
 	private int availableFromSuccessPercent;
+	private boolean logMeasurementsToDB;
+	private boolean logMeasurementsDetailsToDB;
 	//=================================================================================================
 	// methods
 
@@ -25,13 +27,17 @@ public class PingMeasurementProperties {
 	public PingMeasurementProperties() {}
 
 	//-------------------------------------------------------------------------------------------------
-	public PingMeasurementProperties(final int timeToRepeat, final int timeout, final int pocketSize, final int rest, final int availableFromSuccessPercent) {
+	public PingMeasurementProperties(final int timeToRepeat, final int timeout, final int pocketSize, 
+			final int rest, final int availableFromSuccessPercent, final boolean logMeasurementsToDB, 
+			final boolean logMeasurementsDetailsToDB) {
 
 		this.timeToRepeat = timeToRepeat;
 		this.timeout = timeout;
 		this.packetSize = pocketSize;
 		this.rest = rest;
 		this.availableFromSuccessPercent = availableFromSuccessPercent;
+		this.logMeasurementsToDB = logMeasurementsToDB;
+		this.logMeasurementsDetailsToDB = logMeasurementsDetailsToDB;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -40,13 +46,16 @@ public class PingMeasurementProperties {
 	public int getPacketSize() { return packetSize; }
 	public int getRest() { return rest; }
 	public int getAvailableFromSuccessPercent() { return availableFromSuccessPercent; }
-
+	public boolean getLogMeasurementsToDB() { return logMeasurementsToDB; }
+	public boolean getLogMeasurementsDetailsToDB() {return logMeasurementsDetailsToDB; }
 	//-------------------------------------------------------------------------------------------------
 	public void setTimeToRepeat(final int timeToRepeat) { this.timeToRepeat = timeToRepeat; }
 	public void setTimeout(final int timeout) { this.timeout = timeout; }
 	public void setPacketSize(final int packetSize) { this.packetSize = packetSize; }
 	public void setRest(final int rest) { this.rest = rest; }
 	public void setAvailableFromSuccessPercent(final int availableFromSuccessPercent) { this.availableFromSuccessPercent = availableFromSuccessPercent; }
+	public void setLogMeasurementsToDB(final boolean logMeasurementsToDB) { this.logMeasurementsToDB = logMeasurementsToDB; }
+	public void setLogMeasurementsDetailsToDB(final boolean logMeasurementsDetailsToDB) { this.logMeasurementsDetailsToDB = logMeasurementsDetailsToDB; }
 
 	//-------------------------------------------------------------------------------------------------
 	@PostConstruct

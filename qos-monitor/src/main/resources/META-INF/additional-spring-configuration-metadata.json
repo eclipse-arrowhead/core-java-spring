@@ -63,5 +63,15 @@
     "name": "ping.available_from_success_percent",
     "type": "java.lang.Integer",
     "description": "A description for 'ping.available_from_success_percent'"
+  },
+  {
+    "name": "ping.logMeasurementsToDB",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'ping.logMeasurementsToDB'"
+  },
+  {
+    "name": "ping.logMeasurementsDetailsToDB",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'ping.logMeasurementsDetailsToDB'"
   }
 ]}
