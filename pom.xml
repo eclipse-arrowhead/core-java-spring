@@ -33,6 +33,7 @@
 	    <module>choreographer</module>
 	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
+	    <module>docker-all</module>
   	</modules>
   	
 	<properties>
