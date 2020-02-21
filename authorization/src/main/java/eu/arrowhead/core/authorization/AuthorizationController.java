@@ -597,10 +597,6 @@ public class AuthorizationController {
 		logger.debug("New token generation request received");
 		checkTokenGenerationRequest(request);
 		
-		if (request.getDuration() != null && request.getDuration().intValue() <= 0) {
-			request.setDuration(null);
-		}
-
 		final TokenGenerationResponseDTO response = tokenGenerationService.generateTokensResponse(request);
 		logger.debug("{} token(s) are generated for {}", calculateNumberOfTokens(response.getTokenData()), request.getConsumer().getSystemName());
 		
@@ -668,6 +664,10 @@ public class AuthorizationController {
 			if (!interfaceNameVerifier.isValid(intf)) {
 				throw new BadPayloadException("Specified interface name is not valid: " + intf, HttpStatus.SC_BAD_REQUEST, origin);
 			}
+		}
+		
+		if (provider.getTokenDuration() <= 0) {
+			provider.setTokenDuration(-1);
 		}
 	}
 

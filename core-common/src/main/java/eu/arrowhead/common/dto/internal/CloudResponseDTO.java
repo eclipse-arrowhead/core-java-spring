@@ -74,12 +74,15 @@ public class CloudResponseDTO implements Serializable {
 		if (this == obj) {
 			return true;
 		}
+		
 		if (obj == null) {
 			return false;
 		}
+		
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
+		
 		final CloudResponseDTO other = (CloudResponseDTO) obj;
 		
 		return id == other.id;

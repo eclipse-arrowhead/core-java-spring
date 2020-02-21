@@ -735,6 +735,29 @@ public class ServiceRegistryController {
 		logger.debug("Return system by name: {}, address: {}, port: {}", systemName, address, port);
 		return result;
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return all service registry entries", response = ServiceRegistryListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_SERVICE_REGISTRY_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_SERVICE_REGISTRY_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_URI)
+	@ResponseBody public ServiceRegistryListResponseDTO getServiceRegistryEntries() {
+		logger.debug("New Service Registry get request recieved");
+
+		final int page = 0;
+		final int size = Integer.MAX_VALUE;
+		final Direction direction = Direction.ASC;
+		final String sortField = CommonConstants.COMMON_FIELD_NAME_ID;
+		
+		final ServiceRegistryListResponseDTO serviceRegistryEntriesResponse = serviceRegistryDBService.getServiceRegistryEntriesResponse(page, size, direction, sortField);
+		logger.debug("Service Registry entries with page: {} and item_per page: {} successfully retrieved", page, size);
+		
+		return serviceRegistryEntriesResponse;
+	}
 		
 	//=================================================================================================
 	// assistant methods

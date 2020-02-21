@@ -629,7 +629,7 @@ public class AuthorizationDBService {
 						checkConstraintsOfAuthorizationIntraCloudTable(consumer, provider, service);
 						toBeSaved.add(new AuthorizationIntraCloud(consumer, provider, service));
 					} catch (final InvalidParameterException ex) {
-						//not throwing towards as in this bulk operation case should be only a warning
+						// not throwing towards as in this bulk operation case should be only a warning
 						logger.debug(ex.getMessage());
 					}
 				} else {
@@ -784,7 +784,7 @@ public class AuthorizationDBService {
 					checkConstraintsOfAuthorizationInterCloudTable(cloud, provider, service);
 					toBeSaved.add(new AuthorizationInterCloud(cloud, provider, service));
 				} catch (final InvalidParameterException ex) {
-					//not throwing towards as in this bulk operation case should be only a warning
+					// not throwing towards as in this bulk operation case should be only a warning
 					logger.debug(ex.getMessage());
 				}
 			} else {
