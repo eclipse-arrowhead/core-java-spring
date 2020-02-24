@@ -414,12 +414,14 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 
 CREATE TABLE IF NOT EXISTS `qos_inter_measurement` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`cloud_id` bigint(20) NOT NULL,
 	`address` varchar(255) NOT NULL,
 	`measurement_type` varchar(255) NOT NULL,
 	`last_measurement_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	UNIQUE KEY `unique_address_measurement_type` (`address`, `measurement_type`)
+	CONSTRAINT `fk_system` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_cloud_id_address_measurement_type` (`cloud_id`, `address`, `measurement_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement` (

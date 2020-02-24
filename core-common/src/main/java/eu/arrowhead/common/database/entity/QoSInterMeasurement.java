@@ -6,9 +6,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -18,7 +21,7 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 
 @Entity
-@Table(name = "qos_inter_measurement", uniqueConstraints = @UniqueConstraint(columnNames = {"address", "measurementType"}))
+@Table(name = "qos_inter_measurement", uniqueConstraints = @UniqueConstraint(columnNames = {"systemId", "address", "measurementType"}))
 public class QoSInterMeasurement {
 	
 	//=================================================================================================
@@ -27,6 +30,10 @@ public class QoSInterMeasurement {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "cloudId", referencedColumnName = "id", nullable = false)
+	private Cloud cloud;
 	
 	@Column(nullable = false)
 	private String address;
