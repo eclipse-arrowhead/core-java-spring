@@ -51,6 +51,7 @@ public class GatekeeperAccessControlFilterTest {
 	private static final String GATEKEEPER_MGMT_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CoreCommonConstants.MGMT_URI + "/clouds";
 	private static final String GATEKEEPER_INIT_GSD_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_GSD_SERVICE;
 	private static final String GATEKEEPER_INIT_ICN_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE;
+	private static final String GATEKEEPER_PULL_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -165,6 +166,26 @@ public class GatekeeperAccessControlFilterTest {
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(getICNRequestFormDTO()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPullCloudsCertificateQoSMonitor() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_PULL_CLOUDS_URI)
+				    .secure(true)
+					.with(x509("certificates/qos_monitor.pem"))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testPullCloudsCertificateNotQoSMonitor() throws Exception {
+		this.mockMvc.perform(get(GATEKEEPER_PULL_CLOUDS_URI)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}

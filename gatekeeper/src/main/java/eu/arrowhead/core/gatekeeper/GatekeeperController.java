@@ -77,8 +77,8 @@ public class GatekeeperController {
 	private static final String INIT_GLOBAL_SERVICE_DISCOVERY_URI = "/init_gsd";
 	private static final String INIT_INTER_CLOUD_NEGOTIATION_URI = "/init_icn";
 	
-	private static final String GET_CLOUDS_MGMT_HTTP_200_MESSAGE = "Cloud entries returned";
-	private static final String GET_CLOUDS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
+	private static final String GET_CLOUDS_HTTP_200_MESSAGE = "Cloud entries returned";
+	private static final String GET_CLOUDS_HTTP_400_MESSAGE = "Could not retrieve Cloud entries";
 	private static final String POST_CLOUDS_MGMT_HTTP_201_MESSAGE = "Cloud entries created";
 	private static final String POST_CLOUDS_MGMT_HTTP_400_MESSAGE = "Could not create Cloud entries";
 	private static final String POST_CLOUDS_ASSIGN_MGMT_HTTP_200_MESSAGE = "Cloud and Relay entries assigned";
@@ -103,6 +103,7 @@ public class GatekeeperController {
 	private static final String POST_INIT_ICN_HTTP_200_MESSAGE = "ICN result returned";
 	private static final String POST_INIT_ICN_HTTP_400_MESSAGE = "Could not initiate inter cloud negotiation";
 	private static final String POST_INIT_ICN_HTTP_504_MESSAGE = "Timeout occurs in the communication via relay.";
+	private static final String GET_PULL_CLOUDS_DESCRIPTION = "Return all registrated clouds for QoS Monitor Core System";
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperController.class);
 	
@@ -130,8 +131,8 @@ public class GatekeeperController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Cloud entries by the given parameters", response = CloudWithRelaysListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -154,8 +155,8 @@ public class GatekeeperController {
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Return requested Cloud entry", response = CloudWithRelaysResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
@@ -478,6 +479,22 @@ public class GatekeeperController {
 		
 		logger.debug("Inter cloud negotiation has been finished.");
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_PULL_CLOUDS_DESCRIPTION, response = CloudWithRelaysListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_CLOUDS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_CLOUDS_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public CloudWithRelaysListResponseDTO pullClouds() {
+		logger.debug("new pullClouds request received");
+		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(-1, -1, null, null);
+		logger.debug("pullClouds request successfully finished");
+		return cloudsResponse;
 	}
 	
 	//=================================================================================================
