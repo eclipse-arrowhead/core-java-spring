@@ -11,7 +11,10 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
     1. [Docker](#quickstart_docker)
-        * [Handy Docker Commands](#quickstart_dockercommands)
+        * [System Requirements](#quickstart_dockersysreqs)
+        * [Examples](#quickstart_examples)
+        * [Guide](#quickstart_dockerguide)
+        * [Cheat-Sheet](#quickstart_dockercommands)
         * [Troubleshooting](#quickstart_dockertroubleshooting)
 	2. [Debian Installer](#quickstart_debian)
     3. [Compile Code](#quickstart_compile)
@@ -87,7 +90,13 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 
 ### Docker
 
-#### Requirements
+[Docker](https://docs.docker.com/) is a container platform that can be used to package and deploy applications in server environments, among other.
+In particular, the [`docker-compose`](https://docs.docker.com/compose/) utility may with advantage be used during application development to test integration with the Arrowhead Core systems.
+Here, we provide brief instructions on how to install and run both Docker and container images for the Arrowhead Core systems.
+
+<a name="quickstart_dockersysreqs" />
+
+#### System Requirements
 
 > **Note:** A system with 4GB of RAM is advised. 
 
@@ -98,6 +107,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
   * [Windows](https://docs.docker.com/docker-for-windows/install/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
+<a name="quickstart_examples" />
+
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
 Don't forget to copy the `initSQL.sh` script next to the docker-compose file and execute it! On the first run it initializes the Database!<br />
 Example copy command which does this for you, execute from the project root directory.
@@ -107,17 +118,21 @@ cd docker
 ./initSQL.sh
 ```
 
-Inside the `docker` folder an example is provided. 
+#### Examples
 
-##### Core System Config
+We provide two examples of how Docker containers can be used to host Arrowhead Core systems in this repository.
+The first one is located in the [`docker`](docker) folder and the second one in the [`docker-all`](docker-all) folder.
+The former example shows how some prebuilt Docker images can be used to bring up networks, while the second describes how a Docker image can be constructed that contains all Arrowhead Core systems.
+Please refer to those folders for more information.
+In particular, each folder contains its own `README.md` file with more instructions.
 
-Example Core System Configuration files are available in this folder. 
+<a name="quickstart_dockerguide" />
+
+#### Docker Guide
 
 > **Note:** Don't forget to set `domain.name` and `domain.port` properties!
 
-##### Docker Compose
-
-Example Docker Compose file is located here. The interesting part is the volumes section. 
+Example Docker Compose file is located [here](docker/docker-compose.yml). The interesting part is the volumes section. 
 Format is /path/on/your/local/machine:/path/inside/docker/container
 
 You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mounting point inside the container, otherwise it will start up with default config.
@@ -137,9 +152,9 @@ If you change your config you have to restart the appropriate container
 
 `docker restart <containerName>`
 
-<a name="quickstart_dockercommands" />`
+<a name="quickstart_cheatsheet" />
 
-##### Handy Docker Commands
+#### Docker Cheat-Sheet
  
 | Command | Description |
 | ------- | ----------- |
@@ -147,6 +162,7 @@ If you change your config you have to restart the appropriate container
 | `docker images` | List all images |
 | `docker-compose up -d` | Starts the Docker containers |
 | `docker-compose down` | Destroys the Docker containers |
+| `docker restart <containerName>` | Restarts a container, making it re-read its configuration files |
 | `docker logs <containerName>` | Shows logs for the container |
 | `docker volume create --name=<volumeName>` | Creates a named volume |
 | `docker volume rm <volumeName>` | Removes the specified named volume |
@@ -157,7 +173,6 @@ If you change your config you have to restart the appropriate container
 
 Q: MySQL won't start. What did went wrong? <br />
 A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
-
 
 <a name="quickstart_debian" />
 
@@ -408,7 +423,7 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
 1) Master certificate: `arrowhead.eu`
 2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
 3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
-The certificate naming convetion have strict rules:
+The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
@@ -431,6 +446,14 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
 
+If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
+
+> **Note:** Basic scripting knowledge is required!
+
+* lib_certs.sh - Certificate generation code
+* mk_certs.sh - Usage example
+* rm_certs.sh - Delete generated certs 
+
 ### System Operator Certificate
 
 The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
@@ -438,6 +461,14 @@ SysOp certificate allows the client to use the management endpoints of the Arrow
 * [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
 * [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
 * [Import SysOp Certificate (Linux)](documentation/certificates/import_sysop_certificate_linux.pdf)
+
+### Include certificate in Docker container
+
+The following guide describes step by step, how to include your own certificates into a Docker container.
+
+* [How to include certificate in Docker](documentation/certificates/docker_certificate_guide.md)
+
+
 
 <a name="setupgatekeeper_and_gateway" /> 
 
@@ -3330,7 +3361,7 @@ __ServiceRequestForm__ is the input
       "string"
     ],
     "securityRequirements": [
-      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+      "NOT_SECURE", "CERTIFICATE", "TOKEN"
     ],
     "metadataRequirements": {
       "additionalProp1": "string",
