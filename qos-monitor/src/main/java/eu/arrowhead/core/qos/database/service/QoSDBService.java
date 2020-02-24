@@ -499,6 +499,20 @@ public class QoSDBService {
 		//TODO implement method logic here
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterMeasurement getOrCreateInterMeasurement(final String address, final CloudResponseDTO cloud) {
+		logger.debug("getOrCreateInterMeasurement started ...");
+
+		//TODO implement method logic here
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void updateInterMeasurement(final ZonedDateTime aroundNow, final QoSInterMeasurement measurement) {
+		logger.debug("updateInterMeasurement started ...");
+
+		//TODO implement method logic here
+	}
 	//=================================================================================================
 	// assistant methods
 
@@ -517,16 +531,6 @@ public class QoSDBService {
 		if (Utilities.isEmpty(systemResponseDTO.getAddress())) {
 			throw new InvalidParameterException("System address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
-	}
-
-	public QoSInterMeasurement getOrCreateInterMeasurement(String address, CloudResponseDTO cloud) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void updateInterMeasurement(ZonedDateTime aroundNow, QoSInterMeasurement measurement) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
