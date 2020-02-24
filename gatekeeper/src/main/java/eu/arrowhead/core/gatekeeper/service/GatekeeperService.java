@@ -306,6 +306,13 @@ public class GatekeeperService {
 	public AccessTypeRelayResponseDTO returnAccessType() {
 		return new AccessTypeRelayResponseDTO(!gatewayIsMandatory);
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public SystemAddressSetRelayResponseDTO initSystemAddressCollection(final CloudRequestDTO request) {
+		//TODO:
+		
+		return null;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	public SystemAddressSetRelayResponseDTO doSystemAddressCollection() {
