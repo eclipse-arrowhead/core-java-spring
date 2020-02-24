@@ -293,7 +293,13 @@ public class OrchestratorService {
 		List<OrchestrationResultDTO> orList = compileOrchestrationResponse(queryData, request);
 		orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 		if (orList.isEmpty()) {
-			return new OrchestrationResponseDTO();
+			if (isInterCloudOrchestrationPossible(flags)) {
+				// no result after filter reserved providers => we try with other clouds
+				logger.debug("dynamicOrchestration: no free provider in this cloud  => moving to Inter-Cloud orchestration.");
+				return triggerInterCloud(request);
+			} else {
+				return new OrchestrationResponseDTO(); // empty response
+			}
 		}
 		
 		final boolean needReservation = qosEnabled && flags.get(Flag.ENABLE_QOS) && request.getCommands().containsKey(OrchestrationFormRequestDTO.QOS_COMMAND_EXCLUSIVITY);
@@ -305,14 +311,26 @@ public class OrchestratorService {
 		if (flags.get(Flag.ENABLE_QOS)) {
 			orList = qosManager.verifyServices(orList, request);
 			if (orList.isEmpty()) {
-				return new OrchestrationResponseDTO();
+				if (isInterCloudOrchestrationPossible(flags)) {
+					// no result after verify providers => we try with other clouds
+					logger.debug("dynamicOrchestration: no verified provider in this cloud  => moving to Inter-Cloud orchestration.");
+					return triggerInterCloud(request);
+				} else {
+					return new OrchestrationResponseDTO(); // empty response
+				}
 			}
 		}
 		
 		if (!needReservation) {
 			orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 			if (orList.isEmpty()) {
-				return new OrchestrationResponseDTO();
+				if (isInterCloudOrchestrationPossible(flags)) {
+					// no result after filter reserved providers => we try with other clouds
+					logger.debug("dynamicOrchestration: no free provider in this cloud  => moving to Inter-Cloud orchestration.");
+					return triggerInterCloud(request);
+				} else {
+					return new OrchestrationResponseDTO(); // empty response
+				}
 			}
 		}
 		
@@ -322,7 +340,14 @@ public class OrchestratorService {
 			if (!needReservation) {
 				orList = qosManager.filterReservedProviders(orList, request.getRequesterSystem());
 				if (orList.isEmpty()) {
-					return new OrchestrationResponseDTO();
+					if (isInterCloudOrchestrationPossible(flags)) {
+						// no result after filter reserved providers => we try with other clouds
+						logger.debug("dynamicOrchestration: no free provider in this cloud  => moving to Inter-Cloud orchestration.");
+						return triggerInterCloud(request);
+					} else {
+						return new OrchestrationResponseDTO(); // empty response
+					}
+
 				}
 			}
 		}
