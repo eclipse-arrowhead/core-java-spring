@@ -40,6 +40,7 @@ import eu.arrowhead.common.dto.internal.RelayListResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -104,6 +105,9 @@ public class GatekeeperController {
 	private static final String POST_INIT_ICN_HTTP_400_MESSAGE = "Could not initiate inter cloud negotiation";
 	private static final String POST_INIT_ICN_HTTP_504_MESSAGE = "Timeout occurs in the communication via relay.";
 	private static final String GET_PULL_CLOUDS_DESCRIPTION = "Return all registrated clouds for QoS Monitor Core System";
+	private static final String POST_COLLECT_SYSTEM_ADDRESSES_DESCRIPTION = "Return all registrated system ip address from a neighbor cloud for QoS Monitor Core System";
+	private static final String POST_COLLECT_SYSTEM_ADDRESSES_HTTP_200_MESSAGE = "Addresses returned";
+	private static final String POST_COLLECT_SYSTEM_ADDRESSES_HTTP_400_MESSAGE = "Could not collect addresses";
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperController.class);
 	
@@ -495,6 +499,25 @@ public class GatekeeperController {
 		final CloudWithRelaysListResponseDTO cloudsResponse = gatekeeperDBService.getCloudsResponse(-1, -1, null, null);
 		logger.debug("pullClouds request successfully finished");
 		return cloudsResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_COLLECT_SYSTEM_ADDRESSES_DESCRIPTION, response = SystemAddressSetRelayResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_COLLECT_SYSTEM_ADDRESSES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_COLLECT_SYSTEM_ADDRESSES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public SystemAddressSetRelayResponseDTO collectSystemAddressesOfNeighborCloud(@RequestBody final CloudRequestDTO dto) {
+		logger.debug("new collectSystemAddressesOfNeighborCloud request received");
+		
+		validateCloudRequestDTO(dto, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE);
+		final SystemAddressSetRelayResponseDTO addresses = gatekeeperService.initSystemAddressCollection(dto);
+		
+		logger.debug("collectSystemAddressesOfNeighborCloud request successfully finished");
+		return addresses;
 	}
 	
 	//=================================================================================================
