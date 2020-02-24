@@ -18,16 +18,22 @@ import org.springframework.transaction.annotation.Transactional;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.QoSInterMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.repository.QoSInterMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
@@ -51,6 +57,9 @@ public class QoSDBService {
 
 	@Autowired
 	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
+
+	@Autowired
+	private QoSInterMeasurementRepository qoSInterMeasurementRepository;
 
 	@Autowired
 	private QoSIntraMeasurementPingRepository qoSIntraMeasurementPingRepository;
@@ -430,6 +439,66 @@ public class QoSDBService {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public List<QoSInterMeasurement> getInterMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
+		logger.debug("getInterMeasurementByCloud started ...");
+
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		try {
+
+			final List<QoSInterMeasurement> measurementList = qoSInterMeasurementRepository.findByCloudAndMeasurementType(cloud, QoSMeasurementType.PING);
+
+			return measurementList;
+
+		} catch (final Exception ex) {
+
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public Optional<QoSInterPingMeasurement> getInterPingMeasurementByMeasurement(final QoSInterMeasurement measurement) {
+		logger.debug("getInterMeasurementByCloud started ...");
+
+		//TODO implement method logic here
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void createInterPingMeasurement(final QoSInterMeasurement measurement,
+			final PingMeasurementCalculationsDTO calculationsDTO, final ZonedDateTime aroundNow) {
+		logger.debug("createInterPingMeasurement started ...");
+
+		//TODO implement method logic here
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterPingMeasurementLog logInterMeasurementToDB(final String address,
+			final PingMeasurementCalculationsDTO calculationsDTO, final ZonedDateTime aroundNow) {
+		logger.debug("logInterMeasurementToDB started ...");
+
+		//TODO implement method logic here
+		return null;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void logInterMeasurementDetailsToDB(final QoSInterPingMeasurementLog measurementLogSaved,
+			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+		logger.debug("logInterMeasurementDetailsToDB started ...");
+
+		//TODO implement method logic here
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public void updateInterPingMeasurement(final QoSInterMeasurement measurement,
+			final PingMeasurementCalculationsDTO calculationsDTO, final QoSInterPingMeasurement qoSInterPingMeasurement,
+			final ZonedDateTime aroundNow) {
+		logger.debug("updateInterPingMeasurement started ...");
+
+		//TODO implement method logic here
+	}
+
 	//=================================================================================================
 	// assistant methods
 
@@ -448,5 +517,16 @@ public class QoSDBService {
 		if (Utilities.isEmpty(systemResponseDTO.getAddress())) {
 			throw new InvalidParameterException("System address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
-	}	
+	}
+
+	public QoSInterMeasurement getOrCreateInterMeasurement(String address, CloudResponseDTO cloud) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void updateInterMeasurement(ZonedDateTime aroundNow, QoSInterMeasurement measurement) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

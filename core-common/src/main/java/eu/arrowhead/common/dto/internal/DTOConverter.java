@@ -501,6 +501,26 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static Cloud convertCloudResponseDTOToCloud(final CloudResponseDTO cloudResponseDTO) {
+		Assert.notNull(cloudResponseDTO, "cloudResponseDTO is null");
+		Assert.notNull(cloudResponseDTO.getOperator(), "cloudResponseDTO.Operator is null");
+		Assert.notNull(cloudResponseDTO.getName(), "cloudResponseDTO.Name is null");
+		
+		final Cloud cloud = new Cloud();
+		
+		cloud.setId(cloudResponseDTO.getId());
+		cloud.setOperator(cloudResponseDTO.getOperator());
+		cloud.setName(cloudResponseDTO.getName());
+		cloud.setSecure(cloudResponseDTO.getSecure());
+		cloud.setNeighbor(cloudResponseDTO.getNeighbor());
+		cloud.setAuthenticationInfo(cloudResponseDTO.getAuthenticationInfo());
+		cloud.setCreatedAt(Utilities.parseUTCStringToLocalZonedDateTime(cloudResponseDTO.getCreatedAt()));
+		cloud.setUpdatedAt(Utilities.parseUTCStringToLocalZonedDateTime(cloudResponseDTO.getUpdatedAt()));
+		
+		return cloud;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription) {
 		Assert.notNull(subscription, "subscription is null");
 		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null");
