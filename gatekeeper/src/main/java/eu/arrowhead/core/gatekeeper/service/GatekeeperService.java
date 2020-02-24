@@ -309,9 +309,14 @@ public class GatekeeperService {
 
 	//-------------------------------------------------------------------------------------------------
 	public SystemAddressSetRelayResponseDTO doSystemAddressCollection() {
-		//TODO:
+		final Set<String> addresses = new HashSet<>();
 		
-		return null;
+		final ServiceQueryResultDTO results = gatekeeperDriver.sendServiceRegistryQueryAll();
+		for (ServiceRegistryResponseDTO sr : results.getServiceQueryData()) {
+			addresses.add(sr.getProvider().getAddress());
+		}
+		
+		return new SystemAddressSetRelayResponseDTO(addresses);
 	}
 	
 	//=================================================================================================

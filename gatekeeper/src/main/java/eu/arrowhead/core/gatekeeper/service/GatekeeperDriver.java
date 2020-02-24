@@ -166,6 +166,16 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultDTO sendServiceRegistryQueryAll() {
+		logger.debug("sendServiceReistryQueryAll started...");		
+		
+		final UriComponents queryUri = getServiceRegistryQueryAllUri();
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public Map<Long,List<Long>> sendInterCloudAuthorizationCheckQuery(final List<ServiceRegistryResponseDTO> serviceQueryData, final CloudRequestDTO cloud, final String serviceDefinition) {
 		logger.debug("sendInterCloudAuthorizationCheckQuery started...");		
 		Assert.notNull(serviceQueryData, "serviceQueryData is null.");
@@ -338,6 +348,21 @@ public class GatekeeperDriver {
 		}
 		
 		throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getServiceRegistryQueryAllUri() {
+		logger.debug("getServiceRegistryQueryAllUri started...");
+		
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find Service Registry query/all URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find Service Registry query/all URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

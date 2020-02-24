@@ -14,11 +14,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
@@ -99,6 +101,11 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 			throw new ServiceConfigurationError("Gatekeeper can't start with 'gateway_is_present=false' property when the 'gateway_is_mandatory' property is true!");
 		}
 		
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> context = event.getApplicationContext().getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
+		final UriComponents queryAll = createQueryAllUri(CommonConstants.HTTPS);
+		context.put(CoreCommonConstants.SR_QUERY_ALL, queryAll);
+		
 		initializeGatekeeperRelayClient(event.getApplicationContext());
 		relaySubscriberDataContainer = event.getApplicationContext().getBean(RelaySubscriberDataContainer.class);
 		relaySubscriberDataContainer.init();
@@ -126,5 +133,14 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 
 		this.gatekeeperRelayClientWithCache = (GatekeeperRelayClientUsingCachedSessions) GatekeeperRelayClientFactory.createGatekeeperRelayClient(serverCN, publicKey, privateKey, sslProps, timeout,
 																																				  true);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents createQueryAllUri(final String scheme) {
+		logger.debug("createQueryAllUri started...");
+
+		final String registyUriStr = CommonConstants.SERVICE_REGISTRY_URI + CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_URI;
+
+		return Utilities.createURI(scheme, coreSystemRegistrationProperties.getServiceRegistryAddress(), coreSystemRegistrationProperties.getServiceRegistryPort(), registyUriStr);
 	}
 }
