@@ -23,6 +23,7 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
+import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
@@ -37,6 +38,7 @@ import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
@@ -298,6 +300,18 @@ public class GatekeeperService {
 		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
 		
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public AccessTypeRelayResponseDTO returnAccessType() {
+		return new AccessTypeRelayResponseDTO(!gatewayIsMandatory);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public SystemAddressSetRelayResponseDTO doSystemAddressCollection() {
+		//TODO:
+		
+		return null;
 	}
 	
 	//=================================================================================================

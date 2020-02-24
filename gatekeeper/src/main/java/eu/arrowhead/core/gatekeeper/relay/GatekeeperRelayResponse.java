@@ -3,8 +3,10 @@ package eu.arrowhead.core.gatekeeper.relay;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
 public class GatekeeperRelayResponse {
@@ -50,6 +52,24 @@ public class GatekeeperRelayResponse {
 			return (ICNProposalResponseDTO) payload;
 		}
 		
-		throw new DataNotFoundException("The response is not a reslult of an ICN proposal.");
+		throw new DataNotFoundException("The response is not a result of an ICN proposal.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public AccessTypeRelayResponseDTO getAccessTypeResponse() {
+		if (payload instanceof AccessTypeRelayResponseDTO) {
+			return (AccessTypeRelayResponseDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The response is not a result of an access type request.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public SystemAddressSetRelayResponseDTO getSystemAddressSetResponse() {
+		if (payload instanceof SystemAddressSetRelayResponseDTO) {
+			return (SystemAddressSetRelayResponseDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The response is not a result of a system addresses request.");
 	}
 }

@@ -8,6 +8,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
+import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -65,4 +66,13 @@ public class GatekeeperRelayRequest {
 		
 		throw new DataNotFoundException("The request is not an ICN proposal.");
 	}
-}
+	
+	//-------------------------------------------------------------------------------------------------
+	public GeneralRelayRequestDTO getGeneralRelayRequest() {
+		if (payload instanceof GeneralRelayRequestDTO) {
+			return (GeneralRelayRequestDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The request is not a general request.");
+	}
+ }

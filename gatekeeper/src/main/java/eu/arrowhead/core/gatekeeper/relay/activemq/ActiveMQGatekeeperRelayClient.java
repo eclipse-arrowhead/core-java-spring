@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 
 import javax.jms.Connection;
@@ -31,12 +32,15 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
 import eu.arrowhead.common.dto.internal.DecryptedMessageDTO;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GeneralAdvertisementMessageDTO;
+import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
@@ -59,6 +63,9 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private static final String REQUEST_QUEUE_PREFIX = "REQ-";
 	private static final String RESPONSE_QUEUE_PREFIX = "RESP-";
 	private static final String ERROR_CODE = "\"errorCode\"";
+	
+	private static final List<String> supportedRequestTypes = List.of(CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL, CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL,
+																	  CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE, CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST);	
 	
 	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int SESSION_ID_LENGTH = 48;
@@ -442,6 +449,10 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 			return request ? GSDPollRequestDTO.class : GSDPollResponseDTO.class;
 		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 			return request ? ICNProposalRequestDTO.class : ICNProposalResponseDTO.class;
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE:
+			return request ? GeneralRelayRequestDTO.class : AccessTypeRelayResponseDTO.class;
+		case CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST:
+			return request ? GeneralRelayRequestDTO.class : SystemAddressSetRelayResponseDTO.class;
 		default:
 			throw new ArrowheadException("Invalid message type: " + messageType);
 		}
@@ -457,6 +468,10 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 		
 		if (requestPayload instanceof ICNProposalRequestDTO) {
 			return CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL;
+		}
+		
+		if (requestPayload instanceof GeneralRelayRequestDTO) {
+			return ((GeneralRelayRequestDTO)requestPayload).getMessageType();
 		}
 		
 		throw new ArrowheadException("Invalid message DTO: " + requestPayload.getClass().getSimpleName());
@@ -475,7 +490,7 @@ public class ActiveMQGatekeeperRelayClient implements GatekeeperRelayClient {
 	private void validateRequest(final String sessionId, final DecryptedMessageDTO msg) {
 		logger.debug("validateRequest started...");
 		
-		if (!CoreCommonConstants.RELAY_MESSAGE_TYPE_GSD_POLL.equalsIgnoreCase(msg.getMessageType()) && !CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL.equalsIgnoreCase(msg.getMessageType())) {
+		if (!supportedRequestTypes.contains(msg.getMessageType().toLowerCase())) {
 			throw new AuthException("Unauthorized message on queue.");
 		}
 		
