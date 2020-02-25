@@ -41,7 +41,6 @@ public class GeneralRelayRequestDTO implements Serializable {
 	//-------------------------------------------------------------------------------------------------
 	public String getMessageType() { return messageType; }
 
-
 	//-------------------------------------------------------------------------------------------------
 	public void setMessageType(final String messageType) { this.messageType = messageType; }
 }
