@@ -1,5 +1,7 @@
 package eu.arrowhead.core.gatekeeper.service;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.security.PrivateKey;
@@ -11,12 +13,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
+import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.http.HttpService;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDriverTest {
@@ -29,6 +39,9 @@ public class GatekeeperDriverTest {
 	
 	@Mock
 	private Map<String,Object> arrowheadContext;
+	
+	@Mock
+	private HttpService httpService;
 
 	//=================================================================================================
 	// methods
@@ -130,5 +143,36 @@ public class GatekeeperDriverTest {
 		
 		final Object relayClient = ReflectionTestUtils.getField(testingObject, "relayClient");
 		Assert.assertNotNull(relayClient);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendServiceRegistryQueryAllNoUri() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(false);
+		
+		testingObject.sendServiceRegistryQueryAll();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendServiceRegistryQueryAllWrongUriType() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn("uri");
+		
+		testingObject.sendServiceRegistryQueryAll();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSendServiceRegistryQueryAllOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "abc");
+		
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+		when(httpService.sendRequest(uri, HttpMethod.POST, ServiceQueryResultDTO.class)).thenReturn(new ResponseEntity<>(new ServiceQueryResultDTO(), HttpStatus.OK));
+		
+		testingObject.sendServiceRegistryQueryAll();
+		
+		verify(httpService, times(1)).sendRequest(uri, HttpMethod.POST, ServiceQueryResultDTO.class);
 	}
 }
