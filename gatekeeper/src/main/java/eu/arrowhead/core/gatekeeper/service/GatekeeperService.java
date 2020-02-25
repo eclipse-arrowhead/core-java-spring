@@ -309,9 +309,10 @@ public class GatekeeperService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public SystemAddressSetRelayResponseDTO initSystemAddressCollection(final CloudRequestDTO request) {
-		//TODO:
+		validateCloudRequest(request);
 		
-		return null;
+		final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(request.getOperator(), request.getName());
+		return gatekeeperDriver.sendSystemAddressCollectionRequest(cloud);
 	}
 
 	//-------------------------------------------------------------------------------------------------
