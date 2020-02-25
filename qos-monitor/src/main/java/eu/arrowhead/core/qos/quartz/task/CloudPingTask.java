@@ -19,11 +19,8 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
@@ -31,13 +28,12 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSInterMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
+import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
-import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
@@ -51,7 +47,6 @@ public class CloudPingTask implements Job {
 
 	//=================================================================================================
 	// members
-	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
 
 	private static final int INVALID_CALCULATION_VALUE = -1;
 
@@ -68,9 +63,6 @@ public class CloudPingTask implements Job {
 
 	@Autowired
 	private QoSMonitorDriver qoSMonitorDriver;
-
-	@Autowired
-	private HttpService httpService;
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
@@ -118,38 +110,46 @@ public class CloudPingTask implements Job {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-
 	private Set<CloudResponseDTO> getCloudsFromResponse(final CloudWithRelaysListResponseDTO responseDTO) {
 		logger.debug("getCloudsFromResponse started...");
 
-		final Set<CloudResponseDTO> clouds = new HashSet<>();
-		for (final CloudWithRelaysResponseDTO cloudWithRelay: responseDTO.getData()) {
+		final List<CloudRequestDTO> cloudsToRequest = new ArrayList<>();
+		for (final CloudWithRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
 
 			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
-				clouds.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudResponseDTO(cloudWithRelay));
+				cloudsToRequest.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudRequestDTO(cloudWithRelay));
 			}
 		}
-		return null;
+		
+		return filterCloudsByAccessType(cloudsToRequest, responseDTO);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<String> getAddressesToMeasure(final CloudResponseDTO cloud) {
-		logger.debug("getAddressesToMeasure started...");
+	private Set<CloudResponseDTO> filterCloudsByAccessType(final List<CloudRequestDTO> cloudsToRequest,
+			final CloudWithRelaysListResponseDTO responseDTO) {
+		logger.debug("filterCloudsByAccessType started...");
 
-		//TODO implement method logic here
+		final List<CloudAccessResponseDTO> cloudAccessResponseDTOList = qoSMonitorDriver.queryGatekeeperGatewayIsMandatory(cloudsToRequest);
+		if (cloudAccessResponseDTOList == null || cloudAccessResponseDTOList.isEmpty()) {
+			return null;
+		}
 
-		final List<String> addressList = null;
+		final Set<CloudResponseDTO> clouds = new HashSet<>();
+		for (final CloudWithRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
 
-		return addressList;
-	}
+			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
+				for (final CloudAccessResponseDTO cloudAccessResponseDTO : cloudAccessResponseDTOList) {
 
-	//-------------------------------------------------------------------------------------------------
-	private List<CloudResponseDTO> getAllClouds() {
-		logger.debug("getAllClouds started...");
-
-		//TODO implement method logic here
-
-		final List<CloudResponseDTO> clouds = null;
+					if (cloudAccessResponseDTO != null && cloudAccessResponseDTO.isDirectAccess()) {
+						if ( (cloudWithRelay.getName().equalsIgnoreCase(cloudAccessResponseDTO.getCloudName())) && 
+								(cloudWithRelay.getOperator().equalsIgnoreCase(cloudAccessResponseDTO.getCloudOperator())) ) {
+							clouds.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudResponseDTO(cloudWithRelay));
+						}
+					}
+				}
+				
+			}
+		}
 
 		return clouds;
 	}
@@ -340,40 +340,6 @@ public class CloudPingTask implements Job {
 		}
 
 		return calculationsDTO;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private ServiceRegistryListResponseDTO queryServiceRegistryAll() {
-		logger.debug("queryServiceRegistryAll started...");
-
-		try {
-			final UriComponents queryBySystemDTOUri = getQueryAllUri();
-			final ResponseEntity<ServiceRegistryListResponseDTO> response = httpService.sendRequest(queryBySystemDTOUri, HttpMethod.GET, ServiceRegistryListResponseDTO.class);
-
-			return response.getBody();
-
-		} catch (final ArrowheadException ex) {
-
-			logger.debug("Exception: " + ex.getMessage());
-			throw ex;
-
-		}
-
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private UriComponents getQueryAllUri() {
-		logger.debug("getQueryUri started...");
-
-		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)) {
-			try {
-				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL);
-			} catch (final ClassCastException ex) {
-				throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
-			}
-		} else {
-			throw new ArrowheadException("QoS Mointor can't find Service Registry Query All URI.");
-		}
 	}
 
 	//-------------------------------------------------------------------------------------------------

@@ -16,12 +16,11 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -33,6 +32,7 @@ public class QoSMonitorDriver {
 
 	private static final String GATEKEEPER_PULL_CLOUDS_URI_KEY = CoreSystemService.GATEKEEPER_PULL_CLOUDS.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
@@ -86,12 +86,13 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Boolean queryGatekeeperGatewayIsMandatory(final CloudRequestDTO cloud) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List<CloudAccessResponseDTO> queryGatekeeperGatewayIsMandatory(final List<CloudRequestDTO> cloudList) {
 		logger.debug("queryGatekeeperGatewayIsMandatory started...");
 
 		try {
 			final UriComponents queryByGatewayIsMandatoryUri = getGatekeeperGatewayIsMandatoryUri();
-			final ResponseEntity<Boolean> response = httpService.sendRequest(queryByGatewayIsMandatoryUri, HttpMethod.POST, Boolean.class, cloud);
+			final ResponseEntity<List> response = httpService.sendRequest(queryByGatewayIsMandatoryUri, HttpMethod.POST, List.class, cloudList);
 
 			return response.getBody();
 
@@ -145,9 +146,9 @@ public class QoSMonitorDriver {
 	private UriComponents getGatekeeperAllCloudsUri() {
 		logger.debug("getGatekeeperAllCloudsUri started...");
 
-		if (arrowheadContext.containsKey("GATEKEEPER_")) {
+		if (arrowheadContext.containsKey(GATEKEEPER_PULL_CLOUDS_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get("GATEKEEPER_");
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_PULL_CLOUDS_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("QoS Mointor can't find gatekeeper all_clouds URI.");
 			}
@@ -160,9 +161,9 @@ public class QoSMonitorDriver {
 	private UriComponents getGatekeeperGatewayIsMandatoryUri() {
 		logger.debug("getGatekeeperGatewayIsMandatoryUri started...");
 
-		if (arrowheadContext.containsKey(GATEKEEPER_PULL_CLOUDS_URI_KEY)) {
+		if (arrowheadContext.containsKey(GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get(GATEKEEPER_PULL_CLOUDS_URI_KEY);
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("QoS Mointor can't find gatekeeper gateway_is_mandatory URI.");
 			}
