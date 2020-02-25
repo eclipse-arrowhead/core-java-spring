@@ -102,6 +102,10 @@ public class GatekeeperTask implements Runnable {
 				return gatekeeperService.doGSDPoll(request.getGSDPollRequest());
 			case CoreCommonConstants.RELAY_MESSAGE_TYPE_ICN_PROPOSAL:
 				return gatekeeperService.doICN(request.getICNProposalRequest());
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_ACCESS_TYPE:
+				return gatekeeperService.returnAccessType();
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST:
+				return gatekeeperService.doSystemAddressCollection();
 			default:
 				throw new BadPayloadException("Invalid message type: " + request.getMessageType());
 			}

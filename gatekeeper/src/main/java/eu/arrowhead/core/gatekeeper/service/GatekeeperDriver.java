@@ -42,11 +42,13 @@ import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayConsumerConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -161,6 +163,16 @@ public class GatekeeperDriver {
 		
 		final UriComponents queryUri = getServiceRegistryQueryUri();
 		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public ServiceQueryResultDTO sendServiceRegistryQueryAll() {
+		logger.debug("sendServiceReistryQueryAll started...");		
+		
+		final UriComponents queryUri = getServiceRegistryQueryAllUri();
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class);
 		
 		return response.getBody();
 	}
@@ -304,6 +316,37 @@ public class GatekeeperDriver {
 		return getGatewayPublicKeyUri().getHost();
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public SystemAddressSetRelayResponseDTO sendSystemAddressCollectionRequest(final Cloud targetCloud) {
+		logger.debug("sendSystemAddressCollectionRequest started...");
+		
+		Assert.notNull(targetCloud, "Cloud is null");
+		Assert.isTrue(!Utilities.isEmpty(targetCloud.getOperator()), "cloud operator is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(targetCloud.getName()), "cloud name is null or blank");	
+		Assert.isTrue(targetCloud.getGatekeeperRelays() != null && !targetCloud.getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList of target cloud is null or empty.");
+		
+		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(targetCloud));
+		try {
+			final Session session = relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.getSecure());
+			final String recipientCommonName = getRecipientCommonName(targetCloud);
+			final GeneralAdvertisementResult advResult = relayClient.publishGeneralAdvertisement(session, recipientCommonName, targetCloud.getAuthenticationInfo());
+			if (advResult == null) {
+				throw new TimeoutException(recipientCommonName + " does not acknowledge request in time", HttpStatus.SC_GATEWAY_TIMEOUT, "SystemAddressCollectionRequest to " + recipientCommonName);
+			}
+			final GatekeeperRelayResponse relayResponse = relayClient.sendRequestAndReturnResponse(session, advResult, new GeneralRelayRequestDTO(CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST));
+			if (relayResponse == null) {
+				throw new TimeoutException(recipientCommonName + " does not respond in time", HttpStatus.SC_GATEWAY_TIMEOUT, "SystemAddressCollectionRequest to " + recipientCommonName);
+			}
+			
+			return relayResponse.getSystemAddressSetResponse();
+		} catch (final JMSException ex) {
+			logger.debug("Error while sending SystemAddressCollectionRequest via relay: {}", ex.getMessage());
+			logger.debug("Exception:", ex);
+			
+			throw new ArrowheadException("Error while sending SystemAddressCollectionRequest via relay.", ex);
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -338,6 +381,21 @@ public class GatekeeperDriver {
 		}
 		
 		throw new ArrowheadException("Gatekeeper can't find Service Registry Query URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getServiceRegistryQueryAllUri() {
+		logger.debug("getServiceRegistryQueryAllUri started...");
+		
+		if (arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)) {
+			try {
+				return (UriComponents) arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find Service Registry query/all URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find Service Registry query/all URI.");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

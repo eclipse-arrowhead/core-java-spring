@@ -17,7 +17,8 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 	//=================================================================================================
 	// members
 	
-	private static final CoreSystem[] allowedCoreSystemsForChecks = { CoreSystem.ORCHESTRATOR };
+	private static final CoreSystem[] allowedCoreSystemsForOrchestrationTasks = { CoreSystem.ORCHESTRATOR };
+	private static final CoreSystem[] allowedCoreSystemsForQoSTasks = { CoreSystem.QOS_MONITOR };
 	
 	//=================================================================================================
 	// assistant methods
@@ -34,7 +35,9 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 			// Only the local System Operator can use these methods
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_GSD_SERVICE) || requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_ICN_SERVICE)) {
-			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForChecks, requestTarget);
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForOrchestrationTasks, requestTarget);
+		} else if (requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE) || requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE)) {
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQoSTasks, requestTarget);
 		}
 	}
 }

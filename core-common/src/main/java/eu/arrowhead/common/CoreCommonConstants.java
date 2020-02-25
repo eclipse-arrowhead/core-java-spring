@@ -29,6 +29,8 @@ public class CoreCommonConstants {
 	public static final String RELAY_MESSAGE_TYPE_ACK = "ack";
 	public static final String RELAY_MESSAGE_TYPE_GSD_POLL = "gsd_poll";
 	public static final String RELAY_MESSAGE_TYPE_ICN_PROPOSAL = "icn_proposal";
+	public static final String RELAY_MESSAGE_TYPE_ACCESS_TYPE = "access_type";
+	public static final String RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST = "system_address_list";
 	
 	public static final String LOCAL_SYSTEM_OPERATOR_NAME = "sysop"; 
 	
