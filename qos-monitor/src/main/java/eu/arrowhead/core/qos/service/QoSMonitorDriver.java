@@ -17,7 +17,9 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -29,13 +31,13 @@ public class QoSMonitorDriver {
 	//=================================================================================================
 	// members
 
-	//private static final String "GATEKEEPER_"INIT_GSD_URI_KEY = CoreSystemService."GATEKEEPER_"GLOBAL_SERVICE_DISCOVERY.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
-	//private static final String "GATEKEEPER_"INIT_ICN_URI_KEY = CoreSystemService."GATEKEEPER_"INTER_CLOUD_NEGOTIATION.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_PULL_CLOUDS_URI_KEY = CoreSystemService.GATEKEEPER_PULL_CLOUDS.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
-	
+
 	private static final Logger logger = LogManager.getLogger(QoSMonitorDriver.class);
-	
+
 	@Autowired
 	private HttpService httpService;
 
@@ -65,12 +67,12 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<CloudResponseDTO> queryGatekeeperAllCloud() {
+	public CloudWithRelaysListResponseDTO queryGatekeeperAllCloud() {
 		logger.debug("queryGatekeeperAllCloud started...");
 
 		try {
 			final UriComponents queryByAllCloudsUri = getGatekeeperAllCloudsUri();
-			final ResponseEntity<List> response = httpService.sendRequest(queryByAllCloudsUri, HttpMethod.GET, List.class);
+			final ResponseEntity<CloudWithRelaysListResponseDTO> response = httpService.sendRequest(queryByAllCloudsUri, HttpMethod.GET, CloudWithRelaysListResponseDTO.class);
 
 			return response.getBody();
 
@@ -103,12 +105,12 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public List<SystemResponseDTO> queryGatekeeperAllSystems(final CloudRequestDTO cloud) {
-		logger.debug("queryGatekeeperAllSystems started...");
+	public SystemAddressSetRelayResponseDTO queryGatekeeperAllSystemAddresses(final CloudRequestDTO cloud) {
+		logger.debug("queryGatekeeperAllSystemAddresses started...");
 
 		try {
 			final UriComponents queryByAllSystemsUri = getGatekeeperAllSystemsUri();
-			final ResponseEntity<List> response = httpService.sendRequest(queryByAllSystemsUri, HttpMethod.POST, List.class, cloud);
+			final ResponseEntity<SystemAddressSetRelayResponseDTO> response = httpService.sendRequest(queryByAllSystemsUri, HttpMethod.POST, SystemAddressSetRelayResponseDTO.class, cloud);
 
 			return response.getBody();
 
@@ -142,7 +144,7 @@ public class QoSMonitorDriver {
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getGatekeeperAllCloudsUri() {
 		logger.debug("getGatekeeperAllCloudsUri started...");
-		
+
 		if (arrowheadContext.containsKey("GATEKEEPER_")) {
 			try {
 				return (UriComponents) arrowheadContext.get("GATEKEEPER_");
@@ -150,17 +152,17 @@ public class QoSMonitorDriver {
 				throw new ArrowheadException("QoS Mointor can't find gatekeeper all_clouds URI.");
 			}
 		}
-		
+
 		throw new ArrowheadException("QoS Mointor can't find gatekeeper all_clouds URI.");
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getGatekeeperGatewayIsMandatoryUri() {
 		logger.debug("getGatekeeperGatewayIsMandatoryUri started...");
-		
-		if (arrowheadContext.containsKey("GATEKEEPER_")) {
+
+		if (arrowheadContext.containsKey(GATEKEEPER_PULL_CLOUDS_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get("GATEKEEPER_");
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_PULL_CLOUDS_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("QoS Mointor can't find gatekeeper gateway_is_mandatory URI.");
 			}
@@ -172,15 +174,15 @@ public class QoSMonitorDriver {
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getGatekeeperAllSystemsUri() {
 		logger.debug("getGatekeeperAllSystemsUri started...");
-		
-		if (arrowheadContext.containsKey("GATEKEEPER_")) {
+
+		if (arrowheadContext.containsKey(GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY)) {
 			try {
-				return (UriComponents) arrowheadContext.get("GATEKEEPER_");
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY);
 			} catch (final ClassCastException ex) {
 				throw new ArrowheadException("QoS Mointor can't find gatekeeper all_systems URI.");
 			}
 		}
-		
+
 		throw new ArrowheadException("QoS Mointor can't find gatekeeper all_systems URI.");
 	}
 

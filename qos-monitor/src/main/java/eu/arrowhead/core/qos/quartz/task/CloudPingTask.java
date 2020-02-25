@@ -1,10 +1,13 @@
 package eu.arrowhead.core.qos.quartz.task;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -29,6 +32,8 @@ import eu.arrowhead.common.database.entity.QoSInterMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
@@ -84,23 +89,24 @@ public class CloudPingTask implements Job {
 			return;
 		}
 
-		final List<CloudResponseDTO> clouds = qoSMonitorDriver.queryGatekeeperAllCloud();
+		final CloudWithRelaysListResponseDTO responseDTO = qoSMonitorDriver.queryGatekeeperAllCloud();
+		final Set<CloudResponseDTO> clouds = getCloudsFromResponse(responseDTO);
 		if (clouds == null || clouds.isEmpty()) {
 
 			return;
 		}
 
 		final CloudResponseDTO cloudResponseDTO = chooseCloudToMeasure(clouds);
-		final List<SystemResponseDTO> systemList = qoSMonitorDriver.queryGatekeeperAllSystems(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloudResponseDTO));
-		if (systemList == null || systemList.isEmpty()) {
+		final Set<String> systemAddressSet = qoSMonitorDriver.queryGatekeeperAllSystemAddresses(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloudResponseDTO)).getAddresses();
+		if (systemAddressSet == null || systemAddressSet.isEmpty()) {
 
 			return;
 		}
 
-		for (final SystemResponseDTO system : systemList) {
+		for (final String address : systemAddressSet) {
 
-			if (!Utilities.isEmpty(system.getAddress())) {
-				pingSystem(system.getAddress(), cloudResponseDTO);
+			if (!Utilities.isEmpty(address)) {
+				pingSystem(address, cloudResponseDTO);
 			}
 
 		}
@@ -110,6 +116,21 @@ public class CloudPingTask implements Job {
 
 	//=================================================================================================
 	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+
+	private Set<CloudResponseDTO> getCloudsFromResponse(final CloudWithRelaysListResponseDTO responseDTO) {
+		logger.debug("getCloudsFromResponse started...");
+
+		final Set<CloudResponseDTO> clouds = new HashSet<>();
+		for (final CloudWithRelaysResponseDTO cloudWithRelay: responseDTO.getData()) {
+
+			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
+				clouds.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudResponseDTO(cloudWithRelay));
+			}
+		}
+		return null;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	private List<String> getAddressesToMeasure(final CloudResponseDTO cloud) {
@@ -134,7 +155,7 @@ public class CloudPingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private CloudResponseDTO chooseCloudToMeasure(final List<CloudResponseDTO> cloudList) {
+	private CloudResponseDTO chooseCloudToMeasure(final Set<CloudResponseDTO> cloudList) {
 		logger.debug("chooseCloudToMeasure started...");
 
 		if(cloudList == null || cloudList.isEmpty()) {
