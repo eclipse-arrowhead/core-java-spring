@@ -420,7 +420,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_measurement` (
 	`last_measurement_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_system` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_cloud` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_cloud_id_address_measurement_type` (`cloud_id`, `address`, `measurement_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -443,7 +443,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement` (
 	`received_all` bigint(20) NOT NULL DEFAULT 0,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_measurement` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_inter_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_measurement` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_measurement` (`measurement_id`)
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -482,7 +482,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement_log_details` (
 	`measured_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_ping_measurement_log` (`id`) ON DELETE CASCADE
+	CONSTRAINT `fk_inter_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_ping_measurement_log` (`id`) ON DELETE CASCADE
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
