@@ -303,7 +303,7 @@ public class GatekeeperService {
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
 	}
 	
-	public CloudAccessResponseDTO initAccessTypesCollection(final List<CloudRequestDTO> request) {
+	public List<CloudAccessResponseDTO> initAccessTypesCollection(final List<CloudRequestDTO> request) {
 		//TODO
 		return null;
 	}
