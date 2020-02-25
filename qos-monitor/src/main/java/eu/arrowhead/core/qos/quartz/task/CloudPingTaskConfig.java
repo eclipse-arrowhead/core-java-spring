@@ -71,7 +71,7 @@ public class CloudPingTaskConfig {
 	@Bean
 	public JobDetailFactoryBean cloudPingTaskDetails() {
 		final JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-		jobDetailFactory.setJobClass(PingTask.class);
+		jobDetailFactory.setJobClass(CloudPingTask.class);
 		jobDetailFactory.setName(NAME_OF_TASK);
 		jobDetailFactory.setDurability(true);
 

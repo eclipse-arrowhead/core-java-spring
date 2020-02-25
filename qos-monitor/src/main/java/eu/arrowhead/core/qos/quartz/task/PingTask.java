@@ -75,34 +75,34 @@ public class PingTask implements Job {
 	public void execute(final JobExecutionContext context) throws JobExecutionException {
 		logger.debug("STARTED: ping task");
 
-		if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
-
-			logger.debug("Finished: ping task can not run if server is in standalon mode");
-			return;
-		}
-
-		final List<SystemResponseDTO> systems = getSystemsToMeasure();
-		if (systems == null || systems.isEmpty()) {
-
-			return;
-		}
-
-		final HashMap<String, PingMeasurementCalculationsDTO> pingCache = new HashMap<>(systems.size());
-		for (final SystemResponseDTO systemResponseDTO : systems) {
-
-			final String address = systemResponseDTO.getAddress();
-			if (pingCache.containsKey(address)) {
-
-				copyCalculationsToPingMeasurement(systemResponseDTO, pingCache.get(address));
-
-			}else {
-
-				final PingMeasurementCalculationsDTO calculations = pingSystem(systemResponseDTO);
-				pingCache.put(address, calculations);
-
-			}
-
-		}
+		//if (arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)) {
+        //
+		//	logger.debug("Finished: ping task can not run if server is in standalon mode");
+		//	return;
+		//}
+        //
+		//final List<SystemResponseDTO> systems = getSystemsToMeasure();
+		//if (systems == null || systems.isEmpty()) {
+        //
+		//	return;
+		//}
+        //
+		//final HashMap<String, PingMeasurementCalculationsDTO> pingCache = new HashMap<>(systems.size());
+		//for (final SystemResponseDTO systemResponseDTO : systems) {
+        //
+		//	final String address = systemResponseDTO.getAddress();
+		//	if (pingCache.containsKey(address)) {
+        //
+		//		copyCalculationsToPingMeasurement(systemResponseDTO, pingCache.get(address));
+        //
+		//	}else {
+        //
+		//		final PingMeasurementCalculationsDTO calculations = pingSystem(systemResponseDTO);
+		//		pingCache.put(address, calculations);
+        //
+		//	}
+        //
+		//}
 
 		logger.debug("Finished: ping task success");
 	}
