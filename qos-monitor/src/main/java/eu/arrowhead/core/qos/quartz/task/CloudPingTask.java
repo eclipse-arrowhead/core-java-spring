@@ -24,17 +24,21 @@ import org.springframework.web.util.UriComponents;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSInterMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.InterPingMeasurementProperties;
 import eu.arrowhead.core.qos.service.PingService;
+import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 
 @Component
 @DisallowConcurrentExecution
@@ -58,6 +62,9 @@ public class CloudPingTask implements Job {
 	private QoSDBService qoSDBService;
 
 	@Autowired
+	private QoSMonitorDriver qoSMonitorDriver;
+
+	@Autowired
 	private HttpService httpService;
 
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
@@ -77,22 +84,24 @@ public class CloudPingTask implements Job {
 			return;
 		}
 
-		final List<CloudResponseDTO> clouds = getAllClouds();
+		final List<CloudResponseDTO> clouds = qoSMonitorDriver.queryGatekeeperAllCloud();
 		if (clouds == null || clouds.isEmpty()) {
 
 			return;
 		}
 
 		final CloudResponseDTO cloudResponseDTO = chooseCloudToMeasure(clouds);
-		final List<String> addressList = getAddressesToMeasure(cloudResponseDTO);
-		if (addressList == null || addressList.isEmpty()) {
+		final List<SystemResponseDTO> systemList = qoSMonitorDriver.queryGatekeeperAllSystems(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloudResponseDTO));
+		if (systemList == null || systemList.isEmpty()) {
 
 			return;
 		}
 
-		for (final String address : addressList) {
+		for (final SystemResponseDTO system : systemList) {
 
-				pingSystem(address, cloudResponseDTO);
+			if (!Utilities.isEmpty(system.getAddress())) {
+				pingSystem(system.getAddress(), cloudResponseDTO);
+			}
 
 		}
 
