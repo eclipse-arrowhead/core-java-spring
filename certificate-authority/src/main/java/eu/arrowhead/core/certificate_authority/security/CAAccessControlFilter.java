@@ -3,17 +3,11 @@ package eu.arrowhead.core.certificate_authority.security;
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystem;
-import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.shared.ServiceQueryFormDTO;
-import eu.arrowhead.common.dto.shared.ServiceRegistryRequestDTO;
-import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
 
 @Component
