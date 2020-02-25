@@ -28,6 +28,7 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
@@ -108,6 +109,9 @@ public class GatekeeperController {
 	private static final String POST_COLLECT_SYSTEM_ADDRESSES_DESCRIPTION = "Return all registrated system ip address from a neighbor cloud for QoS Monitor Core System";
 	private static final String POST_COLLECT_SYSTEM_ADDRESSES_HTTP_200_MESSAGE = "Addresses returned";
 	private static final String POST_COLLECT_SYSTEM_ADDRESSES_HTTP_400_MESSAGE = "Could not collect addresses";
+	private static final String POST_COLLECT_ACCESS_TYPES_DESCRIPTION = "Return access types of requested clouds for QoS Monitor Core System";
+	private static final String POST_COLLECT_ACCESS_TYPES_HTTP_200_MESSAGE = "Access types returned";
+	private static final String POST_COLLECT_ACCESS_TYPES_HTTP_400_MESSAGE = "Could not collect access types";
 	
 	private final Logger logger = LogManager.getLogger(GatekeeperController.class);
 	
@@ -518,6 +522,25 @@ public class GatekeeperController {
 		
 		logger.debug("collectSystemAddressesOfNeighborCloud request successfully finished");
 		return addresses;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = POST_COLLECT_ACCESS_TYPES_DESCRIPTION, response = CloudAccessResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_COLLECT_ACCESS_TYPES_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_COLLECT_ACCESS_TYPES_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public List<CloudAccessResponseDTO> collectNeighborCloudAccessTypes(@RequestBody final List<CloudRequestDTO> dtos) {
+		logger.debug("new collectNeighborCloudAccessTypes request received");
+		for (CloudRequestDTO cloudRequestDTO : dtos) {
+			validateCloudRequestDTO(cloudRequestDTO, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE);
+		}
+		final List<CloudAccessResponseDTO> accessTypes = gatekeeperService.initAccessTypesCollection(dtos);
+		logger.debug("collectNeighborCloudAccessTypes request successfully finished");
+		return accessTypes;
 	}
 	
 	//=================================================================================================

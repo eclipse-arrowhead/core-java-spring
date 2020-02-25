@@ -53,6 +53,7 @@ public class GatekeeperAccessControlFilterTest {
 	private static final String GATEKEEPER_INIT_ICN_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_ICN_SERVICE;
 	private static final String GATEKEEPER_PULL_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE;
 	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE;
+	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE;
 	
 	@Autowired
 	private ApplicationContext appContext;
@@ -211,6 +212,30 @@ public class GatekeeperAccessControlFilterTest {
 					.with(x509("certificates/provider.pem"))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsBytes(getCloudRequestDTO()))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isUnauthorized());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectAccessTypesCertificateQoSMonitor() throws Exception {
+		this.mockMvc.perform(post(GATEKEEPER_COLLECT_ACCESS_TYPES_URI)
+				    .secure(true)
+					.with(x509("certificates/qos_monitor.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of(getCloudRequestDTO())))
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectAccessTypesCertificateNotQoSMonitor() throws Exception {
+		this.mockMvc.perform(post(GATEKEEPER_COLLECT_ACCESS_TYPES_URI)
+				    .secure(true)
+					.with(x509("certificates/provider.pem"))
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsBytes(List.of(getCloudRequestDTO())))
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isUnauthorized());
 	}
