@@ -315,15 +315,39 @@ public class GatekeeperDriver {
 		
 		return getGatewayPublicKeyUri().getHost();
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	public List<ErrorWrapperDTO> sendAccessTypesCollectionRequest(final List<Cloud> clouds) throws InterruptedException {
+		logger.debug("sendAccessTypesCollectionRequest started...");
+		Assert.isTrue(clouds != null && !clouds.isEmpty(), "cloud list is null or empty");
+		for (Cloud cloud : clouds) {
+			validateCloud(cloud);
+		}
+		
+		final int numOfCloudsToContact = clouds.size();
+		final BlockingQueue<ErrorWrapperDTO> queue = new LinkedBlockingQueue<>(numOfCloudsToContact);	
+		
+		AccessTypesCollectionRequestExecutor atcRequestExecutor = new AccessTypesCollectionRequestExecutor(queue, relayClient, getOneGatekeeperRelayPerCloud(clouds));
+		atcRequestExecutor.execute();
+		
+		final List<ErrorWrapperDTO> atcAnswers = new ArrayList<>();
+		for (int i = 0; i < numOfCloudsToContact; ++i) {
+			try {
+				atcAnswers.add(queue.take());
+			} catch (final InterruptedException ex) {
+				logger.trace("Thread {} is interrupted...", Thread.currentThread().getName());
+				atcRequestExecutor.shutdownExecutionNow();
+				throw ex;
+			}
+		}
+		
+		return atcAnswers;
+	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public SystemAddressSetRelayResponseDTO sendSystemAddressCollectionRequest(final Cloud targetCloud) {
 		logger.debug("sendSystemAddressCollectionRequest started...");
-		
-		Assert.notNull(targetCloud, "Cloud is null");
-		Assert.isTrue(!Utilities.isEmpty(targetCloud.getOperator()), "cloud operator is null or blank");
-		Assert.isTrue(!Utilities.isEmpty(targetCloud.getName()), "cloud name is null or blank");	
-		Assert.isTrue(targetCloud.getGatekeeperRelays() != null && !targetCloud.getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList of target cloud is null or empty.");
+		validateCloud(targetCloud);
 		
 		final Relay relay = gatekeeperMatchmaker.doMatchmaking(new RelayMatchmakingParameters(targetCloud));
 		try {
@@ -345,7 +369,7 @@ public class GatekeeperDriver {
 			
 			throw new ArrowheadException("Error while sending SystemAddressCollectionRequest via relay.", ex);
 		}
-	}
+	}	
 	
 	//=================================================================================================
 	// assistant methods
@@ -560,6 +584,16 @@ public class GatekeeperDriver {
 		Assert.notNull(cloud, "Cloud is null");
 		Assert.isTrue(!Utilities.isEmpty(cloud.getOperator()), "cloud operator is null or blank");
 		Assert.isTrue(!Utilities.isEmpty(cloud.getName()), "cloud name is null or blank");		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloud(final Cloud cloud) {
+		logger.debug("validateCloud started...");
+		
+		Assert.notNull(cloud, "Cloud is null");
+		Assert.isTrue(!Utilities.isEmpty(cloud.getOperator()), "cloud operator is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(cloud.getName()), "cloud name is null or blank");	
+		Assert.isTrue(cloud.getGatekeeperRelays() != null && !cloud.getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList of target cloud is null or empty.");		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
