@@ -36,6 +36,10 @@ cd ..\..\choreographer\target
 START "" /B "cmd /c javaw -jar arrowhead-choreographer-4.1.3.jar > sout_choreographer.log 2>&1"
 echo Choreographer started
 
+cd ..\..\certificate-authority\target
+START "" /B "cmd /c javaw -jar arrowhead-certificate-authority-4.1.3.jar > sout_ca.log 2>&1"
+echo Certificate Authority started
+
 cd %parent_path%
 
 ::Kill self
