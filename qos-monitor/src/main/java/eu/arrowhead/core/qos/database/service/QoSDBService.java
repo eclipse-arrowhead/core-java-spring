@@ -22,12 +22,16 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.QoSInterMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
+import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.repository.QoSInterMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSInterMeasurementRepository;
+import eu.arrowhead.common.database.repository.QoSInterPingMeasurementLogDetailsRepository;
+import eu.arrowhead.common.database.repository.QoSInterPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetailsRepository;
@@ -65,10 +69,19 @@ public class QoSDBService {
 	private QoSIntraMeasurementPingRepository qoSIntraMeasurementPingRepository;
 
 	@Autowired
+	private QoSInterMeasurementPingRepository qoSInterMeasurementPingRepository;
+
+	@Autowired
 	private QoSIntraPingMeasurementLogRepository qoSIntraPingMeasurementLogRepository;
 
 	@Autowired
+	private QoSInterPingMeasurementLogRepository qoSInterPingMeasurementLogRepository;
+
+	@Autowired
 	private QoSIntraPingMeasurementLogDetailsRepository qoSIntraPingMeasurementLogDetailsRepository;
+
+	@Autowired
+	private QoSInterPingMeasurementLogDetailsRepository qoSInterPingMeasurementLogDetailsRepository;
 
 	@Autowired
 	private SystemRepository systemRepository;
@@ -110,6 +123,23 @@ public class QoSDBService {
 
 		try {
 			qoSIntraMeasurementRepository.saveAndFlush(measurement);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+
+		return measurement;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	public QoSInterMeasurement createInterMeasurement(final Cloud cloud, final String address, final QoSMeasurementType ping, final ZonedDateTime aroundNow) {
+		logger.debug("createInterMeasurement started...");
+
+		final QoSInterMeasurement measurement = new QoSInterMeasurement(cloud, address, QoSMeasurementType.PING, aroundNow);
+
+		try {
+			qoSInterMeasurementRepository.saveAndFlush(measurement);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -461,25 +491,96 @@ public class QoSDBService {
 	public Optional<QoSInterPingMeasurement> getInterPingMeasurementByMeasurement(final QoSInterMeasurement measurement) {
 		logger.debug("getInterMeasurementByCloud started ...");
 
-		//TODO implement method logic here
-		return null;
+		if (measurement == null) {
+			throw new InvalidParameterException("QoSIntraMeasurement" + NULL_ERROR_MESSAGE);
+		}
+
+		try {
+			return qoSInterMeasurementPingRepository.findByMeasurement(measurement);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void createInterPingMeasurement(final QoSInterMeasurement measurement,
-			final PingMeasurementCalculationsDTO calculationsDTO, final ZonedDateTime aroundNow) {
+	public void createInterPingMeasurement(final QoSInterMeasurement measurementParam,
+			final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("createInterPingMeasurement started ...");
 
-		//TODO implement method logic here
+		if (measurementParam == null) {
+			throw new InvalidParameterException("QoSInterMeasurement" + NULL_ERROR_MESSAGE);
+		}
+		if (calculations == null) {
+			throw new InvalidParameterException("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE);
+		}
+		if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
+		final QoSInterPingMeasurement pingMeasurement = new QoSInterPingMeasurement();
+
+		pingMeasurement.setMeasurement(measurementParam);
+		pingMeasurement.setAvailable(calculations.isAvailable());
+		pingMeasurement.setMaxResponseTime(calculations.getMaxResponseTime());
+		pingMeasurement.setMinResponseTime(calculations.getMinResponseTime());
+		pingMeasurement.setMeanResponseTimeWithoutTimeout(calculations.getMeanResponseTimeWithoutTimeout());
+		pingMeasurement.setMeanResponseTimeWithTimeout(calculations.getMeanResponseTimeWithTimeout());
+		pingMeasurement.setJitterWithoutTimeout(calculations.getJitterWithoutTimeout());
+		pingMeasurement.setJitterWithTimeout(calculations.getJitterWithTimeout());
+		pingMeasurement.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
+		pingMeasurement.setCountStartedAt(aroundNow);
+		pingMeasurement.setLastAccessAt(calculations.isAvailable() ? aroundNow : null);
+		pingMeasurement.setSent(calculations.getSentInThisPing());
+		pingMeasurement.setSentAll(calculations.getSentInThisPing());
+		pingMeasurement.setReceived(calculations.getReceivedInThisPing());
+		pingMeasurement.setReceivedAll(calculations.getReceivedInThisPing());
+
+		try {
+
+			qoSInterMeasurementPingRepository.saveAndFlush(pingMeasurement);
+
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSInterPingMeasurementLog logInterMeasurementToDB(final String address,
-			final PingMeasurementCalculationsDTO calculationsDTO, final ZonedDateTime aroundNow) {
+			final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("logInterMeasurementToDB started ...");
 
-		//TODO implement method logic here
-		return null;
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		} else if (calculations == null) {
+			throw new InvalidParameterException("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE);
+		} else if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
+		final QoSInterPingMeasurementLog measurementLog = new QoSInterPingMeasurementLog();
+		measurementLog.setMeasuredSystemAddress(address);
+		measurementLog.setAvailable(calculations.isAvailable());
+		measurementLog.setMinResponseTime(calculations.getMinResponseTime());
+		measurementLog.setMaxResponseTime(calculations.getMaxResponseTime());
+		measurementLog.setMeanResponseTimeWithoutTimeout(calculations.getMeanResponseTimeWithoutTimeout());
+		measurementLog.setMeanResponseTimeWithTimeout(calculations.getMeanResponseTimeWithTimeout());
+		measurementLog.setJitterWithoutTimeout(calculations.getJitterWithoutTimeout());
+		measurementLog.setJitterWithTimeout(calculations.getJitterWithTimeout());
+		measurementLog.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
+		measurementLog.setSent(calculations.getSentInThisPing());
+		measurementLog.setReceived(calculations.getReceivedInThisPing());
+		measurementLog.setMeasuredAt(aroundNow);
+
+		try {
+			return qoSInterPingMeasurementLogRepository.saveAndFlush(measurementLog);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -487,31 +588,130 @@ public class QoSDBService {
 			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("logInterMeasurementDetailsToDB started ...");
 
-		//TODO implement method logic here
+		if (responseList == null || responseList.isEmpty()) {
+			throw new InvalidParameterException("List<IcmpPingResponse>" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		} else if (measurementLogSaved == null) {
+			throw new InvalidParameterException("QoSInterPingMeasurementLog" + NULL_ERROR_MESSAGE);
+		} else if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
+		final List<QoSInterPingMeasurementLogDetails> interMeasurementLogDetailsList = new ArrayList<>(responseList.size());
+
+		int measurementSequenece = 0;
+		for (final IcmpPingResponse icmpPingResponse : responseList) {
+
+			final QoSInterPingMeasurementLogDetails measurementLogDetails = new QoSInterPingMeasurementLogDetails();
+			measurementLogDetails.setMeasurementLog(measurementLogSaved);
+			measurementLogDetails.setMeasurementSequeneceNumber( measurementSequenece++ );
+			measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
+			measurementLogDetails.setTimeoutFlag(icmpPingResponse.getTimeoutFlag());
+			measurementLogDetails.setErrorMessage(icmpPingResponse.getErrorMessage());
+			measurementLogDetails.setThrowable(icmpPingResponse.getThrowable() == null ? null : icmpPingResponse.getThrowable().toString());
+			measurementLogDetails.setSize(icmpPingResponse.getSize());
+			measurementLogDetails.setTtl(icmpPingResponse.getTtl());
+			measurementLogDetails.setRtt(icmpPingResponse.getRtt());
+			measurementLogDetails.setDuration((int) icmpPingResponse.getDuration());
+			measurementLogDetails.setMeasuredAt(aroundNow);
+
+			interMeasurementLogDetailsList.add(measurementLogDetails);
+		}
+
+		try {
+			qoSInterPingMeasurementLogDetailsRepository.saveAll(interMeasurementLogDetailsList);
+			qoSInterPingMeasurementLogDetailsRepository.flush();
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public void updateInterPingMeasurement(final QoSInterMeasurement measurement,
-			final PingMeasurementCalculationsDTO calculationsDTO, final QoSInterPingMeasurement qoSInterPingMeasurement,
+			final PingMeasurementCalculationsDTO calculations, final QoSInterPingMeasurement pingMeasurement,
 			final ZonedDateTime aroundNow) {
 		logger.debug("updateInterPingMeasurement started ...");
 
-		//TODO implement method logic here
+
+		if (measurement == null) {
+			throw new InvalidParameterException("QoSIntraMeasurement" + NULL_ERROR_MESSAGE);
+		} else if (calculations == null) {
+			throw new InvalidParameterException("PingMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE);
+		} else if (pingMeasurement == null) {
+			throw new InvalidParameterException("QoSInterPingMeasurement" + NULL_ERROR_MESSAGE);
+		} else if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
+		pingMeasurement.setMeasurement(measurement);
+		pingMeasurement.setAvailable(calculations.isAvailable());
+		pingMeasurement.setMaxResponseTime(calculations.getMaxResponseTime());
+		pingMeasurement.setMinResponseTime(calculations.getMinResponseTime());
+		pingMeasurement.setMeanResponseTimeWithoutTimeout(calculations.getMeanResponseTimeWithoutTimeout());
+		pingMeasurement.setMeanResponseTimeWithTimeout(calculations.getMeanResponseTimeWithTimeout());
+		pingMeasurement.setJitterWithoutTimeout(calculations.getJitterWithoutTimeout());
+		pingMeasurement.setJitterWithTimeout(calculations.getJitterWithTimeout());
+		pingMeasurement.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
+		pingMeasurement.setCountStartedAt(pingMeasurement.getCountStartedAt());
+		pingMeasurement.setLastAccessAt(calculations.isAvailable() ? aroundNow : pingMeasurement.getLastAccessAt());
+		pingMeasurement.setSent(pingMeasurement.getSent() + calculations.getSentInThisPing());
+		pingMeasurement.setSentAll(pingMeasurement.getSentAll() + calculations.getSentInThisPing());
+		pingMeasurement.setReceived(pingMeasurement.getReceived() + calculations.getReceivedInThisPing());
+		pingMeasurement.setReceivedAll(pingMeasurement.getReceivedAll() + calculations.getReceivedInThisPing());
+
+		try {
+
+			qoSInterMeasurementPingRepository.saveAndFlush(pingMeasurement);
+
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterMeasurement getOrCreateInterMeasurement(final String address, final CloudResponseDTO cloud) {
+	public QoSInterMeasurement getOrCreateInterMeasurement(final String address, final CloudResponseDTO cloudResponseDTO) {
 		logger.debug("getOrCreateInterMeasurement started ...");
 
-		//TODO implement method logic here
-		return null;
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("Address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+
+		if (cloudResponseDTO == null) {
+			throw new InvalidParameterException("CloudResponseDTO" + NULL_ERROR_MESSAGE);
+		}
+
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		final QoSInterMeasurement measurement;
+		final Optional<QoSInterMeasurement> qoSInterMeasurementOptional = qoSInterMeasurementRepository.findByCloudAndAddressAndMeasurementType(cloud, address, QoSMeasurementType.PING);
+		if (qoSInterMeasurementOptional.isEmpty()) {
+			final ZonedDateTime aroundNow = ZonedDateTime.now();
+			measurement = createInterMeasurement(cloud, address, QoSMeasurementType.PING, aroundNow);
+		}else {
+			 measurement = qoSInterMeasurementOptional.get();
+		}
+
+		return measurement;
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	public void updateInterMeasurement(final ZonedDateTime aroundNow, final QoSInterMeasurement measurement) {
 		logger.debug("updateInterMeasurement started ...");
 
-		//TODO implement method logic here
+		if (measurement == null) {
+			throw new InvalidParameterException("QoSInterMeasurement" + NULL_ERROR_MESSAGE);
+		} else if (aroundNow == null) {
+			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
+		}
+
+		measurement.setLastMeasurementAt(aroundNow);
+		try {
+			qoSInterMeasurementRepository.saveAndFlush(measurement);
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
 	}
 	//=================================================================================================
 	// assistant methods

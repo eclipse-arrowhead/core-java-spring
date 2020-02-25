@@ -1,6 +1,8 @@
 package eu.arrowhead.common.database.repository;
 
-public interface QoSInterPingMeasurementLogRepository extends RefreshableRepository<QoSInterPingMeasurementLogRepository, Long> {
+import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
+
+public interface QoSInterPingMeasurementLogRepository extends RefreshableRepository<QoSInterPingMeasurementLog, Long> {
 	//=================================================================================================
 	// methods
 }
