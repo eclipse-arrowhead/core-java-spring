@@ -161,14 +161,14 @@ public class CloudPingTask implements Job {
 		}
 
 		if (!cloudToMeasureFound) {
-			ZonedDateTime earlyestMeasurement = ZonedDateTime.now();
+			ZonedDateTime earliestMeasurement = ZonedDateTime.now();
 			for (final ZonedDateTime date : updatedAtMapedToCloud.keySet()) {
-				if (date.isBefore(earlyestMeasurement)) {
-					earlyestMeasurement = date;
+				if (date.isBefore(earliestMeasurement)) {
+					earliestMeasurement = date;
 				}
 			}
 
-			cloudToMeasure = updatedAtMapedToCloud.get(earlyestMeasurement);
+			cloudToMeasure = updatedAtMapedToCloud.get(earliestMeasurement);
 		}
 
 		return cloudToMeasure;
