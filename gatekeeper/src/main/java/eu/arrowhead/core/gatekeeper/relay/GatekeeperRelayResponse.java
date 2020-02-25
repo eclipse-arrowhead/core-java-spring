@@ -6,6 +6,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
@@ -71,5 +72,14 @@ public class GatekeeperRelayResponse {
 		}
 		
 		throw new DataNotFoundException("The response is not a result of a system addresses request.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSRelayTestProposalResponseDTO getQoSRelayTestProposalResponse() {
+		if (payload instanceof QoSRelayTestProposalResponseDTO) {
+			return (QoSRelayTestProposalResponseDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The response is not a result of a relay test request.");
 	}
 }

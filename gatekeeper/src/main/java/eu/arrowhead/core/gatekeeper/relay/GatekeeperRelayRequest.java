@@ -10,6 +10,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.exception.DataNotFoundException;
 
 public class GatekeeperRelayRequest {
@@ -74,5 +75,14 @@ public class GatekeeperRelayRequest {
 		}
 		
 		throw new DataNotFoundException("The request is not a general request.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSRelayTestProposalRequestDTO getQoSRelayTestProposalRequest() {
+		if (payload instanceof QoSRelayTestProposalRequestDTO) {
+			return (QoSRelayTestProposalRequestDTO) payload;
+		}
+		
+		throw new DataNotFoundException("The request is not a relay test proposal.");
 	}
  }
