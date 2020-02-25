@@ -19,13 +19,12 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
-import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
-import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
 import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
 
-public class GSDPollRequestExecutor {
-	
+public class AccessTypesCollectionRequestExecutor {
+
 	//=================================================================================================
 	// members
 	
@@ -34,39 +33,37 @@ public class GSDPollRequestExecutor {
 	private final BlockingQueue<ErrorWrapperDTO> queue;
 	private final ThreadPoolExecutor threadPool;
 	private final GatekeeperRelayClient relayClient;
-	private final GSDPollRequestDTO gsdPollRequestDTO;
 	private final Map<Cloud,Relay> gatekeeperRelayPerCloud;
 	
-	private final Logger logger = LogManager.getLogger(GSDPollRequestExecutor.class);
-	
+	private final Logger logger = LogManager.getLogger(AccessTypesCollectionRequestExecutor.class);
+
 	//=================================================================================================
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-	public GSDPollRequestExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final GSDPollRequestDTO gsdPollRequestDTO, 
-								  final Map<Cloud,Relay> gatekeeperRelayPerCloud) {
+	public AccessTypesCollectionRequestExecutor(final BlockingQueue<ErrorWrapperDTO> queue, final GatekeeperRelayClient relayClient, final Map<Cloud, Relay> gatekeeperRelayPerCloud) {
 		this.queue = queue;
 		this.relayClient = relayClient;
-		this.gsdPollRequestDTO = gsdPollRequestDTO;
 		this.gatekeeperRelayPerCloud = gatekeeperRelayPerCloud;
+		
 		this.threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.gatekeeperRelayPerCloud.size() > MAX_THREAD_POOL_SIZE ? MAX_THREAD_POOL_SIZE : this.gatekeeperRelayPerCloud.size());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public void execute() {
-		logger.debug("GSDPollRequestExecutor.execute started...");
+		logger.debug("AccessTypesCollectionRequestExecutor.execute started...");
 		validateMembers();
 		
 		final Map<String,Session> sessionsToClouds = createSessionsToClouds();
-		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {			
+		for (final Entry<Cloud,Relay> cloudRelay : gatekeeperRelayPerCloud.entrySet()) {
 			try {
-				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());				
-				threadPool.execute(new GSDPollTask(relayClient, sessionsToClouds.get(cloudCN), cloudCN, cloudRelay.getKey().getAuthenticationInfo(), gsdPollRequestDTO, queue));
+				final String cloudCN = getRecipientCommonName(cloudRelay.getKey());		
+				threadPool.execute(new AccessTypeCollectionTask(relayClient, sessionsToClouds.get(cloudCN), cloudRelay.getKey().getName(), cloudRelay.getKey().getOperator(), cloudCN, cloudRelay.getKey().getAuthenticationInfo(), queue));
 			} catch (final RejectedExecutionException ex) {
-				logger.error("GSDPollTask execution rejected at {}", ZonedDateTime.now());
+				logger.error("AccessTypeCollectionTask execution rejected at {}", ZonedDateTime.now());
 				
 				// adding empty responseDTO into the blocking queue in order to having exactly as many response as request was sent
-				queue.add(new GSDPollResponseDTO());
+				queue.add(new CloudAccessResponseDTO());
 			}
 		}
 		
@@ -112,7 +109,6 @@ public class GSDPollRequestExecutor {
 		Assert.notNull(this.queue, "queue is null");
 		Assert.notNull(this.threadPool, "threadPool is null");
 		Assert.notNull(this.relayClient, "relayClient is null");
-		Assert.notNull(this.gsdPollRequestDTO, "gsdPollRequestDTO is null");
 		Assert.notNull(this.gatekeeperRelayPerCloud, "gatekeeperRelayPerCloud is null");
 	}
 }
