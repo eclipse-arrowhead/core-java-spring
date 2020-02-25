@@ -27,7 +27,7 @@ public class QoSInterPingMeasurementLogDetails {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "measurement_log_id", referencedColumnName = "id", nullable = false, unique = true)
-	private QoSIntraPingMeasurementLog measurementLog;
+	private QoSInterPingMeasurementLog measurementLog;
 
 	@Column(name = "measurement_sequenece_number", nullable = false)
 	private int measurementSequeneceNumber;
@@ -85,7 +85,7 @@ public class QoSInterPingMeasurementLogDetails {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSIntraPingMeasurementLog getMeasurementLog() { return measurementLog; }
+	public QoSInterPingMeasurementLog getMeasurementLog() { return measurementLog; }
 	public int getMeasurementSequeneceNumber() { return measurementSequeneceNumber; }
 	public boolean isSuccessFlag() { return successFlag; }
 	public boolean isTimeoutFlag() { return timeoutFlag; }
@@ -98,7 +98,7 @@ public class QoSInterPingMeasurementLogDetails {
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setMeasurementLog(final QoSIntraPingMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
+	public void setMeasurementLog(final QoSInterPingMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
 	public void setMeasurementSequeneceNumber(final int measurementSequeneceNumber) { this.measurementSequeneceNumber = measurementSequeneceNumber; }
 	public void setSuccessFlag(final boolean successFlag) { this.successFlag = successFlag; }
 	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
