@@ -6,19 +6,19 @@ public class CertificateSigningRequestDTO implements Serializable {
 
     private static final long serialVersionUID = -6810780579000655432L;
 
-    private String certificatePem;
+    private String encodedCSR;
 
     public CertificateSigningRequestDTO() {}
 
-    public CertificateSigningRequestDTO(String certificatePem) {
-        this.certificatePem = certificatePem;
+    public CertificateSigningRequestDTO(String encodedCSR) {
+        this.encodedCSR = encodedCSR;
     }
 
-    public String getCertificatePem() {
-        return certificatePem;
+    public String getEncodedCSR() {
+        return encodedCSR;
     }
 
-    public void setCertificatePem(String certificatePem) {
-        this.certificatePem = certificatePem;
+    public void setEncodedCSR(String encodedCSR) {
+        this.encodedCSR = encodedCSR;
     }
 }

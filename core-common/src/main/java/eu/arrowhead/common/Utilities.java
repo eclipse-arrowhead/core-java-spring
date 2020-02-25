@@ -385,18 +385,42 @@ public class Utilities {
 			while (enumeration.hasMoreElements()) {
 				final String alias = enumeration.nextElement();
 				final String[] aliasParts = alias.split("\\.");
-				if (aliasParts.length == 3 && aliasParts[1].equals(AH_MASTER_NAME) && aliasParts[2].equals(AH_MASTER_SUFFIX)) {
+				if (aliasParts.length == 4 && aliasParts[2].equals(AH_MASTER_NAME) && aliasParts[3].equals(AH_MASTER_SUFFIX)) {
 					return (X509Certificate) keystore.getCertificate(alias);
 				}
 			}
 
 			final String errorMsg = "Getting the cloud cert from keystore failed. " +
-					"Cannot find alias in the following format: {cloudname}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
+					"Cannot find alias in the following format: {cloudname}.{cloudoperator}." + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
 			logger.error(errorMsg);
 			throw new ServiceConfigurationError(errorMsg);
 		} catch (final KeyStoreException | NoSuchElementException ex) {
 			logger.error("Getting the cloud cert from keystore failed...", ex);
 			throw new ServiceConfigurationError("Getting the cloud cert from keystore failed...", ex);
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static X509Certificate getRootCertFromKeyStore(final KeyStore keystore) {
+		Assert.notNull(keystore, "Key store is not defined.");
+
+		try {
+			final Enumeration<String> enumeration = keystore.aliases();
+			while (enumeration.hasMoreElements()) {
+				final String alias = enumeration.nextElement();
+				final String[] aliasParts = alias.split("\\.");
+				if (aliasParts.length == 2 && aliasParts[0].equals(AH_MASTER_NAME) && aliasParts[1].equals(AH_MASTER_SUFFIX)) {
+					return (X509Certificate) keystore.getCertificate(alias);
+				}
+			}
+
+			final String errorMsg = "Getting the root cert from keystore failed. " +
+					"Cannot find alias in the following format: " + AH_MASTER_NAME + "." + AH_MASTER_SUFFIX;
+			logger.error(errorMsg);
+			throw new ServiceConfigurationError(errorMsg);
+		} catch (final KeyStoreException | NoSuchElementException ex) {
+			logger.error("Getting the root cert from keystore failed...", ex);
+			throw new ServiceConfigurationError("Getting the root cert from keystore failed...", ex);
 		}
 	}
 

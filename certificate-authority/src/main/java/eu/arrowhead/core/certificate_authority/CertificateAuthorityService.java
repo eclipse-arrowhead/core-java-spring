@@ -1,6 +1,5 @@
 package eu.arrowhead.core.certificate_authority;
 
-import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
@@ -8,6 +7,9 @@ import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -28,7 +30,6 @@ import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -41,34 +42,36 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Map;
-import java.util.ServiceConfigurationError;
+import java.util.*;
 
 @Service
 public class CertificateAuthorityService {
 
+    private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
+
     @Autowired
     private SSLProperties sslProperties;
 
-    @Autowired
-    private ApplicationContext appContext;
-
     private SecureRandom random;
     private KeyStore keyStore;
+
+    private X509Certificate rootCertificate;
+    private X509Certificate cloudCertificate;
 
     @PostConstruct
     private void init() {
         random = new SecureRandom();
         random.reseed();
         keyStore = getKeyStore();
+
+        rootCertificate = Utilities.getRootCertFromKeyStore(keyStore);
+        cloudCertificate = Utilities.getCloudCertFromKeyStore(keyStore);
     }
 
     public String getCloudCommonName() {
         try {
-            final X500Name issuer = new JcaX509CertificateHolder(getServerCertificate(appContext)).getIssuer();
-            final RDN cn = issuer.getRDNs(BCStyle.CN)[0];
+            final X500Name subject = new JcaX509CertificateHolder(cloudCertificate).getSubject();
+            final RDN cn = subject.getRDNs(BCStyle.CN)[0];
             return IETFUtils.valueToString(cn.getFirst().getValue());
         } catch (CertificateEncodingException e) {
             throw new ServiceConfigurationError("Cannot get cloud common name from server cert.", e);
@@ -76,18 +79,18 @@ public class CertificateAuthorityService {
     }
 
     public CertificateSigningResponseDTO signCertificate(CertificateSigningRequestDTO request) {
-        JcaPKCS10CertificationRequest csr = decodePKCS10CSR(request);
+        final JcaPKCS10CertificationRequest csr = decodePKCS10CSR(request);
         checkCommonName(csr, getCloudCommonName());
         checkCsrSignature(csr);
 
+        logger.info("Signing certificate for " + csr.getSubject().toString() + "...");
+
         final PrivateKey cloudPrivateKey = Utilities.getPrivateKey(keyStore, getCloudCommonName(), sslProperties.getKeyPassword());
-        final X509Certificate serverCertificate = getServerCertificate(appContext);
-        final X509Certificate clientCertificate = buildCertificate(csr.getSubject(), getClientKey(csr), cloudPrivateKey, serverCertificate);
 
-        final String encodedClientCertificate = encodeCertificate(clientCertificate);
-        final String encodedServerCertificate = encodeCertificate(serverCertificate);
+        final X509Certificate clientCertificate = buildCertificate(csr.getSubject(), getClientKey(csr), cloudPrivateKey, cloudCertificate);
+        final List<String> encodedCertificateChain = buildEncodedCertificateChain(clientCertificate);
 
-        return new CertificateSigningResponseDTO(encodedClientCertificate + " " + encodedServerCertificate);
+        return new CertificateSigningResponseDTO(encodedCertificateChain);
     }
 
     private KeyStore getKeyStore() {
@@ -102,9 +105,10 @@ public class CertificateAuthorityService {
 
     private JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
-            final byte[] csrBytes = Base64.getDecoder().decode(csr.getCertificatePem());
+            final byte[] csrBytes = Base64.getDecoder().decode(csr.getEncodedCSR());
             return new JcaPKCS10CertificationRequest(csrBytes);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
+            logger.error("Failed to parse request as a PKCS10 CSR, because: " + ex.toString());
             throw new BadPayloadException("Failed to parse request as a PKCS10 CSR", ex);
         }
     }
@@ -115,6 +119,14 @@ public class CertificateAuthorityService {
         } catch (CertificateEncodingException e) {
             throw new AuthException("Certificate encoding failed! (" + e.getMessage() + ")", e);
         }
+    }
+
+    private List<String> buildEncodedCertificateChain(X509Certificate clientCertificate) {
+        final ArrayList<String> encodedCertificateChain = new ArrayList<>();
+        encodedCertificateChain.add(encodeCertificate(clientCertificate));
+        encodedCertificateChain.add(encodeCertificate(cloudCertificate));
+        encodedCertificateChain.add(encodeCertificate(rootCertificate));
+        return encodedCertificateChain;
     }
 
     private void checkCommonName(JcaPKCS10CertificationRequest csr, String cloudCN) {
@@ -145,19 +157,14 @@ public class CertificateAuthorityService {
         }
     }
 
-    private X509Certificate getServerCertificate(final ApplicationContext appContext) {
-        @SuppressWarnings("unchecked") final Map<String, Object> context = appContext.getBean(CommonConstants.ARROWHEAD_CONTEXT, Map.class);
-        return (X509Certificate) context.get(CommonConstants.SERVER_CERTIFICATE);
-    }
-
-    private X509Certificate buildCertificate(X500Name csrSubject, PublicKey clientKey, PrivateKey cloudPrivateKey, X509Certificate serverCertificate) {
+    private X509Certificate buildCertificate(X500Name csrSubject, PublicKey clientKey, PrivateKey cloudPrivateKey, X509Certificate cloudCertificate) {
         final ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.systemDefault());
         final Date validFrom = Date.from(now.minusSeconds(5).toInstant());
         final Date validUntil = Date.from(now.plusYears(1).toInstant());
 
         final BigInteger serial = BigInteger.valueOf(now.toInstant().toEpochMilli()).multiply(BigInteger.valueOf(random.nextLong()));
 
-        X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(serverCertificate, serial, validFrom, validUntil, csrSubject, clientKey);
+        X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(cloudCertificate, serial, validFrom, validUntil, csrSubject, clientKey);
 
         /* Adding the following extensions to the new certificate:
            1) The subject key identifier provides a hashed value that should uniquely identify the public key
@@ -167,12 +174,11 @@ public class CertificateAuthorityService {
         try {
             JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
             builder.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(clientKey));
-            builder.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(serverCertificate));
+            builder.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(cloudCertificate));
             builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
         } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException e) {
             throw new AuthException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
         }
-
 
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA").setProvider("BC");
         try {
