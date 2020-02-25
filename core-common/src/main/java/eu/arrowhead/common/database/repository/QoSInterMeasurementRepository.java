@@ -19,4 +19,7 @@ public interface QoSInterMeasurementRepository extends RefreshableRepository<QoS
 
 	//-------------------------------------------------------------------------------------------------
 	public List<QoSInterMeasurement> findByCloudAndMeasurementType(final Cloud cloud, final QoSMeasurementType ping);
+
+	//-------------------------------------------------------------------------------------------------
+	public Optional<QoSInterMeasurement> findByCloudAndAddressAndMeasurementType(final Cloud cloud,  final String address, final QoSMeasurementType ping);
 }

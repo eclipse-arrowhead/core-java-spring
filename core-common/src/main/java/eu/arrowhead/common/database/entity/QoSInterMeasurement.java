@@ -58,7 +58,7 @@ public class QoSInterMeasurement {
 	public QoSInterMeasurement() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterMeasurement(final String address, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt) {
+	public QoSInterMeasurement(final Cloud cloud, final String address, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt) {
 		this.address = address;
 		this.measurementType = measurementType;
 		this.lastMeasurementAt = lastMeasurementAt;
@@ -79,6 +79,7 @@ public class QoSInterMeasurement {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
+	public Cloud getCloud() {return cloud; }
 	public String getAddress() { return address; }
 	public QoSMeasurementType getMeasurementType() { return measurementType; }
 	public ZonedDateTime getLastMeasurementAt() { return lastMeasurementAt; }
@@ -87,6 +88,7 @@ public class QoSInterMeasurement {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
+	public void setCloud(final Cloud cloud) { this.cloud = cloud; }
 	public void setAddress(final String address) { this.address = address; }
 	public void setMeasurementType(final QoSMeasurementType measurementType) { this.measurementType = measurementType; }
 	public void setLastMeasurementAt(final ZonedDateTime lastMeasurementAt) { this.lastMeasurementAt = lastMeasurementAt; }
