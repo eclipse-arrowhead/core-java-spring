@@ -138,20 +138,33 @@ public class CloudPingTask implements Job {
 		for (final CloudWithRelaysResponseDTO cloudWithRelay : responseDTO.getData()) {
 
 			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
-				for (final CloudAccessResponseDTO cloudAccessResponseDTO : cloudAccessResponseDTOList) {
+				if( cloudIsDirectlyAccessable(cloudWithRelay, cloudAccessResponseDTOList)) {
 
-					if (cloudAccessResponseDTO != null && cloudAccessResponseDTO.isDirectAccess()) {
-						if ( (cloudWithRelay.getName().equalsIgnoreCase(cloudAccessResponseDTO.getCloudName())) && 
-								(cloudWithRelay.getOperator().equalsIgnoreCase(cloudAccessResponseDTO.getCloudOperator())) ) {
-							clouds.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudResponseDTO(cloudWithRelay));
-						}
-					}
+					clouds.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudResponseDTO(cloudWithRelay));
 				}
-				
 			}
 		}
 
 		return clouds;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private boolean cloudIsDirectlyAccessable(final CloudWithRelaysResponseDTO cloudWithRelay,
+			final List<CloudAccessResponseDTO> cloudAccessResponseDTOList) {
+		logger.debug("cloudIsDirectlyAccessable started...");
+
+		for (final CloudAccessResponseDTO cloudAccessResponseDTO : cloudAccessResponseDTOList) {
+
+			if (cloudAccessResponseDTO != null && cloudAccessResponseDTO.isDirectAccess()) {
+				if ( (cloudWithRelay.getName().equalsIgnoreCase(cloudAccessResponseDTO.getCloudName())) && 
+						(cloudWithRelay.getOperator().equalsIgnoreCase(cloudAccessResponseDTO.getCloudOperator())) ) {
+
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	//-------------------------------------------------------------------------------------------------
