@@ -303,9 +303,30 @@ public class GatekeeperService {
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
 	}
 	
-	public List<CloudAccessResponseDTO> initAccessTypesCollection(final List<CloudRequestDTO> request) {
-		//TODO
-		return null;
+	//-------------------------------------------------------------------------------------------------
+	public List<CloudAccessResponseDTO> initAccessTypesCollection(final List<CloudRequestDTO> request) throws InterruptedException {
+		final List<Cloud> cloudList = new ArrayList<>();
+		for (final CloudRequestDTO cloudRequestDTO : request) {
+			validateCloudRequest(cloudRequestDTO);
+			cloudList.add(gatekeeperDBService.getCloudByOperatorAndName(cloudRequestDTO.getOperator(), cloudRequestDTO.getName()));
+		}
+		
+		final List<ErrorWrapperDTO> atcAnswers = gatekeeperDriver.sendAccessTypesCollectionRequest(cloudList);
+		final List<CloudAccessResponseDTO> successfulResponses = new ArrayList<>();
+		final List<ErrorMessageDTO> errorMessageResponses = new ArrayList<>();
+		for (final ErrorWrapperDTO answer : atcAnswers) {
+			if (answer.isError()) {
+				errorMessageResponses.add((ErrorMessageDTO) answer);
+			} else {
+				successfulResponses.add((CloudAccessResponseDTO) answer);
+			}
+		}
+		
+		if (successfulResponses.isEmpty() && !errorMessageResponses.isEmpty()) {
+			Utilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
+		}
+		
+		return successfulResponses;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -326,7 +347,7 @@ public class GatekeeperService {
 		final Set<String> addresses = new HashSet<>();
 		
 		final ServiceQueryResultDTO results = gatekeeperDriver.sendServiceRegistryQueryAll();
-		for (ServiceRegistryResponseDTO sr : results.getServiceQueryData()) {
+		for (final ServiceRegistryResponseDTO sr : results.getServiceQueryData()) {
 			addresses.add(sr.getProvider().getAddress());
 		}
 		

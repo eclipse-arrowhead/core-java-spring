@@ -2,7 +2,11 @@ package eu.arrowhead.common.dto.internal;
 
 import java.io.Serializable;
 
-public class CloudAccessResponseDTO implements Serializable {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
+
+public class CloudAccessResponseDTO implements Serializable, ErrorWrapperDTO {
 
 	//=================================================================================================
 	// members
@@ -35,5 +39,12 @@ public class CloudAccessResponseDTO implements Serializable {
 	public void setCloudName(final String cloudName) { this.cloudName = cloudName; }
 	public void setCloudOperator(final String cloudOperator) { this.cloudOperator = cloudOperator; }
 	public void setDirectAccess(final boolean directAccess) { this.directAccess = directAccess; }
+
+	//-------------------------------------------------------------------------------------------------
+	@JsonIgnore
+	@Override
+	public boolean isError() {
+		return false;
+	}
 	
 }
