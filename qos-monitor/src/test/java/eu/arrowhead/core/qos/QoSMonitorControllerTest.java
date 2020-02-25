@@ -3,6 +3,8 @@ package eu.arrowhead.core.qos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -14,11 +16,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.Resource;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -26,6 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -57,6 +65,7 @@ public class QoSMonitorControllerTest {
 	private static final String QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI =  CoreCommonConstants.MGMT_URI + PING_MEASUREMENTS;
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI = QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String QOS_MONITOR_PUBLIC_KEY_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI;
 
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	private static final String PAGE_OR_SIZE_ERROR_MESSAGE = "Defined page or size could not be with undefined size or page.";
@@ -72,6 +81,12 @@ public class QoSMonitorControllerTest {
 
 	@MockBean(name = "mockQoSDBService") 
 	QoSDBService qoSDBService;
+	
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
+	
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	private boolean secure;
 
 	//=================================================================================================
 	// methods
@@ -295,6 +310,47 @@ public class QoSMonitorControllerTest {
 		final PingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementResponseDTO.class);
 		assertNull(responseBody.getId());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicKeyNotSecure() throws Exception {
+		assumeFalse(secure);
+		
+		final MvcResult result = getPublicKey(status().isInternalServerError());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.ARROWHEAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_PUBLIC_KEY_URI, error.getOrigin());
+		Assert.assertEquals("QoS Monitor core service runs in insecure mode.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testGetPublicKeyNotAvailable() throws Exception {
+		assumeTrue(secure);
+
+		final Object publicKey = arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		try {
+			arrowheadContext.remove(CommonConstants.SERVER_PUBLIC_KEY);
+			final MvcResult result = getPublicKey(status().isInternalServerError());
+			final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+			
+			Assert.assertEquals(ExceptionType.ARROWHEAD, error.getExceptionType());
+			Assert.assertEquals(QOS_MONITOR_PUBLIC_KEY_URI, error.getOrigin());
+			Assert.assertEquals("Public key is not available.", error.getErrorMessage());
+		} finally {
+			arrowheadContext.put(CommonConstants.SERVER_PUBLIC_KEY, publicKey);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("squid:S2699") // because of false positive in sonar
+	@Test
+	public void testGetPublicKeyOk() throws Exception {
+		assumeTrue(secure);
+		
+		getPublicKey(status().isOk());
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -379,5 +435,12 @@ public class QoSMonitorControllerTest {
 				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
 
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------	
+	private MvcResult getPublicKey(final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(get((QOS_MONITOR_PUBLIC_KEY_URI))
+						   .accept(MediaType.TEXT_PLAIN))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
 }
