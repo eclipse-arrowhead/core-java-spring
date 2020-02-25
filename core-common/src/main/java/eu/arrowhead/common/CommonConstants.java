@@ -35,6 +35,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_GATEKEEPER_PULL_CLOUDS = "pull-clouds";
 	public static final String CORE_SERVICE_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES = "collect-system-addresses";
+	public static final String CORE_SERVICE_GATEKEEPER_COLLECT_ACCESS_TYPES = "collect-access-types";
 	
 	public static final String CORE_SERVICE_GATEWAY_PUBLIC_KEY = "gw-public-key";
 	public static final String CORE_SERVICE_GATEWAY_CONNECT_CONSUMER = "gw-connect-consumer";
@@ -100,6 +101,7 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_ICN_SERVICE = "/init_icn";
 	public static final String OP_GATEKEEPER_PULL_CLOUDS_SERVICE = "/pull_clouds";
 	public static final String OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE = "/collect_system_addresses";
+	public static final String OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE = "/collect_access_types";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	

@@ -24,6 +24,7 @@ import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
@@ -300,6 +301,11 @@ public class GatekeeperService {
 		final GatewayProviderConnectionResponseDTO response = gatekeeperDriver.connectProvider(connectionRequest);
 		
 		return new ICNProposalResponseDTO(selectedResult, DTOConverter.convertRelayToRelayResponseDTO(selectedRelay), response);
+	}
+	
+	public CloudAccessResponseDTO initAccessTypesCollection(final List<CloudRequestDTO> request) {
+		//TODO
+		return null;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
