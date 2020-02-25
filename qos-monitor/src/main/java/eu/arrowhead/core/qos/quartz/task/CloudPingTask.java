@@ -136,7 +136,7 @@ public class CloudPingTask implements Job {
 		boolean cloudToMeasureFound = false;
 		CloudResponseDTO cloudToMeasure = null;
 
-		final HashMap<ZonedDateTime, CloudResponseDTO> updatedAtMapedToCloud = new HashMap<>(cloudList.size());
+		final HashMap<ZonedDateTime, CloudResponseDTO> earliestUpdatedAtMapedToCloud = new HashMap<>(cloudList.size());
 		for (final CloudResponseDTO cloudResponseDTO : cloudList) {
 
 			final List<QoSInterMeasurement> measurementList = qoSDBService.getInterMeasurementByCloud(cloudResponseDTO);
@@ -156,19 +156,19 @@ public class CloudPingTask implements Job {
 					}
 				}
 
-				updatedAtMapedToCloud.put(min, cloudResponseDTO);
+				earliestUpdatedAtMapedToCloud.put(min, cloudResponseDTO);
 			}
 		}
 
 		if (!cloudToMeasureFound) {
 			ZonedDateTime earliestMeasurement = ZonedDateTime.now();
-			for (final ZonedDateTime date : updatedAtMapedToCloud.keySet()) {
+			for (final ZonedDateTime date : earliestUpdatedAtMapedToCloud.keySet()) {
 				if (date.isBefore(earliestMeasurement)) {
 					earliestMeasurement = date;
 				}
 			}
 
-			cloudToMeasure = updatedAtMapedToCloud.get(earliestMeasurement);
+			cloudToMeasure = earliestUpdatedAtMapedToCloud.get(earliestMeasurement);
 		}
 
 		return cloudToMeasure;
