@@ -22,6 +22,7 @@ import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -34,6 +35,9 @@ public class CertificateAuthorityService {
 
     @Autowired
     private SSLProperties sslProperties;
+
+    @Autowired
+    private CAProperties caProperties;
 
     private SecureRandom random;
     private KeyStore keyStore;
@@ -99,8 +103,10 @@ public class CertificateAuthorityService {
     private X509Certificate buildCertificate(JcaPKCS10CertificationRequest csr, PrivateKey cloudPrivateKey,
             X509Certificate cloudCertificate) {
         final ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.systemDefault());
-        final Date validFrom = Date.from(now.minusSeconds(5).toInstant());
-        final Date validUntil = Date.from(now.plusYears(1).toInstant());
+        final Date validFrom = Date.from(
+                now.minus(Duration.ofMillis(caProperties.getCertValidityPositiveOffsetMillis())).toInstant());
+        final Date validUntil = Date.from(
+                now.plus(Duration.ofMillis(caProperties.getCertValidityPositiveOffsetMillis())).toInstant());
 
         return CertificateAuthorityUtils.buildCertificate(csr, cloudPrivateKey, cloudCertificate, validFrom, validUntil,
                 random);
