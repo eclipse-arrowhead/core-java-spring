@@ -59,6 +59,7 @@ public class QoSInterMeasurement {
 	
 	//-------------------------------------------------------------------------------------------------
 	public QoSInterMeasurement(final Cloud cloud, final String address, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt) {
+		this.cloud = cloud;
 		this.address = address;
 		this.measurementType = measurementType;
 		this.lastMeasurementAt = lastMeasurementAt;
