@@ -129,7 +129,7 @@ public class CloudPingTask implements Job {
 			final CloudWithRelaysListResponseDTO responseDTO) {
 		logger.debug("filterCloudsByAccessType started...");
 
-		final List<CloudAccessResponseDTO> cloudAccessResponseDTOList = qoSMonitorDriver.queryGatekeeperGatewayIsMandatory(cloudsToRequest);
+		final List<CloudAccessResponseDTO> cloudAccessResponseDTOList = qoSMonitorDriver.queryGatekeeperGatewayIsMandatory(cloudsToRequest).getData();
 		if (cloudAccessResponseDTOList == null || cloudAccessResponseDTOList.isEmpty()) {
 			return null;
 		}

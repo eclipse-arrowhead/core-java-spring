@@ -28,6 +28,7 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
@@ -525,7 +526,7 @@ public class GatekeeperController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = POST_COLLECT_ACCESS_TYPES_DESCRIPTION, response = CloudAccessResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiOperation(value = POST_COLLECT_ACCESS_TYPES_DESCRIPTION, response = CloudAccessListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_COLLECT_ACCESS_TYPES_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_COLLECT_ACCESS_TYPES_HTTP_400_MESSAGE),
@@ -533,12 +534,12 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public List<CloudAccessResponseDTO> collectNeighborCloudAccessTypes(@RequestBody final List<CloudRequestDTO> dtos) throws InterruptedException {
+	@ResponseBody public CloudAccessListResponseDTO collectNeighborCloudAccessTypes(@RequestBody final List<CloudRequestDTO> dtos) throws InterruptedException {
 		logger.debug("new collectNeighborCloudAccessTypes request received");
 		for (CloudRequestDTO cloudRequestDTO : dtos) {
 			validateCloudRequestDTO(cloudRequestDTO, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE);
 		}
-		final List<CloudAccessResponseDTO> accessTypes = gatekeeperService.initAccessTypesCollection(dtos);
+		final CloudAccessListResponseDTO accessTypes = gatekeeperService.initAccessTypesCollection(dtos);
 		logger.debug("collectNeighborCloudAccessTypes request successfully finished");
 		return accessTypes;
 	}

@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponents;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.core.CoreSystemService;
-import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
@@ -86,13 +86,12 @@ public class QoSMonitorDriver {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public List<CloudAccessResponseDTO> queryGatekeeperGatewayIsMandatory(final List<CloudRequestDTO> cloudList) {
+	public CloudAccessListResponseDTO queryGatekeeperGatewayIsMandatory(final List<CloudRequestDTO> cloudList) {
 		logger.debug("queryGatekeeperGatewayIsMandatory started...");
 
 		try {
 			final UriComponents queryByGatewayIsMandatoryUri = getGatekeeperGatewayIsMandatoryUri();
-			final ResponseEntity<List> response = httpService.sendRequest(queryByGatewayIsMandatoryUri, HttpMethod.POST, List.class, cloudList);
+			final ResponseEntity<CloudAccessListResponseDTO> response = httpService.sendRequest(queryByGatewayIsMandatoryUri, HttpMethod.POST, CloudAccessListResponseDTO.class, cloudList);
 
 			return response.getBody();
 
