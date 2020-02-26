@@ -6,5 +6,4 @@ import eu.arrowhead.common.database.entity.AuthorizationInterCloudInterfaceConne
 
 @Repository
 public interface AuthorizationInterCloudInterfaceConnectionRepository extends RefreshableRepository<AuthorizationInterCloudInterfaceConnection,Long> {
-
 }

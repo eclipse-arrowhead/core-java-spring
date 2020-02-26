@@ -1,5 +1,6 @@
 package eu.arrowhead.core.orchestrator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,9 @@ import eu.arrowhead.core.orchestrator.matchmaking.DefaultInterCloudProviderMatch
 import eu.arrowhead.core.orchestrator.matchmaking.InterCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.IntraCloudProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.orchestrator.matchmaking.RandomIntraCloudProviderMatchmaker;
+import eu.arrowhead.core.qos.manager.QoSManager;
+import eu.arrowhead.core.qos.manager.impl.DummyQoSManager;
+import eu.arrowhead.core.qos.manager.impl.QoSManagerImpl;
 
 @Component
 public class OrchestratorApplicationInitListener extends ApplicationInitListener {
@@ -30,6 +34,9 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
+	
+	@Value(CoreCommonConstants.$QOS_ENABLED_WD)
+	private boolean qosEnabled;
 	
 	//=================================================================================================
 	// methods
@@ -51,6 +58,12 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	public CloudMatchmakingAlgorithm getCloudMatchmaker() {
 		return new DefaultCloudMatchmaker();
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Bean(CoreCommonConstants.QOS_MANAGER)
+	public QoSManager getQoSManager() {
+		return qosEnabled ? new QoSManagerImpl() : new DummyQoSManager();
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -58,12 +71,20 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		final List<CoreSystemService> result = new ArrayList<>(5);
+		result.add(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE); 
+		result.add(CoreSystemService.AUTH_CONTROL_INTRA_SERVICE);
+		
 		if (gatekeeperIsPresent) {
-			return List.of(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE, CoreSystemService.AUTH_CONTROL_INTRA_SERVICE, CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY,
-						   CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION);
+			result.add(CoreSystemService.GATEKEEPER_GLOBAL_SERVICE_DISCOVERY);
+			result.add(CoreSystemService.GATEKEEPER_INTER_CLOUD_NEGOTIATION);
 		}
 		
-		return List.of(CoreSystemService.AUTH_TOKEN_GENERATION_SERVICE,	CoreSystemService.AUTH_CONTROL_INTRA_SERVICE);
+		if (qosEnabled) {
+			result.add(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE);
+		}
+		
+		return result;
 	}
 	
 	//-------------------------------------------------------------------------------------------------

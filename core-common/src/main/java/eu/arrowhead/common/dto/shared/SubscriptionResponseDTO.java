@@ -68,6 +68,6 @@ public class SubscriptionResponseDTO implements Serializable {
 	public void setStartDate(final String startDate) { this.startDate = startDate; }
 	public void setEndDate(final String endDate) { this.endDate = endDate; }
 	public void setSources(final Set<SystemResponseDTO> sources) { this.sources = sources;	}
-	public void setCreatedAt( final String createdAt ) { this.createdAt = createdAt; }
-	public void setUpdatedAt( final String updatedAt ) { this.updatedAt = updatedAt; }
+	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
+	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
 }

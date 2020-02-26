@@ -333,4 +333,95 @@ CREATE TABLE IF NOT EXISTS `choreographer_next_action_step` (
   CONSTRAINT `next_action_step` FOREIGN KEY (`action_step_id`) REFERENCES `choreographer_action_step` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- QoS Monitor
 
+CREATE TABLE IF NOT EXISTS `qos_intra_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`system_id` bigint(20) NOT NULL,
+	`measurement_type` varchar(255) NOT NULL,
+	`last_measurement_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_system` FOREIGN KEY (`system_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_system_id_measurement_type` (`system_id`, `measurement_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_id` bigint(20) NOT NULL,
+	`available` int(1) NOT NULL DEFAULT 0,
+	`last_access_at` timestamp NULL DEFAULT NULL,
+	`min_response_time` int(11) DEFAULT NULL,
+	`max_response_time` int(11) DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`count_started_at` timestamp NULL,
+	`sent_all` bigint(20) NOT NULL DEFAULT 0,
+	`received_all` bigint(20) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_intra_measurement` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_measurement` (`measurement_id`)
+	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measured_system_address` varchar(255) NOT NULL,
+	`available` int(1) NOT NULL DEFAULT 0,
+	`min_response_time` int(11) DEFAULT NULL,
+	`max_response_time` int(11) DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`measured_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_log_id` bigint(20) NOT NULL,
+	`measurement_sequenece_number` int(3) NOT NULL,
+	`success_flag` int(1) NOT NULL DEFAULT 0,
+	`timeout_flag` int(1) NOT NULL DEFAULT 0,
+	`error_message` varchar(255) NULL DEFAULT NULL,
+	`throwable` varchar(255) NULL DEFAULT NULL,
+	`size_` int(11) NULL DEFAULT NULL,
+	`rtt` int(11) NULL DEFAULT NULL,
+	`ttl` int(3) NULL DEFAULT NULL,
+	`duration` int(5) NULL DEFAULT NULL,
+	`measured_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_intra_ping_measurement_log` (`id`) ON DELETE CASCADE
+	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- QoS Manager
+
+CREATE TABLE IF NOT EXISTS `qos_reservation` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`reserved_provider_id` bigint(20) NOT NULL,
+	`reserved_service_id` bigint(20) NOT NULL,
+	`consumer_system_name` varchar(255) NOT NULL,
+	`consumer_address` varchar(255) NOT NULL,
+	`consumer_port` int(11) NOT NULL,
+	`reserved_to` timestamp NOT NULL,
+	`temporary_lock` int(1) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_reserved_provider` FOREIGN KEY (`reserved_provider_id`) REFERENCES `system_` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_reserved_service` FOREIGN KEY (`reserved_service_id`) REFERENCES `service_definition` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_reserved_provider_and_service` (`reserved_provider_id`, `reserved_service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

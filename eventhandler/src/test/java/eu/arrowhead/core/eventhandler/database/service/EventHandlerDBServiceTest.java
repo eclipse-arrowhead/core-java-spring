@@ -260,7 +260,7 @@ public class EventHandlerDBServiceTest {
 			eventHandlerDBService.getSubscriptionsResponse(page, size, direction, sortField);
 		} catch (final Exception ex) {
 			verify(subscriptionRepository, never()).findAll(any(PageRequest.class));
-			Assert.assertTrue(ex.getMessage().contains(" sortable field  is not available." ));
+			Assert.assertTrue(ex.getMessage().contains(" sortable field is not available." ));
 			throw ex;
 		}
 	}
@@ -365,7 +365,7 @@ public class EventHandlerDBServiceTest {
 			eventHandlerDBService.getSubscriptions(page, size, direction, sortField);
 		} catch (final Exception ex) {
 			verify(subscriptionRepository, never()).findAll(any(PageRequest.class));
-			Assert.assertTrue(ex.getMessage().contains(" sortable field  is not available."));
+			Assert.assertTrue(ex.getMessage().contains(" sortable field is not available."));
 			throw ex;
 		}
 	}
@@ -877,7 +877,7 @@ public class EventHandlerDBServiceTest {
 			verify(eventTypeRepository, times(1)).findByEventTypeName(any());
 			verify(eventTypeRepository, times(1)).saveAndFlush(any());
 			verify(subscriptionRepository, never()).findByEventTypeAndSubscriberSystem(any(), any());			
-			Assert.assertTrue(ex.getMessage().contains("Start Date sould be before End Date"));
+			Assert.assertTrue(ex.getMessage().contains("Start Date should be before End Date"));
 			throw ex;
 		}
 	}
@@ -907,7 +907,7 @@ public class EventHandlerDBServiceTest {
 			verify(eventTypeRepository, times(1)).findByEventTypeName(any());
 			verify(eventTypeRepository, times(1)).saveAndFlush(any());
 			verify(subscriptionRepository, times(0)).findByEventTypeAndSubscriberSystem(any(), any());			
-			Assert.assertTrue(ex.getMessage().contains("Start Date sould be before End Date"));
+			Assert.assertTrue(ex.getMessage().contains("Start Date should be before End Date"));
 			throw ex;
 		}
 	}
@@ -935,7 +935,7 @@ public class EventHandlerDBServiceTest {
 			verify(eventTypeRepository, times(1)).findByEventTypeName(any());
 			verify(eventTypeRepository, times(1)).saveAndFlush(any());
 			verify(subscriptionRepository, never()).findByEventTypeAndSubscriberSystem(any(), any());			
-			Assert.assertTrue(ex.getMessage().contains("If MatchMetaData is true filterMetaData sould not be null or empty"));
+			Assert.assertTrue(ex.getMessage().contains("If MatchMetaData is true filterMetaData should not be null or empty"));
 			throw ex;
 		}
 	}
@@ -963,7 +963,7 @@ public class EventHandlerDBServiceTest {
 			verify(eventTypeRepository, times(1)).findByEventTypeName(any());
 			verify(eventTypeRepository, times(1)).saveAndFlush(any());
 			verify(subscriptionRepository, never()).findByEventTypeAndSubscriberSystem(any(), any());			
-			Assert.assertTrue(ex.getMessage().contains("If MatchMetaData is true filterMetaData sould not be null or empty"));
+			Assert.assertTrue(ex.getMessage().contains("If MatchMetaData is true filterMetaData should not be null or empty"));
 			throw ex;
 		}
 	}
@@ -1132,7 +1132,7 @@ public class EventHandlerDBServiceTest {
 			verify(subscriptionPublisherConnectionRepository, never()).saveAll(any());
 			verify(subscriptionPublisherConnectionRepository, never()).flush();
 			verify(subscriptionRepository, never()).saveAndFlush(any());
-			Assert.assertTrue(ex.getMessage().contains("Subscription violates uniqueConstraint rules"));
+			Assert.assertTrue(ex.getMessage().contains("Subscription violates unique constraint rules"));
 			throw ex;
 		}
 	}

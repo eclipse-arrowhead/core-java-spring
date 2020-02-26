@@ -43,5 +43,20 @@
     "name": "domain.port",
     "type": "java.lang.String",
     "description": "A description for 'domain.port'"
+  },
+  {
+    "name": "enable_qos",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'enable_qos'"
+  },
+  {
+    "name": "qos_reservation_check_interval",
+    "type": "java.lang.Integer",
+    "description": "A description for 'qos_reservation_check_interval'"
+  },
+  {
+    "name": "qos_ping_measurement_cache_threshold",
+    "type": "java.lang.Integer",
+    "description": "A description for 'qos_ping_measurement_cache_threshold'"
   }
 ]}
