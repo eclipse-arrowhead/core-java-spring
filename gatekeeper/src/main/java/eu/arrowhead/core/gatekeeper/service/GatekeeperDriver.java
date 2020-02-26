@@ -172,7 +172,7 @@ public class GatekeeperDriver {
 		logger.debug("sendServiceReistryQueryAll started...");		
 		
 		final UriComponents queryUri = getServiceRegistryQueryAllUri();
-		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class);
+		final ResponseEntity<ServiceQueryResultDTO> response = httpService.sendRequest(queryUri, HttpMethod.GET, ServiceQueryResultDTO.class);
 		
 		return response.getBody();
 	}
