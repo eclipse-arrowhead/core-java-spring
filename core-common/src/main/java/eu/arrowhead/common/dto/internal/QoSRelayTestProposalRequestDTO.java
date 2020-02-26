@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.springframework.util.Assert;
 
-import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 
 public class QoSRelayTestProposalRequestDTO implements Serializable {
@@ -12,9 +11,9 @@ public class QoSRelayTestProposalRequestDTO implements Serializable {
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = -3624831623265548479L;
+	private static final long serialVersionUID = -5314341474633023883L;
 	
-	private CloudRequestDTO requesterCloud;
+	private CloudRequestDTO targetCloud;
 	private RelayRequestDTO relay;
 	private String senderQoSMonitorPublicKey;
 	
@@ -25,23 +24,21 @@ public class QoSRelayTestProposalRequestDTO implements Serializable {
 	public QoSRelayTestProposalRequestDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSRelayTestProposalRequestDTO(final CloudRequestDTO requesterCloud, final RelayRequestDTO relay, final String senderQoSMonitorPublicKey) {
-		Assert.notNull(requesterCloud, "Requester cloud is null.");
+	public QoSRelayTestProposalRequestDTO(final CloudRequestDTO targetCloud, final RelayRequestDTO relay) {
+		Assert.notNull(targetCloud, "Target cloud is null.");
 		Assert.notNull(relay, "relay is null.");
-		Assert.isTrue(!Utilities.isEmpty(senderQoSMonitorPublicKey), "Sender QoS Monitor's public key is null or empty.");
 		
-		this.requesterCloud = requesterCloud;
+		this.targetCloud = targetCloud;
 		this.relay = relay;
-		this.senderQoSMonitorPublicKey = senderQoSMonitorPublicKey;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public CloudRequestDTO getRequesterCloud() { return requesterCloud; }
+	public CloudRequestDTO getTargetCloud() { return targetCloud; }
 	public RelayRequestDTO getRelay() { return relay; }
 	public String getSenderQoSMonitorPublicKey() { return senderQoSMonitorPublicKey; }
 	
 	//-------------------------------------------------------------------------------------------------
-	public void setRequesterCloud(final CloudRequestDTO requesterCloud) { this.requesterCloud = requesterCloud; }
+	public void setTargetCloud(final CloudRequestDTO targetCloud) { this.targetCloud = targetCloud; }
 	public void setRelay(final RelayRequestDTO relay) { this.relay = relay; }
 	public void setSenderQoSMonitorPublicKey(final String senderQoSMonitorPublicKey) { this.senderQoSMonitorPublicKey = senderQoSMonitorPublicKey; }
 }

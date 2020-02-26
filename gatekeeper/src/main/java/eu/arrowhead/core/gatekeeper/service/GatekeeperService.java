@@ -37,8 +37,11 @@ import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -331,11 +334,14 @@ public class GatekeeperService {
 	
 	//-------------------------------------------------------------------------------------------------
 	public AccessTypeRelayResponseDTO returnAccessType() {
+		logger.debug("returnAccessType started...");
+		
 		return new AccessTypeRelayResponseDTO(!gatewayIsMandatory);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	public SystemAddressSetRelayResponseDTO initSystemAddressCollection(final CloudRequestDTO request) {
+		logger.debug("initSystemAddressCollection started...");
 		validateCloudRequest(request);
 		
 		final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(request.getOperator(), request.getName());
@@ -344,14 +350,39 @@ public class GatekeeperService {
 
 	//-------------------------------------------------------------------------------------------------
 	public SystemAddressSetRelayResponseDTO doSystemAddressCollection() {
+		logger.debug("doSystemAddressCollection started...");
 		final Set<String> addresses = new HashSet<>();
 		
-		final ServiceQueryResultDTO results = gatekeeperDriver.sendServiceRegistryQueryAll();
-		for (final ServiceRegistryResponseDTO sr : results.getServiceQueryData()) {
+		final ServiceRegistryListResponseDTO results = gatekeeperDriver.sendServiceRegistryQueryAll();
+		for (final ServiceRegistryResponseDTO sr : results.getData()) {
 			addresses.add(sr.getProvider().getAddress());
 		}
 		
 		return new SystemAddressSetRelayResponseDTO(addresses);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void initRelayTest(final QoSRelayTestProposalRequestDTO request) {
+		logger.debug("initRelayTest started...");
+		
+		validateQoSRelayTestProposalRequestDTO(request, false);
+		
+		final String qosMonitorPublicKey = gatekeeperDriver.queryQoSMonitorPublicKey();
+		request.setSenderQoSMonitorPublicKey(qosMonitorPublicKey);
+		
+		final Cloud targetCloud = gatekeeperDBService.getCloudByOperatorAndName(request.getTargetCloud().getOperator(), request.getTargetCloud().getName());
+		final QoSRelayTestProposalResponseDTO response = gatekeeperDriver.sendQoSRelayTestProposal(request, targetCloud);
+		//TODO: continue implementation
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSRelayTestProposalResponseDTO joinRelayTest(final QoSRelayTestProposalRequestDTO request) {
+		logger.debug("joinRelayTest started...");
+		
+		validateQoSRelayTestProposalRequestDTO(request, true);
+		
+		//TODO: continue implementation
+		return null;
 	}
 	
 	//=================================================================================================
@@ -611,11 +642,29 @@ public class GatekeeperService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Relay selectRelay(final ICNProposalRequestDTO request) {
+		logger.debug("selectRelay started...");
+		
 		final Cloud requesterCloud = gatekeeperDBService.getCloudByOperatorAndName(request.getRequesterCloud().getOperator(), request.getRequesterCloud().getName());
 		final RelayMatchmakingParameters relayMMParams = new RelayMatchmakingParameters(requesterCloud);
 		relayMMParams.setPreferredGatewayRelays(request.getPreferredGatewayRelays());
 		relayMMParams.setKnownGatewayRelays(request.getKnownGatewayRelays());
 		
 		return gatewayMatchmaker.doMatchmaking(relayMMParams);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateQoSRelayTestProposalRequestDTO(final QoSRelayTestProposalRequestDTO request, final boolean checkKey) {
+		logger.debug("validateQoSRelayTestProposalRequestDTO started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("Relay test proposal is null.");
+		}
+		
+		validateCloudRequest(request.getTargetCloud());
+		validateRelayRequest(request.getRelay());
+		
+		if (checkKey && Utilities.isEmpty(request.getSenderQoSMonitorPublicKey())) {
+			throw new InvalidParameterException("Sender QoS Monitor's public key is null or blank.");
+		}
 	}
 }

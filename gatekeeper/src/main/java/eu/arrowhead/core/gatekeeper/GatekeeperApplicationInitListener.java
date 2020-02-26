@@ -82,7 +82,7 @@ public class GatekeeperApplicationInitListener extends ApplicationInitListener {
 	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
 		if (gatewayIsPresent) {
 			return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.GATEWAY_CONSUMER_SERVICE,
-						   CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE); 
+						   CoreSystemService.GATEWAY_PROVIDER_SERVICE, CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE, CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE); 
 		}
 		
 		return List.of(CoreSystemService.AUTH_CONTROL_INTER_SERVICE, CoreSystemService.ORCHESTRATION_SERVICE); 
