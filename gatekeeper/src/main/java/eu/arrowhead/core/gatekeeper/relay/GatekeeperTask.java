@@ -106,6 +106,8 @@ public class GatekeeperTask implements Runnable {
 				return gatekeeperService.returnAccessType();
 			case CoreCommonConstants.RELAY_MESSAGE_TYPE_SYSTEM_ADDRESS_LIST:
 				return gatekeeperService.doSystemAddressCollection();
+			case CoreCommonConstants.RELAY_MESSAGE_TYPE_QOS_RELAY_TEST:
+				return gatekeeperService.joinRelayTest(request.getQoSRelayTestProposalRequest());
 			default:
 				throw new BadPayloadException("Invalid message type: " + request.getMessageType());
 			}

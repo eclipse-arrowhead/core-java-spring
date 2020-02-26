@@ -169,10 +169,10 @@ public class GatekeeperDriverTest {
 		
 		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
 		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
-		when(httpService.sendRequest(uri, HttpMethod.POST, ServiceQueryResultDTO.class)).thenReturn(new ResponseEntity<>(new ServiceQueryResultDTO(), HttpStatus.OK));
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceQueryResultDTO.class)).thenReturn(new ResponseEntity<>(new ServiceQueryResultDTO(), HttpStatus.OK));
 		
 		testingObject.sendServiceRegistryQueryAll();
 		
-		verify(httpService, times(1)).sendRequest(uri, HttpMethod.POST, ServiceQueryResultDTO.class);
+		verify(httpService, times(1)).sendRequest(uri, HttpMethod.GET, ServiceQueryResultDTO.class);
 	}
 }
