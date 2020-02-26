@@ -5,7 +5,7 @@
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
         </Property>
 		<Property name="JDBC_LEVEL">OFF</Property>
-		<Property name="CONSOLE_FILE_LEVEL">DEBUG</Property>
+		<Property name="CONSOLE_FILE_LEVEL">OFF</Property>
     </Properties>
 	<Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
