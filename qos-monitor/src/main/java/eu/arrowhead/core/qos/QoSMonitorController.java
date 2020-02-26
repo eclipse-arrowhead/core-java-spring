@@ -1,9 +1,16 @@
 package eu.arrowhead.core.qos;
 
+import java.security.PublicKey;
+import java.util.Base64;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,6 +29,7 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import io.swagger.annotations.Api;
@@ -58,11 +66,18 @@ public class QoSMonitorController {
 	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_200_MESSAGE = "Ping-Measurement entry returned";
 	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entry";
 
+	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 
 	@Autowired
 	private QoSDBService qoSDBService;
 
+	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+	private Map<String,Object> arrowheadContext;
+	
+	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+	private boolean secure;
+	
 	private final Logger logger = LogManager.getLogger(QoSMonitorController.class);
 
 	//=================================================================================================
@@ -158,5 +173,41 @@ public class QoSMonitorController {
 
 		logger.debug("PingMeasurement entry with system id: {} successfully retrieved", id);
 		return pingMeasurementResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Returns the public key of the QoS Monitor core service as a Base64 encoded text", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_PUBLIC_KEY_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_QOS_MONITOR_KEY_URI)
+	public String getPublicKey() {
+		logger.debug("New public key GET request received...");
+		
+		return acquireAndConvertPublicKey();
+	}
+	
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private String acquireAndConvertPublicKey() {
+		logger.debug("acquireAndConvertPublicKey started...");
+		
+		final String origin = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI;
+		
+		if (!secure) {
+			throw new ArrowheadException("QoS Monitor core service runs in insecure mode.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
+		}
+		
+		if (!arrowheadContext.containsKey(CommonConstants.SERVER_PUBLIC_KEY)) {
+			throw new ArrowheadException("Public key is not available.", HttpStatus.SC_INTERNAL_SERVER_ERROR, origin);
+		}
+		
+		final PublicKey publicKey = (PublicKey) arrowheadContext.get(CommonConstants.SERVER_PUBLIC_KEY);
+		
+		return Base64.getEncoder().encodeToString(publicKey.getEncoded());
 	}
 }

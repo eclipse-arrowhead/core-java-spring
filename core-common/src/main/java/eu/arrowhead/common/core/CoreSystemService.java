@@ -40,7 +40,8 @@ public enum CoreSystemService {
 	
 	// QoS Monitor services
 	QOS_MONITOR_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + 
-										 CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX);
+										 CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX),
+	QOS_MONITOR_PUBLIC_KEY_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI);
 	
 	//TODO: additional services 
 	

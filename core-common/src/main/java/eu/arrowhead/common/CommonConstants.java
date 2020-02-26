@@ -47,6 +47,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 	
 	public static final String CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT = "qos-monitor-ping-measurement";
+	public static final String CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY = "qos-monitor-public-key";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -120,6 +121,7 @@ public class CommonConstants {
 	public static final String QOS_MONITOR_URI = "/qosmonitor";
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_QOS_MONITOR_KEY_URI = "/publickey";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
