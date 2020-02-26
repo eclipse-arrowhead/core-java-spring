@@ -24,7 +24,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -169,10 +169,10 @@ public class GatekeeperDriverTest {
 		
 		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
 		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
-		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceQueryResultDTO.class)).thenReturn(new ResponseEntity<>(new ServiceQueryResultDTO(), HttpStatus.OK));
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(new ResponseEntity<>(new ServiceRegistryListResponseDTO(), HttpStatus.OK));
 		
 		testingObject.sendServiceRegistryQueryAll();
 		
-		verify(httpService, times(1)).sendRequest(uri, HttpMethod.GET, ServiceQueryResultDTO.class);
+		verify(httpService, times(1)).sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class);
 	}
 }
