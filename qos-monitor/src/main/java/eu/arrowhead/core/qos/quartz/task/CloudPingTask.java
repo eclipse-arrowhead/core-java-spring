@@ -171,11 +171,6 @@ public class CloudPingTask implements Job {
 	private CloudResponseDTO chooseCloudToMeasure(final Set<CloudResponseDTO> cloudList) {
 		logger.debug("chooseCloudToMeasure started...");
 
-		if(cloudList == null || cloudList.isEmpty()) {
-
-			return null;
-		}
-
 		boolean cloudToMeasureFound = false;
 		CloudResponseDTO cloudToMeasure = null;
 
