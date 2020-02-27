@@ -369,6 +369,7 @@ public class GatekeeperService {
 		
 		final String qosMonitorPublicKey = gatekeeperDriver.queryQoSMonitorPublicKey();
 		request.setSenderQoSMonitorPublicKey(qosMonitorPublicKey);
+		request.setRequesterCloud(getOwnCloudRequestDTO());
 		
 		final Cloud targetCloud = gatekeeperDBService.getCloudByOperatorAndName(request.getTargetCloud().getOperator(), request.getTargetCloud().getName());
 		final QoSRelayTestProposalResponseDTO response = gatekeeperDriver.sendQoSRelayTestProposal(request, targetCloud);
@@ -653,7 +654,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void validateQoSRelayTestProposalRequestDTO(final QoSRelayTestProposalRequestDTO request, final boolean checkKey) {
+	private void validateQoSRelayTestProposalRequestDTO(final QoSRelayTestProposalRequestDTO request, final boolean checkAdditionalFields) {
 		logger.debug("validateQoSRelayTestProposalRequestDTO started...");
 		
 		if (request == null) {
@@ -663,8 +664,24 @@ public class GatekeeperService {
 		validateCloudRequest(request.getTargetCloud());
 		validateRelayRequest(request.getRelay());
 		
-		if (checkKey && Utilities.isEmpty(request.getSenderQoSMonitorPublicKey())) {
+		if (checkAdditionalFields) {
+			validateCloudRequest(request.getRequesterCloud());
+		}
+		
+		if (checkAdditionalFields && Utilities.isEmpty(request.getSenderQoSMonitorPublicKey())) {
 			throw new InvalidParameterException("Sender QoS Monitor's public key is null or blank.");
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private CloudRequestDTO getOwnCloudRequestDTO() {
+		logger.debug("getOwnCloudRequestDTO started...");
+		
+		final Cloud requesterCloud = commonDBService.getOwnCloud(true);
+		final CloudRequestDTO requesterCloudDTO = new CloudRequestDTO();
+		requesterCloudDTO.setName(requesterCloud.getName());
+		requesterCloudDTO.setOperator(requesterCloud.getOperator());
+		
+		return requesterCloudDTO;
 	}
 }

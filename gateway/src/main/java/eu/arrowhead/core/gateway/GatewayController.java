@@ -178,7 +178,7 @@ public class GatewayController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Creates a Socket and Message queue between the given Relay and Provider and return the necesarry connection informations",
+	@ApiOperation(value = "Creates a Socket and Message queue between the given Relay and Provider and return the necessary connection informations",
 				  response = GatewayProviderConnectionResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),

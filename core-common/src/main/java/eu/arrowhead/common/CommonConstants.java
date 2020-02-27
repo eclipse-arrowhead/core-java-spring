@@ -122,6 +122,7 @@ public class CommonConstants {
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
 	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_QOS_MONITOR_KEY_URI = "/publickey";
+	public static final String OP_QOS_MONITOR_JOIN_RELAY_TEST_URI = "/join_relay_test";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
