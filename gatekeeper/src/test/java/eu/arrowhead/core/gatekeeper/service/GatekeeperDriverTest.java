@@ -16,6 +16,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
+<<<<<<< HEAD
+=======
+import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+>>>>>>> 1c5c7b582cc56dfe0fb6ed1ecfd128dda390c872
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.http.HttpService;
 
@@ -136,4 +141,37 @@ public class GatekeeperDriverTest {
 		Assert.assertNotNull(relayClient);
 	}
 	
+<<<<<<< HEAD
+=======
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendServiceRegistryQueryAllNoUri() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(false);
+		
+		testingObject.sendServiceRegistryQueryAll();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testSendServiceRegistryQueryAllWrongUriType() {
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn("uri");
+		
+		testingObject.sendServiceRegistryQueryAll();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testSendServiceRegistryQueryAllOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "abc");
+		
+		when(arrowheadContext.containsKey(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(true);
+		when(arrowheadContext.get(CoreCommonConstants.SR_QUERY_ALL)).thenReturn(uri);
+		when(httpService.sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class)).thenReturn(new ResponseEntity<>(new ServiceRegistryListResponseDTO(), HttpStatus.OK));
+		
+		testingObject.sendServiceRegistryQueryAll();
+		
+		verify(httpService, times(1)).sendRequest(uri, HttpMethod.GET, ServiceRegistryListResponseDTO.class);
+	}
+>>>>>>> 1c5c7b582cc56dfe0fb6ed1ecfd128dda390c872
 }
