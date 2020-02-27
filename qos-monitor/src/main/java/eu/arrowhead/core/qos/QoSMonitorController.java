@@ -82,6 +82,7 @@ public class QoSMonitorController {
 	
 	private static final String POST_CONNECT_HTTP_201_MESSAGE = "Connection created";
 	private static final String POST_CONNECT_HTTP_400_MESSAGE = "Could not create connection";
+	private static final String POST_CONNECT_HTTP_502_MESSAGE = "Error occured when initialize relay communication.";
 
 	@Autowired
 	private QoSDBService qosDBService;
@@ -212,6 +213,7 @@ public class QoSMonitorController {
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_GATEWAY, message = POST_CONNECT_HTTP_502_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
