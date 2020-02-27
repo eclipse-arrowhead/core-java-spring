@@ -23,13 +23,13 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.core.gatekeeper.quartz.subscriber.RelaySubscriberDataContainer;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientUsingCachedSessions;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomAndDedicatedIfAnyGatekeeperMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.GetRandomCommonPreferredIfAnyOrRandomCommonPublicGatewayMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.ICNProviderMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RandomICNProviderMatchmaker;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientFactory;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientUsingCachedSessions;
 
 @Component
 public class GatekeeperApplicationInitListener extends ApplicationInitListener {

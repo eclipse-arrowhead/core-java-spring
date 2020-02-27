@@ -22,8 +22,8 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientFactory;
 
 @Component
 public class RelaySubscriberDataContainer {

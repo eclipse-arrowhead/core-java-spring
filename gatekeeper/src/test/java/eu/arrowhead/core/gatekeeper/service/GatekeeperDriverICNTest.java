@@ -72,11 +72,11 @@ import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
-import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
+import eu.arrowhead.relay.gatekeeper.GeneralAdvertisementResult;
 
 @RunWith(SpringRunner.class)
 public class GatekeeperDriverICNTest {

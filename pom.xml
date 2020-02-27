@@ -28,6 +28,7 @@
 	    <module>authorization</module>
 	    <module>orchestrator</module>
 	    <module>eventhandler</module>
+	    <module>relay-library</module>
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
@@ -53,8 +54,6 @@
 		<http.client.version>4.5.8</http.client.version>
   		<jose4j.version>0.6.5</jose4j.version>
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
-  		<jms.api.version>2.0.1</jms.api.version>
-  		<activemq.client.version>5.15.9</activemq.client.version>
   		<icmp4j.version>1.2</icmp4j.version>
   		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -132,17 +131,6 @@
     		<artifactId>commons-lang3</artifactId>
     		<version>${apache.commons.lang3.version}</version>
 		</dependency>
-	    <dependency>
-    		<groupId>javax.jms</groupId>
-    		<artifactId>javax.jms-api</artifactId>
-    		<version>${jms.api.version}</version>
-		</dependency>
-	    <dependency>
-    		<groupId>org.apache.activemq</groupId>
-    		<artifactId>activemq-client</artifactId>
-    		<version>${activemq.client.version}</version>
-		</dependency>
-	    
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>

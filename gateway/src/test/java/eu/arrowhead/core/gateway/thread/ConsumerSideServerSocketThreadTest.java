@@ -52,7 +52,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
-import eu.arrowhead.core.gateway.relay.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 @RunWith(SpringRunner.class)
 public class ConsumerSideServerSocketThreadTest {

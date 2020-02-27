@@ -17,6 +17,11 @@
 	      	<artifactId>arrowhead-core-common</artifactId>
 	      	<version>${revision}</version>
 	    </dependency>
+	    <dependency>
+	      	<groupId>eu.arrowhead</groupId>
+	      	<artifactId>arrowhead-relay-library</artifactId>
+	      	<version>${revision}</version>
+	    </dependency>
   	</dependencies> 
   	
 	<build>

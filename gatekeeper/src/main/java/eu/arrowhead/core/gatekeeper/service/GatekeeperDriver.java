@@ -66,12 +66,12 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.TimeoutException;
 import eu.arrowhead.common.http.HttpService;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClientFactory;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayResponse;
-import eu.arrowhead.core.gatekeeper.relay.GeneralAdvertisementResult;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingAlgorithm;
 import eu.arrowhead.core.gatekeeper.service.matchmaking.RelayMatchmakingParameters;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClientFactory;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayResponse;
+import eu.arrowhead.relay.gatekeeper.GeneralAdvertisementResult;
 
 @Component
 public class GatekeeperDriver {

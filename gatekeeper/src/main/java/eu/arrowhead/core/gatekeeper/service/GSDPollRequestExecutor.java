@@ -22,7 +22,7 @@ import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
 import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorWrapperDTO;
-import eu.arrowhead.core.gatekeeper.relay.GatekeeperRelayClient;
+import eu.arrowhead.relay.gatekeeper.GatekeeperRelayClient;
 
 public class GSDPollRequestExecutor {
 	
