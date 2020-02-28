@@ -1,14 +1,24 @@
 package eu.arrowhead.core.qos.thread;
 
 import java.security.PublicKey;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
+import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +27,7 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
@@ -24,6 +35,8 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	
 	//=================================================================================================
 	// members
+	
+	private static final String CLOSE_MESSAGE_PREFIX = "CLOSE";
 
 	private static final Logger logger = LogManager.getLogger(ReceiverSideRelayTestThread.class);
 	
@@ -31,27 +44,32 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private boolean initialized = false;
 	
 	private final QoSDBService qosDBService;
-	private final GatewayRelayClient relayClient;
-	private final Session relaySession;
 	private final Cloud requesterCloud;
 	private final Relay relay;
+
+	private final GatewayRelayClient relayClient;
+	private final Session relaySession;
 	private final PublicKey requesterQoSMonitorPublicKey;
 	
-	private final int noIteration;
+	private final byte noIteration;
 	private final int testMessageSize;
+	private final long timeout; // in milliseconds
+	
+	private boolean receiver = true;
+	private final Map<Byte,long[]> testResults = new HashMap<>();
 	
 	private String queueId;
 	private MessageProducer sender;
 	private MessageProducer controlSender;
 	
-	private final BlockingQueue<Object> blockingQueue = new ArrayBlockingQueue<Object>(1);
+	private final BlockingQueue<Object> blockingQueue = new LinkedBlockingQueue<Object>();
 
 	//=================================================================================================
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
 	public ReceiverSideRelayTestThread(final ApplicationContext appContext, final GatewayRelayClient relayClient, final Session relaySession, final Cloud requesterCloud,
-									   final Relay relay, final String requesterQoSMonitorPublicKey, final int noIteration, final int testMessageSize) {
+									   final Relay relay, final String requesterQoSMonitorPublicKey, final byte noIteration, final int testMessageSize, final long timeout) {
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.notNull(relayClient, "relayClient is null.");
 		Assert.notNull(relaySession, "relaySession is null.");
@@ -61,6 +79,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		Assert.isTrue(!Utilities.isEmpty(requesterQoSMonitorPublicKey), "public key is null or blank.");
 		Assert.isTrue(noIteration > 0, "Number of iteration must be positive.");
 		Assert.isTrue(testMessageSize > 0, "Test message's size must be positive.");
+		Assert.isTrue(timeout > 0, "Timeout must be positive.");
 		
 		this.qosDBService = appContext.getBean(QoSDBService.class);
 		this.relayClient = relayClient;
@@ -70,6 +89,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		this.requesterQoSMonitorPublicKey = Utilities.getPublicKeyFromBase64EncodedString(requesterQoSMonitorPublicKey);
 		this.noIteration = noIteration;
 		this.testMessageSize = testMessageSize;
+		this.timeout = timeout;
 		
 		setName("TEST-RECEIVER-" + requesterCloud.getName() + "." + requesterCloud.getOperator() + "|" + relay.getAddress() + ":" + relay.getPort());
 	}
@@ -96,8 +116,35 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void onMessage(final Message message) {
-		// TODO Auto-generated method stub
+		logger.debug("onMessage started...");
 
+		try {
+			if (isControlMessage(message)) {
+				handleControlMessage(message);
+			} else {
+				final byte[] bytes = relayClient.getBytesFromMessage(message, requesterQoSMonitorPublicKey);
+				if (receiver) {
+					relayClient.sendBytes(relaySession, sender, requesterQoSMonitorPublicKey, bytes);
+				} else {
+					final long end = System.currentTimeMillis();
+					if (testResults.containsKey(bytes[0]) && testResults.get(bytes[0])[1] <= 0) {
+						testResults.get(bytes[0])[1] = end;
+					}
+					try {
+						blockingQueue.put(new Object());
+					} catch (final InterruptedException ex) {
+						// never happens
+						logger.debug(ex.getMessage());
+						logger.debug("Stacktrace:", ex);
+						closeAndInterrupt();
+					}
+				}
+			}
+		} catch (final JMSException | ArrowheadException ex) {
+			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			closeAndInterrupt();
+		}
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -115,5 +162,135 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public void run() {
+		logger.debug("run started...");
+
+		if (!initialized) {
+			throw new IllegalStateException("Thread is not initialized.");
+		}
+		
+		try {
+			blockingQueue.take(); // waiting for the other side to finish test run
+		} catch (final InterruptedException ex) {
+			logger.debug(ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			return;
+		}
+		
+		testRun();
+		
+		if (interrupted) {
+			close();
+			return;
+		}
+		
+		updateDBWithTestResults();
+		
+		try {
+			relayClient.sendCloseControlMessage(relaySession, controlSender, queueId);
+		} catch (final JMSException ex) {
+			logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
+			logger.debug("Stacktrace:", ex);
+			close();
+		}
+	}
+
+	//=================================================================================================
+	// assistant methods
+	
+	//-------------------------------------------------------------------------------------------------
+	private void updateDBWithTestResults() {
+		// TODO: implementation
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void testRun() {
+		for (byte b = 0; b < noIteration; ++b) {
+			if (interrupted) {
+				close();
+				return;
+			}
+			
+			final byte[] generatedBytes = generateTestMessage();
+			final byte[] testMessage = new byte[testMessageSize];
+			testMessage[0] = b; // id of the message
+			System.arraycopy(generatedBytes, 0, testMessage, 1, generatedBytes.length);
+			final long[] times = new long[2];
+			final long start = System.currentTimeMillis();
+			times[0] = start;
+			testResults.put(b, times);
+			try {
+				relayClient.sendBytes(relaySession, sender, requesterQoSMonitorPublicKey, testMessage);
+				final Object result = blockingQueue.poll(timeout, TimeUnit.MILLISECONDS); // wait for the echo before new iteration
+				if (result == null) { // means timeout
+					times[1] = start + timeout + 1;
+				}
+			} catch (final JMSException | ArrowheadException | InterruptedException ex) {
+				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
+				logger.debug("Stacktrace:", ex);
+				closeAndInterrupt();
+			}
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private byte[] generateTestMessage() {
+		return RandomUtils.nextBytes(testMessageSize - 1);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void close() {
+		logger.debug("close started...");
+		
+		relayClient.closeConnection(relaySession);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void closeAndInterrupt() {
+		close();
+		interrupt();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isControlMessage(final Message message) throws JMSException {
+		logger.debug("isControlMessage started...");
+		
+		final Destination destination = message.getJMSDestination();
+		final Queue queue = (Queue) destination;
+		
+		return queue.getQueueName().endsWith(GatewayRelayClient.CONTROL_QUEUE_SUFFIX);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private boolean isCloseMessage(final Message message) throws JMSException {
+		logger.debug("isCloseMessage started...");
+		
+		if (message instanceof TextMessage) {
+			final TextMessage textMessage = (TextMessage) message;
+			
+			return textMessage.getText().startsWith(CLOSE_MESSAGE_PREFIX);
+		}
+		
+		return false;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void handleControlMessage(final Message message) throws JMSException {
+		logger.debug("handleControlMessage started...");
+		
+		if (isCloseMessage(message)) {
+			relayClient.handleCloseControlMessage(message, relaySession);
+			closeAndInterrupt();
+		} else { // SWITCH control message
+			relayClient.validateSwitchControlMessage(message);
+			try {
+				receiver = false;
+				blockingQueue.put(new Object()); // to start the reverse testing
+			} catch (final InterruptedException ex) {
+				// never happens
+				logger.debug(ex.getMessage());
+				logger.debug("Stacktrace:", ex);
+				closeAndInterrupt();
+			}
+		}
 	}
 }
