@@ -44,6 +44,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 	private static final String TCP = "tcp";
 	private static final String SSL = "ssl";
 	private static final String CLOSE_COMMAND = "CLOSE ";
+	private static final String SWITCH_COMMAND = "SWITCH ";
 	
 	private static final int CLIENT_ID_LENGTH = 16;
 	private static final int QUEUE_ID_LENGTH = 48;
@@ -273,7 +274,7 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 		
 		if (msg instanceof TextMessage) {
 			final TextMessage tmsg = (TextMessage) msg;
-			final String queueId = parseCommand(tmsg.getText());
+			final String queueId = parseCloseCommand(tmsg.getText());
 			if (tmsg.getJMSDestination() instanceof Queue) {
 				final Queue controlQueue = (Queue) tmsg.getJMSDestination();
 				final String suffix = "-" + queueId + CONTROL_QUEUE_SUFFIX;
@@ -282,6 +283,54 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 				}
 				
 				session.close();
+			} else {
+				throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
+			}
+		} else {
+			throw new JMSException("Invalid message class: " + msg.getClass().getSimpleName());
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void sendSwitchControlMessage(final Session session, final MessageProducer sender, final String queueId) throws JMSException {
+		logger.debug("sendSwitchControlMessage started...");
+		
+		Assert.notNull(session, "session is null.");
+		Assert.notNull(sender, "sender is null.");
+		Assert.isTrue(!Utilities.isEmpty(queueId), "queueId is null or blank.");
+		
+		if (sender.getDestination() instanceof Queue) {
+			final Queue controlQueue = (Queue) sender.getDestination();
+			final String suffix = "-" + queueId + CONTROL_QUEUE_SUFFIX;
+			if (!controlQueue.getQueueName().endsWith(suffix)) {
+				throw new AuthException("Sender can't send control messages.");
+			}
+			
+			final TextMessage msg = session.createTextMessage(SWITCH_COMMAND + queueId);
+			
+			sender.send(msg);
+		} else {
+			throw new JMSException("Invalid destination class: " + sender.getDestination().getClass().getSimpleName());
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public void validateSwitchControlMessage(final Message msg) throws JMSException {
+		logger.debug("isSwitchControlMessage started...");
+		
+		Assert.notNull(msg, "Message is null.");
+		
+		if (msg instanceof TextMessage) {
+			final TextMessage tmsg = (TextMessage) msg;
+			final String queueId = parseSwitchCommand(tmsg.getText());
+			if (tmsg.getJMSDestination() instanceof Queue) {
+				final Queue controlQueue = (Queue) tmsg.getJMSDestination();
+				final String suffix = "-" + queueId + CONTROL_QUEUE_SUFFIX;
+				if (!controlQueue.getQueueName().endsWith(suffix)) {
+					throw new AuthException("Unauthorized switch command: " + tmsg.getText());
+				}
 			} else {
 				throw new JMSException("Invalid destination class: " + tmsg.getJMSDestination().getClass().getSimpleName());
 			}
@@ -333,10 +382,26 @@ public class ActiveMQGatewayRelayClient implements GatewayRelayClient {
 
 	
 	//-------------------------------------------------------------------------------------------------
-	private String parseCommand(final String command) {
+	private String parseCloseCommand(final String command) {
 		final String cmd = command.trim();
 		
 		if (!cmd.startsWith(CLOSE_COMMAND)) {
+			throw new InvalidParameterException("Invalid command: " + cmd);
+		}
+		
+		final String[] parts = cmd.split(" ");
+		if (parts.length < 2) {
+			throw new InvalidParameterException("Missing queue id");
+		}
+		
+		return parts[1].trim();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private String parseSwitchCommand(final String command) {
+		final String cmd = command.trim();
+		
+		if (!cmd.startsWith(SWITCH_COMMAND)) {
 			throw new InvalidParameterException("Invalid command: " + cmd);
 		}
 		

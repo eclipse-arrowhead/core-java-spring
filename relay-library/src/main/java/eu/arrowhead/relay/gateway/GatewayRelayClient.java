@@ -33,5 +33,7 @@ public interface GatewayRelayClient extends RelayClient {
 	
 	//-------------------------------------------------------------------------------------------------
 	public void sendCloseControlMessage(final Session session, final MessageProducer sender, final String queueId) throws JMSException;
+	public void sendSwitchControlMessage(final Session session, final MessageProducer sender, final String queueId) throws JMSException;
 	public void handleCloseControlMessage(final Message msg, final Session session) throws JMSException;
+	public void validateSwitchControlMessage(final Message msg) throws JMSException;
 }

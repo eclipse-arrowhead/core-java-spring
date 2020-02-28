@@ -43,9 +43,6 @@ public class RelayTestService {
 	//=================================================================================================
 	// members
 	
-	@Value(CoreCommonConstants.$GATEWAY_SOCKET_TIMEOUT_WD)
-	private int gatewaySocketTimeout;
-	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
