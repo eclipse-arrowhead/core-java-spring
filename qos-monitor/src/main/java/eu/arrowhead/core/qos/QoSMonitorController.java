@@ -132,7 +132,7 @@ public class QoSMonitorController {
 		logger.debug("New getMeasurements get request recieved with page: {} and item_per page: {}", page, size);
 
 		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI);
-		final PingMeasurementListResponseDTO measurementResponse = qosDBService.getPingMeasurementResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
+		final PingMeasurementListResponseDTO measurementResponse = qosDBService.getIntraPingMeasurementResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(), 
 																												 validParameters.getValidatedDirecion(), sortField);
 
 		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
@@ -156,7 +156,7 @@ public class QoSMonitorController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
-		final PingMeasurementResponseDTO pingMeasurementResponse = qosDBService.getPingMeasurementBySystemIdResponse(id);
+		final PingMeasurementResponseDTO pingMeasurementResponse = qosDBService.getIntraPingMeasurementBySystemIdResponse(id);
 
 		if (pingMeasurementResponse.getId() == null) {
 
@@ -187,7 +187,7 @@ public class QoSMonitorController {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
 
-		final PingMeasurementResponseDTO pingMeasurementResponse = qosDBService.getPingMeasurementBySystemIdResponse(id);
+		final PingMeasurementResponseDTO pingMeasurementResponse = qosDBService.getIntraPingMeasurementBySystemIdResponse(id);
 
 		logger.debug("PingMeasurement entry with system id: {} successfully retrieved", id);
 		return pingMeasurementResponse;

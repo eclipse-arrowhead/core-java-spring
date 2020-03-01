@@ -113,7 +113,7 @@ public class QoSMonitorControllerTest {
 	public void getPingMeasurementsWithoutParametersTest() throws Exception {
 		final PingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest();
 
-		when(qoSDBService.getPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI)
 				.accept(MediaType.APPLICATION_JSON))
@@ -130,7 +130,7 @@ public class QoSMonitorControllerTest {
 		final int responseSize = 3;
 		final PingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest(responseSize);
 
-		when(qoSDBService.getPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI)
 				.param("page", "0")
@@ -149,7 +149,7 @@ public class QoSMonitorControllerTest {
 		final int responseSize = 3;
 		final PingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest(responseSize);
 
-		when(qoSDBService.getPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI)
 				.param("item_per_page", String.valueOf(responseSize))
@@ -172,7 +172,7 @@ public class QoSMonitorControllerTest {
 		final int requestedId = 1;
 		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -189,7 +189,7 @@ public class QoSMonitorControllerTest {
 		final int requestedId = 0;
 		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -207,7 +207,7 @@ public class QoSMonitorControllerTest {
 	public void getManagementPingMeasurementBySystemIdDBExceptionTest() throws Exception {
 		final int requestedId = 1;
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenThrow(new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenThrow(new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -226,7 +226,7 @@ public class QoSMonitorControllerTest {
 		final PingMeasurementResponseDTO pingMeasurementResponseDTO = new PingMeasurementResponseDTO();
 		 pingMeasurementResponseDTO.setId( null );
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -246,7 +246,7 @@ public class QoSMonitorControllerTest {
 		final int requestedId = 1;
 		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -263,7 +263,7 @@ public class QoSMonitorControllerTest {
 		final int requestedId = 0;
 		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -281,7 +281,7 @@ public class QoSMonitorControllerTest {
 	public void getPingMeasurementBySystemIdDBExceptionTest() throws Exception {
 		final int requestedId = 1;
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenThrow(new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenThrow(new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG));
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))
@@ -300,7 +300,7 @@ public class QoSMonitorControllerTest {
 		final PingMeasurementResponseDTO pingMeasurementResponseDTO = new PingMeasurementResponseDTO();
 		 pingMeasurementResponseDTO.setId( null );
 
-		when(qoSDBService.getPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
+		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
 		final MvcResult response = this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + "/" + requestedId)
 				.accept(MediaType.APPLICATION_JSON))

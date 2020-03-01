@@ -219,10 +219,10 @@ public class PingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
 
-		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO);
 		final PingMeasurementCalculationsDTO calculationsDTO = handlePingMeasurement(measurement, responseList, aroundNow);
 
-		qoSDBService.updateMeasurement(aroundNow, measurement);
+		qoSDBService.updateIntraMeasurement(aroundNow, measurement);
 
 		return calculationsDTO;
 
@@ -238,10 +238,10 @@ public class PingTask implements Job {
 			throw new InvalidParameterException("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 
-		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO);
 		handlePingMeasurement(measurement, aroundNow, calculationsDTO);
 
-		qoSDBService.updateMeasurement(aroundNow, measurement);
+		qoSDBService.updateIntraMeasurement(aroundNow, measurement);
 
 	}
 
@@ -251,33 +251,33 @@ public class PingTask implements Job {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList, aroundNow);
-		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getPingMeasurementByMeasurement(measurement);
+		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getIntraPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
 
-			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
+			qoSDBService.createIntraPingMeasurement(measurement, calculationsDTO, aroundNow);
 
 			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logIntraMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
 				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 
-					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+					qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
 
 		} else {
 
-			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
+			qoSDBService.updateIntraPingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
 			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
 
-				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
+				final QoSIntraPingMeasurementLog measurementLogSaved = qoSDBService.logIntraMeasurementToDB(measurement.getSystem().getAddress(), calculationsDTO, aroundNow);
 
 				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 
-					qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+					qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 				}
 			}
 		}
@@ -289,15 +289,15 @@ public class PingTask implements Job {
 	private void handlePingMeasurement(final QoSIntraMeasurement measurement, final ZonedDateTime aroundNow, final PingMeasurementCalculationsDTO calculationsDTO) {
 		logger.debug("handelPingMeasurement started...");
 
-		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getPingMeasurementByMeasurement(measurement);
+		final Optional<QoSIntraPingMeasurement> pingMeasurementOptional = qoSDBService.getIntraPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
 
-			qoSDBService.createPingMeasurement(measurement, calculationsDTO, aroundNow);
+			qoSDBService.createIntraPingMeasurement(measurement, calculationsDTO, aroundNow);
 
 		} else {
 
-			qoSDBService.updatePingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
+			qoSDBService.updateIntraPingMeasurement(measurement, calculationsDTO, pingMeasurementOptional.get(), aroundNow);
 
 		}
 

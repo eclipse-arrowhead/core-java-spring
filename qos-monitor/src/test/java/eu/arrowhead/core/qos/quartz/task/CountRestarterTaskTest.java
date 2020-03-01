@@ -68,7 +68,7 @@ public class CountRestarterTaskTest {
 
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(true);
 
-		doNothing().when(qoSDBService).updateCountStartedAt();
+		doNothing().when(qoSDBService).updateIntraCountStartedAt();
 
 		try {
 
@@ -83,7 +83,7 @@ public class CountRestarterTaskTest {
 		assertNotNull(debugMessages);
 
 		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
-		verify(qoSDBService, times(0)).updateCountStartedAt();
+		verify(qoSDBService, times(0)).updateIntraCountStartedAt();
 
 	}
 
@@ -96,7 +96,7 @@ public class CountRestarterTaskTest {
 
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 
-		doNothing().when(qoSDBService).updateCountStartedAt();
+		doNothing().when(qoSDBService).updateIntraCountStartedAt();
 
 		try {
 
@@ -111,7 +111,7 @@ public class CountRestarterTaskTest {
 		assertNotNull(debugMessages);
 
 		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
-		verify(qoSDBService, times(1)).updateCountStartedAt();
+		verify(qoSDBService, times(1)).updateIntraCountStartedAt();
 
 	}
 
@@ -125,7 +125,7 @@ public class CountRestarterTaskTest {
 
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 
-		doThrow(ArrowheadException.class).when(qoSDBService).updateCountStartedAt();
+		doThrow(ArrowheadException.class).when(qoSDBService).updateIntraCountStartedAt();
 
 		try {
 
@@ -142,7 +142,7 @@ public class CountRestarterTaskTest {
 			assertNotNull(debugMessages);
 
 			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
-			verify(qoSDBService, times(1)).updateCountStartedAt();
+			verify(qoSDBService, times(1)).updateIntraCountStartedAt();
 
 			throw ex;
 		}
