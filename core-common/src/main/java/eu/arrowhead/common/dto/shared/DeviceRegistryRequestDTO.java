@@ -21,7 +21,18 @@ public class DeviceRegistryRequestDTO implements Serializable {
 
 	//=================================================================================================
 	// methods
-	
+
+	public DeviceRegistryRequestDTO() {
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public DeviceRegistryRequestDTO(final DeviceRequestDTO device, final String endOfValidity, final Map<String, String> metadata, final Integer version) {
+		this.device = device;
+		this.endOfValidity = endOfValidity;
+		this.metadata = metadata;
+		this.version = version;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public DeviceRequestDTO getDevice() { return device; }
 	public String getEndOfValidity() { return endOfValidity; }

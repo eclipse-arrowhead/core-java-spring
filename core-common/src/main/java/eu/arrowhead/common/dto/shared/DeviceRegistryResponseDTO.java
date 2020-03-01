@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 @JsonInclude(Include.NON_NULL)
 public class DeviceRegistryResponseDTO implements Serializable {
@@ -24,7 +25,23 @@ public class DeviceRegistryResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// methods
-	
+
+
+	public DeviceRegistryResponseDTO() {
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public DeviceRegistryResponseDTO(final long id, final DeviceResponseDTO device, final String endOfValidity,
+									 final Map<String, String> metadata, final int version, final String createdAt, final String updatedAt) {
+		this.id = id;
+		this.device = device;
+		this.endOfValidity = endOfValidity;
+		this.metadata = metadata;
+		this.version = version;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public DeviceResponseDTO getDevice() { return device; }
@@ -42,4 +59,23 @@ public class DeviceRegistryResponseDTO implements Serializable {
 	public void setVersion(final int version) { this.version = version; }
 	public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
+
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) { return true; }
+		if (o == null || getClass() != o.getClass()) { return false; }
+		final DeviceRegistryResponseDTO that = (DeviceRegistryResponseDTO) o;
+		return id == that.id &&
+				version == that.version &&
+				device.equals(that.device) &&
+				Objects.equals(endOfValidity, that.endOfValidity) &&
+				Objects.equals(metadata, that.metadata) &&
+				createdAt.equals(that.createdAt) &&
+				updatedAt.equals(that.updatedAt);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, device, endOfValidity, metadata, version, createdAt, updatedAt);
+	}
 }

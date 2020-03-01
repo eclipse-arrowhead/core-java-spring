@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,6 +26,8 @@ import eu.arrowhead.core.deviceregistry.database.service.DeviceRegistryDBService
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -67,16 +71,13 @@ public class DeviceRegistryControllerDeviceTest {
     @MockBean(name = "mockDeviceRegistryDBService")
     private DeviceRegistryDBService deviceRegistryDBService;
 
-    @MockBean(name = "mockCommonDBService")
-    private CommonDBService commonDBService;
-
-
     //=================================================================================================
     // methods
 
     //-------------------------------------------------------------------------------------------------
     @Before
     public void setup() {
+        reset(deviceRegistryDBService);
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
@@ -453,14 +454,34 @@ public class DeviceRegistryControllerDeviceTest {
     }
 
     @Test
-    public void removeDevice() {
+    public void removeDeviceInvalidId() throws Exception {
+        this.mockMvc.perform(delete("/deviceregistry/mgmt/devices/" + NEGATIVE_DEVICE_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
     }
 
     @Test
-    public void registerDevice() {
+    public void removeDeviceUnknownId() throws Exception {
+        doThrow(new InvalidParameterException("No device with id : " + UNKNOWN_DEVICE_ID))
+                .when(deviceRegistryDBService)
+                .removeDeviceById(eq(UNKNOWN_DEVICE_ID));
+
+        this.mockMvc.perform(delete("/deviceregistry/mgmt/devices/" + UNKNOWN_DEVICE_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
     }
 
     @Test
-    public void unregisterDevice() {
+    public void removeDevice() throws Exception {
+
+        this.mockMvc.perform(delete("/deviceregistry/mgmt/devices/" + VALID_DEVICE_ID)
+                                     .accept(MediaType.APPLICATION_JSON)
+                                     .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andReturn();
     }
 }

@@ -22,7 +22,19 @@ public class SystemRegistryRequestDTO implements Serializable {
 
 	//=================================================================================================
 	// methods
-	
+
+	public SystemRegistryRequestDTO() {
+	}
+
+	public SystemRegistryRequestDTO(final SystemRequestDTO system, final DeviceRequestDTO provider, final String endOfValidity,
+									final Map<String, String> metadata, final Integer version) {
+		this.system = system;
+		this.provider = provider;
+		this.endOfValidity = endOfValidity;
+		this.metadata = metadata;
+		this.version = version;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public SystemRequestDTO getSystem() { return system; }
 	public DeviceRequestDTO getProvider() { return provider; }

@@ -1,9 +1,9 @@
-package eu.arrowhead.core.deviceregistry;
+package eu.arrowhead.core.systemregistry;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.service.CommonDBService;
-import eu.arrowhead.core.deviceregistry.database.service.DeviceRegistryDBService;
+import eu.arrowhead.core.systemregistry.database.service.SystemRegistryDBService;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -19,10 +19,10 @@ import org.springframework.context.annotation.Primary;
 @ComponentScan(basePackages = CommonConstants.BASE_PACKAGE,
         excludeFilters = {
                 @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*database.*"),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = DeviceRegistryMain.class),
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SystemRegistryMain.class),
         })
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
-public class DeviceRegistryTestContext {
+public class SystemRegistryTestContext {
 
     //=================================================================================================
     // methods
@@ -30,8 +30,8 @@ public class DeviceRegistryTestContext {
     //-------------------------------------------------------------------------------------------------
     @Bean
     @Primary // This bean is primary only in test context
-    public DeviceRegistryDBService mockDeviceRegistryDBService() {
-        return Mockito.mock(DeviceRegistryDBService.class);
+    public SystemRegistryDBService mockSystemRegistryDBService() {
+        return Mockito.mock(SystemRegistryDBService.class);
     }
 
     //-------------------------------------------------------------------------------------------------

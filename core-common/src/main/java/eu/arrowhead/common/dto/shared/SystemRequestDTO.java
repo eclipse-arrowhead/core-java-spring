@@ -17,7 +17,18 @@ public class SystemRequestDTO implements Serializable {
 	
 	//=================================================================================================
 	// methods
-	
+
+
+	public SystemRequestDTO() {
+	}
+
+	public SystemRequestDTO(final String systemName, final String address, final Integer port, final String authenticationInfo) {
+		this.systemName = systemName;
+		this.address = address;
+		this.port = port;
+		this.authenticationInfo = authenticationInfo;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	public String getSystemName() { return systemName; }
 	public String getAddress() { return address; }
