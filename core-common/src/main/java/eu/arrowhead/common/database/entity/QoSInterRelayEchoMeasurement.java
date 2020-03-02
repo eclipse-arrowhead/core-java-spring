@@ -32,9 +32,6 @@ public class QoSInterRelayEchoMeasurement {
 	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSInterRelayMeasurement measurement;
 
-	@Column(name = "available", nullable = false)
-	private boolean available = false;
-
 	@Column(name = "last_access_at", nullable = true)
 	private ZonedDateTime lastAccessAt;
 
@@ -102,7 +99,6 @@ public class QoSInterRelayEchoMeasurement {
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
 	public QoSInterRelayMeasurement getMeasurement() { return measurement; }
-	public boolean isAvailable() { return available; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
 	public Integer getMinResponseTime() { return minResponseTime; }
 	public Integer getMaxResponseTime() { return maxResponseTime; }
@@ -122,7 +118,6 @@ public class QoSInterRelayEchoMeasurement {
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
 	public void setMeasurement(final QoSInterRelayMeasurement measurement) { this.measurement = measurement; }
-	public void setAvailable(final boolean available) { this.available = available; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
 	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }

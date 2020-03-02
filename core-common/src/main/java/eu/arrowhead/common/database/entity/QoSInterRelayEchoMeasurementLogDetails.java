@@ -32,9 +32,6 @@ public class QoSInterRelayEchoMeasurementLogDetails {
 	@Column(name = "measurement_sequenece_number", nullable = false)
 	private int measurementSequeneceNumber;
 
-	@Column(name = "success_flag", nullable = false)
-	private boolean successFlag = false;// delete
-
 	@Column(name = "timeout_flag", nullable = false)
 	private boolean timeoutFlag = false;
 
@@ -46,12 +43,6 @@ public class QoSInterRelayEchoMeasurementLogDetails {
 
 	@Column(name = "size_", nullable = true)
 	private Integer size;
-
-	@Column(name = "rtt", nullable = true)
-	private Integer rtt;//delete
-
-	@Column(name = "ttl", nullable = true)
-	private Integer ttl;//delete
 
 	@Column(name = "duration", nullable = true)
 	private Integer duration;
@@ -87,26 +78,20 @@ public class QoSInterRelayEchoMeasurementLogDetails {
 	//-------------------------------------------------------------------------------------------------
 	public QoSInterRelayEchoMeasurementLog getMeasurementLog() { return measurementLog; }
 	public int getMeasurementSequeneceNumber() { return measurementSequeneceNumber; }
-	public boolean isSuccessFlag() { return successFlag; }
 	public boolean isTimeoutFlag() { return timeoutFlag; }
 	public String getErrorMessage() { return errorMessage; }
 	public String getThrowable() { return throwable; }
 	public Integer getSize() { return size; }
-	public Integer getRtt() { return rtt; }
-	public Integer getTtl() { return ttl; }
 	public Integer getDuration() { return duration; }
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setMeasurementLog(final QoSInterRelayEchoMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
 	public void setMeasurementSequeneceNumber(final int measurementSequeneceNumber) { this.measurementSequeneceNumber = measurementSequeneceNumber; }
-	public void setSuccessFlag(final boolean successFlag) { this.successFlag = successFlag; }
 	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
 	public void setErrorMessage(final String errorMessage) { this.errorMessage = errorMessage; }
 	public void setThrowable(final String throwable) { this.throwable = throwable; }
 	public void setSize(final Integer size) { this.size = size; }
-	public void setRtt(final Integer rtt) { this.rtt = rtt; }
-	public void setTtl(final Integer ttl) { this.ttl = ttl; }
 	public void setDuration(final Integer duration) { this.duration = duration; }
 	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
 

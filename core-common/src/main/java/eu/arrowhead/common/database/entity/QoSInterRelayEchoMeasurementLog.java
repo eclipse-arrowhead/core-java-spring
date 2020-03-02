@@ -4,9 +4,12 @@ import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -22,11 +25,9 @@ public class QoSInterRelayEchoMeasurementLog {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@Column(name = "measured_address", nullable = false)
-	private String measuredAddress; //fk_measurment
-
-	@Column(name = "available", nullable = false)
-	private boolean available = false; //delete
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
+	private QoSInterRelayMeasurement measurement;
 
 	@Column(name = "min_response_time", nullable = true)
 	private Integer minResponseTime;
@@ -84,8 +85,7 @@ public class QoSInterRelayEchoMeasurementLog {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public String getMeasuredAddress() { return measuredAddress; }
-	public boolean isAvailable() { return available; }
+	public QoSInterRelayMeasurement getMeasurement() { return measurement; }
 	public Integer getMinResponseTime() { return minResponseTime; }
 	public Integer getMaxResponseTime() { return maxResponseTime; }
 	public Integer getMeanResponseTimeWithTimeout() { return meanResponseTimeWithTimeout; }
@@ -98,8 +98,7 @@ public class QoSInterRelayEchoMeasurementLog {
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setMeasuredAddress(final String measuredSystemAddress) { this.measuredAddress = measuredSystemAddress; }
-	public void setAvailable(final boolean available) { this.available = available; }
+	public void setMeasurement(final QoSInterRelayMeasurement measurement) { this.measurement = measurement; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
 	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }
 	public void setMeanResponseTimeWithTimeout(final Integer meanResponseTimeWithTimeout) { this.meanResponseTimeWithTimeout = meanResponseTimeWithTimeout; }
