@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import com.google.gson.Gson;
 
 import eu.arrowhead.common.CommonConstants;
 
@@ -162,11 +161,6 @@ public class SenML implements Serializable {
     return ut;
   }
   
-  public String toString() {
-      Gson gson = new Gson();
-      return gson.toJson(this);
-  }
-
 
   //-------------------------------------------------------------------------------------------------
 }
