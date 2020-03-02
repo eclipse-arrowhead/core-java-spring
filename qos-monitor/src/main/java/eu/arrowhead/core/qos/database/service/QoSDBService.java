@@ -19,6 +19,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.QoSInterMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
@@ -29,6 +30,7 @@ import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.System;
+import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
 import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.QoSInterMeasurementPingRepository;
 import eu.arrowhead.common.database.repository.QoSInterMeasurementRepository;
@@ -40,9 +42,12 @@ import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetails
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -60,6 +65,7 @@ public class QoSDBService {
 	private static final String NOT_IN_DB_ERROR_MESSAGE = " is not available in database";
 	private static final String EMPTY_OR_NULL_ERROR_MESSAGE = " is empty or null";
 	private static final String NULL_ERROR_MESSAGE = " is null";
+	private static final String NOT_APPLICABLE_RELAY_TYPE = " is not an applicable relay type";
 
 	@Autowired
 	private QoSIntraMeasurementRepository qoSIntraMeasurementRepository;
@@ -93,6 +99,9 @@ public class QoSDBService {
 	
 	@Autowired
 	private RelayRepository relayRepository;
+	
+	@Autowired
+	private CloudGatekeeperRelayRepository cloudGatekeeperRelayRepository;
 
 	protected Logger logger = LogManager.getLogger(QoSDBService.class);
 	
@@ -200,6 +209,47 @@ public class QoSDBService {
 			measurement = createIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
 		}else {
 			 measurement = qoSIntraMeasurementOptional.get();
+		}
+
+		return measurement;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	public QoSInterMeasurement getOrCreateInterMeasurement(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO) {
+		logger.debug("getOrCreateInterMeasurement started...");
+
+		validateCloudResponseDTO(cloudResponseDTO);
+		validateRelayResponseDTO(relayResponseDTO);
+		
+		final Cloud cloud;
+		final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(cloudResponseDTO.getOperator(), cloudResponseDTO.getName());
+		if (cloudOpt.isPresent()) {
+			cloud = cloudOpt.get();
+		} else {
+			throw new InvalidParameterException("Requested cloud" + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		final Relay relay;
+		final Optional<Relay> relayOpt = relayRepository.findByAddressAndPort(relayResponseDTO.getAddress(), relayResponseDTO.getPort());
+		if (relayOpt.isPresent()) {
+			relay = relayOpt.get();
+		} else {
+			throw new InvalidParameterException("Requested relay" + NOT_IN_DB_ERROR_MESSAGE);
+		}
+		
+		final Optional<CloudGatekeeperRelay> cloudRelayConn = cloudGatekeeperRelayRepository.findByCloudAndRelay(cloud, relay);
+		if (cloudRelayConn.isEmpty()) {
+			throw new InvalidParameterException("No connection between cloud(" + cloud.getName() +"." + cloud.getOperator() + ") and relay(" + relay.getAddress() + ":" + relay.getPort() + ")");
+		}
+		
+		final QoSInterMeasurement measurement;
+		final Optional<QoSInterMeasurement> qoSInterMeasurementOptional = qoSInterMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, QoSMeasurementType.PING);
+		if (qoSInterMeasurementOptional.isEmpty()) {
+			final ZonedDateTime aroundNow = ZonedDateTime.now();
+			measurement = createInterMeasurement(cloud, relay, QoSMeasurementType.PING, aroundNow);
+		}else {
+			 measurement = qoSInterMeasurementOptional.get();
 		}
 
 		return measurement;
@@ -765,5 +815,39 @@ public class QoSDBService {
 		if (Utilities.isEmpty(systemResponseDTO.getAddress())) {
 			throw new InvalidParameterException("System address" + EMPTY_OR_NULL_ERROR_MESSAGE);
 		}
-	}	
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloudResponseDTO (final CloudResponseDTO dto) {
+		logger.debug("validateCloudResponseDTO started...");
+
+		if (dto == null) {
+			throw new InvalidParameterException("CloudResponseDTO" + NULL_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(dto.getName())) {
+			throw new InvalidParameterException("Cloud name" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(dto.getOperator())) {
+			throw new InvalidParameterException("Cloud operator" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateRelayResponseDTO (final RelayResponseDTO dto) {
+		logger.debug("validateRelayResponseDTO started...");
+
+		if (dto == null) {
+			throw new InvalidParameterException("RelayResponseDTO" + NULL_ERROR_MESSAGE);
+		}
+		
+		if (Utilities.isEmpty(dto.getAddress())) {
+			throw new InvalidParameterException("Relay address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		if (dto.getType() == RelayType.GATEWAY_RELAY) {
+			throw new InvalidParameterException(dto.getType().name() + NOT_APPLICABLE_RELAY_TYPE);
+		}
+	}
 }
