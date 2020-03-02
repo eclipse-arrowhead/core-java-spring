@@ -22,8 +22,8 @@ import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 
 @Entity
-@Table(name = "qos_inter_measurement", uniqueConstraints = @UniqueConstraint(columnNames = {"cloudId", "relayId", "measurementType"}))
-public class QoSInterMeasurement {
+@Table(name = "qos_inter_relay_measurement", uniqueConstraints = @UniqueConstraint(columnNames = {"cloudId", "relayId", "measurementType"}))
+public class QoSInterRelayMeasurement {
 
 	//=================================================================================================
 	// members
@@ -61,10 +61,10 @@ public class QoSInterMeasurement {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterMeasurement() {}
+	public QoSInterRelayMeasurement() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterMeasurement(final Cloud cloud, final Relay relay, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt) {
+	public QoSInterRelayMeasurement(final Cloud cloud, final Relay relay, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt) {
 		this.cloud = cloud;
 		this.relay = relay;
 		this.measurementType = measurementType;

@@ -15,8 +15,8 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "qos_inter_ping_measurement_log_details")
-public class QoSInterPingMeasurementLogDetails {
+@Table(name = "qos_inter_relay_echo_measurement_log_details")
+public class QoSInterRelayEchoMeasurementLogDetails {
 
 	//=================================================================================================
 	// members
@@ -27,13 +27,13 @@ public class QoSInterPingMeasurementLogDetails {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "measurement_log_id", referencedColumnName = "id", nullable = false, unique = true)
-	private QoSInterPingMeasurementLog measurementLog;
+	private QoSInterRelayEchoMeasurementLog measurementLog;
 
 	@Column(name = "measurement_sequenece_number", nullable = false)
 	private int measurementSequeneceNumber;
 
 	@Column(name = "success_flag", nullable = false)
-	private boolean successFlag = false;
+	private boolean successFlag = false;// delete
 
 	@Column(name = "timeout_flag", nullable = false)
 	private boolean timeoutFlag = false;
@@ -48,10 +48,10 @@ public class QoSInterPingMeasurementLogDetails {
 	private Integer size;
 
 	@Column(name = "rtt", nullable = true)
-	private Integer rtt;
+	private Integer rtt;//delete
 
 	@Column(name = "ttl", nullable = true)
-	private Integer ttl;
+	private Integer ttl;//delete
 
 	@Column(name = "duration", nullable = true)
 	private Integer duration;
@@ -69,7 +69,7 @@ public class QoSInterPingMeasurementLogDetails {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterPingMeasurementLogDetails() {}
+	public QoSInterRelayEchoMeasurementLogDetails() {}
 
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
@@ -85,7 +85,7 @@ public class QoSInterPingMeasurementLogDetails {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterPingMeasurementLog getMeasurementLog() { return measurementLog; }
+	public QoSInterRelayEchoMeasurementLog getMeasurementLog() { return measurementLog; }
 	public int getMeasurementSequeneceNumber() { return measurementSequeneceNumber; }
 	public boolean isSuccessFlag() { return successFlag; }
 	public boolean isTimeoutFlag() { return timeoutFlag; }
@@ -98,7 +98,7 @@ public class QoSInterPingMeasurementLogDetails {
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setMeasurementLog(final QoSInterPingMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
+	public void setMeasurementLog(final QoSInterRelayEchoMeasurementLog measurementLog) { this.measurementLog = measurementLog; }
 	public void setMeasurementSequeneceNumber(final int measurementSequeneceNumber) { this.measurementSequeneceNumber = measurementSequeneceNumber; }
 	public void setSuccessFlag(final boolean successFlag) { this.successFlag = successFlag; }
 	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }

@@ -16,8 +16,8 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "qos_inter_ping_measurement")
-public class QoSInterPingMeasurement {
+@Table(name = "qos_inter_relay_echo_measurement")
+public class QoSInterRelayEchoMeasurement {
 
 	//=================================================================================================
 	// members
@@ -30,7 +30,7 @@ public class QoSInterPingMeasurement {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
-	private QoSInterMeasurement measurement;
+	private QoSInterRelayMeasurement measurement;
 
 	@Column(name = "available", nullable = false)
 	private boolean available = false;
@@ -84,7 +84,7 @@ public class QoSInterPingMeasurement {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterPingMeasurement() {}
+	public QoSInterRelayEchoMeasurement() {}
 
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
@@ -101,7 +101,7 @@ public class QoSInterPingMeasurement {
 
 	//-------------------------------------------------------------------------------------------------
 	public long getId() { return id; }
-	public QoSInterMeasurement getMeasurement() { return measurement; }
+	public QoSInterRelayMeasurement getMeasurement() { return measurement; }
 	public boolean isAvailable() { return available; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
 	public Integer getMinResponseTime() { return minResponseTime; }
@@ -121,7 +121,7 @@ public class QoSInterPingMeasurement {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final long id) { this.id = id; }
-	public void setMeasurement(final QoSInterMeasurement measurement) { this.measurement = measurement; }
+	public void setMeasurement(final QoSInterRelayMeasurement measurement) { this.measurement = measurement; }
 	public void setAvailable(final boolean available) { this.available = available; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }

@@ -408,7 +408,7 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `qos_inter_measurement` (
+CREATE TABLE IF NOT EXISTS `qos_inter_relay_measurement` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`cloud_id` bigint(20) NOT NULL,
 	`relay_id` bigint(20) NOT NULL,
@@ -422,7 +422,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_measurement` (
 	UNIQUE KEY `unique_cloud_relay_measurement_type` (`cloud_id`, `relay_id`, `measurement_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement` (
+CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`measurement_id` bigint(20) NOT NULL,
 	`available` int(1) NOT NULL DEFAULT 0,
@@ -441,12 +441,12 @@ CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement` (
 	`received_all` bigint(20) NOT NULL DEFAULT 0,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_inter_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_measurement` (`id`) ON DELETE CASCADE,
-	UNIQUE KEY `unique_inter_measurement` (`measurement_id`)
+	CONSTRAINT `fk_inter_relay_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_relay_measurement` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_inter_relay_echo_measurement` (`measurement_id`)
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement_log` (
+CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`measured_address` varchar(255) NOT NULL,
 	`available` int(1) NOT NULL DEFAULT 0,
@@ -465,7 +465,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement_log` (
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement_log_details` (
+CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log_details` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`measurement_log_id` bigint(20) NOT NULL,
 	`measurement_sequenece_number` int(3) NOT NULL,
@@ -480,7 +480,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement_log_details` (
 	`measured_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_inter_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_ping_measurement_log` (`id`) ON DELETE CASCADE
+	CONSTRAINT `fk_inter_relay_echo_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_relay_echo_measurement_log` (`id`) ON DELETE CASCADE
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

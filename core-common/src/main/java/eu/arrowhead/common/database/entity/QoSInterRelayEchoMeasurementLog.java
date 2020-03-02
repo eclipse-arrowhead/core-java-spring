@@ -12,8 +12,8 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "qos_inter_ping_measurement_log")
-public class QoSInterPingMeasurementLog {
+@Table(name = "qos_inter_relay_echo_measurement_log")
+public class QoSInterRelayEchoMeasurementLog {
 
 	//=================================================================================================
 	// members
@@ -23,10 +23,10 @@ public class QoSInterPingMeasurementLog {
 	private long id;
 
 	@Column(name = "measured_address", nullable = false)
-	private String measuredAddress;
+	private String measuredAddress; //fk_measurment
 
 	@Column(name = "available", nullable = false)
-	private boolean available = false;
+	private boolean available = false; //delete
 
 	@Column(name = "min_response_time", nullable = true)
 	private Integer minResponseTime;
@@ -68,7 +68,7 @@ public class QoSInterPingMeasurementLog {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterPingMeasurementLog() {}
+	public QoSInterRelayEchoMeasurementLog() {}
 
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
