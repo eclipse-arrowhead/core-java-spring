@@ -42,6 +42,7 @@ import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
@@ -664,6 +665,32 @@ public class QoSDBService {
 		}
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurementsResponse(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getInterRelayEchoMeasurementsPage started...");
+		return DTOConverter.convertQoSInterRelayEchoMeasurementPageToQoSInterRelayEchoMeasurementListResponseDTO(getInterRelayEchoMeasurementsPage(page, size, direction, sortField));
+	}
+	//-------------------------------------------------------------------------------------------------
+	public Page<QoSInterRelayEchoMeasurement> getInterRelayEchoMeasurementsPage(final int page, final int size, final Direction direction, final String sortField) {
+		logger.debug("getInterRelayEchoMeasurementsPage started...");
+
+		final int validatedPage = page < 0 ? 0 : page;
+		final int validatedSize = size < 1 ? Integer.MAX_VALUE : size;
+		final Direction validatedDirection = direction == null ? Direction.ASC : direction;
+		final String validatedSortField = Utilities.isEmpty(sortField) ? CommonConstants.COMMON_FIELD_NAME_ID : sortField.trim();
+
+		if (!QoSInterRelayEchoMeasurement.SORTABLE_FIELDS_BY.contains(validatedSortField)) {
+			throw new InvalidParameterException(validatedSortField + NOT_AVAILABLE_SORTABLE_FIELD_ERROR_MESSAGE);
+		}
+		
+		try {
+			return qosInterRelayEchoMeasurementRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	public PingMeasurementResponseDTO getIntraPingMeasurementBySystemIdResponse(final long id) {
 		logger.debug("getIntraPingMeasurementBySystemIdResponse started ...");

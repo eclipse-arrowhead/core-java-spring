@@ -33,6 +33,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -64,6 +65,8 @@ public class QoSMonitorController {
 	private static final String QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI =  CoreCommonConstants.MGMT_URI + PING_MEASUREMENTS;
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI = QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
+	
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_URI = CoreCommonConstants.MGMT_URI + "/measurements/intercloud/relay_echo";
 
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_DESCRIPTION = "Return requested Ping-Measurements entries by the given parameters";
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entries returned";
@@ -77,6 +80,10 @@ public class QoSMonitorController {
 	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_200_MESSAGE = "Ping-Measurement entry returned";
 	private static final String OP_GET_QOS_MONITOR_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entry";
 
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_DESCRIPTION = "Return requested Inter-Cloud Relay-Echo measurments entries by the given parameters.";
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entry returned";
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entry";
+	
 	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	
@@ -168,6 +175,28 @@ public class QoSMonitorController {
 		}
 
 		return pingMeasurementResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurements(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+																							   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+																							   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+																							   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New getInterRelayEchoMeasurements request recieved with page: {} and item_per page: {}", page, size);
+
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_URI);
+		final QoSInterRelayEchoMeasurementListResponseDTO response = qosDBService.getInterRelayEchoMeasurementsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
+																												  		validParameters.getValidatedDirecion(), sortField);
+		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
+		return response;
 	}
 
 	//-------------------------------------------------------------------------------------------------

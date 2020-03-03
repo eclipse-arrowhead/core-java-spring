@@ -30,6 +30,8 @@ import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.Relay;
@@ -709,7 +711,7 @@ public class DTOConverter {
 		pingMeasurementResponseDTO.setCountStartedAt(pingMeasurement.getCountStartedAt());
 		pingMeasurementResponseDTO.setSentAll(pingMeasurement.getSentAll());
 		pingMeasurementResponseDTO.setReceivedAll(pingMeasurement.getReceivedAll());
-		pingMeasurementResponseDTO.setCreatedAt(pingMeasurement.getUpdatedAt());
+		pingMeasurementResponseDTO.setCreatedAt(pingMeasurement.getCreatedAt());
 		pingMeasurementResponseDTO.setUpdatedAt(pingMeasurement.getUpdatedAt());
 
 		return pingMeasurementResponseDTO;
@@ -743,6 +745,50 @@ public class DTOConverter {
 
 		return new PingMeasurementListResponseDTO(pingMeasurementEntries, entries.getTotalElements());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSInterRelayMeasurementResponseDTO convertQoSInterRelayMeasurementToQoSInterRelayMeasurementResponseDTO(final QoSInterRelayMeasurement entry) {
+		Assert.notNull(entry, "QoSInterRelayMeasurement is null");
+		
+		return new QoSInterRelayMeasurementResponseDTO(entry.getId(), convertCloudToCloudResponseDTO(entry.getCloud()), convertRelayToRelayResponseDTO(entry.getRelay()),
+													   entry.getMeasurementType(), entry.getStatus(), entry.getLastMeasurementAt(), entry.getCreatedAt(), entry.getUpdatedAt());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSInterRelayEchoMeasurementResponseDTO convertQoSInterRelayEchoMeasurementToQoSInterRelayEchoMeasurementResponseDTO(final QoSInterRelayEchoMeasurement entry) {
+		Assert.notNull(entry, "QoSInterRelayEchoMeasurement is null");
+		
+		return new QoSInterRelayEchoMeasurementResponseDTO(entry.getId(),
+														   convertQoSInterRelayMeasurementToQoSInterRelayMeasurementResponseDTO(entry.getMeasurement()),
+														   entry.getLastAccessAt(),
+														   entry.getMinResponseTime(),
+														   entry.getMaxResponseTime(),
+														   entry.getMeanResponseTimeWithTimeout(),
+														   entry.getMeanResponseTimeWithoutTimeout(),
+														   entry.getJitterWithTimeout(),
+														   entry.getJitterWithoutTimeout(),
+														   entry.getLostPerMeasurementPercent(),
+														   entry.getSent(),
+														   entry.getReceived(),
+														   entry.getCountStartedAt(),
+														   entry.getSentAll(),
+														   entry.getReceivedAll(),
+														   entry.getCreatedAt(),
+														   entry.getUpdatedAt());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSInterRelayEchoMeasurementListResponseDTO convertQoSInterRelayEchoMeasurementPageToQoSInterRelayEchoMeasurementListResponseDTO(final Page<QoSInterRelayEchoMeasurement> entries) {
+		Assert.notNull(entries, "Page<QoSInterRelayEchoMeasurement> is null");
+		
+		final List<QoSInterRelayEchoMeasurementResponseDTO> data = new ArrayList<>(entries.getSize());
+		for (final QoSInterRelayEchoMeasurement entry : entries) {
+			data.add(convertQoSInterRelayEchoMeasurementToQoSInterRelayEchoMeasurementResponseDTO(entry));
+		}
+		
+		return new QoSInterRelayEchoMeasurementListResponseDTO(data, entries.getTotalElements());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
