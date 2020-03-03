@@ -50,7 +50,7 @@ JMS Api and Apache ActiveMQ Client
 
 Every core system have basically the same general structure. We define three separate layers. 
 
-The first layer (web layer) is for the web service endpoints (in the controller classes) Here we define the REST endpoints, perform basic input validations and sometimes minor conversations on input parameters (i.e. create an enumeration value from a String). Basic validation means checking mandatory parameters are specified and valid, specified optional paramters are valid, the specified parameter combination is valid. We check everything in this layer that is possible without accessing the database (so no unique constraint checking here).
+The first layer (web layer) is for the web service endpoints (in the controller classes) Here we define the REST endpoints, perform basic input validations and sometimes minor conversations on input parameters (i.e. create an enumeration value from a String). Basic validation means checking mandatory parameters are specified and valid, specified optional parameters are valid, the specified parameter combination is valid. We check everything in this layer that is possible without accessing the database (so no unique constraint checking here).
 In the web layer no business logic is implemented, endpoints call a method from the second layer after input validation and possible conversation steps and returns the value. Let's see an example for an endpoint:
 
 @RestController
@@ -273,7 +273,7 @@ Let's see the contents of the module:
  - a predefined set of core systems can use query (/query URI) without limitations;
  - a predefined set of core systems can use query by system (/query/system/{id} URI);
  
- * eu.arrowhead.core.serviceregistry.swagger.SRSwaggerConfig: it is a descendant class of DefaultSwaggerConfig. It configures and actives Swagger UI. See Swagger Documentation for details.
+ * eu.arrowhead.core.serviceregistry.swagger.SRSwaggerConfig: it is a descendant class of DefaultSwaggerConfig. It configures and activates Swagger UI. See Swagger Documentation for details.
 
 9.3 Authorization Module
 
@@ -290,18 +290,63 @@ Let's see the contents of the module:
 * eu.arrowhead.core.authorization.AuthorizationMain: the main class of the Authorization core system is the default implementation of the Spring Boot web server (see Spring Boot documentation). We using annotations to tell Spring this is a Spring Boot application (@SpringBootApplication) and where to search for Spring-managed classes (@ComponentScan), database entities (@EntityScan) and database repositories (@EnableJpaRepositories). And it enables Swagger UI (@EnableSwagger2 annotation)
 * eu.arrowhead.core.authorization.AuthorizationApplicationInitListener: it overrides the getRequiredCoreSystemServiceUris(), because if there is Event Handler in the local cloud the it needs one of the Event Handler's service URIs to be able to notify about authorization rule changes.
 * eu.arrowhead.core.authorization.AuthorizationController: it contains the web service endpoints of the Authorization core system, see Authorization API documentation.
+* eu.arrowhead.core.authorization.database.service.AuthorizationDBService: this class implements the higher level database-related methods that handle inter-cloud and intra-cloud rule creation, deletion, reading and checking.
+* eu.arrowhead.core.authorization.security.AuthSecurityConfig: it's an empty descendant of the DefaultSecurityConfig class. We use @EnableWebSecurity and @Configuration annotations to activate the security.
+* eu.arrowhead.core.authorization.security.AuthAccessControlFilter: it is a descendant class of the CoreSystemAccessControlFilter and it enforces authentication requirements of the Authorization web services. Only works in secured mode (see @ConditionalOnProperty annotation). Implemented rules:
+
+ - web services are only accessible from the local cloud (inherited through the base class);
+ - management web services (/mgmt appears in the URI) are only accessible to the local system operator (sysop.<cloud>.<operator>.arrowhead.eu);
+ - a predefined set of core systems can use authorization checking and token generation services;
+ 
+* eu.arrowhead.core.authorization.swagger.AuthSwaggerConfig: it is a descendant class of DefaultSwaggerConfig. It configures and activates Swagger UI. See Swagger Documentation for details.
+* eu.arrowhead.core.authorization.token.TokenGenerationService: this class implements the token generation feature. The token is an additional security tool that Arrowhead providers can utilize to make sure that any consumer trying to use its services comes through the proper channel (using orchestration). A token is a long string identifier in which is signed (by the Authorization core system) and encrypted and contains information about the consumer (name, cloud), the service (so can't reuse token to access to a different service), the service interface (so can't reuse token to access the service in a different format/protocol) and optionally an expiration date (forcing consumers to orchestrate periodically). The consumer receives the token(s) in the orchestration results which can be passed to the provider as a query parameter (at least in case of HTTP(S) services). We are using JWT (JSON Web Tokens) standard (see jwt.io) and JOSE (JSON Object Signing and Encryption) specification suite (https://datatracker.ietf.org/wg/jose/charter/) to implement our token generation. We are using the jose4j (https://bitbucket.org/b_c/jose4j/wiki/Home) implementation (which relies solely on the Java Cryptography Architecture API for cryptography) of JOSE in this class. First, we generate the JSON object that contains the information about the consumer, service, etc.(and some other JWT-related data), then sign it using the Authorization core system's private key (the selected signing algorithm is "RS512" (RSA/SHA512). After that, we encrypt the signed JSON using the provider's public key (which is stored in the DB as authenticationInfo). The encryption algorithm is "A256CBC-HS512". We also need a key management encryption algorithm as well (hence the previous algorithm uses a generated secret key that need to include in the JSON in an encrypted format), which is "RSA-OAEP-256". It seems difficult, but the jose4j did most of the work: we just have to select the algorithms, provide the necessary keys and payload, and call some high-level methods.
+
+9.4 Orchestrator Module
+
+The Orchestration core system is responsible for storing orchestration rules and performs store (using the previously mentioned rules) and dynamic orchestration. In both cases, the orchestrator tries to find suitable providers for a consumer. These providers can be local ones or (if a gatekeeper is installed in the cloud) from an other cloud. 
+
+The application.properties of the Orchestrator contains some custom property which are not used by (all) other core systems.
+
+use_strict_service_intf_name_verifier: Interface names has to follow this format <PROTOCOL>-<SECURITY>-<FORMAT>, where security can be SECURE or INSECURE and protocol and format must be a sequence of letters, numbers and underscore. A regexp checker will verify that. If this setting is set to true then the PROTOCOL and FORMAT must come from a predefined set. Currently, only HTTP and HTTPS are acceptable as PROTOCOL and JSON and XML as FORMAT.
+gatekeeper_is_present: a flag that tells the Orchestrator whether a Gatekeeper core system is installed in the cloud or not. If the value is false, the Orchestrator can only search providers in the local cloud.
+
+Let's see the contents of the module:
+
+* eu.arrowhead.core.orchestrator.OrchestratorMain: the main class of the Orchestrator core system is the default implementation of the Spring Boot web server (see Spring Boot documentation). We using annotations to tell Spring this is a Spring Boot application (@SpringBootApplication) and where to search for Spring-managed classes (@ComponentScan), database entities (@EntityScan) and database repositories (@EnableJpaRepositories). And it enables Swagger UI (@EnableSwagger2 annotation)
+* eu.arrowhead.core.orchestrator.OrchestratorApplicationInitListener: it overrides the customInit() method to load the Service Registry query URTs to the Arrowhead context object. It also overrides getRequiredCoreSystemServiceUris() to tell the URI crawler task to load the necessary URIs from the Service Registry: intra-cloud authorization rule checking, token generation, global service discovery (only if the Gatekeeper is installed) and inter-cloud negotiation (only if Gatekeeper is installed). This class also defines 
+some beans which we will use in different matchmaking situations (see later).
+* eu.arrowhead.core.orchestrator.OrchestratorStoreController: it contains the Orchestrator web service endpoints related to storing and accessing orchestration rules. See Orchestration API documentation for details.
+* eu.arrowhead.core.orchestrator.OrchestratorController: it contains the Orchestrator web service endpoints related orchestration process. See Orchestration API documentation for details.
+* eu.arrowhead.core.orchestrator.database.service.OrchestratorStoreDBService: this class implements the higher level database-related methods that handle orchestrator rule creation, modification, deletion and reading.
+* eu.arrowhead.core.orchestrator.matchmaking package: matchmaking is the name of the process when the Orchestrator core system has to select one element (provider, cloud) from multiple suitable entities. Because matchmaking is possible using different strategies, we define an interface for all matchmaking situations and provide one or more implementations for each interface. CloudMatchmakingAlgorithm interface is used when the orchestrator has to choose a cloud when multiple clouds have the providers that are suitable for the consumer. The DefaultCloudMatchmaker simply returns the first preferred cloud. If no preferred cloud for the consumer, it returns the first cloud in the list. The RandomWeightedCloudMatchmaker implementation chooses randomly from the clouds but clouds with higher number of suitable providers have higher chance. This strategy also try to select from the preferred clouds first. An other matchmaking interface is IntraCloudProviderMatchmakingAlgorithm which is used when the orchestrator has to select one result from local providers. The DefaultIntraCloudProviderMatchmaker selects the first (preferred) provider, while the RandomIntraCloudProviderMatchmaker chooses randomly, if no preferred is available. The third matchmaking interface is InterCloudProviderMatchmakingAlgorithm, which selects one from foreign providers. Currently, only the DefaultInterCloudProviderMatchmaker implements this interface and returns the first (preferred) provider from the list.
+* eu.arrowhead.core.orchestrator.security.OSecurityConfig: it's an empty descendant of the DefaultSecurityConfig class. We use @EnableWebSecurity and @Configuration annotations to activate the security.
+* eu.arrowhead.core.orchestrator.security.OrchestratorAccessControlFilter: it is a descendant class of the CoreSystemAccessControlFilter and it enforces authentication requirements of the Orchestrator web services. Only works in secured mode (see @ConditionalOnProperty annotation). Implemented rules:
+
+ - web services are only accessible from the local cloud (inherited through the base class);
+ - management web services (/mgmt appears in the URI) are only accessible to the local system operator (sysop.<cloud>.<operator>.arrowhead.eu);
+ - external service request (marked with the flag externalServiceRequest=true) is only allowed to the local gatekeeper;
+ - in case of other type of dynamic orchestration the requester system's name (in the input JSON) has to match the first part of the requester's common name (in the certificate);
+
+* eu.arrowhead.core.orchestrator.service.OrchestratorDriver: it contains support methods for calling web services of other core systems: query from Service Registry, intra-cloud rule check and token generation from Authorization and global service discovery and inter-cloud negotiation from Gatekeeper.
+* eu.arrowhead.core.orchestrator.service.OrchestratorService: this class implements the various orchestration features by using web services of other core systems (via the OrchestratorDriver class).
+
+  - externalServiceRequest() handles the dynamic orchestration request comes from a different cloud (via the foreign and the local Gatekeepers). The main difference between an external service request and a local request that the first one skips the authorization checks (because that is handled by the local Gatekeeper). This could be a potential security issue so be sure that this version of orchestration is only called from the local Gatekeeper (currently the security filter ensures that). The implementation is pretty straightforward: collecting suitable providers by using Service Registry query; removing non-preferred providers if necessary; converting the result to the expected format; generating tokens if necessary using Authorization's service.
+  - triggerInterCloud() handles the orchestration in other clouds. It basically calls the global service discovery (GSD) and inter-cloud negotiation (ICN) services of the local Gatekeeper. Please note that the GSD can return multiple clouds and the implementation selects one using the appropriate matchmaking algorithm. The ICN only contacts the selected cloud, but can return with multiple providers (from the same cloud). If the matchMaking flag is set, then an other matchmaker will select from the returned providers.
+  - dynamicOrchestration() handles the local dynamic orchestration requests (comes from actual consumers). This methods first tries to find suitable providers in the local cloud, but if it can't (and the cloud configuration and ochestration flags allow it), the search will expand to other clouds (calling the triggerInterCloud() previously mentioned). The steps of the implementations are the following: collecting suitable providers by using Service Registry query; removing providers that the consumer can't use because of authorization rules (by calling the appropriate web service of the Authorization core system); removing non-preferred providers if necessary; select one provider if necessary by using a matchmaker algorithm; converting the result to the expected format; generating tokens if necessary using Authorization's service.
+  - topPriorityEntriesOrchestrationProcess() handles the local store orchestration when only a consumer system id is provided. In that case we have to orchestrate all necessary (local) providers using top priority (1) rules. The steps are the following: obtain the appropriate rules; remove foreign provider-related rules, because this method only works with local providers; query the Service Registry for the actual provider data (and to remove the unavailable providers); query Authorization core system to check permissions; converting the result to the expected format; generating tokens if necessary using Authorization's service.
+  - orchestrationFromStore() handles the store orchestration when a service requirement is specified. It's using all rules related to the service, and returns the one that has the highest priority, is currently working and accessible. Please note that this method works with foreign providers too (if gatekeeper is available in the cloud).
+  
+* eu.arrowhead.core.orchestrator.swagger.OSwaggerConfig: it is a descendant class of DefaultSwaggerConfig. It configures and activates Swagger UI. See Swagger Documentation for details.
+
+9.5 Gatekeeper module
 
 
-
-Orch
-
-GK
 
 GW
 
 EH
 
-Chor
+
 
 
 

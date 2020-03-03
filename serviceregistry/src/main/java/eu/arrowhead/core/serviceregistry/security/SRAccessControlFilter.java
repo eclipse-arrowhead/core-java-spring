@@ -27,6 +27,7 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 																	 CoreSystem.AUTHORIZATION };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemId = { CoreSystem.ORCHESTRATOR };
 	private static final CoreSystem[] allowedCoreSystemsForQueryBySystemDTO = { CoreSystem.ORCHESTRATOR };
+	private static final CoreSystem[] allowedCoreSystemsForQueryAll = { CoreSystem.QOS_MONITOR };
 	
 	//=================================================================================================
 	// assistant methods
@@ -61,6 +62,9 @@ public class SRAccessControlFilter extends CoreSystemAccessControlFilter {
 		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI)) {
 			// Only dedicated core systems can use this service
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryBySystemDTO, requestTarget);
+		} else if (requestTarget.endsWith(CoreCommonConstants.OP_SERVICE_REGISTRY_QUERY_ALL_URI)) {
+			// Only dedicated core systems can use this service
+			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQueryAll, requestTarget);
 		}
 	}
 

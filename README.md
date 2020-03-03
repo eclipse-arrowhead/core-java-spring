@@ -1,3 +1,4 @@
+
 # Arrowhead Framework 4.1.3
 
 [Arrowhead](http://www.arrowhead.eu/) (and its continuation, [Productive4.0](https://productive40.eu/)) is an ambitious holistic innovation project,
@@ -10,15 +11,19 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 ## Table of Contents
 1. [Quick Start Guide](#quickstart)
     1. [Docker](#quickstart_docker)
-        * [Handy Docker Commands](#quickstart_dockercommands)
+        * [System Requirements](#quickstart_dockersysreqs)
+        * [Examples](#quickstart_examples)
+        * [Guide](#quickstart_dockerguide)
+        * [Cheat-Sheet](#quickstart_dockercommands)
         * [Troubleshooting](#quickstart_dockertroubleshooting)
 	2. [Debian Installer](#quickstart_debian)
     3. [Compile Code](#quickstart_compile)
 2. [Migration Guide 4.1.2 -> 4.1.3](#migration)
 3. [Certificates](#certificates)
 4. [Gatekeeper and Gateway Setup with ActiveMQ Relay](#setupgatekeeper_and_gateway)
-5. [How to Contribute](#howtocontribute)
-6. [Documentation](#documentation) 
+5. [Continuous Integration / Continuous Delivery](#ci_cd)
+6. [How to Contribute](#howtocontribute)
+7. [Documentation](#documentation) 
     1. [Service Registry](#serviceregistry)
        * [System Design Description Overview](#serviceregistry_sdd)
        * [Services and Use Cases](#serviceregistry_usecases)
@@ -48,15 +53,11 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
     4. [EventHandler](#event_handler)
        * [System Design Description Overview](#event_handler_sdd)
        * [Services and Use Cases](#event_handler_usecases)  
-       * [Service Description Overview](#publish_service_description_overview)
-           * [Publish](#publish_service_description_overview)
-	   * [Subcribe](#subscribe_service_description_overview)
-	   * [Unsubscribe](#unsubscribe_service_description_overview)
-	   * [PublishAuthUpdate](#publish_auth_update_service_description_overview)
+       * [Service Description Overview](#event_handler_provided_services)
        * [Endpoints](#event_handler_endpoints)
            * [Client](#event_handler_endpoints_client)
-           * [Private](#event_handler_endpoints_private)
            * [Management](#event_handler_endpoints_management)
+           * [Private](#event_handler_endpoints_private)
            * [Removed Endpoints](#event_handler_removed)
     5. [Gatekeeper](#gatekeeper)
        * [System Design Description Overview](#gatekeeper_sdd)
@@ -73,6 +74,13 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 	       * [Client](#gateway_endpoints_client)
            * [Private](#gateway_endpoints_private)
            * [Management](#gateway_endpoints_mgmt)
+	6. [QoS Monitor (Quality of Service Monitor)](#qos_monitor)
+       * [System Design Description Overview](#qos_monitor_sdd)
+       * [Services and Use Cases](#qos_monitor_usecases)  
+       * [Endpoints](#qos_monitor_endpoints)
+	       * [Client](#qos_monitor_endpoints_client)
+           * [Private](#qos_monitor_endpoints_private)
+           * [Management](#qos_monitor_endpoints_mgmt)
 	
 <a name="quickstart" />
 
@@ -82,7 +90,13 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
 
 ### Docker
 
-#### Requirements
+[Docker](https://docs.docker.com/) is a container platform that can be used to package and deploy applications in server environments, among other.
+In particular, the [`docker-compose`](https://docs.docker.com/compose/) utility may with advantage be used during application development to test integration with the Arrowhead Core systems.
+Here, we provide brief instructions on how to install and run both Docker and container images for the Arrowhead Core systems.
+
+<a name="quickstart_dockersysreqs" />
+
+#### System Requirements
 
 > **Note:** A system with 4GB of RAM is advised. 
 
@@ -93,6 +107,8 @@ Please be aware, that 4.1.3 is __NOT__ backwards compatible with 4.1.2. If you h
   * [Windows](https://docs.docker.com/docker-for-windows/install/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
+<a name="quickstart_examples" />
+
 Don't forget to create a volume for mysql: `docker volume create --name=mysql` <br />
 Don't forget to copy the `initSQL.sh` script next to the docker-compose file and execute it! On the first run it initializes the Database!<br />
 Example copy command which does this for you, execute from the project root directory.
@@ -102,17 +118,21 @@ cd docker
 ./initSQL.sh
 ```
 
-Inside the `docker` folder an example is provided. 
+#### Examples
 
-##### Core System Config
+We provide two examples of how Docker containers can be used to host Arrowhead Core systems in this repository.
+The first one is located in the [`docker`](docker) folder and the second one in the [`docker-all`](docker-all) folder.
+The former example shows how some prebuilt Docker images can be used to bring up networks, while the second describes how a Docker image can be constructed that contains all Arrowhead Core systems.
+Please refer to those folders for more information.
+In particular, each folder contains its own `README.md` file with more instructions.
 
-Example Core System Configuration files are available in this folder. 
+<a name="quickstart_dockerguide" />
+
+#### Docker Guide
 
 > **Note:** Don't forget to set `domain.name` and `domain.port` properties!
 
-##### Docker Compose
-
-Example Docker Compose file is located here. The interesting part is the volumes section. 
+Example Docker Compose file is located [here](docker/docker-compose.yml). The interesting part is the volumes section. 
 Format is /path/on/your/local/machine:/path/inside/docker/container
 
 You may want to copy the config files elsewhere with the compose file too. If you copy them, please don't forget to change the volume mounting point, but DON'T change the volume mounting point inside the container, otherwise it will start up with default config.
@@ -132,9 +152,9 @@ If you change your config you have to restart the appropriate container
 
 `docker restart <containerName>`
 
-<a name="quickstart_dockercommands" />`
+<a name="quickstart_cheatsheet" />
 
-##### Handy Docker Commands
+#### Docker Cheat-Sheet
  
 | Command | Description |
 | ------- | ----------- |
@@ -142,6 +162,7 @@ If you change your config you have to restart the appropriate container
 | `docker images` | List all images |
 | `docker-compose up -d` | Starts the Docker containers |
 | `docker-compose down` | Destroys the Docker containers |
+| `docker restart <containerName>` | Restarts a container, making it re-read its configuration files |
 | `docker logs <containerName>` | Shows logs for the container |
 | `docker volume create --name=<volumeName>` | Creates a named volume |
 | `docker volume rm <volumeName>` | Removes the specified named volume |
@@ -152,7 +173,6 @@ If you change your config you have to restart the appropriate container
 
 Q: MySQL won't start. What did went wrong? <br />
 A: Probably you missed to copy the init SQL script next to the compose file, or you have a typo in its name. Solution: [https://github.com/arrowhead-f/core-java-spring/issues/105](https://github.com/arrowhead-f/core-java-spring/issues/105)
-
 
 <a name="quickstart_debian" />
 
@@ -403,7 +423,7 @@ Arrowhead Framework's security is relying on SSL Certificate Trust Chains. The A
 1) Master certificate: `arrowhead.eu`
 2) Cloud certificate: `my_cloud.my_company.arrowhead.eu`
 3) Client certificate: `my_client.my_cloud.my_company.arrowhead.eu`
-The certificate naming convetion have strict rules:
+The certificate naming convention have strict rules:
 * The different parts are delimited by dots, therefore parts are not allowed to contain any of them.
 * A cloud certificate name has to consist of four part and the last two part have to be 'arrowhead' and 'eu'.
 * A client certificate name has to consist of five part and the last two part have to be 'arrowhead' and 'eu'. 
@@ -426,17 +446,42 @@ Currently Arrowhead community have the possibility to create only "self signed" 
 * [Create Arrowhead Client Self Signed Certificate](documentation/certificates/create_client_certificate.pdf)
 * [Create Trust Store](documentation/certificates/create_trust_store.pdf)
 
+If you wish to generate all Certificates by a script, you can use the scripts in the [scripts/certificate_generation](scripts/certificate_generation) folder.
+
+> **Note:** Basic scripting knowledge is required!
+
+* lib_certs.sh - Certificate generation code
+* mk_certs.sh - Usage example
+* rm_certs.sh - Delete generated certs 
+
 ### System Operator Certificate
 
 The System Operator Certificate is a special client certificate with the naming convention of `sysop.my_cloud.my_company.arrowhead.eu`.
-SysOp certificate allows the client to use the management endpoints of the Arrowhed Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser.
-* [Import SysOp Certificate (Windows 10)](https://github.com/arrowhead-f/core-java-spring/blob/documentation/documentation/certificates/import_sysop_certificate_win10.pdf)
+SysOp certificate allows the client to use the management endpoints of the Arrowhead Core Systems. Typical usage of SysOp certificate is by front end applications running in a web browser (for example if you want to access the Swagger or use the Management Tool in secure mode.
+* [Import SysOp Certificate (Windows 10)](documentation/certificates/import_sysop_certificate_win10.pdf)
+* [Import SysOp Certificate (macOS)](documentation/certificates/import_sysop_certificate_macos.pdf)
+* [Import SysOp Certificate (Linux)](documentation/certificates/import_sysop_certificate_linux.pdf)
+
+### Include certificate in Docker container
+
+The following guide describes step by step, how to include your own certificates into a Docker container.
+
+* [How to include certificate in Docker](documentation/certificates/docker_certificate_guide.md)
+
+
 
 <a name="setupgatekeeper_and_gateway" /> 
 
 ## Gatekeeper and Gateway Setup with ActiveMQ Relay
 
 Please follow this guide to setup the Arrowhead Gatekeeper and Gateway core systems: [Gatekeeper & Gateway Setup Guide with ActiveMQ Relay](documentation/gatekeeper/GatekeeperSetup.md)
+
+<a name="ci_cd" />
+
+## Continuous Integration / Continuous Delivery
+
+Arrowhead's CI/CD pipeline is based on the work of Haris Isakovic and Peter Ketcher from TU Wien. Thank you for providing this amazing guide and countless hours of help setting it up properly.
+[CI/CD Tutorial for Arrowhead Framework](documentation/ci_cd/Arrowhead_CICD.pdf)
 
 <a name="howtocontribute" />
 
@@ -3316,7 +3361,7 @@ __ServiceRequestForm__ is the input
       "string"
     ],
     "securityRequirements": [
-      "NOT_SECURE", "CEERTIFICATE", "TOKEN"
+      "NOT_SECURE", "CERTIFICATE", "TOKEN"
     ],
     "metadataRequirements": {
       "additionalProp1": "string",
@@ -4194,27 +4239,512 @@ __PriorityList__ is the input
 
 ## System Design Description Overview
 
-placeholder
+The purpose of Event Handler supporting core system is providing authorized publish-subscribe messaging system to the Arrowhead Framework.
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator`
+![#ffcc44](https://placehold.it/15/ffcc44/000000?text=+) `AH Event Handler`
+![Alt text](/documentation/eventhandler/overview.png)
+
+<a name="event_handler_sysd" />
+
+## System Design Overview
+![Alt text](/documentation/eventhandler/sysd/event_handler_controller.jpg)
+
+<a name="event_handler_provided_services" />
+
+## Provided services
+
+The Event Handler provides the following services:
+* [Echo](#eventhandler_endpoints_get_echo)
+* [Publish](#eventhandler_endpoints_post_publish)
+* [Subscribe](#eventhandler_endpoints_post_subscribe)
+* [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe)
+* [AuthUpdate](#eventhandler_endpoints_post_auth_update)
+
+<a name="event_handler_consumed_services" />
+
+## Consumed services
+
+The Event Handler consumes the following services:
+* CheckAuthorizationSubscription private service from the Authorization core system
+* Notification service from the subscriber client system
 
 <a name="event_handler_usecases" />
 
-## Services and Use Cases
+## Use cases
 
-placeholder
-
-
-<a name="publish_service_description_overview" />
-
-## Publish Service Description Overview
-
-placeholder
-
+The Event Handler has the following use cases:
+* [Publish Event](documentation/eventhandler/use_cases/EH_use_case_1.md)
+![Alt text](/documentation/eventhandler/use_cases/PublishEvent.png)
+* [Register Subscription](documentation/eventhandler/use_cases/EH_use_case_2.md)
+![Alt text](/documentation/eventhandler/use_cases/RegisterSubscription.png)
+* [Unregister Subscription](documentation/eventhandler/use_cases/EH_use_case_3.md)
+![Alt text](/documentation/eventhandler/use_cases/Unsubscribe.png)
+* [Update Authorization](documentation/eventhandler/use_cases/EH_use_case_4.md)
+![Alt text](/documentation/authorization/SubscriptionAuthUpdate.png)
+![Alt text](/documentation/eventhandler/use_cases/PublishAuthUpdate.png)
 
 <a name="event_handler_endpoints" />
 
 ## Endpoints
 
-placeholder
+<a name="event_handler_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#eventhandler_endpoints_get_echo) | /echo | GET    | -    | OK     |
+| [Subscribe](#eventhandler_endpoints_post_subscribe) | /subscribe | POST    | -    | OK     |
+| [Unsubscribe](#eventhandler_endpoints_delete_unsubscribe) | /unsubscribe | DELETE    | -    | OK     |
+| [Publish](#eventhandler_endpoints_post_publish) | /publish | POST    | -    | OK     |
+
+<a name="event_handler_endpoints_management" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get subscriptions](#eventhandler_endpoints_get_subscription_list) | /mgmt/subscriptions | GET | direction && item_per_page && page && sort_field | [Subscription list response](#eventhandler_subscription_list_response) |
+| [Get subscription by id](#eventhandler_endpoints_get_subscription) | /mgmt/subscriptions/{id} | GET | id | [Subscription response](#eventhandler_subscription_response) |
+| [Update subscription](#eventhandler_endpoints_put_subscription) | /mgmt/subscriptions/{id} | PUT | id && Subscription request| Subscription response |
+| [Delete subscription](#eventhandler_endpoints_delete_subscription) | /mgmt/subscriptions/{id} | DELETE | id | OK |
+
+<a name="event_handler_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [AuthorizationUpdate](#eventhandler_endpoints_post_auth_update) | /publish/authupdate | POST    | -    | OK     |
+
+<a name="eventhandler_endpoints_get_echo" />
+
+### Echo 
+```
+GET /eventhandler/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+<a name="eventhandler_endpoints_post_subscribe" />
+
+### Subscribe 
+```
+POST /eventhandler/subscribe
+```
+
+Creates a subscription record specified by parameters.
+
+<a name="datastructures_subscriptionrequest" />
+
+__SubscriptionRequest__ is the input.
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The received event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_subscription_response" />
+
+__SubscriptionRequest__ output:
+
+```json
+
+{
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+
+```
+
+<a name="eventhandler_endpoints_delete_unsubscribe" />
+
+### Unsubscribe 
+```
+DELETE /eventhandler/unsubscribe
+```
+Removes the subscription record specified by parameters.
+
+<a name="datastructures_eventhandlerunsubscriberequest" />
+
+__Unsubscribe query parameters__ are the input :
+`https://eventhandler_ip:unsubscribe_port/eventhandler/unsubscribe?address=`192.168.0.1`&event_type=`EVENT_TYPE_1`&port=`9009`&system_name=`test_consumer`
+
+| __Unsubscribe__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `event_type` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+| `system_name` | The name of the system. | mandatory | max. length = 255 |
+
+<a name="eventhandler_endpoints_post_publish" />
+
+### Publish
+```
+POST /eventhandler/publish
+```
+
+Start the publishing process to deliver the event to the subscribers.
+
+<a name="eventhandler_endpoints_publish" />
+
+__PublishRequest__ is the input:
+
+```json
+{
+  "eventType": "string",
+  "metaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "payload": "string",
+  "source": {
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0,
+    "systemName": "string"
+  },
+  "timeStamp": "string"
+}
+```
+
+| __PublishRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event. | mandatory | max. length = 255 |
+| `metaData` |  The "key - value" pairs for event filtering. | optional | max.length = 65535 |
+| `payload` | String representation of the event. | mandatory | not defined |
+| `source` |   Details of the publisher system. | mandatory | as in system |
+| `timestamp` | The time of publishing  | mandatory | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+
+| __System__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `systemName` | The name of the system. | mandatory | max. length = 255 |
+| `address` |  Domain name or IP of the system. | mandatory | max. length = 255 |
+| `authenticationInfo` | Public key of the system. | optional | single line string without the "-----BEGIN PUBLIC KEY-----" prefix and the "-----END PUBLIC KEY-----" suffix |
+| `port` | The port where the system provides services | mandatory | max.length = defined by local cloud operator ( default valid range: 1-65535 ) |
+
+<a name="eventhandler_endpoints_get_subscription_list" />
+
+### Get subscriptions
+
+```
+GET /mgmt/eventhandler/subscriptions
+```
+
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
+
+| __Get subscriptions__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
+| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
+| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
+| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
+
+<a name="eventhandler_subscription_list_response" />
+
+__Get subscriptions query parameters__  the output :
+
+```json
+{
+  "count": 0,
+  "data": [
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+  ]
+}
+```
+
+<a name="eventhandler_endpoints_get_subscription" />
+
+### Get subscription by id
+
+```
+GET /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Get subscriptions query parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+<a name="eventhandler_subscription_response" />
+
+__Get subscription by id__  the output :
+
+```json
+    {
+        "id": 0,
+        "eventType": {
+        "eventTypeName": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "filterMetaData": {
+        "additionalProp1": "string",
+        "additionalProp2": "string",
+        "additionalProp3": "string"
+      },
+      "id": 0,
+      "matchMetaData": true,
+      "notifyUri": "string",
+      "sources": [
+        {
+          "id": 0,
+          "systemName": "string",
+          "address": "string",
+          "authenticationInfo": "string",
+          "port": 0,
+          "createdAt": "string",
+          "updatedAt": "string"
+        }
+      ],
+      "startDate": "string",
+      "endDate": "string",
+      "subscriberSystem": {
+        "id": 0,
+        "systemName": "string",
+        "address": "string",
+        "authenticationInfo": "string",
+        "port": 0,
+        "createdAt": "string",
+        "updatedAt": "string"
+      },
+      "createdAt": "string",
+      "updatedAt": "string"
+    }
+```
+
+<a name="eventhandler_endpoints_put_subscription" />
+
+### Update subscription
+
+```
+PUT /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Update subscription request__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Update subscription__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+```json
+{
+  "eventType": "string",
+  "filterMetaData": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "matchMetaData": true,
+  "notifyUri": "string",
+  "sources": [
+    {
+      "systemName": "string",
+      "address": "string",
+      "authenticationInfo": "string",
+      "port": 0
+    }
+  ],
+  "startDate": "string",
+  "endDate": "string",
+  "subscriberSystem": {
+    "systemName": "string",
+    "address": "string",
+    "authenticationInfo": "string",
+    "port": 0
+  }
+}
+```
+| __SubscriptionRequest__  fields |
+| ------------------------------------------------------- |
+
+| Field | Description | Necessity | Format/Limitations |
+| ----- | ----------- | --------- | ----------- |
+| `eventType` | Type of event to subscribe to | mandatory | max. length = 255 |
+| `filterMetaData` | The received event has to contain all the "key - value" pairs defined here  | optional | max.length = 65535 |
+| `matchMetaData` | A flag to turn on/off metadata filtering | mandatory |  true or false |
+| `notifyUri` | Url subpath of the subscriber system's notification endpoint | mandatory | max.length = 65535 |
+| `sources` | List of publisher systems | optional (if not defined or empty, all publishers will be able to send requests which are authorized and allowed by the other filtering options )| not defined |
+| `startDate` | If startDate is defined, the subscriber system will only receive events when the event's timestamp is after startDate.  | optional ( StartDate must be after the current date/time. ) | UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format |
+| `endDate` | If endDate is defined, the subscriber system will only receive events when the event's timestamp is before endDate. | optional ( EndDate must be after the current date/time. If startDate is defined endDate must be after startDate. )|  UTC time in `yyyy-MM-dd`  `HH`:`mm`:`ss` format  |
+| `subscriberSystem` | Details of subscriber system | mandatory | as in system |
+
+<a name="eventhandler_endpoints_delete_subscription" />
+
+### Delete subscription
+
+```
+DELETE /mgmt/eventhandler/subscriptions/{id}
+```
+
+__Delete subscription parameters__  the input :
+
+`https://eventhandler_ip:eventhandler_port/eventhandler/mgmt/subscriptions/`1
+
+| __Get subscription by id__   path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of subscription | mandatory | integer |
+
+<a name="eventhandler_endpoints_post_auth_update" />
+
+### Publish Auth Update <br />
+        
+This service can only be used by other core services, therefore this is not part of the public API.    
 
 # Gatekeeper 
  
@@ -5742,3 +6272,285 @@ __ActiveSession__ is the output.
 | `responseQueue` | response messaging queue through the the Relay |
 | `responseControlQueue` | control queue of response messaging through the the Relay |
 | `sessionStartedAt` | Time stamp of session start |
+
+<a name="qos_monitor" />
+
+# QOS MONITOR (QUALITY OF SERVICE MONITOR)
+
+<a name="qos_monitor_sdd" />
+
+## System Design Description Overview
+
+The purpose of QoS Monitor supporting core system is providing QoS (Quality of Service) measurements to the QoS Manager (which is part of the Orchestrator core system).
+
+![#1589F0](https://placehold.it/15/1589F0/000000?text=+) `AH Service Registry`
+![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `AH Authorization` 
+![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `AH Orchestrator / QoS Manager`
+![#ffcc44](https://placehold.it/15/a33c00/000000?text=+) `AH QoS Monitor`
+![Alt text](/documentation/qos_monitor/sdd/overview.png)
+
+<a name="qos_monitor_sysd" />
+
+## System Design Overview
+![Alt text](/documentation/qos_monitor/sysd/qos_monitor_sys_d.jpg)
+
+<a name="qos_monitor_provided_services" />
+
+## Provided services
+
+The QoS Monitor provides the following services:
+* [Echo](#qos_monitor_endpoints_get_echo)
+* [Ping Measurement](#qos_monitor_endpoints_ping_measurement_by_system_id)
+
+<a name="qos_monitor_consumed_services" />
+
+## Consumed services
+
+The QoS Monitor consumes the following service:
+* QueryAll private service from the ServiceRegistry core system
+
+<a name="qos_monitor_usecases" />
+
+## Use cases
+
+The QoS Monitor has the following use cases:
+* [Ping Measurement](documentation/qos_monitor/use_cases/QoSMonitor_use_case_1.md)
+![Alt text](/documentation/qos_monitor/use_cases/PingMeasurement.png)
+* [Reset Counter](documentation/qos_monitor/use_cases/QoSMonitor_use_case_2.md)
+![Alt text](/documentation/qos_monitor/use_cases/Reset_Counter.png)
+* [Get Measurements](documentation/qos_monitor/use_cases/QoSMonitor_use_case_3.md)
+![Alt text](/documentation/qos_monitor/use_cases/GetMeaurements.png)
+
+<a name="qos_monitor_endpoints" />
+
+## Endpoints
+
+<a name="qos_monitor_endpoints_client" />
+
+### Client endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Echo](#qos_monitor_endpoints_get_echo) | /echo | GET    | -    | OK     |
+
+<a name="qos_monitor_endpoints_mgmt" />
+
+### Management endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get ping measurements mgmt](#qos_monitor_endpoints_get_ping_measurements_list) | /mgmt/ping/measurements | GET | direction && item_per_page && page && sort_field | [PingMeasurement list response](#qos_monitor_ping_measurement_list_response) |
+| [Get ping measurements by system id mgmt](#qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id) | /mgmt/ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
+
+<a name="qos_monitor_endpoints_private" />
+
+### Private endpoint description<br />
+
+| Function | URL subpath | Method | Input | Output |
+| -------- | ----------- | ------ | ----- | ------ |
+| [Get ping measurements by system id](#qos_monitor_endpoints_get_ping_measurement_by_system_id) | /ping/measurements/{id} | GET | id | [Ping Measurment response](#qos_monitor_ping_measurement_response) |
+
+<a name="qos_monitor_endpoints_get_echo" />
+
+### Echo 
+```
+GET /qos_monitor/echo
+```
+
+Returns a "Got it" message with the purpose of testing the core service availability.
+
+### Get ping measurements mgmt
+
+```
+GET /mgmt/ping/measurements
+```
+
+__Get subscriptions query parameters__ the input :
+
+`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements?dirction=`ASC`&item_per_page=`100`&page=`0`&sort_field=`id
+
+| __Get ping measurements mgmt__  query parameters |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `direction` |  Direction of sorting. | optional | valid values: "ASC", "DESC" - default: "ASC"|
+| `item_per_page` | Maximum number of items returned. | optional (mandatory, if page is defined)| integer |
+| `page` | Zero based page index. | optional (mandatory, if item_per_page is defined)| integer |
+| `sort_field` | The field to sort the results by. | optional | valid values: "id", "updatedAt", "createdAt" - default: "id" |
+
+<a name="qos_monitor_ping_measurement_list_response" />
+
+__PingMeasurement list response__ the output :
+
+```json
+{
+	"data": [
+		{
+			"id": 1,
+			"measurement": {
+				"id": 1,
+				"system": {
+					"id": 5,
+					"systemName": "testsystem",
+					"address": "testsystem.ai",
+					"port": 12345,
+					"createdAt": "2020-02-04 09:38:56",
+					"updatedAt": "2020-02-04 09:38:56"
+				},
+				"measurementType": "PING",
+				"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
+				"createdAt": "2020-02-04T10:42:04+01:00",
+				"updatedAt": "2020-02-14T10:48:47+01:00"
+			},
+			"available": true,
+			"lastAccessAt": "2020-02-14T10:48:10+01:00",
+			"minResponseTime": 15,
+			"maxResponseTime": 26,
+			"meanResponseTimeWithTimeout": 18,
+			"meanResponseTimeWithoutTimeout": 18,
+			"jitterWithTimeout": 3,
+			"jitterWithoutTimeout": 3,
+			"lostPerMeasurementPercent": 0,
+			"sent": 12075,
+			"received": 12070,
+			"countStartedAt": "2020-02-07T00:00:00+01:00",
+			"sentAll": 63175,
+			"receivedAll": 56721,
+			"createdAt": "2020-02-14T10:48:47+01:00",
+			"updatedAt": "2020-02-14T10:48:47+01:00"
+		}
+	],
+	"count": 1
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `count` | Number of record found |
+| `data` | Array of data |
+| `id` | ID of the ping measurement |
+| `measurement.id` | ID of the measurement |
+| `measurement.system.id` | ID of the measured system |
+| `measurement.system.systemName` | Name of the measured system |
+| `measurement.system.address` | Address of the measured system |
+| `measurement.system.port` | Port of the measured system |
+| `measurement.system.createdAt` | Date of creation of the measured system |
+| `measurement.system.updatedAt` | Date of update of the measured system |
+| `measurement.measurementType` | Type of the measurement |
+| `measurement.lastMeasurementAt` | Time of the last measurement |
+| `measurement.createdAt` | Date of creation of the measurement |
+| `measurement.updatedAt` | Date of update of the measurement |
+| `available` | Boolean value of the systems calculated availability|
+| `lastAccessAt` | TimeStamp value of the systems last known availability|
+| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
+| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
+| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
+| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
+| `sent` | Integer value of sent pings in measurement|
+| `received` | Integer value of received pings in measurement|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `sentAll` | Integer value of sent pings since ping measurement created|
+| `receivedAll` | Integer value of received pings since ping measurement created|
+| `createdAt` | Date of creation of the ping measurement |
+| `updatedAt` | Date of update of the ping measurement |
+
+<a name="qos_monitor_mgmt_endpoints_get_ping_measurement_by_system_id" />
+
+### Get ping measurements by system id mgmt
+
+```
+GET /mgmt/ping/measurements/{id}
+```
+
+__Get ping measurements by system id mgmt path parameter__ the input :
+
+`https://qos_monitor_ip:qos_monitor_port/qos_monitor/mgmt/ping/measurements/`1
+
+| __Get ping measurement by system id__ path parameter |
+| ------------------------------------------------------- |
+
+| Parameter | Description | Necessity | Format/Limitations |
+| --------- | ----------- | --------- | ----------- |
+| `id` |  Id of measured system | mandatory | integer |
+
+<a name="qos_monitor_ping_measurement_response" />
+
+__Ping Measurment response by system id__ the output :
+
+```json
+{
+	"id": 1,
+	"measurement": {
+		"id": 1,
+		"system": {
+			"id": 5,
+			"systemName": "testsystem",
+			"address": "testsystem.ai",
+			"port": 12345,
+			"createdAt": "2020-02-04 09:38:56",
+			"updatedAt": "2020-02-04 09:38:56"
+		},
+		"measurementType": "PING",
+		"lastMeasurementAt": "2020-02-14T10:48:10+01:00",
+		"createdAt": "2020-02-04T10:42:04+01:00",
+		"updatedAt": "2020-02-14T10:48:47+01:00"
+	},
+	"available": true,
+	"lastAccessAt": "2020-02-14T10:48:10+01:00",
+	"minResponseTime": 15,
+	"maxResponseTime": 26,
+	"meanResponseTimeWithTimeout": 18,
+	"meanResponseTimeWithoutTimeout": 18,
+	"jitterWithTimeout": 3,
+	"jitterWithoutTimeout": 3,
+	"lostPerMeasurementPercent": 0,
+	"sent": 12075,
+	"received": 12070,
+	"countStartedAt": "2020-02-07T00:00:00+01:00",
+	"sentAll": 63175,
+	"receivedAll": 56721,
+	"createdAt": "2020-02-14T10:48:47+01:00",
+	"updatedAt": "2020-02-14T10:48:47+01:00"
+}
+```
+
+| Field | Description |
+| ----- | ----------- |
+| `id` | ID of the ping measurement |
+| `measurement.id` | ID of the measurement |
+| `measurement.system.id` | ID of the measured system |
+| `measurement.system.systemName` | Name of the measured system |
+| `measurement.system.address` | Address of the measured system |
+| `measurement.system.port` | Port of the measured system |
+| `measurement.system.createdAt` | Date of creation of the measured system |
+| `measurement.system.updatedAt` | Date of update of the measured system |
+| `measurement.measurementType` | Type of the measurement |
+| `measurement.lastMeasurementAt` | Time of the last measurement |
+| `measurement.createdAt` | Date of creation of the measurement |
+| `measurement.updatedAt` | Date of update of the measurement |
+| `available` | Boolean value of the systems calculated availability|
+| `lastAccessAt` | TimeStamp value of the systems last known availability|
+| `minResponseTime` | Integer value of milliseconds of the fastest returned ping|
+| `maxResponseTime` | Integer value of milliseconds of the slowest returned ping|
+| `meanResponseTimeWithTimeout` | Integer value of milliseconds of the calculated average of pings including timeouts|
+| `meanResponseTimeWithoutTimeout` | Integer value of milliseconds of the calculated average of pings not including timeouts|
+| `jitterWithTimeout` | Integer value of milliseconds of the calculated standard deviation of pings including timeouts|
+| `jitterWithoutTimeout` | Integer value of milliseconds of the calculated standard deviation of pings not including timeouts|
+| `lostPerMeasurementPercent` | Integer value of calculated lost ping percentage|
+| `sent` | Integer value of sent pings in measurement|
+| `received` | Integer value of received pings in measurement|
+| `countStartedAt` | TimeSatmp value of the last reset of sent and received fields|
+| `sentAll` | Integer value of sent pings since ping measurement created|
+| `receivedAll` | Integer value of received pings since ping measurement created|
+| `createdAt` | Date of creation of the ping measurement |
+| `updatedAt` | Date of update of the ping measurement |
+
+<a name="qos_monitor_endpoints_get_ping_measurement_by_system_id" />
+
+### Get ping measurements by system id 
+
+For private endpoints no detailed description available.

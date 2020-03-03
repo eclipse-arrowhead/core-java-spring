@@ -23,6 +23,7 @@ public enum CoreSystem {
 			, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE,  CoreSystemService.EVENT_PUBLISH_AUTH_UPDATE_SERVICE)),
 	GATEWAY(Defaults.DEFAULT_GATEWAY_PORT, List.of(CoreSystemService.GATEWAY_PUBLIC_KEY_SERVICE, CoreSystemService.GATEWAY_PROVIDER_SERVICE,CoreSystemService.GATEWAY_CONSUMER_SERVICE)),
 	CHOREOGRAPHER(Defaults.DEFAULT_CHOREOGRAPHER_PORT, List.of()), // TODO: add services
+	QOS_MONITOR(Defaults.DEFAULT_QOS_MONITOR_PORT, List.of(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE)),
 	CERTIFICATE_AUTHORITY(Defaults.DEFAULT_CERTIFICATE_AUTHORITY_PORT, List.of()); // TODO: add services		
 	
 	//=================================================================================================

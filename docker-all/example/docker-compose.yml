@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  arrowhead_core_mysql:
+    container_name: arrowhead_core_mysql
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=THIS_WILL_BE_YOUR_CONTAINERS_ROOT_PW
+    volumes:
+      - arrowhead_core_mysql:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306
+
+  arrowhead_core:
+    container_name: arrowhead_core
+    build: ../
+    depends_on:
+      - arrowhead_core_mysql
+    environment:
+      - JVM_FLAGS=-XX:+UseSerialGC -Xmx1G -Xms32m # Lowers memory usage of the services, but also lowers performance.
+    volumes:
+      # Only systems with provided .properties files will be started when the container stars.
+      - ./properties/serviceregistry.properties:/opt/arrowhead-core/serviceregistry/application.properties
+      - ./properties/authorization.properties:/opt/arrowhead-core/authorization/application.properties
+      - ./properties/orchestrator.properties:/opt/arrowhead-core/orchestrator/application.properties
+      #- ./properties/eventhandler.properties:/opt/arrowhead-core/eventhandler/application.properties
+      - ./properties/gatekeeper.properties:/opt/arrowhead-core/gatekeeper/application.properties
+      - ./properties/gateway.properties:/opt/arrowhead-core/gateway/application.properties
+    ports:
+      - 8443:8443 # Service Registry
+      - 8445:8445 # Authorization
+      - 8441:8441 # Orchestrator
+      #- 8455:8455 # Event Handler
+      - 8449:8449 # Gatekeeper
+      - 8453:8453 # Gateway
+
+volumes:
+  arrowhead_core_mysql:
+    external: true  

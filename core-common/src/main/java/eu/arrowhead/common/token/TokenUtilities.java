@@ -38,7 +38,7 @@ public class TokenUtilities {
 	public static TokenInfo validateTokenAndExtractTokenInfo(final String token, final PublicKey authorizationPublicKey, final PrivateKey privateKey) {
 		logger.debug("validateTokenAndExtractTokenInfo started...");
 		Assert.notNull(authorizationPublicKey, "Authorization public key is null.");
-		Assert.notNull(privateKey, "Caller's private key is null.");
+		Assert.notNull(privateKey, "Private key is null.");
 		
 		if (Utilities.isEmpty(token)) {
 			throw new InvalidParameterException("No token is provided.");

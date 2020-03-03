@@ -21,6 +21,7 @@ public class CoreCommonConstants {
 	public static final String SR_QUERY_URI = "service.registry.query.uri";
 	public static final String SR_QUERY_BY_SYSTEM_ID_URI = "service.registry.query.by.system.id.uri";
 	public static final String SR_QUERY_BY_SYSTEM_DTO_URI = "service.registry.query.by.system.dto.uri";
+	public static final String SR_QUERY_ALL = "service.registry.query.all.uri";
 	public static final String REQUIRED_URI_LIST = "required.uri.list";
 	public static final String URI_SUFFIX = "-uri";
 	
@@ -36,6 +37,7 @@ public class CoreCommonConstants {
 	
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_ID_URI = "/query/system/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_SERVICE_REGISTRY_QUERY_BY_SYSTEM_DTO_URI = "/query/system";
+	public static final String OP_SERVICE_REGISTRY_QUERY_ALL_URI = "/query/all";
 		
 	public static final String ORCHESTRATOR_STORE_MGMT_URI = "/mgmt/store";
 	
@@ -95,7 +97,7 @@ public class CoreCommonConstants {
 	public static final String $SERVICE_REGISTRY_TTL_INTERVAL_WD = "${" + SERVICE_REGISTRY_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_SERVICE_REGISTRY_TTL_INTERVAL_MINUTES + "}";
 	
     public static final String AUTHORIZATION_IS_EVENTHANDLER_PRESENT = "eventhandler_is_present";
-    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" +CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
+    public static final String $AUTHORIZATION_IS_EVENTHANDLER_PRESENT_WD = "${" + AUTHORIZATION_IS_EVENTHANDLER_PRESENT + ":" + CoreDefaults.DEFAULT_AUTHORIZATION_IS_EVENTHANDLER_PRESENT + "}";
 	
 	public static final String ORCHESTRATOR_IS_GATEKEEPER_PRESENT = "gatekeeper_is_present";
 	public static final String $ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD = "${" + ORCHESTRATOR_IS_GATEKEEPER_PRESENT + ":" + CoreDefaults.DEFAULT_ORCHESTRATOR_IS_GATEKEEPER_PRESENT + "}";
@@ -115,6 +117,20 @@ public class CoreCommonConstants {
 	public static final String CLOUD_MATCHMAKER = "cloudMatchmaker";
 	
 	public static final int TOP_PRIORITY = 1;
+	
+	public static final String QOS_MANAGER = "qosManager";
+	public static final String QOS_ENABLED = "enable_qos";
+	public static final String $QOS_ENABLED_WD = "${" + QOS_ENABLED + ":" + CoreDefaults.DEFAULT_QOS_ENABLED + "}";
+	public static final String QOS_RESERVATION_CHECK_INTERVAL = "qos_reservation_check_interval"; // in seconds
+	public static final String $QOS_RESERVATION_CHECK_INTERVAL_WD = "${" + QOS_RESERVATION_CHECK_INTERVAL + ":" + CoreDefaults.DEFAULT_QOS_RESERVATION_CHECK_INTERVAL + "}";
+	public static final String QOS_RESERVATION_TEMP_LOCK_DURATION = "qos_reservation_temp_lock_duration"; // in seconds
+	public static final String $QOS_RESERVATION_TEMP_LOCK_DURATION_WD = "${" + QOS_RESERVATION_TEMP_LOCK_DURATION + ":" + CoreDefaults.DEFAULT_QOS_TEMPORARY_LOCK_DURATION + "}";
+	public static final String QOS_MAX_RESERVATION_DURATION = "qos_maximum_reservation_duration"; // in seconds
+	public static final String $QOS_MAX_RESERVATION_DURATION_WD = "${" + QOS_MAX_RESERVATION_DURATION + ":" + CoreDefaults.DEFAULT_QOS_MAX_RESERVATION_DURATION + "}";
+	public static final String QOS_PING_MEASUREMENT_CACHE_THRESHOLD = "qos_ping_measurement_cache_threshold"; // in seconds
+	public static final String $QOS_PING_MEASUREMENT_CACHE_THRESHOLD_WD = "${" + QOS_PING_MEASUREMENT_CACHE_THRESHOLD + ":" + CoreDefaults.DEFAULT_QOS_PING_MEASUREMENT_CACHE_THRESHOLD + "}";
+	public static final String QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = "qos_not_measured_system_verify_result"; // result of verify if a system has no measurement records
+	public static final String $QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = "${" + QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT + ":" + CoreDefaults.DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT + "}";
 	
 	public static final String NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS = "no_gatekeeper_relay_request_handler_workers";
 	public static final String $NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS_WD = "${" + NO_GATEKEEPER_RELAY_REQUEST_HANDLER_WORKERS + ":" + 
@@ -144,6 +160,12 @@ public class CoreCommonConstants {
 	public static final String EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS = "event_handler_max_express_subscribers";
 	public static final String $EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS_WD = "${" + EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + ":" + CoreDefaults.DEFAULT_EVENT_HANDLER_MAX_EXPRESS_SUBSCRIBERS + "}";
 	public static final String EVENT_PUBLISHING_EXPRESS_EXECUTOR = "eventPublishingExpressExecutor";
+
+	public static final String PING_TTL_INTERVAL = "ping_ttl_interval_minutes";
+	public static final String $PING_TTL_INTERVAL_WD = "${" + PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_PING_TTL_INTERVAL_MINUTES + "}";
+	
+	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval_minutes";
+	public static final String $CLOUD_PING_TTL_INTERVAL_WD = "${" + CLOUD_PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES + "}";
 
 	//=================================================================================================
 	// assistant methods

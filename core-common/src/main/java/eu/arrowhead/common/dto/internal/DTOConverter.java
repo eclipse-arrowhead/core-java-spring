@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import eu.arrowhead.common.database.entity.System;
 import org.springframework.data.domain.Page;
 import org.springframework.util.Assert;
 
@@ -31,6 +30,8 @@ import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
+import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -38,6 +39,7 @@ import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
@@ -650,7 +652,65 @@ public class DTOConverter {
 													  Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getCreatedAt()),
 													  Utilities.convertZonedDateTimeToUTCString(actionPlanEntry.getUpdatedAt()));
 	}
-	
+
+	//-------------------------------------------------------------------------------------------------
+	public static PingMeasurementResponseDTO convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(
+		final QoSIntraPingMeasurement pingMeasurement) {
+		Assert.notNull(pingMeasurement, "pingMeasurement is null");
+
+		final QoSIntraMeasurementResponseDTO measurementResponseDTO = convertQoSIntraMeasurementToQoSIntraMeasurementResponseDTO(pingMeasurement.getMeasurement());
+
+		final PingMeasurementResponseDTO pingMeasurementResponseDTO = new PingMeasurementResponseDTO();
+		pingMeasurementResponseDTO.setId(pingMeasurement.getId());
+		pingMeasurementResponseDTO.setMeasurement(measurementResponseDTO);
+		pingMeasurementResponseDTO.setAvailable(pingMeasurement.isAvailable());
+		pingMeasurementResponseDTO.setLastAccessAt(pingMeasurement.getLastAccessAt());
+		pingMeasurementResponseDTO.setMinResponseTime(pingMeasurement.getMinResponseTime());
+		pingMeasurementResponseDTO.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
+		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
+		pingMeasurementResponseDTO.setMeanResponseTimeWithoutTimeout(pingMeasurement.getMeanResponseTimeWithoutTimeout());
+		pingMeasurementResponseDTO.setJitterWithTimeout(pingMeasurement.getJitterWithTimeout());
+		pingMeasurementResponseDTO.setJitterWithoutTimeout(pingMeasurement.getJitterWithoutTimeout());
+		pingMeasurementResponseDTO.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
+		pingMeasurementResponseDTO.setSent(pingMeasurement.getSent());
+		pingMeasurementResponseDTO.setReceived(pingMeasurement.getReceived());
+		pingMeasurementResponseDTO.setCountStartedAt(pingMeasurement.getCountStartedAt());
+		pingMeasurementResponseDTO.setSentAll(pingMeasurement.getSentAll());
+		pingMeasurementResponseDTO.setReceivedAll(pingMeasurement.getReceivedAll());
+		pingMeasurementResponseDTO.setCreatedAt(pingMeasurement.getUpdatedAt());
+		pingMeasurementResponseDTO.setUpdatedAt(pingMeasurement.getUpdatedAt());
+
+		return pingMeasurementResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static QoSIntraMeasurementResponseDTO convertQoSIntraMeasurementToQoSIntraMeasurementResponseDTO(
+		final QoSIntraMeasurement measurement) {
+		Assert.notNull(measurement, "measurement is null");
+
+		final SystemResponseDTO system = convertSystemToSystemResponseDTO(measurement.getSystem());
+
+		return new QoSIntraMeasurementResponseDTO(
+				measurement.getId(), 
+				system, 
+				measurement.getMeasurementType(), 
+				measurement.getLastMeasurementAt(), 
+				measurement.getCreatedAt(), 
+				measurement.getUpdatedAt());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static PingMeasurementListResponseDTO convertQoSIntraPingMeasurementPageToPingMeasurementListResponseDTO(
+		final Page<QoSIntraPingMeasurement> entries) {
+		Assert.notNull(entries, "pingMeasurementPage is null");
+
+		final List<PingMeasurementResponseDTO> pingMeasurementEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final QoSIntraPingMeasurement entry : entries) {
+			pingMeasurementEntries.add(convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(entry));
+		}
+
+		return new PingMeasurementListResponseDTO(pingMeasurementEntries, entries.getTotalElements());
+	}
 	//=================================================================================================
 	// assistant methods
 
@@ -754,4 +814,5 @@ public class DTOConverter {
 		
 		return result;
 	}
+
 }

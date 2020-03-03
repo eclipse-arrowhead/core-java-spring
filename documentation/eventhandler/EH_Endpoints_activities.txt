@@ -1,0 +1,44 @@
+EventHandler Endpoints Activities 
+
+EH_SUBSCRIBE ENDPOINT
+
+O
+
+- checkSubscriptionRequestDTO | - > End BadRequest ...
+	- getAuthorizedPublishers | < - > Authorization
+	- validateSubscriptionRequestDTO | < - > DB
+	- save subscription | < - > DB
+	
+----
+
+
+EH_PUBLISH ENDPOINT
+
+O
+
+- checkEventPublishRequestDTO | - > End BadRequest ...
+- validateTimeStamp | - > End BadRequest ...
+
+	- getInvolvedSubscriptions ( eventType equals subscribedEventType && publisher is authorized ) | < - > DB
+	- filterInvolvedSubscriptionsByStartDate
+	- filterInvolvedSubscriptionsByEndDate
+	- filterInvolvedSubscriptionsByMetaData
+	
+	- publishEvent 
+----
+
+
+EH_PUBLISH AUTH_UPDATE ENDPOINT
+
+O
+
+- checkEventPublishRequestDTO | - > End BadRequest ...
+- validateTimeStamp | - > End BadRequest ...
+
+	- validateAuthorizationUpdateEventType 
+	- validateAuthorizationUpdatePayload
+	- getInvolvedSubscriptions...
+	
+	- getAuthorizedPublishers | <-> Authorization
+	- updateSubscriberAuthorization
+	

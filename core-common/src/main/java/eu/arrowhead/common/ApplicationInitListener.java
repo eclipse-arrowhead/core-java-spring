@@ -219,7 +219,7 @@ public abstract class ApplicationInitListener {
 			
 			final ServiceQueryFormDTO queryForm = new ServiceQueryFormDTO.Builder(coreService.getServiceDefinition()).build();
 			final ResponseEntity<ServiceQueryResultDTO> queryResponse = httpService.sendRequest(queryUri, HttpMethod.POST, ServiceQueryResultDTO.class, queryForm);
-			for (final ServiceRegistryResponseDTO result : queryResponse.getBody().getServiceQueryData()) { // stucked entries
+			for (final ServiceRegistryResponseDTO result : queryResponse.getBody().getServiceQueryData()) { // old, possibly obsolete entries
 				final UriComponents unregisterUri = createUnregisterUri(scheme, coreService, result.getProvider().getAddress(), result.getProvider().getPort());
 				httpService.sendRequest(unregisterUri, HttpMethod.DELETE, Void.class);
 			}

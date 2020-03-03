@@ -31,7 +31,9 @@
 	    <module>gatekeeper</module>
 	    <module>gateway</module>
 	    <module>choreographer</module>
+	    <module>qos-monitor</module>
 	    <module>deb-installer</module>
+	    <module>docker-all</module>
   	</modules>
   	
 	<properties>
@@ -53,8 +55,18 @@
   		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
   		<jms.api.version>2.0.1</jms.api.version>
   		<activemq.client.version>5.15.9</activemq.client.version>
+  		<icmp4j.version>1.2</icmp4j.version>
+  		<jna.version>5.5.0</jna.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
+	<repositories>
+        <repository>
+            <id>spring-repo</id>
+            <name>Spring Repository</name>
+			<url>https://repo.spring.io/plugins-release/</url>
+        </repository>
+    </repositories>
 
 	<dependencies>
 		<dependency>
@@ -147,6 +159,22 @@
 			<version>${mysql.jdbc.driver}</version>
 			<scope>runtime</scope>
 		</dependency>
+		
+		<dependency>
+        	<groupId>sheltekio.javalibs</groupId>
+        	<artifactId>icmp4j</artifactId>
+        	<version>${icmp4j.version}</version>
+    	</dependency>
+    	<dependency>
+        	<groupId>net.java.dev.jna</groupId>
+        	<artifactId>jna</artifactId>
+        	<version>${jna.version}</version>
+    	</dependency>
+    	<dependency>
+	        <groupId>net.java.dev.jna</groupId>
+        	<artifactId>jna-platform</artifactId>
+        	<version>${jna.version}</version>
+    	</dependency> 
 		
 <!--
 		<dependency>
