@@ -77,6 +77,18 @@ public class Device
 		this.authenticationInfo = authenticationInfo;
 	}
 
+	public Device(final long id, final String deviceName, final String address, final String macAddress, final String authenticationInfo,
+				  final ZonedDateTime createdAt, final ZonedDateTime updatedAt, final Set<SystemRegistry> systemRegistryEntries) {
+		this.id = id;
+		this.deviceName = deviceName;
+		this.address = address;
+		this.macAddress = macAddress;
+		this.authenticationInfo = authenticationInfo;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.systemRegistryEntries = systemRegistryEntries;
+	}
+
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist
 	public void onCreate() {

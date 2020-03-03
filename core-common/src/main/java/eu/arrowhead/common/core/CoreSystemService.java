@@ -1,5 +1,6 @@
 package eu.arrowhead.common.core;
 
+import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
 import org.springframework.util.Assert;
 
@@ -23,6 +24,7 @@ import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_PUBLIC_KE
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_CSR;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_NAME;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ORCH_PROCESS;
+import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SYSTEM_REGISTRY_REGISTER;
@@ -51,11 +53,14 @@ import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_KEY_URI;
 import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_CSR;
 import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_NAME;
 import static eu.arrowhead.common.CommonConstants.OP_ORCH_PROCESS;
+import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT;
+import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX;
 import static eu.arrowhead.common.CommonConstants.OP_SERVICE_REGISTRY_REGISTER_URI;
 import static eu.arrowhead.common.CommonConstants.OP_SERVICE_REGISTRY_UNREGISTER_URI;
 import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_REGISTER_URI;
 import static eu.arrowhead.common.CommonConstants.OP_SYSTEM_REGISTRY_UNREGISTER_URI;
 import static eu.arrowhead.common.CommonConstants.ORCHESTRATOR_URI;
+import static eu.arrowhead.common.CommonConstants.QOS_MONITOR_URI;
 import static eu.arrowhead.common.CommonConstants.SERVICE_REGISTRY_URI;
 import static eu.arrowhead.common.CommonConstants.SYSTEM_REGISTRY_URI;
 
@@ -91,8 +96,8 @@ public enum CoreSystemService {
     EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
 
 	// QoS Monitor services
-	QOS_MONITOR_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT +
-			CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX),
+	QOS_MONITOR_PING_MEASUREMENT_SERVICE(CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT,
+            QOS_MONITOR_URI + OP_QOS_MONITOR_PING_MEASUREMENT + OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX),
 
 
 	// Onboarding services

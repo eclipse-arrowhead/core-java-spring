@@ -61,20 +61,13 @@ public class DeviceRegistryDBService {
 
     private final DeviceRepository deviceRepository;
 
-    private final SSLProperties sslProperties;
-
-    @Value(CoreCommonConstants.$SYSTEM_REGISTRY_PING_TIMEOUT_WD)
-    private int pingTimeout;
-
     @Autowired
     public DeviceRegistryDBService(final DeviceRegistryRepository deviceRegistryRepository,
                                    final SystemRepository systemRepository,
-                                   final DeviceRepository deviceRepository,
-                                   final SSLProperties sslProperties) {
+                                   final DeviceRepository deviceRepository) {
         this.deviceRegistryRepository = deviceRegistryRepository;
         this.systemRepository = systemRepository;
         this.deviceRepository = deviceRepository;
-        this.sslProperties = sslProperties;
     }
 
 
@@ -584,7 +577,7 @@ public class DeviceRegistryDBService {
         if (Utilities.isEmpty(macAddress)) {
             throw new InvalidParameterException("MAC address is null or empty");
         } else {
-            final Matcher matcher = DeviceRegistryController.MAC_ADDRESS_PATTERN.matcher(address);
+            final Matcher matcher = DeviceRegistryController.MAC_ADDRESS_PATTERN.matcher(macAddress);
             if (!matcher.matches()) {
                 throw new InvalidParameterException("Unrecognized format of MAC Address");
             }
