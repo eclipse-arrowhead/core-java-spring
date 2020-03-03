@@ -44,6 +44,7 @@ import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
+import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -212,8 +213,6 @@ public class QoSDBService {
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
 		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResponseDTO);
 		
-		//How to check the connection between cloud and relay w/o direct db access?
-		
 		final QoSInterRelayMeasurement measurement;
 		final Optional<QoSInterRelayMeasurement> qoSInterRelayMeasurementOptional = qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, type);
 		if (qoSInterRelayMeasurementOptional.isEmpty()) {
@@ -226,6 +225,24 @@ public class QoSDBService {
 		return measurement;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@Transactional (rollbackFor = ArrowheadException.class)
+	public void changeInterRelayMeasurementStatusById(final long id, final QoSMeasurementStatus status) {
+		final Optional<QoSInterRelayMeasurement> optional = qosInterRelayMeasurementRepository.findById(id);
+		if (optional.isEmpty()) {
+			throw new InvalidParameterException("InterRelayMeasurement with id: " + id + NOT_IN_DB_ERROR_MESSAGE);
+		} else {
+			final QoSInterRelayMeasurement measurement = optional.get();
+			measurement.setStatus(status);
+			try {
+				qosInterRelayMeasurementRepository.saveAndFlush(measurement);
+			} catch (final Exception ex) {
+				logger.debug(ex.getMessage(), ex);
+				throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			}
+		}		
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
 	public void createIntraPingMeasurement(final QoSIntraMeasurement measurementParam, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
