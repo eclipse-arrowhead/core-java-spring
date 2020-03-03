@@ -19,7 +19,6 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurementLogDetails;
@@ -30,8 +29,6 @@ import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.repository.CloudGatekeeperRelayRepository;
-import eu.arrowhead.common.database.repository.CloudRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementRepository;
@@ -40,7 +37,6 @@ import eu.arrowhead.common.database.repository.QoSIntraMeasurementPingRepository
 import eu.arrowhead.common.database.repository.QoSIntraMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
-import eu.arrowhead.common.database.repository.RelayRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -96,15 +92,6 @@ public class QoSDBService {
 	@Autowired
 	private SystemRepository systemRepository;
 	
-	@Autowired
-	private CloudRepository cloudRepository;
-	
-	@Autowired
-	private RelayRepository relayRepository;
-	
-	@Autowired
-	private CloudGatekeeperRelayRepository cloudGatekeeperRelayRepository;
-
 	protected Logger logger = LogManager.getLogger(QoSDBService.class);
 	
 	//=================================================================================================
@@ -216,38 +203,22 @@ public class QoSDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSInterRelayMeasurement getOrCreateInterRelayMeasurement(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO) {
+	public QoSInterRelayMeasurement getOrCreateInterRelayMeasurement(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO, final QoSMeasurementType type) {
 		logger.debug("getOrCreateInterRelayMeasurement started...");
 
 		validateCloudResponseDTO(cloudResponseDTO);
 		validateRelayResponseDTO(relayResponseDTO);
 		
-		final Cloud cloud;
-		final Optional<Cloud> cloudOpt = cloudRepository.findByOperatorAndName(cloudResponseDTO.getOperator(), cloudResponseDTO.getName());
-		if (cloudOpt.isPresent()) {
-			cloud = cloudOpt.get();
-		} else {
-			throw new InvalidParameterException("Requested cloud" + NOT_IN_DB_ERROR_MESSAGE);
-		}
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResponseDTO);
 		
-		final Relay relay;
-		final Optional<Relay> relayOpt = relayRepository.findByAddressAndPort(relayResponseDTO.getAddress(), relayResponseDTO.getPort());
-		if (relayOpt.isPresent()) {
-			relay = relayOpt.get();
-		} else {
-			throw new InvalidParameterException("Requested relay" + NOT_IN_DB_ERROR_MESSAGE);
-		}
-		
-		final Optional<CloudGatekeeperRelay> cloudRelayConn = cloudGatekeeperRelayRepository.findByCloudAndRelay(cloud, relay);
-		if (cloudRelayConn.isEmpty()) {
-			throw new InvalidParameterException("No connection between cloud(" + cloud.getName() +"." + cloud.getOperator() + ") and relay(" + relay.getAddress() + ":" + relay.getPort() + ")");
-		}
+		//How to check the connection between cloud and relay w/o direct db access?
 		
 		final QoSInterRelayMeasurement measurement;
-		final Optional<QoSInterRelayMeasurement> qoSInterRelayMeasurementOptional = qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, QoSMeasurementType.PING);
+		final Optional<QoSInterRelayMeasurement> qoSInterRelayMeasurementOptional = qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, type);
 		if (qoSInterRelayMeasurementOptional.isEmpty()) {
 			final ZonedDateTime aroundNow = ZonedDateTime.now();
-			measurement = createInterRelayMeasurement(cloud, relay, QoSMeasurementType.PING, aroundNow);
+			measurement = createInterRelayMeasurement(cloud, relay, type, aroundNow);
 		}else {
 			 measurement = qoSInterRelayMeasurementOptional.get();
 		}
@@ -737,36 +708,18 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurement getInterRelayEchoMeasurementByCloudIdAndRealyId(final long cloudId, final long relayId) {
-		logger.debug("getInterRelayEchoMeasurementByCloudIdAndRealyId started ...");
+	public QoSInterRelayEchoMeasurement getInterRelayEchoMeasurementByCloudAndRealy(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO) {
+		logger.debug("getInterRelayEchoMeasurementByCloudAndRealy started ...");
+		
+		validateCloudResponseDTO(cloudResponseDTO);
+		validateRelayResponseDTO(relayResponseDTO);
 
-		if (cloudId < 1) {
-			throw new InvalidParameterException("cloudId" + LESS_THAN_ONE_ERROR_MESSAGE);
-		}
-		if (relayId < 1) {
-			throw new InvalidParameterException("relayId" + LESS_THAN_ONE_ERROR_MESSAGE);
-		}
-
-		final Cloud cloud;
-		final Relay relay;
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResponseDTO);
 		try {
 
-			final Optional<Cloud> cloudOpt = cloudRepository.findById(cloudId);
-			if (cloudOpt.isPresent()) {
-				cloud = cloudOpt.get();
-			} else {
-				throw new InvalidParameterException("Requested cloud" + NOT_IN_DB_ERROR_MESSAGE);
-			}
-			
-			final Optional<Relay> relayOpt = relayRepository.findById(relayId);
-			if (relayOpt.isPresent()) {
-				relay = relayOpt.get();
-			} else {
-				throw new InvalidParameterException("Requested relay" + NOT_IN_DB_ERROR_MESSAGE);
-			}
-
 			final QoSInterRelayMeasurement measurement;
-			final Optional<QoSInterRelayMeasurement> qoSInterRelayMeasurementOptional = qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, QoSMeasurementType.PING);
+			final Optional<QoSInterRelayMeasurement> qoSInterRelayMeasurementOptional = qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, QoSMeasurementType.RELAY_ECHO);
 			if (qoSInterRelayMeasurementOptional.isEmpty()) {	
 				return null;
 			} else {

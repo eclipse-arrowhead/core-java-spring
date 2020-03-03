@@ -501,6 +501,21 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static Cloud convertCloudResponseDTOToCloud(final CloudResponseDTO cloudResponseDTO) {
+		Assert.notNull(cloudResponseDTO, "cloudResponseDTO is null");
+		Assert.notNull(cloudResponseDTO.getOperator(), "cloudResponseDTO.Operator is null");
+		Assert.notNull(cloudResponseDTO.getName(), "cloudResponseDTO.Name is null");
+		
+		final Cloud cloud = new Cloud();
+		
+		cloud.setId(cloudResponseDTO.getId());
+		cloud.setOperator(cloudResponseDTO.getOperator());
+		cloud.setName(cloudResponseDTO.getName());
+		
+		return cloud;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription) {
 		Assert.notNull(subscription, "subscription is null");
 		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null");
@@ -576,6 +591,23 @@ public class DTOConverter {
 		Assert.notNull(response, "Relay response is null.");
 		
 		return new RelayRequestDTO(response.getAddress(), response.getPort(), response.isSecure(), response.isExclusive(), response.getType().name());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static Relay convertRelayResponseDTOToRelay(final RelayResponseDTO dto) {
+		Assert.notNull(dto, "RelayResponseDTO is null.");
+		Assert.isTrue(Utilities.isEmpty(dto.getAddress()), "RelayResponseDTO.address is null or empty.");
+		Assert.notNull(dto.getType(), "RelayResponseDTO.type is null.");
+		
+		final Relay relay = new Relay();
+		relay.setId(dto.getId());
+		relay.setAddress(dto.getAddress());
+		relay.setPort(dto.getPort());
+		relay.setSecure(dto.isSecure());
+		relay.setExclusive(dto.isExclusive());
+		relay.setType(dto.getType());
+		
+		return relay;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
