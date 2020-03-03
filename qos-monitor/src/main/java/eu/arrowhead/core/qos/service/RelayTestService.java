@@ -9,12 +9,12 @@ import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.apache.catalina.core.ApplicationContext;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -24,7 +24,8 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.GatewayProviderConnectionResponseDTO;
+import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -51,6 +52,18 @@ public class RelayTestService {
 
 	@Autowired
 	private SSLProperties sslProps;
+	
+	@Value(CoreCommonConstants.$RELAY_TEST_TIME_TO_REPEAT_WD)
+	private byte noIteration;
+	
+	@Value(CoreCommonConstants.$RELAY_TEST_TIMEOUT_WD)
+	private long timeout;
+	
+	@Value(CoreCommonConstants.$RELAY_TEST_MESSAGE_SIZE_WD)
+	private int testMessageSize;
+	
+	@Value(CoreCommonConstants.$RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD)
+	private boolean logIndividualMeasurements;
 	
 	private final Logger logger = LogManager.getLogger(RelayTestService.class);
 	
@@ -90,16 +103,20 @@ public class RelayTestService {
 		
 		validateQoSRelayTestProposalRequestDTO(request);
 		// TODO: find cloud and relay db objects
+		final Cloud requesterCloud = null;
+		final Relay relay = null;
+		
 		// TODO: find or create measurement record for the cloud, relay pair (and set to pending/new)
 		
-		final RelayRequestDTO relay = request.getRelay();
-		final Session session = getRelaySession(relay);
+		final RelayRequestDTO relayRequest = request.getRelay();
+		final Session session = getRelaySession(relayRequest);
 
 		ReceiverSideRelayTestThread thread = null;
 		try {
-			// TODO: create thread
+			thread = new ReceiverSideRelayTestThread(appContext, relayClient, session, requesterCloud, relay, request.getSenderQoSMonitorPublicKey(), noIteration, testMessageSize,
+													 timeout, logIndividualMeasurements);
 			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, thread);
-			// TODO: init thread
+			thread.init(info.getQueueId(), info.getMessageSender(), info.getControlMessageSender());
 			thread.start();
 
 			return new QoSRelayTestProposalResponseDTO(info.getQueueId(), info.getPeerName(), Base64.getEncoder().encodeToString(myPublicKey.getEncoded()));

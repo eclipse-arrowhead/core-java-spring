@@ -55,7 +55,12 @@ public class CoreDefaults {
 	public static final int DEFAULT_QOS_TEMPORARY_LOCK_DURATION = 60; // in seconds
 	public static final int DEFAULT_QOS_MAX_RESERVATION_DURATION = 3600; // in seconds
 	public static final int DEFAULT_QOS_PING_MEASUREMENT_CACHE_THRESHOLD = 600; // in seconds
-	public static final boolean DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = true; 
+	public static final boolean DEFAULT_QOS_NOT_MEASURED_SYSTEM_VERIFY_RESULT = true;
+	
+	public static final byte DEFAULT_RELAY_TEST_TIME_TO_REPEAT = 35;
+	public static final int DEFAULT_RELAY_TEST_TIMEOUT = 5000; // in milliseconds
+	public static final int DEFAULT_RELAY_TEST_MESSAGE_SIZE = 2048; // in bytes
+	public static final boolean DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB = true;
 	
 	//=================================================================================================
 	// assistant methods

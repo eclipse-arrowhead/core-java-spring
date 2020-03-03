@@ -1,9 +1,7 @@
 package eu.arrowhead.core.qos.thread;
 
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -54,6 +52,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private final byte noIteration;
 	private final int testMessageSize;
 	private final long timeout; // in milliseconds
+	private final boolean logIndividualMeasurements;
 	
 	private boolean receiver = true;
 	private final Map<Byte,long[]> testResults = new HashMap<>();
@@ -69,7 +68,8 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 
 	//-------------------------------------------------------------------------------------------------
 	public ReceiverSideRelayTestThread(final ApplicationContext appContext, final GatewayRelayClient relayClient, final Session relaySession, final Cloud requesterCloud,
-									   final Relay relay, final String requesterQoSMonitorPublicKey, final byte noIteration, final int testMessageSize, final long timeout) {
+								   	   final Relay relay, final String requesterQoSMonitorPublicKey, final byte noIteration, final int testMessageSize, final long timeout,
+								   	   final boolean logIndividualMeasurements) {
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.notNull(relayClient, "relayClient is null.");
 		Assert.notNull(relaySession, "relaySession is null.");
@@ -90,6 +90,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		this.noIteration = noIteration;
 		this.testMessageSize = testMessageSize;
 		this.timeout = timeout;
+		this.logIndividualMeasurements = logIndividualMeasurements;
 		
 		setName("TEST-RECEIVER-" + requesterCloud.getName() + "." + requesterCloud.getOperator() + "|" + relay.getAddress() + ":" + relay.getPort());
 	}
@@ -227,6 +228,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 			} catch (final JMSException | ArrowheadException | InterruptedException ex) {
 				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 				logger.debug("Stacktrace:", ex);
+				//TODO: log error in the measurement details table
 				closeAndInterrupt();
 			}
 		}

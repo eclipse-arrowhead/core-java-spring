@@ -73,5 +73,25 @@
     "name": "ping.logMeasurementsDetailsToDB",
     "type": "java.lang.Boolean",
     "description": "A description for 'ping.logMeasurementsDetailsToDB'"
+  },
+  {
+    "name": "relay.test.time_to_repeat",
+    "type": "java.lang.Byte",
+    "description": "A description for 'relay.test.time_to_repeat'"
+  },
+  {
+    "name": "relay.test.message_size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'relay.test.message_size'"
+  },
+  {
+    "name": "relay.test.timeout",
+    "type": "java.lang.Long",
+    "description": "A description for 'relay.test.timeout'"
+  },
+  {
+    "name": "relay.test.log_measurements_to_db",
+    "type": "java.lang.Boolean",
+    "description": "A description for 'relay.test.log_measurements_to_db'"
   }
 ]}
