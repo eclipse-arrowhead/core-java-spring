@@ -34,6 +34,8 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -54,6 +56,7 @@ public class GatekeeperControllerQoSTest {
 	
 	private static final String PULL_CLOUDS_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE;
 	private static final String COLLECT_SYSTEM_ADDRESSES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE;
+	private static final String COLLECT_ACCESS_TYPES_URI = CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE;
 	
 	
 	@Autowired
@@ -88,9 +91,9 @@ public class GatekeeperControllerQoSTest {
 		when(gatekeeperDBService.getCloudsResponse(anyInt(), anyInt(), any(), any())).thenReturn(dto);
 		
 		final MvcResult response = this.mockMvc.perform(get(PULL_CLOUDS_URI)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isOk())
-				   .andReturn();
+				   							   .accept(MediaType.APPLICATION_JSON))
+				   							   .andExpect(status().isOk())
+				   							   .andReturn();
 		
 		final CloudWithRelaysListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), CloudWithRelaysListResponseDTO.class);
 		assertEquals(amountOfClouds, responseBody.getCount());
@@ -110,13 +113,13 @@ public class GatekeeperControllerQoSTest {
 		when(gatekeeperService.initSystemAddressCollection(any())).thenReturn(responseDTO);
 		
 		final MvcResult response = this.mockMvc.perform(post(COLLECT_SYSTEM_ADDRESSES_URI)
-					.content(objectMapper.writeValueAsBytes(requestDTO))
-				   .contentType(MediaType.APPLICATION_JSON)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isOk())
-				   .andReturn();
+											   .content(objectMapper.writeValueAsBytes(requestDTO))
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+										   	   .andExpect(status().isOk())
+										   	   .andReturn();
 		
-		SystemAddressSetRelayResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemAddressSetRelayResponseDTO.class);
+		final SystemAddressSetRelayResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), SystemAddressSetRelayResponseDTO.class);
 		assertEquals(responseDTO.getAddresses().size(), responseBody.getAddresses().size());
 	}
 	
@@ -133,9 +136,9 @@ public class GatekeeperControllerQoSTest {
 		
 		this.mockMvc.perform(post(COLLECT_SYSTEM_ADDRESSES_URI)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
-				   .contentType(MediaType.APPLICATION_JSON)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -151,9 +154,9 @@ public class GatekeeperControllerQoSTest {
 		
 		this.mockMvc.perform(post(COLLECT_SYSTEM_ADDRESSES_URI)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
-				   .contentType(MediaType.APPLICATION_JSON)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -169,9 +172,9 @@ public class GatekeeperControllerQoSTest {
 		
 		this.mockMvc.perform(post(COLLECT_SYSTEM_ADDRESSES_URI)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
-				   .contentType(MediaType.APPLICATION_JSON)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isBadRequest());
+				    .contentType(MediaType.APPLICATION_JSON)
+				    .accept(MediaType.APPLICATION_JSON))
+				    .andExpect(status().isBadRequest());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -187,9 +190,87 @@ public class GatekeeperControllerQoSTest {
 		
 		this.mockMvc.perform(post(COLLECT_SYSTEM_ADDRESSES_URI)
 					.content(objectMapper.writeValueAsBytes(requestDTO))
-				   .contentType(MediaType.APPLICATION_JSON)
-				   .accept(MediaType.APPLICATION_JSON))
-				   .andExpect(status().isBadRequest());
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+				   	.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectNeighborCloudAccessTypesOk() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setName("test-name");
+		requestDTO.setOperator("test-oprator");
+		final CloudAccessResponseDTO responseDTO = new CloudAccessResponseDTO(requestDTO.getName(), requestDTO.getOperator(), true);
+		
+		when(gatekeeperService.initAccessTypesCollection(any())).thenReturn(new CloudAccessListResponseDTO(List.of(responseDTO), 1));
+		
+		final MvcResult response = this.mockMvc.perform(post(COLLECT_ACCESS_TYPES_URI)
+											   .content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
+											   .contentType(MediaType.APPLICATION_JSON)
+											   .accept(MediaType.APPLICATION_JSON))
+											   .andExpect(status().isOk())
+											   .andReturn();
+		
+		final CloudAccessListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), CloudAccessListResponseDTO.class);
+		assertEquals(responseDTO.getCloudName(), responseBody.getData().get(0).getCloudName());
+		assertEquals(responseDTO.getCloudOperator(), responseBody.getData().get(0).getCloudOperator());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectNeighborCloudAccessTypesNullCloudName() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setName(null);
+		requestDTO.setOperator("test-oprator");
+		
+		this.mockMvc.perform(post(COLLECT_ACCESS_TYPES_URI)
+					.content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectNeighborCloudAccessTypesBlankCloudName() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setName("  ");
+		requestDTO.setOperator("test-oprator");
+		
+		this.mockMvc.perform(post(COLLECT_ACCESS_TYPES_URI)
+					.content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectNeighborCloudAccessTypesNullCloudOperator() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setName("test-name");
+		requestDTO.setOperator(null);
+		
+		this.mockMvc.perform(post(COLLECT_ACCESS_TYPES_URI)
+					.content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCollectNeighborCloudAccessTypesBlankCloudOperator() throws Exception {
+		final CloudRequestDTO requestDTO = new CloudRequestDTO();
+		requestDTO.setName("test-name");
+		requestDTO.setOperator("  ");
+		
+		this.mockMvc.perform(post(COLLECT_ACCESS_TYPES_URI)
+					.content(objectMapper.writeValueAsBytes(List.of(requestDTO)))
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isBadRequest());
 	}
 	
 	//=================================================================================================

@@ -518,6 +518,41 @@ public class DTOConverter {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public static Cloud convertCloudWithRelaysResponseDTOToCloud(final CloudWithRelaysResponseDTO cloudResponseDTO) {
+		Assert.notNull(cloudResponseDTO, "cloudResponseDTO is null");
+		Assert.notNull(cloudResponseDTO.getOperator(), "cloudResponseDTO.Operator is null");
+		Assert.notNull(cloudResponseDTO.getName(), "cloudResponseDTO.Name is null");
+		
+		final Cloud cloud = new Cloud();
+		
+		cloud.setId(cloudResponseDTO.getId());
+		cloud.setOperator(cloudResponseDTO.getOperator());
+		cloud.setName(cloudResponseDTO.getName());
+		
+		return cloud;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static CloudResponseDTO convertCloudWithRelaysResponseDTOToCloudResponseDTO(final CloudWithRelaysResponseDTO entity) {
+		Assert.notNull(entity, "cloudResponseDTO is null");
+		Assert.notNull(entity.getOperator(), "cloudResponseDTO.Operator is null");
+		Assert.notNull(entity.getName(), "cloudResponseDTO.Name is null");
+		
+		return new CloudResponseDTO(entity.getId(), entity.getOperator(), entity.getName(), entity.getSecure(), entity.getNeighbor(), entity.getOwnCloud(), entity.getAuthenticationInfo(),
+				   entity.getCreatedAt(), entity.getUpdatedAt());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static CloudRequestDTO convertCloudWithRelaysResponseDTOToCloudRequestDTO(final CloudWithRelaysResponseDTO entity) {
+		Assert.notNull(entity, "cloudResponseDTO is null");
+		Assert.notNull(entity.getOperator(), "cloudResponseDTO.Operator is null");
+		Assert.notNull(entity.getName(), "cloudResponseDTO.Name is null");
+		
+		return convertCloudResponseDTOToCloudRequestDTO( new CloudResponseDTO(entity.getId(), entity.getOperator(), entity.getName(), entity.getSecure(), entity.getNeighbor(), entity.getOwnCloud(), entity.getAuthenticationInfo(),
+				   entity.getCreatedAt(), entity.getUpdatedAt()));
+	}
+
+	//-------------------------------------------------------------------------------------------------
 	public static SubscriptionResponseDTO convertSubscriptionToSubscriptionResponseDTO(final Subscription subscription) {
 		Assert.notNull(subscription, "subscription is null");
 		Assert.notNull(subscription.getSubscriberSystem(), "subscription.ConsumerSystem is null");
