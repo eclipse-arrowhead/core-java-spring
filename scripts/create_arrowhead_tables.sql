@@ -409,6 +409,83 @@ CREATE TABLE IF NOT EXISTS `qos_intra_ping_measurement_log_details` (
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- QoS Monitor
+-- Inter
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`cloud_id` bigint(20) NOT NULL,
+	`address` varchar(255) NOT NULL,
+	`measurement_type` varchar(255) NOT NULL,
+	`last_measurement_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_cloud_inter_direct` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_cloud_id_address_measurement_type` (`cloud_id`, `address`, `measurement_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_id` bigint(20) NOT NULL,
+	`available` int(1) NOT NULL DEFAULT 0,
+	`last_access_at` timestamp NULL DEFAULT NULL,
+	`min_response_time` int(11) DEFAULT NULL,
+	`max_response_time` int(11) DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`count_started_at` timestamp NULL,
+	`sent_all` bigint(20) NOT NULL DEFAULT 0,
+	`received_all` bigint(20) NOT NULL DEFAULT 0,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_inter_direct_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_direct_measurement` (`id`) ON DELETE CASCADE,
+	UNIQUE KEY `unique_measurement` (`measurement_id`)
+	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measured_system_address` varchar(255) NOT NULL,
+	`available` int(1) NOT NULL DEFAULT 0,
+	`min_response_time` int(11) DEFAULT NULL,
+	`max_response_time` int(11) DEFAULT NULL,
+	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
+	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
+	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
+	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
+	`sent` bigint(20) NOT NULL DEFAULT 0,
+	`received` bigint(20) NOT NULL DEFAULT 0,
+	`measured_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `qos_inter_direct_ping_measurement_log_details` (
+	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
+	`measurement_log_id` bigint(20) NOT NULL,
+	`measurement_sequenece_number` int(3) NOT NULL,
+	`success_flag` int(1) NOT NULL DEFAULT 0,
+	`timeout_flag` int(1) NOT NULL DEFAULT 0,
+	`error_message` varchar(255) NULL DEFAULT NULL,
+	`throwable` varchar(255) NULL DEFAULT NULL,
+	`size_` int(11) NULL DEFAULT NULL,
+	`rtt` int(11) NULL DEFAULT NULL,
+	`ttl` int(3) NULL DEFAULT NULL,
+	`duration` int(5) NULL DEFAULT NULL,
+	`measured_at` timestamp NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `fk_inter_direct_ping_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_direct_ping_measurement_log` (`id`) ON DELETE CASCADE
+	
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS `qos_inter_relay_measurement` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`cloud_id` bigint(20) NOT NULL,
@@ -418,8 +495,8 @@ CREATE TABLE IF NOT EXISTS `qos_inter_relay_measurement` (
 	`last_measurement_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_cloud` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
-	CONSTRAINT `fk_relay` FOREIGN KEY (`relay_id`) REFERENCES `relay` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_cloud_inter_relay` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `fk_relay_inter_relay` FOREIGN KEY (`relay_id`) REFERENCES `relay` (`id`) ON DELETE CASCADE,
 	UNIQUE KEY `unique_cloud_relay_measurement_type` (`cloud_id`, `relay_id`, `measurement_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -478,83 +555,6 @@ CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log_details` (
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `fk_inter_relay_echo_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_relay_echo_measurement_log` (`id`) ON DELETE CASCADE
-	
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- QoS Monitor
--- Inter
-
-CREATE TABLE IF NOT EXISTS `qos_inter_measurement` (
-	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-	`cloud_id` bigint(20) NOT NULL,
-	`address` varchar(255) NOT NULL,
-	`measurement_type` varchar(255) NOT NULL,
-	`last_measurement_at` timestamp NOT NULL,
-	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_cloud` FOREIGN KEY (`cloud_id`) REFERENCES `cloud` (`id`) ON DELETE CASCADE,
-	UNIQUE KEY `unique_cloud_id_address_measurement_type` (`cloud_id`, `address`, `measurement_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement` (
-	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-	`measurement_id` bigint(20) NOT NULL,
-	`available` int(1) NOT NULL DEFAULT 0,
-	`last_access_at` timestamp NULL DEFAULT NULL,
-	`min_response_time` int(11) DEFAULT NULL,
-	`max_response_time` int(11) DEFAULT NULL,
-	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
-	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
-	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
-	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
-	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
-	`sent` bigint(20) NOT NULL DEFAULT 0,
-	`received` bigint(20) NOT NULL DEFAULT 0,
-	`count_started_at` timestamp NULL,
-	`sent_all` bigint(20) NOT NULL DEFAULT 0,
-	`received_all` bigint(20) NOT NULL DEFAULT 0,
-	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_inter_measurement` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_measurement` (`id`) ON DELETE CASCADE,
-	UNIQUE KEY `unique_measurement` (`measurement_id`)
-	
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement_log` (
-	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-	`measured_system_address` varchar(255) NOT NULL,
-	`available` int(1) NOT NULL DEFAULT 0,
-	`min_response_time` int(11) DEFAULT NULL,
-	`max_response_time` int(11) DEFAULT NULL,
-	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
-	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
-	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
-	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
-	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
-	`sent` bigint(20) NOT NULL DEFAULT 0,
-	`received` bigint(20) NOT NULL DEFAULT 0,
-	`measured_at` timestamp NOT NULL,
-	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-	
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `qos_inter_ping_measurement_log_details` (
-	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-	`measurement_log_id` bigint(20) NOT NULL,
-	`measurement_sequenece_number` int(3) NOT NULL,
-	`success_flag` int(1) NOT NULL DEFAULT 0,
-	`timeout_flag` int(1) NOT NULL DEFAULT 0,
-	`error_message` varchar(255) NULL DEFAULT NULL,
-	`throwable` varchar(255) NULL DEFAULT NULL,
-	`size_` int(11) NULL DEFAULT NULL,
-	`rtt` int(11) NULL DEFAULT NULL,
-	`ttl` int(3) NULL DEFAULT NULL,
-	`duration` int(5) NULL DEFAULT NULL,
-	`measured_at` timestamp NOT NULL,
-	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_inter_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_ping_measurement_log` (`id`) ON DELETE CASCADE
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

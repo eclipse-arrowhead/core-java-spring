@@ -12,8 +12,8 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "qos_inter_ping_measurement_log")
-public class QoSInterPingMeasurementLog {
+@Table(name = "qos_inter_direct_ping_measurement_log")
+public class QoSInterDirectPingMeasurementLog {
 
 	//=================================================================================================
 	// members
@@ -68,7 +68,7 @@ public class QoSInterPingMeasurementLog {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterPingMeasurementLog() {}
+	public QoSInterDirectPingMeasurementLog() {}
 
 	//-------------------------------------------------------------------------------------------------
 	@PrePersist

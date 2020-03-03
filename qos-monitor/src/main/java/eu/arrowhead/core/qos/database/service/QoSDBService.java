@@ -19,10 +19,10 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.QoSInterMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
-import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLogDetails;
+import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurementLogDetails;
@@ -33,10 +33,10 @@ import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.System;
-import eu.arrowhead.common.database.repository.QoSInterMeasurementPingRepository;
-import eu.arrowhead.common.database.repository.QoSInterMeasurementRepository;
-import eu.arrowhead.common.database.repository.QoSInterPingMeasurementLogDetailsRepository;
-import eu.arrowhead.common.database.repository.QoSInterPingMeasurementLogRepository;
+import eu.arrowhead.common.database.repository.QoSInterDirectMeasurementPingRepository;
+import eu.arrowhead.common.database.repository.QoSInterDirectMeasurementRepository;
+import eu.arrowhead.common.database.repository.QoSInterDirectPingMeasurementLogDetailsRepository;
+import eu.arrowhead.common.database.repository.QoSInterDirectPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementRepository;
@@ -88,16 +88,16 @@ public class QoSDBService {
 	private QoSIntraPingMeasurementLogDetailsRepository qoSIntraPingMeasurementLogDetailsRepository;
 	
 	@Autowired
-	private QoSInterMeasurementRepository qoSInterMeasurementRepository;
+	private QoSInterDirectMeasurementRepository qoSInterDirectMeasurementRepository;
 	
 	@Autowired
-	private QoSInterMeasurementPingRepository qoSInterMeasurementPingRepository;
+	private QoSInterDirectMeasurementPingRepository qoSInterDirectMeasurementPingRepository;
 
 	@Autowired
-	private QoSInterPingMeasurementLogRepository qoSInterPingMeasurementLogRepository;
+	private QoSInterDirectPingMeasurementLogRepository qoSInterDirectPingMeasurementLogRepository;
 	
 	@Autowired
-	private QoSInterPingMeasurementLogDetailsRepository qoSInterPingMeasurementLogDetailsRepository;
+	private QoSInterDirectPingMeasurementLogDetailsRepository qoSInterDirectPingMeasurementLogDetailsRepository;
 
 	@Autowired
 	private QoSInterRelayMeasurementRepository qosInterRelayMeasurementRepository;
@@ -476,13 +476,13 @@ public class QoSDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSInterMeasurement createInterDirectMeasurement(final Cloud cloud, final String address, final QoSMeasurementType ping, final ZonedDateTime aroundNow) {
+	public QoSInterDirectMeasurement createInterDirectMeasurement(final Cloud cloud, final String address, final QoSMeasurementType ping, final ZonedDateTime aroundNow) {
 		logger.debug("createInterMeasurement started...");
 
-		final QoSInterMeasurement measurement = new QoSInterMeasurement(cloud, address, QoSMeasurementType.PING, aroundNow);
+		final QoSInterDirectMeasurement measurement = new QoSInterDirectMeasurement(cloud, address, QoSMeasurementType.PING, aroundNow);
 
 		try {
-			qoSInterMeasurementRepository.saveAndFlush(measurement);
+			qoSInterDirectMeasurementRepository.saveAndFlush(measurement);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -492,13 +492,13 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<QoSInterMeasurement> getInterDirectMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
+	public List<QoSInterDirectMeasurement> getInterDirectMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
 		logger.debug("getInterDirectMeasurementByCloud started ...");
 
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
 		try {
 
-			final List<QoSInterMeasurement> measurementList = qoSInterMeasurementRepository.findByCloudAndMeasurementType(cloud, QoSMeasurementType.PING);
+			final List<QoSInterDirectMeasurement> measurementList = qoSInterDirectMeasurementRepository.findByCloudAndMeasurementType(cloud, QoSMeasurementType.PING);
 
 			return measurementList;
 
@@ -510,7 +510,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public Optional<QoSInterPingMeasurement> getInterDirectPingMeasurementByMeasurement(final QoSInterMeasurement measurement) {
+	public Optional<QoSInterDirectPingMeasurement> getInterDirectPingMeasurementByMeasurement(final QoSInterDirectMeasurement measurement) {
 		logger.debug("getInterDirectPingMeasurementByMeasurement started ...");
 
 		if (measurement == null) {
@@ -518,7 +518,7 @@ public class QoSDBService {
 		}
 
 		try {
-			return qoSInterMeasurementPingRepository.findByMeasurement(measurement);
+			return qoSInterDirectMeasurementPingRepository.findByMeasurement(measurement);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -526,7 +526,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void createInterDirectPingMeasurement(final QoSInterMeasurement measurementParam, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
+	public void createInterDirectPingMeasurement(final QoSInterDirectMeasurement measurementParam, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("createInterDirectPingMeasurement started ...");
 
 		if (measurementParam == null) {
@@ -539,7 +539,7 @@ public class QoSDBService {
 			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
 		}
 
-		final QoSInterPingMeasurement pingMeasurement = new QoSInterPingMeasurement();
+		final QoSInterDirectPingMeasurement pingMeasurement = new QoSInterDirectPingMeasurement();
 
 		pingMeasurement.setMeasurement(measurementParam);
 		pingMeasurement.setAvailable(calculations.isAvailable());
@@ -559,7 +559,7 @@ public class QoSDBService {
 
 		try {
 
-			qoSInterMeasurementPingRepository.saveAndFlush(pingMeasurement);
+			qoSInterDirectMeasurementPingRepository.saveAndFlush(pingMeasurement);
 
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -569,7 +569,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterPingMeasurementLog logInterDirectMeasurementToDB(final String address, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
+	public QoSInterDirectPingMeasurementLog logInterDirectMeasurementToDB(final String address, final PingMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
 		logger.debug("logInterDirectMeasurementToDB started ...");
 
 		if (Utilities.isEmpty(address)) {
@@ -580,7 +580,7 @@ public class QoSDBService {
 			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
 		}
 
-		final QoSInterPingMeasurementLog measurementLog = new QoSInterPingMeasurementLog();
+		final QoSInterDirectPingMeasurementLog measurementLog = new QoSInterDirectPingMeasurementLog();
 		measurementLog.setMeasuredSystemAddress(address);
 		measurementLog.setAvailable(calculations.isAvailable());
 		measurementLog.setMinResponseTime(calculations.getMinResponseTime());
@@ -595,7 +595,7 @@ public class QoSDBService {
 		measurementLog.setMeasuredAt(aroundNow);
 
 		try {
-			return qoSInterPingMeasurementLogRepository.saveAndFlush(measurementLog);
+			return qoSInterDirectPingMeasurementLogRepository.saveAndFlush(measurementLog);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -604,7 +604,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void logInterDirectMeasurementDetailsToDB(final QoSInterPingMeasurementLog measurementLogSaved, final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+	public void logInterDirectMeasurementDetailsToDB(final QoSInterDirectPingMeasurementLog measurementLogSaved, final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("logInterDirectMeasurementDetailsToDB started ...");
 
 		if (responseList == null || responseList.isEmpty()) {
@@ -615,12 +615,12 @@ public class QoSDBService {
 			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
 		}
 
-		final List<QoSInterPingMeasurementLogDetails> interMeasurementLogDetailsList = new ArrayList<>(responseList.size());
+		final List<QoSInterDirectPingMeasurementLogDetails> interMeasurementLogDetailsList = new ArrayList<>(responseList.size());
 
 		int measurementSequenece = 0;
 		for (final IcmpPingResponse icmpPingResponse : responseList) {
 
-			final QoSInterPingMeasurementLogDetails measurementLogDetails = new QoSInterPingMeasurementLogDetails();
+			final QoSInterDirectPingMeasurementLogDetails measurementLogDetails = new QoSInterDirectPingMeasurementLogDetails();
 			measurementLogDetails.setMeasurementLog(measurementLogSaved);
 			measurementLogDetails.setMeasurementSequeneceNumber( measurementSequenece++ );
 			measurementLogDetails.setSuccessFlag(icmpPingResponse.getSuccessFlag());
@@ -637,8 +637,8 @@ public class QoSDBService {
 		}
 
 		try {
-			qoSInterPingMeasurementLogDetailsRepository.saveAll(interMeasurementLogDetailsList);
-			qoSInterPingMeasurementLogDetailsRepository.flush();
+			qoSInterDirectPingMeasurementLogDetailsRepository.saveAll(interMeasurementLogDetailsList);
+			qoSInterDirectPingMeasurementLogDetailsRepository.flush();
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -646,7 +646,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void updateInterDirectPingMeasurement(final QoSInterMeasurement measurement, final PingMeasurementCalculationsDTO calculations, final QoSInterPingMeasurement pingMeasurement,
+	public void updateInterDirectPingMeasurement(final QoSInterDirectMeasurement measurement, final PingMeasurementCalculationsDTO calculations, final QoSInterDirectPingMeasurement pingMeasurement,
 												 final ZonedDateTime aroundNow) {
 		logger.debug("updateInterDirectPingMeasurement started ...");
 
@@ -679,7 +679,7 @@ public class QoSDBService {
 
 		try {
 
-			qoSInterMeasurementPingRepository.saveAndFlush(pingMeasurement);
+			qoSInterDirectMeasurementPingRepository.saveAndFlush(pingMeasurement);
 
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -688,7 +688,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterMeasurement getOrCreateDirectInterMeasurement(final String address, final CloudResponseDTO cloudResponseDTO) {
+	public QoSInterDirectMeasurement getOrCreateDirectInterMeasurement(final String address, final CloudResponseDTO cloudResponseDTO) {
 		logger.debug("getOrCreateDirectInterMeasurement started ...");
 
 		if (Utilities.isEmpty(address)) {
@@ -700,20 +700,20 @@ public class QoSDBService {
 		}
 
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
-		final QoSInterMeasurement measurement;
-		final Optional<QoSInterMeasurement> qoSInterMeasurementOptional = qoSInterMeasurementRepository.findByCloudAndAddressAndMeasurementType(cloud, address, QoSMeasurementType.PING);
-		if (qoSInterMeasurementOptional.isEmpty()) {
+		final QoSInterDirectMeasurement measurement;
+		final Optional<QoSInterDirectMeasurement> qoSInterDirectMeasurementOptional = qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(cloud, address, QoSMeasurementType.PING);
+		if (qoSInterDirectMeasurementOptional.isEmpty()) {
 			final ZonedDateTime aroundNow = ZonedDateTime.now();
 			measurement = createInterDirectMeasurement(cloud, address, QoSMeasurementType.PING, aroundNow);
 		}else {
-			 measurement = qoSInterMeasurementOptional.get();
+			 measurement = qoSInterDirectMeasurementOptional.get();
 		}
 
 		return measurement;
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public void updateInterDirectMeasurement(final ZonedDateTime aroundNow, final QoSInterMeasurement measurement) {
+	public void updateInterDirectMeasurement(final ZonedDateTime aroundNow, final QoSInterDirectMeasurement measurement) {
 		logger.debug("updateInterDirectMeasurement started ...");
 
 		if (measurement == null) {
@@ -724,7 +724,7 @@ public class QoSDBService {
 
 		measurement.setLastMeasurementAt(aroundNow);
 		try {
-			qoSInterMeasurementRepository.saveAndFlush(measurement);
+			qoSInterDirectMeasurementRepository.saveAndFlush(measurement);
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

@@ -25,9 +25,9 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.QoSInterMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
+import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
@@ -176,7 +176,7 @@ public class CloudPingTask implements Job {
 		final HashMap<ZonedDateTime, CloudResponseDTO> earliestUpdatedAtMapedToCloud = new HashMap<>(cloudList.size());
 		for (final CloudResponseDTO cloudResponseDTO : cloudList) {
 
-			final List<QoSInterMeasurement> measurementList = qoSDBService.getInterDirectMeasurementByCloud(cloudResponseDTO);
+			final List<QoSInterDirectMeasurement> measurementList = qoSDBService.getInterDirectMeasurementByCloud(cloudResponseDTO);
 			if (measurementList.isEmpty()) {
 				// has no measurement for the cloud yet
 
@@ -187,7 +187,7 @@ public class CloudPingTask implements Job {
 			}else {
 
 				ZonedDateTime min = ZonedDateTime.now();
-				for (final QoSInterMeasurement qoSInterMeasurement : measurementList) {
+				for (final QoSInterDirectMeasurement qoSInterMeasurement : measurementList) {
 					if (qoSInterMeasurement.getUpdatedAt().isBefore(min)) {
 						min = qoSInterMeasurement.getUpdatedAt();
 					}
@@ -300,7 +300,7 @@ public class CloudPingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
 
-		final QoSInterMeasurement measurement = qoSDBService.getOrCreateDirectInterMeasurement(address, cloud);
+		final QoSInterDirectMeasurement measurement = qoSDBService.getOrCreateDirectInterMeasurement(address, cloud);
 		final PingMeasurementCalculationsDTO calculationsDTO = handleInterPingMeasurement(measurement, responseList, aroundNow);
 
 		qoSDBService.updateInterDirectMeasurement(aroundNow, measurement);
@@ -310,12 +310,12 @@ public class CloudPingTask implements Job {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementCalculationsDTO handleInterPingMeasurement(final QoSInterMeasurement measurement,
+	private PingMeasurementCalculationsDTO handleInterPingMeasurement(final QoSInterDirectMeasurement measurement,
 			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("handelPingMeasurement started...");
 
 		final PingMeasurementCalculationsDTO calculationsDTO = calculatePingMeasurementValues(responseList, aroundNow);
-		final Optional<QoSInterPingMeasurement> pingMeasurementOptional = qoSDBService.getInterDirectPingMeasurementByMeasurement(measurement);
+		final Optional<QoSInterDirectPingMeasurement> pingMeasurementOptional = qoSDBService.getInterDirectPingMeasurementByMeasurement(measurement);
 
 		if (pingMeasurementOptional.isEmpty()) {
 
@@ -323,7 +323,7 @@ public class CloudPingTask implements Job {
 
 			if (pingMeasurementProperties.getLogMeasurementsToDB()) {
 
-				final QoSInterPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
+				final QoSInterDirectPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
 
 				if (pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 
@@ -337,7 +337,7 @@ public class CloudPingTask implements Job {
 
 			if(pingMeasurementProperties.getLogMeasurementsToDB()) {
 
-				final QoSInterPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
+				final QoSInterDirectPingMeasurementLog measurementLogSaved = qoSDBService.logInterDirectMeasurementToDB(measurement.getAddress(), calculationsDTO, aroundNow);
 
 				if(pingMeasurementProperties.getLogMeasurementsDetailsToDB() && measurementLogSaved != null) {
 

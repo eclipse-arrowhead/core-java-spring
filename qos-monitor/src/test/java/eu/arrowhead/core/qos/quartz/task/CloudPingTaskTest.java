@@ -35,9 +35,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.QoSInterMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterPingMeasurement;
-import eu.arrowhead.common.database.entity.QoSInterPingMeasurementLog;
+import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
@@ -112,15 +112,15 @@ public class CloudPingTaskTest {
 
 		final CloudWithRelaysListResponseDTO cloudWithRelaysListResponseDTO = getCloudWithRelaysListResponseDTOForTest(10);
 		final CloudAccessListResponseDTO cloudAccessListResponseDTO = getCloudAccessListResponseDTOForTest(10);
-		final List<QoSInterMeasurement> measurementList = getListOfQoSInterMeasurementForTest(10);
+		final List<QoSInterDirectMeasurement> measurementList = getListOfQoSInterDirectMeasurementForTest(10);
 		final CloudResponseDTO cloudResponseDTO = getCloudResponseDTOForTest();
 
 		final SystemAddressSetRelayResponseDTO systemAddressSet = getSystemAddressSetRelayResponseDTOForTest(10);
 		final List<IcmpPingResponse> responseList = getResponseListForTest();
 
-		final QoSInterMeasurement measurement = getQoSInterMeasurementForTest();
-		final QoSInterPingMeasurement interPingMeasurement = getInterPingMeasurementForTest();
-		final QoSInterPingMeasurementLog measurementLogSaved = getInterPingMeasurementLogForTest();
+		final QoSInterDirectMeasurement measurement = getQoSInterDirectMeasurementForTest();
+		final QoSInterDirectPingMeasurement interPingMeasurement = getInterPingMeasurementForTest();
+		final QoSInterDirectPingMeasurementLog measurementLogSaved = getInterPingMeasurementLogForTest();
 
 		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
 		doNothing().when(logger).debug( debugValueCapture.capture());
@@ -129,8 +129,8 @@ public class CloudPingTaskTest {
 		final ArgumentCaptor<CloudRequestDTO> cloudRequestDTOValueCaptor = ArgumentCaptor.forClass(CloudRequestDTO.class);
 		final ArgumentCaptor<List<CloudRequestDTO>> cloudRequestListDTOValueCaptor = ArgumentCaptor.forClass(List.class);
 		final ArgumentCaptor<String> addressValueCaptor = ArgumentCaptor.forClass(String.class);
-		final ArgumentCaptor<QoSInterMeasurement> measurementValueCaptor = ArgumentCaptor.forClass(QoSInterMeasurement.class);
-		final ArgumentCaptor<QoSInterPingMeasurement> interPingMeasurementValueCaptor = ArgumentCaptor.forClass(QoSInterPingMeasurement.class);
+		final ArgumentCaptor<QoSInterDirectMeasurement> measurementValueCaptor = ArgumentCaptor.forClass(QoSInterDirectMeasurement.class);
+		final ArgumentCaptor<QoSInterDirectPingMeasurement> interPingMeasurementValueCaptor = ArgumentCaptor.forClass(QoSInterDirectPingMeasurement.class);
 		final ArgumentCaptor<PingMeasurementCalculationsDTO> calculationsDTOValueCaptor = ArgumentCaptor.forClass(PingMeasurementCalculationsDTO.class);
 		final ArgumentCaptor<ZonedDateTime> aroundNowValueCaptor = ArgumentCaptor.forClass(ZonedDateTime.class);
 
@@ -214,11 +214,11 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private QoSInterPingMeasurement getInterPingMeasurementForTest() {
+	private QoSInterDirectPingMeasurement getInterPingMeasurementForTest() {
 
-		final QoSInterPingMeasurement pingMeasurement = new QoSInterPingMeasurement();
+		final QoSInterDirectPingMeasurement pingMeasurement = new QoSInterDirectPingMeasurement();
 
-		pingMeasurement.setMeasurement(getQoSInterMeasurementForTest());
+		pingMeasurement.setMeasurement(getQoSInterDirectMeasurementForTest());
 		pingMeasurement.setAvailable(true);
 		pingMeasurement.setMaxResponseTime(1);
 		pingMeasurement.setMinResponseTime(1);
@@ -238,9 +238,9 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private QoSInterMeasurement getQoSInterMeasurementForTest() {
+	private QoSInterDirectMeasurement getQoSInterDirectMeasurementForTest() {
 
-		return new QoSInterMeasurement(
+		return new QoSInterDirectMeasurement(
 				getCloudForTest(),
 				"address",
 				QoSMeasurementType.PING,
@@ -296,11 +296,11 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<QoSInterMeasurement> getListOfQoSInterMeasurementForTest(final int count) {
+	private List<QoSInterDirectMeasurement> getListOfQoSInterDirectMeasurementForTest(final int count) {
 
-		final List<QoSInterMeasurement> list = new ArrayList<QoSInterMeasurement>(count);
+		final List<QoSInterDirectMeasurement> list = new ArrayList<QoSInterDirectMeasurement>(count);
 		for (int i = 0; i < count; i++) {
-			final QoSInterMeasurement measurement = getQoSInterMeasurementForTest();
+			final QoSInterDirectMeasurement measurement = getQoSInterDirectMeasurementForTest();
 			measurement.setId(i + 1L);
 			measurement.setCreatedAt(measurement.getLastMeasurementAt());
 			measurement.setUpdatedAt(measurement.getCreatedAt().plusMinutes(i));
@@ -554,9 +554,9 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private QoSInterPingMeasurementLog getInterPingMeasurementLogForTest() {
+	private QoSInterDirectPingMeasurementLog getInterPingMeasurementLogForTest() {
 
-		final QoSInterPingMeasurementLog measurementLog = new QoSInterPingMeasurementLog();
+		final QoSInterDirectPingMeasurementLog measurementLog = new QoSInterDirectPingMeasurementLog();
 		measurementLog.setAvailable(true);
 
 		return measurementLog;

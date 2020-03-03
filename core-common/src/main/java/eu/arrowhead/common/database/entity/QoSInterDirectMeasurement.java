@@ -21,8 +21,8 @@ import eu.arrowhead.common.CoreDefaults;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 
 @Entity
-@Table(name = "qos_inter_measurement", uniqueConstraints = @UniqueConstraint(columnNames = {"cloudId", "address", "measurementType"}))
-public class QoSInterMeasurement {
+@Table(name = "qos_inter_direct_measurement", uniqueConstraints = @UniqueConstraint(columnNames = {"cloudId", "address", "measurementType"}))
+public class QoSInterDirectMeasurement {
 	
 	//=================================================================================================
 	// members
@@ -55,10 +55,10 @@ public class QoSInterMeasurement {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterMeasurement() {}
+	public QoSInterDirectMeasurement() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterMeasurement(final Cloud cloud, final String address, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt) {
+	public QoSInterDirectMeasurement(final Cloud cloud, final String address, final QoSMeasurementType measurementType, final ZonedDateTime lastMeasurementAt) {
 		this.cloud = cloud;
 		this.address = address;
 		this.measurementType = measurementType;
