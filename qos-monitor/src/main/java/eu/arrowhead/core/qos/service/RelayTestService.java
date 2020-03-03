@@ -26,6 +26,7 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -34,6 +35,8 @@ import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.thread.ReceiverSideRelayTestThread;
+import eu.arrowhead.core.qos.thread.SenderSideRelayTestThread;
+import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 import eu.arrowhead.relay.gateway.GatewayRelayClientFactory;
 import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
@@ -134,6 +137,39 @@ public class RelayTestService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public void initRelayTest(final QoSMonitorSenderConnectionRequestDTO request) {
+		logger.debug("initRelayTest started...");
+		
+		validateQoSMonitorSenderConnectionRequestDTO(request);
+		// TODO: find cloud and relay db objects
+		final Cloud requesterCloud = null;
+		final Relay relay = null;
+
+		final RelayRequestDTO relayRequest = request.getRelay();
+		final Session session = getRelaySession(relayRequest);
+		
+		SenderSideRelayTestThread thread = null;
+		try {
+			thread = new SenderSideRelayTestThread(appContext, relayClient, session, requesterCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId(),
+												   noIteration, testMessageSize, timeout, logIndividualMeasurements);
+			ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
+			thread.init(info.getMessageSender(), info.getControlResponseMessageSender());
+			thread.start();
+		} catch (final JMSException ex) {
+			relayClient.closeConnection(session);
+			throw new ArrowheadException("Error occured when initialize relay communication.", HttpStatus.SC_BAD_GATEWAY, ex);
+		} catch (final ArrowheadException ex) {
+			relayClient.closeConnection(session);
+
+			if (thread != null && thread.isInitialized()) {
+				thread.setInterrupted(true);
+			}
+			
+			throw ex;
+		}
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -150,6 +186,30 @@ public class RelayTestService {
 
 		if (Utilities.isEmpty(request.getSenderQoSMonitorPublicKey())) {
 			throw new InvalidParameterException("Sender QoS Monitor's public key is null or blank.");
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateQoSMonitorSenderConnectionRequestDTO(final QoSMonitorSenderConnectionRequestDTO request) {
+		logger.debug("validateQoSMonitorSenderConnectionRequestDTO started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("Connection request is null.");
+		}
+		
+		validateRelayRequest(request.getRelay());
+		validateCloudRequest(request.getTargetCloud());
+
+		if (Utilities.isEmpty(request.getQueueId())) {
+			throw new InvalidParameterException("Queue id is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getPeerName())) {
+			throw new InvalidParameterException("Peer id is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getReceiverQoSMonitorPublicKey())) {
+			throw new InvalidParameterException("Receiver QoS Monitor's public key is null or blank.");
 		}
 	}
 	
