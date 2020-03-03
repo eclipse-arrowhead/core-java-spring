@@ -90,7 +90,12 @@ public enum CoreSystemService {
     EVENT_UNSUBSCRIBE_SERVICE(CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_UNSUBSCRIBE),
     EVENT_PUBLISH_AUTH_UPDATE_SERVICE(CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE, EVENT_HANDLER_URI + OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE),
 
-    // Onboarding services
+	// QoS Monitor services
+	QOS_MONITOR_PING_MEASUREMENT_SERVICE(CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT +
+			CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX),
+
+
+	// Onboarding services
     ONBOARDING_SERVICE_WITH_NAME(CORE_SERVICE_ONBOARDING_NAME, ONBOARDING_URI + OP_ONBOARDING_NAME),
     ONBOARDING_SERVICE_WITH_CSR(CORE_SERVICE_ONBOARDING_CSR, ONBOARDING_URI + OP_ONBOARDING_CSR),
 
@@ -130,11 +135,12 @@ public enum CoreSystemService {
     //=================================================================================================
     // constructors
 
-    //-------------------------------------------------------------------------------------------------
-    private CoreSystemService(final String serviceDefinition, final String serviceUri) {
-        Assert.isTrue(!Utilities.isEmpty(serviceDefinition), serviceUri);
-
-        this.serviceDefinition = serviceDefinition;
-        this.serviceUri = serviceUri;
-    }
+	//-------------------------------------------------------------------------------------------------
+	private CoreSystemService(final String serviceDefinition, final String serviceUri) {
+		Assert.isTrue(!Utilities.isEmpty(serviceDefinition), "Service definition is null or blank");
+		Assert.isTrue(!Utilities.isEmpty(serviceUri), "Service URI is null or blank");
+		
+		this.serviceDefinition = serviceDefinition;
+		this.serviceUri = serviceUri;
+	}
 }

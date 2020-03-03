@@ -22,6 +22,8 @@ public class CommonConstants {
 	public static final String CORE_SYSTEM_GATEWAY = "Gateway";
 	public static final String CORE_SYSTEM_ORCHESTRATOR = "Orchestrator";
 	public static final String CORE_SYSTEM_SERVICE_REGISTRY = "Service Registry";
+	public static final String CORE_SYSTEM_QOS_MONITOR = "Quality of Service Monitor";
+
 	public static final String CORE_SYSTEM_SYSTEM_REGISTRY = "System Registry";
 	public static final String CORE_SYSTEM_DEVICE_REGISTRY = "Device Registry";
 	public static final String CORE_SYSTEM_ONBOARDING = "Onboarding Controller";
@@ -44,6 +46,9 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_SUBSCRIBE = "event-subscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_UNSUBSCRIBE = "event-unsubscribe";
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
+
+	public static final String CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT = "qos-monitor-ping-measurement";
+
 
 	public static final String CORE_SERVICE_SERVICE_REGISTRY_REGISTER = "service-register";
 	public static final String CORE_SERVICE_SERVICE_REGISTRY_UNREGISTER = "service-unregister";
@@ -143,6 +148,10 @@ public class CommonConstants {
 	public static final String OP_EVENT_HANDLER_UNSUBSCRIBE = "/unsubscribe";
 	public static final String OP_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "/publish/authupdate";
 
+	public static final String QOS_MONITOR_URI = "/qosmonitor";
+	public static final String OP_QOS_MONITOR_PING_MEASUREMENT = "/ping/measurement";
+	public static final String OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
+
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";
 	public static final String SWAGGER_HTTP_200_MESSAGE = "Core service is available";
@@ -199,6 +208,7 @@ public class CommonConstants {
 	
 	public static final long CONVERSION_MILLISECOND_TO_SECOND = 1000;
 	public static final long CONVERSION_MILLISECOND_TO_MINUTE = 60000;
+	public static final long CONVERSION_SECOND_TO_MINUTE = 60;
 
 	public static final String SORT_ORDER_ASCENDING = "ASC";
 	public static final String SORT_ORDER_DESCENDING = "DESC";

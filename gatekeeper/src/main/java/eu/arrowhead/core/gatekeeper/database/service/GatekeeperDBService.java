@@ -903,12 +903,14 @@ public class GatekeeperDBService {
 		final Set<Long> relaysToAssign = new HashSet<>();
 		for (final CloudGatewayRelay relayConn : cloud.getGatewayRelays()) {
 			boolean relayConnToRemove = true;
-			for (final Long dtoRelayId : gatewayRealyIds) {
-				if (relayConn.getRelay().getId() == dtoRelayId) {
-					relaysToKeep.add(relayConn.getRelay().getId());
-					relayConnToRemove = false;
-					break;
-				} 
+			if (gatewayRealyIds != null && !gatewayRealyIds.isEmpty()) {				
+				for (final Long dtoRelayId : gatewayRealyIds) {
+					if (relayConn.getRelay().getId() == dtoRelayId) {
+						relaysToKeep.add(relayConn.getRelay().getId());
+						relayConnToRemove = false;
+						break;
+					} 
+				}
 			}
 			
 			if (relayConnToRemove) {
@@ -916,7 +918,9 @@ public class GatekeeperDBService {
 			}
 		}
 		
-		relaysToAssign.addAll(gatewayRealyIds);
+		if (gatewayRealyIds != null && !gatewayRealyIds.isEmpty()) {
+			relaysToAssign.addAll(gatewayRealyIds);
+		}
 		relaysToAssign.removeAll(relaysToKeep);
 		
 		final List<CloudGatewayRelay> entriesToDelete = cloudGatewayRelayRepository.findAllById(relaysConnToDelete);

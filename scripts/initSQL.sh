@@ -5,10 +5,11 @@ rm -rf sql
 mkdir sql
 cd sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/create_empty_arrowhead_db.sql
-sed 's/source /& docker-entrypoint-initdb.d\/privileges\//g' create_empty_arrowhead_db.sql
+sed -i 's/source /& docker-entrypoint-initdb.d\/privileges\//g' create_empty_arrowhead_db.sql
 
 mkdir privileges
 cd privileges
+wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/create_arrowhead_tables.sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/service_registry_privileges.sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/authorization_privileges.sql
 wget https://raw.githubusercontent.com/arrowhead-f/core-java-spring/master/scripts/orchestrator_privileges.sql

@@ -20,6 +20,8 @@ import eu.arrowhead.common.database.entity.DeviceRegistry;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
+import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.database.entity.ServiceInterface;
@@ -27,8 +29,8 @@ import eu.arrowhead.common.database.entity.ServiceRegistry;
 import eu.arrowhead.common.database.entity.ServiceRegistryInterfaceConnection;
 import eu.arrowhead.common.database.entity.Subscription;
 import eu.arrowhead.common.database.entity.SubscriptionPublisherConnection;
-import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.database.entity.SystemRegistry;
+import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.shared.ChoreographerActionPlanResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerActionResponseDTO;
 import eu.arrowhead.common.dto.shared.ChoreographerActionStepResponseDTO;
@@ -237,11 +239,11 @@ public class DTOConverter {
 		return new ServiceInterfaceResponseDTO(intf.getId(), intf.getInterfaceName(), Utilities.convertZonedDateTimeToUTCString(intf.getCreatedAt()), 
 											   Utilities.convertZonedDateTimeToUTCString(intf.getUpdatedAt()));
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	public static ServiceQueryResultDTO convertListOfServiceRegistryEntriesToServiceQueryResultDTO(final List<ServiceRegistry> entries, final int unfilteredHits) {
 		final ServiceQueryResultDTO result = new ServiceQueryResultDTO();
-
+		
 		if (entries != null) {
 			Assert.isTrue(unfilteredHits >= entries.size(), "Invalid value of unfiltered hits: " + unfilteredHits);
 			result.setUnfilteredHits(unfilteredHits);
@@ -249,7 +251,7 @@ public class DTOConverter {
 				result.getServiceQueryData().add(convertServiceRegistryToServiceRegistryResponseDTO(srEntry));
 			}
 		}
-
+		
 		return result;
 	}
 
@@ -792,6 +794,65 @@ public class DTOConverter {
 		return new DeviceQueryResultDTO(list, list.size());
 	}
 
+
+	//-------------------------------------------------------------------------------------------------
+	public static PingMeasurementResponseDTO convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(
+		final QoSIntraPingMeasurement pingMeasurement) {
+		Assert.notNull(pingMeasurement, "pingMeasurement is null");
+
+		final QoSIntraMeasurementResponseDTO measurementResponseDTO = convertQoSIntraMeasurementToQoSIntraMeasurementResponseDTO(pingMeasurement.getMeasurement());
+
+		final PingMeasurementResponseDTO pingMeasurementResponseDTO = new PingMeasurementResponseDTO();
+		pingMeasurementResponseDTO.setId(pingMeasurement.getId());
+		pingMeasurementResponseDTO.setMeasurement(measurementResponseDTO);
+		pingMeasurementResponseDTO.setAvailable(pingMeasurement.isAvailable());
+		pingMeasurementResponseDTO.setLastAccessAt(pingMeasurement.getLastAccessAt());
+		pingMeasurementResponseDTO.setMinResponseTime(pingMeasurement.getMinResponseTime());
+		pingMeasurementResponseDTO.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
+		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
+		pingMeasurementResponseDTO.setMeanResponseTimeWithoutTimeout(pingMeasurement.getMeanResponseTimeWithoutTimeout());
+		pingMeasurementResponseDTO.setJitterWithTimeout(pingMeasurement.getJitterWithTimeout());
+		pingMeasurementResponseDTO.setJitterWithoutTimeout(pingMeasurement.getJitterWithoutTimeout());
+		pingMeasurementResponseDTO.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
+		pingMeasurementResponseDTO.setSent(pingMeasurement.getSent());
+		pingMeasurementResponseDTO.setReceived(pingMeasurement.getReceived());
+		pingMeasurementResponseDTO.setCountStartedAt(pingMeasurement.getCountStartedAt());
+		pingMeasurementResponseDTO.setSentAll(pingMeasurement.getSentAll());
+		pingMeasurementResponseDTO.setReceivedAll(pingMeasurement.getReceivedAll());
+		pingMeasurementResponseDTO.setCreatedAt(pingMeasurement.getUpdatedAt());
+		pingMeasurementResponseDTO.setUpdatedAt(pingMeasurement.getUpdatedAt());
+
+		return pingMeasurementResponseDTO;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static QoSIntraMeasurementResponseDTO convertQoSIntraMeasurementToQoSIntraMeasurementResponseDTO(
+		final QoSIntraMeasurement measurement) {
+		Assert.notNull(measurement, "measurement is null");
+
+		final SystemResponseDTO system = convertSystemToSystemResponseDTO(measurement.getSystem());
+
+		return new QoSIntraMeasurementResponseDTO(
+				measurement.getId(),
+				system,
+				measurement.getMeasurementType(),
+				measurement.getLastMeasurementAt(),
+				measurement.getCreatedAt(),
+				measurement.getUpdatedAt());
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public static PingMeasurementListResponseDTO convertQoSIntraPingMeasurementPageToPingMeasurementListResponseDTO(
+		final Page<QoSIntraPingMeasurement> entries) {
+		Assert.notNull(entries, "pingMeasurementPage is null");
+
+		final List<PingMeasurementResponseDTO> pingMeasurementEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final QoSIntraPingMeasurement entry : entries) {
+			pingMeasurementEntries.add(convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(entry));
+		}
+
+		return new PingMeasurementListResponseDTO(pingMeasurementEntries, entries.getTotalElements());
+	}
 	//=================================================================================================
 	// assistant methods
 
@@ -799,15 +860,15 @@ public class DTOConverter {
 	private DTOConverter() {
 		throw new UnsupportedOperationException();
 	}
-
+	
 	//-------------------------------------------------------------------------------------------------
 	private static List<SystemResponseDTO> systemEntryListToSystemResponseDTOList(final List<System> systemList) {
 		final List<SystemResponseDTO> systemResponseDTOs = new ArrayList<>(systemList.size());
-
+		
 		for (final System system : systemList) {
 			systemResponseDTOs.add(convertSystemToSystemResponseDTO(system));
 		}
-
+		
 		return systemResponseDTOs;
 	}
 
@@ -906,5 +967,4 @@ public class DTOConverter {
 		
 		return result;
 	}
-
 }

@@ -128,12 +128,12 @@ public class EventHandlerDriver {
 			throw new InvalidParameterException("Payload" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 		
-		ckeckTimeStamp(request.getTimeStamp());	
+		checkTimeStamp(request.getTimeStamp());	
 		checkSystemRequestDTO(request.getSource());
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private void ckeckTimeStamp(final String timeStampString) {
+	private void checkTimeStamp(final String timeStampString) {
 		logger.debug("ckeckTimeStamp started...");
 		
 		if (Utilities.isEmpty(timeStampString)) {
