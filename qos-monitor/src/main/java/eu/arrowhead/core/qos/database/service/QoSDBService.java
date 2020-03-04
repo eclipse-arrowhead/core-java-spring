@@ -883,8 +883,8 @@ public class QoSDBService {
 			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
 		}
 
-		List<QoSInterRelayEchoMeasurementLog> toSave = new ArrayList<>(measurementDetails.size());
-		for (RelayEchoMeasurementDetailsDTO details : measurementDetails) {
+		final List<QoSInterRelayEchoMeasurementLog> toSave = new ArrayList<>(measurementDetails.size());
+		for (final RelayEchoMeasurementDetailsDTO details : measurementDetails) {
 			final QoSInterRelayEchoMeasurementLog measurementLog = new QoSInterRelayEchoMeasurementLog();
 			measurementLog.setMeasurement(measurement);
 			measurementLog.setMeasurementSequeneceNumber(details.getMeasurementSequenceNumber());
