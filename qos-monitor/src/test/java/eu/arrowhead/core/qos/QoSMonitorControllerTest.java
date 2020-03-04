@@ -61,7 +61,7 @@ public class QoSMonitorControllerTest {
 	// members
 	
 	private static final String PATH_VARIABLE_ID = "id";
-	private static final String PING_MEASUREMENTS = "/ping/measurements";
+	private static final String PING_MEASUREMENTS = "/measurements/intracloud/ping";
 	private static final String QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI =  CoreCommonConstants.MGMT_URI + PING_MEASUREMENTS;
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI = QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";

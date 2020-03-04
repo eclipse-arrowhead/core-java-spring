@@ -505,7 +505,7 @@ public class OrchestratorDriverTest {
 		final int systemId = 23;
 		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 8451, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + 
 				 									  CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
-		Assert.assertTrue(uri.toString().contains("/ping/measurement/23"));
+		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping"));
 		
 		final PingMeasurementResponseDTO responseDTO = new PingMeasurementResponseDTO();
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);

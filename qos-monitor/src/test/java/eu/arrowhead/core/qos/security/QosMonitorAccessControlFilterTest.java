@@ -39,7 +39,7 @@ public class QosMonitorAccessControlFilterTest {
 
 	private static final String QOS_MONITOR_ECHO_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.ECHO_URI;
 
-	private static final String PING_MEASUREMENTS = "/ping/measurements";
+	private static final String PING_MEASUREMENTS = "/measurements/intracloud/ping";
 	private static final String QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI = CommonConstants.QOS_MONITOR_URI + CoreCommonConstants.MGMT_URI + PING_MEASUREMENTS;
 
 	@Autowired
