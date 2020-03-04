@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -31,7 +30,6 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -91,7 +89,6 @@ class CertificateAuthorityUtils {
     }
 
     static void checkCsrSignature(JcaPKCS10CertificationRequest csr) {
-        Security.addProvider(new BouncyCastleProvider());
         try {
             ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder().setProvider(PROVIDER)
                     .build(csr.getSubjectPublicKeyInfo());
