@@ -780,7 +780,14 @@ public class QoSDBService {
 			final ZonedDateTime aroundNow = ZonedDateTime.now();
 			measurement = createInterRelayMeasurement(cloud, relay, type, aroundNow);
 		}else {
-			 measurement = qoSInterRelayMeasurementOptional.get();
+			measurement = qoSInterRelayMeasurementOptional.get();
+			measurement.setStatus(QoSMeasurementStatus.PENDING);
+			try {
+				qosInterRelayMeasurementRepository.saveAndFlush(measurement);
+			} catch (final Exception ex) {
+				logger.debug(ex.getMessage(), ex);
+				throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+			}
 		}
 
 		return measurement;
