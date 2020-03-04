@@ -49,6 +49,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEASUREMENT = "qos-monitor-intra-ping-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT = "qos-monitor-inter-relay-echo-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY = "qos-monitor-public-key";
+	public static final String CORE_SERVICE_QOS_MONITOR_JOIN_RELAY_TEST = "qos-monitor-join-relay-test";
+	public static final String CORE_SERVICE_QOS_MONITOR_INIT_RELAY_TEST = "qos-monitor-init-relay-test";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
 	
@@ -125,6 +127,7 @@ public class CommonConstants {
 	public static final String OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT = "/measurements/intercloud/relay_echo";
 	public static final String OP_QOS_MONITOR_KEY_URI = "/publickey";
 	public static final String OP_QOS_MONITOR_JOIN_RELAY_TEST_URI = "/join_relay_test";
+	public static final String OP_QOS_MONITOR_INIT_RELAY_TEST_URI = "/init_relay_test";
 
 	public static final String SWAGGER_COMMON_PACKAGE = "eu.arrowhead.common.swagger";
 	public static final String SWAGGER_UI_URI = "/swagger-ui.html";

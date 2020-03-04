@@ -38,6 +38,7 @@ import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -378,7 +379,10 @@ public class GatekeeperService {
 		
 		final Cloud targetCloud = gatekeeperDBService.getCloudByOperatorAndName(request.getTargetCloud().getOperator(), request.getTargetCloud().getName());
 		final QoSRelayTestProposalResponseDTO response = gatekeeperDriver.sendQoSRelayTestProposal(request, targetCloud);
-		//TODO: continue implementation
+		
+		final QoSMonitorSenderConnectionRequestDTO connectionRequest = new QoSMonitorSenderConnectionRequestDTO(request.getTargetCloud(), request.getRelay(), response.getQueueId(),
+																												response.getPeerName(), response.getReceiverQoSMonitorPublicKey());
+		gatekeeperDriver.initRelayTest(connectionRequest);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -387,8 +391,7 @@ public class GatekeeperService {
 		
 		validateQoSRelayTestProposalRequestDTO(request, true);
 		
-		//TODO: continue implementation
-		return null;
+		return gatekeeperDriver.joinRelayTest(request);
 	}
 	
 	//=================================================================================================

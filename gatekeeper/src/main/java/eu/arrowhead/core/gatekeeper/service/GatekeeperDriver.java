@@ -46,6 +46,7 @@ import eu.arrowhead.common.dto.internal.GeneralRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
+import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -85,6 +86,8 @@ public class GatekeeperDriver {
 	private static final String GATEWAY_CONNECT_PROVIDER_URI_KEY = CoreSystemService.GATEWAY_PROVIDER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEWAY_CONNECT_CONSUMER_URI_KEY = CoreSystemService.GATEWAY_CONSUMER_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String QOS_MONITOR_PUBLIC_KEY_URI_KEY = CoreSystemService.QOS_MONITOR_PUBLIC_KEY_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOS_MONITOR_JOIN_RELAY_TEST_URI_KEY = CoreSystemService.QOS_MONITOR_JOIN_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String QOS_MONITOR_INIT_RELAY_TEST_URI_KEY = CoreSystemService.QOS_MONITOR_INIT_RELAY_TEST_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	
 	@Resource(name = CoreCommonConstants.GATEKEEPER_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatekeeperMatchmaker;
@@ -415,9 +418,32 @@ public class GatekeeperDriver {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public QoSRelayTestProposalResponseDTO joinRelayTest(final QoSRelayTestProposalRequestDTO request) {
+		logger.debug("joinRelayTest started...");
+
+		validateQoSRelayTestProposalRequestDTO(request);
+		validateCloud(request.getRequesterCloud());
+
+		final UriComponents uri = getQoSMonitorJoinRelayTestUri();
+		final ResponseEntity<QoSRelayTestProposalResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSRelayTestProposalResponseDTO.class);
+		
+		return response.getBody();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void initRelayTest(final QoSMonitorSenderConnectionRequestDTO request) {
+		logger.debug("initRelayTest started...");
+		
+		validateQosMonitorSenderConnectionRequestDTO(request);
+		
+		final UriComponents uri = getQoSMonitorInitRelayTestUri();
+		httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
+	}
+	
 	//=================================================================================================
 	// assistant methods
-	
+
 	//-------------------------------------------------------------------------------------------------		
 	private Map<Cloud,Relay> getOneGatekeeperRelayPerCloud(final List<Cloud> clouds) {
 		logger.debug("getOneGatekeeperRelayPerCloud started...");
@@ -665,6 +691,36 @@ public class GatekeeperDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQoSMonitorJoinRelayTestUri() {
+		logger.debug("getQoSMonitorJoinRelayTestUri started...");
+		
+		if (arrowheadContext.containsKey(QOS_MONITOR_JOIN_RELAY_TEST_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(QOS_MONITOR_JOIN_RELAY_TEST_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find QoS Monitor join relay test URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find QoSMonitor join relay test URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getQoSMonitorInitRelayTestUri() {
+		logger.debug("getQoSMonitorInitRelayTestUri started...");
+		
+		if (arrowheadContext.containsKey(QOS_MONITOR_INIT_RELAY_TEST_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(QOS_MONITOR_INIT_RELAY_TEST_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("Gatekeeper can't find QoS Monitor init relay test URI.");
+			}
+		}
+		
+		throw new ArrowheadException("Gatekeeper can't find QoSMonitor init relay test URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private void validateQoSRelayTestProposalRequestDTO(final QoSRelayTestProposalRequestDTO request) {
 		logger.debug("validateQoSRelayTestProposalRequestDTO started...");
 		
@@ -679,5 +735,28 @@ public class GatekeeperDriver {
 			throw new InvalidParameterException("Sender QoS Monitor's public key is null or blank.");
 		}
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateQosMonitorSenderConnectionRequestDTO(final QoSMonitorSenderConnectionRequestDTO request) {
+		logger.debug("validateQosMonitorSenderConnectionRequestDTO started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("Connection request is null.");
+		}
+		
+		validateCloud(request.getTargetCloud());
+		validateRelay(request.getRelay());
+		
+		if (Utilities.isEmpty(request.getQueueId())) {
+			throw new InvalidParameterException("Queue id is null or blank.");
+		}
+		
+		if (Utilities.isEmpty(request.getPeerName())) {
+			throw new InvalidParameterException("Peer name is null or blank.");
+		}
+		if (Utilities.isEmpty(request.getReceiverQoSMonitorPublicKey())) {
+			throw new InvalidParameterException("Receiver QoS Monitor's public key is null or blank.");
+		}
+	}
 }
+

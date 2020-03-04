@@ -169,7 +169,16 @@ public class CoreCommonConstants {
 	
 	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval_minutes";
 	public static final String $CLOUD_PING_TTL_INTERVAL_WD = "${" + CLOUD_PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES + "}";
-
+	
+	public static final String RELAY_TEST_TIME_TO_REPEAT = "relay.test.time_to_repeat";
+	public static final String $RELAY_TEST_TIME_TO_REPEAT_WD = "${" + RELAY_TEST_TIME_TO_REPEAT + ":" + CoreDefaults.DEFAULT_RELAY_TEST_TIME_TO_REPEAT + "}";
+	public static final String RELAY_TEST_TIMEOUT = "rely.test.timeout"; 
+	public static final String $RELAY_TEST_TIMEOUT_WD = "${" + RELAY_TEST_TIMEOUT + ":" + CoreDefaults.DEFAULT_RELAY_TEST_TIMEOUT + "}";
+	public static final String RELAY_TEST_MESSAGE_SIZE = "relay.test.messsage_size";
+	public static final String $RELAY_TEST_MESSAGE_SIZE_WD = "${" + RELAY_TEST_MESSAGE_SIZE + ":" + CoreDefaults.DEFAULT_RELAY_TEST_MESSAGE_SIZE + "}";
+	public static final String RELAY_TEST_LOG_MEASUREMENTS_IN_DB = "relay.test.log_measurements_in_db";
+	public static final String $RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD = "${" + RELAY_TEST_LOG_MEASUREMENTS_IN_DB + ":" + CoreDefaults.DEFAULT_RELAY_TEST_LOG_MEASUREMENTS_IN_DB + "}";
+	
 	//=================================================================================================
 	// assistant methods
 

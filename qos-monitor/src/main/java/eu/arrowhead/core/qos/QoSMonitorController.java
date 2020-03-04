@@ -34,6 +34,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
@@ -236,9 +237,9 @@ public class QoSMonitorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Creates a Message queue for testing the connection between this cloud and requester cloud through the given Relay and return the necessary connection informations",
+	@ApiOperation(value = "Creates message queues for testing the connection between this cloud and the requester cloud through the given relay and return the necessary connection informations",
 				  response = QoSRelayTestProposalResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
-	@ApiResponses (value = {
+	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_GATEWAY, message = POST_CONNECT_HTTP_502_MESSAGE),
@@ -256,6 +257,27 @@ public class QoSMonitorController {
 		
 		logger.debug("joinRelayTest finished...");
 		return response;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Creates message queues for testing the connection between this cloud and the target cloud through the given relay", 
+				  tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_CREATED, message = POST_CONNECT_HTTP_201_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_CONNECT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_GATEWAY, message = POST_CONNECT_HTTP_502_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@ResponseStatus(value = org.springframework.http.HttpStatus.CREATED)
+	@PostMapping(path = CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public void initRelayTest(@RequestBody final QoSMonitorSenderConnectionRequestDTO request) {
+		logger.debug("initRelayTest started...");
+		
+		validateConnectionRequest(request, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI);
+		relayTestService.initRelayTest(request);
+		
+		logger.debug("initRelayTest finished...");
 	}
 	
 	//=================================================================================================
@@ -293,6 +315,30 @@ public class QoSMonitorController {
 		
 		if (Utilities.isEmpty(request.getSenderQoSMonitorPublicKey())) {
 			throw new BadPayloadException("Sender QoS Monitor's public key is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
+		}		
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateConnectionRequest(final QoSMonitorSenderConnectionRequestDTO request, final String origin) {
+		logger.debug("validateConnectionRequest started...");
+		
+		if (request == null) {
+			throw new InvalidParameterException("Connection request is null.");
+		}
+		
+		validateCloudRequest(request.getTargetCloud(), origin);
+		validateRelayRequest(request.getRelay(), origin);
+		
+		if (Utilities.isEmpty(request.getQueueId())) {
+			throw new BadPayloadException("Queue id is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(request.getPeerName())) {
+			throw new BadPayloadException("Peer name is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(request.getReceiverQoSMonitorPublicKey())) {
+			throw new BadPayloadException("Receiver QoS Monitor's public key is null or blank.", HttpStatus.SC_BAD_REQUEST, origin);
 		}		
 	}
 	
@@ -344,5 +390,4 @@ public class QoSMonitorController {
 			throw new BadPayloadException("Relay type is invalid", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
-
 }
