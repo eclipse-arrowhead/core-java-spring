@@ -7,11 +7,6 @@ import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.asn1.x500.RDN;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.asn1.x500.style.IETFUtils;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +14,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.security.*;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
@@ -44,6 +38,7 @@ public class CertificateAuthorityService {
 
     private X509Certificate rootCertificate;
     private X509Certificate cloudCertificate;
+    private String cloudCommonName;
 
     @PostConstruct
     private void init() {
@@ -53,26 +48,21 @@ public class CertificateAuthorityService {
 
         rootCertificate = Utilities.getRootCertFromKeyStore(keyStore);
         cloudCertificate = Utilities.getCloudCertFromKeyStore(keyStore);
+        cloudCommonName = CertificateAuthorityUtils.getCloudCommonName(cloudCertificate);
     }
 
     public String getCloudCommonName() {
-        try {
-            final X500Name subject = new JcaX509CertificateHolder(cloudCertificate).getSubject();
-            final RDN cn = subject.getRDNs(BCStyle.CN)[0];
-            return IETFUtils.valueToString(cn.getFirst().getValue());
-        } catch (CertificateEncodingException e) {
-            throw new ServiceConfigurationError("Cannot get cloud common name from server cert.", e);
-        }
+        return cloudCommonName;
     }
 
     public CertificateSigningResponseDTO signCertificate(CertificateSigningRequestDTO request) {
         final JcaPKCS10CertificationRequest csr = CertificateAuthorityUtils.decodePKCS10CSR(request);
-        CertificateAuthorityUtils.checkCommonName(csr, getCloudCommonName());
+        CertificateAuthorityUtils.checkCommonName(csr, cloudCommonName);
         CertificateAuthorityUtils.checkCsrSignature(csr);
 
         logger.info("Signing certificate for " + csr.getSubject().toString() + "...");
 
-        final PrivateKey cloudPrivateKey = Utilities.getPrivateKey(keyStore, getCloudCommonName(),
+        final PrivateKey cloudPrivateKey = Utilities.getPrivateKey(keyStore, cloudCommonName,
                 sslProperties.getKeyPassword());
 
         final X509Certificate clientCertificate = buildCertificate(csr, cloudPrivateKey, cloudCertificate);

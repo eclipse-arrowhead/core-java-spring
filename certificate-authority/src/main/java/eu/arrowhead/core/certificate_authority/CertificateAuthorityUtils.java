@@ -15,14 +15,20 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Date;
+import java.util.ServiceConfigurationError;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -58,6 +64,17 @@ class CertificateAuthorityUtils {
             return Base64.getEncoder().encodeToString(certificate.getEncoded());
         } catch (CertificateEncodingException e) {
             throw new AuthException("Certificate encoding failed! (" + e.getMessage() + ")", e);
+        }
+    }
+
+    static String getCloudCommonName(X509Certificate cloudCertificate) {
+        try {
+            final X500Name subject = new JcaX509CertificateHolder(cloudCertificate).getSubject();
+            final RDN cn = subject.getRDNs(BCStyle.CN)[0];
+            return IETFUtils.valueToString(cn.getFirst().getValue());
+        } catch (CertificateEncodingException | NullPointerException e) {
+            logger.error("Cannot get common name from cloud cert, because: " + e.getMessage());
+            throw new ServiceConfigurationError("Cannot get common name from cloud cert.", e);
         }
     }
 
