@@ -23,8 +23,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
@@ -42,8 +42,8 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	private boolean initialized = false;
 	
 	private final QoSDBService qosDBService;
-	private final Cloud targetCloud;
-	private final Relay relay;
+	private final CloudResponseDTO targetCloud;
+	private final RelayResponseDTO relay;
 
 	private final GatewayRelayClient relayClient;
 	private final Session relaySession;
@@ -67,8 +67,8 @@ public class SenderSideRelayTestThread extends Thread implements MessageListener
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public SenderSideRelayTestThread(final ApplicationContext appContext, final GatewayRelayClient relayClient, final Session relaySession, final Cloud targetCloud,
-								   	   final Relay relay, final String receiverQoSMonitorPublicKey, final String queueId, final byte noIteration, final int testMessageSize,
+	public SenderSideRelayTestThread(final ApplicationContext appContext, final GatewayRelayClient relayClient, final Session relaySession, final CloudResponseDTO targetCloud,
+								   	   final RelayResponseDTO relay, final String receiverQoSMonitorPublicKey, final String queueId, final byte noIteration, final int testMessageSize,
 								   	   final long timeout, final boolean logIndividualMeasurements) {
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.notNull(relayClient, "relayClient is null.");

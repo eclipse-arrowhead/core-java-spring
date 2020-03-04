@@ -36,8 +36,11 @@ public class GatekeeperAccessControlFilter extends CoreSystemAccessControlFilter
 			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
 		} else if (requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_GSD_SERVICE) || requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_ICN_SERVICE)) {
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForOrchestrationTasks, requestTarget);
-		} else if (requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE) || requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE)
-					|| requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE)) {
+		} else if (requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_PULL_CLOUDS_SERVICE) || 
+				   requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_SERVICE) ||
+				   requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_COLLECT_ACCESS_TYPES_SERVICE) ||
+				   requestTarget.endsWith(CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE) ||
+				   requestTarget.contains(CommonConstants.OP_GATEKEEPER_GET_CLOUD_SERVICE)) {
 			checkIfClientIsAnAllowedCoreSystem(clientCN, cloudCN, allowedCoreSystemsForQoSTasks, requestTarget);
 		}
 	}
