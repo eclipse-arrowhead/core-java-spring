@@ -49,6 +49,9 @@ class CertificateAuthorityUtils {
 
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
 
+    private static final String PROVIDER = "BC";
+    private static final String SIGNATURE_ALGORITM = "SHA512withRSA";
+
     static JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
             final byte[] csrBytes = Base64.getDecoder().decode(csr.getEncodedCSR());
@@ -90,7 +93,7 @@ class CertificateAuthorityUtils {
     static void checkCsrSignature(JcaPKCS10CertificationRequest csr) {
         Security.addProvider(new BouncyCastleProvider());
         try {
-            ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder().setProvider("BC")
+            ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder().setProvider(PROVIDER)
                     .build(csr.getSubjectPublicKeyInfo());
             if (!csr.isSignatureValid(verifierProvider)) {
                 throw new AuthException("Certificate request has invalid signature! (key pair does not match)");
@@ -144,9 +147,9 @@ class CertificateAuthorityUtils {
             throw new AuthException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
         }
 
-        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA").setProvider("BC");
+        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder(SIGNATURE_ALGORITM).setProvider(PROVIDER);
         try {
-            return new JcaX509CertificateConverter().setProvider("BC")
+            return new JcaX509CertificateConverter().setProvider(PROVIDER)
                     .getCertificate(builder.build(signerBuilder.build(cloudPrivateKey)));
         } catch (CertificateException e) {
             throw new AuthException("Certificate encoding failed! (" + e.getMessage() + ")", e);
