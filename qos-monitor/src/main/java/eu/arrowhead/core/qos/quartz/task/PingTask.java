@@ -30,6 +30,7 @@ import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -219,7 +220,7 @@ public class PingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
 
-		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO);
+		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 		final PingMeasurementCalculationsDTO calculationsDTO = handlePingMeasurement(measurement, responseList, aroundNow);
 
 		qoSDBService.updateIntraMeasurement(aroundNow, measurement);
@@ -238,7 +239,7 @@ public class PingTask implements Job {
 			throw new InvalidParameterException("System.address" + NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE);
 		}
 
-		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO);
+		final QoSIntraMeasurement measurement = qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 		handlePingMeasurement(measurement, aroundNow, calculationsDTO);
 
 		qoSDBService.updateIntraMeasurement(aroundNow, measurement);

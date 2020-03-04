@@ -139,12 +139,12 @@ public class CloudPingTaskTest {
 		when(qoSMonitorDriver.queryGatekeeperAllCloud()).thenReturn(cloudWithRelaysListResponseDTO);
 		when(qoSMonitorDriver.queryGatekeeperGatewayIsMandatory(cloudRequestListDTOValueCaptor.capture())).thenReturn(cloudAccessListResponseDTO);
 		//TEST it with empty List response too
-		when(qoSDBService.getInterDirectMeasurementByCloud(cloudResponseDTOValueCaptor.capture())).thenReturn(measurementList);
+		when(qoSDBService.getInterDirectMeasurementByCloud(cloudResponseDTOValueCaptor.capture(), any())).thenReturn(measurementList);
 
 		when(qoSMonitorDriver.queryGatekeeperAllSystemAddresses(cloudRequestDTOValueCaptor.capture())).thenReturn(systemAddressSet);
 
 		when(pingService.getPingResponseList(addressValueCaptor.capture())).thenReturn(responseList);
-		when(qoSDBService.getOrCreateDirectInterMeasurement(addressValueCaptor.capture(), cloudResponseDTOValueCaptor.capture())).thenReturn(measurement);
+		when(qoSDBService.getOrCreateDirectInterMeasurement(addressValueCaptor.capture(), cloudResponseDTOValueCaptor.capture(), any())).thenReturn(measurement);
 
 		//Handle InterPingMeasurement
 		when(qoSDBService.getInterDirectPingMeasurementByMeasurement(measurementValueCaptor.capture())).thenReturn(Optional.of(interPingMeasurement));
@@ -178,11 +178,11 @@ public class CloudPingTaskTest {
 		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
 		verify(qoSMonitorDriver, times(1)).queryGatekeeperAllCloud();
 		verify(qoSMonitorDriver, times(1)).queryGatekeeperGatewayIsMandatory(any());
-		verify(qoSDBService, times(1)).getInterDirectMeasurementByCloud(any());
+		verify(qoSDBService, times(1)).getInterDirectMeasurementByCloud(any(), any());
 		verify(qoSMonitorDriver, times(1)).queryGatekeeperAllSystemAddresses(any());
 
 		verify(pingService, atLeastOnce()).getPingResponseList(anyString());
-		verify(qoSDBService, atLeastOnce()).getOrCreateDirectInterMeasurement(any(), any());
+		verify(qoSDBService, atLeastOnce()).getOrCreateDirectInterMeasurement(any(), any(), any());
 
 		verify(qoSDBService, atLeastOnce()).getInterDirectPingMeasurementByMeasurement(any());
 		verify(qoSDBService, atLeastOnce()).updateInterDirectPingMeasurement(any(), any(), any(), any());

@@ -34,6 +34,7 @@ import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.InterPingMeasurementProperties;
@@ -139,7 +140,7 @@ public class CloudPingTask implements Job {
 			if (cloudWithRelay != null && !cloudWithRelay.getOwnCloud()) {
 				if( cloudIsDirectlyAccessable(cloudWithRelay, cloudAccessResponseDTOList)) {
 
-					clouds.add(DTOConverter.convertCloudWithRelaysResponseDTOToCloudResponseDTO(cloudWithRelay));
+					clouds.add(cloudWithRelay);
 				}
 			}
 		}
@@ -173,10 +174,10 @@ public class CloudPingTask implements Job {
 		boolean cloudToMeasureFound = false;
 		CloudResponseDTO cloudToMeasure = null;
 
-		final HashMap<ZonedDateTime, CloudResponseDTO> earliestUpdatedAtMapedToCloud = new HashMap<>(cloudList.size());
+		final HashMap<ZonedDateTime, CloudResponseDTO> earliestUpdatedAtMappedToCloud = new HashMap<>(cloudList.size());
 		for (final CloudResponseDTO cloudResponseDTO : cloudList) {
 
-			final List<QoSInterDirectMeasurement> measurementList = qoSDBService.getInterDirectMeasurementByCloud(cloudResponseDTO);
+			final List<QoSInterDirectMeasurement> measurementList = qoSDBService.getInterDirectMeasurementByCloud(cloudResponseDTO, QoSMeasurementType.PING);
 			if (measurementList.isEmpty()) {
 				// has no measurement for the cloud yet
 
@@ -193,19 +194,19 @@ public class CloudPingTask implements Job {
 					}
 				}
 
-				earliestUpdatedAtMapedToCloud.put(min, cloudResponseDTO);
+				earliestUpdatedAtMappedToCloud.put(min, cloudResponseDTO);
 			}
 		}
 
 		if (!cloudToMeasureFound) {
 			ZonedDateTime earliestMeasurement = ZonedDateTime.now();
-			for (final ZonedDateTime date : earliestUpdatedAtMapedToCloud.keySet()) {
+			for (final ZonedDateTime date : earliestUpdatedAtMappedToCloud.keySet()) {
 				if (date.isBefore(earliestMeasurement)) {
 					earliestMeasurement = date;
 				}
 			}
 
-			cloudToMeasure = earliestUpdatedAtMapedToCloud.get(earliestMeasurement);
+			cloudToMeasure = earliestUpdatedAtMappedToCloud.get(earliestMeasurement);
 		}
 
 		return cloudToMeasure;
@@ -300,7 +301,7 @@ public class CloudPingTask implements Job {
 
 		final List<IcmpPingResponse> responseList = pingService.getPingResponseList(address);
 
-		final QoSInterDirectMeasurement measurement = qoSDBService.getOrCreateDirectInterMeasurement(address, cloud);
+		final QoSInterDirectMeasurement measurement = qoSDBService.getOrCreateDirectInterMeasurement(address, cloud, QoSMeasurementType.PING);
 		final PingMeasurementCalculationsDTO calculationsDTO = handleInterPingMeasurement(measurement, responseList, aroundNow);
 
 		qoSDBService.updateInterDirectMeasurement(aroundNow, measurement);

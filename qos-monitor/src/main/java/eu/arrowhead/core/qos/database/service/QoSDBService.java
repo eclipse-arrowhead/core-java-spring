@@ -136,10 +136,10 @@ public class QoSDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraMeasurement createIntraMeasurement(final System system, final QoSMeasurementType ping, final ZonedDateTime aroundNow) {
+	public QoSIntraMeasurement createIntraMeasurement(final System system, final QoSMeasurementType type, final ZonedDateTime aroundNow) {
 		logger.debug("createIntraMeasurement started...");
 
-		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
+		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(system, type, aroundNow);
 
 		try {
 			qoSIntraMeasurementRepository.saveAndFlush(measurement);
@@ -153,7 +153,7 @@ public class QoSDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSIntraMeasurement getOrCreateIntraMeasurement(final SystemResponseDTO systemResponseDTO) {
+	public QoSIntraMeasurement getOrCreateIntraMeasurement(final SystemResponseDTO systemResponseDTO, final QoSMeasurementType type) {
 		logger.debug("getOrCreateIntraMeasurement started...");
 
 		validateSystemResponseDTO(systemResponseDTO);
@@ -170,10 +170,10 @@ public class QoSDBService {
 		}
 
 		final QoSIntraMeasurement measurement;
-		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, QoSMeasurementType.PING);
+		final Optional<QoSIntraMeasurement> qoSIntraMeasurementOptional = qoSIntraMeasurementRepository.findBySystemAndMeasurementType(system, type);
 		if (qoSIntraMeasurementOptional.isEmpty()) {
 			final ZonedDateTime aroundNow = ZonedDateTime.now();
-			measurement = createIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
+			measurement = createIntraMeasurement(system, type, aroundNow);
 		}else {
 			 measurement = qoSIntraMeasurementOptional.get();
 		}
@@ -278,8 +278,7 @@ public class QoSDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public void logIntraMeasurementDetailsToDB(final QoSIntraPingMeasurementLog measurementLogSaved,
-			final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
+	public void logIntraMeasurementDetailsToDB(final QoSIntraPingMeasurementLog measurementLogSaved, final List<IcmpPingResponse> responseList, final ZonedDateTime aroundNow) {
 		logger.debug("logIntraMeasurementDetailsToDB started...");
 
 		if (responseList == null || responseList.isEmpty()) {
@@ -471,10 +470,10 @@ public class QoSDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSInterDirectMeasurement createInterDirectMeasurement(final Cloud cloud, final String address, final QoSMeasurementType ping, final ZonedDateTime aroundNow) {
+	public QoSInterDirectMeasurement createInterDirectMeasurement(final Cloud cloud, final String address, final QoSMeasurementType type, final ZonedDateTime aroundNow) {
 		logger.debug("createInterMeasurement started...");
 
-		final QoSInterDirectMeasurement measurement = new QoSInterDirectMeasurement(cloud, address, QoSMeasurementType.PING, aroundNow);
+		final QoSInterDirectMeasurement measurement = new QoSInterDirectMeasurement(cloud, address, type, aroundNow);
 
 		try {
 			qoSInterDirectMeasurementRepository.saveAndFlush(measurement);
@@ -487,13 +486,13 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<QoSInterDirectMeasurement> getInterDirectMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
+	public List<QoSInterDirectMeasurement> getInterDirectMeasurementByCloud(final CloudResponseDTO cloudResponseDTO, final QoSMeasurementType type) {
 		logger.debug("getInterDirectMeasurementByCloud started ...");
 
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
 		try {
 
-			final List<QoSInterDirectMeasurement> measurementList = qoSInterDirectMeasurementRepository.findByCloudAndMeasurementType(cloud, QoSMeasurementType.PING);
+			final List<QoSInterDirectMeasurement> measurementList = qoSInterDirectMeasurementRepository.findByCloudAndMeasurementType(cloud, type);
 
 			return measurementList;
 
@@ -683,7 +682,7 @@ public class QoSDBService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterDirectMeasurement getOrCreateDirectInterMeasurement(final String address, final CloudResponseDTO cloudResponseDTO) {
+	public QoSInterDirectMeasurement getOrCreateDirectInterMeasurement(final String address, final CloudResponseDTO cloudResponseDTO, final QoSMeasurementType type) {
 		logger.debug("getOrCreateDirectInterMeasurement started ...");
 
 		if (Utilities.isEmpty(address)) {
@@ -696,10 +695,10 @@ public class QoSDBService {
 
 		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
 		final QoSInterDirectMeasurement measurement;
-		final Optional<QoSInterDirectMeasurement> qoSInterDirectMeasurementOptional = qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(cloud, address, QoSMeasurementType.PING);
+		final Optional<QoSInterDirectMeasurement> qoSInterDirectMeasurementOptional = qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(cloud, address, type);
 		if (qoSInterDirectMeasurementOptional.isEmpty()) {
 			final ZonedDateTime aroundNow = ZonedDateTime.now();
-			measurement = createInterDirectMeasurement(cloud, address, QoSMeasurementType.PING, aroundNow);
+			measurement = createInterDirectMeasurement(cloud, address, type, aroundNow);
 		}else {
 			 measurement = qoSInterDirectMeasurementOptional.get();
 		}
