@@ -81,7 +81,7 @@ public class OrchestratorApplicationInitListener extends ApplicationInitListener
 		}
 		
 		if (qosEnabled) {
-			result.add(CoreSystemService.QOS_MONITOR_PING_MEASUREMENT_SERVICE);
+			result.add(CoreSystemService.QOS_MONITOR_INTRA_PING_MEASUREMENT_SERVICE);
 		}
 		
 		return result;

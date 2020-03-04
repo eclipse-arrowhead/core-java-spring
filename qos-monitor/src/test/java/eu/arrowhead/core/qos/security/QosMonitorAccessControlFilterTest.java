@@ -112,7 +112,7 @@ public class QosMonitorAccessControlFilterTest {
 	@Test
 	public void testOPGetPingMeasurementsCertificateSysop() throws Exception {
 
-		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT)
+		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT)
 					.secure(true)
 					.with(x509("certificates/valid.pem"))
 					.accept(MediaType.TEXT_PLAIN))
@@ -123,7 +123,7 @@ public class QosMonitorAccessControlFilterTest {
 	@Test
 	public void testOPGetPingMeasurementsCertificateNotSysop() throws Exception {
 
-		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT)
+		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT)
 				.secure(true)
 					.with(x509("certificates/provider.pem"))
 					.accept(MediaType.TEXT_PLAIN))
@@ -134,7 +134,7 @@ public class QosMonitorAccessControlFilterTest {
 	@Test
 	public void testOPGetPingMeasurementsCertificateOrchestrator() throws Exception {
 
-		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT + "/1")
+		this.mockMvc.perform(get(CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/1")
 				.secure(true)
 					.with(x509("certificates/orchestrator.pem"))
 					.accept(MediaType.APPLICATION_JSON))

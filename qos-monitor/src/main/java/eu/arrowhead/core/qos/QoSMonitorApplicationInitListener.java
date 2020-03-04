@@ -1,5 +1,7 @@
 package eu.arrowhead.core.qos;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
@@ -11,12 +13,24 @@ import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.core.CoreSystemService;
 
 @Component
 public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 
 	//=================================================================================================
 	// assistant methods
+
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	protected List<CoreSystemService> getRequiredCoreSystemServiceUris() {
+		final List<CoreSystemService> result = new ArrayList<>(3);
+		result.add(CoreSystemService.GATEKEEPER_PULL_CLOUDS); 
+		result.add(CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES);
+		result.add(CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
+
+		return result;
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

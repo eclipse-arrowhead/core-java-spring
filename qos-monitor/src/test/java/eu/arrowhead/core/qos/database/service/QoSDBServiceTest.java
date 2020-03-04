@@ -99,7 +99,7 @@ public class QoSDBServiceTest {
 		when(qoSIntraMeasurementPingRepository.saveAll(valueCapture.capture())).thenReturn(List.of());
 		doNothing().when(qoSIntraMeasurementPingRepository).flush();
 
-		qoSDBService.updateCountStartedAt();
+		qoSDBService.updateIntraCountStartedAt();
 
 		verify(qoSIntraMeasurementPingRepository, times(1)).findAll();
 		verify(qoSIntraMeasurementPingRepository, times(1)).saveAll(any());
@@ -130,7 +130,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updateCountStartedAt();
+			qoSDBService.updateIntraCountStartedAt();
 
 		} catch (final Exception ex) {
 
@@ -170,7 +170,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updateCountStartedAt();
+			qoSDBService.updateIntraCountStartedAt();
 
 		} catch (final Exception ex) {
 
@@ -207,7 +207,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updateCountStartedAt();
+			qoSDBService.updateIntraCountStartedAt();
 
 		} catch (final Exception ex) {
 
@@ -237,7 +237,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementRepository.saveAndFlush(valueCapture.capture())).thenReturn(measurement);
 
-		qoSDBService.createMeasurement(system, QoSMeasurementType.PING, aroundNow);
+		qoSDBService.createIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
 
 		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
 
@@ -258,7 +258,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementRepository.saveAndFlush(valueCapture.capture())).thenThrow(HibernateException.class);
 
-		qoSDBService.createMeasurement(system, QoSMeasurementType.PING, aroundNow);
+		qoSDBService.createIntraMeasurement(system, QoSMeasurementType.PING, aroundNow);
 
 		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
 
@@ -282,7 +282,7 @@ public class QoSDBServiceTest {
 		when(systemRepository.findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt())).thenReturn(Optional.of(system));
 		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
 
-		qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+		qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
@@ -301,7 +301,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		} catch (final Exception ex) {
 
@@ -327,7 +327,7 @@ public class QoSDBServiceTest {
 		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
 		when(qoSIntraMeasurementRepository.saveAndFlush(any())).thenReturn(measurement);
 
-		qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+		qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		verify(systemRepository, times(1)).findBySystemNameAndAddressAndPort(anyString(), anyString(), anyInt());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
@@ -347,7 +347,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		} catch (final Exception ex) {
 
@@ -374,7 +374,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		} catch (final Exception ex) {
 
@@ -401,7 +401,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		} catch (final Exception ex) {
 
@@ -428,7 +428,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		} catch (final Exception ex) {
 
@@ -455,7 +455,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getOrCreateMeasurement(systemResponseDTO);
+			qoSDBService.getOrCreateIntraMeasurement(systemResponseDTO, QoSMeasurementType.PING);
 
 		} catch (final Exception ex) {
 
@@ -483,7 +483,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementPingRepository.saveAndFlush(any())).thenReturn(pingMeasurement);
 
-		qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+		qoSDBService.createIntraPingMeasurement(measurementParam, calculations, aroundNow);
 
 		verify(qoSIntraMeasurementPingRepository, times(1)).saveAndFlush(any());
 
@@ -503,7 +503,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+			qoSDBService.createIntraPingMeasurement(measurementParam, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -528,7 +528,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+			qoSDBService.createIntraPingMeasurement(measurementParam, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -553,7 +553,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+			qoSDBService.createIntraPingMeasurement(measurementParam, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -576,7 +576,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.createPingMeasurement(measurementParam, calculations, aroundNow);
+			qoSDBService.createIntraPingMeasurement(measurementParam, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -600,7 +600,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
 
-		qoSDBService.getPingMeasurementByMeasurement(measurementParam);
+		qoSDBService.getIntraPingMeasurementByMeasurement(measurementParam);
 
 		verify(qoSIntraMeasurementPingRepository, times(1)).findByMeasurement(any());
 
@@ -618,7 +618,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementByMeasurement(measurementParam);
+			qoSDBService.getIntraPingMeasurementByMeasurement(measurementParam);
 
 		} catch (final Exception ex) {
 
@@ -639,7 +639,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementByMeasurement(measurementParam);
+			qoSDBService.getIntraPingMeasurementByMeasurement(measurementParam);
 
 		} catch (final Exception ex) {
 
@@ -665,7 +665,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraPingMeasurementLogRepository.saveAndFlush(any())).thenReturn(measurementLog);
 
-		qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+		qoSDBService.logIntraMeasurementToDB(address, calculations, aroundNow);
 
 		verify(qoSIntraPingMeasurementLogRepository, times(1)).saveAndFlush(any());
 
@@ -685,7 +685,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+			qoSDBService.logIntraMeasurementToDB(address, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -711,7 +711,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+			qoSDBService.logIntraMeasurementToDB(address, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -737,7 +737,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+			qoSDBService.logIntraMeasurementToDB(address, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -763,7 +763,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+			qoSDBService.logIntraMeasurementToDB(address, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -787,7 +787,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementToDB(address, calculations, aroundNow);
+			qoSDBService.logIntraMeasurementToDB(address, calculations, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -817,7 +817,7 @@ public class QoSDBServiceTest {
 		when(qoSIntraPingMeasurementLogDetailsRepository.saveAll(valueCapture.capture())).thenReturn(measurementLogDetailsList);
 		doNothing().when(qoSIntraPingMeasurementLogDetailsRepository).flush();
 
-		qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+		qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 
 		verify(qoSIntraPingMeasurementLogDetailsRepository, times(1)).saveAll(any());
 		verify(qoSIntraPingMeasurementLogDetailsRepository, times(1)).flush();
@@ -849,7 +849,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+			qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -877,7 +877,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+			qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -905,7 +905,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+			qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -933,7 +933,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+			qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -962,7 +962,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+			qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -1002,7 +1002,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.logMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
+			qoSDBService.logIntraMeasurementDetailsToDB(measurementLogSaved, responseList, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -1044,7 +1044,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementPingRepository.saveAndFlush(valueCapture.capture())).thenReturn(pingMeasurement);
 
-		qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+		qoSDBService.updateIntraPingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
 
 		verify(qoSIntraMeasurementPingRepository, times(1)).saveAndFlush(any());
 
@@ -1071,7 +1071,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+			qoSDBService.updateIntraPingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -1099,7 +1099,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+			qoSDBService.updateIntraPingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -1123,7 +1123,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+			qoSDBService.updateIntraPingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -1147,7 +1147,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+			qoSDBService.updateIntraPingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -1171,7 +1171,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updatePingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
+			qoSDBService.updateIntraPingMeasurement(measurement, calculations, pingMeasurement, aroundNow);
 
 		} catch (final Exception ex) {
 
@@ -1196,7 +1196,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementRepository.saveAndFlush(valueCapture.capture())).thenReturn(measurement);
 
-		qoSDBService.updateMeasurement(aroundNow, measurement);
+		qoSDBService.updateIntraMeasurement(aroundNow, measurement);
 
 		verify(qoSIntraMeasurementRepository, times(1)).saveAndFlush(any());
 
@@ -1218,7 +1218,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updateMeasurement(aroundNow, measurement);
+			qoSDBService.updateIntraMeasurement(aroundNow, measurement);
 
 		} catch (final Exception ex) {
 
@@ -1244,7 +1244,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updateMeasurement(aroundNow, measurement);
+			qoSDBService.updateIntraMeasurement(aroundNow, measurement);
 
 		} catch (final Exception ex) {
 
@@ -1267,7 +1267,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.updateMeasurement(aroundNow, measurement);
+			qoSDBService.updateIntraMeasurement(aroundNow, measurement);
 
 		} catch (final Exception ex) {
 
@@ -1295,7 +1295,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementPingRepository.findAll(any(PageRequest.class))).thenReturn(pageResponse);
 
-		qoSDBService.getPingMeasurementResponse(page, size, direction, sortField);
+		qoSDBService.getIntraPingMeasurementResponse(page, size, direction, sortField);
 
 		verify(qoSIntraMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
 
@@ -1317,7 +1317,7 @@ public class QoSDBServiceTest {
 
 		when(qoSIntraMeasurementPingRepository.findAll(any(PageRequest.class))).thenReturn(pageResponse);
 
-		qoSDBService.getPingMeasurementPage(page, size, direction, sortField);
+		qoSDBService.getIntraPingMeasurementPage(page, size, direction, sortField);
 
 		verify(qoSIntraMeasurementPingRepository, times(1)).findAll(any(PageRequest.class));
 
@@ -1338,7 +1338,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementPage(page, size, direction, sortField);
+			qoSDBService.getIntraPingMeasurementPage(page, size, direction, sortField);
 
 		} catch (final Exception ex) {
 
@@ -1363,7 +1363,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementPage(page, size, direction, sortField);
+			qoSDBService.getIntraPingMeasurementPage(page, size, direction, sortField);
 
 		} catch (final Exception ex) {
 
@@ -1392,7 +1392,7 @@ public class QoSDBServiceTest {
 		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
 		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
 
-		qoSDBService.getPingMeasurementBySystemId(id);
+		qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		verify(systemRepository, times(1)).findById(anyLong());
 		verify(qoSIntraMeasurementRepository, times(1)).findBySystemAndMeasurementType(any(), any());
@@ -1413,7 +1413,7 @@ public class QoSDBServiceTest {
 		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.of(measurement));
 		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.ofNullable(null));
 
-		final QoSIntraPingMeasurement response = qoSDBService.getPingMeasurementBySystemId(id);
+		final QoSIntraPingMeasurement response = qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		assertNull(response);
 
@@ -1435,7 +1435,7 @@ public class QoSDBServiceTest {
 		when(qoSIntraMeasurementRepository.findBySystemAndMeasurementType(any(), any())).thenReturn(Optional.ofNullable(null));
 		when(qoSIntraMeasurementPingRepository.findByMeasurement(any())).thenReturn(Optional.of(pingMeasurement));
 
-		final QoSIntraPingMeasurement response = qoSDBService.getPingMeasurementBySystemId(id);
+		final QoSIntraPingMeasurement response = qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		assertNull(response);
 
@@ -1459,7 +1459,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementBySystemId(id);
+			qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		} catch (final Exception ex) {
 
@@ -1488,7 +1488,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementBySystemId(id);
+			qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		} catch (final Exception ex) {
 
@@ -1516,7 +1516,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementBySystemId(id);
+			qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		} catch (final Exception ex) {
 
@@ -1544,7 +1544,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementBySystemId(id);
+			qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		} catch (final Exception ex) {
 
@@ -1572,7 +1572,7 @@ public class QoSDBServiceTest {
 
 		try {
 
-			qoSDBService.getPingMeasurementBySystemId(id);
+			qoSDBService.getIntraPingMeasurementBySystemId(id);
 
 		} catch (final Exception ex) {
 

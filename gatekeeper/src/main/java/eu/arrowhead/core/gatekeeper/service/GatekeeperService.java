@@ -24,6 +24,7 @@ import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.AccessTypeRelayResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.GSDPollRequestDTO;
@@ -308,7 +309,7 @@ public class GatekeeperService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public List<CloudAccessResponseDTO> initAccessTypesCollection(final List<CloudRequestDTO> request) throws InterruptedException {
+	public CloudAccessListResponseDTO initAccessTypesCollection(final List<CloudRequestDTO> request) throws InterruptedException {
 		final List<Cloud> cloudList = new ArrayList<>();
 		for (final CloudRequestDTO cloudRequestDTO : request) {
 			validateCloudRequest(cloudRequestDTO);
@@ -330,7 +331,11 @@ public class GatekeeperService {
 			Utilities.createExceptionFromErrorMessageDTO(errorMessageResponses.get(0));
 		}
 		
-		return successfulResponses;
+		final CloudAccessListResponseDTO successfulListResponse = new CloudAccessListResponseDTO();
+		successfulListResponse.setData(successfulResponses);
+		successfulListResponse.setCount(successfulResponses.size());
+		
+		return successfulListResponse;
 	}
 	
 	//-------------------------------------------------------------------------------------------------
