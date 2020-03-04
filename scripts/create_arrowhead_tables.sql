@@ -526,25 +526,6 @@ CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement` (
 CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log` (
 	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
 	`measurement_id` bigint(20) NOT NULL,
-	`min_response_time` int(11) DEFAULT NULL,
-	`max_response_time` int(11) DEFAULT NULL,
-	`mean_response_time_with_timeout` int(11) NULL DEFAULT NULL,
-	`mean_response_time_without_timeout` int(11) NULL DEFAULT NULL,
-	`jitter_with_timeout` int(11) NULL DEFAULT NULL,
-	`jitter_without_timeout` int(11) NULL DEFAULT NULL,
-	`lost_per_measurement_percent` int(3) NOT NULL DEFAULT 0,
-	`sent` bigint(20) NOT NULL DEFAULT 0,
-	`received` bigint(20) NOT NULL DEFAULT 0,
-	`measured_at` timestamp NOT NULL,
-	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_inter_relay_measurement_log` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_relay_measurement` (`id`) ON DELETE CASCADE
-	
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log_details` (
-	`id` bigint(20) PRIMARY KEY AUTO_INCREMENT,
-	`measurement_log_id` bigint(20) NOT NULL,
 	`measurement_sequenece_number` int(3) NOT NULL,
 	`timeout_flag` int(1) NOT NULL DEFAULT 0,
 	`error_message` varchar(255) NULL DEFAULT NULL,
@@ -554,7 +535,7 @@ CREATE TABLE IF NOT EXISTS `qos_inter_relay_echo_measurement_log_details` (
 	`measured_at` timestamp NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `fk_inter_relay_echo_measurement_log` FOREIGN KEY (`measurement_log_id`) REFERENCES `qos_inter_relay_echo_measurement_log` (`id`) ON DELETE CASCADE
+	CONSTRAINT `fk_inter_relay_echo_measurement_log` FOREIGN KEY (`measurement_id`) REFERENCES `qos_inter_relay_measurement` (`id`) ON DELETE CASCADE
 	
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

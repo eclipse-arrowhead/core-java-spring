@@ -10,6 +10,7 @@ public class RelayEchoMeasurementDetailsDTO implements Serializable{
 	
 	private static final long serialVersionUID = -6417775229433791206L;
 	
+	private int measurementSequenceNumber;
 	private boolean timeoutFlag;
 	private String errorMessage;
 	private String throwable;
@@ -24,7 +25,7 @@ public class RelayEchoMeasurementDetailsDTO implements Serializable{
 	public RelayEchoMeasurementDetailsDTO() {}
 	
 	//-------------------------------------------------------------------------------------------------
-	public RelayEchoMeasurementDetailsDTO(final boolean timeoutFlag, final String errorMessage, final String throwable, final Integer size,
+	public RelayEchoMeasurementDetailsDTO(final int measurementSequenceNumber, final boolean timeoutFlag, final String errorMessage, final String throwable, final Integer size,
 										  final Integer duration, final ZonedDateTime measuredAt) {
 		this.timeoutFlag = timeoutFlag;
 		this.errorMessage = errorMessage;
@@ -35,6 +36,7 @@ public class RelayEchoMeasurementDetailsDTO implements Serializable{
 	}
 
 	//-------------------------------------------------------------------------------------------------
+	public int getMeasurementSequenceNumber() { return measurementSequenceNumber; }	
 	public boolean getTimeoutFlag() { return timeoutFlag; }
 	public String getErrorMessage() { return errorMessage; }
 	public String getThrowable() { return throwable; }
@@ -43,7 +45,8 @@ public class RelayEchoMeasurementDetailsDTO implements Serializable{
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
-	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; } 
+	public void setMeasurementSequenceNumber(int measurementSequenceNumber) { this.measurementSequenceNumber = measurementSequenceNumber; }
+	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }	
 	public void setErrorMessage(final String errorMessage) { this.errorMessage = errorMessage; }
 	public void setThrowable(final String throwable) { this.throwable = throwable; }
 	public void setSize(final Integer size) { this.size = size; }

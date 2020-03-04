@@ -25,7 +25,6 @@ import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurementLog;
-import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurementLogDetails;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
@@ -37,7 +36,6 @@ import eu.arrowhead.common.database.repository.QoSInterDirectMeasurementPingRepo
 import eu.arrowhead.common.database.repository.QoSInterDirectMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSInterDirectPingMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSInterDirectPingMeasurementLogRepository;
-import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementLogDetailsRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayEchoMeasurementRepository;
 import eu.arrowhead.common.database.repository.QoSInterRelayMeasurementRepository;
@@ -108,9 +106,6 @@ public class QoSDBService {
 	@Autowired
 	private QoSInterRelayEchoMeasurementLogRepository qosInterRelayEchoMeasurementLogRepository;
 
-	@Autowired
-	private QoSInterRelayEchoMeasurementLogDetailsRepository qosInterRelayEchoMeasurementLogDetailsRepository;
-	
 	@Autowired
 	private SystemRepository systemRepository;
 	
@@ -824,26 +819,26 @@ public class QoSDBService {
 			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
 		}
 
-		final QoSInterRelayEchoMeasurement pingMeasurement = new QoSInterRelayEchoMeasurement();
+		final QoSInterRelayEchoMeasurement measurement = new QoSInterRelayEchoMeasurement();
 
-		pingMeasurement.setMeasurement(measurementParam);
-		pingMeasurement.setMaxResponseTime(calculations.getMaxResponseTime());
-		pingMeasurement.setMinResponseTime(calculations.getMinResponseTime());
-		pingMeasurement.setMeanResponseTimeWithoutTimeout(calculations.getMeanResponseTimeWithoutTimeout());
-		pingMeasurement.setMeanResponseTimeWithTimeout(calculations.getMeanResponseTimeWithTimeout());
-		pingMeasurement.setJitterWithoutTimeout(calculations.getJitterWithoutTimeout());
-		pingMeasurement.setJitterWithTimeout(calculations.getJitterWithTimeout());
-		pingMeasurement.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
-		pingMeasurement.setCountStartedAt(aroundNow);
-		pingMeasurement.setLastAccessAt(aroundNow);
-		pingMeasurement.setSent(calculations.getSentInThisTest());
-		pingMeasurement.setSentAll(calculations.getSentInThisTest());
-		pingMeasurement.setReceived(calculations.getReceivedInThisTest());
-		pingMeasurement.setReceivedAll(calculations.getReceivedInThisTest());
+		measurement.setMeasurement(measurementParam);
+		measurement.setMaxResponseTime(calculations.getMaxResponseTime());
+		measurement.setMinResponseTime(calculations.getMinResponseTime());
+		measurement.setMeanResponseTimeWithoutTimeout(calculations.getMeanResponseTimeWithoutTimeout());
+		measurement.setMeanResponseTimeWithTimeout(calculations.getMeanResponseTimeWithTimeout());
+		measurement.setJitterWithoutTimeout(calculations.getJitterWithoutTimeout());
+		measurement.setJitterWithTimeout(calculations.getJitterWithTimeout());
+		measurement.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
+		measurement.setCountStartedAt(aroundNow);
+		measurement.setLastAccessAt(aroundNow);
+		measurement.setSent(calculations.getSentInThisTest());
+		measurement.setSentAll(calculations.getSentInThisTest());
+		measurement.setReceived(calculations.getReceivedInThisTest());
+		measurement.setReceivedAll(calculations.getReceivedInThisTest());
 
 		try {
 
-			qosInterRelayEchoMeasurementRepository.saveAndFlush(pingMeasurement);
+			qosInterRelayEchoMeasurementRepository.saveAndFlush(measurement);
 
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
@@ -870,72 +865,34 @@ public class QoSDBService {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
-	public QoSInterRelayEchoMeasurementLog logInterRelayEchoMeasurementToDB(final QoSInterRelayMeasurement measurement, final RelayEchoMeasurementCalculationsDTO calculations, final ZonedDateTime aroundNow) {
+	public void logInterRelayEchoMeasurementToDB(final QoSInterRelayMeasurement measurement, final List<RelayEchoMeasurementDetailsDTO> measurementDetails, final ZonedDateTime aroundNow) {
 		logger.debug("logInterRelayEchoMeasurementToDB started...");
 
 		if (measurement == null) {
 			throw new InvalidParameterException("measurement" + NULL_ERROR_MESSAGE);
-		} else if (calculations == null) {
-			throw new InvalidParameterException("RelayEchoMeasurementCalculationsDTO" + NULL_ERROR_MESSAGE);
+		} else if (measurementDetails == null) {
+			throw new InvalidParameterException("RelayEchoMeasurementDetailsDTO" + NULL_ERROR_MESSAGE);
 		} else if (aroundNow == null) {
 			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
 		}
 
-		final QoSInterRelayEchoMeasurementLog measurementLog = new QoSInterRelayEchoMeasurementLog();
-		measurementLog.setMeasurement(measurement);
-		measurementLog.setMinResponseTime(calculations.getMinResponseTime());
-		measurementLog.setMaxResponseTime(calculations.getMaxResponseTime());
-		measurementLog.setMeanResponseTimeWithoutTimeout(calculations.getMeanResponseTimeWithoutTimeout());
-		measurementLog.setMeanResponseTimeWithTimeout(calculations.getMeanResponseTimeWithTimeout());
-		measurementLog.setJitterWithoutTimeout(calculations.getJitterWithoutTimeout());
-		measurementLog.setJitterWithTimeout(calculations.getJitterWithTimeout());
-		measurementLog.setLostPerMeasurementPercent(calculations.getLostPerMeasurementPercent());
-		measurementLog.setSent(calculations.getSentInThisTest());
-		measurementLog.setReceived(calculations.getReceivedInThisTest());
-		measurementLog.setMeasuredAt(aroundNow);
-
-		try {
-			return qosInterRelayEchoMeasurementLogRepository.saveAndFlush(measurementLog);
-		} catch (final Exception ex) {
-			logger.debug(ex.getMessage(), ex);
-			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Transactional (rollbackFor = ArrowheadException.class)
-	public void logInterRelayEchoMeasurementDetailsToDB(final QoSInterRelayEchoMeasurementLog measurementLogSaved, final List<RelayEchoMeasurementDetailsDTO> measurementDetails, final ZonedDateTime aroundNow) {
-		logger.debug("logInterRelayEchoMeasurementDetailsToDB started...");
-
-		if (measurementDetails == null || measurementDetails.isEmpty()) {
-			throw new InvalidParameterException("List<RelayEchoMeasurementDetailsDTO>" + EMPTY_OR_NULL_ERROR_MESSAGE);
-		} else if (measurementLogSaved == null) {
-			throw new InvalidParameterException("QoSInterRelayEchoMeasurementLog" + NULL_ERROR_MESSAGE);
-		} else if (aroundNow == null) {
-			throw new InvalidParameterException("ZonedDateTime" + NULL_ERROR_MESSAGE);
-		}
-
-		final List<QoSInterRelayEchoMeasurementLogDetails> measurementLogDetailsList = new ArrayList<>(measurementDetails.size());
-
-		int measurementSequenece = 0;
-		for (final RelayEchoMeasurementDetailsDTO details : measurementDetails) {
-
-			final QoSInterRelayEchoMeasurementLogDetails measurementLogDetails = new QoSInterRelayEchoMeasurementLogDetails();
-			measurementLogDetails.setMeasurementLog(measurementLogSaved);
-			measurementLogDetails.setMeasurementSequeneceNumber(measurementSequenece++);
-			measurementLogDetails.setTimeoutFlag(details.getTimeoutFlag());
-			measurementLogDetails.setErrorMessage(details.getErrorMessage());
-			measurementLogDetails.setThrowable(details.getThrowable() == null ? null : details.getThrowable().toString());
-			measurementLogDetails.setSize(details.getSize());
-			measurementLogDetails.setDuration(details.getDuration());
-			measurementLogDetails.setMeasuredAt(aroundNow);
-
-			measurementLogDetailsList.add(measurementLogDetails);
+		List<QoSInterRelayEchoMeasurementLog> toSave = new ArrayList<>(measurementDetails.size());
+		for (RelayEchoMeasurementDetailsDTO details : measurementDetails) {
+			final QoSInterRelayEchoMeasurementLog measurementLog = new QoSInterRelayEchoMeasurementLog();
+			measurementLog.setMeasurement(measurement);
+			measurementLog.setMeasurementSequeneceNumber(details.getMeasurementSequenceNumber());
+			measurementLog.setTimeoutFlag(details.getTimeoutFlag());
+			measurementLog.setErrorMessage(details.getErrorMessage());
+			measurementLog.setThrowable(details.getThrowable() == null ? null : details.getThrowable().toString());
+			measurementLog.setSize(details.getSize());
+			measurementLog.setDuration(details.getDuration());
+			measurementLog.setMeasuredAt(aroundNow);
+			toSave.add(measurementLog);
 		}
 
 		try {
-			qosInterRelayEchoMeasurementLogDetailsRepository.saveAll(measurementLogDetailsList);
-			qosInterRelayEchoMeasurementLogDetailsRepository.flush();
+			qosInterRelayEchoMeasurementLogRepository.saveAll(toSave);
+			qosInterRelayEchoMeasurementLogRepository.flush();
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

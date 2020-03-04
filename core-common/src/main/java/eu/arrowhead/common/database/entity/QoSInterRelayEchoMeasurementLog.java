@@ -29,34 +29,25 @@ public class QoSInterRelayEchoMeasurementLog {
 	@JoinColumn(name = "measurementId", referencedColumnName = "id", nullable = false, unique = true)
 	private QoSInterRelayMeasurement measurement;
 
-	@Column(name = "min_response_time", nullable = true)
-	private Integer minResponseTime;
+	@Column(name = "measurement_sequenece_number", nullable = false)
+	private int measurementSequeneceNumber;
 
-	@Column(name = "max_response_time", nullable = true)
-	private Integer maxResponseTime;
+	@Column(name = "timeout_flag", nullable = false)
+	private boolean timeoutFlag = false;
 
-	@Column(name = "mean_response_time_with_timeout", nullable = true)
-	private Integer meanResponseTimeWithTimeout;
+	@Column(name = "error_message", nullable = true)
+	private String errorMessage;
 
-	@Column(name = "mean_response_time_without_timeout", nullable = true)
-	private Integer meanResponseTimeWithoutTimeout;
+	@Column(name = "throwable", nullable = true)
+	private String throwable;
 
-	@Column(name = "jitter_with_timeout", nullable = true)
-	private Integer jitterWithTimeout;
+	@Column(name = "size_", nullable = true)
+	private Integer size;
 
-	@Column(name = "jitter_without_timeout", nullable = true)
-	private Integer jitterWithoutTimeout;
+	@Column(name = "duration", nullable = true)
+	private Integer duration;
 
-	@Column(name = "lost_per_measurement_percent", nullable = false)
-	private Integer lostPerMeasurementPercent;
-
-	@Column(name = "sent", nullable = false)
-	private long sent;
-
-	@Column(name = "received", nullable = false)
-	private long received;
-
-	@Column(name = "measured_at",nullable = false)
+	@Column(name = "measured_at", nullable = false)
 	private ZonedDateTime measuredAt;
 
 	@Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -86,28 +77,21 @@ public class QoSInterRelayEchoMeasurementLog {
 
 	//-------------------------------------------------------------------------------------------------
 	public QoSInterRelayMeasurement getMeasurement() { return measurement; }
-	public Integer getMinResponseTime() { return minResponseTime; }
-	public Integer getMaxResponseTime() { return maxResponseTime; }
-	public Integer getMeanResponseTimeWithTimeout() { return meanResponseTimeWithTimeout; }
-	public Integer getMeanResponseTimeWithoutTimeout() { return meanResponseTimeWithoutTimeout; }
-	public Integer getJitterWithTimeout() { return jitterWithTimeout; }
-	public Integer getJitterWithoutTimeout() { return jitterWithoutTimeout; }
-	public Integer getLostPerMeasurementPercent() { return lostPerMeasurementPercent; }
-	public long getSent() { return sent; }
-	public long getReceived() { return received; }
+	public int getMeasurementSequeneceNumber() { return measurementSequeneceNumber; }
+	public boolean isTimeoutFlag() { return timeoutFlag; }
+	public String getErrorMessage() { return errorMessage; }
+	public String getThrowable() { return throwable; }
+	public Integer getSize() { return size; }
+	public Integer getDuration() { return duration; }
 	public ZonedDateTime getMeasuredAt() { return measuredAt; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setMeasurement(final QoSInterRelayMeasurement measurement) { this.measurement = measurement; }
-	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }
-	public void setMaxResponseTime(final Integer maxResponseTime) { this.maxResponseTime = maxResponseTime; }
-	public void setMeanResponseTimeWithTimeout(final Integer meanResponseTimeWithTimeout) { this.meanResponseTimeWithTimeout = meanResponseTimeWithTimeout; }
-	public void setMeanResponseTimeWithoutTimeout(final Integer meanResponseTimeWithoutTimeout) { this.meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeout; }
-	public void setJitterWithTimeout(final Integer jitterWithTimeout) { this.jitterWithTimeout = jitterWithTimeout; }
-	public void setJitterWithoutTimeout(final Integer jitterWithoutTimeout) { this.jitterWithoutTimeout = jitterWithoutTimeout; }
-	public void setLostPerMeasurementPercent(final Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
-	public void setSent(final long sent) { this.sent = sent; }
-	public void setReceived(final long received) { this.received = received; }
+	public void setMeasurementSequeneceNumber(final int measurementSequeneceNumber) { this.measurementSequeneceNumber = measurementSequeneceNumber; }
+	public void setTimeoutFlag(final boolean timeoutFlag) { this.timeoutFlag = timeoutFlag; }
+	public void setErrorMessage(final String errorMessage) { this.errorMessage = errorMessage; }
+	public void setThrowable(final String throwable) { this.throwable = throwable; }
+	public void setSize(final Integer size) { this.size = size; }
+	public void setDuration(final Integer duration) { this.duration = duration; }
 	public void setMeasuredAt(final ZonedDateTime measuredAt) { this.measuredAt = measuredAt; }
-
 }
