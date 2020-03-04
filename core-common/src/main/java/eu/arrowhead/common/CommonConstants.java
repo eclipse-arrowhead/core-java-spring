@@ -47,6 +47,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 	
 	public static final String CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEASUREMENT = "qos-monitor-intra-ping-measurement";
+	public static final String CORE_SERVICE_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT = "qos-monitor-inter-relay-echo-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY = "qos-monitor-public-key";
 	
 	public static final String COMMON_FIELD_NAME_ID = "id";
