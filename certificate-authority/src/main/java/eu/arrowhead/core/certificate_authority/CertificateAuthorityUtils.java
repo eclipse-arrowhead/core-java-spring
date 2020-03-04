@@ -122,7 +122,7 @@ class CertificateAuthorityUtils {
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(cloudCertificate, serial, validFrom,
                 validUntil, csr.getSubject(), clientKey);
 
-        /**
+        /*
          * Adding the following extensions to the new certificate:
          * 
          * 1) The subject key identifier provides a hashed value that should uniquely
