@@ -35,6 +35,7 @@ import eu.arrowhead.common.dto.internal.CloudRelayFormDTO;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSBestRelayRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
@@ -72,7 +73,8 @@ public class QoSMonitorController {
 	
 	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT;
 	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT + "/pair_results";
-
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT + "/best_relay";
+	
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_DESCRIPTION = "Return requested Ping-Measurements entries by the given parameters";
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entries returned";
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entries";
@@ -89,10 +91,13 @@ public class QoSMonitorController {
 	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entries returned";
 	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entries";
 	
-	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BY_CLOUD_AND_RELAY_MGMT_DESCRIPTION = "Return requested Inter-Cloud Relay-Echo measurment entry by cloud and relay.";
-	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entry returned";
-	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entry";
+	private static final String QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BY_CLOUD_AND_RELAY_MGMT_DESCRIPTION = "Return requested Inter-Cloud Relay-Echo measurment entry by cloud and relay.";
+	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entry returned";
+	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entry";
 	
+	private static final String QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BEST_RELAY_MGMT_DESCRIPTION = "Return best Inter-Cloud Relay-Echo measurment entry by cloud and attribute.";
+	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entry returned";
+	private static final String POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entry";
 	
 	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
@@ -233,15 +238,15 @@ public class QoSMonitorController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BY_CLOUD_AND_RELAY_MGMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BY_CLOUD_AND_RELAY_MGMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path = QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public QoSInterRelayEchoMeasurementResponseDTO getMgmtInterRelayEchoMeasurementByCloudAndRelay(@RequestBody final CloudRelayFormDTO request) {
+	@PostMapping(path = QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSInterRelayEchoMeasurementResponseDTO queryMgmtInterRelayEchoMeasurementByCloudAndRelay(@RequestBody final CloudRelayFormDTO request) {
 		logger.debug("New getMgmtInterRelayEchoMeasurementsByCloudAndRelay request recieved");
 		
 		validateCloudRelayForm(request, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY);
@@ -250,6 +255,24 @@ public class QoSMonitorController {
 		return response;		
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BEST_RELAY_MGMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@PostMapping(path = QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSInterRelayEchoMeasurementResponseDTO queryMgmtBestInterRelayEchoMeasurementByCloud(@RequestBody final QoSBestRelayRequestDTO request) {
+		logger.debug("New getMgmtBestInterRelayEchoMeasurementByCloud request recieved");
+		
+		validateQoSBestRelayRequest(request, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BEST_RELAY);
+		final QoSInterRelayEchoMeasurementResponseDTO response = qosDBService.getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(request.getCloud(),
+																																		  Utilities.convertStringToQoSMeasurementAttribute(request.getAttribute()));
+		logger.debug("Measurement retrieved successfully");
+		return response;
+	}
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Returns the public key of the QoS Monitor core service as a Base64 encoded text", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
@@ -473,5 +496,19 @@ public class QoSMonitorController {
 			throw new BadPayloadException("Relay type is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateQoSBestRelayRequest(final QoSBestRelayRequestDTO request, final String origin) {
+		logger.debug("validateQoSBestRelayRequest started...");
+		
+		if (request == null) {
+			throw new BadPayloadException("QoSBestRelayRequestDTO is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		validateCloudResponse(request.getCloud(), origin);
+		
+		if (Utilities.isEmpty(request.getAttribute())) {
+			throw new BadPayloadException("attribute is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
 }

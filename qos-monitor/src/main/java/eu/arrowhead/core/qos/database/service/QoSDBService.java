@@ -50,6 +50,7 @@ import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
@@ -1027,6 +1028,73 @@ public class QoSDBService {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterRelayEchoMeasurementResponseDTO getBestInterRelayEchoMeasurementByCloudAndAttributeResponse(final CloudResponseDTO cloud, final QoSMeasurementAttribute attribute) {
+		logger.debug("getBestInterRelayEchoMeasurementByCloudAndAttributeResponse started ...");
+		final QoSInterRelayEchoMeasurement best = getBestInterRelayEchoMeasurementByCloudAndAttribute(cloud, attribute);
+		if (best == null) {
+			throw new InvalidParameterException("Have no relay-echo measurement with cloud " + cloud.getName() + "." + cloud.getOperator());
+		}
+		return DTOConverter.convertQoSInterRelayEchoMeasurementToQoSInterRelayEchoMeasurementResponseDTO(best);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterRelayEchoMeasurement getBestInterRelayEchoMeasurementByCloudAndAttribute(final CloudResponseDTO cloud, final QoSMeasurementAttribute attribute) {
+		logger.debug("getBestInterRelayEchoMeasurementByCloudAndAttribute started ...");
+		
+		validateCloudResponseDTO(cloud);
+		if (attribute == null) {
+			throw new InvalidParameterException("attribute" + NULL_ERROR_MESSAGE);
+		}
+		
+		final List<QoSInterRelayMeasurement> measurementList = qosInterRelayMeasurementRepository.findByCloudAndMeasurementType(DTOConverter.convertCloudResponseDTOToCloud(cloud),
+																																QoSMeasurementType.RELAY_ECHO);
+		if (measurementList.isEmpty()) {
+			return null;
+		}
+		
+		final List<QoSInterRelayEchoMeasurement> echoMeasurementList = new ArrayList<>(measurementList.size());
+		for (final QoSInterRelayMeasurement measurement : measurementList) {
+			final Optional<QoSInterRelayEchoMeasurement> opt = qosInterRelayEchoMeasurementRepository.findByMeasurement(measurement);
+			if (opt.isPresent()) {
+				echoMeasurementList.add(opt.get());
+			}
+		}
+		
+		if (echoMeasurementList.isEmpty()) {
+			return null;
+		}
+		
+		QoSInterRelayEchoMeasurement best = echoMeasurementList.get(0);
+		for (final QoSInterRelayEchoMeasurement echoMeasurement : echoMeasurementList) {
+			switch (attribute) {
+			case MIN_RESPONSE_TIME:
+				best = echoMeasurement.getMinResponseTime() < best.getMinResponseTime() ? echoMeasurement : best;
+				break;
+			case MAX_RESPONSE_TIME:
+				best = echoMeasurement.getMaxResponseTime() < best.getMaxResponseTime() ? echoMeasurement : best;
+				break;
+			case MEAN_RESPONSE_TYPE_WITH_TIMEOUT:
+				best = echoMeasurement.getMeanResponseTimeWithTimeout() < best.getMeanResponseTimeWithTimeout() ? echoMeasurement : best;
+				break;
+			case MEAN_RESPONSE_TYPE_WITHOUT_TIMEOUT:
+				best = echoMeasurement.getMeanResponseTimeWithoutTimeout() < best.getMeanResponseTimeWithoutTimeout() ? echoMeasurement : best;
+				break;
+			case JITTER_WITH_TIMEOUT:
+				best = echoMeasurement.getJitterWithTimeout() < best.getJitterWithTimeout() ? echoMeasurement : best;
+				break;
+			case JITTER_WITHOUT_TIMEOUT:
+				best = echoMeasurement.getJitterWithoutTimeout() < best.getJitterWithoutTimeout() ? echoMeasurement : best;
+				break;
+			case LOST_PER_MEASUREMENT_PERCENT:
+				best = echoMeasurement.getLostPerMeasurementPercent() < best.getLostPerMeasurementPercent() ? echoMeasurement : best;
+			default:
+				throw new InvalidParameterException("Unkown attribute: " + attribute);
+			}
+		}
+		return best;
 	}
 	
 	//=================================================================================================
