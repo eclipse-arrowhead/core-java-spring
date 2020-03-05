@@ -31,13 +31,17 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.CloudRelayFormDTO;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -66,7 +70,8 @@ public class QoSMonitorController {
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI = QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
 	
-	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT;
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT;
+	private static final String QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY = CoreCommonConstants.MGMT_URI + CommonConstants.OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT + "/pair_results";
 
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_DESCRIPTION = "Return requested Ping-Measurements entries by the given parameters";
 	private static final String GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Ping-Measurement entries returned";
@@ -81,8 +86,13 @@ public class QoSMonitorController {
 	private static final String OP_GET_QOS_MONITOR_INTRA_PING_MEASUREMENT_BY_SYSTEM_ID_HTTP_400_MESSAGE = "Could not retrieve Ping-Measurement entry";
 
 	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_DESCRIPTION = "Return requested Inter-Cloud Relay-Echo measurments entries by the given parameters.";
-	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entry returned";
-	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entry";
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entries returned";
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entries";
+	
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BY_CLOUD_AND_RELAY_MGMT_DESCRIPTION = "Return requested Inter-Cloud Relay-Echo measurment entry by cloud and relay.";
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_200_MESSAGE = "Relay-Echo measurement entry returned";
+	private static final String GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_400_MESSAGE = "Could not retrieve Relay-Echo measurement entry";
+	
 	
 	private static final String GET_PUBLIC_KEY_200_MESSAGE = "Public key returned";
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
@@ -131,7 +141,7 @@ public class QoSMonitorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = QOS_MONITOR_INTRA_PING_MEASUREMENTS_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public PingMeasurementListResponseDTO getPingMeasurements(
+	@ResponseBody public PingMeasurementListResponseDTO getIntraPingMeasurements(
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
 			@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
@@ -155,7 +165,7 @@ public class QoSMonitorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public PingMeasurementResponseDTO getManagementPingMeasurementBySystemId(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+	@ResponseBody public PingMeasurementResponseDTO getManagementIntraPingMeasurementBySystemId(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New getPingMeasurementBySystemId get request recieved with id: {}", id);
 
 		final String origin = CommonConstants.QOS_MONITOR_URI + GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI;
@@ -176,28 +186,6 @@ public class QoSMonitorController {
 
 		return pingMeasurementResponse;
 	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(path = QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public QoSInterRelayEchoMeasurementListResponseDTO getInterRelayEchoMeasurements(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
-																							   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
-																							   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
-																							   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
-		logger.debug("New getInterRelayEchoMeasurements request recieved with page: {} and item_per page: {}", page, size);
-
-		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_URI);
-		final QoSInterRelayEchoMeasurementListResponseDTO response = qosDBService.getInterRelayEchoMeasurementsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
-																												  		validParameters.getValidatedDirecion(), sortField);
-		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
-		return response;
-	}
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = OP_GET_QOS_MONITOR_INTRA_PING_MEASUREMENT_BY_SYSTEM_ID_DESCRIPTION, response = PingMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
@@ -208,18 +196,58 @@ public class QoSMonitorController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path = GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public PingMeasurementResponseDTO getPingMeasurementBySystemId(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
+	@ResponseBody public PingMeasurementResponseDTO getIntraPingMeasurementBySystemId(@PathVariable(value = PATH_VARIABLE_ID) final long id) {
 		logger.debug("New getPingMeasurementBySystemId get request recieved with id: {}", id);
-
+		
 		final String origin = CommonConstants.QOS_MONITOR_URI + GET_QOS_MONITOR_INTRA_PING_MEASUREMENTS_BY_SYSTEM_ID_URI;
 		if (id < 1) {
 			throw new BadPayloadException(ID_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
 		}
-
+		
 		final PingMeasurementResponseDTO pingMeasurementResponse = qosDBService.getIntraPingMeasurementBySystemIdResponse(id);
-
+		
 		logger.debug("PingMeasurement entry with system id: {} successfully retrieved", id);
 		return pingMeasurementResponse;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSInterRelayEchoMeasurementListResponseDTO getMgmtInterRelayEchoMeasurements(@RequestParam(name = CoreCommonConstants.REQUEST_PARAM_PAGE, required = false) final Integer page,
+																							   	   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_ITEM_PER_PAGE, required = false) final Integer size,
+																							   	   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_DIRECTION, defaultValue = CoreDefaults.DEFAULT_REQUEST_PARAM_DIRECTION_VALUE) final String direction,
+																							   	   	   @RequestParam(name = CoreCommonConstants.REQUEST_PARAM_SORT_FIELD, defaultValue = CommonConstants.COMMON_FIELD_NAME_ID) final String sortField) {
+		logger.debug("New getInterRelayEchoMeasurements request recieved with page: {} and item_per page: {}", page, size);
+
+		final ValidatedPageParams validParameters = CoreUtilities.validatePageParameters(page, size, direction, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_MGMT_URI);
+		final QoSInterRelayEchoMeasurementListResponseDTO response = qosDBService.getInterRelayEchoMeasurementsResponse(validParameters.getValidatedPage(), validParameters.getValidatedSize(),
+																												  		validParameters.getValidatedDirecion(), sortField);
+		logger.debug("Measurements  with page: {} and item_per page: {} retrieved successfully", page, size);
+		return response;
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_BY_CLOUD_AND_RELAY_MGMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = GET_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSInterRelayEchoMeasurementResponseDTO getMgmtInterRelayEchoMeasurementByCloudAndRelay(@RequestBody final CloudRelayFormDTO request) {
+		logger.debug("New getMgmtInterRelayEchoMeasurementsByCloudAndRelay request recieved");
+		
+		validateCloudRelayForm(request, CommonConstants.QOS_MONITOR_URI + QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENTS_BY_CLOUD_AND_RELAY);
+		final QoSInterRelayEchoMeasurementResponseDTO response = qosDBService.getInterRelayEchoMeasurementByCloudAndRealyResponse(request.getCloud(), request.getRelay());
+		logger.debug("Measurement retrieved successfully");
+		return response;		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -342,12 +370,41 @@ public class QoSMonitorController {
 		}		
 	}
 	
+	private void validateCloudRelayForm(final CloudRelayFormDTO request, final String origin) {
+		if (request == null) {
+			throw new InvalidParameterException("CloudRelayFormDTO is null.");
+		}		
+		validateCloudResponse(request.getCloud(), origin);
+		validateRelayResponse(request.getRelay(), origin);
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	private void validateCloudRequest(final CloudRequestDTO cloud, final String origin) {
 		logger.debug("validateCloudRequest started...");
 		
 		if (cloud == null) {
 			throw new BadPayloadException("Cloud is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(cloud.getOperator())) {
+			throw new BadPayloadException("Cloud operator is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(cloud.getName())) {
+			throw new BadPayloadException("Cloud name is null or empty", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private void validateCloudResponse(final CloudResponseDTO cloud, final String origin) {
+		logger.debug("validateCloudResponse started...");
+		
+		if (cloud == null) {
+			throw new BadPayloadException("Cloud is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (cloud.getId() < 1) {
+			throw new BadPayloadException("Cloud id less than 1", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 		
 		if (Utilities.isEmpty(cloud.getOperator())) {
@@ -390,4 +447,31 @@ public class QoSMonitorController {
 			throw new BadPayloadException("Relay type is invalid", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	private void validateRelayResponse(final RelayResponseDTO relay, final String origin) {
+		logger.debug("validateRelayRequest started...");
+		
+		if (relay == null) {
+			throw new BadPayloadException("relay is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+			
+		if (relay.getId() < 1) {
+			throw new BadPayloadException("Relay id less than 1", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (Utilities.isEmpty(relay.getAddress())) {
+			throw new BadPayloadException("Relay address is null or blank", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		final int validatedPort = relay.getPort();
+		if (validatedPort < CommonConstants.SYSTEM_PORT_RANGE_MIN || validatedPort > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
+			throw new BadPayloadException("Relay port must be between " + CommonConstants.SYSTEM_PORT_RANGE_MIN + " and " + CommonConstants.SYSTEM_PORT_RANGE_MAX + ".", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+		
+		if (relay.getType() == null) {
+			throw new BadPayloadException("Relay type is null", HttpStatus.SC_BAD_REQUEST, origin);
+		}
+	}
+
 }

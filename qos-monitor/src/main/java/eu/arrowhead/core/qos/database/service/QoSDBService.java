@@ -49,6 +49,7 @@ import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.QoSMeasurementStatus;
@@ -990,7 +991,18 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterRelayEchoMeasurement getInterRelayEchoMeasurementByCloudAndRealy(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO) {
+	public QoSInterRelayEchoMeasurementResponseDTO getInterRelayEchoMeasurementByCloudAndRealyResponse(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO) {
+		logger.debug("getInterRelayEchoMeasurementByCloudAndRealyResponse started ...");
+		final Optional<QoSInterRelayEchoMeasurement> optional = getInterRelayEchoMeasurementByCloudAndRealy(cloudResponseDTO, relayResponseDTO);
+		if (optional.isEmpty()) {
+			throw new InvalidParameterException("Have no relay-echo measurement with cloud " + cloudResponseDTO.getName() + "." + cloudResponseDTO.getOperator()
+												+ " and relay " + relayResponseDTO.getAddress() + ":" + relayResponseDTO.getPort());
+		}
+		return DTOConverter.convertQoSInterRelayEchoMeasurementToQoSInterRelayEchoMeasurementResponseDTO(optional.get());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<QoSInterRelayEchoMeasurement> getInterRelayEchoMeasurementByCloudAndRealy(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO) {
 		logger.debug("getInterRelayEchoMeasurementByCloudAndRealy started ...");
 		
 		validateCloudResponseDTO(cloudResponseDTO);
@@ -1003,17 +1015,12 @@ public class QoSDBService {
 			final QoSInterRelayMeasurement measurement;
 			final Optional<QoSInterRelayMeasurement> qoSInterRelayMeasurementOptional = qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, QoSMeasurementType.RELAY_ECHO);
 			if (qoSInterRelayMeasurementOptional.isEmpty()) {	
-				return null;
+				return Optional.empty();
 			} else {
 				 measurement = qoSInterRelayMeasurementOptional.get();
 			}
 
-			final Optional<QoSInterRelayEchoMeasurement> measurementOptional = qosInterRelayEchoMeasurementRepository.findByMeasurement(measurement);
-			if (measurementOptional.isEmpty()) {
-				return null;
-			} else {
-				return measurementOptional.get();
-			}
+			return qosInterRelayEchoMeasurementRepository.findByMeasurement(measurement);
 		} catch (final InvalidParameterException ex) {
 			throw ex;
 		} catch (final Exception ex) {
