@@ -778,7 +778,7 @@ public class QoSDBService {
 		if (qoSInterRelayMeasurementOptional.isEmpty()) {
 			final ZonedDateTime aroundNow = ZonedDateTime.now();
 			measurement = createInterRelayMeasurement(cloud, relay, type, aroundNow);
-		}else {
+		} else {
 			measurement = qoSInterRelayMeasurementOptional.get();
 			measurement.setStatus(QoSMeasurementStatus.PENDING);
 			try {

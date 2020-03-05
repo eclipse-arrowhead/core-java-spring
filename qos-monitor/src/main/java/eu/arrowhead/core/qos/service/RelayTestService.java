@@ -24,7 +24,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
@@ -32,8 +32,10 @@ import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
+import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
+import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.thread.ReceiverSideRelayTestThread;
 import eu.arrowhead.core.qos.thread.SenderSideRelayTestThread;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
@@ -55,6 +57,12 @@ public class RelayTestService {
 
 	@Autowired
 	private SSLProperties sslProps;
+	
+	@Autowired
+	private QoSMonitorDriver qosMonitorDriver;
+	
+	@Autowired
+	private QoSDBService qosDBService;
 	
 	@Value(CoreCommonConstants.$RELAY_TEST_TIME_TO_REPEAT_WD)
 	private byte noIteration;
@@ -105,13 +113,12 @@ public class RelayTestService {
 		logger.debug("joinRelayTest started...");
 		
 		validateQoSRelayTestProposalRequestDTO(request);
-		// TODO: find cloud and relay db objects
-		final CloudResponseDTO requesterCloud = null;
-		final RelayResponseDTO relay = null;
-		
-		// TODO: find or create measurement record for the cloud, relay pair (and set to pending/new)
-		
+		final CloudWithRelaysResponseDTO requesterCloud = qosMonitorDriver.queryGatekeeperCloudInfo(request.getRequesterCloud().getOperator(), request.getRequesterCloud().getName());
 		final RelayRequestDTO relayRequest = request.getRelay();
+		final RelayResponseDTO relay = findRelayResponseDTO(requesterCloud, relayRequest.getAddress(), relayRequest.getPort());
+		
+		qosDBService.getOrCreateInterRelayMeasurement(requesterCloud, relay, QoSMeasurementType.RELAY_ECHO);
+		
 		final Session session = getRelaySession(relayRequest);
 
 		ReceiverSideRelayTestThread thread = null;
@@ -136,22 +143,21 @@ public class RelayTestService {
 			throw ex;
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------------------------------
 	public void initRelayTest(final QoSMonitorSenderConnectionRequestDTO request) {
 		logger.debug("initRelayTest started...");
 		
 		validateQoSMonitorSenderConnectionRequestDTO(request);
-		// TODO: find cloud and relay db objects
-		final CloudResponseDTO requesterCloud = null;
-		final RelayResponseDTO relay = null;
-
+		final CloudWithRelaysResponseDTO targetCloud = qosMonitorDriver.queryGatekeeperCloudInfo(request.getTargetCloud().getOperator(), request.getTargetCloud().getName());
 		final RelayRequestDTO relayRequest = request.getRelay();
+		final RelayResponseDTO relay = findRelayResponseDTO(targetCloud, relayRequest.getAddress(), relayRequest.getPort());
+
 		final Session session = getRelaySession(relayRequest);
 		
 		SenderSideRelayTestThread thread = null;
 		try {
-			thread = new SenderSideRelayTestThread(appContext, relayClient, session, requesterCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId(),
+			thread = new SenderSideRelayTestThread(appContext, relayClient, session, targetCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId(),
 												   noIteration, testMessageSize, timeout, logIndividualMeasurements);
 			ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
 			thread.init(info.getMessageSender(), info.getControlResponseMessageSender());
@@ -263,6 +269,8 @@ public class RelayTestService {
 	
 	//-------------------------------------------------------------------------------------------------
 	private Session getRelaySession(final RelayRequestDTO relay) {
+		logger.debug("getRelaySession started...");
+		
 		try {
 			return relayClient.createConnection(relay.getAddress(), relay.getPort(), relay.isSecure());
 		} catch (final JMSException ex) {
@@ -272,5 +280,18 @@ public class RelayTestService {
 			
 			throw new ArrowheadException("Error while trying to connect relay at " + relay.getAddress() + ":" + relay.getPort(), ex);
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private RelayResponseDTO findRelayResponseDTO(final CloudWithRelaysResponseDTO cloud, final String address, final int port) {
+		logger.debug("findRelayResponseDTO started...");
+
+		for (final RelayResponseDTO relay : cloud.getGatewayRelays()) {
+			if (address.equals(relay.getAddress()) && port == relay.getPort()) {
+				return relay;
+			}
+		}
+		
+		throw new ArrowheadException("Can't find relay: " + address + ":" + port);
 	}
 }

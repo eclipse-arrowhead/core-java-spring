@@ -29,6 +29,7 @@ import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
+import eu.arrowhead.common.database.entity.Relay;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudRelaysAssignmentRequestDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
@@ -121,7 +122,7 @@ public class GatekeeperController {
 	private static final String POST_INIT_RELAY_TEST_HTTP_200_MESSAGE = "Test started";
 	private static final String POST_INIT_RELAY_TEST_HTTP_400_MESSAGE = "Could not start the test";
 	private static final String POST_INIT_RELAY_TEST_HTTP_504_MESSAGE = "Timeout occurs in the communication via relay.";
-	private static final String GET_GET_CLOUD_DESCRIPTION = "Returns the specified cloud";
+	private static final String GET_GET_CLOUD_DESCRIPTION = "Returns the specified cloud (with all the available gateway relays, even public ones)";
 	private static final String GET_GET_CLOUD_HTTP_200_MESSAGE = "Cloud returned";
 	private static final String GET_GET_CLOUD_HTTP_400_MESSAGE = "Could not acquire cloud";
 	
@@ -596,10 +597,16 @@ public class GatekeeperController {
 		}
 		
 		final Cloud cloud = gatekeeperDBService.getCloudByOperatorAndName(operator, name);
+		final CloudWithRelaysResponseDTO response = DTOConverter.convertCloudToCloudWithRelaysResponseDTO(cloud);
+		final List<Relay> publicGatewayRelays = gatekeeperDBService.getPublicGatewayRelays();
+
+		for (final Relay relay : publicGatewayRelays) {
+			response.getGatewayRelays().add(DTOConverter.convertRelayToRelayResponseDTO(relay));
+		}
 		
 		logger.debug("Cloud entry with operator: '{}', and name: '{}' successfully retrieved", operator, name);
 		
-		return DTOConverter.convertCloudToCloudWithRelaysResponseDTO(cloud);
+		return response;
 	}
 	
 	//=================================================================================================

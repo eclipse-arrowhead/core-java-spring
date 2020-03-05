@@ -411,9 +411,7 @@ public class GatekeeperDBService {
 		logger.debug("getPublicRelaysByType started...");
 				
 		try {
-			
 			return relayRepository.findAllByExclusiveAndTypeIn(false, List.of(RelayType.GATEWAY_RELAY, RelayType.GENERAL_RELAY));
-			
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
