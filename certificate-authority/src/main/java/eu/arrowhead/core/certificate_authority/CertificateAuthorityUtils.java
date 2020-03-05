@@ -12,18 +12,25 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.ServiceConfigurationError;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.asn1.pkcs.Attribute;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -48,7 +55,7 @@ class CertificateAuthorityUtils {
     private static final Logger logger = LogManager.getLogger(CertificateAuthorityService.class);
 
     private static final String PROVIDER = "BC";
-    private static final String SIGNATURE_ALGORITM = "SHA512withRSA";
+    private static final String SIGNATURE_ALGORITHM = "SHA512withRSA";
 
     static JcaPKCS10CertificationRequest decodePKCS10CSR(CertificateSigningRequestDTO csr) {
         try {
@@ -122,29 +129,9 @@ class CertificateAuthorityUtils {
         X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(cloudCertificate, serial, validFrom,
                 validUntil, csr.getSubject(), clientKey);
 
-        /*
-         * Adding the following extensions to the new certificate:
-         * 
-         * 1) The subject key identifier provides a hashed value that should uniquely
-         * identify the public key
-         * 
-         * 2) The authority key identifier provides a hashed value that should uniquely
-         * identify the issuer of the certificate
-         * 
-         * 3) And this basic constraint is for forbidding issuing other certificates
-         * under this certificate
-         */
-        try {
-            JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
-            builder.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(clientKey));
-            builder.addExtension(Extension.authorityKeyIdentifier, false,
-                    extUtils.createAuthorityKeyIdentifier(cloudCertificate));
-            builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
-        } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException e) {
-            throw new AuthException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
-        }
+        addCertificateExtensions(builder, csr, clientKey, cloudCertificate);
 
-        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder(SIGNATURE_ALGORITM).setProvider(PROVIDER);
+        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(PROVIDER);
         try {
             return new JcaX509CertificateConverter().setProvider(PROVIDER)
                     .getCertificate(builder.build(signerBuilder.build(cloudPrivateKey)));
@@ -153,6 +140,63 @@ class CertificateAuthorityUtils {
         } catch (OperatorCreationException e) {
             throw new AuthException("Certificate signing failed! (" + e.getMessage() + ")", e);
         }
+    }
+
+    /**
+         * Adding the following extensions to the new certificate:
+     * <ol>
+     * <li>The subject alternative name makes possible to use the certificate for
+     * accessing a host via IP address or hostname</li>
+         * 
+     * <li>The subject key identifier provides a hashed value that should uniquely
+     * identify the public key</li>
+         * 
+     * <li>The authority key identifier provides a hashed value that should uniquely
+     * identify the issuer of the certificate</li>
+         * 
+     * <li>And this basic constraint is for forbidding issuing other certificates
+     * under this certificate</li>
+     * </ol>
+         */
+    static void addCertificateExtensions(X509v3CertificateBuilder builder, JcaPKCS10CertificationRequest csr,
+            PublicKey clientKey, X509Certificate cloudCertificate) {
+        try {
+            JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+
+            final List<GeneralName> subjectAlternativeNames = getSubjectAlternativeNames(csr);
+            builder.addExtension(Extension.subjectAlternativeName, false,
+                    new GeneralNames(subjectAlternativeNames.toArray(new GeneralName[] {})));
+            builder.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(clientKey));
+            builder.addExtension(Extension.authorityKeyIdentifier, false,
+                    extUtils.createAuthorityKeyIdentifier(cloudCertificate));
+            builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+        } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException e) {
+            throw new AuthException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
+        }
+    }
+
+    static List<GeneralName> getSubjectAlternativeNames(JcaPKCS10CertificationRequest csr) {
+        List<GeneralName> alternativeNames = new ArrayList<>();
+
+        for (final Attribute attribute : csr.getAttributes()) {
+            if (attribute == null) {
+                continue;
+            }
+            if (attribute.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
+                final Extensions extensions = Extensions.getInstance(attribute.getAttrValues().getObjectAt(0));
+                final GeneralNames generalNames = GeneralNames.fromExtensions(extensions,
+                        Extension.subjectAlternativeName);
+                if (generalNames != null && generalNames.getNames() != null && generalNames.getNames().length > 0) {
+                    for (final GeneralName name : generalNames.getNames()) {
+                        if (name.getTagNo() == GeneralName.dNSName || name.getTagNo() == GeneralName.iPAddress) {
+                            alternativeNames.add(name);
+                        }
+                    }
+                }
+            }
+        }
+
+        return alternativeNames;
     }
 
     private CertificateAuthorityUtils() {
