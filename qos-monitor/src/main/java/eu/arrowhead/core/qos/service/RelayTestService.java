@@ -24,12 +24,12 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.database.entity.Cloud;
-import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -106,8 +106,8 @@ public class RelayTestService {
 		
 		validateQoSRelayTestProposalRequestDTO(request);
 		// TODO: find cloud and relay db objects
-		final Cloud requesterCloud = null;
-		final Relay relay = null;
+		final CloudResponseDTO requesterCloud = null;
+		final RelayResponseDTO relay = null;
 		
 		// TODO: find or create measurement record for the cloud, relay pair (and set to pending/new)
 		
@@ -143,8 +143,8 @@ public class RelayTestService {
 		
 		validateQoSMonitorSenderConnectionRequestDTO(request);
 		// TODO: find cloud and relay db objects
-		final Cloud requesterCloud = null;
-		final Relay relay = null;
+		final CloudResponseDTO requesterCloud = null;
+		final RelayResponseDTO relay = null;
 
 		final RelayRequestDTO relayRequest = request.getRelay();
 		final Session session = getRelaySession(relayRequest);

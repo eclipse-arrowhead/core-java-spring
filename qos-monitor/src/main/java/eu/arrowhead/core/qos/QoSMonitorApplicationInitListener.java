@@ -28,6 +28,8 @@ public class QoSMonitorApplicationInitListener extends ApplicationInitListener {
 		result.add(CoreSystemService.GATEKEEPER_PULL_CLOUDS); 
 		result.add(CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES);
 		result.add(CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES);
+		result.add(CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE);
+		result.add(CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE);
 
 		return result;
 	}
