@@ -73,9 +73,6 @@ public class RelayTestService {
 	@Value(CoreCommonConstants.$RELAY_TEST_MESSAGE_SIZE_WD)
 	private int testMessageSize;
 	
-	@Value(CoreCommonConstants.$RELAY_TEST_LOG_MEASUREMENTS_IN_DB_WD)
-	private boolean logIndividualMeasurements;
-	
 	private final Logger logger = LogManager.getLogger(RelayTestService.class);
 	
 	private GatewayRelayClient relayClient;
@@ -124,7 +121,7 @@ public class RelayTestService {
 		ReceiverSideRelayTestThread thread = null;
 		try {
 			thread = new ReceiverSideRelayTestThread(appContext, relayClient, session, requesterCloud, relay, request.getSenderQoSMonitorPublicKey(), noIteration, testMessageSize,
-													 timeout, logIndividualMeasurements);
+													 timeout);
 			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, thread);
 			thread.init(info.getQueueId(), info.getMessageSender(), info.getControlMessageSender());
 			thread.start();
@@ -158,7 +155,7 @@ public class RelayTestService {
 		SenderSideRelayTestThread thread = null;
 		try {
 			thread = new SenderSideRelayTestThread(appContext, relayClient, session, targetCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId(),
-												   noIteration, testMessageSize, timeout, logIndividualMeasurements);
+												   noIteration, testMessageSize, timeout);
 			ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
 			thread.init(info.getMessageSender(), info.getControlResponseMessageSender());
 			thread.start();

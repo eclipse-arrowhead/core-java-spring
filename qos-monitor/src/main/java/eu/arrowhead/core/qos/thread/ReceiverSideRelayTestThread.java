@@ -26,7 +26,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.database.service.RelayTestDBService;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
 public class ReceiverSideRelayTestThread extends Thread implements MessageListener {
@@ -41,7 +41,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private boolean interrupted = false;
 	private boolean initialized = false;
 	
-	private final QoSDBService qosDBService;
+	private final RelayTestDBService relayTestDBService;
 	private final CloudResponseDTO requesterCloud;
 	private final RelayResponseDTO relay;
 
@@ -52,7 +52,6 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	private final byte noIteration;
 	private final int testMessageSize;
 	private final long timeout; // in milliseconds
-	private final boolean logIndividualMeasurements;
 	
 	private boolean receiver = true;
 	private final Map<Byte,long[]> testResults = new HashMap<>();
@@ -68,8 +67,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 
 	//-------------------------------------------------------------------------------------------------
 	public ReceiverSideRelayTestThread(final ApplicationContext appContext, final GatewayRelayClient relayClient, final Session relaySession, final CloudResponseDTO requesterCloud,
-								   	   final RelayResponseDTO relay, final String requesterQoSMonitorPublicKey, final byte noIteration, final int testMessageSize, final long timeout,
-								   	   final boolean logIndividualMeasurements) {
+								   	   final RelayResponseDTO relay, final String requesterQoSMonitorPublicKey, final byte noIteration, final int testMessageSize, final long timeout) {
 		Assert.notNull(appContext, "appContext is null.");
 		Assert.notNull(relayClient, "relayClient is null.");
 		Assert.notNull(relaySession, "relaySession is null.");
@@ -81,7 +79,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		Assert.isTrue(testMessageSize > 0, "Test message's size must be positive.");
 		Assert.isTrue(timeout > 0, "Timeout must be positive.");
 		
-		this.qosDBService = appContext.getBean(QoSDBService.class);
+		this.relayTestDBService = appContext.getBean(RelayTestDBService.class);
 		this.relayClient = relayClient;
 		this.relaySession = relaySession;
 		this.requesterCloud = requesterCloud;
@@ -90,7 +88,6 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 		this.noIteration = noIteration;
 		this.testMessageSize = testMessageSize;
 		this.timeout = timeout;
-		this.logIndividualMeasurements = logIndividualMeasurements;
 		
 		setName("TEST-RECEIVER-" + requesterCloud.getName() + "." + requesterCloud.getOperator() + "|" + relay.getAddress() + ":" + relay.getPort());
 	}
@@ -184,7 +181,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 			return;
 		}
 		
-		updateDBWithTestResults();
+		relayTestDBService.storeMeasurements(requesterCloud, relay, testResults);
 		
 		try {
 			relayClient.sendCloseControlMessage(relaySession, controlSender, queueId);
@@ -198,11 +195,6 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 	//=================================================================================================
 	// assistant methods
 	
-	//-------------------------------------------------------------------------------------------------
-	private void updateDBWithTestResults() {
-		// TODO: implementation
-	}
-
 	//-------------------------------------------------------------------------------------------------
 	private void testRun() {
 		for (byte b = 0; b < noIteration; ++b) {
@@ -228,7 +220,7 @@ public class ReceiverSideRelayTestThread extends Thread implements MessageListen
 			} catch (final JMSException | ArrowheadException | InterruptedException ex) {
 				logger.debug("Problem occurs in gateway communication: {}", ex.getMessage());
 				logger.debug("Stacktrace:", ex);
-				//TODO: log error in the measurement details table
+				relayTestDBService.logErrorIntoMeasurmentsTable(requesterCloud, relay, b, null, ex);
 				closeAndInterrupt();
 			}
 		}

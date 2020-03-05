@@ -908,7 +908,7 @@ public class QoSDBService {
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
 	public void updateInterRelayEchoMeasurement(final QoSInterRelayMeasurement measurement, final RelayEchoMeasurementCalculationsDTO calculations,
-												final QoSInterRelayEchoMeasurement relayEchoMeasurement,final ZonedDateTime aroundNow) {
+												final QoSInterRelayEchoMeasurement relayEchoMeasurement, final ZonedDateTime aroundNow) {
 		logger.debug("updateInterRelayEchoMeasurement started...");
 
 		if (measurement == null) {

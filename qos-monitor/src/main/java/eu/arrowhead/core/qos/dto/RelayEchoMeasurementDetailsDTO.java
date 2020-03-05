@@ -3,7 +3,7 @@ package eu.arrowhead.core.qos.dto;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
-public class RelayEchoMeasurementDetailsDTO implements Serializable{
+public class RelayEchoMeasurementDetailsDTO implements Serializable {
 
 	//=================================================================================================
 	// members
