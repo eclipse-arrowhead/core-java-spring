@@ -38,10 +38,6 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurementLog;
-import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
-import eu.arrowhead.common.database.entity.QoSIntraPingMeasurement;
-import eu.arrowhead.common.database.entity.QoSIntraPingMeasurementLog;
-import eu.arrowhead.common.database.entity.System;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
@@ -50,7 +46,6 @@ import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
-import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.dto.PingMeasurementCalculationsDTO;
 import eu.arrowhead.core.qos.measurement.properties.InterPingMeasurementProperties;
@@ -87,8 +82,6 @@ public class CloudPingTaskTest {
 
 	final static int TIME_TO_REPEAT_PING = 3;
 
-	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
-
 	//=================================================================================================
 	// methods
 
@@ -113,7 +106,6 @@ public class CloudPingTaskTest {
 		final CloudWithRelaysListResponseDTO cloudWithRelaysListResponseDTO = getCloudWithRelaysListResponseDTOForTest(10);
 		final CloudAccessListResponseDTO cloudAccessListResponseDTO = getCloudAccessListResponseDTOForTest(10);
 		final List<QoSInterDirectMeasurement> measurementList = getListOfQoSInterDirectMeasurementForTest(10);
-		final CloudResponseDTO cloudResponseDTO = getCloudResponseDTOForTest();
 
 		final SystemAddressSetRelayResponseDTO systemAddressSet = getSystemAddressSetRelayResponseDTOForTest(10);
 		final List<IcmpPingResponse> responseList = getResponseListForTest();
@@ -137,7 +129,7 @@ public class CloudPingTaskTest {
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 
 		when(qoSMonitorDriver.queryGatekeeperAllCloud()).thenReturn(cloudWithRelaysListResponseDTO);
-		when(qoSMonitorDriver.queryGatekeeperGatewayIsMandatory(cloudRequestListDTOValueCaptor.capture())).thenReturn(cloudAccessListResponseDTO);
+		when(qoSMonitorDriver.queryGatekeeperCloudAccessTypes(cloudRequestListDTOValueCaptor.capture())).thenReturn(cloudAccessListResponseDTO);
 		//TEST it with empty List response too
 		when(qoSDBService.getInterDirectMeasurementByCloud(cloudResponseDTOValueCaptor.capture(), any())).thenReturn(measurementList);
 
@@ -177,7 +169,7 @@ public class CloudPingTaskTest {
 
 		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
 		verify(qoSMonitorDriver, times(1)).queryGatekeeperAllCloud();
-		verify(qoSMonitorDriver, times(1)).queryGatekeeperGatewayIsMandatory(any());
+		verify(qoSMonitorDriver, times(1)).queryGatekeeperCloudAccessTypes(any());
 		verify(qoSDBService, times(1)).getInterDirectMeasurementByCloud(any(), any());
 		verify(qoSMonitorDriver, times(1)).queryGatekeeperAllSystemAddresses(any());
 
@@ -265,21 +257,6 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private CloudResponseDTO getCloudResponseDTOForTest() {
-
-		return new CloudResponseDTO(
-				1L, //id,
-				"sysop", //operator,
-				"testCloudxxx", //name,
-				true, //secure,
-				true, //neighbor,
-				false, //ownCloud,
-				"authenticationInfo", //authenticationInfo,
-				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()), //createdAt,
-				Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));//updatedAt;
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	private Cloud getCloudForTest() {
 
 		final Cloud cloud = new Cloud(
@@ -345,30 +322,6 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private System getSystemForTest() {
-
-		final System system = new System(
-				"testSystem",
-				"address",
-				12345,
-				"authenticationInfo");
-
-		return system;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private ServiceInterfaceResponseDTO getServiceInterfaceResponseDTOForTest() {
-
-		final ServiceInterfaceResponseDTO serviceInterfaceResponseDTO = new ServiceInterfaceResponseDTO();
-		serviceInterfaceResponseDTO.setId(1L);
-		serviceInterfaceResponseDTO.setInterfaceName("interfaceName");
-		serviceInterfaceResponseDTO.setCreatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
-		serviceInterfaceResponseDTO.setUpdatedAt(Utilities.convertZonedDateTimeToUTCString(ZonedDateTime.now()));
-
-		return serviceInterfaceResponseDTO;
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	private List<IcmpPingResponse> getResponseListForTest() {
 
 		final List<IcmpPingResponse> responseList = new ArrayList<>();
@@ -391,107 +344,6 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> get100LongResponseListWithIncementingResponseTimeAnd10PercentLossForTest() {
-
-		final List<IcmpPingResponse> responseList = new ArrayList<>();
-		for (int i = 1; i < 91; i++) {
-
-			final IcmpPingResponse pingResponse = getIcmpPingResponse();
-			pingResponse.setSuccessFlag(true);
-			pingResponse.setTimeoutFlag(false);
-			pingResponse.setRtt(i);
-			pingResponse.setDuration(i);
-
-			responseList.add(pingResponse);
-		}
-
-		for (int i = 0; i < 10; i++) {
-
-			final IcmpPingResponse pingResponse = getIcmpPingResponse();
-			pingResponse.setSuccessFlag(false);
-			pingResponse.setTimeoutFlag(true);
-
-			responseList.add(pingResponse);
-		}
-
-		return responseList;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> get100LongResponseListWith99PercentLossForTest() {
-
-		final List<IcmpPingResponse> responseList = new ArrayList<>();
-		
-		final IcmpPingResponse pingResponse = getIcmpPingResponse();
-		pingResponse.setSuccessFlag(true);
-		pingResponse.setTimeoutFlag(false);
-		pingResponse.setRtt(1);
-		pingResponse.setDuration(1);
-
-		responseList.add(pingResponse);
-
-		for (int i = 0; i < 100; i++) {
-
-			final IcmpPingResponse pingResponseInLoop= getIcmpPingResponse();
-			pingResponse.setSuccessFlag(false);
-			pingResponse.setTimeoutFlag(true);
-
-			responseList.add(pingResponseInLoop);
-		}
-
-		return responseList;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> get100LongResponseListWith99Point9PercentLossForTest() {
-
-		final List<IcmpPingResponse> responseList = new ArrayList<>();
-		
-		final IcmpPingResponse pingResponse = getIcmpPingResponse();
-		pingResponse.setSuccessFlag(true);
-		pingResponse.setTimeoutFlag(false);
-		pingResponse.setRtt(1);
-		pingResponse.setDuration(1);
-
-		responseList.add(pingResponse);
-
-		for (int i = 0; i < 200; i++) {
-
-			final IcmpPingResponse pingResponseInLoop= getIcmpPingResponse();
-			pingResponse.setSuccessFlag(false);
-			pingResponse.setTimeoutFlag(true);
-
-			responseList.add(pingResponseInLoop);
-		}
-
-		return responseList;
-	}
-	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> get100LongResponseListWithIncementingResponseTimeAnd0PercentLossForTest() {
-
-		final List<IcmpPingResponse> responseList = new ArrayList<>();
-		for (int i = 1; i < 101; i++) {
-
-			final IcmpPingResponse pingResponse = getIcmpPingResponse();
-			pingResponse.setSuccessFlag(true);
-			pingResponse.setTimeoutFlag(false);
-			pingResponse.setRtt(i);
-			pingResponse.setDuration(i);
-
-			responseList.add(pingResponse);
-		}
-
-		return responseList;
-	}
-	//-------------------------------------------------------------------------------------------------
-	private List<IcmpPingResponse> getEmptyResponseListForTest() {
-
-		final List<IcmpPingResponse> responseList = List.of();
-
-		return responseList;
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	private IcmpPingResponse getIcmpPingResponse() {
 
 		final IcmpPingResponse pingResponse = new IcmpPingResponse();
@@ -507,53 +359,6 @@ public class CloudPingTaskTest {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private QoSIntraMeasurement getQoSIntraMeasurementForTest() {
-
-		final System system = getSystemForTest();
-		final QoSIntraMeasurement measurement = new QoSIntraMeasurement(
-				system, 
-				QoSMeasurementType.PING, 
-				ZonedDateTime.now());
-
-		return measurement;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private QoSIntraPingMeasurement getQosIntraPingMeasurementForTest() {
-
-		final QoSIntraMeasurement measurement = getQoSIntraMeasurementForTest();
-
-		final QoSIntraPingMeasurement pingMeasurement = new QoSIntraPingMeasurement();
-
-		pingMeasurement.setMeasurement(measurement);
-		pingMeasurement.setAvailable(true);
-		pingMeasurement.setMaxResponseTime(1);
-		pingMeasurement.setMinResponseTime(1);
-		pingMeasurement.setMeanResponseTimeWithoutTimeout(1);
-		pingMeasurement.setMeanResponseTimeWithTimeout(1);
-		pingMeasurement.setJitterWithoutTimeout(1);
-		pingMeasurement.setJitterWithTimeout(1);
-		pingMeasurement.setLostPerMeasurementPercent(0);
-		pingMeasurement.setCountStartedAt(ZonedDateTime.now());
-		pingMeasurement.setLastAccessAt(ZonedDateTime.now());
-		pingMeasurement.setSent(35);
-		pingMeasurement.setSentAll(35);
-		pingMeasurement.setReceived(35);
-		pingMeasurement.setReceivedAll(35);
-
-		return pingMeasurement;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	private QoSIntraPingMeasurementLog getOrCreateMeasurementLogForTest() {
-
-		final QoSIntraPingMeasurementLog measurementLog = new QoSIntraPingMeasurementLog();
-		measurementLog.setAvailable(true);
-
-		return measurementLog;
-	}
-
-	//-------------------------------------------------------------------------------------------------
 	private QoSInterDirectPingMeasurementLog getInterPingMeasurementLogForTest() {
 
 		final QoSInterDirectPingMeasurementLog measurementLog = new QoSInterDirectPingMeasurementLog();
@@ -561,5 +366,4 @@ public class CloudPingTaskTest {
 
 		return measurementLog;
 	}
-
 }
