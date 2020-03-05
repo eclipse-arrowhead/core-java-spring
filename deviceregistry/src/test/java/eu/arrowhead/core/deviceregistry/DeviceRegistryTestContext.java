@@ -2,6 +2,9 @@ package eu.arrowhead.core.deviceregistry;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.database.repository.CloudRepository;
+import eu.arrowhead.common.database.repository.DeviceRegistryRepository;
+import eu.arrowhead.common.database.repository.DeviceRepository;
+import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.core.deviceregistry.database.service.DeviceRegistryDBService;
 import org.mockito.Mockito;
@@ -46,5 +49,26 @@ public class DeviceRegistryTestContext {
     @Primary // This bean is primary only in test context
     public CloudRepository mockCloudRepository() {
         return Mockito.mock(CloudRepository.class);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public DeviceRegistryRepository mockDeviceRegistryRepository() {
+        return Mockito.mock(DeviceRegistryRepository.class);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public DeviceRepository mockDeviceRepository() {
+        return Mockito.mock(DeviceRepository.class);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @Bean
+    @Primary // This bean is primary only in test context
+    public SystemRepository mockSystemRepository() {
+        return Mockito.mock(SystemRepository.class);
     }
 }

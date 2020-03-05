@@ -3,7 +3,6 @@ package eu.arrowhead.core.deviceregistry.database.service;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.CoreUtilities;
-import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Device;
 import eu.arrowhead.common.database.entity.DeviceRegistry;
@@ -26,7 +25,6 @@ import eu.arrowhead.core.deviceregistry.DeviceRegistryController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -494,32 +492,6 @@ public class DeviceRegistryDBService {
         }
     }
 
-    //-------------------------------------------------------------------------------------------------
-    @Transactional(rollbackFor = ArrowheadException.class)
-    public List<System> getSystemByName(final String name) {
-        try {
-            return systemRepository.findBySystemName(Utilities.lowerCaseTrim(name));
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @Transactional(rollbackFor = ArrowheadException.class)
-    public System createSystem(final String systemName, final String address, final int port, final String authenticationInfo) {
-        logger.debug("createSystem started...");
-
-        final System system = validateNonNullSystemParameters(systemName, address, port, authenticationInfo);
-
-        try {
-            return systemRepository.saveAndFlush(system);
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
-    }
-
     //=================================================================================================
     // assistant methods
     //-------------------------------------------------------------------------------------------------
@@ -651,28 +623,6 @@ public class DeviceRegistryDBService {
             provider = createDevice(validateName, validateAddress, validatedMacAddress, authenticationInfo);
         }
         return provider;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    private System validateNonNullSystemParameters(final String systemName, final String address, final int port, final String authenticationInfo) {
-        logger.debug("validateNonNullSystemParameters started...");
-
-        if (Utilities.isEmpty(systemName)) {
-            throw new InvalidParameterException("Name is null or empty");
-        }
-        if (Utilities.isEmpty(address)) {
-            throw new InvalidParameterException("Address is null or empty");
-        }
-        if (port < CommonConstants.SYSTEM_PORT_RANGE_MIN || port > CommonConstants.SYSTEM_PORT_RANGE_MAX) {
-            throw new InvalidParameterException(PORT_RANGE_ERROR_MESSAGE);
-        }
-
-        final String validatedSystemName = Utilities.lowerCaseTrim(systemName);
-        final String validatedAddress = Utilities.lowerCaseTrim(address);
-
-        checkConstraintsOfSystemTable(validatedSystemName, validatedAddress, port);
-
-        return new System(validatedSystemName, validatedAddress, port, authenticationInfo);
     }
 
     //-------------------------------------------------------------------------------------------------

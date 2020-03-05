@@ -236,8 +236,8 @@ public class SystemRegistryDBService {
 
             if (checkSystemIfUniqueValidationNeeded(system, validatedSystemName, validatedAddress, validatedPort)) {
                 checkConstraintsOfSystemTable(validatedSystemName != null ? validatedSystemName : system.getSystemName(),
-                                              validatedAddress != null ? validatedAddress : system.getAddress(),
-                                              validatedPort != null ? validatedPort : system.getPort());
+                        validatedAddress != null ? validatedAddress : system.getAddress(),
+                        validatedPort != null ? validatedPort : system.getPort());
             }
 
             if (Utilities.notEmpty(validatedSystemName)) {
@@ -297,7 +297,7 @@ public class SystemRegistryDBService {
 
         try {
             final Page<Device> devices = deviceRepository.findAll(PageRequest.of(pageParams.getValidatedPage(), pageParams.getValidatedSize(),
-                                                                                 pageParams.getValidatedDirection(), validatedSortField));
+                    pageParams.getValidatedDirection(), validatedSortField));
             return DTOConverter.convertDeviceEntryListToDeviceListResponseDTO(devices);
         } catch (final Exception ex) {
             logger.debug(ex.getMessage(), ex);
@@ -372,9 +372,9 @@ public class SystemRegistryDBService {
 
         try {
             final PageRequest pageRequest = PageRequest.of(params.getValidatedPage(),
-                                                           params.getValidatedSize(),
-                                                           params.getValidatedDirection(),
-                                                           validatedSortField);
+                    params.getValidatedSize(),
+                    params.getValidatedDirection(),
+                    validatedSortField);
             final Page<SystemRegistry> systemRegistryPage = systemRegistryRepository.findAll(pageRequest);
             return DTOConverter.convertSystemRegistryListToSystemRegistryListResponseDTO(systemRegistryPage);
         } catch (final Exception ex) {
@@ -532,7 +532,7 @@ public class SystemRegistryDBService {
 
         final List<System> systemList = systemRepository.findBySystemName(systemName);
         final PageRequest pageRequest = PageRequest.of(pageParameters.getValidatedPage(), pageParameters.getValidatedSize(),
-                                                       pageParameters.getValidatedDirection(), sortField);
+                pageParameters.getValidatedDirection(), sortField);
 
         final Page<SystemRegistry> systemRegistries = systemRegistryRepository.findAllBySystemIsIn(systemList, pageRequest);
         return DTOConverter.convertSystemRegistryListToSystemRegistryListResponseDTO(systemRegistries);
@@ -576,8 +576,7 @@ public class SystemRegistryDBService {
                     logger.debug("System not found: {}", systemName);
                     return DTOConverter.convertSystemRegistryListToSystemQueryResultDTO(Collections.emptyList());
                 }
-            }
-            else {
+            } else {
                 throw new InvalidParameterException("System Name must not be null");
             }
 
@@ -600,8 +599,7 @@ public class SystemRegistryDBService {
             // filter on version
             if (Objects.nonNull(form.getVersionRequirement())) {
                 registryList.removeIf(e -> Objects.equals(form.getVersionRequirement(), e.getVersion()));
-            }
-            else if (Objects.nonNull(form.getMinVersionRequirement()) || Objects.nonNull(form.getMaxVersionRequirement())) {
+            } else if (Objects.nonNull(form.getMinVersionRequirement()) || Objects.nonNull(form.getMaxVersionRequirement())) {
                 final int minVersion = form.getMinVersionRequirement() == null ? 1 : form.getMinVersionRequirement();
                 final int maxVersion = form.getMaxVersionRequirement() == null ? Integer.MAX_VALUE : form.getMaxVersionRequirement();
 
@@ -612,15 +610,15 @@ public class SystemRegistryDBService {
             if (form.getMetadataRequirements() != null && !form.getMetadataRequirements().isEmpty()) {
                 final Map<String, String> requiredMetadata = normalizeMetadata(form.getMetadataRequirements());
                 registryList.removeIf(e ->
-                                      {
-                                          final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
-                                          if (Objects.isNull(metadata)) {
-                                              // we have requirements but no metadata -> remove
-                                              return true;
-                                          }
+                {
+                    final Map<String, String> metadata = Utilities.text2Map(e.getMetadata());
+                    if (Objects.isNull(metadata)) {
+                        // we have requirements but no metadata -> remove
+                        return true;
+                    }
 
-                                          return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
-                                      });
+                    return !metadata.entrySet().containsAll(requiredMetadata.entrySet());
+                });
             }
 
             // filter on ping
@@ -643,17 +641,6 @@ public class SystemRegistryDBService {
     public SystemResponseDTO getSystemDtoByNameAndAddressAndPort(final String systemName, final String address, final int port) {
         final System system = getSystemByNameAndAddressAndPort(systemName, address, port);
         return DTOConverter.convertSystemToSystemResponseDTO(system);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    @Transactional(rollbackFor = ArrowheadException.class)
-    public List<System> getSystemByName(final String name) {
-        try {
-            return systemRepository.findBySystemName(Utilities.lowerCaseTrim(name));
-        } catch (final Exception ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
-        }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -692,11 +679,9 @@ public class SystemRegistryDBService {
 
         if (validatedSystemName != null && !actualSystemName.equalsIgnoreCase(validatedSystemName)) {
             return true;
-        }
-        else if (validatedAddress != null && !actualAddress.equalsIgnoreCase(validatedAddress)) {
+        } else if (validatedAddress != null && !actualAddress.equalsIgnoreCase(validatedAddress)) {
             return true;
-        }
-        else {
+        } else {
             return validatedPort != null && actualPort != validatedPort;
         }
     }
@@ -732,11 +717,11 @@ public class SystemRegistryDBService {
         final Map<String, String> map = new HashMap<>();
 
         metadata.forEach((k, v) ->
-                         {
-                             if (Objects.nonNull(v)) {
-                                 map.put(k.trim(), v.trim());
-                             }
-                         });
+        {
+            if (Objects.nonNull(v)) {
+                map.put(k.trim(), v.trim());
+            }
+        });
 
         return map;
     }
@@ -905,9 +890,9 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private System findOrCreateSystem(SystemRequestDTO requestSystemDto) {
         return findOrCreateSystem(requestSystemDto.getSystemName(),
-                                  requestSystemDto.getAddress(),
-                                  requestSystemDto.getPort(),
-                                  requestSystemDto.getAuthenticationInfo());
+                requestSystemDto.getAddress(),
+                requestSystemDto.getPort(),
+                requestSystemDto.getAuthenticationInfo());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -927,8 +912,7 @@ public class SystemRegistryDBService {
                 provider.setAddress(validatedAddress);
                 provider = systemRepository.saveAndFlush(provider);
             }
-        }
-        else {
+        } else {
             provider = createSystem(validatedName, validatedAddress, port, authenticationInfo);
         }
         return provider;
@@ -937,9 +921,9 @@ public class SystemRegistryDBService {
     //-------------------------------------------------------------------------------------------------
     private Device findOrCreateDevice(DeviceRequestDTO requestDeviceDto) {
         return findOrCreateDevice(requestDeviceDto.getDeviceName(),
-                                  requestDeviceDto.getAddress(),
-                                  requestDeviceDto.getMacAddress(),
-                                  requestDeviceDto.getAuthenticationInfo());
+                requestDeviceDto.getAddress(),
+                requestDeviceDto.getMacAddress(),
+                requestDeviceDto.getAuthenticationInfo());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -960,8 +944,7 @@ public class SystemRegistryDBService {
                 provider.setAddress(validateAddress);
                 provider = deviceRepository.saveAndFlush(provider);
             }
-        }
-        else {
+        } else {
             provider = createDevice(validateName, validateAddress, validatedMacAddress, authenticationInfo);
         }
         return provider;
@@ -997,7 +980,7 @@ public class SystemRegistryDBService {
             final Optional<SystemRegistry> find = systemRegistryRepository.findBySystemAndDevice(systemDb, deviceDb);
             if (find.isPresent()) {
                 throw new InvalidParameterException("System Registry entry with provider: (" + deviceDb.getDeviceName() + ", " + deviceDb.getMacAddress() +
-                                                            ") and system : " + systemDb.getSystemName() + " already exists.");
+                        ") and system : " + systemDb.getSystemName() + " already exists.");
             }
         } catch (final InvalidParameterException ex) {
             throw ex;
