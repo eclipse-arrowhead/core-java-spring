@@ -1,5 +1,6 @@
 package eu.arrowhead.common.database.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -14,4 +15,5 @@ public interface QoSInterRelayMeasurementRepository extends RefreshableRepositor
 
 	//-------------------------------------------------------------------------------------------------
 	public Optional<QoSInterRelayMeasurement> findByCloudAndRelayAndMeasurementType(final Cloud cloud, final Relay relay, final QoSMeasurementType type);
+	public List<QoSInterRelayMeasurement> findByCloudAndMeasurementType(final Cloud cloud, final QoSMeasurementType type);
 }

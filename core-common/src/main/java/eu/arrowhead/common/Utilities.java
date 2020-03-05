@@ -52,6 +52,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -327,6 +328,19 @@ public class Utilities {
 			return RelayType.valueOf(str.toUpperCase().trim());			
 		} catch (final IllegalArgumentException ex) {
 			return null;
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSMeasurementAttribute convertStringToQoSMeasurementAttribute(final String str) {
+		if (isEmpty(str)) {
+			throw new InvalidParameterException("Attribute string is null or empty");
+		}
+				
+		try {
+			return QoSMeasurementAttribute.valueOf(str.toUpperCase().trim());			
+		} catch (final IllegalArgumentException ex) {
+			throw new InvalidParameterException("Unkown attribute string: " + str);
 		}
 	}
 	
