@@ -565,7 +565,7 @@ public class GatekeeperController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@PostMapping(path = CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void initRelayTest(@RequestBody final QoSRelayTestProposalRequestDTO request) throws InterruptedException {
+	public void initRelayTest(@RequestBody final QoSRelayTestProposalRequestDTO request) {
 		logger.debug("new initRelayTest request received");
 		
 		validateQoSRelayTestProposalRequestDTO(request, CommonConstants.GATEKEEPER_URI + CommonConstants.OP_GATEKEEPER_RELAY_TEST_SERVICE);
@@ -793,5 +793,10 @@ public class GatekeeperController {
 		
 		validateCloudRequestDTO(request.getTargetCloud(), origin);
 		validateRelayRequestDTO(request.getRelay(), origin);
+		
+		final RelayType relayType = Utilities.convertStringToRelayType(request.getRelay().getType());
+		if (RelayType.GATEKEEPER_RELAY == relayType) {
+			throw new BadPayloadException("Invalid relay type for testing: " + RelayType.GATEKEEPER_RELAY, HttpStatus.SC_BAD_REQUEST, origin);
+		}
 	}
 }
