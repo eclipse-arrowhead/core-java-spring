@@ -21,8 +21,10 @@ import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEKEEPER_ICN;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_CONSUMER;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_CONNECT_PROVIDER;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_GATEWAY_PUBLIC_KEY;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_CSR;
-import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_NAME;
+import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
+import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_ORCH_PROCESS;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT;
 import static eu.arrowhead.common.CommonConstants.CORE_SERVICE_SERVICE_REGISTRY_REGISTER;
@@ -50,8 +52,10 @@ import static eu.arrowhead.common.CommonConstants.OP_GATEKEEPER_ICN_SERVICE;
 import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_CONNECT_CONSUMER_URI;
 import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_CONNECT_PROVIDER_URI;
 import static eu.arrowhead.common.CommonConstants.OP_GATEWAY_KEY_URI;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_CSR;
-import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_NAME;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
 import static eu.arrowhead.common.CommonConstants.OP_ORCH_PROCESS;
 import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT;
 import static eu.arrowhead.common.CommonConstants.OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX;
@@ -102,10 +106,11 @@ public enum CoreSystemService {
 	QOS_MONITOR_PING_MEASUREMENT_SERVICE(CORE_SERVICE_QOS_MONITOR_PING_MEASUREMENT,
             QOS_MONITOR_URI + OP_QOS_MONITOR_PING_MEASUREMENT + OP_QOS_MONITOR_PING_MEASUREMENT_SUFFIX),
 
-
 	// Onboarding services
-    ONBOARDING_SERVICE_WITH_NAME(CORE_SERVICE_ONBOARDING_NAME, ONBOARDING_URI + OP_ONBOARDING_NAME),
-    ONBOARDING_SERVICE_WITH_CSR(CORE_SERVICE_ONBOARDING_CSR, ONBOARDING_URI + OP_ONBOARDING_CSR),
+    ONBOARDING_WITH_CERTIFICATE_AND_NAME(CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_NAME, ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME),
+    ONBOARDING_WITH_CERTIFICATE_AND_CSR(CORE_SERVICE_ONBOARDING_WITH_CERTIFICATE_AND_CSR, ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR),
+    ONBOARDING_WITH_SHARED_SECRET_AND_NAME(CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_NAME, ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME),
+    ONBOARDING_WITH_SHARED_SECRET_AND_CSR(CORE_SERVICE_ONBOARDING_WITH_SHARED_SECRET_AND_CSR, ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR),
 
     // Device Registry services
     DEVICE_REGISTRY_REGISTER_SERVICE(CORE_SERVICE_DEVICE_REGISTRY_REGISTER, DEVICE_REGISTRY_URI + OP_DEVICE_REGISTRY_REGISTER_URI),

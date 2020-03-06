@@ -11,13 +11,9 @@ public class OnboardingWithNameResponseDTO implements Serializable {
     private ServiceEndpoint systemRegistry;
     private ServiceEndpoint serviceRegistry;
 
-    private String onboardingCertificate;
+    private CertificateResponseDTO onboardingCertificate;
     private String intermediateCertificate;
     private String rootCertificate;
-    private String keyAlgorithm;
-    private String keyFormat;
-    private byte[] privateKey;
-    private byte[] publicKey;
 
 
     //=================================================================================================
@@ -60,13 +56,13 @@ public class OnboardingWithNameResponseDTO implements Serializable {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public String getOnboardingCertificate()
+    public CertificateResponseDTO getOnboardingCertificate()
     {
         return onboardingCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setOnboardingCertificate(final String onboardingCertificate)
+    public void setOnboardingCertificate(final CertificateResponseDTO onboardingCertificate)
     {
         this.onboardingCertificate = onboardingCertificate;
     }
@@ -93,53 +89,5 @@ public class OnboardingWithNameResponseDTO implements Serializable {
     public void setRootCertificate(final String rootCertificate)
     {
         this.rootCertificate = rootCertificate;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public String getKeyAlgorithm()
-    {
-        return keyAlgorithm;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public void setKeyAlgorithm(final String keyAlgorithm)
-    {
-        this.keyAlgorithm = keyAlgorithm;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public String getKeyFormat()
-    {
-        return keyFormat;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public void setKeyFormat(final String keyFormat)
-    {
-        this.keyFormat = keyFormat;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public byte[] getPrivateKey()
-    {
-        return privateKey;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public void setPrivateKey(final byte[] privateKey)
-    {
-        this.privateKey = privateKey;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public byte[] getPublicKey()
-    {
-        return publicKey;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public void setPublicKey(final byte[] publicKey)
-    {
-        this.publicKey = publicKey;
     }
 }

@@ -1,6 +1,6 @@
 [Unit]
 Description=arrowhead-onboarding
-After=network.target mysql.target
+After=network.target mysql.target arrowhead-serviceregistry arrowhead-certificate-authority arrowhead-orchestration
 
 [Service]
 WorkingDirectory=/etc/arrowhead/systems/onboarding_controller

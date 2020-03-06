@@ -43,6 +43,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR;
+import static eu.arrowhead.common.CommonConstants.OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME;
+
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
         allowedHeaders = {HttpHeaders.ORIGIN, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION}
@@ -56,14 +61,8 @@ public class OnboardingController {
 
     private static final String ONBOARDING_HTTP_200_MESSAGE = "Initial Onboarding successful";
     private static final String ONBOARDING_HTTP_400_MESSAGE = "Request parameter missing";
-    private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
+    private static final String COMMON_NAME_NULL_ERROR_MESSAGE = " Common name must have value ";
     private static final String CSR_NULL_ERROR_MESSAGE = " CertificateSigningRequest must have value ";
-
-    private static final String AUTHENTICATE_WITH_CERTIFICATE = "/certificate";
-    private static final String AUTHENTICATE_WITH_SHARED_SECRET = "/sharedsecret";
-
-    private static final String ONBOARDING_WITH_NAME_URI = "/name";
-    private static final String ONBOARDING_WITH_CSR_URI = "/csr";
 
     private final Logger logger = LogManager.getLogger(OnboardingController.class);
     private final OnboardingDBService onboardingDBService;
@@ -105,14 +104,14 @@ public class OnboardingController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(AUTHENTICATE_WITH_CERTIFICATE + ONBOARDING_WITH_NAME_URI)
+    @PostMapping(OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME)
     @ResponseBody
     public OnboardingWithNameResponseDTO onboardWithCertificateAndName(final HttpServletRequest httpServletRequest,
                                                                        @RequestBody final OnboardingWithNameRequestDTO onboardingRequest) {
         logger.debug("onboardWithCertificateAndName started ...");
 
         authenticateCertificate(httpServletRequest);
-        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
+        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_NAME);
 
         return onboardingDBService.onboarding(onboardingRequest);
     }
@@ -125,14 +124,14 @@ public class OnboardingController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(AUTHENTICATE_WITH_SHARED_SECRET + ONBOARDING_WITH_NAME_URI)
+    @PostMapping(OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME)
     @ResponseBody
     public OnboardingWithNameResponseDTO onboardWithSharedSecretAndName(@RequestBody final OnboardingWithNameRequestDTO onboardingRequest,
                                                                         @RequestHeader(HttpHeaders.AUTHORIZATION) final String authorization) {
         logger.debug("onboardWithSharedSecretAndName started ...");
 
         authenticateSharedSecret(authorization);
-        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
+        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_NAME);
 
         return onboardingDBService.onboarding(onboardingRequest);
     }
@@ -145,14 +144,14 @@ public class OnboardingController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(AUTHENTICATE_WITH_CERTIFICATE + ONBOARDING_WITH_CSR_URI)
+    @PostMapping(OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR)
     @ResponseBody
     public OnboardingWithCsrResponseDTO onboardWithCertificateAndSigningRequest(final HttpServletRequest httpServletRequest,
                                                                                 @RequestBody final OnboardingWithCsrRequestDTO onboardingRequest) {
         logger.debug("onboardWithCertificateAndSigningRequest started ...");
 
         authenticateCertificate(httpServletRequest);
-        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
+        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_CERTIFICATE_AND_CSR);
 
         return onboardingDBService.onboarding(onboardingRequest);
     }
@@ -165,14 +164,14 @@ public class OnboardingController {
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(AUTHENTICATE_WITH_SHARED_SECRET + ONBOARDING_WITH_CSR_URI)
+    @PostMapping(OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR)
     @ResponseBody
     public OnboardingWithCsrResponseDTO onboardWithSharedSecretAndSigningRequest(@RequestBody final OnboardingWithCsrRequestDTO onboardingRequest,
                                                                                  @RequestHeader(HttpHeaders.AUTHORIZATION) final String authorization) {
         logger.debug("onboardWithSharedSecretAndSigningRequest started ...");
 
         authenticateSharedSecret(authorization);
-        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
+        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + OP_ONBOARDING_WITH_SHARED_SECRET_AND_CSR);
 
         return onboardingDBService.onboarding(onboardingRequest);
     }
@@ -247,12 +246,12 @@ public class OnboardingController {
     private void verifyRequest(final OnboardingWithNameRequestDTO onboardingRequest, final String origin) {
         logger.debug("verifyRequest started...");
 
-        if (onboardingRequest == null) {
+        if (Objects.isNull(onboardingRequest) || Objects.isNull(onboardingRequest.getCreationRequestDTO())) {
             throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        if (Utilities.isEmpty(onboardingRequest.getDeviceName())) {
-            throw new BadPayloadException(DEVICE_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
+        if (Utilities.isEmpty(onboardingRequest.getCreationRequestDTO().getCommonName())) {
+            throw new BadPayloadException(COMMON_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
@@ -260,7 +259,7 @@ public class OnboardingController {
     private void verifyRequest(final OnboardingWithCsrRequestDTO onboardingRequest, final String origin) {
         logger.debug("verifyRequest started...");
 
-        if (onboardingRequest == null) {
+        if (Objects.isNull(onboardingRequest)) {
             throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
         }
 

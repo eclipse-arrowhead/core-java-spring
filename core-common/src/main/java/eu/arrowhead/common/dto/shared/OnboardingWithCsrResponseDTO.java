@@ -11,11 +11,11 @@ public class OnboardingWithCsrResponseDTO implements Serializable {
     private ServiceEndpoint deviceRegistry;
     private ServiceEndpoint systemRegistry;
     private ServiceEndpoint serviceRegistry;
+    private ServiceEndpoint orchestrationService;
 
-    private String onboardingCertificate;
+    private CertificateResponseDTO onboardingCertificate;
     private String intermediateCertificate;
     private String rootCertificate;
-    private byte[] publicKey;
 
 
     //=================================================================================================
@@ -58,13 +58,23 @@ public class OnboardingWithCsrResponseDTO implements Serializable {
     }
 
     //-------------------------------------------------------------------------------------------------
-    public String getOnboardingCertificate()
+    public ServiceEndpoint getOrchestrationService() {
+        return orchestrationService;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void setOrchestrationService(ServiceEndpoint orchestrationService) {
+        this.orchestrationService = orchestrationService;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public CertificateResponseDTO getOnboardingCertificate()
     {
         return onboardingCertificate;
     }
 
     //-------------------------------------------------------------------------------------------------
-    public void setOnboardingCertificate(final String onboardingCertificate)
+    public void setOnboardingCertificate(final CertificateResponseDTO onboardingCertificate)
     {
         this.onboardingCertificate = onboardingCertificate;
     }
@@ -93,15 +103,4 @@ public class OnboardingWithCsrResponseDTO implements Serializable {
         this.rootCertificate = rootCertificate;
     }
 
-    //-------------------------------------------------------------------------------------------------
-    public byte[] getPublicKey()
-    {
-        return publicKey;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    public void setPublicKey(final byte[] publicKey)
-    {
-        this.publicKey = publicKey;
-    }
 }

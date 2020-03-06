@@ -4,7 +4,6 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequest;
@@ -13,14 +12,21 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.ServiceConfigurationError;
 
 @Service
 public class CertificateAuthorityService {
@@ -43,7 +49,7 @@ public class CertificateAuthorityService {
     @PostConstruct
     private void init() {
         random = new SecureRandom();
-        random.reseed();
+        //random.reseed();
         keyStore = getKeyStore();
 
         rootCertificate = Utilities.getRootCertFromKeyStore(keyStore);

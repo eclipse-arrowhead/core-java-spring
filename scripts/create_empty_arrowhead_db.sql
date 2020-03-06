@@ -23,8 +23,8 @@ CREATE USER IF NOT EXISTS 'device_registry'@'%' IDENTIFIED BY 'iooHU87hNGUalht';
 source device_registry_privileges.sql
 
 -- Onboarding controller
-CREATE USER IF NOT EXISTS 'onboarding'@'localhost' IDENTIFIED BY 'JKgh1as5f6oi7aV';
-CREATE USER IF NOT EXISTS 'onboarding'@'%' IDENTIFIED BY 'JKgh1as5f6oi7aV';
+CREATE USER IF NOT EXISTS 'onboarding_controller'@'localhost' IDENTIFIED BY 'JKgh1as5f6oi7aV';
+CREATE USER IF NOT EXISTS 'onboarding_controller'@'%' IDENTIFIED BY 'JKgh1as5f6oi7aV';
 source onboarding_controller_privileges.sql
 
 -- Authorization
