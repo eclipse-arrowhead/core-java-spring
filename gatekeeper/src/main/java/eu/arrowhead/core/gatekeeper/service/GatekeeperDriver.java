@@ -663,7 +663,7 @@ public class GatekeeperDriver {
 		Assert.notNull(cloud, "Cloud is null");
 		Assert.isTrue(!Utilities.isEmpty(cloud.getOperator()), "cloud operator is null or blank");
 		Assert.isTrue(!Utilities.isEmpty(cloud.getName()), "cloud name is null or blank");	
-		Assert.isTrue(cloud.getGatekeeperRelays() != null && !cloud.getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList of target cloud is null or empty.");		
+		Assert.isTrue(cloud.getGatekeeperRelays() != null && !cloud.getGatekeeperRelays().isEmpty(), "GatekeeperRelaysList of cloud is null or empty.");		
 	}
 	
 	//-------------------------------------------------------------------------------------------------
