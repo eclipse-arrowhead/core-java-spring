@@ -28,6 +28,10 @@ public class QoSRelayTestProposalResponseDTO implements Serializable {
 		Assert.isTrue(!Utilities.isEmpty(queueId), "Queue id is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(peerName), "Peer name is null or empty.");
 		Assert.isTrue(!Utilities.isEmpty(receiverQoSMonitorPublicKey), "Receiver QoS Monitor's public key is null or empty.");
+		
+		this.queueId = queueId;
+		this.peerName = peerName;
+		this.receiverQoSMonitorPublicKey = receiverQoSMonitorPublicKey;
 	}
 
 	//-------------------------------------------------------------------------------------------------

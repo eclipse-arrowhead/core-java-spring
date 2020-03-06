@@ -2,6 +2,10 @@ package eu.arrowhead.core.gatekeeper.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -17,6 +21,10 @@ import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.service.CommonDBService;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudAccessResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
@@ -143,7 +151,7 @@ public class GatekeeperServiceQoSTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void initAccessTypesCollectionOk() throws Exception {
+	public void testInitAccessTypesCollectionOk() throws Exception {
 		final CloudRequestDTO requestDTO1 = new CloudRequestDTO();
 		requestDTO1.setName("test-name1");
 		requestDTO1.setOperator("test-operator1");
@@ -174,7 +182,7 @@ public class GatekeeperServiceQoSTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void initAccessTypesCollectionNullCloudName() throws Exception {
+	public void testInitAccessTypesCollectionNullCloudName() throws Exception {
 		final CloudRequestDTO requestDTO = new CloudRequestDTO();
 		requestDTO.setName(null);
 		requestDTO.setOperator("test-operator");
@@ -184,7 +192,7 @@ public class GatekeeperServiceQoSTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void initAccessTypesCollectionBlankCloudName() throws Exception {
+	public void testInitAccessTypesCollectionBlankCloudName() throws Exception {
 		final CloudRequestDTO requestDTO = new CloudRequestDTO();
 		requestDTO.setName("  ");
 		requestDTO.setOperator("test-operator");
@@ -194,7 +202,7 @@ public class GatekeeperServiceQoSTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void initAccessTypesCollectionNullCloudOperator() throws Exception {
+	public void testInitAccessTypesCollectionNullCloudOperator() throws Exception {
 		final CloudRequestDTO requestDTO = new CloudRequestDTO();
 		requestDTO.setName("test-name");
 		requestDTO.setOperator(null);
@@ -204,11 +212,280 @@ public class GatekeeperServiceQoSTest {
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
-	public void initAccessTypesCollectionBlankCloudOperator() throws Exception {
+	public void testInitAccessTypesCollectionBlankCloudOperator() throws Exception {
 		final CloudRequestDTO requestDTO = new CloudRequestDTO();
 		requestDTO.setName("test-name");
 		requestDTO.setOperator("  ");
 				
 		gatekeeperService.initAccessTypesCollection(List.of(requestDTO));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestNullRequest() throws Exception {
+		
+		gatekeeperService.initRelayTest(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestTargetCloudNull() throws Exception {
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestTargetCloudOperatorNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestTargetCloudOperatorEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator(" ");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestTargetCloudNameNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestTargetCloudNameEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName(" ");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayAddressNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayAddressEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress(" ");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayPortNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayPortTooLow() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(-2);
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayPortTooHigh() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(200000);
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayTypeNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayTypeEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayTypeInvalid() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("invalid");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRelayTypeGatekeeper() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEKEEPER_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		gatekeeperService.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestOk() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		when(gatekeeperDriver.queryQoSMonitorPublicKey()).thenReturn("valid public key");
+		when(commonDBService.getOwnCloud(true)).thenReturn(new Cloud("aitia", "testcloud", true, false, true, "abcd"));
+		when(gatekeeperDBService.getCloudByOperatorAndName(anyString(), anyString())).thenReturn(new Cloud());
+		when(gatekeeperDriver.sendQoSRelayTestProposal(any(QoSRelayTestProposalRequestDTO.class), any(Cloud.class))).thenReturn(
+																												new QoSRelayTestProposalResponseDTO("1234", "peer", "public key"));
+		doNothing().when(gatekeeperDriver).initRelayTest(any(QoSMonitorSenderConnectionRequestDTO.class));
+		
+		gatekeeperService.initRelayTest(request);
+		
+		verify(gatekeeperDriver, times(1)).queryQoSMonitorPublicKey();
+		verify(commonDBService, times(1)).getOwnCloud(true);
+		verify(gatekeeperDBService, times(1)).getCloudByOperatorAndName(anyString(), anyString());
+		verify(gatekeeperDriver, times(1)).sendQoSRelayTestProposal(any(QoSRelayTestProposalRequestDTO.class), any(Cloud.class));
+		verify(gatekeeperDriver, times(1)).initRelayTest(any(QoSMonitorSenderConnectionRequestDTO.class));
 	}
 }

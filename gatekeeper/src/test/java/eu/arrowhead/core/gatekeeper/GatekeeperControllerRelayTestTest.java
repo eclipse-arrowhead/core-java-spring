@@ -1,7 +1,6 @@
 package eu.arrowhead.core.gatekeeper;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,7 +24,6 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
@@ -352,7 +350,7 @@ public class GatekeeperControllerRelayTestTest {
 		
 		doNothing().when(gatekeeperService).initRelayTest(request);
 		
-		final MvcResult result = postInitICN(request, status().isOk());
+		postInitICN(request, status().isOk());
 	}
 
 	//=================================================================================================
