@@ -7,6 +7,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,18 +63,15 @@ public class CountRestarterTaskTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testExecuteServerIsInStandalonMode() {
-
 		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
-		doNothing().when(logger).debug( debugValueCapture.capture());
+		doNothing().when(logger).debug(debugValueCapture.capture());
 
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(true);
-
 		doNothing().when(qoSDBService).updateIntraCountStartedAt();
+		doNothing().when(qoSDBService).updateInterRelayCountStartedAt();
 
 		try {
-
 			counRestarterTask.execute(jobExecutionContext);
-
 		} catch (final JobExecutionException ex) {
 			fail();
 		}
@@ -83,25 +81,23 @@ public class CountRestarterTaskTest {
 		assertNotNull(debugMessages);
 
 		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
-		verify(qoSDBService, times(0)).updateIntraCountStartedAt();
-
+		verify(qoSDBService, never()).updateIntraCountStartedAt();
+		verify(qoSDBService, never()).updateInterRelayCountStartedAt();
 	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testExecute() {
-
 		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
-		doNothing().when(logger).debug( debugValueCapture.capture());
 
+		doNothing().when(logger).debug(debugValueCapture.capture());
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
 
 		doNothing().when(qoSDBService).updateIntraCountStartedAt();
+		doNothing().when(qoSDBService).updateInterRelayCountStartedAt();
 
 		try {
-
 			counRestarterTask.execute(jobExecutionContext);
-
 		} catch (final JobExecutionException ex) {
 			fail();
 		}
@@ -112,40 +108,60 @@ public class CountRestarterTaskTest {
 
 		verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
 		verify(qoSDBService, times(1)).updateIntraCountStartedAt();
-
+		verify(qoSDBService, times(1)).updateInterRelayCountStartedAt();
 	}
-
 
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testExecuteUpdateCountStartedAtThrowsException() {
-
 		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
-		doNothing().when(logger).debug( debugValueCapture.capture());
 
+		doNothing().when(logger).debug(debugValueCapture.capture());
 		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
-
 		doThrow(ArrowheadException.class).when(qoSDBService).updateIntraCountStartedAt();
+		doNothing().when(qoSDBService).updateInterRelayCountStartedAt();
 
 		try {
-
 			counRestarterTask.execute(jobExecutionContext);
-
 		} catch (final JobExecutionException ex) {
-
 			fail();
-
-		}catch (final ArrowheadException ex) {
-
+		} catch (final ArrowheadException ex) {
 			verify(logger, atLeastOnce()).debug(any(String.class));
 			final List<String> debugMessages = debugValueCapture.getAllValues();
 			assertNotNull(debugMessages);
 
 			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
 			verify(qoSDBService, times(1)).updateIntraCountStartedAt();
+			verify(qoSDBService, never()).updateInterRelayCountStartedAt();
 
 			throw ex;
 		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testExecuteUpdateCountStartedAtThrowsException2() {
+		final ArgumentCaptor<String> debugValueCapture = ArgumentCaptor.forClass(String.class);
 
+		doNothing().when(logger).debug(debugValueCapture.capture());
+		when(arrowheadContext.containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE)).thenReturn(false);
+		doNothing().when(qoSDBService).updateIntraCountStartedAt();
+		doThrow(ArrowheadException.class).when(qoSDBService).updateInterRelayCountStartedAt();
+
+		try {
+			counRestarterTask.execute(jobExecutionContext);
+		} catch (final JobExecutionException ex) {
+			fail();
+		} catch (final ArrowheadException ex) {
+			verify(logger, atLeastOnce()).debug(any(String.class));
+			final List<String> debugMessages = debugValueCapture.getAllValues();
+			assertNotNull(debugMessages);
+
+			verify(arrowheadContext, times(1)).containsKey(CoreCommonConstants.SERVER_STANDALONE_MODE);
+			verify(qoSDBService, times(1)).updateIntraCountStartedAt();
+			verify(qoSDBService, times(1)).updateInterRelayCountStartedAt();
+
+			throw ex;
+		}
 	}
 }

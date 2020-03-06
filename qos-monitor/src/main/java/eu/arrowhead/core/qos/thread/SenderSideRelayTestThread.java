@@ -26,7 +26,6 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
-import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.database.service.RelayTestDBService;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 
