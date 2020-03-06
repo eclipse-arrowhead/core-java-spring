@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
@@ -42,7 +42,7 @@ public class PingRequirementsVerifierTest {
 	private OrchestratorDriver orchestratorDriver;
 	
 	@Mock
-	private Map<Long,PingMeasurementResponseDTO> pingMeasurementCache;
+	private Map<Long,QoSIntraPingMeasurementResponseDTO> pingMeasurementCache;
 	
 	//=================================================================================================
 	// methods
@@ -104,7 +104,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = ArrowheadException.class)
 	public void testVerifyObsoleteCache() {
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now().minusHours(2));
 		response.setMeasurement(measurement);
@@ -125,7 +125,7 @@ public class PingRequirementsVerifierTest {
 	@Test
 	public void testVerifyNoMeasurementRecordUsingDefaultTrue() {
 		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", true);
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		Assert.assertFalse(response.hasRecord());
 		when(pingMeasurementCache.get(anyLong())).thenReturn(null);
 		when(orchestratorDriver.getPingMeasurement(anyLong())).thenReturn(response);
@@ -145,7 +145,7 @@ public class PingRequirementsVerifierTest {
 	@Test
 	public void testVerifyNoMeasurementRecordUsingDefaultFalse() {
 		ReflectionTestUtils.setField(verifier, "verifyNotMeasuredSystem", false);
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		Assert.assertFalse(response.hasRecord());
 		when(pingMeasurementCache.get(anyLong())).thenReturn(null);
 		when(orchestratorDriver.getPingMeasurement(anyLong())).thenReturn(response);
@@ -164,7 +164,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifySystemNotAvailable() {
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		response.setId(12L);
 		response.setAvailable(false);
 		Assert.assertTrue(response.hasRecord());
@@ -185,7 +185,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyMaximumThresholdResponseRequirementInvalid() { // also tests that cache is stored the measurement
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -215,7 +215,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyMaximumThresholdResponseRequirementNotPositive() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -238,7 +238,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyMaximumThresholdResponseRequirementNotVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -262,7 +262,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyMaximumThresholdResponseRequirementVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -286,7 +286,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyAverageThresholdResponseRequirementInvalid() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -309,7 +309,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyAverageThresholdResponseRequirementNotPositive() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -332,7 +332,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyAverageThresholdResponseRequirementNotVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -356,7 +356,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyAverageThresholdResponseRequirementVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -380,7 +380,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyJitterThresholdResponseRequirementInvalid() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -403,7 +403,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyJitterThresholdResponseRequirementNegative() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -426,7 +426,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyJitterThresholdResponseRequirementNotVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -450,7 +450,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyJitterThresholdResponseRequirementVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -474,7 +474,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyRecentPacketLossRequirementInvalid() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -498,7 +498,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyRecentPacketLossRequirementNegative() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -522,7 +522,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyRecentPacketLossRequirementNotVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -547,7 +547,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyRecentPacketLossRequirementVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -572,7 +572,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyPacketLossRequirementInvalid() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -596,7 +596,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = InvalidParameterException.class)
 	public void testVerifyPacketLossRequirementNegative() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -620,7 +620,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyPacketLossRequirementNotVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);
@@ -645,7 +645,7 @@ public class PingRequirementsVerifierTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyPacketLossRequirementVerified() { // measurement comes from cache
-		final PingMeasurementResponseDTO response = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO response = new QoSIntraPingMeasurementResponseDTO();
 		final QoSIntraMeasurementResponseDTO measurement = new QoSIntraMeasurementResponseDTO();
 		measurement.setLastMeasurementAt(ZonedDateTime.now());
 		response.setMeasurement(measurement);

@@ -30,6 +30,8 @@ import eu.arrowhead.common.database.entity.CloudGatewayRelay;
 import eu.arrowhead.common.database.entity.EventType;
 import eu.arrowhead.common.database.entity.ForeignSystem;
 import eu.arrowhead.common.database.entity.OrchestratorStore;
+import eu.arrowhead.common.database.entity.QoSInterDirectMeasurement;
+import eu.arrowhead.common.database.entity.QoSInterDirectPingMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayEchoMeasurement;
 import eu.arrowhead.common.database.entity.QoSInterRelayMeasurement;
 import eu.arrowhead.common.database.entity.QoSIntraMeasurement;
@@ -698,13 +700,41 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static PingMeasurementResponseDTO convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(
-		final QoSIntraPingMeasurement pingMeasurement) {
+	public static QoSIntraPingMeasurementResponseDTO convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(final QoSIntraPingMeasurement pingMeasurement) {
 		Assert.notNull(pingMeasurement, "pingMeasurement is null");
 
 		final QoSIntraMeasurementResponseDTO measurementResponseDTO = convertQoSIntraMeasurementToQoSIntraMeasurementResponseDTO(pingMeasurement.getMeasurement());
 
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO = new QoSIntraPingMeasurementResponseDTO();
+		pingMeasurementResponseDTO.setId(pingMeasurement.getId());
+		pingMeasurementResponseDTO.setMeasurement(measurementResponseDTO);
+		pingMeasurementResponseDTO.setAvailable(pingMeasurement.isAvailable());
+		pingMeasurementResponseDTO.setLastAccessAt(pingMeasurement.getLastAccessAt());
+		pingMeasurementResponseDTO.setMinResponseTime(pingMeasurement.getMinResponseTime());
+		pingMeasurementResponseDTO.setMaxResponseTime(pingMeasurement.getMaxResponseTime());
+		pingMeasurementResponseDTO.setMeanResponseTimeWithTimeout(pingMeasurement.getMeanResponseTimeWithTimeout());
+		pingMeasurementResponseDTO.setMeanResponseTimeWithoutTimeout(pingMeasurement.getMeanResponseTimeWithoutTimeout());
+		pingMeasurementResponseDTO.setJitterWithTimeout(pingMeasurement.getJitterWithTimeout());
+		pingMeasurementResponseDTO.setJitterWithoutTimeout(pingMeasurement.getJitterWithoutTimeout());
+		pingMeasurementResponseDTO.setLostPerMeasurementPercent(pingMeasurement.getLostPerMeasurementPercent());
+		pingMeasurementResponseDTO.setSent(pingMeasurement.getSent());
+		pingMeasurementResponseDTO.setReceived(pingMeasurement.getReceived());
+		pingMeasurementResponseDTO.setCountStartedAt(pingMeasurement.getCountStartedAt());
+		pingMeasurementResponseDTO.setSentAll(pingMeasurement.getSentAll());
+		pingMeasurementResponseDTO.setReceivedAll(pingMeasurement.getReceivedAll());
+		pingMeasurementResponseDTO.setCreatedAt(pingMeasurement.getCreatedAt());
+		pingMeasurementResponseDTO.setUpdatedAt(pingMeasurement.getUpdatedAt());
+
+		return pingMeasurementResponseDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSInterDirectPingMeasurementResponseDTO convertQoSInterDirectPingMeasurementToPingMeasurementResponseDTO(final QoSInterDirectPingMeasurement pingMeasurement) {
+		Assert.notNull(pingMeasurement, "pingMeasurement is null");
+
+		final QoSInterDirectMeasurementResponseDTO measurementResponseDTO = convertQoSInterDirectMeasurementToQoSInterDirectMeasurementResponseDTO(pingMeasurement.getMeasurement());
+
+		final QoSInterDirectPingMeasurementResponseDTO pingMeasurementResponseDTO = new QoSInterDirectPingMeasurementResponseDTO();
 		pingMeasurementResponseDTO.setId(pingMeasurement.getId());
 		pingMeasurementResponseDTO.setMeasurement(measurementResponseDTO);
 		pingMeasurementResponseDTO.setAvailable(pingMeasurement.isAvailable());
@@ -728,8 +758,7 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static QoSIntraMeasurementResponseDTO convertQoSIntraMeasurementToQoSIntraMeasurementResponseDTO(
-		final QoSIntraMeasurement measurement) {
+	public static QoSIntraMeasurementResponseDTO convertQoSIntraMeasurementToQoSIntraMeasurementResponseDTO(final QoSIntraMeasurement measurement) {
 		Assert.notNull(measurement, "measurement is null");
 
 		final SystemResponseDTO system = convertSystemToSystemResponseDTO(measurement.getSystem());
@@ -744,16 +773,39 @@ public class DTOConverter {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	public static PingMeasurementListResponseDTO convertQoSIntraPingMeasurementPageToPingMeasurementListResponseDTO(
-		final Page<QoSIntraPingMeasurement> entries) {
+	public static QoSInterDirectMeasurementResponseDTO convertQoSInterDirectMeasurementToQoSInterDirectMeasurementResponseDTO(final QoSInterDirectMeasurement measurement) {
+		Assert.notNull(measurement, "measurement is null");
+
+		return new QoSInterDirectMeasurementResponseDTO(convertCloudToCloudResponseDTO(measurement.getCloud()),
+														measurement.getAddress(),
+														measurement.getMeasurementType(),
+														measurement.getLastMeasurementAt(),
+														measurement.getCreatedAt(),
+														measurement.getUpdatedAt());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSIntraPingMeasurementListResponseDTO convertQoSIntraPingMeasurementPageToPingMeasurementListResponseDTO( final Page<QoSIntraPingMeasurement> entries) {
 		Assert.notNull(entries, "pingMeasurementPage is null");
 
-		final List<PingMeasurementResponseDTO> pingMeasurementEntries = new ArrayList<>(entries.getNumberOfElements());
+		final List<QoSIntraPingMeasurementResponseDTO> pingMeasurementEntries = new ArrayList<>(entries.getNumberOfElements());
 		for (final QoSIntraPingMeasurement entry : entries) {
 			pingMeasurementEntries.add(convertQoSIntraPingMeasurementToPingMeasurementResponseDTO(entry));
 		}
 
-		return new PingMeasurementListResponseDTO(pingMeasurementEntries, entries.getTotalElements());
+		return new QoSIntraPingMeasurementListResponseDTO(pingMeasurementEntries, entries.getTotalElements());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public static QoSInterDirectPingMeasurementListResponseDTO convertQoSInterDirectPingMeasurementPageToPingMeasurementListResponseDTO( final Page<QoSInterDirectPingMeasurement> entries) {
+		Assert.notNull(entries, "pingMeasurementPage is null");
+
+		final List<QoSInterDirectPingMeasurementResponseDTO> pingMeasurementEntries = new ArrayList<>(entries.getNumberOfElements());
+		for (final QoSInterDirectPingMeasurement entry : entries) {
+			pingMeasurementEntries.add(convertQoSInterDirectPingMeasurementToPingMeasurementResponseDTO(entry));
+		}
+
+		return new QoSInterDirectPingMeasurementListResponseDTO(pingMeasurementEntries, entries.getTotalElements());
 	}
 	
 	//-------------------------------------------------------------------------------------------------

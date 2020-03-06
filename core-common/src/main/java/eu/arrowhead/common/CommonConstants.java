@@ -49,6 +49,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_EVENT_HANDLER_PUBLISH_AUTH_UPDATE = "event-publish-auth-update";
 	
 	public static final String CORE_SERVICE_QOS_MONITOR_INTRA_PING_MEASUREMENT = "qos-monitor-intra-ping-measurement";
+	public static final String CORE_SERVICE_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT = "qos-monitor-inter-direct-ping-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT = "qos-monitor-inter-relay-echo-measurement";
 	public static final String CORE_SERVICE_QOS_MONITOR_PUBLIC_KEY = "qos-monitor-public-key";
 	public static final String CORE_SERVICE_QOS_MONITOR_JOIN_RELAY_TEST = "qos-monitor-join-relay-test";
@@ -129,6 +130,8 @@ public class CommonConstants {
 	public static final String QOS_MONITOR_URI = "/qosmonitor";
 	public static final String OP_QOS_MONITOR_INTRA_PING_MEASUREMENT = "/measurements/intracloud/ping";
 	public static final String OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
+	public static final String OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT = "/measurements/intercloud/ping";
+	public static final String OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SUFFIX = "/{cloudId}/{address}";
 	public static final String OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT = "/measurements/intercloud/relay_echo";
 	public static final String OP_QOS_MONITOR_KEY_URI = "/publickey";
 	public static final String OP_QOS_MONITOR_JOIN_RELAY_TEST_URI = "/join_relay_test";

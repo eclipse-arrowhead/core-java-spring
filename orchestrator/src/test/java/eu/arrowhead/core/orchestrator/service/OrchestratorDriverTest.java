@@ -34,7 +34,7 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
-import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationResponseDTO;
@@ -507,12 +507,12 @@ public class OrchestratorDriverTest {
 				 									  CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX).expand(systemId);
 		Assert.assertTrue(uri.toString().contains("/measurements/intracloud/ping"));
 		
-		final PingMeasurementResponseDTO responseDTO = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO responseDTO = new QoSIntraPingMeasurementResponseDTO();
 		when(arrowheadContext.containsKey(any(String.class))).thenReturn(true);
 		when(arrowheadContext.get(any(String.class))).thenReturn(uri);
-		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(PingMeasurementResponseDTO.class))).thenReturn(new ResponseEntity<PingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
+		when(httpService.sendRequest(eq(uri), eq(HttpMethod.GET), eq(QoSIntraPingMeasurementResponseDTO.class))).thenReturn(new ResponseEntity<QoSIntraPingMeasurementResponseDTO>(responseDTO, HttpStatus.OK));
 		
-		final PingMeasurementResponseDTO result = orchestratorDriver.getPingMeasurement(systemId);
+		final QoSIntraPingMeasurementResponseDTO result = orchestratorDriver.getPingMeasurement(systemId);
 		
 		Assert.assertNotNull(result);
 		Assert.assertFalse(result.hasRecord());
