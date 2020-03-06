@@ -4,6 +4,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static org.mockito.ArgumentMatchers.anyString;
+
 import java.util.List;
 import java.util.Map;
 
@@ -101,13 +103,13 @@ public class GatekeeperDriverQoSTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testSendSystemAddressCollectionRequestNullCloudName() {
-		testingObject.sendSystemAddressCollectionRequest(generateCloudEntity(null, "test-oprator"));
+		testingObject.sendSystemAddressCollectionRequest(generateCloudEntity(null, "test-operator"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
 	public void testSendSystemAddressCollectionRequestBlankCloudName() {
-		testingObject.sendSystemAddressCollectionRequest(generateCloudEntity("   ", "test-oprator"));
+		testingObject.sendSystemAddressCollectionRequest(generateCloudEntity("   ", "test-operator"));
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -120,6 +122,37 @@ public class GatekeeperDriverQoSTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testSendSystemAddressCollectionRequestBlankCloudOperator() {
 		testingObject.sendSystemAddressCollectionRequest(generateCloudEntity("test-name", "  "));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryQoSMonitorPublicKeyUriNotFound() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		
+		testingObject.queryQoSMonitorPublicKey();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testQueryQoSMonitorPublicKeyInvalidUri() {
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn("not an object");
+		
+		testingObject.queryQoSMonitorPublicKey();
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testQueryQoSMonitorPublicKeyOk() {
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI);
+		
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(uri, HttpMethod.GET, String.class)).thenReturn(new ResponseEntity<>("public key", HttpStatus.OK));
+		
+		testingObject.queryQoSMonitorPublicKey();
+		
+		verify(httpService, times(1)).sendRequest(uri, HttpMethod.GET, String.class);
 	}
 	
 	//=================================================================================================
