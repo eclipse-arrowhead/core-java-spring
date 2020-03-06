@@ -72,7 +72,17 @@ services:
     volumes:
       - ./core_system_config/gateway.properties:/gateway/application.properties
     ports:
-      - 8453:8453 
+      - 8453:8453
+
+  certificateauthority:
+    container_name: certificateauthority
+    image: svetlint/certificateauthority:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/certificateauthority.properties:/certificateauthority/application.properties
+    ports:
+      - 8448:8448 
 
 volumes:
   mysql:
