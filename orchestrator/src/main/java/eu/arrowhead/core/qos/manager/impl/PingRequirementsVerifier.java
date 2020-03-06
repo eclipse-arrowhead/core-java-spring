@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
 import eu.arrowhead.common.CoreCommonConstants;
-import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
@@ -34,7 +34,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	
 	private static final Logger logger = LogManager.getLogger(PingRequirementsVerifier.class);
 	
-	private Map<Long,PingMeasurementResponseDTO> pingMeasurementCache = new ConcurrentHashMap<>();
+	private Map<Long,QoSIntraPingMeasurementResponseDTO> pingMeasurementCache = new ConcurrentHashMap<>();
 
 	//=================================================================================================
 	// methods
@@ -49,7 +49,7 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			return true;
 		}
 		
-		final PingMeasurementResponseDTO measurement = getPingMeasurement(result.getProvider().getId());
+		final QoSIntraPingMeasurementResponseDTO measurement = getPingMeasurement(result.getProvider().getId());
 		
 		if (!measurement.hasRecord()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
@@ -226,10 +226,10 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementResponseDTO getPingMeasurement(final long systemId) {
+	private QoSIntraPingMeasurementResponseDTO getPingMeasurement(final long systemId) {
 		logger.debug("getPingMeasurement started...");
 		
-		final PingMeasurementResponseDTO measurement = pingMeasurementCache.get(systemId);
+		final QoSIntraPingMeasurementResponseDTO measurement = pingMeasurementCache.get(systemId);
 		
 		if (measurement == null) {
 			return getPingMeasurementFromQoSMonitor(systemId);
@@ -244,10 +244,10 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementResponseDTO getPingMeasurementFromQoSMonitor(final long systemId) {
+	private QoSIntraPingMeasurementResponseDTO getPingMeasurementFromQoSMonitor(final long systemId) {
 		logger.debug("getPingMeasurementFromQoSMonitor started...");
 		
-		final PingMeasurementResponseDTO measurement = orchestrationDriver.getPingMeasurement(systemId);
+		final QoSIntraPingMeasurementResponseDTO measurement = orchestrationDriver.getPingMeasurement(systemId);
 		
 		if (measurement.hasRecord() && measurement.isAvailable()) { // only caching when there are some data
 			pingMeasurementCache.put(systemId, measurement);

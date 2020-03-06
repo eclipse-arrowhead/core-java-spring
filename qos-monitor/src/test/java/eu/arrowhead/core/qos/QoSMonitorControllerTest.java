@@ -42,8 +42,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.internal.PingMeasurementListResponseDTO;
-import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
@@ -111,7 +111,7 @@ public class QoSMonitorControllerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void getPingMeasurementsWithoutParametersTest() throws Exception {
-		final PingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest();
+		final QoSIntraPingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest();
 
 		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
@@ -120,7 +120,7 @@ public class QoSMonitorControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		final PingMeasurementListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementListResponseDTO.class);
+		final QoSIntraPingMeasurementListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSIntraPingMeasurementListResponseDTO.class);
 		assertEquals(pingMeasurementListResponseDTO.getData().size(), responseBody.getData().size());
 	}
 
@@ -128,7 +128,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getPingMeasurementsWithPageAndSizeParametersTest() throws Exception {
 		final int responseSize = 3;
-		final PingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest(responseSize);
+		final QoSIntraPingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest(responseSize);
 
 		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
@@ -139,7 +139,7 @@ public class QoSMonitorControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		final PingMeasurementListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementListResponseDTO.class);
+		final QoSIntraPingMeasurementListResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSIntraPingMeasurementListResponseDTO.class);
 		assertEquals(pingMeasurementListResponseDTO.getData().size(), responseBody.getData().size());
 	}
 
@@ -147,7 +147,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getPingMeasurementsWithNullPageButDefinedSizeParameterTest() throws Exception {
 		final int responseSize = 3;
-		final PingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest(responseSize);
+		final QoSIntraPingMeasurementListResponseDTO pingMeasurementListResponseDTO = getPingMeasurementListResponseDTOForTest(responseSize);
 
 		when(qoSDBService.getIntraPingMeasurementResponse( anyInt(), anyInt(), any(), anyString())).thenReturn(pingMeasurementListResponseDTO);
 
@@ -170,7 +170,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getManagementPingMeasurementBySystemIdTest() throws Exception {
 		final int requestedId = 1;
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
@@ -179,7 +179,7 @@ public class QoSMonitorControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		final PingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementResponseDTO.class);
+		final QoSIntraPingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSIntraPingMeasurementResponseDTO.class);
 		assertEquals(requestedId, responseBody.getMeasurement().getSystem().getId());
 	}
 
@@ -187,7 +187,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getManagementPingMeasurementBySystemIdInvalidSystemIdTest() throws Exception {
 		final int requestedId = 0;
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
@@ -223,7 +223,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getManagementPingMeasurementBySystemIdNoMeasurementInDBTest() throws Exception {
 		final int requestedId = 1;
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO = new QoSIntraPingMeasurementResponseDTO();
 		 pingMeasurementResponseDTO.setId( null );
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
@@ -233,7 +233,7 @@ public class QoSMonitorControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		final PingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementResponseDTO.class);
+		final QoSIntraPingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSIntraPingMeasurementResponseDTO.class);
 		assertNull(responseBody.getId());
 	}
 
@@ -244,7 +244,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getPingMeasurementBySystemIdTest() throws Exception {
 		final int requestedId = 1;
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
@@ -253,7 +253,7 @@ public class QoSMonitorControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		final PingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementResponseDTO.class);
+		final QoSIntraPingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSIntraPingMeasurementResponseDTO.class);
 		assertEquals(requestedId, responseBody.getMeasurement().getSystem().getId());
 	}
 
@@ -261,7 +261,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getPingMeasurementBySystemIdInvalidSystemIdTest() throws Exception {
 		final int requestedId = 0;
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO = getPingMeasurementResponseDTOForTest();
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
 
@@ -297,7 +297,7 @@ public class QoSMonitorControllerTest {
 	@Test
 	public void getPingMeasurementBySystemIdNoMeasurementInDBTest() throws Exception {
 		final int requestedId = 1;
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO = new QoSIntraPingMeasurementResponseDTO();
 		 pingMeasurementResponseDTO.setId( null );
 
 		when(qoSDBService.getIntraPingMeasurementBySystemIdResponse(anyLong())).thenReturn(pingMeasurementResponseDTO);
@@ -307,7 +307,7 @@ public class QoSMonitorControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		final PingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), PingMeasurementResponseDTO.class);
+		final QoSIntraPingMeasurementResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), QoSIntraPingMeasurementResponseDTO.class);
 		assertNull(responseBody.getId());
 	}
 	
@@ -356,36 +356,36 @@ public class QoSMonitorControllerTest {
 	// assistant methods
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementListResponseDTO getPingMeasurementListResponseDTOForTest() {
+	private QoSIntraPingMeasurementListResponseDTO getPingMeasurementListResponseDTOForTest() {
 
 		final int responseSize = 3;
-		final List<PingMeasurementResponseDTO> pingMeasurementList = new ArrayList<>(3);
+		final List<QoSIntraPingMeasurementResponseDTO> pingMeasurementList = new ArrayList<>(3);
 
 		for (int i = 0; i < responseSize; i++) {
 			pingMeasurementList.add(getPingMeasurementResponseDTOForTest());
 		}
 
-		return new PingMeasurementListResponseDTO(pingMeasurementList, responseSize);
+		return new QoSIntraPingMeasurementListResponseDTO(pingMeasurementList, responseSize);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementListResponseDTO getPingMeasurementListResponseDTOForTest(final int responseSize) {
+	private QoSIntraPingMeasurementListResponseDTO getPingMeasurementListResponseDTOForTest(final int responseSize) {
 
-		final List<PingMeasurementResponseDTO> pingMeasurementList = new ArrayList<>(responseSize);
+		final List<QoSIntraPingMeasurementResponseDTO> pingMeasurementList = new ArrayList<>(responseSize);
 
 		for (int i = 0; i < responseSize; i++) {
 			pingMeasurementList.add(getPingMeasurementResponseDTOForTest());
 		}
 
-		return new PingMeasurementListResponseDTO(pingMeasurementList, responseSize);
+		return new QoSIntraPingMeasurementListResponseDTO(pingMeasurementList, responseSize);
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private PingMeasurementResponseDTO getPingMeasurementResponseDTOForTest() {
+	private QoSIntraPingMeasurementResponseDTO getPingMeasurementResponseDTOForTest() {
 
 		final QoSIntraMeasurementResponseDTO qoSIntraMeasurementResponseDTO = getQoSIntraMeasurementResponseDTOForTest();
 
-		final PingMeasurementResponseDTO pingMeasurementResponseDTO  = new PingMeasurementResponseDTO();
+		final QoSIntraPingMeasurementResponseDTO pingMeasurementResponseDTO  = new QoSIntraPingMeasurementResponseDTO();
 		pingMeasurementResponseDTO.setId(1L);
 		pingMeasurementResponseDTO.setMeasurement(qoSIntraMeasurementResponseDTO);
 		pingMeasurementResponseDTO.setAvailable(true);

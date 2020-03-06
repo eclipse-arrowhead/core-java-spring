@@ -5,15 +5,15 @@ import java.time.ZonedDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class PingMeasurementResponseDTO  implements Serializable {
+public class QoSInterDirectPingMeasurementResponseDTO implements Serializable {
 
 	//=================================================================================================
 	// members
 
-	private static final long serialVersionUID = 4436693629791850816L;
-
+	private static final long serialVersionUID = -60790026108226022L;
+	
 	private Long id;
-	private QoSIntraMeasurementResponseDTO measurement;
+	private QoSInterDirectMeasurementResponseDTO measurement;
 	private boolean available = false;
 	private ZonedDateTime lastAccessAt;
 	private Integer minResponseTime;
@@ -35,11 +35,11 @@ public class PingMeasurementResponseDTO  implements Serializable {
 	// methods
 
 	//-------------------------------------------------------------------------------------------------
-	public PingMeasurementResponseDTO() {}
+	public QoSInterDirectPingMeasurementResponseDTO() {}
 
 	//-------------------------------------------------------------------------------------------------
 	public Long getId() { return id; }
-	public QoSIntraMeasurementResponseDTO getMeasurement() { return measurement; }
+	public QoSInterDirectMeasurementResponseDTO getMeasurement() { return measurement; }
 	public boolean isAvailable() {return available; }
 	public ZonedDateTime getLastAccessAt() { return lastAccessAt; }
 	public Integer getMinResponseTime() { return minResponseTime; }
@@ -65,7 +65,7 @@ public class PingMeasurementResponseDTO  implements Serializable {
 
 	//-------------------------------------------------------------------------------------------------
 	public void setId(final Long id) { this.id = id; }
-	public void setMeasurement(final QoSIntraMeasurementResponseDTO measurement) { this.measurement = measurement; }
+	public void setMeasurement(final QoSInterDirectMeasurementResponseDTO measurement) { this.measurement = measurement; }
 	public void setAvailable(final boolean available) { this.available = available; }
 	public void setLastAccessAt(final ZonedDateTime lastAccessAt) { this.lastAccessAt = lastAccessAt; }
 	public void setMinResponseTime(final Integer minResponseTime) { this.minResponseTime = minResponseTime; }

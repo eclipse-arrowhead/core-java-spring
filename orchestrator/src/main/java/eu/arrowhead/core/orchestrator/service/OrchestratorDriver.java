@@ -32,7 +32,7 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.IdIdListDTO;
-import eu.arrowhead.common.dto.internal.PingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.TokenDataDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationProviderDTO;
 import eu.arrowhead.common.dto.internal.TokenGenerationRequestDTO;
@@ -194,11 +194,11 @@ public class OrchestratorDriver {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public PingMeasurementResponseDTO getPingMeasurement(final long systemId) {
+	public QoSIntraPingMeasurementResponseDTO getPingMeasurement(final long systemId) {
 		logger.debug("getPingMeasurement started...");
 		
 		final UriComponents pingUri = getQosMonitorPingMeasurementUri(systemId);
-		final ResponseEntity<PingMeasurementResponseDTO> response = httpService.sendRequest(pingUri, HttpMethod.GET, PingMeasurementResponseDTO.class);
+		final ResponseEntity<QoSIntraPingMeasurementResponseDTO> response = httpService.sendRequest(pingUri, HttpMethod.GET, QoSIntraPingMeasurementResponseDTO.class);
 		
 		return response.getBody();
 	}
