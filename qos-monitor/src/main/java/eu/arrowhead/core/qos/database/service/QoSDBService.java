@@ -47,10 +47,11 @@ import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementListResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterRelayEchoMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSMeasurementAttribute;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
@@ -733,6 +734,7 @@ public class QoSDBService {
 		logger.debug("getInterDirectPingMeasurementsPageResponse started...");
 		return DTOConverter.convertQoSInterDirectPingMeasurementPageToPingMeasurementListResponseDTO(getInterDirectPingMeasurementsPage(page, size, direction, sortField));
 	}
+	
 	//-------------------------------------------------------------------------------------------------
 	public Page<QoSInterDirectPingMeasurement> getInterDirectPingMeasurementsPage(final int page, final int size, final Direction direction, final String sortField) {
 		logger.debug("getInterDirectPingMeasurementsPage started...");
@@ -748,6 +750,42 @@ public class QoSDBService {
 		
 		try {
 			return qoSInterDirectMeasurementPingRepository.findAll(PageRequest.of(validatedPage, validatedSize, validatedDirection, validatedSortField));
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurementsPageByCloudAndSystemAddressResponse(final CloudResponseDTO cloud, final String address) {
+		logger.debug("getInterDirectPingMeasurementsPageByCloudAndSystemAddressResponse started...");
+		final Optional<QoSInterDirectPingMeasurement> optional = getInterDirectPingMeasurementsPageByCloudAndSystemAddress(cloud, address);
+		if (optional.isEmpty()) {
+			throw new InvalidParameterException("Have no direct ping measurement with cloud " + cloud.getName() + "." + cloud.getOperator() + " system address " + address);
+		}
+		return DTOConverter.convertQoSInterDirectPingMeasurementToPingMeasurementResponseDTO(optional.get());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<QoSInterDirectPingMeasurement> getInterDirectPingMeasurementsPageByCloudAndSystemAddress(final CloudResponseDTO cloud, final String address) {
+		logger.debug("getInterDirectPingMeasurementsPageByCloudAndSystemAddress started...");
+		
+		validateCloudResponseDTO(cloud);
+		if (Utilities.isEmpty(address)) {
+			throw new InvalidParameterException("System address" + EMPTY_OR_NULL_ERROR_MESSAGE);
+		}
+		
+		try {
+			
+			final Optional<QoSInterDirectMeasurement> measurementOpt = qoSInterDirectMeasurementRepository.findByCloudAndAddressAndMeasurementType(DTOConverter.convertCloudResponseDTOToCloud(cloud), address, QoSMeasurementType.PING);
+			if (measurementOpt.isEmpty()) {
+				return Optional.empty();
+			}
+			
+			return qoSInterDirectMeasurementPingRepository.findByMeasurement(measurementOpt.get());
+			
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);

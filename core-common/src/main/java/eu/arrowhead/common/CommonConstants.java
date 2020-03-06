@@ -131,7 +131,6 @@ public class CommonConstants {
 	public static final String OP_QOS_MONITOR_INTRA_PING_MEASUREMENT = "/measurements/intracloud/ping";
 	public static final String OP_QOS_MONITOR_INTRA_PING_MEASUREMENT_SUFFIX = "/{" + COMMON_FIELD_NAME_ID + "}";
 	public static final String OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT = "/measurements/intercloud/ping";
-	public static final String OP_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_SUFFIX = "/{cloudId}/{address}";
 	public static final String OP_QOS_MONITOR_INTER_RELAY_MEASUREMENT = "/measurements/intercloud/relay_echo";
 	public static final String OP_QOS_MONITOR_KEY_URI = "/publickey";
 	public static final String OP_QOS_MONITOR_JOIN_RELAY_TEST_URI = "/join_relay_test";
