@@ -3,13 +3,17 @@ package eu.arrowhead.core.onboarding;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
+import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.DeviceResponseDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithCsrRequestDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithCsrResponseDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithNameRequestDTO;
 import eu.arrowhead.common.dto.shared.OnboardingWithNameResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
+import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.onboarding.database.service.OnboardingDBService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,18 +23,25 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Api(tags = {CoreCommonConstants.SWAGGER_TAG_ALL})
 @CrossOrigin(maxAge = Defaults.CORS_MAX_AGE, allowCredentials = Defaults.CORS_ALLOW_CREDENTIALS,
@@ -38,8 +49,7 @@ import java.util.Objects;
 )
 @RestController
 @RequestMapping(CommonConstants.ONBOARDING_URI)
-public class OnboardingController
-{
+public class OnboardingController {
 
     //=================================================================================================
     // members
@@ -49,16 +59,27 @@ public class OnboardingController
     private static final String DEVICE_NAME_NULL_ERROR_MESSAGE = " Device name must have value ";
     private static final String CSR_NULL_ERROR_MESSAGE = " CertificateSigningRequest must have value ";
 
+    private static final String AUTHENTICATE_WITH_CERTIFICATE = "/certificate";
+    private static final String AUTHENTICATE_WITH_SHARED_SECRET = "/sharedsecret";
+
     private static final String ONBOARDING_WITH_NAME_URI = "/name";
     private static final String ONBOARDING_WITH_CSR_URI = "/csr";
 
     private final Logger logger = LogManager.getLogger(OnboardingController.class);
     private final OnboardingDBService onboardingDBService;
+    private final SSLProperties sslProperties;
+
+
+    @Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
+    private Map<String,Object> arrowheadContext;
+
+    @Value(value = "${sharedSecret:#{null}}")
+    private Optional<String> sharedSecret;
 
     @Autowired
-    public OnboardingController(final OnboardingDBService onboardingDBService)
-    {
+    public OnboardingController(final OnboardingDBService onboardingDBService, final SSLProperties sslProperties) {
         this.onboardingDBService = onboardingDBService;
+        this.sslProperties = sslProperties;
     }
 
     //=================================================================================================
@@ -72,48 +93,85 @@ public class OnboardingController
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
     @GetMapping(path = CommonConstants.ECHO_URI)
-    public String echoOnboarding()
-    {
+    public String echoOnboarding() {
         return "Got it!";
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return onboarding certificate", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Onboarding with certificate and device name", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(ONBOARDING_WITH_NAME_URI)
+    @PostMapping(AUTHENTICATE_WITH_CERTIFICATE + ONBOARDING_WITH_NAME_URI)
     @ResponseBody
-    public OnboardingWithNameResponseDTO onboardWithName(final HttpServletRequest httpServletRequest,
-                                                         @RequestBody final OnboardingWithNameRequestDTO onboardingRequest)
-    {
-        logger.debug("onboardWithName started ...");
+    public OnboardingWithNameResponseDTO onboardWithCertificateAndName(final HttpServletRequest httpServletRequest,
+                                                                       @RequestBody final OnboardingWithNameRequestDTO onboardingRequest) {
+        logger.debug("onboardWithCertificateAndName started ...");
 
-        authenticateRequest(httpServletRequest);
+        authenticateCertificate(httpServletRequest);
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
 
         return onboardingDBService.onboarding(onboardingRequest);
     }
 
     //-------------------------------------------------------------------------------------------------
-    @ApiOperation(value = "Return onboarding certificate", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiOperation(value = "Onboarding with shared secret and device name", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
     @ApiResponses(value = {
             @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
             @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
     })
-    @PostMapping(ONBOARDING_WITH_CSR_URI)
+    @PostMapping(AUTHENTICATE_WITH_SHARED_SECRET + ONBOARDING_WITH_NAME_URI)
     @ResponseBody
-    public OnboardingWithCsrResponseDTO onboardWithCsr(final HttpServletRequest httpServletRequest,
-                                                         @RequestBody final OnboardingWithCsrRequestDTO onboardingRequest)
-    {
-        logger.debug("onboardWithName started ...");
+    public OnboardingWithNameResponseDTO onboardWithSharedSecretAndName(@RequestBody final OnboardingWithNameRequestDTO onboardingRequest,
+                                                                        @RequestHeader(HttpHeaders.AUTHORIZATION) final String authorization) {
+        logger.debug("onboardWithSharedSecretAndName started ...");
 
-        authenticateRequest(httpServletRequest);
+        authenticateSharedSecret(authorization);
+        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
+
+        return onboardingDBService.onboarding(onboardingRequest);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(AUTHENTICATE_WITH_CERTIFICATE + ONBOARDING_WITH_CSR_URI)
+    @ResponseBody
+    public OnboardingWithCsrResponseDTO onboardWithCertificateAndSigningRequest(final HttpServletRequest httpServletRequest,
+                                                                                @RequestBody final OnboardingWithCsrRequestDTO onboardingRequest) {
+        logger.debug("onboardWithCertificateAndSigningRequest started ...");
+
+        authenticateCertificate(httpServletRequest);
+        verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
+
+        return onboardingDBService.onboarding(onboardingRequest);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    @ApiOperation(value = "Onboarding with certificate and certificate signing request", response = DeviceResponseDTO.class, tags = {CoreCommonConstants.SWAGGER_TAG_MGMT})
+    @ApiResponses(value = {
+            @ApiResponse(code = HttpStatus.SC_OK, message = ONBOARDING_HTTP_200_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = ONBOARDING_HTTP_400_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+            @ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+    })
+    @PostMapping(AUTHENTICATE_WITH_SHARED_SECRET + ONBOARDING_WITH_CSR_URI)
+    @ResponseBody
+    public OnboardingWithCsrResponseDTO onboardWithSharedSecretAndSigningRequest(@RequestBody final OnboardingWithCsrRequestDTO onboardingRequest,
+                                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION) final String authorization) {
+        logger.debug("onboardWithSharedSecretAndSigningRequest started ...");
+
+        authenticateSharedSecret(authorization);
         verifyRequest(onboardingRequest, CommonConstants.ONBOARDING_URI + ONBOARDING_WITH_NAME_URI);
 
         return onboardingDBService.onboarding(onboardingRequest);
@@ -123,45 +181,101 @@ public class OnboardingController
     // assistant methods
 
     //-------------------------------------------------------------------------------------------------
-    private void authenticateRequest(final HttpServletRequest httpServletRequest)
-    {
+    private void authenticateCertificate(final HttpServletRequest httpServletRequest) {
         final X509Certificate[] certificates = (X509Certificate[]) httpServletRequest.getAttribute(CommonConstants.ATTR_JAVAX_SERVLET_REQUEST_X509_CERTIFICATE);
 
-        if (Objects.nonNull(certificates))
-        {
-            // TODO verify certificate with certificate authority
+        if (sslProperties.isSslEnabled()) {
+            if (Objects.nonNull(certificates) && certificates.length > 0) {
+
+                // TODO verification should be done by CA
+                final X509Certificate cert = certificates[0];
+                final String clientCN = Utilities.getCertCNFromSubject(cert.getSubjectDN().getName());
+                final String requestTarget = Utilities.stripEndSlash(httpServletRequest.getRequestURL().toString());
+
+                if (!Utilities.isKeyStoreCNArrowheadValid(clientCN)) {
+                    logger.debug("{} is not a valid common name, access denied!", clientCN);
+                    throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
+                }
+
+                // All requests from the local cloud are allowed
+                if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, getServerCloudCN())) {
+                    logger.debug("{} is unauthorized to access {}", clientCN, requestTarget);
+                    throw new AuthException(clientCN + " is unauthorized to access " + requestTarget);
+                }
+            }
+            else
+            {
+                logger.debug("No client certificate given!");
+                throw new AuthException("Client certificate in needed!");
+            }
         }
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void verifyRequest(final OnboardingWithNameRequestDTO onboardingRequest, final String origin)
-    {
+    private void authenticateSharedSecret(final String authorization) {
+        if (sharedSecret.isEmpty()) {
+            throw new InvalidParameterException("Shared Secret is not accepted by this service");
+        }
+
+        if (Utilities.isEmpty(authorization)) {
+            throw new AuthException("Basic Authentication is needed for this method", HttpStatus.SC_UNAUTHORIZED);
+        }
+
+        // Header is in the format "Basic 5tyc0uiDat4"
+        // We need to extract data before decoding it back to original string
+        final String[] authParts = authorization.split("\\s+");
+        final String authInfo = authParts[1];
+
+        // Decode the data back to original string
+        byte[] bytes;
+        try {
+            bytes = Base64.getDecoder().decode(authInfo);
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            throw new ArrowheadException("Unable to decode authorization header");
+        }
+
+        final String expectedSecret = sharedSecret.get();
+        final String[] basicAuth = new String(bytes).split(":");
+
+        if (!(basicAuth.length == 2 && expectedSecret.equals(basicAuth[1]))) {
+            throw new AuthException("Basic Authentication failed with the given secret", HttpStatus.SC_UNAUTHORIZED);
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    private void verifyRequest(final OnboardingWithNameRequestDTO onboardingRequest, final String origin) {
         logger.debug("verifyRequest started...");
 
-        if (onboardingRequest == null)
-        {
+        if (onboardingRequest == null) {
             throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        if (Utilities.isEmpty(onboardingRequest.getDeviceName()))
-        {
+        if (Utilities.isEmpty(onboardingRequest.getDeviceName())) {
             throw new BadPayloadException(DEVICE_NAME_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
 
     //-------------------------------------------------------------------------------------------------
-    private void verifyRequest(final OnboardingWithCsrRequestDTO onboardingRequest, final String origin)
-    {
+    private void verifyRequest(final OnboardingWithCsrRequestDTO onboardingRequest, final String origin) {
         logger.debug("verifyRequest started...");
 
-        if (onboardingRequest == null)
-        {
+        if (onboardingRequest == null) {
             throw new BadPayloadException("Request is null.", HttpStatus.SC_BAD_REQUEST, origin);
         }
 
-        if (Utilities.isEmpty(onboardingRequest.getCertificateSigningRequest()))
-        {
+        if (Utilities.isEmpty(onboardingRequest.getCertificateSigningRequest())) {
             throw new BadPayloadException(CSR_NULL_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, origin);
         }
     }
+
+    //-------------------------------------------------------------------------------------------------
+    private String getServerCloudCN() {
+        final String serverCN = (String) arrowheadContext.get(CommonConstants.SERVER_COMMON_NAME);
+        final String[] serverFields = serverCN.split("\\.", 2); // serverFields contains: coreSystemName, cloudName.operator.arrowhead.eu
+        Assert.isTrue(serverFields.length >= 2, "Server common name is invalid: " + serverCN);
+
+        return serverFields[1];
+    }
+
 }
