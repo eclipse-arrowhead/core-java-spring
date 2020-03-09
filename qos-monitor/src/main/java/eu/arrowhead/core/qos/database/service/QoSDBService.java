@@ -45,6 +45,7 @@ import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetails
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
@@ -757,9 +758,9 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurementsPageByCloudAndSystemAddressResponse(final CloudResponseDTO cloud, final String address) {
-		logger.debug("getInterDirectPingMeasurementsPageByCloudAndSystemAddressResponse started...");
-		final Optional<QoSInterDirectPingMeasurement> optional = getInterDirectPingMeasurementsPageByCloudAndSystemAddress(cloud, address);
+	public QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurementByCloudAndSystemAddressResponse(final CloudResponseDTO cloud, final String address) {
+		logger.debug("getInterDirectPingMeasurementByCloudAndSystemAddressResponse started...");
+		final Optional<QoSInterDirectPingMeasurement> optional = getInterDirectPingMeasurementByCloudAndSystemAddress(cloud, address);
 		if (optional.isEmpty()) {
 			throw new InvalidParameterException("Have no direct ping measurement with cloud " + cloud.getName() + "." + cloud.getOperator() + " system address " + address);
 		}
@@ -767,8 +768,8 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Optional<QoSInterDirectPingMeasurement> getInterDirectPingMeasurementsPageByCloudAndSystemAddress(final CloudResponseDTO cloud, final String address) {
-		logger.debug("getInterDirectPingMeasurementsPageByCloudAndSystemAddress started...");
+	public Optional<QoSInterDirectPingMeasurement> getInterDirectPingMeasurementByCloudAndSystemAddress(final CloudResponseDTO cloud, final String address) {
+		logger.debug("getInterDirectPingMeasurementByCloudAndSystemAddress started...");
 		
 		validateCloudResponseDTO(cloud);
 		if (Utilities.isEmpty(address)) {
