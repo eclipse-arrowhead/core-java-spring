@@ -45,7 +45,6 @@ import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogDetails
 import eu.arrowhead.common.database.repository.QoSIntraPingMeasurementLogRepository;
 import eu.arrowhead.common.database.repository.SystemRepository;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
-import eu.arrowhead.common.dto.internal.CloudSystemFormDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSInterDirectPingMeasurementResponseDTO;
@@ -1066,6 +1065,15 @@ public class QoSDBService {
 												+ " and relay " + relayResponseDTO.getAddress() + ":" + relayResponseDTO.getPort());
 		}
 		return DTOConverter.convertQoSInterRelayEchoMeasurementToQoSInterRelayEchoMeasurementResponseDTO(optional.get());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<QoSInterRelayMeasurement> getInterRelayEchoMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
+		logger.debug("getInterRelayEchoMeasurementByCloud started ...");
+		
+		validateCloudResponseDTO(cloudResponseDTO);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		return qosInterRelayMeasurementRepository.findByCloudAndMeasurementType(cloud, QoSMeasurementType.RELAY_ECHO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

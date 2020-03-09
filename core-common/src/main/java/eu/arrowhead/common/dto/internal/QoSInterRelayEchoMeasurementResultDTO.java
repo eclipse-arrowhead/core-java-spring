@@ -25,10 +25,6 @@ public class QoSInterRelayEchoMeasurementResultDTO implements Serializable {
 	private Integer jitterWithTimeout;
 	private Integer jitterWithoutTimeout;
 	private Integer lostPerMeasurementPercent;
-	private long sent;
-	private long received;
-	private long sentAll;
-	private long receivedAll;
 	
 	//=================================================================================================
 	// methods
@@ -40,7 +36,7 @@ public class QoSInterRelayEchoMeasurementResultDTO implements Serializable {
 	public QoSInterRelayEchoMeasurementResultDTO(final CloudResponseDTO cloud, final SystemResponseDTO system, final RelayResponseDTO relay, final QoSMeasurementType measurementType,
 												 final ZonedDateTime lastAccessAt, final Integer minResponseTime, final Integer maxResponseTime, final Integer meanResponseTimeWithTimeout,
 												 final Integer meanResponseTimeWithoutTimeout, final Integer jitterWithTimeout, final Integer jitterWithoutTimeout, 
-												 final Integer lostPerMeasurementPercent, final long sent, final long received, final long sentAll, final long receivedAll) {
+												 final Integer lostPerMeasurementPercent) {
 		this.cloud = cloud;
 		this.system = system;
 		this.relay = relay;
@@ -53,10 +49,6 @@ public class QoSInterRelayEchoMeasurementResultDTO implements Serializable {
 		this.jitterWithTimeout = jitterWithTimeout;
 		this.jitterWithoutTimeout = jitterWithoutTimeout;
 		this.lostPerMeasurementPercent = lostPerMeasurementPercent;
-		this.sent = sent;
-		this.received = received;
-		this.sentAll = sentAll;
-		this.receivedAll = receivedAll;
 	}
 
 	//-------------------------------------------------------------------------------------------------
@@ -72,10 +64,6 @@ public class QoSInterRelayEchoMeasurementResultDTO implements Serializable {
 	public Integer getJitterWithTimeout() { return jitterWithTimeout; }
 	public Integer getJitterWithoutTimeout() { return jitterWithoutTimeout; }
 	public Integer getLostPerMeasurementPercent() { return lostPerMeasurementPercent; }
-	public long getSent() { return sent; }
-	public long getReceived() { return received; }
-	public long getSentAll() { return sentAll; }
-	public long getReceivedAll() { return receivedAll; }
 
 	//-------------------------------------------------------------------------------------------------
 	public void setCloud(CloudResponseDTO cloud) { this.cloud = cloud; }
@@ -89,9 +77,5 @@ public class QoSInterRelayEchoMeasurementResultDTO implements Serializable {
 	public void setMeanResponseTimeWithoutTimeout(Integer meanResponseTimeWithoutTimeout) { this.meanResponseTimeWithoutTimeout = meanResponseTimeWithoutTimeout; }
 	public void setJitterWithTimeout(Integer jitterWithTimeout) { this.jitterWithTimeout = jitterWithTimeout; }
 	public void setJitterWithoutTimeout(Integer jitterWithoutTimeout) { this.jitterWithoutTimeout = jitterWithoutTimeout; }
-	public void setLostPerMeasurementPercent(Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }
-	public void setSent(long sent) { this.sent = sent; }
-	public void setReceived(long received) { this.received = received; }
-	public void setSentAll(long sentAll) { this.sentAll = sentAll; }
-	public void setReceivedAll(long receivedAll) { this.receivedAll = receivedAll; }	
+	public void setLostPerMeasurementPercent(Integer lostPerMeasurementPercent) { this.lostPerMeasurementPercent = lostPerMeasurementPercent; }	
 }
