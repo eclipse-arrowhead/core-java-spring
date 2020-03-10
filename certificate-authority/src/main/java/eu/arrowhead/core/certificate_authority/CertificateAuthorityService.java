@@ -4,6 +4,7 @@ import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.dto.internal.CertificateSigningResponseDTO;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,14 +14,21 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.ServiceConfigurationError;
 
 @Service
 public class CertificateAuthorityService {
@@ -56,6 +64,8 @@ public class CertificateAuthorityService {
     }
 
     public CertificateSigningResponseDTO signCertificate(CertificateSigningRequestDTO request) {
+        verifyCertificateSigningRequest(request);
+
         final JcaPKCS10CertificationRequest csr = CertificateAuthorityUtils.decodePKCS10CSR(request);
         CertificateAuthorityUtils.checkCommonName(csr, cloudCommonName);
         CertificateAuthorityUtils.checkCsrSignature(csr);
@@ -79,6 +89,20 @@ public class CertificateAuthorityService {
             return keystore;
         } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
             throw new ServiceConfigurationError("Cannot open keystore: " + e.getMessage());
+        }
+    }
+
+    private static void verifyCertificateSigningRequest(CertificateSigningRequestDTO request) {
+        if (request == null) {
+            logger.error("CertificateSigningRequest cannot be null");
+            throw new InvalidParameterException("CertificateSigningRequest cannot be null");
+        }
+
+        final String encodedCSR = request.getEncodedCSR();
+
+        if (encodedCSR == null || encodedCSR.isEmpty()) {
+            logger.error("CertificateSigningRequest cannot be empty");
+            throw new InvalidParameterException("CertificateSigningRequest cannot be empty");
         }
     }
 
