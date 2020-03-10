@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,7 +34,6 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
-import org.apache.activemq.ActiveMQSession;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -50,11 +50,13 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.Cloud;
 import eu.arrowhead.common.database.entity.CloudGatekeeperRelay;
 import eu.arrowhead.common.database.entity.Relay;
+import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.TimeoutException;
@@ -592,6 +594,272 @@ public class GatekeeperDriverQoSTest {
 		verify(relayClient, times(1)).sendRequestAndReturnResponse(any(Session.class), any(GeneralAdvertisementResult.class), any());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestRequestNull() {
+		testingObject.initRelayTest(null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitRelayTestTargetCloudNull() {
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitRelayTestTargetCloudOperatorNull() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitRelayTestTargetCloudOperatorEmpty() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator(" ");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitRelayTestTargetCloudNameNull() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitRelayTestTargetCloudNameEmpty() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName(" ");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	// skip relay validation tests because it is the same method that was used in sendQoSRelayTestProposal()
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestQueueIdNull() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestQueueIdEmpty() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId(" ");
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestPeerNameNull() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestPeerNameEmpty() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName(" ");
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestReceiverQoSMonitorPublicKeyNull() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testInitRelayTestReceiverQoSMonitorPublicKeyEmpty() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey(" ");
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testInitRelayTestUriNotFound() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey("valid key");
+		
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testInitRelayTestInvalidUri() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey("valid key");
+		
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn("not an URI object");
+		
+		testingObject.initRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestOk() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey("valid key");
+		
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "ignored");
+		
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(Void.class), any(QoSMonitorSenderConnectionRequestDTO.class))).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+		
+		testingObject.initRelayTest(request);
+		
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(Void.class), any(QoSMonitorSenderConnectionRequestDTO.class));
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -659,6 +927,7 @@ public class GatekeeperDriverQoSTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	@SuppressWarnings("serial")
 	private PublicKey getDummyPublicKey() {
 		return new PublicKey() {
 			public String getFormat() { return null; }

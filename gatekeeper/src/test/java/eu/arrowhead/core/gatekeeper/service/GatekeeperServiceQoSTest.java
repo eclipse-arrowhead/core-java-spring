@@ -488,4 +488,84 @@ public class GatekeeperServiceQoSTest {
 		verify(gatekeeperDriver, times(1)).sendQoSRelayTestProposal(any(QoSRelayTestProposalRequestDTO.class), any(Cloud.class));
 		verify(gatekeeperDriver, times(1)).initRelayTest(any(QoSMonitorSenderConnectionRequestDTO.class));
 	}
+	
+	// skip cloud and relay validations tests because it is the same method that was used in the initRelayTask()
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testJoinRelayTestSenderQoSMonitorPublicKeyNull() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud2");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+
+		gatekeeperService.joinRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testJoinRelayTestSenderQoSMonitorPublicKeyEmpty() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud2");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey(" ");
+
+		gatekeeperService.joinRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testJoinRelayTestOk() {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud2");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey("valid key");
+		
+		when(gatekeeperDriver.joinRelayTest(any(QoSRelayTestProposalRequestDTO.class))).thenReturn(new QoSRelayTestProposalResponseDTO());
+
+		gatekeeperService.joinRelayTest(request);
+		
+		verify(gatekeeperDriver, times(1)).joinRelayTest(any(QoSRelayTestProposalRequestDTO.class));
+	}
 }
