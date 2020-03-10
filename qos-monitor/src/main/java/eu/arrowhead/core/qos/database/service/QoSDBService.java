@@ -472,6 +472,26 @@ public class QoSDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional (rollbackFor = ArrowheadException.class)
+	public void updateInterDirectCountStartedAt() {
+		logger.debug("updateInterDirectCountStartedAt started...");
+
+		try {
+			final List<QoSInterDirectPingMeasurement> measurementList = qoSInterDirectMeasurementPingRepository.findAll();
+			for (final QoSInterDirectPingMeasurement qoSInterDirectPingMeasurement : measurementList) {
+				qoSInterDirectPingMeasurement.setSent(0);
+				qoSInterDirectPingMeasurement.setReceived(0);
+				qoSInterDirectPingMeasurement.setCountStartedAt(ZonedDateTime.now());
+			}
+			qoSInterDirectMeasurementPingRepository.saveAll(measurementList);
+			qoSInterDirectMeasurementPingRepository.flush();
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
 	public QoSInterDirectMeasurement createInterDirectMeasurement(final Cloud cloud, final String address, final QoSMeasurementType type, final ZonedDateTime aroundNow) {
