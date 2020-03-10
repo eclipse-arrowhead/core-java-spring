@@ -22,7 +22,7 @@ public class RelayEchoTaskConfig {
 	//=================================================================================================
 	// members
 
-	protected Logger logger = LogManager.getLogger(CloudPingTaskConfig.class);
+	protected Logger logger = LogManager.getLogger(RelayEchoTaskConfig.class);
 
 	@Autowired
 	private ApplicationContext applicationContext; //NOSONAR

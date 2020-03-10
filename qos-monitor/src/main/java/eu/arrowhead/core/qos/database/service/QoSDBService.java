@@ -813,6 +813,26 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	public Optional<QoSInterRelayMeasurement> getInterRelayMeasurement(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO, final QoSMeasurementType type) {
+		logger.debug("getInterRelayMeasurement started ...");
+		
+		validateCloudResponseDTO(cloudResponseDTO);
+		validateRelayResponseDTO(relayResponseDTO);
+
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResponseDTO);
+		
+		try {
+			return qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, type);
+		} catch (final InvalidParameterException ex) {
+			throw ex;
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
 	public QoSInterRelayMeasurement createInterRelayMeasurement(final Cloud cloud, final Relay relay, final QoSMeasurementType type, final ZonedDateTime aroundNow) {
 		logger.debug("createInterRelayMeasurement started...");
