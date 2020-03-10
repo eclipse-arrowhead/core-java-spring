@@ -426,7 +426,7 @@ public class GatekeeperDriver {
 		validateCloud(request.getRequesterCloud());
 
 		final UriComponents uri = getQoSMonitorJoinRelayTestUri();
-		final ResponseEntity<QoSRelayTestProposalResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSRelayTestProposalResponseDTO.class);
+		final ResponseEntity<QoSRelayTestProposalResponseDTO> response = httpService.sendRequest(uri, HttpMethod.POST, QoSRelayTestProposalResponseDTO.class, request);
 		
 		return response.getBody();
 	}

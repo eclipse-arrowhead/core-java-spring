@@ -860,6 +860,119 @@ public class GatekeeperDriverQoSTest {
 		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(Void.class), any(QoSMonitorSenderConnectionRequestDTO.class));
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testJoinRelayTestRequestNull() {
+		testingObject.joinRelayTest(null);
+	}
+	
+	// skip relay validation tests because it is the same method that was used in sendQoSRelayTestProposal()
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testJoinRelayTestSenderQoSMonitorPublicKeyNull() {
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRelay(relay);
+		
+		testingObject.joinRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = InvalidParameterException.class)
+	public void testJoinRelayTestSenderQoSMonitorPublicKeyEmpty() {
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey(" ");
+		
+		testingObject.joinRelayTest(request);
+	}
+	
+	// skip cloud validation tests because it is the same method that was used in initRelayTest()
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testJoinRelayTestUriNotFound() {
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey("valid key");
+		
+		when(arrowheadContext.containsKey(anyString())).thenReturn(false);
+		
+		testingObject.joinRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testJoinRelayTestInvalidUri() {
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey("valid key");
+		
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn("not an URI object");
+		
+		testingObject.joinRelayTest(request);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testJoinRelayTestOk() {
+		final CloudRequestDTO requesterCloud = new CloudRequestDTO();
+		requesterCloud.setOperator("aitia");
+		requesterCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(3000);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSRelayTestProposalRequestDTO request = new QoSRelayTestProposalRequestDTO();
+		request.setRequesterCloud(requesterCloud);
+		request.setRelay(relay);
+		request.setSenderQoSMonitorPublicKey("valid key");
+		
+		final UriComponents uri = Utilities.createURI(CommonConstants.HTTPS, "localhost", 1234, "ignored");
+		
+		when(arrowheadContext.containsKey(anyString())).thenReturn(true);
+		when(arrowheadContext.get(anyString())).thenReturn(uri);
+		when(httpService.sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(QoSRelayTestProposalResponseDTO.class), any(QoSRelayTestProposalRequestDTO.class))).
+																							thenReturn(new ResponseEntity<>(new QoSRelayTestProposalResponseDTO(), HttpStatus.OK));
+		
+		testingObject.joinRelayTest(request);
+		
+		verify(httpService, times(1)).sendRequest(any(UriComponents.class), eq(HttpMethod.POST), eq(QoSRelayTestProposalResponseDTO.class), any(QoSRelayTestProposalRequestDTO.class));
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
