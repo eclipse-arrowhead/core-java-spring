@@ -113,7 +113,7 @@ public class RelayEchoTask implements Job {
 					proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
 					proposal.setRelay(DTOConverter.convertRelayResponseDTOToRelayRequestDTO(relay));
 					return proposal;
-				} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() == QoSMeasurementStatus.PENDING) {
+				} else if (measurementOpt.isPresent() && measurementOpt.get().getStatus() != QoSMeasurementStatus.PENDING) {
 					final QoSInterRelayMeasurement echoMeasurement = measurementOpt.get();
 					if (echoMeasurement.getLastMeasurementAt().isBefore(latestMeasurementTime)) {
 						proposal.setTargetCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(cloud));
