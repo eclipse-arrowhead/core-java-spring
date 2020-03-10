@@ -21,6 +21,7 @@ import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.internal.CloudAccessListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysListResponseDTO;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
 import eu.arrowhead.common.dto.internal.SystemAddressSetRelayResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
@@ -37,6 +38,7 @@ public class QoSMonitorDriver {
 	private static final String GATEKEEPER_COLLECT_SYSTEM_ADDRESSES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_SYSTEM_ADDRESSES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_COLLECT_ACCESS_TYPES_URI_KEY = CoreSystemService.GATEKEEPER_COLLECT_ACCESS_TYPES.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
 	private static final String GATEKEEPER_GET_CLOUD_URI_KEY = CoreSystemService.GATEKEEPER_GET_CLOUD_SERVICE.getServiceDefinition() + CoreCommonConstants.URI_SUFFIX;
+	private static final String GATEKEEPER_INIT_RELAY_TEST_URI_KEY = CoreSystemService.GATEKEEPER_RELAY_TEST_SERVICE.getServiceDefinition();
 	
 	public static final String KEY_CALCULATED_SERVICE_TIME_FRAME = "QoSCalculatedServiceTimeFrame";
 
@@ -128,6 +130,21 @@ public class QoSMonitorDriver {
 			throw ex;
 		}
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public void requestGatekeeperInitRelayTest(final QoSRelayTestProposalRequestDTO request) {
+		logger.debug("requestGatekeeperInitRelayTest started...");
+		Assert.notNull(request, "QoSRelayTestProposalRequestDTO is null or blank.");
+		
+		try {
+			final UriComponents uri = getGatekeeperInitRelayTestUri();
+			httpService.sendRequest(uri, HttpMethod.POST, Void.class, request);
+		} catch (final ArrowheadException ex) {
+			logger.debug("Exception: " + ex.getMessage());
+			throw ex;
+		}
+		
+	}
 
 	//=================================================================================================
 	// assistant methods
@@ -195,6 +212,7 @@ public class QoSMonitorDriver {
 	//-------------------------------------------------------------------------------------------------
 	private UriComponents getGatekeeperGetCloudUri(final String operator, final String name) {
 		logger.debug("getGatekeeperGetCloudUri started...");
+		
 		if (arrowheadContext.containsKey(GATEKEEPER_GET_CLOUD_URI_KEY)) {
 			try {
 				final UriComponents uriTemplate = (UriComponents) arrowheadContext.get(GATEKEEPER_GET_CLOUD_URI_KEY);
@@ -205,5 +223,20 @@ public class QoSMonitorDriver {
 		}
 		
 		throw new ArrowheadException("QoS Monitor can't find gatekeeper get cloud URI.");
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private UriComponents getGatekeeperInitRelayTestUri() {
+		logger.debug("getGatekeeperIniitRelayTestUri started...");
+		
+		if (arrowheadContext.containsKey(GATEKEEPER_INIT_RELAY_TEST_URI_KEY)) {
+			try {
+				return (UriComponents) arrowheadContext.get(GATEKEEPER_INIT_RELAY_TEST_URI_KEY);
+			} catch (final ClassCastException ex) {
+				throw new ArrowheadException("QoS Monitor can't find gatekeeper init_relay_test URI.");
+			}
+		}
+		
+		throw new ArrowheadException("QoS Monitor can't find gatekeeper init_relay_test URI.");
 	}
 }

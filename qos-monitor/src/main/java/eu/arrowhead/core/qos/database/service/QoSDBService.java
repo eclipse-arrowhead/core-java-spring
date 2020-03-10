@@ -472,6 +472,26 @@ public class QoSDBService {
 		}
 	}
 	
+	//-------------------------------------------------------------------------------------------------	
+	@Transactional (rollbackFor = ArrowheadException.class)
+	public void updateInterDirectCountStartedAt() {
+		logger.debug("updateInterDirectCountStartedAt started...");
+
+		try {
+			final List<QoSInterDirectPingMeasurement> measurementList = qoSInterDirectMeasurementPingRepository.findAll();
+			for (final QoSInterDirectPingMeasurement qoSInterDirectPingMeasurement : measurementList) {
+				qoSInterDirectPingMeasurement.setSent(0);
+				qoSInterDirectPingMeasurement.setReceived(0);
+				qoSInterDirectPingMeasurement.setCountStartedAt(ZonedDateTime.now());
+			}
+			qoSInterDirectMeasurementPingRepository.saveAll(measurementList);
+			qoSInterDirectMeasurementPingRepository.flush();
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Transactional (rollbackFor = ArrowheadException.class)
 	public QoSInterDirectMeasurement createInterDirectMeasurement(final Cloud cloud, final String address, final QoSMeasurementType type, final ZonedDateTime aroundNow) {
@@ -757,9 +777,9 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurementsPageByCloudAndSystemAddressResponse(final CloudResponseDTO cloud, final String address) {
-		logger.debug("getInterDirectPingMeasurementsPageByCloudAndSystemAddressResponse started...");
-		final Optional<QoSInterDirectPingMeasurement> optional = getInterDirectPingMeasurementsPageByCloudAndSystemAddress(cloud, address);
+	public QoSInterDirectPingMeasurementResponseDTO getInterDirectPingMeasurementByCloudAndSystemAddressResponse(final CloudResponseDTO cloud, final String address) {
+		logger.debug("getInterDirectPingMeasurementByCloudAndSystemAddressResponse started...");
+		final Optional<QoSInterDirectPingMeasurement> optional = getInterDirectPingMeasurementByCloudAndSystemAddress(cloud, address);
 		if (optional.isEmpty()) {
 			throw new InvalidParameterException("Have no direct ping measurement with cloud " + cloud.getName() + "." + cloud.getOperator() + " system address " + address);
 		}
@@ -767,8 +787,8 @@ public class QoSDBService {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	public Optional<QoSInterDirectPingMeasurement> getInterDirectPingMeasurementsPageByCloudAndSystemAddress(final CloudResponseDTO cloud, final String address) {
-		logger.debug("getInterDirectPingMeasurementsPageByCloudAndSystemAddress started...");
+	public Optional<QoSInterDirectPingMeasurement> getInterDirectPingMeasurementByCloudAndSystemAddress(final CloudResponseDTO cloud, final String address) {
+		logger.debug("getInterDirectPingMeasurementByCloudAndSystemAddress started...");
 		
 		validateCloudResponseDTO(cloud);
 		if (Utilities.isEmpty(address)) {
@@ -806,6 +826,26 @@ public class QoSDBService {
 			}
 			qosInterRelayEchoMeasurementRepository.saveAll(measurementList);
 			qosInterRelayEchoMeasurementRepository.flush();
+		} catch (final Exception ex) {
+			logger.debug(ex.getMessage(), ex);
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		}
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public Optional<QoSInterRelayMeasurement> getInterRelayMeasurement(final CloudResponseDTO cloudResponseDTO, final RelayResponseDTO relayResponseDTO, final QoSMeasurementType type) {
+		logger.debug("getInterRelayMeasurement started ...");
+		
+		validateCloudResponseDTO(cloudResponseDTO);
+		validateRelayResponseDTO(relayResponseDTO);
+
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		final Relay relay = DTOConverter.convertRelayResponseDTOToRelay(relayResponseDTO);
+		
+		try {
+			return qosInterRelayMeasurementRepository.findByCloudAndRelayAndMeasurementType(cloud, relay, type);
+		} catch (final InvalidParameterException ex) {
+			throw ex;
 		} catch (final Exception ex) {
 			logger.debug(ex.getMessage(), ex);
 			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
@@ -1065,6 +1105,15 @@ public class QoSDBService {
 												+ " and relay " + relayResponseDTO.getAddress() + ":" + relayResponseDTO.getPort());
 		}
 		return DTOConverter.convertQoSInterRelayEchoMeasurementToQoSInterRelayEchoMeasurementResponseDTO(optional.get());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	public List<QoSInterRelayMeasurement> getInterRelayEchoMeasurementByCloud(final CloudResponseDTO cloudResponseDTO) {
+		logger.debug("getInterRelayEchoMeasurementByCloud started ...");
+		
+		validateCloudResponseDTO(cloudResponseDTO);
+		final Cloud cloud = DTOConverter.convertCloudResponseDTOToCloud(cloudResponseDTO);
+		return qosInterRelayMeasurementRepository.findByCloudAndMeasurementType(cloud, QoSMeasurementType.RELAY_ECHO);
 	}
 	
 	//-------------------------------------------------------------------------------------------------

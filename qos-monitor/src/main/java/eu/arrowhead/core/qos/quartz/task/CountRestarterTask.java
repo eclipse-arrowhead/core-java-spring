@@ -45,6 +45,7 @@ public class CountRestarterTask implements Job {
 		}
 
 		qoSDBService.updateIntraCountStartedAt();
+		qoSDBService.updateInterDirectCountStartedAt();
 		qoSDBService.updateInterRelayCountStartedAt();
 
 		logger.debug("Finished: count restarter task");

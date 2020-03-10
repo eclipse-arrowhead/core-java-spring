@@ -170,6 +170,9 @@ public class CoreCommonConstants {
 	public static final String CLOUD_PING_TTL_INTERVAL = "cloud_ping_ttl_interval_minutes";
 	public static final String $CLOUD_PING_TTL_INTERVAL_WD = "${" + CLOUD_PING_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_CLOUD_PING_TTL_INTERVAL_MINUTES + "}";
 	
+	public static final String RELAY_ECHO_TTL_INTERVAL = "relay_echo_ttl_interval_minutes";
+	public static final String $RELAY_ECHO_TTL_INTERVAL_WD = "${" + RELAY_ECHO_TTL_INTERVAL + ":" + CoreDefaults.DEFAULT_RELAY_ECHO_TTL_INTERVAL_MINUTES + "}";
+	
 	public static final String RELAY_TEST_TIME_TO_REPEAT = "relay.test.time_to_repeat";
 	public static final String $RELAY_TEST_TIME_TO_REPEAT_WD = "${" + RELAY_TEST_TIME_TO_REPEAT + ":" + CoreDefaults.DEFAULT_RELAY_TEST_TIME_TO_REPEAT + "}";
 	public static final String RELAY_TEST_TIMEOUT = "rely.test.timeout"; 
