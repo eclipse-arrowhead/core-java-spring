@@ -9,8 +9,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.ZonedDateTime;
@@ -42,15 +46,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementListResponseDTO;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
-import eu.arrowhead.common.dto.internal.QoSIntraMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
+import eu.arrowhead.common.dto.internal.RelayRequestDTO;
+import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.ErrorMessageDTO;
 import eu.arrowhead.common.dto.shared.QoSMeasurementType;
 import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.ExceptionType;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
+import eu.arrowhead.core.qos.service.RelayTestService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = QoSMonitorMain.class)
@@ -66,6 +74,7 @@ public class QoSMonitorControllerTest {
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_MGMT_URI = QOS_MONITOR_PING_MEASUREMENTS_MGMT_URI + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String GET_QOS_MONITOR_PING_MEASUREMENTS_BY_SYSTEM_ID_URI = CommonConstants.OP_QOS_MONITOR_INTRA_PING_MEASUREMENT + "/{" + PATH_VARIABLE_ID + "}";
 	private static final String QOS_MONITOR_PUBLIC_KEY_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_KEY_URI;
+	private static final String QOS_MONITOR_INIT_RELAY_TEST_URI = CommonConstants.QOS_MONITOR_URI + CommonConstants.OP_QOS_MONITOR_INIT_RELAY_TEST_URI;
 
 	private static final String ID_NOT_VALID_ERROR_MESSAGE = " Id must be greater than 0. ";
 	private static final String PAGE_OR_SIZE_ERROR_MESSAGE = "Defined page or size could not be with undefined size or page.";
@@ -80,14 +89,17 @@ public class QoSMonitorControllerTest {
 	private ObjectMapper objectMapper;
 
 	@MockBean(name = "mockQoSDBService") 
-	QoSDBService qoSDBService;
+	private QoSDBService qoSDBService;
+	
+	@MockBean(name = "mockRelayTestService")
+	private RelayTestService relayTestService;
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
 	
 	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
 	private boolean secure;
-
+	
 	//=================================================================================================
 	// methods
 
@@ -351,7 +363,491 @@ public class QoSMonitorControllerTest {
 		
 		getPublicKey(status().isOk());
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestTargetCloudNull() throws Exception {
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Cloud is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestTargetCloudOperatorNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestTargetCloudOperatorEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator(" ");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Cloud operator is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestTargetCloudNameNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Cloud name is null or empty", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestTargetCloudNameEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName(" ");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Cloud name is null or empty", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayAddressNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayAddressBlank() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress(" ");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay address is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayPortNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay port is null", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayPortTooLow() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(-2);
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertTrue(error.getErrorMessage().contains("Relay port must be between"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayPortTooHigh() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(200000);
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertTrue(error.getErrorMessage().contains("Relay port must be between"));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayTypeNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayTypeBlank() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType(" ");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay type is null or blank", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayTypeInvalid() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("invalid");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay type is invalid", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestRelayTypeGatekeeper() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEKEEPER_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Relay type is invalid", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestQueueIdNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Queue id is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestQueueIdEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId(" ");
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Queue id is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestPeerNameNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Peer name is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestPeerNameEmpty() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName(" ");
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Peer name is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestReceiverPublicKeyNull() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Receiver QoS Monitor's public key is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestReceiverPublicKeyBlank() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey(" ");
+		
+		final MvcResult result = postInitTestRelayTest(request, status().isBadRequest());
+		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
+		
+		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
+		Assert.assertEquals(QOS_MONITOR_INIT_RELAY_TEST_URI, error.getOrigin());
+		Assert.assertEquals("Receiver QoS Monitor's public key is null or blank.", error.getErrorMessage());
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestOk() throws Exception {
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
+		relay.setType("GATEWAY_RELAY");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setTargetCloud(targetCloud);
+		request.setRelay(relay);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey("valid key");
+		
+		doNothing().when(relayTestService).initRelayTest(any(QoSMonitorSenderConnectionRequestDTO.class));
+		
+		postInitTestRelayTest(request, status().isCreated());
 
+		verify(relayTestService, times(1)).initRelayTest(any(QoSMonitorSenderConnectionRequestDTO.class));
+	}
+	
 	//=================================================================================================
 	// assistant methods
 
@@ -438,8 +934,17 @@ public class QoSMonitorControllerTest {
 	
 	//-------------------------------------------------------------------------------------------------	
 	private MvcResult getPublicKey(final ResultMatcher matcher) throws Exception {
-		return this.mockMvc.perform(get((QOS_MONITOR_PUBLIC_KEY_URI))
+		return this.mockMvc.perform(get(QOS_MONITOR_PUBLIC_KEY_URI)
 						   .accept(MediaType.TEXT_PLAIN))
+						   .andExpect(matcher)
+						   .andReturn();
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MvcResult postInitTestRelayTest(final QoSMonitorSenderConnectionRequestDTO request, final ResultMatcher matcher) throws Exception {
+		return this.mockMvc.perform(post(QOS_MONITOR_INIT_RELAY_TEST_URI)
+						   .contentType(MediaType.APPLICATION_JSON)
+						   .content(objectMapper.writeValueAsBytes(request)))
 						   .andExpect(matcher)
 						   .andReturn();
 	}

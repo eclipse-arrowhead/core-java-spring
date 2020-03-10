@@ -531,7 +531,7 @@ public class QoSMonitorController {
 		logger.debug("validateRelayRequest started...");
 		
 		if (relay == null) {
-			throw new BadPayloadException("relay is null", HttpStatus.SC_BAD_REQUEST, origin);
+			throw new BadPayloadException("Relay is null", HttpStatus.SC_BAD_REQUEST, origin);
 		}
 			
 		if (Utilities.isEmpty(relay.getAddress())) {
