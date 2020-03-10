@@ -49,6 +49,7 @@ import eu.arrowhead.common.dto.internal.CertificateSigningRequestDTO;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
+import eu.arrowhead.common.exception.InvalidParameterException;
 
 class CertificateAuthorityUtils {
 
@@ -61,16 +62,16 @@ class CertificateAuthorityUtils {
         try {
             final byte[] csrBytes = Base64.getDecoder().decode(csr.getEncodedCSR());
             return new JcaPKCS10CertificationRequest(csrBytes);
-        } catch (Exception ex) {
-            logger.error("Failed to parse request as a PKCS10 CSR, because: " + ex.getMessage());
-            throw new BadPayloadException("Failed to parse request as a PKCS10 CSR", ex);
+        } catch (Exception e) {
+            logger.error("Failed to parse request as a PKCS10 CSR, because: " + e.getMessage());
+            throw new BadPayloadException("Failed to parse request as a PKCS10 CSR", e);
         }
     }
 
     static String encodeCertificate(X509Certificate certificate) {
         try {
             return Base64.getEncoder().encodeToString(certificate.getEncoded());
-        } catch (CertificateEncodingException e) {
+        } catch (CertificateEncodingException | NullPointerException e) {
             throw new AuthException("Certificate encoding failed! (" + e.getMessage() + ")", e);
         }
     }
@@ -87,6 +88,12 @@ class CertificateAuthorityUtils {
     }
 
     static void checkCommonName(JcaPKCS10CertificationRequest csr, String cloudCN) {
+        if (csr == null) {
+            throw new BadPayloadException("CSR cannot be null");
+        }
+        if (cloudCN == null || cloudCN.isEmpty()) {
+            throw new BadPayloadException("CloudCN cannot be null");
+        }
         final String clientCN = Utilities.getCertCNFromSubject(csr.getSubject().toString());
         if (!Utilities.isKeyStoreCNArrowheadValid(clientCN, cloudCN)) {
             throw new BadPayloadException(
@@ -97,20 +104,21 @@ class CertificateAuthorityUtils {
 
     static void checkCsrSignature(JcaPKCS10CertificationRequest csr) {
         try {
-            ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder().setProvider(PROVIDER)
+            final ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder()
+                    .setProvider(PROVIDER)
                     .build(csr.getSubjectPublicKeyInfo());
             if (!csr.isSignatureValid(verifierProvider)) {
-                throw new AuthException("Certificate request has invalid signature! (key pair does not match)");
+                throw new BadPayloadException("Certificate request has invalid signature! (key pair does not match)");
             }
-        } catch (OperatorCreationException | PKCSException e) {
-            throw new AuthException("Encapsulated " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
+        } catch (OperatorCreationException | PKCSException | NullPointerException e) {
+            throw new BadPayloadException("Encapsulated " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
         }
     }
 
     static PublicKey getClientKey(JcaPKCS10CertificationRequest csr) {
         try {
             return csr.getPublicKey();
-        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NullPointerException e) {
             // This should not be possible after a successful signature verification
             throw new DataNotFoundException("Extracting the public key from the CSR failed (" + e.getMessage() + ")",
                     e);
@@ -136,28 +144,28 @@ class CertificateAuthorityUtils {
             return new JcaX509CertificateConverter().setProvider(PROVIDER)
                     .getCertificate(builder.build(signerBuilder.build(cloudPrivateKey)));
         } catch (CertificateException e) {
-            throw new AuthException("Certificate encoding failed! (" + e.getMessage() + ")", e);
+            throw new BadPayloadException("Certificate encoding failed! (" + e.getMessage() + ")", e);
         } catch (OperatorCreationException e) {
-            throw new AuthException("Certificate signing failed! (" + e.getMessage() + ")", e);
+            throw new BadPayloadException("Certificate signing failed! (" + e.getMessage() + ")", e);
         }
     }
 
     /**
-         * Adding the following extensions to the new certificate:
+     * Adding the following extensions to the new certificate:
      * <ol>
      * <li>The subject alternative name makes possible to use the certificate for
      * accessing a host via IP address or hostname</li>
-         * 
+     * 
      * <li>The subject key identifier provides a hashed value that should uniquely
      * identify the public key</li>
-         * 
+     * 
      * <li>The authority key identifier provides a hashed value that should uniquely
      * identify the issuer of the certificate</li>
-         * 
+     * 
      * <li>And this basic constraint is for forbidding issuing other certificates
      * under this certificate</li>
      * </ol>
-         */
+     */
     static void addCertificateExtensions(X509v3CertificateBuilder builder, JcaPKCS10CertificationRequest csr,
             PublicKey clientKey, X509Certificate cloudCertificate) {
         try {
@@ -170,14 +178,17 @@ class CertificateAuthorityUtils {
             builder.addExtension(Extension.authorityKeyIdentifier, false,
                     extUtils.createAuthorityKeyIdentifier(cloudCertificate));
             builder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
-        } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException e) {
-            throw new AuthException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
+        } catch (NoSuchAlgorithmException | CertIOException | CertificateEncodingException | NullPointerException e) {
+            throw new InvalidParameterException("Appending extensions to the certificate failed! (" + e.getMessage() + ")", e);
         }
     }
 
     static List<GeneralName> getSubjectAlternativeNames(JcaPKCS10CertificationRequest csr) {
-        List<GeneralName> alternativeNames = new ArrayList<>();
+        if (csr == null) {
+            throw new InvalidParameterException("CSR cannot be null");
+        }
 
+        List<GeneralName> alternativeNames = new ArrayList<>();
         for (final Attribute attribute : csr.getAttributes()) {
             if (attribute == null) {
                 continue;
