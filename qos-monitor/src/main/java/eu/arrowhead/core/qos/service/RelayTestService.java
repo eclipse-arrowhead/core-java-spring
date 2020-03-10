@@ -13,15 +13,12 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.CloudWithRelaysResponseDTO;
@@ -37,6 +34,7 @@ import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.qos.database.service.QoSDBService;
 import eu.arrowhead.core.qos.thread.ReceiverSideRelayTestThread;
+import eu.arrowhead.core.qos.thread.RelayTestThreadFactory;
 import eu.arrowhead.core.qos.thread.SenderSideRelayTestThread;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
@@ -51,9 +49,6 @@ public class RelayTestService {
 	
 	@Resource(name = CommonConstants.ARROWHEAD_CONTEXT)
 	private Map<String,Object> arrowheadContext;
-	
-	@Autowired
-	private ApplicationContext appContext;
 
 	@Autowired
 	private SSLProperties sslProps;
@@ -62,16 +57,10 @@ public class RelayTestService {
 	private QoSMonitorDriver qosMonitorDriver;
 	
 	@Autowired
+	private RelayTestThreadFactory threadFactory;
+	
+	@Autowired
 	private QoSDBService qosDBService;
-	
-	@Value(CoreCommonConstants.$RELAY_TEST_TIME_TO_REPEAT_WD)
-	private byte noIteration;
-	
-	@Value(CoreCommonConstants.$RELAY_TEST_TIMEOUT_WD)
-	private long timeout;
-	
-	@Value(CoreCommonConstants.$RELAY_TEST_MESSAGE_SIZE_WD)
-	private int testMessageSize;
 	
 	private final Logger logger = LogManager.getLogger(RelayTestService.class);
 	
@@ -120,8 +109,7 @@ public class RelayTestService {
 
 		ReceiverSideRelayTestThread thread = null;
 		try {
-			thread = new ReceiverSideRelayTestThread(appContext, relayClient, session, requesterCloud, relay, request.getSenderQoSMonitorPublicKey(), noIteration, testMessageSize,
-													 timeout);
+			thread = threadFactory.createReceiverSideThread(relayClient, session, requesterCloud, relay, request.getSenderQoSMonitorPublicKey()); 
 			final ProviderSideRelayInfo info = relayClient.initializeProviderSideRelay(session, thread);
 			thread.init(info.getQueueId(), info.getMessageSender(), info.getControlMessageSender());
 			thread.start();
@@ -154,9 +142,8 @@ public class RelayTestService {
 		
 		SenderSideRelayTestThread thread = null;
 		try {
-			thread = new SenderSideRelayTestThread(appContext, relayClient, session, targetCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId(),
-												   noIteration, testMessageSize, timeout);
-			ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
+			thread = threadFactory.createSenderSideThread(relayClient, session, targetCloud, relay, request.getReceiverQoSMonitorPublicKey(), request.getQueueId()); 
+			final ConsumerSideRelayInfo info = relayClient.initializeConsumerSideRelay(session, thread, request.getPeerName(), request.getQueueId());
 			thread.init(info.getMessageSender(), info.getControlResponseMessageSender());
 			thread.start();
 		} catch (final JMSException ex) {
@@ -283,9 +270,11 @@ public class RelayTestService {
 	private RelayResponseDTO findRelayResponseDTO(final CloudWithRelaysResponseDTO cloud, final String address, final int port) {
 		logger.debug("findRelayResponseDTO started...");
 
-		for (final RelayResponseDTO relay : cloud.getGatewayRelays()) {
-			if (address.equals(relay.getAddress()) && port == relay.getPort()) {
-				return relay;
+		if (cloud.getGatewayRelays() != null) {
+			for (final RelayResponseDTO relay : cloud.getGatewayRelays()) {
+				if (address.equals(relay.getAddress()) && port == relay.getPort()) {
+					return relay;
+				}
 			}
 		}
 		
