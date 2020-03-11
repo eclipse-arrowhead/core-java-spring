@@ -40,7 +40,7 @@ public class RelayEchoTaskConfig {
 
 	//-------------------------------------------------------------------------------------------------
 	@Bean
-	public SchedulerFactoryBean cloudPingSheduler() {
+	public SchedulerFactoryBean relayEchoScheduler() {
 		final AutoWiringSpringBeanQuartzTaskFactory jobFactory = new AutoWiringSpringBeanQuartzTaskFactory();
 		jobFactory.setApplicationContext(applicationContext);
 		
