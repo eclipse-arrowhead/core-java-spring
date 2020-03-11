@@ -4,13 +4,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.security.PublicKey;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -31,13 +35,21 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
@@ -53,7 +65,10 @@ import eu.arrowhead.core.qos.service.QoSMonitorDriver;
 import eu.arrowhead.core.qos.service.RelayTestService;
 import eu.arrowhead.core.qos.thread.RelayTestThreadFactory;
 import eu.arrowhead.core.qos.thread.SenderSideRelayTestThread;
+import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
+import eu.arrowhead.relay.gateway.ControlRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
+import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
 @RunWith(SpringRunner.class)
 public class RelayTestServiceTest {
@@ -73,9 +88,6 @@ public class RelayTestServiceTest {
 	@Mock
 	private RelayTestThreadFactory threadFactory;
 	
-	@Autowired
-	private ApplicationContext appContext;
-
 	//=================================================================================================
 	// methods
 	
@@ -530,7 +542,6 @@ public class RelayTestServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@Ignore //TODO: delete this after fixing test
 	@Test(expected = ArrowheadException.class)
 	public void testInitRelayTestRelayInitFailed() throws JMSException {
 		final RelayRequestDTO relay = new RelayRequestDTO();
@@ -554,18 +565,17 @@ public class RelayTestServiceTest {
 
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
-		when(relayClient.isConnectionClosed(any(Session.class))).thenReturn(false);
+		final SenderSideRelayTestThread testThreadDoNothing = getSenderSideTestThreadDoNothing();
+		when(threadFactory.createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString()))
+																																	.thenReturn(testThreadDoNothing);  
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString())).thenThrow(JMSException.class);
 		
-		when(threadFactory.createSenderSideThread(eq(relayClient), any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(),
-				anyString())).thenReturn(getSenderSideTestThreadDoNothing()); // mockito error here 
 		
 		relayTestService.initRelayTest(request);
 		
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
 		verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
-		verify(threadFactory, times(1)).createSenderSideThread(any(GatewayRelayClient.class), any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(),
-															   anyString());
+		verify(threadFactory, times(1)).createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString());
 		verify(relayClient, times(1)).initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString());
 		verify(relayClient, times(1)).closeConnection(any(Session.class));
 	}
@@ -621,8 +631,73 @@ public class RelayTestServiceTest {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
+	private GatewayRelayClient getTestClient() {
+		return new GatewayRelayClient() {
+			public boolean isConnectionClosed(final Session session) { return false; }
+			public Session createConnection(final String host, final int port, final boolean secure) throws JMSException { return getTestSession();	}
+			public void closeConnection(final Session session) {}
+			public void validateSwitchControlMessage(final Message msg) throws JMSException {}
+			public void sendSwitchControlMessage(final Session session, final MessageProducer sender, final String queueId) throws JMSException {}
+			public void sendCloseControlMessage(final Session session, final MessageProducer sender, final String queueId) throws JMSException {}
+			public void sendBytes(final Session session, final MessageProducer sender, final PublicKey peerPublicKey, final byte[] bytes) throws JMSException {}
+			public ProviderSideRelayInfo initializeProviderSideRelay(final Session session, final MessageListener listener) throws JMSException { return null; }
+			public ControlRelayInfo initializeControlRelay(final Session session, final String peerName, final String queueId) throws JMSException { return null; }
+			public ConsumerSideRelayInfo initializeConsumerSideRelay(final Session session, final MessageListener listener, final String peerName, final String queueId) throws JMSException { return null; }
+			public void handleCloseControlMessage(final Message msg, final Session session) throws JMSException {}
+			public byte[] getBytesFromMessage(final Message msg, final PublicKey peerPublicKey) throws JMSException { return null; }
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ApplicationContext getTestApplicationContext() {
+		return new ApplicationContext() {
+			public Resource getResource(final String location) { return null; }
+			public ClassLoader getClassLoader() { return null; }
+			public Resource[] getResources(final String locationPattern) throws IOException { return null; }
+			public void publishEvent(final Object event) {}
+			public String getMessage(final String code, final Object[] args, final String defaultMessage, final Locale locale) { return null; }
+			public String getMessage(final String code, final Object[] args, final Locale locale) throws NoSuchMessageException { return null; }
+			public String getMessage(final MessageSourceResolvable resolvable, final Locale locale) throws NoSuchMessageException { return null; }
+			public BeanFactory getParentBeanFactory() { return null; }
+			public boolean containsLocalBean(final String name) { return false; }
+			public boolean isTypeMatch(final String name, final Class<?> typeToMatch) throws NoSuchBeanDefinitionException { return false; }
+			public boolean isTypeMatch(final String name, final ResolvableType typeToMatch) throws NoSuchBeanDefinitionException { return false; }
+			public boolean isSingleton(final String name) throws NoSuchBeanDefinitionException { return false; }
+			public boolean isPrototype(final String name) throws NoSuchBeanDefinitionException { return false; }
+			public Class<?> getType(final String name) throws NoSuchBeanDefinitionException { return null; }
+			public <T> ObjectProvider<T> getBeanProvider(final ResolvableType requiredType) { return null; }
+			public <T> ObjectProvider<T> getBeanProvider(final Class<T> requiredType) { return null; }
+			public <T> T getBean(final Class<T> requiredType, final Object... args) throws BeansException { return null; }
+			public Object getBean(final String name, final Object... args) throws BeansException { return null;	}
+			public <T> T getBean(final String name, final Class<T> requiredType) throws BeansException { return null; }
+			public <T> T getBean(final Class<T> requiredType) throws BeansException { return null; }
+			public Object getBean(final String name) throws BeansException { return null; }
+			public String[] getAliases(final String name) { return null; }
+			public boolean containsBean(final String name) { return false; }
+			public Map<String,Object> getBeansWithAnnotation(final Class<? extends Annotation> annotationType) throws BeansException { return null; }
+			public <T> Map<String,T> getBeansOfType(final Class<T> type, final boolean includeNonSingletons, final boolean allowEagerInit) throws BeansException { return null; }
+			public <T> Map<String,T> getBeansOfType(final Class<T> type) throws BeansException { return null; }
+			public String[] getBeanNamesForType(final Class<?> type, final boolean includeNonSingletons, final boolean allowEagerInit) { return null; }
+			public String[] getBeanNamesForType(final Class<?> type) { return null;	}
+			public String[] getBeanNamesForType(final ResolvableType type) { return null; }
+			public String[] getBeanNamesForAnnotation(final Class<? extends Annotation> annotationType) { return null; }
+			public String[] getBeanDefinitionNames() { return null;	}
+			public int getBeanDefinitionCount() { return 0;	}
+			public <A extends Annotation> A findAnnotationOnBean(final String beanName, final Class<A> annotationType) throws NoSuchBeanDefinitionException { return null; }
+			public boolean containsBeanDefinition(final String beanName) { return false; }
+			public Environment getEnvironment() { return null; }
+			public long getStartupDate() { return 0; }
+			public ApplicationContext getParent() { return null; }
+			public String getId() { return null; }
+			public String getDisplayName() { return null; }
+			public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException { return null; }
+			public String getApplicationName() { return null; }
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
 	private SenderSideRelayTestThread getSenderSideTestThreadDoNothing() {
-		return new SenderSideRelayTestThread(appContext, relayClient, getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", "queueId", (byte) 1, 1, 1) {
+		return new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", "queueId", (byte) 1, 1, 1) {
 			public void run() {
 				// do nothing
 			}
