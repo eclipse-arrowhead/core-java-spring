@@ -570,7 +570,6 @@ public class RelayTestServiceTest {
 																																	.thenReturn(testThreadDoNothing);  
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString())).thenThrow(JMSException.class);
 		
-		
 		relayTestService.initRelayTest(request);
 		
 		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
@@ -697,7 +696,9 @@ public class RelayTestServiceTest {
 	
 	//-------------------------------------------------------------------------------------------------
 	private SenderSideRelayTestThread getSenderSideTestThreadDoNothing() {
-		return new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", "queueId", (byte) 1, 1, 1) {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		
+		return new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId", (byte) 1, 1, 1) {
 			public void run() {
 				// do nothing
 			}
