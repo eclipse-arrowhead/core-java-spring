@@ -7,8 +7,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.security.PublicKey;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
@@ -33,10 +37,26 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.internal.CloudResponseDTO;
+import eu.arrowhead.common.dto.internal.RelayResponseDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.ControlRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
@@ -63,7 +83,7 @@ public class RelayTestThreadFactoryTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testInitOk() {
-		threadFactory.init(getTestClient());
+		threadFactory.init(getTestClient(false));
 		
 		final Object relayClient = ReflectionTestUtils.getField(threadFactory, "relayClient");
 		Assert.assertNotNull(relayClient);
@@ -72,13 +92,106 @@ public class RelayTestThreadFactoryTest {
 		Assert.assertTrue(initialized);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testCreateSenderSideThreadFactoryNotInitialized() {
+		threadFactory.createSenderSideThread(null, null, null, null, null);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadRelaySessionNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		
+		threadFactory.createSenderSideThread(null, null, null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadRelaySessionClosed() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(true));
+		
+		threadFactory.createSenderSideThread(getTestSession(), null, null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadRequesterCloudNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createSenderSideThread(getTestSession(), null, null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadRelayNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), null, null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadPublicKeyNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadPublicKeyEmpty() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), " ", null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadQueueIdNull() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", null);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateSenderSideThreadQueueIdEmpty() {
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		
+		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", " ");
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testCreateSenderSideThreadOk() {
+		ReflectionTestUtils.setField(threadFactory, "appContext", getTestApplicationContext());
+		ReflectionTestUtils.setField(threadFactory, "initialized", true);
+		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
+		ReflectionTestUtils.setField(threadFactory, "noIteration", (byte) 1);
+		ReflectionTestUtils.setField(threadFactory, "timeout", 1);
+		ReflectionTestUtils.setField(threadFactory, "testMessageSize", 1);
+
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		final SenderSideRelayTestThread thread = threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId");
+		
+		Assert.assertNotNull(thread);
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private GatewayRelayClient getTestClient() {
+	private GatewayRelayClient getTestClient(final boolean isClosed) {
 		return new GatewayRelayClient() {
-			public boolean isConnectionClosed(final Session session) { return false; }
+			public boolean isConnectionClosed(final Session session) { return isClosed; }
 			public Session createConnection(final String host, final int port, final boolean secure) throws JMSException { return getTestSession();	}
 			public void closeConnection(final Session session) {}
 			public void validateSwitchControlMessage(final Message msg) throws JMSException {}
@@ -134,6 +247,53 @@ public class RelayTestThreadFactoryTest {
 			public TemporaryQueue createTemporaryQueue() throws JMSException { return null; }
 			public TemporaryTopic createTemporaryTopic() throws JMSException { return null;	}
 			public void unsubscribe(final String name) throws JMSException {}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private ApplicationContext getTestApplicationContext() {
+		return new ApplicationContext() {
+			public Resource getResource(final String location) { return null; }
+			public ClassLoader getClassLoader() { return null; }
+			public Resource[] getResources(final String locationPattern) throws IOException { return null; }
+			public void publishEvent(final Object event) {}
+			public String getMessage(final String code, final Object[] args, final String defaultMessage, final Locale locale) { return null; }
+			public String getMessage(final String code, final Object[] args, final Locale locale) throws NoSuchMessageException { return null; }
+			public String getMessage(final MessageSourceResolvable resolvable, final Locale locale) throws NoSuchMessageException { return null; }
+			public BeanFactory getParentBeanFactory() { return null; }
+			public boolean containsLocalBean(final String name) { return false; }
+			public boolean isTypeMatch(final String name, final Class<?> typeToMatch) throws NoSuchBeanDefinitionException { return false; }
+			public boolean isTypeMatch(final String name, final ResolvableType typeToMatch) throws NoSuchBeanDefinitionException { return false; }
+			public boolean isSingleton(final String name) throws NoSuchBeanDefinitionException { return false; }
+			public boolean isPrototype(final String name) throws NoSuchBeanDefinitionException { return false; }
+			public Class<?> getType(final String name) throws NoSuchBeanDefinitionException { return null; }
+			public <T> ObjectProvider<T> getBeanProvider(final ResolvableType requiredType) { return null; }
+			public <T> ObjectProvider<T> getBeanProvider(final Class<T> requiredType) { return null; }
+			public <T> T getBean(final Class<T> requiredType, final Object... args) throws BeansException { return null; }
+			public Object getBean(final String name, final Object... args) throws BeansException { return null;	}
+			public <T> T getBean(final String name, final Class<T> requiredType) throws BeansException { return null; }
+			public <T> T getBean(final Class<T> requiredType) throws BeansException { return null; }
+			public Object getBean(final String name) throws BeansException { return null; }
+			public String[] getAliases(final String name) { return null; }
+			public boolean containsBean(final String name) { return false; }
+			public Map<String,Object> getBeansWithAnnotation(final Class<? extends Annotation> annotationType) throws BeansException { return null; }
+			public <T> Map<String,T> getBeansOfType(final Class<T> type, final boolean includeNonSingletons, final boolean allowEagerInit) throws BeansException { return null; }
+			public <T> Map<String,T> getBeansOfType(final Class<T> type) throws BeansException { return null; }
+			public String[] getBeanNamesForType(final Class<?> type, final boolean includeNonSingletons, final boolean allowEagerInit) { return null; }
+			public String[] getBeanNamesForType(final Class<?> type) { return null;	}
+			public String[] getBeanNamesForType(final ResolvableType type) { return null; }
+			public String[] getBeanNamesForAnnotation(final Class<? extends Annotation> annotationType) { return null; }
+			public String[] getBeanDefinitionNames() { return null;	}
+			public int getBeanDefinitionCount() { return 0;	}
+			public <A extends Annotation> A findAnnotationOnBean(final String beanName, final Class<A> annotationType) throws NoSuchBeanDefinitionException { return null; }
+			public boolean containsBeanDefinition(final String beanName) { return false; }
+			public Environment getEnvironment() { return null; }
+			public long getStartupDate() { return 0; }
+			public ApplicationContext getParent() { return null; }
+			public String getId() { return null; }
+			public String getDisplayName() { return null; }
+			public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException { return null; }
+			public String getApplicationName() { return null; }
 		};
 	}
 }

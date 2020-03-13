@@ -59,6 +59,10 @@ public class RelayTestThreadFactory {
 															final String receiverQoSMonitorPublicKey, final String queueId) {
 		logger.debug("createSenderSideThread started...");
 		
+		if (!initialized) {
+			throw new ArrowheadException("Thread factory is not initialized.");
+		}
+		
 		Assert.notNull(relaySession, "relaySession is null.");
 		Assert.isTrue(!relayClient.isConnectionClosed(relaySession), "relaySession is closed.");
 		Assert.notNull(targetCloud, "targetCloud is null.");
@@ -66,9 +70,6 @@ public class RelayTestThreadFactory {
 		Assert.isTrue(!Utilities.isEmpty(receiverQoSMonitorPublicKey), "public key is null or blank.");
 		Assert.isTrue(!Utilities.isEmpty(queueId), "queueId is null or blank.");
 		
-		if (!initialized) {
-			throw new ArrowheadException("Thread factory is not initialized.");
-		}
 
 		return new SenderSideRelayTestThread(appContext, relayClient, relaySession, targetCloud, relay, receiverQoSMonitorPublicKey, queueId, noIteration, testMessageSize, timeout);
 	}
@@ -78,15 +79,15 @@ public class RelayTestThreadFactory {
 																final String requesterQoSMonitorPublicKey) {
 		logger.debug("createReceiverSideThread started...");
 
+		if (!initialized) {
+			throw new ArrowheadException("Thread factory is not initialized.");
+		}
+		
 		Assert.notNull(relaySession, "relaySession is null.");
 		Assert.isTrue(!relayClient.isConnectionClosed(relaySession), "relaySession is closed.");
 		Assert.notNull(requesterCloud, "requesterCloud is null.");
 		Assert.notNull(relay, "relay is null");
 		Assert.isTrue(!Utilities.isEmpty(requesterQoSMonitorPublicKey), "public key is null or blank.");
-		
-		if (!initialized) {
-			throw new ArrowheadException("Thread factory is not initialized.");
-		}
 
 		return new ReceiverSideRelayTestThread(appContext, relayClient, relaySession, requesterCloud, relay, requesterQoSMonitorPublicKey, noIteration, testMessageSize, timeout);
 	}
