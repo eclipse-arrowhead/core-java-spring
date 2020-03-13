@@ -29,7 +29,6 @@ import javax.jms.TopicSubscriber;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -42,137 +41,111 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayResponseDTO;
-import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.relay.gateway.ConsumerSideRelayInfo;
 import eu.arrowhead.relay.gateway.ControlRelayInfo;
 import eu.arrowhead.relay.gateway.GatewayRelayClient;
 import eu.arrowhead.relay.gateway.ProviderSideRelayInfo;
 
 @RunWith(SpringRunner.class)
-public class RelayTestThreadFactoryTest {
+public class SenderSideRelayTestThreadTest {
 
 	//=================================================================================================
-	// members
-	
-	@InjectMocks
-	private RelayTestThreadFactory threadFactory;
-	
-	//=================================================================================================
-	// members
+	// methods
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test(expected = IllegalArgumentException.class)
-	public void testInitRelayClientNull() {
-		threadFactory.init(null);
+	public void testConstructorAppContextNull() {
+		new SenderSideRelayTestThread(null, null, null, null, null, null, null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorRelayClientNull() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), null, null, null, null, null, null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorRelaySessionNull() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(true), null, null, null, null, null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorRelaySessionClosed() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(true), getTestSession(), null, null, null, null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorTargetCloudNull() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), null, null, null, null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorRelayNull() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), null, null, null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorPublicKeyNull() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), null, null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorPublicKeyEmpty() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "", null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorQueueIdNull() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", null, (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorQueueIdEmpty() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", " ", (byte) 0, 0, 0);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorNoIterationNotPositive() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", "queueId", (byte) 0, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorTestMessageSizeNotPositive() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", "queueId", (byte) 10, 0, 0);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructorTimeoutNotPositive() {
+		new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", "queueId", (byte) 10, 2048, 0);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
 	@Test
-	public void testInitOk() {
-		threadFactory.init(getTestClient(false));
-		
-		final Object relayClient = ReflectionTestUtils.getField(threadFactory, "relayClient");
-		Assert.assertNotNull(relayClient);
-		
-		final boolean initialized = (boolean) ReflectionTestUtils.getField(threadFactory, "initialized");
-		Assert.assertTrue(initialized);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = ArrowheadException.class)
-	public void testCreateSenderSideThreadFactoryNotInitialized() {
-		threadFactory.createSenderSideThread(null, null, null, null, null);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadRelaySessionNull() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		
-		threadFactory.createSenderSideThread(null, null, null, null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadRelaySessionClosed() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(true));
-		
-		threadFactory.createSenderSideThread(getTestSession(), null, null, null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadTargetCloudNull() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
-		
-		threadFactory.createSenderSideThread(getTestSession(), null, null, null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadRelayNull() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
-		
-		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), null, null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadPublicKeyNull() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
-		
-		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), null, null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadPublicKeyEmpty() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
-		
-		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), " ", null);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadQueueIdNull() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
-		
-		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", null);
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Test(expected = IllegalArgumentException.class)
-	public void testCreateSenderSideThreadQueueIdEmpty() {
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
-		
-		threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), "key", " ");
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@Test
-	public void testCreateSenderSideThreadOk() {
-		ReflectionTestUtils.setField(threadFactory, "appContext", getTestApplicationContext());
-		ReflectionTestUtils.setField(threadFactory, "initialized", true);
-		ReflectionTestUtils.setField(threadFactory, "relayClient", getTestClient(false));
-		ReflectionTestUtils.setField(threadFactory, "noIteration", (byte) 1);
-		ReflectionTestUtils.setField(threadFactory, "timeout", 1);
-		ReflectionTestUtils.setField(threadFactory, "testMessageSize", 1);
-
+	public void testConstructorOk() {
+		final CloudResponseDTO targetCloud = new CloudResponseDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		final RelayResponseDTO relay = new RelayResponseDTO();
+		relay.setAddress("localhost");
+		relay.setPort(1234);
 		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
-		final SenderSideRelayTestThread thread = threadFactory.createSenderSideThread(getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId");
 		
-		Assert.assertNotNull(thread);
+		final SenderSideRelayTestThread thread = new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), targetCloud, relay, publicKey, "queueId", (byte) 10, 2048, 30000);
+		Assert.assertEquals("TEST-SENDER-testcloud.aitia|localhost:1234", thread.getName());
 	}
 	
 	//=================================================================================================
