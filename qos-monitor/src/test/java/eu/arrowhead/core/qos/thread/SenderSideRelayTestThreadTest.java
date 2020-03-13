@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.jms.BytesMessage;
+import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -148,6 +149,43 @@ public class SenderSideRelayTestThreadTest {
 		Assert.assertEquals("TEST-SENDER-testcloud.aitia|localhost:1234", thread.getName());
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitSenderNull() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		
+		final SenderSideRelayTestThread thread = new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId",
+																			   (byte) 10, 2048, 30000);
+		
+		thread.init(null, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = IllegalArgumentException.class)
+	public void testInitControlSenderNull() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		
+		final SenderSideRelayTestThread thread = new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId",
+																			   (byte) 10, 2048, 30000);
+		final MessageProducer producer = getTestProducer();
+		
+		thread.init(producer, null);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitOk() {
+		final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwms8AvBuIxqPjXmyGnqds1EIkvX/kjl+kW9a0SObsp1n/u567vbpYSa+ESZNg4KrxAHJjA8M1TvpGkq4LLrJkEUkC2WNxq3qbWQbseZrIDSpcn6C7gHObJOLjRSpGTSlRHZfncRs1h+MLApVhf6qf611mZNDgN5AqaMtBbB3UzArE3CgO0jiKzBgZGyT9RSKccjlsO6amBgZrLBY0+x6VXPJK71hwZ7/1Y2CHGsgSb20/g2P82qLYf91Eht33u01rcptsETsvGrsq6SqIKtHtmWkYMW1lWB7p2mwFpAft8llUpHewRRAU1qsKYAI6myc/sPmQuQul+4yESMSBu3KyQIDAQAB";
+		
+		final SenderSideRelayTestThread thread = new SenderSideRelayTestThread(getTestApplicationContext(), getTestClient(false), getTestSession(), new CloudResponseDTO(), new RelayResponseDTO(), publicKey, "queueId",
+																			   (byte) 10, 2048, 30000);
+		final MessageProducer producer = getTestProducer();
+		
+		Assert.assertFalse(thread.isInitialized());
+		thread.init(producer, producer);
+		Assert.assertTrue(thread.isInitialized());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -257,6 +295,34 @@ public class SenderSideRelayTestThreadTest {
 			public String getDisplayName() { return null; }
 			public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException { return null; }
 			public String getApplicationName() { return null; }
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MessageProducer getTestProducer() {
+		return new MessageProducer() {
+			public void setTimeToLive(long timeToLive) throws JMSException {}
+			public void setPriority(int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
+			public void setDisableMessageID(boolean value) throws JMSException {}
+			public void setDeliveryMode(int deliveryMode) throws JMSException {}
+			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message) throws JMSException {}
+			public void send(Message message) throws JMSException {}
+			public long getTimeToLive() throws JMSException { return 0;	}
+			public int getPriority() throws JMSException { return 0; }
+			public boolean getDisableMessageTimestamp() throws JMSException { return false; }
+			public boolean getDisableMessageID() throws JMSException { return false; }
+			public Destination getDestination() throws JMSException { return null; }
+			public int getDeliveryMode() throws JMSException { return 0; }
+			public long getDeliveryDelay() throws JMSException { return 0; }
+			public void close() throws JMSException {}
 		};
 	}
 }
