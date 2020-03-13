@@ -44,6 +44,7 @@ public class RelayTestThreadFactory {
 	//=================================================================================================
 	// methods
 	
+	//-------------------------------------------------------------------------------------------------
 	public void init(final GatewayRelayClient relayClient) {
 		logger.debug("init started...");
 		

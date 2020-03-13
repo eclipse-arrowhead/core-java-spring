@@ -1,4 +1,4 @@
-package eu.arrowhead.core.qos.database.service;
+package eu.arrowhead.core.qos.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -802,7 +802,6 @@ public class RelayTestServiceTest {
 			public TemporaryQueue createTemporaryQueue() throws JMSException { return null; }
 			public TemporaryTopic createTemporaryTopic() throws JMSException { return null;	}
 			public void unsubscribe(final String name) throws JMSException {}
-
 		};
 	}
 	
