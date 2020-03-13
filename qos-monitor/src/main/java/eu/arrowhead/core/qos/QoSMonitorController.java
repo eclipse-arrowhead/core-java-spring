@@ -284,7 +284,7 @@ public class QoSMonitorController {
 	}
 	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_DESCRIPTION, response = QoSInterDirectPingMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_DESCRIPTION, response = QoSInterDirectPingMeasurementResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_QOS_MONITOR_INTER_DIRECT_PING_MEASUREMENT_BY_CLOUD_AND_SYSTEM_HTTP_400_MESSAGE),
@@ -363,7 +363,7 @@ public class QoSMonitorController {
 	
 	//-------------------------------------------------------------------------------------------------
 	//TODO
-	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResultListDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = QUERY_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_DESCRIPTION, response = QoSInterRelayEchoMeasurementResultListDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
 	@ApiResponses(value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = POST_QOS_MONITOR_INTER_RELAY_ECHO_MEASUREMENT_RESULTS_BY_CLOUD_AND_SYSTEMT_HTTP_400_MESSAGE),

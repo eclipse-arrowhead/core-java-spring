@@ -27,11 +27,13 @@ import eu.arrowhead.common.database.entity.ServiceDefinition;
 import eu.arrowhead.common.dto.internal.CloudResponseDTO;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.dto.internal.DTOUtilities;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryFormDTO;
 import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
@@ -151,7 +153,28 @@ public class OrchestratorService {
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
 		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
 		
-		final CloudResponseDTO targetCloud = callGSD(request, flags);
+		final GSDQueryResultDTO gsdResult = callGSD(request, flags);
+		if (gsdResult == null || gsdResult.getResults() == null || gsdResult.getResults().isEmpty()) {
+			// Return empty response
+			return new OrchestrationResponseDTO();
+		}
+
+		if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
+			
+			flags.put(Flag.ONLY_PREFERRED, true);
+			final List<GSDPollResponseDTO> verifiedResults = new ArrayList<>();
+			final List<PreferredProviderDataDTO> verifiedProviders = new ArrayList<>();
+			for (final GSDPollResponseDTO result : gsdResult.getResults()) {
+				//TODO bordi QoS Manager verify
+			}
+			gsdResult.setResults(verifiedResults);
+			request.setPreferredProviders(verifiedProviders);
+			request.setOrchestrationFlags(flags);
+		} 
+		final CloudMatchmakingParameters iCCMparams = new CloudMatchmakingParameters(gsdResult, getPreferredClouds(request.getPreferredProviders()), flags.get(Flag.ONLY_PREFERRED));
+		
+		final CloudResponseDTO targetCloud = cloudMatchmaker.doMatchmaking(iCCMparams);
+		
         if (targetCloud == null || Utilities.isEmpty(targetCloud.getName())) {
         	// Return empty response
             return new OrchestrationResponseDTO();
@@ -386,6 +409,11 @@ public class OrchestratorService {
 	    return topPriorityEntriesOrchestrationProcess(orchestrationFormRequestDTO, systemId);
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public QoSReservationListResponseDTO getAllQoSReservationResponse() {
+		return DTOConverter.convertQoSReservationListToQoSReservationListResponseDTO(qosManager.fetchAllReservation());
+	}
+	
 	//=================================================================================================
 	// assistant methods
 	
@@ -513,7 +541,7 @@ public class OrchestratorService {
 	private List<OrchestrationResultDTO> compileOrchestrationResponse(final List<ServiceRegistryResponseDTO> srList, final OrchestrationFormRequestDTO request) {
 		logger.debug("compileOrchestrationResponse started...");
 		
-		List<OrchestrationResultDTO> orList = new ArrayList<>(srList.size());
+		final List<OrchestrationResultDTO> orList = new ArrayList<>(srList.size());
 		for (final ServiceRegistryResponseDTO entry : srList) {
 			final OrchestrationResultDTO result = new OrchestrationResultDTO(entry.getProvider(), entry.getServiceDefinition(), entry.getServiceUri(), entry.getSecure(), entry.getMetadata(), 
 																			 entry.getInterfaces(), entry.getVersion());
@@ -866,19 +894,12 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	private CloudResponseDTO callGSD(final OrchestrationFormRequestDTO request, final OrchestrationFlags flags) {
+	private GSDQueryResultDTO callGSD(final OrchestrationFormRequestDTO request, final OrchestrationFlags flags) {
 		logger.debug("callGSD started ...");
 		
 		final List<CloudRequestDTO> preferredClouds = getPreferredClouds(request.getPreferredProviders());
 		
-		final GSDQueryResultDTO result = orchestratorDriver.doGlobalServiceDiscovery(new GSDQueryFormDTO(request.getRequestedService(), preferredClouds));
-		if (result == null || result.getResults() == null || result.getResults().isEmpty()) {
-			return new CloudResponseDTO();
-		}
-
-		final CloudMatchmakingParameters iCCMparams = new CloudMatchmakingParameters(result, preferredClouds, flags.get(Flag.ONLY_PREFERRED));
-		
-		return cloudMatchmaker.doMatchmaking(iCCMparams);
+		return orchestratorDriver.doGlobalServiceDiscovery(new GSDQueryFormDTO(request.getRequestedService(), preferredClouds, flags.getOrDefault(Flag.ENABLE_QOS, false)));
 	}
 	
 	//-------------------------------------------------------------------------------------------------

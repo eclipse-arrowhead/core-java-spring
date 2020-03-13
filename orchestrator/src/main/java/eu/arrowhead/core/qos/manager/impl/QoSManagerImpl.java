@@ -47,6 +47,12 @@ public class QoSManagerImpl implements QoSManager {
 		verifiers.add(appContext.getBean(QoSVerifiers.PING_REQUIREMENTS_VERIFIER, QoSVerifier.class));
 		//TODO: add further verifiers here
 	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<QoSReservation> fetchAllReservation() {
+		return qosReservationDBService.getAllReservation();
+	}
 
 	//-------------------------------------------------------------------------------------------------
 	@Override

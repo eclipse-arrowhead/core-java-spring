@@ -1,5 +1,6 @@
 package eu.arrowhead.core.gatekeeper.service;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,9 +39,12 @@ import eu.arrowhead.common.dto.internal.ICNProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.ICNProposalResponseDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
+import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSMonitorSenderConnectionRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalRequestDTO;
 import eu.arrowhead.common.dto.internal.QoSRelayTestProposalResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSReservationResponseDTO;
 import eu.arrowhead.common.dto.internal.RelayRequestDTO;
 import eu.arrowhead.common.dto.internal.RelayType;
 import eu.arrowhead.common.dto.internal.ServiceRegistryListResponseDTO;
@@ -57,6 +61,7 @@ import eu.arrowhead.common.dto.shared.ServiceInterfaceResponseDTO;
 import eu.arrowhead.common.dto.shared.ServiceQueryResultDTO;
 import eu.arrowhead.common.dto.shared.ServiceRegistryResponseDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.AuthException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.common.exception.UnavailableServerException;
@@ -94,6 +99,8 @@ public class GatekeeperService {
 	
 	@Resource(name = CoreCommonConstants.GATEWAY_MATCHMAKER)
 	private RelayMatchmakingAlgorithm gatewayMatchmaker;
+	
+	private final long qosReservationPufferSeconds = 5;
 
 	//=================================================================================================
 	// methods
@@ -126,7 +133,7 @@ public class GatekeeperService {
 			}
 		}
 		
-		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent);
+		final GSDPollRequestDTO gsdPollRequestDTO = new GSDPollRequestDTO(gsdForm.getRequestedService(), getOwnCloud(), gatewayIsPresent, gsdForm.needQoSMeasurements());
 		final List<ErrorWrapperDTO> gsdPollAnswers = gatekeeperDriver.sendGSDPollRequest(cloudsToContact, gsdPollRequestDTO);
 		
 		final List<GSDPollResponseDTO> successfulResponses = new ArrayList<>();
@@ -162,6 +169,11 @@ public class GatekeeperService {
 		logger.debug("doGSDPoll started...");
 		
 		validateGSDPollRequestDTO(request);
+		
+		// Check whether need for QoS can be fulfilled or not
+		if (request.needQoSMeasurements() && !gatekeeperDriver.checkQoSEnabled()) {
+			return new GSDPollResponseDTO();
+		}
 				
 		// Querying Service Registry core system
 		final ServiceQueryResultDTO srQueryResult = gatekeeperDriver.sendServiceRegistryQuery(request.getRequestedService());
@@ -177,27 +189,54 @@ public class GatekeeperService {
 			return new GSDPollResponseDTO();
 		}
 		
-		// Cross checking Service Registry and Authorization results
+		// Cross checking Service Registry and Authorization results and add QoS Reservations
 		final Set<String> availableInterfaces = new HashSet<>();
 		int numOfProviders = 0;
+		final List<QoSMeasurementAttributesFormDTO> qosMeasurements = new ArrayList<>();
+		final Set<String> reservedProviderIdAndSystemIdPairs = getReservedProviderIdAndSystemIdPairs();
 		
 		for (final ServiceRegistryResponseDTO srEntryDTO : srQueryResult.getServiceQueryData()) {
 			final long providerId = srEntryDTO.getProvider().getId();
-			if (authorizedProviderIdsWithInterfaceIdList.containsKey(providerId)) {
+			if (authorizedProviderIdsWithInterfaceIdList.containsKey(providerId) 
+					&& !reservedProviderIdAndSystemIdPairs.contains(srEntryDTO.getProvider().getId() + "-" + srEntryDTO.getServiceDefinition().getId())) {
+				
+				final Set<String> providerInterfaces = new HashSet<>();
 				for (final ServiceInterfaceResponseDTO interfaceDTO : srEntryDTO.getInterfaces()) {
 					if (authorizedProviderIdsWithInterfaceIdList.get(providerId).contains(interfaceDTO.getId())) {
-						availableInterfaces.add(interfaceDTO.getInterfaceName());
+						providerInterfaces.add(interfaceDTO.getInterfaceName());
 					}
 				}
 				
-				numOfProviders++;	
+				if (!request.needQoSMeasurements()) {
+					availableInterfaces.addAll(providerInterfaces);
+					numOfProviders++;
+				} else {
+					try {
+						final QoSIntraPingMeasurementResponseDTO pingMeasurement = gatekeeperDriver.getQoSIntraPingMeasurementsForLocalSystem(srEntryDTO.getProvider().getId());
+						qosMeasurements.add(new QoSMeasurementAttributesFormDTO(pingMeasurement.getMeasurement().getSystem(),
+																				pingMeasurement.getLastAccessAt(),
+																				pingMeasurement.getMinResponseTime(),
+																				pingMeasurement.getMaxResponseTime(),
+																				pingMeasurement.getMeanResponseTimeWithTimeout(),
+																				pingMeasurement.getMeanResponseTimeWithoutTimeout(),
+																				pingMeasurement.getJitterWithTimeout(),
+																				pingMeasurement.getJitterWithoutTimeout(),
+																				pingMeasurement.getLostPerMeasurementPercent()));
+						availableInterfaces.addAll(providerInterfaces);
+						numOfProviders++;
+					} catch (final ArrowheadException ex) {
+						logger.debug("Exception occured during doGSDPoll - QoS details request. Provider skipped.");
+						logger.debug(ex.getMessage());
+					}					
+				}
+				
 			}		
 		}
 		
 		final Cloud ownCloud = commonDBService.getOwnCloud(true); // gatekeeper works only secure mode
 		
 		return new GSDPollResponseDTO(DTOConverter.convertCloudToCloudResponseDTO(ownCloud), request.getRequestedService().getServiceDefinitionRequirement(), List.copyOf(availableInterfaces), 
-									  numOfProviders, request.getRequestedService().getMetadataRequirements());
+									  numOfProviders, qosMeasurements, request.getRequestedService().getMetadataRequirements(), gatewayIsMandatory);
 	}
 	
 	//-------------------------------------------------------------------------------------------------
@@ -691,5 +730,21 @@ public class GatekeeperService {
 		requesterCloudDTO.setOperator(requesterCloud.getOperator());
 		
 		return requesterCloudDTO;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private Set<String> getReservedProviderIdAndSystemIdPairs() {
+		logger.debug("getReservedProviderIdAndSystemIdPairs started...");
+		
+		final Set<String> reservedProviderIdAndSystemIdPairs = new HashSet<>();
+		final List<QoSReservationResponseDTO> qosReservations = gatekeeperDriver.getQoSReservationList();
+		final ZonedDateTime now = ZonedDateTime.now();
+		
+		for (final QoSReservationResponseDTO reservation : qosReservations) {
+			if (reservation.getReservedTo().toEpochSecond() - now.toEpochSecond() <= qosReservationPufferSeconds) {
+				reservedProviderIdAndSystemIdPairs.add(reservation.getReservedProviderId() + "-" + reservation.getReservedServiceId());
+			}
+		}
+		return reservedProviderIdAndSystemIdPairs;
 	}
 }

@@ -1,7 +1,9 @@
 package eu.arrowhead.core.qos.manager.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import eu.arrowhead.common.database.entity.QoSReservation;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -12,6 +14,12 @@ public class DummyQoSManager implements QoSManager {
 	//=================================================================================================
 	// methods
 
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<QoSReservation> fetchAllReservation() {
+		return new ArrayList<>();
+	}
+	
 	//-------------------------------------------------------------------------------------------------
 	@Override
 	public List<OrchestrationResultDTO> filterReservedProviders(final List<OrchestrationResultDTO> orList, final SystemRequestDTO requester) {

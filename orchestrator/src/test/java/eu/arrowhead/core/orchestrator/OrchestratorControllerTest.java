@@ -50,7 +50,7 @@ public class OrchestratorControllerTest {
 	//=================================================================================================
 	// members
 	
-	private static final String ORCHESTRATION_PROCESS_URI = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS; 
+	private static final String ORCHESTRATION_PROCESS_URI = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI; 
 	
 	@Autowired
 	private WebApplicationContext wac;
@@ -545,7 +545,7 @@ public class OrchestratorControllerTest {
 		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
-		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/1")
+		this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI + "/1")
 					.accept(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk());
 	}
@@ -556,7 +556,7 @@ public class OrchestratorControllerTest {
 		final OrchestrationResponseDTO dto =  new OrchestrationResponseDTO();
 		when(orchestratorService.storeOchestrationProcessResponse(anyLong())).thenReturn(dto);
 		
-		final MvcResult result = this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/-1")
+		final MvcResult result = this.mockMvc.perform(get(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI + "/-1")
 											 .accept(MediaType.APPLICATION_JSON))
 											 .andExpect(status().isBadRequest())
 											 .andReturn();
@@ -564,7 +564,7 @@ public class OrchestratorControllerTest {
 		final ErrorMessageDTO error = objectMapper.readValue(result.getResponse().getContentAsByteArray(), ErrorMessageDTO.class);
 		
 		Assert.assertEquals(ExceptionType.BAD_PAYLOAD, error.getExceptionType());
-		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS + "/{" + CoreCommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
+		Assert.assertEquals(CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI + "/{" + CoreCommonConstants.COMMON_FIELD_NAME_ID + "}", error.getOrigin());
 		Assert.assertEquals("Consumer system :  Id must be greater than 0. ", error.getErrorMessage());
 	}
 	

@@ -17,7 +17,7 @@ public class QosMonitorAccessControlFilter extends CoreSystemAccessControlFilter
 	//=================================================================================================
 	// members
 	
-	private static final CoreSystem[] allowedCoreSystemsForGetMeasurements = { CoreSystem.ORCHESTRATOR };
+	private static final CoreSystem[] allowedCoreSystemsForGetMeasurements = { CoreSystem.ORCHESTRATOR, CoreSystem.GATEKEEPER };
 	private static final CoreSystem[] allowedCoreSystemsForExecuteRelayTests = { CoreSystem.GATEKEEPER };
 	
 	//=================================================================================================

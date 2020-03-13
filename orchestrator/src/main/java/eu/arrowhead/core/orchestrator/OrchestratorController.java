@@ -20,6 +20,7 @@ import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags.Flag;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
@@ -45,13 +46,15 @@ public class OrchestratorController {
 	// members
 	
 	private static final String PATH_VARIABLE_ID = "id";
-	private static final String OP_ORCH_PROCESS_BY_ID = CommonConstants.OP_ORCH_PROCESS + "/{" + PATH_VARIABLE_ID + "}";
+	private static final String OP_ORCH_PROCESS_BY_ID = CommonConstants.OP_ORCH_PROCESS_URI + "/{" + PATH_VARIABLE_ID + "}";
 	
 	private static final String GET_ORCHESTRATOR_HTTP_200_MESSAGE = "Orchestration by consumer system id returned";
 	private static final String GET_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not orchestrate by requested consumer system id";
 	private static final String POST_ORCHESTRATIOR_DESCRIPTION = "Start Orchestration process.";
 	private static final String POST_ORCHESTRATOR_HTTP_200_MESSAGE = "Returns possible providers of the specified service.";
 	private static final String POST_ORCHESTRATOR_HTTP_400_MESSAGE = "Could not run the orchestration process";
+	private static final String GET_ORCHESTRATOR_QOS_ENABLED_HTTP_200_MESSAGE = "QoS Monitor flage returned";
+	private static final String GET_ORCHESTRATOR_QOS_RESERVATIONS_HTTP_200_MESSAGE = "QoS Reservations returned";
 	
 	private static final String NULL_PARAMETER_ERROR_MESSAGE = " is null.";
 	private static final String NULL_OR_BLANK_PARAMETER_ERROR_MESSAGE = " is null or blank.";
@@ -62,6 +65,9 @@ public class OrchestratorController {
 	
 	@Value(CoreCommonConstants.$ORCHESTRATOR_IS_GATEKEEPER_PRESENT_WD)
 	private boolean gatekeeperIsPresent;
+	
+	@Value(CoreCommonConstants.$QOS_ENABLED_WD)
+	private boolean qosEnabled;
 	
 	@Autowired
 	private OrchestratorService orchestratorService;
@@ -89,11 +95,11 @@ public class OrchestratorController {
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@PostMapping(path = CommonConstants.OP_ORCH_PROCESS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = CommonConstants.OP_ORCH_PROCESS_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public OrchestrationResponseDTO orchestrationProcess(@RequestBody final OrchestrationFormRequestDTO request) {
 		logger.debug("orchestrationProcess started ...");
 		
-		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS;
+		final String origin = CommonConstants.ORCHESTRATOR_URI + CommonConstants.OP_ORCH_PROCESS_URI;
 		checkOrchestratorFormRequestDTO(request, origin);
 		
 	    if (request.getOrchestrationFlags().getOrDefault(Flag.EXTERNAL_SERVICE_REQUEST, false)) {
@@ -136,6 +142,30 @@ public class OrchestratorController {
 		return orchestratorService.storeOchestrationProcessResponse(systemId);
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return QoS Monitor enabled flag.", response = String.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_QOS_ENABLED_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_ORCH_QOS_ENABLED_URI)
+	public String isQoSEnabled() {
+		return String.valueOf(qosEnabled);
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Return all QoSManager reservation entry.", response = QoSReservationListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_PRIVATE })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = GET_ORCHESTRATOR_QOS_RESERVATIONS_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path = CommonConstants.OP_ORCH_QOS_RESERVATIONS_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public QoSReservationListResponseDTO getAllQoSReservation() {
+		return orchestratorService.getAllQoSReservationResponse();
+	}
+	
 	//=================================================================================================
 	// assistant methods
 

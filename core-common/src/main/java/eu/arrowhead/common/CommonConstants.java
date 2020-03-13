@@ -31,6 +31,9 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_AUTH_CONTROL_SUBSCRIPTION = "authorization-control-subscription";
 	
 	public static final String CORE_SERVICE_ORCH_PROCESS = "orchestration-service";
+	public static final String CORE_SERVICE_ORCH_QOS_ENABLED = "orchestration-qos-enabled";
+	public static final String CORE_SERVICE_ORCH_QOS_RESERVATIONS = "orchestration-qos-reservations";
+	
 	public static final String CORE_SERVICE_GATEKEEPER_GSD = "global-service-discovery";
 	public static final String CORE_SERVICE_GATEKEEPER_ICN = "inter-cloud-negotiations";
 	public static final String CORE_SERVICE_GATEKEEPER_PULL_CLOUDS = "pull-clouds";
@@ -92,7 +95,10 @@ public class CommonConstants {
 	public static final String OP_AUTH_SUBSCRIPTION_CHECK_URI = "/subscription/check";
 	
 	public static final String ORCHESTRATOR_URI = "/orchestrator";
-	public static final String OP_ORCH_PROCESS = "/orchestration";
+	public static final String OP_ORCH_PROCESS_URI = "/orchestration";
+	public static final String OP_ORCH_QOS_ENABLED_URI = "/qos_enabled";
+	public static final String OP_ORCH_QOS_RESERVATIONS_URI = "/qos_reservations";
+	
 	public static final String ORCHESTRATON_FLAG_MATCHMAKING = "matchmaking";
 	public static final String ORCHESTRATON_FLAG_METADATA_SEARCH = "metadataSearch";
 	public static final String ORCHESTRATON_FLAG_ONLY_PREFERRED = "onlyPreferred";
