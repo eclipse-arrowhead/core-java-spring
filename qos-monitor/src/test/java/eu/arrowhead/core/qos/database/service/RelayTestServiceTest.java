@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.jms.BytesMessage;
+import javax.jms.CompletionListener;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -566,8 +567,7 @@ public class RelayTestServiceTest {
 		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
 		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
 		final SenderSideRelayTestThread testThreadDoNothing = getSenderSideTestThreadDoNothing();
-		when(threadFactory.createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString()))
-																																	.thenReturn(testThreadDoNothing);  
+		when(threadFactory.createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString())).thenReturn(testThreadDoNothing);  
 		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString())).thenThrow(JMSException.class);
 		
 		relayTestService.initRelayTest(request);
@@ -579,7 +579,75 @@ public class RelayTestServiceTest {
 		verify(relayClient, times(1)).closeConnection(any(Session.class));
 	}
 	
-	//TODO: cont 
+	//-------------------------------------------------------------------------------------------------
+	@Test(expected = ArrowheadException.class)
+	public void testInitRelayTestThreadFactoryThrowsException() throws JMSException {
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(4200);
+		relay.setType("GATEWAY_RELAY");
+		
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setRelay(relay);
+		request.setTargetCloud(targetCloud);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey("valid key");
+		
+		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+
+		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
+		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
+		when(threadFactory.createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString())).thenThrow(ArrowheadException.class);  
+		relayTestService.initRelayTest(request);
+		
+		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
+		verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+		verify(threadFactory, times(1)).createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString());
+		verify(relayClient, times(1)).closeConnection(any(Session.class));
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Test
+	public void testInitRelayTestOk() throws JMSException {
+		final RelayRequestDTO relay = new RelayRequestDTO();
+		relay.setAddress("localhost");
+		relay.setPort(4200);
+		relay.setType("GATEWAY_RELAY");
+		
+		final CloudRequestDTO targetCloud = new CloudRequestDTO();
+		targetCloud.setOperator("aitia");
+		targetCloud.setName("testcloud");
+		
+		final QoSMonitorSenderConnectionRequestDTO request = new QoSMonitorSenderConnectionRequestDTO();
+		request.setRelay(relay);
+		request.setTargetCloud(targetCloud);
+		request.setQueueId("queueId");
+		request.setPeerName("peer");
+		request.setReceiverQoSMonitorPublicKey("valid key");
+		
+		final CloudWithRelaysResponseDTO cloudResponse = new CloudWithRelaysResponseDTO();
+		cloudResponse.setGatewayRelays(List.of(new RelayResponseDTO(1, "localhost", 4200, true, false, RelayType.GATEWAY_RELAY, null, null)));
+
+		when(qosMonitorDriver.queryGatekeeperCloudInfo(anyString(), anyString())).thenReturn(cloudResponse);
+		when(relayClient.createConnection(anyString(), anyInt(), anyBoolean())).thenReturn(getTestSession());
+		final SenderSideRelayTestThread testThreadDoNothing = getSenderSideTestThreadDoNothing();
+		when(threadFactory.createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString())).thenReturn(testThreadDoNothing);  
+		final MessageProducer testProducer = getTestProducer();
+		when(relayClient.initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString())).thenReturn(new ConsumerSideRelayInfo(testProducer, testProducer));
+
+		relayTestService.initRelayTest(request);
+		
+		verify(qosMonitorDriver, times(1)).queryGatekeeperCloudInfo(anyString(), anyString());
+		verify(relayClient, times(1)).createConnection(anyString(), anyInt(), anyBoolean());
+		verify(threadFactory, times(1)).createSenderSideThread(any(Session.class), any(CloudResponseDTO.class), any(RelayResponseDTO.class), anyString(), anyString());
+		verify(relayClient, times(1)).initializeConsumerSideRelay(any(Session.class), any(MessageListener.class), anyString(), anyString());
+	}
 	
 	//=================================================================================================
 	// assistant methods
@@ -702,6 +770,34 @@ public class RelayTestServiceTest {
 			public void run() {
 				// do nothing
 			}
+		};
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	private MessageProducer getTestProducer() {
+		return new MessageProducer() {
+			public void setTimeToLive(long timeToLive) throws JMSException {}
+			public void setPriority(int defaultPriority) throws JMSException {}
+			public void setDisableMessageTimestamp(boolean value) throws JMSException {}
+			public void setDisableMessageID(boolean value) throws JMSException {}
+			public void setDeliveryMode(int deliveryMode) throws JMSException {}
+			public void setDeliveryDelay(long deliveryDelay) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Message message, int deliveryMode, int priority, long timeToLive) throws JMSException {}
+			public void send(Destination destination, Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Message message, CompletionListener completionListener) throws JMSException {}
+			public void send(Destination destination, Message message) throws JMSException {}
+			public void send(Message message) throws JMSException {}
+			public long getTimeToLive() throws JMSException { return 0;	}
+			public int getPriority() throws JMSException { return 0; }
+			public boolean getDisableMessageTimestamp() throws JMSException { return false; }
+			public boolean getDisableMessageID() throws JMSException { return false; }
+			public Destination getDestination() throws JMSException { return null; }
+			public int getDeliveryMode() throws JMSException { return 0; }
+			public long getDeliveryDelay() throws JMSException { return 0; }
+			public void close() throws JMSException {}
 		};
 	}
 }
