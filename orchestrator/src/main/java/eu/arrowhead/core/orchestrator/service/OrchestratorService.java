@@ -33,6 +33,7 @@ import eu.arrowhead.common.dto.internal.GSDQueryResultDTO;
 import eu.arrowhead.common.dto.internal.ICNRequestFormDTO;
 import eu.arrowhead.common.dto.internal.ICNResultDTO;
 import eu.arrowhead.common.dto.internal.OrchestratorStoreResponseDTO;
+import eu.arrowhead.common.dto.internal.QoSMeasurementAttributesFormDTO;
 import eu.arrowhead.common.dto.internal.QoSReservationListResponseDTO;
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFlags;
@@ -141,15 +142,14 @@ public class OrchestratorService {
 	}
 
 	//-------------------------------------------------------------------------------------------------	
-	//TODO: handle qos (inter)
 	public OrchestrationResponseDTO triggerInterCloud(final OrchestrationFormRequestDTO request) {
 		logger.debug("triggerInterCloud started ...");
 		
-		// necessary, because we want to use a flag value when we call the check method
 		if (request == null) {
 			throw new InvalidParameterException("request" + NULL_PARAMETER_ERROR_MESSAGE);
 		}
 		
+		// necessary, because we want to use a flag value when we call the check method
 		final OrchestrationFlags flags = request.getOrchestrationFlags();
 		checkServiceRequestForm(request, isInterCloudOrchestrationPossible(flags));
 		
@@ -162,10 +162,15 @@ public class OrchestratorService {
 		if (flags.getOrDefault(Flag.ENABLE_QOS, false)) {
 			
 			flags.put(Flag.ONLY_PREFERRED, true);
-			final List<GSDPollResponseDTO> verifiedResults = new ArrayList<>();
+			final List<GSDPollResponseDTO> verifiedResults = qosManager.verifyInterCloudServices(gsdResult.getResults(), request);
 			final List<PreferredProviderDataDTO> verifiedProviders = new ArrayList<>();
-			for (final GSDPollResponseDTO result : gsdResult.getResults()) {
-				//TODO bordi QoS Manager verify
+			for (final GSDPollResponseDTO result : verifiedResults) {
+				for (final QoSMeasurementAttributesFormDTO measurement : result.getQosMeasurements()) {
+					final PreferredProviderDataDTO preferredProviderData = new PreferredProviderDataDTO();
+					preferredProviderData.setProviderSystem(DTOConverter.convertSystemResponseDTOToSystemRequestDTO(measurement.getSystem()));
+					preferredProviderData.setProviderCloud(DTOConverter.convertCloudResponseDTOToCloudRequestDTO(result.getProviderCloud()));
+					verifiedProviders.add(preferredProviderData);
+				}
 			}
 			gsdResult.setResults(verifiedResults);
 			request.setPreferredProviders(verifiedProviders);
@@ -332,7 +337,7 @@ public class OrchestratorService {
  		} 
 		
 		if (flags.get(Flag.ENABLE_QOS)) {
-			orList = qosManager.verifyServices(orList, request);
+			orList = qosManager.verifyIntraCloudServices(orList, request);
 			if (orList.isEmpty()) {
 				if (isInterCloudOrchestrationPossible(flags)) {
 					// no result after verify providers => we try with other clouds

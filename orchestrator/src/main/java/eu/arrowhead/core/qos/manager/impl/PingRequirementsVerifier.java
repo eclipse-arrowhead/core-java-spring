@@ -13,7 +13,6 @@ import org.springframework.util.Assert;
 import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.dto.internal.QoSIntraPingMeasurementResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
-import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.orchestrator.service.OrchestratorDriver;
 import eu.arrowhead.core.qos.manager.QoSVerifier;
@@ -41,15 +40,15 @@ public class PingRequirementsVerifier implements QoSVerifier {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public boolean verify(final OrchestrationResultDTO result, final Map<String,String> qosRequirements, final Map<String,String> commands) {
+	public boolean verify(final QoSVerificationParameters parameters) {
 		logger.debug("verify started...");
-		validateInput(result);
+		validateInput(parameters);
 		
-		if (qosRequirements == null || qosRequirements.isEmpty()) { // no need to verify anything
+		if (parameters.getQosRequirements() == null || parameters.getQosRequirements().isEmpty()) { // no need to verify anything
 			return true;
 		}
 		
-		final QoSIntraPingMeasurementResponseDTO measurement = getPingMeasurement(result.getProvider().getId());
+		final QoSIntraPingMeasurementResponseDTO measurement = getPingMeasurement(parameters.getProviderSystem().getId());
 		
 		if (!measurement.hasRecord()) { // no record => use related constant to determine output 
 			return verifyNotMeasuredSystem;
@@ -59,44 +58,44 @@ public class PingRequirementsVerifier implements QoSVerifier {
 			return false;
 		}
 		
-		if (hasMaximumResponseTimeThreshold(qosRequirements)) {
-			final int threshold = getMaximumResponseTimeThreshold(qosRequirements);
+		if (hasMaximumResponseTimeThreshold(parameters.getQosRequirements())) {
+			final int threshold = getMaximumResponseTimeThreshold(parameters.getQosRequirements());
 			if (measurement.getMaxResponseTime().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", result.getProvider().getSystemName(), result.getProvider().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of maximum response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasAverageResponseTimeThreshold(qosRequirements)) {
-			final int threshold = getAverageResponseTimeThreshold(qosRequirements);
+		if (hasAverageResponseTimeThreshold(parameters.getQosRequirements())) {
+			final int threshold = getAverageResponseTimeThreshold(parameters.getQosRequirements());
 			if (measurement.getMeanResponseTimeWithoutTimeout().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", result.getProvider().getSystemName(), result.getProvider().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of average response time threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasJitterThreshold(qosRequirements)) {
-			final int threshold = getJitterThreshold(qosRequirements);
+		if (hasJitterThreshold(parameters.getQosRequirements())) {
+			final int threshold = getJitterThreshold(parameters.getQosRequirements());
 			if (measurement.getJitterWithoutTimeout().intValue() > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", result.getProvider().getSystemName(), result.getProvider().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of jitter threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasRecentPacketLossThreshold(qosRequirements)) {
-			final double threshold = getRecentPacketLossThreshold(qosRequirements);
+		if (hasRecentPacketLossThreshold(parameters.getQosRequirements())) {
+			final double threshold = getRecentPacketLossThreshold(parameters.getQosRequirements());
 			final double recentPacketLoss = 1 - measurement.getReceived() / (double) measurement.getSent();
 			if (recentPacketLoss > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", result.getProvider().getSystemName(), result.getProvider().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of recent packet loss threshold", parameters.getProviderSystem().getSystemName(),parameters.getProviderSystem().getId());
 				return false;
 			}
 		}
 		
-		if (hasPacketLossThreshold(qosRequirements)) {
-			final double threshold = getPacketLossThreshold(qosRequirements);
+		if (hasPacketLossThreshold(parameters.getQosRequirements())) {
+			final double threshold = getPacketLossThreshold(parameters.getQosRequirements());
 			final double packetLoss = 1 - measurement.getReceivedAll() / (double) measurement.getSentAll();
 			if (packetLoss > threshold) {
-				logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", result.getProvider().getSystemName(), result.getProvider().getId());
+				logger.debug("Provider '{}' (id: {}) removed because of packet loss threshold", parameters.getProviderSystem().getSystemName(), parameters.getProviderSystem().getId());
 				return false;
 			}
 		}
@@ -108,11 +107,11 @@ public class PingRequirementsVerifier implements QoSVerifier {
 	// assistant methods
 	
 	//-------------------------------------------------------------------------------------------------
-	private void validateInput(final OrchestrationResultDTO result) {
+	private void validateInput(final QoSVerificationParameters parameters) {
 		logger.debug("validateInput started...");
 		
-		Assert.notNull(result, "'result' is null");
-		Assert.notNull(result.getProvider(), "Provider is null");
+		Assert.notNull(parameters, "'parameters' is null");
+		Assert.notNull(parameters.getProviderSystem(), "Provider is null");
 	}
 	
 	//-------------------------------------------------------------------------------------------------

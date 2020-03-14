@@ -13,6 +13,7 @@ import org.springframework.util.Assert;
 
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.database.entity.QoSReservation;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -134,7 +135,7 @@ public class QoSManagerImpl implements QoSManager {
 	
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> verifyServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+	public List<OrchestrationResultDTO> verifyIntraCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
 		logger.debug("verifyServices started ...");
 		
 		Assert.notNull(orList, "'orList' is null.");
@@ -145,8 +146,12 @@ public class QoSManagerImpl implements QoSManager {
 		final List<OrchestrationResultDTO> result = new ArrayList<>();
 		for (final OrchestrationResultDTO dto : orList) {
 			boolean verified = true;
+			final QoSVerificationParameters verificationParameters = new QoSVerificationParameters(dto.getProvider(), null, dto.getMetadata(), request.getQosRequirements(),
+																								   request.getCommands(), dto.getWarnings());
 			for (final QoSVerifier verifier : verifiers) {
-				verified = verifier.verify(dto, request.getQosRequirements(), request.getCommands());
+				verified = verifier.verify(verificationParameters);
+				dto.setWarnings(verificationParameters.getWarnings());
+				dto.setMetadata(verificationParameters.getMetadata());
 				if (!verified) {
 					if (needLockRelease) {
 						qosReservationDBService.removeTemporaryLock(dto);
@@ -162,6 +167,18 @@ public class QoSManagerImpl implements QoSManager {
 		}
 		
 		return result;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<GSDPollResponseDTO> verifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
+		logger.debug("verifyInterCloudServices started ...");
+		
+		Assert.notNull(gsdList, "'orList' is null.");
+		Assert.notNull(request, "'request' is null.");
+		
+		// TODO bordi
+		return null;
 	}
 	
 	//=================================================================================================

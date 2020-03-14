@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.arrowhead.common.database.entity.QoSReservation;
+import eu.arrowhead.common.dto.internal.GSDPollResponseDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationFormRequestDTO;
 import eu.arrowhead.common.dto.shared.OrchestrationResultDTO;
 import eu.arrowhead.common.dto.shared.SystemRequestDTO;
@@ -40,7 +41,13 @@ public class DummyQoSManager implements QoSManager {
 
 	//-------------------------------------------------------------------------------------------------
 	@Override
-	public List<OrchestrationResultDTO> verifyServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
+	public List<OrchestrationResultDTO> verifyIntraCloudServices(final List<OrchestrationResultDTO> orList, final OrchestrationFormRequestDTO request) {
 		return orList;
+	}
+	
+	//-------------------------------------------------------------------------------------------------
+	@Override
+	public List<GSDPollResponseDTO> verifyInterCloudServices(final List<GSDPollResponseDTO> gsdList, final OrchestrationFormRequestDTO request) {
+		return gsdList;
 	}
 }

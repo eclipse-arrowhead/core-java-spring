@@ -45,7 +45,7 @@ public class DummyQoSManagerTest {
 	//-------------------------------------------------------------------------------------------------
 	@Test
 	public void testVerifyServicesDoNothing() {
-		final List<OrchestrationResultDTO> verified = qosManager.verifyServices(getTestOrchestrationResults(), null);
+		final List<OrchestrationResultDTO> verified = qosManager.verifyIntraCloudServices(getTestOrchestrationResults(), null);
 		Assert.assertEquals(3, verified.size());
 		for (int i = 0; i < 3; ++i) {
 			Assert.assertEquals(i, verified.get(i).getProvider().getId());
